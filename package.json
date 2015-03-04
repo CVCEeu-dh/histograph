@@ -1,0 +1,16 @@
+{
+  "name": "histograph",
+  "version": "0.0.0",
+  "description": "networks for dh",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "daniele.guido@cvce.eu",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.12.2",
+    "express-session": "^1.10.3",
+    "seraph": "^0.9.12"
+  }
+}
