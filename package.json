@@ -4,7 +4,7 @@
   "description": "networks for dh",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "node test.js"
   },
   "author": "daniele.guido@cvce.eu",
   "license": "ISC",
@@ -12,7 +12,11 @@
     "body-parser": "^1.12.0",
     "express": "^4.12.2",
     "express-session": "^1.10.3",
+    "lodash": "^3.3.1",
     "require-all": "^1.0.0",
     "seraph": "^0.9.12"
+  },
+  "devDependencies": {
+    "supertest": "^0.15.0"
   }
 }
