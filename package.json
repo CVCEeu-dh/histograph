@@ -4,7 +4,9 @@
   "description": "networks for dh",
   "main": "server.js",
   "scripts": {
-    "test": "mocha test"
+    "migrate": "node ./migration/migrate.js",
+    "test": "mocha test",
+    "start": "node ./server.js"
   },
   "author": "daniele.guido@cvce.eu",
   "license": "ISC",
