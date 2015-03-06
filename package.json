@@ -4,7 +4,7 @@
   "description": "networks for dh",
   "main": "server.js",
   "scripts": {
-    "test": "node test.js"
+    "test": "mocha test"
   },
   "author": "daniele.guido@cvce.eu",
   "license": "ISC",
@@ -17,6 +17,7 @@
     "seraph": "^0.9.12"
   },
   "devDependencies": {
+    "should": "^5.1.0",
     "supertest": "^0.15.0"
   }
 }

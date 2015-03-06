@@ -5,7 +5,7 @@
 
 // call the packages we need
 var express     = require('express'),        // call express
-    app         = express(),                 // define our app using express
+    app         = exports.app = express(),                 // define our app using express
     bodyParser  = require('body-parser'),
     controllers = require('body-parser'),
 
