@@ -35,6 +35,12 @@ router.route('/').
 router.route('/alchemyapi/image-face-tags')
   .post(ctrl.alchemyapi.imageFaceTags.url)
 
+router.route('/rekognition/face-detect')
+  .post(ctrl.rekognition.faceDetect)
+
+router.route('/rekognition/face-search')
+  .post(ctrl.rekognition.faceSearch)
+
 
 // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api
