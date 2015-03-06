@@ -1,7 +1,9 @@
 var fs = require('fs'),
     settings = require('./settings'),
 
-    xml = require('xml2js');
+    xml = require('xml2js'),
+
+    _ = require('lodash');
 
 // ics file names, one for each picture
 var ics = fs.readdirSync(settings.ICSPath);
