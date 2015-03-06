@@ -4,7 +4,8 @@
   ===
   
 */
-var settings = require('../settings');
+var alchemyapi = require('alchemy-api'),
+    settings = require('../settings');
 
 module.exports = {
   imageFaceTags: {
