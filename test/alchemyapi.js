@@ -6,15 +6,13 @@ var request = require('supertest'),
 var app = require('../server').app;
 
 
-describe('api index', function() {
-  it('should return a welcome message given the url /api', function (done) {
+describe('alchemyapi face recognition', function() {
+  it('should calls alchemyapi service - face tags', function (done) {
     request(app)
-      .get('/api')
+      .post('/api/alchemyapi/image-face-tags')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function(err, res) {
-        should.not.exist(err);
-        should.exist(res.text, res.text);
         done();
       });
   });
