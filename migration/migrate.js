@@ -9,7 +9,8 @@ var fs = require('fs'),
 var ics = fs.readdirSync(settings.ICSPath);
 
 
-console.log(ics[1])
+console.log(ics.length)
+
 
 fs.readFile(settings.ICSPath + '/' + ics[1], function(err, content) {
 
