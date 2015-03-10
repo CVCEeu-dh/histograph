@@ -4,13 +4,14 @@ var fs = require('fs'),
     request  = require('request'),
     async    = require('async'),
     xml      = require('xml2js'),
+    YAML     = require('yamljs'),
     _        = require('lodash'),
 
     neo4j    = require('seraph')(settings.neo4j.host),
 
-    transaction = neo4j.batch();
+    batch = neo4j.batch();
 
-    
+
 
 // ics file names, one for each picture
 var ics = fs.readdirSync(settings.ICSPath);
@@ -25,41 +26,57 @@ function getSlug(text){
   .replace(/_+$/, ''); // Trim - from end of text
 } 
 
-console.log('migrating ' +ics.length);
+console.log('migrating ' +ics.length, YAML.stringify({1:3},2));
 
-var media = [];
+// truncate neo4j db ...
+
+
+var media = {},
+    entities = {}; // that is, dbpedia entities found
 
 // for each ic file
 var filequeue = async.queue(function (task, callback) {
-    console.log('starting waterfall for ' + task.name);
+    console.log('starting waterfall step for ' + task.name);
     async.waterfall([
       // 1. get file content
       function(next) { 
-        console.log('  1 waterfall for ' + task.name);
+        console.log('  1 waterfall step for ' + task.name);
         next(null, fs.readFileSync(settings.ICSPath + '/' + task.name));
       },
       // 2. get xml structure for file content
       function(contents, next) { // GET xml
-        console.log('  2 waterfall for ' + task.name);
+        console.log('  3 waterfall step for ' + task.name);
         xml.parseString(contents, {explicitArray: false}, function (err, result) {
           next(null, result);
         });
       },
       // 3. identify resources
       function(result, next) { // GET xml
-        console.log('  3 waterfall for ' + task.name);
-        var resources = [];
+        console.log('  4 waterfall step for ' + task.name);
+        var resources  = [],
+            properties = {
+              name: ''+task.name
+            };
 
+        // get image metadata
+        if(result && result.image_content) {
+          properties.width = result.image_content.image.width,
+          properties.height = result.image_content.image.height
+        }
+        // skip if there is no object
         if(!result || !result.image_content || !result.image_content.objects.object) {
           console.log('empty result, skipping xml');
-          next(null, resources);
+          next(null, resources, properties);
           return;
         }
-
+        // otherwise evaluate objects
         if(result.image_content.objects.object.length) {
           for(var i in result.image_content.objects.object) {
             var resource = {};
             resource.region  = result.image_content.objects.object[i].region;
+            if(result.image_content.objects.object[i].markers)
+              resource.markers  = result.image_content.objects.object[i].markers;
+              // console.log('MMM', resource.markers);
             if(result.image_content.objects.object[i].identification)
               resource.identification  = result.image_content.objects.object[i].identification._;
             resources.push(resource);
@@ -71,41 +88,105 @@ var filequeue = async.queue(function (task, callback) {
           })
         }
 
-        next(null, resources);
+        next(null, resources, properties);
       },
-      // 4. execute dbpedia chain
-      function(resources, next) {
-        console.log('  4 waterfall for ' + task.name);
-        
+      /*
+      
+        4. execute dbpedia chain
+        ===
+      */
+      function(resources, properties, next) {
+        console.log('  5 waterfall step for ' + task.name);
+        media[''+task.name] = {
+          properties: properties
+        };
+
         if(!resources.length) {
           console.log('empty resource, skipping dbpedia');
           next(null, 'done');
           return;
         }
-        
+
         var dbpediaqueue = async.queue(function (resource, dbcallback) {
+          if(!resource.identification && !resource.region) { // just skip it
+            dbcallback();
+            return;
+          }
+
+          if(resource.identification == 'unknown' || !resource.identification) {
+            // res node is incomplete basically...
+            if(!entities.unknown)
+              entities.unknown = {
+                properties: {
+                  name: 'unknown'
+                },
+                links: []
+              }
+            entities.unknown.links.push({
+              node: ''+ task.name,
+              region: _.extend(resource.region),
+              markers: _.extend(resource.markers)
+            });
+
+            dbcallback();
+            return;
+          };
+
           // request dbpedia for persons
-          // request.get('http://lookup.dbpedia.org/api/search.asmx/PrefixSearch?QueryClass=person&MaxHits=5&QueryString=' +  resource.identification, function (err, res, body) {
-          //   if(err) {
-          //     resource.error = err;
-          //     dbcallback();
-          //   } else {  // parse xml of the response
-          //     xml.parseString(body, function(err, result) {
-          //       if(err) {
-          //         resource.error = err;
-          //       } else {
-          //         //console.log(result.ArrayOfResult.Result[0])
-          //         resource.dbpedia = {
-          //           uri: result.ArrayOfResult.Result[0].URI[0],
-          //           label: result.ArrayOfResult.Result[0].Label[0],
-          //           description: result.ArrayOfResult.Result[0].Description[0]
-          //         };
-          //       }
-          //       dbcallback();
-          //     });
-          //   }
-          // });
-          dbcallback();
+          request.get('http://lookup.dbpedia.org/api/search.asmx/PrefixSearch?QueryClass=person&MaxHits=5&QueryString=' +  resource.identification, function (err, res, body) {
+            if(err) {
+              resource.error = err;
+              dbcallback();
+            } else {  // parse xml of the response
+              xml.parseString(body, function(err, result) {
+                if(err) {
+                  resource.error = err;
+                } else if(result && result.ArrayOfResult && result.ArrayOfResult.Result) {
+
+                  var entity_slug = getSlug(result.ArrayOfResult.Result[0].URI[0]);
+                  if(!entities[entity_slug]) {
+                    entities[entity_slug] = {
+                      properties: {
+                        uri: result.ArrayOfResult.Result[0].URI[0],
+                        name: result.ArrayOfResult.Result[0].Label[0],
+                        description: result.ArrayOfResult.Result[0].Description[0],
+                      },
+                      links: []
+                    };
+                  }
+                  entities[entity_slug].links.push({
+                    node: ''+ task.name,
+                    region: _.extend(resource.region),
+                    markers: _.extend(resource.markers)
+                  });
+
+                } else if(result && result.ArrayOfResult && !result.ArrayOfResult.Result) { // identifier not found on dbpedia
+                  
+                  var entity_slug = getSlug('' + resource.identification); // store other information as well
+                  if(!entities[entity_slug]) {
+                    entities[entity_slug] = {
+                      properties: {
+                        name: entity_slug
+                      },
+                      links: []
+                    };
+                  }
+                  entities[entity_slug].links.push({
+                    node: ''+ task.name,
+                    region: _.extend(resource.region),
+                    markers: _.extend(resource.markers)
+                  });
+
+                } else {
+                  // collect errors, to be corrected later on
+                  console.log('(!) ',result, 'when request ',  resource.identification);
+                  throw 'not found';
+                }
+                setTimeout(dbcallback, 500);
+              });
+            }
+          });
+          //dbcallback();
         });
         
         dbpediaqueue.push(resources, function(){
@@ -113,167 +194,84 @@ var filequeue = async.queue(function (task, callback) {
         });
 
         dbpediaqueue.drain = function() {
-          console.log('all items have been processed');
+          console.log('all items have been processed', resources);
+
           next(null, 'done');
         };
       }
 
     ], function (err, result) {
       // result now equals 'done'    
-      console.log('ENDING waterfall for ' + task.name, result);
+      console.log('ENDING waterfall step for ' + task.name, result);
+
+     
+
       callback();
     });
     
 }, 1);
 
 // add each ics file to the queue
-for( var i = 0 ; i < ics.length; i++) {
+for( var i = 0 ; i < 10; i++) {
   filequeue.push({name: ics[i]}, function (err) {
     console.log('--- finished processing foo', ics[i]);
   });
 }
 // assign a callback
 filequeue.drain = function() {
-    console.log('all items have been processed');
-}
+  console.log('all items have been processed');
 
-return;
-// for( var i = 0 ; i < ics.length; i++) {
-//   console.log('    file: ', ics[i]);
+  //console.log(entities);  
+  for(var i in media) {
+    var res_node = batch.save(media[i].properties);
+    media[i].res_node = res_node;
+  }
 
+ 
+  for(var i in entities) {
+    console.log(i, entities[i].links.length);
+    var ent_node = batch.save(entities[i].properties),
+        markdown = [];
 
+    entities[i].ent_node = ent_node;
 
-//   async.waterfall([
-//     function(callback) { // get file content
+    for(var j in entities[i].links) {
+      batch.relate(ent_node, 'appears_in', media[entities[i].links[j].node].res_node);
+       // append entity property to a markdown object
+      if(!media[entities[i].links[j].node].markdown)
+        media[entities[i].links[j].node].markdown = [];
 
-//     },
-//     function()
-//   var contents = fs.readFileSync(settings.ICSPath + '/' + ics[i]);
+      media[entities[i].links[j].node].markdown.push(YAML.stringify({
+          uri: entities[i].properties.uri,
+          name: entities[i].properties.name,
+          region: entities[i].links[j].region,
+          markers: entities[i].links[j].markers,
+      }, 2));
+    }
+  }
 
-// }
-
-return;
-fs.readFile(settings.ICSPath + '/' + ics[0], function(err, content) {
-  console.log('file', ics[0])
-
-  // var resource_node = transaction.save({
-  //   name: ics[0]
-  // });
-  resource_node = slugify(ics[0]);
-
-  transaction.query('MERGE ({slug}:Resource) RETURN {slug}, labels({slug})', {
-    slug: resource_node
-  });
-  //console.log('resource', resource_node);
-  //transaction.label(resource_node, 'Resource');
-
-  // for each object
-  //   get the corresponding dbpedia ID FIRST CANDIDATE, then
-  //   save region as markdown comment 
-  //   use markdown comments jade like, separate objects with a md line ---
-  //   ```
-  //     dbpedia: http://dbpedia.org/resource/Helmut_Kohl
-  //     
-  //     region: [>top, >left, >right, >bottom]
-  //     perspective: EyeLevel
-  //     occlusion: None
-  //     gender: Male
-  //     ---
-  //     
-  //   ```
-  //   add then the link to the object / dbpedia resources (filterlike) in a markdown Simple text 
-  //
-  //    
-  //   save in a version node (n:resource) both markdown AND Simple text
-  xml.parseString(content, {explicitArray: false}, function (err, result) {
-    var resources = [];
-
-    if(result.image_content.objects.object.length) {
-      for(var i in result.image_content.objects.object) {
-        var resource = {};
-        resource.region  = result.image_content.objects.object[i].region;
-        resource.identification  = result.image_content.objects.object[i].identification._;
-        resources.push(resource);
-      };
-    } else {
-      resources.push({
-        region: result.image_content.objects.object.region,
-        identification: result.image_content.objects.object.identification._
-      })
-    };
-    
-    var q = async.queue(function (resource, callback) {
-        //console.log('hello ' + resource.identification);
-        resource.completed = true;
-        
-        request.get('http://lookup.dbpedia.org/api/search.asmx/PrefixSearch?QueryClass=person&MaxHits=5&QueryString=' +  resource.identification, function (err, res, body) {
-          if(err) {
-            resource.error = err;
-            callback();
-          } else {  // parse xml of the response
-            xml.parseString(body, function(err, result) {
-              if(err) {
-                resource.error = err;
-              } else {
-                //console.log(result.ArrayOfResult.Result[0])
-                resource.dbpedia = {
-                  uri: result.ArrayOfResult.Result[0].URI[0],
-                  label: result.ArrayOfResult.Result[0].Label[0],
-                  description: result.ArrayOfResult.Result[0].Description[0]
-                };
-              }
-              callback();
-            });
-          }
-        });
+  // update with md comments
+  for(var i in media) {
+    var ver_node = batch.save({
+      creation_date: 0,
+      name: 'v of '+ i,
+      markdown: '´´´\n\n' + media[i].markdown.join('\n---\n\n') + '\n\n´´´'
     });
+    media[i].ver_node = ver_node;
+    batch.relate(ver_node, 'describes', media[i].res_node, {upvote: 1, downvote: 0});
+  };
 
-    // at the end of queue chain,
-    // 1) let's add nodes:Entity (if they do not exist, cfr URI as "unique" field)
-    // 2) let's add relationships :CONTAINS
-    q.drain = function() {
-      console.log('all items have been processed', resources.length);
+  // label everything
+  batch.label(_.map(media, function (d) { return d.res_node }), 'resource');
+  batch.label(_.map(media, function (d) { return d.ver_node }), 'version');
+  batch.label(_.map(entities, function (d) { return d.ent_node }), 'entity');
 
-      // for(var i=0; i < resources.length; i++) {
-      //   // if resources has dbpedia info, otherwise skip.
-      //   // var entity_node = transaction.save({
-      //   //   label: resources[i].dbpedia.label,
-      //   //   uri: resources[i].dbpedia.uri,
-      //   //   description: resources[i].dbpedia.description
-      //   // })//, 'entity', 'uri', resources[i].dbpedia.uri);
-
-      //   var entity_node = transaction.save({
-      //     name: resources[i].dbpedia.label,
-      //     uri: resources[i].dbpedia.uri,
-      //     description: resources[i].dbpedia.description,
-      //   });
-      //   // console.log(entity_node, resource_node);
-      //   transaction.label(entity_node, 'Entity');
-      //   transaction.relate(entity_node, 'APPEARS', resource_node);
-      // }
-
-      transaction.commit(function (err, results) {
-        console.log('and added to the database', err,results);
-      });
-    };
-
-    q.push(resources, function (err) {});
-
-
-
-    // for(var i=0; i < resources.length; i++) {
-    //   var next = function() {
-    //     return 
-    //   };
-
-    //   request.get('http://lookup.dbpedia.org/api/search.asmx/PrefixSearch?QueryClass=person&MaxHits=5&QueryString=' + resources[i].identification, (function (item) {
-    //     return function(err, res) {
-    //       console.log(res, item)
-    //     }
-    //   })(resources[i]))
-    // }
+  // finally, commmit
+  batch.commit(function (err, results) {
+    if(err)
+      console.log(err)
+    else
+      console.log('all items have been processed ans saved');
   })
-})
-// xml.parseString(xml, function (err, result) {
-//     console.dir(result);
-// });
+    
+}
