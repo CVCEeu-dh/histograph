@@ -30,7 +30,7 @@ describe('rekognition face detect', function() {
   it('should calls rekognition api service - face_recognize', function (done) {
     request(app)
       .post('/api/rekognition/face-search')
-      .attach('picture','./test/test-single.jpg')
+      .attach('picture','./test/test.jpg')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function(err, res) {
