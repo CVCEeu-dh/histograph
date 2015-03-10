@@ -15,18 +15,144 @@ var fs = require('fs'),
 // ics file names, one for each picture
 var ics = fs.readdirSync(settings.ICSPath);
 
-function slugify(text){
-return text.toString().toLowerCase()
-.replace(/\s+/g, '_') // Replace spaces with -
-.replace(/[^\w\_]+/g, '') // Remove all non-word chars
-.replace(/\_\_+/g, '_') // Replace multiple - with single -
-.replace(/^_+/, '') // Trim - from start of text
-.replace(/_+$/, ''); // Trim - from end of text
+// unique readable id for dbpedia entity with resource link
+function getSlug(text){
+  return text.toString().toLowerCase()
+  .replace(/\s+/g, '_') // Replace spaces with -
+  .replace(/[^\w\_]+/g, '') // Remove all non-word chars
+  .replace(/\_\_+/g, '_') // Replace multiple - with single -
+  .replace(/^_+/, '') // Trim - from start of text
+  .replace(/_+$/, ''); // Trim - from end of text
 } 
 
 console.log('migrating ' +ics.length);
 
+var media = [];
+
 // for each ic file
+var filequeue = async.queue(function (task, callback) {
+    console.log('starting waterfall for ' + task.name);
+    async.waterfall([
+      // 1. get file content
+      function(next) { 
+        console.log('  1 waterfall for ' + task.name);
+        next(null, fs.readFileSync(settings.ICSPath + '/' + task.name));
+      },
+      // 2. get xml structure for file content
+      function(contents, next) { // GET xml
+        console.log('  2 waterfall for ' + task.name);
+        xml.parseString(contents, {explicitArray: false}, function (err, result) {
+          next(null, result);
+        });
+      },
+      // 3. identify resources
+      function(result, next) { // GET xml
+        console.log('  3 waterfall for ' + task.name);
+        var resources = [];
+
+        if(!result || !result.image_content || !result.image_content.objects.object) {
+          console.log('empty result, skipping xml');
+          next(null, resources);
+          return;
+        }
+
+        if(result.image_content.objects.object.length) {
+          for(var i in result.image_content.objects.object) {
+            var resource = {};
+            resource.region  = result.image_content.objects.object[i].region;
+            if(result.image_content.objects.object[i].identification)
+              resource.identification  = result.image_content.objects.object[i].identification._;
+            resources.push(resource);
+          };
+        } else {
+          resources.push({
+            region: result.image_content.objects.object.region,
+            identification: result.image_content.objects.object.identification._
+          })
+        }
+
+        next(null, resources);
+      },
+      // 4. execute dbpedia chain
+      function(resources, next) {
+        console.log('  4 waterfall for ' + task.name);
+        
+        if(!resources.length) {
+          console.log('empty resource, skipping dbpedia');
+          next(null, 'done');
+          return;
+        }
+        
+        var dbpediaqueue = async.queue(function (resource, dbcallback) {
+          // request dbpedia for persons
+          // request.get('http://lookup.dbpedia.org/api/search.asmx/PrefixSearch?QueryClass=person&MaxHits=5&QueryString=' +  resource.identification, function (err, res, body) {
+          //   if(err) {
+          //     resource.error = err;
+          //     dbcallback();
+          //   } else {  // parse xml of the response
+          //     xml.parseString(body, function(err, result) {
+          //       if(err) {
+          //         resource.error = err;
+          //       } else {
+          //         //console.log(result.ArrayOfResult.Result[0])
+          //         resource.dbpedia = {
+          //           uri: result.ArrayOfResult.Result[0].URI[0],
+          //           label: result.ArrayOfResult.Result[0].Label[0],
+          //           description: result.ArrayOfResult.Result[0].Description[0]
+          //         };
+          //       }
+          //       dbcallback();
+          //     });
+          //   }
+          // });
+          dbcallback();
+        });
+        
+        dbpediaqueue.push(resources, function(){
+
+        });
+
+        dbpediaqueue.drain = function() {
+          console.log('all items have been processed');
+          next(null, 'done');
+        };
+      }
+
+    ], function (err, result) {
+      // result now equals 'done'    
+      console.log('ENDING waterfall for ' + task.name, result);
+      callback();
+    });
+    
+}, 1);
+
+// add each ics file to the queue
+for( var i = 0 ; i < ics.length; i++) {
+  filequeue.push({name: ics[i]}, function (err) {
+    console.log('--- finished processing foo', ics[i]);
+  });
+}
+// assign a callback
+filequeue.drain = function() {
+    console.log('all items have been processed');
+}
+
+return;
+// for( var i = 0 ; i < ics.length; i++) {
+//   console.log('    file: ', ics[i]);
+
+
+
+//   async.waterfall([
+//     function(callback) { // get file content
+
+//     },
+//     function()
+//   var contents = fs.readFileSync(settings.ICSPath + '/' + ics[i]);
+
+// }
+
+return;
 fs.readFile(settings.ICSPath + '/' + ics[0], function(err, content) {
   console.log('file', ics[0])
 
