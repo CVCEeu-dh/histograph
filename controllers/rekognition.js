@@ -71,13 +71,18 @@ module.exports = {
           }
         })
         .on('response', function(response) {
-          console.log('error', response.statusCode)
-        })
-        .on('data', function(data) {
-          // decompressed data as it is received
-          console.log('' +data)
-          res.json({ message: 'Bear created0 dd!', item: JSON.parse('' +data)});
-        })
+          console.log('error', response.statusCode);
+          
+          var body = '';
+          response.on('data', function (chunk) {
+            body += chunk;
+          });
+          response.on('end', function () {
+            // fs.writeFile('./rekognition.result.json', body);
+            res.json({ message: 'Bear created0 dd!', item: JSON.parse(body)});
+          });
+        });
+        
 
     }); // eof readFile
   }]

@@ -5,14 +5,11 @@
   
   Proxy for alchemy api calls
 */
-var alchemyapi = require('alchemy-api'),
-    settings   = require('../settings'),
+var settings   = require('../settings'),
     multer     = require('multer'),
     request    = require('request'),
 
-    fs = require('fs')
-
-    alchemy = new alchemyapi(settings.ALCHEMYAPI_KEY);
+    fs = require('fs');
 
 module.exports = {
   imageFaceTags: {
@@ -36,15 +33,21 @@ module.exports = {
                 'Content-type': 'multipart/form-data'
               }
             })
-            .on('data', function(data) {
-              // decompressed data as it is received
-              res.json({ message: 'Bear created0 dd!', item: JSON.parse('' +data)});
-            })
-            .on('response', function(res) {
+            .on('response', function(response) {
               if(res.statusCode != 200) {
                 console.log(res.statusCode) // 200
                 console.log(res.headers['content-type']) // 'image/png'
-              } 
+
+              };
+              
+              var body = '';
+              response.on('data', function (chunk) {
+                body += chunk;
+              });
+              response.on('end', function () {
+                // fs.writeFile('./rekognition.result.json', body);
+                res.json({ message: 'alchemy detection', item: JSON.parse(body)});
+              });
             })
         )
 
