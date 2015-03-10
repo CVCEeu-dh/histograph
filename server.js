@@ -41,6 +41,8 @@ router.route('/rekognition/face-detect')
 router.route('/rekognition/face-search')
   .post(ctrl.rekognition.faceSearch)
 
+router.route('/skybiometry/face-detect')
+  .post(ctrl.skybiometry.faceDetect)
 
 // REGISTER OUR ROUTES -------------------------------
 // all of our routes will be prefixed with /api
