@@ -1,3 +1,8 @@
+/**
+  This special ,script works with a collection of ics files - usually connected with same name images.
+  The ics path has to be set in settings.js.
+  A file example can be found under ./migration/picture.example.ic
+*/
 var fs = require('fs'),
 
     settings = require('./settings'),
@@ -212,7 +217,7 @@ var filequeue = async.queue(function (task, callback) {
 }, 1);
 
 // add each ics file to the queue
-for( var i = 0 ; i < 10; i++) {
+for( var i = 0 ; i < ics.length; i++) {
   filequeue.push({name: ics[i]}, function (err) {
     console.log('--- finished processing foo', ics[i]);
   });
@@ -255,7 +260,7 @@ filequeue.drain = function() {
     var ver_node = batch.save({
       creation_date: 0,
       name: 'v of '+ i,
-      markdown: '´´´\n\n' + media[i].markdown.join('\n---\n\n') + '\n\n´´´'
+      markdown: media[i].markdown? '´´´\n\n' + media[i].markdown.join('\n---\n\n') + '\n\n´´´': ''
     });
     media[i].ver_node = ver_node;
     batch.relate(ver_node, 'describes', media[i].res_node, {upvote: 1, downvote: 0});
