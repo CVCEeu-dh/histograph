@@ -4,6 +4,7 @@
   ===
 */
 module.exports = {
+  secret: 'a secret',
   ALCHEMYAPI_KEY: 'your alchemy api key', // cfr alchemyapi.com
   REKOGNITIONAPI_KEY : 'your rekognition qapi key', // cfr rekognition.com
   REKOGNITIONAPI_SECRET : 'your rekognition api secret',

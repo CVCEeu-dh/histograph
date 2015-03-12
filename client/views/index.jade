@@ -1,5 +1,10 @@
 html
   head
     title!= title
+    script(type='text/javascript', src='/socket.io/socket.io.js')
+
   body
     h1!= message
+
+    script(type='text/javascript').
+      var socket = io();

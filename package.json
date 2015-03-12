@@ -12,14 +12,18 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.12.0",
+    "cookie-parser": "^1.3.4",
     "decypher": "^0.1.2",
     "express": "^4.12.2",
     "express-session": "^1.10.3",
     "jade": "^1.9.2",
     "lodash": "^3.3.1",
+    "morgan": "^1.5.1",
     "multer": "^0.1.8",
+    "passport": "^0.2.1",
     "require-all": "^1.0.0",
-    "seraph": "^0.9.12"
+    "seraph": "^0.9.12",
+    "socket.io": "^1.3.5"
   },
   "devDependencies": {
     "async": "^0.9.0",
