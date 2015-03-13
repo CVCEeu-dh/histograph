@@ -53,11 +53,9 @@ passport.serializeUser(function(user, done) {
   });
 });
 
-passport.deserializeUser(function(id, done) {
-  console.log('deserialize', id)
-  done(null, {
-    username: 'test'
-  });
+passport.deserializeUser(function(user, done) {
+  console.log('deserialize', user)
+  done(null, user);
 });
 
 exports.passport = passport;

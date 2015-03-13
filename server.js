@@ -56,9 +56,10 @@ app.use(auth.passport.session());
 
 // enrich express responses
 express.response.ok = function(result) {
+  console.log('pass by here', this)
   return this.json({
     status: 'ok',
-    user: this.user,
+    user: this.req.user,
     result: result
   });
 };
@@ -81,20 +82,15 @@ clientRouter.route('/').
     res.render('index', { message: 'hooray! welcome to our api!' });   
   });
 
-clientRouter.route('/authentication-required').
-  get(function(req, res) { // test route to make sure everything is working (accessed at GET http://localhost:8080/api)
-    return res.error(403, {msg:'use POST request to authenticate'});   
-  });
-
 clientRouter.route('/login')
   .post(function (req, res, next) {
     auth.passport.authenticate('local', function(err, user, info) {
-      console.log('AUTHT', err, user)
       if(err)
         return res.error(403, {message: 'not valid credentials'});
-      
-      return res.ok({
-        user: res.user
+      req.logIn(user, function(err) {
+        if (err)
+          return next(err);
+        return res.redirect('/api');
       });
     })(req, res, next)
   });
@@ -126,7 +122,12 @@ apiRouter.use(function(req, res, next) { // middleware to use for all requests
 // api index
 apiRouter.route('/').
   get(function(req, res) { // test route to make sure everything is working (accessed at GET http://localhost:8080/api)
-    res.json({ message: 'hooray! welcome to our api!' });   
+    res.ok({ message: 'hooray! welcome to our api!' });   
+  });
+
+apiRouter.route('/another').
+  get(function(req, res) { // test route to make sure everything is working (accessed at GET http://localhost:8080/api)
+    res.ok({ message: 'hooray! another!' });   
   });
 
 // api session info
