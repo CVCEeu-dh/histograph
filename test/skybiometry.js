@@ -8,7 +8,7 @@ var app = require('../server').app;
 // uncomment these lines to abilitate alchemy api test
 describe('skybiometry face recognition', function() {
   this.timeout(15000);
-
+  return;
   it('should calls skybiometry service for *face detection*', function (done) {
     request(app)
       .post('/api/skybiometry/face-detect')

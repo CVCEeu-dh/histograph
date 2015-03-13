@@ -1,0 +1,10 @@
+/*
+
+  authentication mechanism
+  ===
+
+*/
+module.exports = {
+  
+
+}

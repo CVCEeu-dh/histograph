@@ -6,15 +6,27 @@ var request = require('supertest'),
 var app = require('../server').app;
 
 
-describe('api index', function() {
-  it('should return a welcome message given the url /api', function (done) {
+describe('api index and api login', function() {
+  it('should return a 403 forbidden because the user it is not authenticated', function (done) {
     request(app)
       .get('/api')
+      .expect('Content-Type', /json/)
+      .expect(403)
+      .end(function(err, res) {
+        should.not.exist(err);
+        should.exist(res.body.status, 'error');
+        done();
+      });
+  });
+
+  it('should return a 200 because the user could authenticate', function (done) {
+    request(app)
+      .get('/login')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function(err, res) {
         should.not.exist(err);
-        should.exist(res.text, res.text);
+        should.exist(res.body.status, 'ok');
         done();
       });
   });

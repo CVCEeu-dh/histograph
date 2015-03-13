@@ -7,11 +7,13 @@
 var express      = require('express'),        // call express
     session      = require('express-session'),
     settings     = require('./settings'),
+
     app          = exports.app = express(),                 // define our app using express
     
-    passport     = require('passport'),
+    passport          = require('passport'),
     LocalStrategy     = require('passport-local').Strategy,
-    
+    crypto            = require('crypto'),
+
     bodyParser   = require('body-parser'),
     cookieParser = require('cookie-parser'),
     morgan       = require('morgan'),
@@ -21,7 +23,10 @@ var express      = require('express'),        // call express
     port         = process.env.PORT || 8080,
 
     clientRouter = express.Router(),
-    apiRouter    = express.Router();        // set our port
+    apiRouter    = express.Router(),
+
+    _            = require('lodash');        // set our port
+
 
 // configure logger
 app.use(morgan('dev'));
@@ -40,7 +45,7 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(session({
   name: 'hg.sid',
-  secret: settings.secret,
+  secret: settings.secret.cookie,
   trustProxy: false,
   resave: true,
   saveUninitialized: true
@@ -49,17 +54,20 @@ app.use(session({
 // auth mechanism
 passport.use(new LocalStrategy(function (username, password, done) {
   console.log(username, password);
-  return done(null, {
+  done(null, {
     username: 'test'
   });
 }));
 
 passport.serializeUser(function(user, done) {
+
   done(null, user.username);
 });
 
 passport.deserializeUser(function(id, done) {
-  console.log('deserialized');
+  done(null, {
+    username: 'test'
+  });
 });
 
 app.use(passport.initialize());
@@ -69,18 +77,17 @@ app.use(passport.session());
 express.response.ok = function(result) {
   return this.json({
     status: 'ok',
-    user: res.user,
+    user: this.user,
     result: result
   });
 };
 
-express.response.error = function(statusCode, message) {
+express.response.error = function(statusCode, err) {
   return this.status(statusCode).json({
     status: 'error',
-    error: {
+    error: _.assign({
       code: statusCode,
-      message: message
-    }
+    }, err)
   });
 };
 
@@ -93,11 +100,21 @@ clientRouter.route('/').
     res.render('index', { message: 'hooray! welcome to our api!' });   
   });
 
+clientRouter.route('/authentication-required').
+  get(function(req, res) { // test route to make sure everything is working (accessed at GET http://localhost:8080/api)
+    return res.error(403, 'use POST request to authenticate');   
+  });
+
 clientRouter.route('/login')
+  .get(function (req, res) {
+    return res.ok({
+      message: 'use POST request to authenticate'
+    });
+  })
   .post(
     passport.authenticate('local', {
-      successRedirect: '/',
-      failureRedirect: '/login'
+      successRedirect: '/api/user/session',
+      failureRedirect: '/authentication-required'
     }),
     function (req, res) {
       return res.ok({
@@ -113,6 +130,9 @@ clientRouter.route('/logout')
       user: res.user
     });
   });
+
+clientRouter.route('/signup')
+  .post(ctrl.user.signup)
 
 /*
 
@@ -137,6 +157,9 @@ apiRouter.route('/').
 apiRouter.route('/user/session')
   .get(ctrl.user.session)
 
+// apiRouter.route('/user')
+//   .post(ctrl.user.create)
+
 
 
 // face recognition tests
@@ -160,7 +183,7 @@ apiRouter.route('/skybiometry/face-detect')
 
 */
 app.use('/', clientRouter); // client router
-app.use('/api', apiRouter); // api endpoint
+app.use('/api', apiRouter); // api endpoint. we should be auth to pass this point.
 
 
 /*
