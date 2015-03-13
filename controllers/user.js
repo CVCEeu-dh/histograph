@@ -28,11 +28,11 @@ var settings   = require('../settings'),
       }
     ];
 
-
-var validate = function(user, fields) {
+// do try catch
+var validate = function(form, fields) {
   var errors = [];
   for(i in fields)
-    if(!validator[fields[i].check].apply(this, [user[fields[i].field]].concat(fields[i].args)))
+    if(!validator[fields[i].check].apply(this, [form[fields[i].field]].concat(fields[i].args)))
       errors.push(fields[i]);
   if(errors.length)
     return errors;
@@ -73,7 +73,7 @@ module.exports = {
       from: 'signup.encrypted',
       secret: settings.secret.salt
     });
-    
+
     activation = helpers.encrypt(req.body.email, {
       from: 'signup.activation',
       secret: settings.secret.activation, 
@@ -96,8 +96,45 @@ module.exports = {
       return res.ok();
     });
   }],
-
+  /*
+    GET:/activate the user, directly from the activation link.
+    Send an activation link by email.
+  */
   activate: [multer(), function (req, res) {
-    return res.ok();
+    var result = validate(req.query, [
+      {
+        field: 'email',
+        check: 'isEmail',
+        error: 'it is not a real email'
+      },
+      {
+        field: 'k',
+        check: 'isLength',
+        args: [
+          8,
+        ],
+        error: 'please provide the k. Otherwise, contact the system administator'
+      }
+    ]);
+
+    if(result !== true)
+      return res.error(400, {form: result});
+
+    neo4j.query('MATCH(n:user {email:{email}, activation:{key}}) SET n.status={status} RETURN n', {
+      email: req.query.email,
+      key: req.query.k,
+      status: 'enabled'
+    }, function(err, items) {
+      if(err)
+        return res.error(400, {message: 'bad request'});
+      return res.ok();
+    })
+
+    
   }],
+
+
+  /*
+    POST:/ add an inquiry on a resource, in crowdsourcing
+  */
 }

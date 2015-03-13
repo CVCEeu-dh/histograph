@@ -35,15 +35,19 @@ passport.use(new LocalStrategy(function (username, password, done) {
       salt: user.salt
     });
 
-    if(user.isValid)
-      return done(null, user)
+    if(!user.isValid)
+      return done({reason: 'credentials not matching'});
+
+    if(user.status != 'enabled')
+      return done({reason: 'user is NOT active, its status should be enabled', found: user.status});
+
+    return done(null, user)
     
-    return done({reason: 'credentials not matching'});
+    
   })
 }));
 
 passport.serializeUser(function(user, done) {
-  console.log('serialize')
   done(null, {
     firstname: user.firstname,
     lastname:  user.lastname,
@@ -54,7 +58,6 @@ passport.serializeUser(function(user, done) {
 });
 
 passport.deserializeUser(function(user, done) {
-  console.log('deserialize', user)
   done(null, user);
 });
 

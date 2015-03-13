@@ -56,7 +56,6 @@ app.use(auth.passport.session());
 
 // enrich express responses
 express.response.ok = function(result) {
-  console.log('pass by here', this)
   return this.json({
     status: 'ok',
     user: this.req.user,
@@ -85,8 +84,10 @@ clientRouter.route('/').
 clientRouter.route('/login')
   .post(function (req, res, next) {
     auth.passport.authenticate('local', function(err, user, info) {
-      if(err)
+      if(err) {
+        console.log('login error', err)
         return res.error(403, {message: 'not valid credentials'});
+      }
       req.logIn(user, function(err) {
         if (err)
           return next(err);
@@ -106,6 +107,9 @@ clientRouter.route('/logout')
 clientRouter.route('/signup')
   .post(ctrl.user.signup)
 
+clientRouter.route('/activate')
+  .get(ctrl.user.activate)
+
 /*
 
   Api router configuration
@@ -113,6 +117,7 @@ clientRouter.route('/signup')
 
 */
 apiRouter.use(function(req, res, next) { // middleware to use for all requests
+  console.log(req.path);
   if (req.isAuthenticated()) {
     return next();
   }
