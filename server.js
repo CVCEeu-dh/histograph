@@ -1,19 +1,17 @@
-// server.js
+/*
 
-// BASE SETUP
-// =============================================================================
+  Welcome to Histograph
+  ===
 
-// call the packages we need
+*/
 var express      = require('express'),        // call express
     session      = require('express-session'),
     settings     = require('./settings'),
 
     app          = exports.app = express(),                 // define our app using express
     
-    passport          = require('passport'),
-    LocalStrategy     = require('passport-local').Strategy,
-    crypto            = require('crypto'),
-
+    auth         = require('./auth'), // auth mechanism with passport
+    
     bodyParser   = require('body-parser'),
     cookieParser = require('cookie-parser'),
     morgan       = require('morgan'),
@@ -51,27 +49,10 @@ app.use(session({
   saveUninitialized: true
 }));
 
-// auth mechanism
-passport.use(new LocalStrategy(function (username, password, done) {
-  console.log(username, password);
-  done(null, {
-    username: 'test'
-  });
-}));
 
-passport.serializeUser(function(user, done) {
 
-  done(null, user.username);
-});
-
-passport.deserializeUser(function(id, done) {
-  done(null, {
-    username: 'test'
-  });
-});
-
-app.use(passport.initialize());
-app.use(passport.session());
+app.use(auth.passport.initialize());
+app.use(auth.passport.session());
 
 // enrich express responses
 express.response.ok = function(result) {
@@ -102,26 +83,21 @@ clientRouter.route('/').
 
 clientRouter.route('/authentication-required').
   get(function(req, res) { // test route to make sure everything is working (accessed at GET http://localhost:8080/api)
-    return res.error(403, 'use POST request to authenticate');   
+    return res.error(403, {msg:'use POST request to authenticate'});   
   });
 
 clientRouter.route('/login')
-  .get(function (req, res) {
-    return res.ok({
-      message: 'use POST request to authenticate'
-    });
-  })
-  .post(
-    passport.authenticate('local', {
-      successRedirect: '/api/user/session',
-      failureRedirect: '/authentication-required'
-    }),
-    function (req, res) {
+  .post(function (req, res, next) {
+    auth.passport.authenticate('local', function(err, user, info) {
+      console.log('AUTHT', err, user)
+      if(err)
+        return res.error(403, {message: 'not valid credentials'});
+      
       return res.ok({
         user: res.user
       });
-    }
-  );
+    })(req, res, next)
+  });
 
 clientRouter.route('/logout')
   .get(function(req, res){

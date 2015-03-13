@@ -21,7 +21,7 @@ describe('create a new user', function() {
       .send({
         username   : 'hello-world',
         password   : 'World',
-        email      : 'user.world@globetrotter.it',
+        email      : 'world@globetrotter.it',
         firstname  : 'Milky',
         lastame    : 'Way',
         strategy   : 'local', // the strategy passport who creates his account, like local or google or twitter
@@ -43,7 +43,7 @@ describe('create a new user', function() {
       .send({
         username   : 'hello-world',
         password   : 'WorldHello',
-        email      : 'user.world@globetrotter.it',
+        email      : 'world@globetrotter.it',
         firstname  : 'Milky',
         lastame    : 'Way',
         strategy   : 'local', // the strategy passport who creates his account, like local or google or twitter
@@ -63,7 +63,7 @@ describe('create a new user', function() {
       .send({
         username   : 'hello-world',
         password   : 'WorldHello',
-        email      : 'user.world@globetrotter.it',
+        email      : 'world@globetrotter.it',
         firstname  : 'Milky',
         lastame    : 'Way',
         strategy   : 'local', // the strategy passport who creates his account, like local or google or twitter
@@ -78,13 +78,42 @@ describe('create a new user', function() {
       })
   });
 
+
+  it('should NOT authenticate the user', function (done) {
+    request(app)
+      .post('/login')
+      .send({
+        username   : 'hello-world',
+        password   : 'World  Hello',
+      })
+      .expect('Content-Type', /json/)
+      .expect(403)
+      .end(function (err, res) {
+        should.equal(res.body.status, 'error');
+        done();
+      })
+  })
+
+
+  it('should authenticate the user', function (done) {
+    request(app)
+      .post('/login')
+      .send({
+        username   : 'hello-world',
+        password   : 'WorldHello',
+      }).end(function (err, res) {
+        should.equal(res.body.status, 'ok');
+        done();
+      })
+  })
+
   it('should fail because user has not been ACTIVATED', function (done) {
     done();
   })
 
-  it('should remove the user with email user.world@globetrotter.it', function (done) {
+  it('should remove the user with email world@globetrotter.it', function (done) {
     neo4j.query('MATCH(n:user {email:{email}}) DELETE n', {
-      email: 'user.world@globetrotter.it'
+      email: 'world@globetrotter.it'
     }, function(err, res) {
       if(err)
         console.log(err)
