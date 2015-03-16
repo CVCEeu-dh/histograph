@@ -18,7 +18,7 @@ var express      = require('express'),        // call express
     
     ctrl         = require('require-all')(__dirname + '/controllers'),
 
-    port         = process.env.PORT || 8080,
+    port         = process.env.PORT || 3000,
 
     clientRouter = express.Router(),
     apiRouter    = express.Router(),
@@ -48,7 +48,6 @@ app.use(session({
   resave: true,
   saveUninitialized: true
 }));
-
 
 
 app.use(auth.passport.initialize());
@@ -109,6 +108,21 @@ clientRouter.route('/signup')
 
 clientRouter.route('/activate')
   .get(ctrl.user.activate)
+
+clientRouter.route('/auth/twitter')
+  .get(auth.passport.authenticate('twitter'));
+
+clientRouter.route('/auth/twitter/callback')
+  .get(function (req, res, next) {
+    auth.passport.authenticate('twitter', function(err, user, info) {
+      //console.log('user', user); // handle errors
+      req.logIn(user, function(err) {
+        if (err)
+          return next(err);
+        return res.redirect('/');
+      });
+    })(req, res, next)
+  });
 
 /*
 
