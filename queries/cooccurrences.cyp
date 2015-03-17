@@ -18,3 +18,6 @@ MATCH (a:`resource`)-[R1:appears_in]-(p:`entity`)-[R2:appears_in]-(b:`resource`)
 WHERE a <> b
 RETURN a,b, length( collect(DISTINCT p.name)), collect(DISTINCT p.name)
 ORDER BY length(collect( DISTINCT p.name)) DESC
+
+// all user activities
+MATCH (u)-[pr:proposes]-(v)-[ra]-(result) RETURN u,pr,v,ra,result LIMIT 1000;
