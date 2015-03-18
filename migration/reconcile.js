@@ -5,6 +5,7 @@
 var fs = require('fs'),
     path = require('path'),
     settings = require('./settings'),
+    moment   = require('moment'),
     request  = require('request'),
     async    = require('async'),
     xml      = require('xml2js'),
@@ -15,6 +16,57 @@ var fs = require('fs'),
     batch = neo4j.batch();
 
 var translations = []; // translation table from old reference to new ones
+
+
+moment.locale('fr', {
+  months: 'janvier_février_mars_avril_mai_juin_juillet_août_septembre_octobre_novembre_décembre'.split('_'),
+  monthsShort: 'janv._févr._mars_avr._mai_juin_juil._août_sept._oct._nov._déc.'.split('_'),
+  weekdays: 'dimanche_lundi_mardi_mercredi_jeudi_vendredi_samedi'.split('_'),
+  weekdaysShort: 'dim._lun._mar._mer._jeu._ven._sam.'.split('_'),
+  weekdaysMin: 'Di_Lu_Ma_Me_Je_Ve_Sa'.split('_'),
+  longDateFormat: {
+    LT: 'HH:mm',
+    L: 'DD/MM/YYYY',
+    LL: 'D MMMM YYYY',
+    LLL: 'D MMMM YYYY LT',
+    LLLL: 'dddd D MMMM YYYY LT'
+  },
+  calendar: {
+    sameDay: '[Aujourdhui à] LT',
+    nextDay: '[Demain à] LT',
+    nextWeek: 'dddd [à] LT',
+    lastDay: '[Hier à] LT',
+    lastWeek: 'dddd [dernier à] LT',
+    sameElse: 'L'
+  },
+  relativeTime: {
+    future: 'dans %s',
+    past: 'il y a %s',
+    s: 'quelques secondes',
+    m: 'une minute',
+    mm: '%d minutes',
+    h: 'une heure',
+    hh: '%d heures',
+    d: 'un jour',
+    dd: '%d jours',
+    M: 'un mois',
+    MM: '%d mois',
+    y: 'une année',
+    yy: '%d années'
+  },
+  ordinal: function (number) {
+    return number + (number === 1 ? 'er' : 'ème');
+  },
+  week: {
+    dow: 1, // Monday is the first day of the week.
+    doy: 4 // The week that contains Jan 4th is the first week of the year.
+  }
+});
+ 
+moment.locale("fr")
+
+
+
 
 async.waterfall([
   // load entities
@@ -230,8 +282,8 @@ async.waterfall([
         function (n, v, nextReconciliation) {
           var icFile = path.resolve(settings.ICSPath, path.parse(n.url).name + '.ic');
           
-          if(!fs.existsSync(icFile)) {
-            console.log('file not found', icFile )
+          if(settings.ignoreICS || !fs.existsSync(icFile)) {
+            //console.log('file not found', icFile )
             nextReconciliation(null, n,v, null);
             return;
           }
@@ -314,6 +366,7 @@ async.waterfall([
           
           relationships.push( entities, function(){})
           relationships.drain = function() {
+            // add markdown info on resource.
             nextReconciliation(null, n, v);
           }
         },
@@ -323,7 +376,49 @@ async.waterfall([
           @param v - the version node
         */
         function (n, v, nextReconciliation) {
-          nextReconciliation();
+          var date = n.date.match(/(\d*)[\sert\-]*(\d*)\s*([^\s]*)\s?(\d{4})/),
+              start_date,
+              end_date;
+          if(!date) {
+            nextReconciliation();
+            return;
+          }
+            
+          if(!date[1].length && !date[3].length) {
+            start_date = moment.utc([1, 'janvier', date[4]].join(' '), 'LL');
+            end_date   = moment(start_date).add(1, 'year').subtract(1, 'minutes');
+          } else if(!date[1].length) {
+            start_date = moment.utc([1,date[3], date[4]].join(' '), 'LL');
+            end_date   = moment(start_date).add(1, 'month').subtract(1, 'minutes');
+          } else {
+            start_date = moment.utc([date[1],date[3], date[4]].join(' '), 'LL');
+            if(date[2].length)
+              end_date = moment.utc([date[2],date[3], date[4]].join(' '), 'LL')
+                .add(24, 'hours')
+                .subtract(1, 'minutes');
+            else
+              end_date = moment(start_date)
+                .add(24, 'hours')
+                .subtract(1, 'minutes');
+          }
+
+          n.start_date = start_date.format();
+          n.start_time = start_date.format('X');
+          n.end_date = end_date.format();
+          n.end_time = end_date.format('X');
+
+          // console.log(n.date)
+          // console.log('     ',start_date.format());
+          // console.log('     ',start_date.format('X'));
+          // console.log('     ',end_date.format());
+          // console.log('     ',end_date.format('X'));
+            
+          neo4j.save(n, function(err, node) {
+            if(err)
+              throw err;
+            nextReconciliation();
+          })
+
         }
       ], callback);
     }, 8);

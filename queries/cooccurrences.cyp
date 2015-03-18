@@ -21,3 +21,6 @@ ORDER BY length(collect( DISTINCT p.name)) DESC
 
 // all user activities
 MATCH (u)-[pr:proposes]-(v)-[ra]-(result) RETURN u,pr,v,ra,result LIMIT 1000;
+
+// timewindow for resources date
+MATCH (n:`resource`) WHERE n.start_time >= '796694400' AND n.end_time <= '875750400' MATCH (n)-[r]-(t) RETURN n,r,t;
