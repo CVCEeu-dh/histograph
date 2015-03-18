@@ -4,6 +4,7 @@
   "description": "networks for dh",
   "main": "server.js",
   "scripts": {
+    "reconcile": "node ./migration/reconcile.js",
     "migrate": "node ./migration/migrate.js",
     "test": "mocha test",
     "start": "node ./server.js"
@@ -28,6 +29,7 @@
   },
   "devDependencies": {
     "async": "^0.9.0",
+    "flat": "^1.5.0",
     "marked": "^0.3.3",
     "seraph": "^0.9.12",
     "should": "^5.2.0",
