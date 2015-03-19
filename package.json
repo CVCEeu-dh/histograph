@@ -4,8 +4,8 @@
   "description": "networks for dh",
   "main": "server.js",
   "scripts": {
-    "reconcile": "node ./migration/reconcile.js",
-    "migrate": "node ./migration/migrate.js",
+    "migrate": "node ./migration/reconcile.js",
+    "resolve": "node ./migration/resolve.js",
     "test": "mocha test",
     "start": "node ./server.js"
   },

@@ -31,3 +31,11 @@ test-single.jpg
   })(document);
 </script>
 ´´´
+
+
+
+## geocode api
+https://console.developers.google.com/project
+create a project, then
+api & auth > geocoding api
+follow the documentation at https://developers.google.com/maps/documentation/geocoding/
