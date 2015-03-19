@@ -6,17 +6,39 @@
 */
 'use strict';
 
-var request = require('supertest'),
-    settings = require('../settings'),
+var settings = require('../settings'),
     should  = require('should'),
-    neo4j   = require('seraph')(settings.neo4j.host);
+    neo4j   = require('seraph')(settings.neo4j.host),
+    
+    app = require('../server').app,
 
-var app = require('../server').app;
+    Session = require('supertest-session')({
+      app: app
+    }),
 
+    session;
+
+before(function () {
+  session = new Session();
+});
+
+after(function () {
+  session.destroy();
+});
+
+describe('create db constraints for user', function() {
+  it('should create a Constraint in Neo4j db', function (done) {
+    neo4j.query('CREATE CONSTRAINT ON (u:user) ASSERT u.email IS UNIQUE', function(err) {
+      should.not.exist(err, err);
+
+      done();
+    });
+  });
+});
 
 describe('create a new user', function() {
   it('should create a new user into the database', function (done) {
-    request(app)
+    session
       .post('/signup')
       .send({
         username   : 'hello-world',
@@ -39,7 +61,7 @@ describe('create a new user', function() {
 
 describe('authenticate the user, but failing', function() {
   it('should fail on password length', function (done) {
-    request(app)
+    session
       .post('/signup')
       .send({
         username   : 'hello-world',
@@ -62,7 +84,7 @@ describe('authenticate the user, but failing', function() {
   
 
   it('should fail because user exists already', function (done) {
-    request(app)
+    session
       .post('/signup')
       .send({
         username   : 'hello-world',
@@ -84,7 +106,7 @@ describe('authenticate the user, but failing', function() {
 
 
   it('should NOT authenticate the user because of wrong credentials', function (done) {
-    request(app)
+    session
       .post('/login')
       .send({
         username   : 'hello-world',
@@ -100,7 +122,7 @@ describe('authenticate the user, but failing', function() {
 
 
   it('should NOT authenticate the user because it is not enabled', function (done) {
-    request(app)
+    session
       .post('/login')
       .send({
         username   : 'hello-world',
@@ -116,7 +138,7 @@ describe('authenticate the user, but failing', function() {
 
 
   it('should NOT activate the user, malformed request!', function (done) {
-    request(app)
+    session
       .get('/activate?k=AAABBBCCCdddEEEFFF&e=world@globetrotter.it')
       .expect('Content-Type', /json/)
       .expect(403)
@@ -144,7 +166,7 @@ describe('authenticate the user, succeed', function() {
 
 
   it('should activate the user!', function (done) {
-    request(app)
+    session
       .get('/activate?k=AAABBBCCCddd&email=world@globetrotter.it')
       .expect('Content-Type', /json/)
       .expect(200)
@@ -156,7 +178,7 @@ describe('authenticate the user, succeed', function() {
 
 
   it('should authenticate the user and should REDIRECT to api index', function (done) {
-    request(app)
+    session
       .post('/login')
       .send({
         username   : 'world@globetrotter.it',
@@ -171,12 +193,12 @@ describe('authenticate the user, succeed', function() {
 
 
   it('should show user properties', function (done) {
-    request(app)
+    session
       .get('/api')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function(err, res) { //
-        console.log('needs supertest session to work')
+        console.log('needs supertest session to work...')
         should.equal(res.body.status, 'ok');
         should.equal(res.body.user.email, 'world@globetrotter.it');
         done();

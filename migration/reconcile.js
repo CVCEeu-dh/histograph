@@ -10,6 +10,7 @@ var fs = require('fs'),
     async    = require('async'),
     xml      = require('xml2js'),
     flatten  = require('flat'),
+    YAML     = require('yamljs'),
     _        = require('lodash'),
     neo4j    = require('seraph')(settings.neo4j.host),
 
@@ -358,7 +359,6 @@ async.waterfall([
               }, function(err, rels) {
                 if(err)
                   throw (err);
-                console.log(rels);
                 nextRelationship()
               }
             );
@@ -367,7 +367,13 @@ async.waterfall([
           relationships.push( entities, function(){})
           relationships.drain = function() {
             // add markdown info on resource.
-            nextReconciliation(null, n, v);
+            v.markdown = YAML.stringify(entities, 2);
+            neo4j.save(v, function(err, node) {
+              if(err)
+                throw err;
+              nextReconciliation(null, n, v);
+            })
+            
           }
         },
         /*
