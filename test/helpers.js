@@ -15,7 +15,7 @@ describe('geocoding api', function() {
   it('should calls geocodingapi service and build a new location entity', function (done) {
     helpers.geocoding('quai d\'Orsay, Paris', function (err, res) {
       should.not.exist(err, err);
-      should.exist(res[0].place_id, res);
+      should.exist(res[0].geocode_id, res);
       done();
     });
   });
@@ -26,7 +26,17 @@ describe('geonames api', function() {
   it('should calls geocodingapi service and build a new location entity', function (done) {
     helpers.geonames('Paris', function (err, res) {
       should.not.exist(err, err);
-      should.exist(res[0].geonameId, res);
+      should.exist(res[0].geonames_id, res);
+      done();
+    });
+  });
+});
+
+describe('viaf api', function() {
+  this.timeout(5000);
+  it('should calls viafapi service and build a new person entity', function (done) {
+    helpers.viaf('Hans von der Groeben', function (err, res) {
+      //should.not.exist(err, err);
       done();
     });
   });
