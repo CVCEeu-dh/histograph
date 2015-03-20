@@ -1,10 +1,19 @@
 /**
   A bunch of useful functions
 */
-var crypto = require('crypto'),
-    _      = require('lodash');
+var crypto   = require('crypto'),
+    settings = require('./settings'),
+    request  = require('request'),
+    _        = require('lodash'),
+    moment   = require('moment'),
+
+    IS_EMPTY = 'is_empty',
+
+    reconcile  = require('decypher')('./queries/migration.resolve.cyp'),
+    neo4j      = require('seraph')(settings.neo4j.host);
 
 module.exports = {
+  IS_EMPTY: IS_EMPTY,
   /**
     Handle causes and stacktraces provided by seraph
     @err the err string provided by cypher
@@ -47,6 +56,177 @@ module.exports = {
 
   comparePassword:  function(password, encrypted, options) {
     return this.encrypt(password, options).key == encrypted;
+  },
+
+
+  geonames: function(address, next) {
+    var geonamesURL = 'http://api.geonames.org/searchJSON?q='
+        + encodeURIComponent(address)
+        + '&style=long&maxRows=10&username=' + settings.geonames.username;
+
+    request.get({
+      url: geonamesURL,
+      json:true
+    }, function (err, res, body) {
+      if(err) {
+        next(err);
+        return;
+      }
+
+      if(!body.geonames || !body.geonames.length) {
+        next(IS_EMPTY);
+        return;
+      };
+      console.log(body.geonames[0].toponymName, body.geonames[0].countryName, 'for', address);
+      neo4j.query(reconcile.merge_geonames_entity, _.assign({
+          q: geonamesURL,
+          countryId: '',
+          countryCode: ''
+        }, body.geonames[0]),
+        function(err, nodes) {
+          if(err) {
+            next(err);
+            return;
+          }
+          next(null, nodes);
+        }
+      );
+    });
+  },
+
+  /**
+    Create a Geocoded entity:location Neo4j node for you. The Neo4J MERGE result will be
+    returned as arg for the next function next(null, result)
+    
+    Call the geocode api according to your current settings: make sure you use the proper
+    
+      settings.geocoding.key
+
+    Handle err response; it creates nodes frm the very first address found.
+    @next your callback with(err, res)
+  */
+  geocoding: function(address, next) {
+    request.get({
+      url: 'https://maps.googleapis.com/maps/api/geocode/json?key='
+          + settings.geocoding.key
+          + '&address=' + encodeURIComponent(address),
+      json: true
+    }, function (err, res, body) {
+      if(err) {
+        next(err);
+        return;
+      }
+      
+      if(!body.results.length) {
+        next(IS_EMPTY);
+        return;
+      };
+      console.log(body.results[0].formatted_address, 'for', address);
+      console.log(body.results[0].address_components)
+
+      var country = _.find(body.results[0].address_components, function (d){
+          return d.types[0] == 'country';
+        }),
+        locality =  _.find(body.results[0].address_components, function (d){
+          return d.types[0] == 'locality';
+        });
+      
+      // update the nodee
+      neo4j.query(reconcile.merge_geocoding_entity, {
+        place_id: body.results[0].place_id,
+
+        q: 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(address),
+        
+        countryName: country? country.long_name: '',
+
+        countryId: country? country.short_name: '',
+
+        toponymName: locality? locality.long_name: '',
+
+        formatted_address : body.results[0].formatted_address,
+
+        lat: body.results[0].geometry.location.lat,
+        lng: body.results[0].geometry.location.lng,
+
+        ne_lat: body.results[0].geometry.viewport.northeast.lat,
+        ne_lng: body.results[0].geometry.viewport.northeast.lng,
+        sw_lat: body.results[0].geometry.viewport.southwest.lat,
+        sw_lng: body.results[0].geometry.viewport.southwest.lng,
+      }, function(err, nodes) {
+        if(err) {
+          next(err);
+          return;
+        };
+        next(null, nodes);
+        //batch.relate(n, 'helds_in', nodes[0], {upvote: 1, downvote:0});
+        //nextReconciliation(null, n, v);
+      });
+    }); // end of get geocode
+  },
+
+  /**
+    Create a relationship @relationship from two nodes resource and entity.
+    The Neo4J MERGE result will be returned as arg for the next function next(null, result)
+    @resource - Neo4J node:resource as js object
+    @entity   - Neo4J node:entity as js object
+    @next     - your callback with(err, res)
+  */
+  enrichResource: function(resource, entity, next) {
+    neo4j.query(reconcile.merge_relationship_entity_resource, {
+      entity_id: entity.id,
+      resource_id: resource.id,
+      }, function (err, relationships) {
+        if(err) {
+          next(err)
+          return
+        }
+        next(null, relationships);
+    });
+  },
+
+  /**
+    Dummy Time transformation with moment.
+  */
+  reconcileHumanDate: function(humanDate, lang, next) {
+    var date = humanDate.match(/(\d*)[\sert\-]*(\d*)\s*([^\s]*)\s?(\d{4})/),
+        start_date,
+        end_date,
+        result = {};
+
+    if(!date) {
+      next(IS_EMPTY);
+      return;
+    }
+    
+    moment.locale(lang);
+
+    var monthName = moment().month(0).format('MMMM');
+    
+
+    if(!date[1].length && !date[3].length) {
+      start_date = moment.utc([1, monthName, date[4]].join(' '), 'LL');
+      end_date   = moment(start_date).add(1, 'year').subtract(1, 'minutes');
+    } else if(!date[1].length) {
+      start_date = moment.utc([1,date[3], date[4]].join(' '), 'LL');
+      end_date   = moment(start_date).add(1, 'month').subtract(1, 'minutes');
+    } else {
+      start_date = moment.utc([date[1],date[3], date[4]].join(' '), 'LL');
+      if(date[2].length)
+        end_date = moment.utc([date[2],date[3], date[4]].join(' '), 'LL')
+          .add(24, 'hours')
+          .subtract(1, 'minutes');
+      else
+        end_date = moment(start_date)
+          .add(24, 'hours')
+          .subtract(1, 'minutes');
+    }
+
+    result.start_date = start_date.format();
+    result.start_time = start_date.format('X');
+    result.end_date = end_date.format();
+    result.end_time = end_date.format('X');
+
+    next(null, result);
   }
 }
       
