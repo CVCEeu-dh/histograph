@@ -59,6 +59,52 @@ module.exports = {
   },
 
 
+  /**
+    Create a Viaf entity:person node for you
+   */
+  viaf: function(fullname, next) {
+    var viafURL = 'http://www.viaf.org/viaf/AutoSuggest?query='
+        + encodeURIComponent(fullname);
+
+    request.get({
+      url: viafURL,
+      json:true
+    }, function (err, res, body) {
+      if(err) {
+        next(err);
+        return;
+      }
+
+      //console.log(body);
+      next(IS_EMPTY);
+      // neo4j.query(reconcile.merge_geonames_entity, _.assign({
+      //     q: geonamesURL,
+      //     countryId: '',
+      //     countryCode: ''
+      //   }, body.geonames[0]),
+      //   function(err, nodes) {
+      //     if(err) {
+      //       next(err);
+      //       return;
+      //     }
+      //     next(null, nodes);
+      //   }
+      // );
+    });
+  },
+
+
+  /**
+    Create a Geocoded entity:location Neo4j node for you. The Neo4J MERGE result will be
+    returned as arg for the next function next(null, result)
+    
+    Call the geocode api according to your current settings: make sure you use the proper
+    
+      settings.geocoding.key
+
+    Handle err response; it creates nodes frm the very first address found.
+    @next your callback with(err, res)
+  */
   geonames: function(address, next) {
     var geonamesURL = 'http://api.geonames.org/searchJSON?q='
         + encodeURIComponent(address)
@@ -79,6 +125,7 @@ module.exports = {
       };
       console.log(body.geonames[0].toponymName, body.geonames[0].countryName, 'for', address);
       neo4j.query(reconcile.merge_geonames_entity, _.assign({
+          geonames_id: body.geonames[0].geonameId,
           q: geonamesURL,
           countryId: '',
           countryCode: ''
@@ -121,8 +168,8 @@ module.exports = {
         next(IS_EMPTY);
         return;
       };
-      console.log(body.results[0].formatted_address, 'for', address);
-      console.log(body.results[0].address_components)
+      //console.log(body.results[0].formatted_address, 'for', address);
+      //console.log(body.results[0].address_components)
 
       var country = _.find(body.results[0].address_components, function (d){
           return d.types[0] == 'country';
@@ -133,7 +180,7 @@ module.exports = {
       
       // update the nodee
       neo4j.query(reconcile.merge_geocoding_entity, {
-        place_id: body.results[0].place_id,
+        geocode_id: body.results[0].place_id,
 
         q: 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(address),
         
@@ -157,6 +204,7 @@ module.exports = {
           next(err);
           return;
         };
+        //console.log('COCOCOC', nodes)
         next(null, nodes);
         //batch.relate(n, 'helds_in', nodes[0], {upvote: 1, downvote:0});
         //nextReconciliation(null, n, v);
@@ -193,34 +241,38 @@ module.exports = {
         end_date,
         result = {};
 
-    if(!date) {
-      next(IS_EMPTY);
-      return;
-    }
-    
     moment.locale(lang);
-
     var monthName = moment().month(0).format('MMMM');
-    
 
-    if(!date[1].length && !date[3].length) {
-      start_date = moment.utc([1, monthName, date[4]].join(' '), 'LL');
-      end_date   = moment(start_date).add(1, 'year').subtract(1, 'minutes');
-    } else if(!date[1].length) {
-      start_date = moment.utc([1,date[3], date[4]].join(' '), 'LL');
-      end_date   = moment(start_date).add(1, 'month').subtract(1, 'minutes');
-    } else {
-      start_date = moment.utc([date[1],date[3], date[4]].join(' '), 'LL');
-      if(date[2].length)
-        end_date = moment.utc([date[2],date[3], date[4]].join(' '), 'LL')
-          .add(24, 'hours')
-          .subtract(1, 'minutes');
-      else
-        end_date = moment(start_date)
-          .add(24, 'hours')
-          .subtract(1, 'minutes');
+    if(!date) {
+      // check other patterns
+      var candidate = humanDate.match(/(\d{2,4})[^\d](\d{2,4})/);
+      if(!candidate) {
+        next(IS_EMPTY);
+        return;
+      }
+      start_date = moment.utc([1, monthName, candidate[1].length < 4? '19' + candidate[1]:candidate[1]].join(' '), 'LL');
+      end_date = moment.utc([1, monthName, candidate[2].length < 4? '19' + candidate[2]:candidate[2]].join(' '), 'LL');
+      end_date = moment(end_date).add(1, 'year').subtract(1, 'minutes');
+    } else {  
+      if(!date[1].length && !date[3].length) {
+        start_date = moment.utc([1, monthName, date[4]].join(' '), 'LL');
+        end_date   = moment(start_date).add(1, 'year').subtract(1, 'minutes');
+      } else if(!date[1].length) {
+        start_date = moment.utc([1,date[3], date[4]].join(' '), 'LL');
+        end_date   = moment(start_date).add(1, 'month').subtract(1, 'minutes');
+      } else {
+        start_date = moment.utc([date[1],date[3], date[4]].join(' '), 'LL');
+        if(date[2].length)
+          end_date = moment.utc([date[2],date[3], date[4]].join(' '), 'LL')
+            .add(24, 'hours')
+            .subtract(1, 'minutes');
+        else
+          end_date = moment(start_date)
+            .add(24, 'hours')
+            .subtract(1, 'minutes');
+      }
     }
-
     result.start_date = start_date.format();
     result.start_time = start_date.format('X');
     result.end_date = end_date.format();

@@ -23,4 +23,13 @@ ORDER BY length(collect( DISTINCT p.name)) DESC
 MATCH (u)-[pr:proposes]-(v)-[ra]-(result) RETURN u,pr,v,ra,result LIMIT 1000;
 
 // timewindow for resources date
-MATCH (n:`resource`) WHERE n.start_time >= '796694400' AND n.end_time <= '875750400' MATCH (n)-[r]-(t) RETURN n,r,t;
+MATCH (n:`resource`)
+WHERE n.start_time >= '796694400' AND n.end_time <= '875750400'
+MATCH (n)-[r]-(t) 
+RETURN n,r,t;
+
+// betwenness centrality measurement
+MATCH p = allShortestPaths(a:`entity`-[r..*]->b:`entity`)
+WHERE a <> b  AND LENGTH(NODES(p)) > 2
+WITH EXTRACT(n IN NODES(p): n.name) AS nodes
+RETURN HEAD(nodes) AS source, HEAD(TAIL(TAIL(nodes))) AS destination, COLLECT(nodes) AS paths

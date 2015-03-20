@@ -1,101 +1,68 @@
 /*
   Enrich neo4j item labelled resource with metadata.
-  Basically MERGE existing nodes
+  Algorithm:
+  
+  - merge all person found in the entitites file, e.g
+    "persons":[
+      {
+         "picture":{
+            "image":"http://upload.wikimedia.org/wikipedia/commons/c/c4/Stalin_1945.jpg",
+            "source":"Wikimedia"
+         },
+         "name":"Joseph Stalin",
+         "id":"8000554",
+         "links":{
+            "viaf":"101787139",
+            "worldcat":"lccn-n80044789",
+            "wiki":"Joseph_Stalin"
+         }
+      },
+  -
+
 */
 var fs = require('fs'),
     path = require('path'),
-    settings = require('./settings'),
-    moment   = require('moment'),
+    settings = require('./settings'), // note: migration specific settings to already existing HG
+    
+    helpers  = require('../helpers'),
     request  = require('request'),
     async    = require('async'),
     xml      = require('xml2js'),
     flatten  = require('flat'),
     YAML     = require('yamljs'),
     _        = require('lodash'),
+
+    queries = require('decypher')('./queries/migration.resolve.cyp'),
+
     neo4j    = require('seraph')(settings.neo4j.host),
 
     batch = neo4j.batch();
 
-var translations = []; // translation table from old reference to new ones
-
-
-moment.locale('fr', {
-  months: 'janvier_février_mars_avril_mai_juin_juillet_août_septembre_octobre_novembre_décembre'.split('_'),
-  monthsShort: 'janv._févr._mars_avr._mai_juin_juil._août_sept._oct._nov._déc.'.split('_'),
-  weekdays: 'dimanche_lundi_mardi_mercredi_jeudi_vendredi_samedi'.split('_'),
-  weekdaysShort: 'dim._lun._mar._mer._jeu._ven._sam.'.split('_'),
-  weekdaysMin: 'Di_Lu_Ma_Me_Je_Ve_Sa'.split('_'),
-  longDateFormat: {
-    LT: 'HH:mm',
-    L: 'DD/MM/YYYY',
-    LL: 'D MMMM YYYY',
-    LLL: 'D MMMM YYYY LT',
-    LLLL: 'dddd D MMMM YYYY LT'
-  },
-  calendar: {
-    sameDay: '[Aujourdhui à] LT',
-    nextDay: '[Demain à] LT',
-    nextWeek: 'dddd [à] LT',
-    lastDay: '[Hier à] LT',
-    lastWeek: 'dddd [dernier à] LT',
-    sameElse: 'L'
-  },
-  relativeTime: {
-    future: 'dans %s',
-    past: 'il y a %s',
-    s: 'quelques secondes',
-    m: 'une minute',
-    mm: '%d minutes',
-    h: 'une heure',
-    hh: '%d heures',
-    d: 'un jour',
-    dd: '%d jours',
-    M: 'un mois',
-    MM: '%d mois',
-    y: 'une année',
-    yy: '%d années'
-  },
-  ordinal: function (number) {
-    return number + (number === 1 ? 'er' : 'ème');
-  },
-  week: {
-    dow: 1, // Monday is the first day of the week.
-    doy: 4 // The week that contains Jan 4th is the first week of the year.
-  }
-});
- 
-moment.locale("fr")
-
-
-
+var translations = [],  // translation table from old reference to new ones
+    lacking_references = [];  //here references not appearing in translation will be put
+    lacking_people = {};
+    geonames = {};
 
 async.waterfall([
-  // load entities
+  /**
+    Create entity:person node from each pêrson fond in the person json file
+    specified by settings.metadataPath.persons
+  */
   function(next) {
     var persons = require(settings.metadataPath.persons).persons,
         queue;
 
     queue = async.queue(function (person, callback) {
+      var person = _.assign({
+        picture: {
+          image: '',
+          source: ''
+        }
+      }, person);
+
       console.log(flatten(person, {delimiter: '_'}));
 
-      neo4j.query(
-          'MERGE (k:entity:person { uri:{id} })'
-        + ' ON CREATE SET '
-        + '  k.name = {name}, '
-        + (person.picture? '  k.picture = {picture_image},': '')
-        + (person.picture? '  k.picture_source = {picture_source}, ' : '')
-        + '  k.links_viaf = {links_viaf}, '
-        + '  k.links_worldcat = {links_worldcat}, '
-        + '  k.links_wiki = {links_wiki}'
-        + ' ON MATCH SET'
-        + '  k.name = {name}, '
-        + (person.picture? '  k.picture = {picture_image},': '')
-        + (person.picture? '  k.picture_source = {picture_source}, ' : '')
-        + '  k.links_viaf = {links_viaf}, '
-        + '  k.links_worldcat = {links_worldcat}, '
-        + '  k.links_wiki = {links_wiki}'
-        + '  RETURN k',
-        flatten(person, {delimiter: '_'}),
+      neo4j.query(queries.merge_person_entity, flatten(person, {delimiter: '_'}),
         function(err, node) {
           if(err)
             console.log(err);
@@ -103,7 +70,11 @@ async.waterfall([
         });
     }, 15);
 
-    queue.push(persons.slice(0,1), function (err) {if(err)console.log(err)});
+    queue.push(_.take(persons, 0), function (err) { // _.take(persons, 0)
+      if(err)
+        throw err
+    });
+
     queue.drain = function() {
       console.log('all persons have been processed');
       next(null);
@@ -122,67 +93,61 @@ async.waterfall([
   },
 
 
-
+  /**
+    For each picture, do the reconciliation job
+  */
   function(pictures, next) {
     // date should be in ISO format, cfr. http://www.w3.org/TR/NOTE-datetime
     // create a queue object with concurrency 2
     var q = async.queue(function (picture, callback) {
       var reference = _.find(translations, _.matchesProperty('oldReference', ('000000'+picture.id).slice(-5) + '.jpg'));
-      if(!reference)
-        console.log('no old-new reference, please check', picture, ('000000'+picture.id).slice(-5) + '.jpg')
-      // the chain for reconciliation
+      if(!reference) {
+        lacking_references.push(picture);
+      };
+      
       var reconciliation = async.waterfall([
-        // store resource in neo4j
+        /**
+          Create a node:resource (unique key: url)
+        */
         function(nextReconciliation) {
-          neo4j.query(
-              'MERGE (k:resource { url:{url} })'
-            + ' ON CREATE SET '
-            + '  k.date = {date}, '
-            + '  k.title = {title}, '
-            + '  k.place = {place}, '
-            + '  k.stakeholders = {stakeholders} '
-            + ' ON MATCH SET'
-            + '  k.date = {date}, '
-            + '  k.title = {title}, '
-            + '  k.place = {place}, '
-            + '  k.stakeholders = {stakeholders} '
-            + 'RETURN k',
-            {
-              url: reference? reference.newReference: picture.id,
-              date: picture.date,
-              title: picture.title,
-              place: picture.place,
-              stakeholders: picture.stakeholders
-            },function(err, node) {
-              if(err) {
-                console.log('error saving picture picture', picture);
-                throw(err);
-              } else
-                nextReconciliation(null, node[0])
-            });
+          neo4j.query(queries.merge_resource, {
+            url: reference? reference.newReference: picture.id,
+            date: picture.date,
+            title: picture.title,
+            place: picture.place,
+            stakeholders: picture.stakeholders
+          }, function (err, node) {
+            if(err) {
+              console.log('error saving picture picture', picture);
+              throw(err);
+            }
+            nextReconciliation(null, node[0])
+          });
         },
         /*
-          Create a basic version for the entity, that will be able to link entities.
+          Create a node:version for the node:resource,
+          that will be able to host entities 'fingerprint' on the resouce.
           Nextstep: reconcile geonames.
           @param n - the picture node just created
         */
         function(n, nextReconciliation) {
-          neo4j.query(
-              'MERGE (k:version { url:{url}, first: true })'
-            + ' ON CREATE SET '
-            + '  k.creation_date = timestamp() '
-            + 'RETURN k',
-            {
-              url: n.url,
-            }, function(err, nodes) {
-              if(err) {
-                console.log(err);
-                throw(err);
-              } else {
-                // merge relationship instead.
-                batch.relate(nodes[0], 'describes', n, {upvote: 1, downvote:0});
+          neo4j.query(queries.merge_version, {
+            url: n.url,
+          }, function (err, nodes) {
+            if(err) {
+              console.log(err);
+              throw(err);
+            } else {
+              neo4j.query(queries.merge_relationship_version_resource, {
+                resource_id: n.id,
+                version_id: nodes[0].id
+              }, function (err, results) {
+                if(err)
+                  throw err;
+                //console.log(results);
                 nextReconciliation(null, n, nodes[0]);
-              }
+              });  
+            }
           });
         },
         /*
@@ -192,88 +157,46 @@ async.waterfall([
           @param v - the version node just created
         */
         function(n, v, nextReconciliation) {
-          var geonamesURL = 'http://api.geonames.org/searchJSON?q='
-              + encodeURIComponent(n.place)
-              + '&style=long&maxRows=10&username=' + settings.geonames.username;
-          if(settings.geonames.reconcile && n.place.length > 2)
-            request.get({
-              url: geonamesURL,
-              json:true
-            }, function (err, res, body) {
-              if(err)
-                throw err;
-              if(!body.geonames ||  !body.geonames.length) {
-                // strange place, maybe inquiry upon it...
-                neo4j.query(
-                    'MERGE (k:inquiry { strategy:{strategy}, content:{content} })'
-                  + ' ON CREATE SET '
-                  + '  k.content={content}'
-                  + ' ON MATCH SET'
-                  + '  k.content={content}'
-                  + 'RETURN k', {
-                    strategy: 'reconciliation',
-                    content: 'Reconciliation: fill #place with lat/lon for **' + n.place + '**'
-                  }, function(err, nodes) {
-                    if(err)
-                      throw err;
-                    batch.relate(nodes[0], 'questions', v, {upvote: 1, downvote:0});
-                    nextReconciliation(null, n, v, null);
-                  });
-              } else {
-                // handle geonames err, @todo
-                console.log(n.place, '-->', body.geonames[0].countryName, '/', body.geonames[0].toponymName); // take the first name
-                nextReconciliation(null, n, v, _.assign({
-                  q: geonamesURL,
-                  countryId: '',
-                  countryCode: ''
-                }, body.geonames[0]));
-              };
-
-                
-            });
-          else
-            nextReconciliation(null, n, v, null);
-        },
-        /*
-          Reconcile with geonames, 2/2: save entity to the db and create a relationship between the resource version and the entity.
-          @param n - the picture node
-          @param place - the geoname top result from the disambiguation plus the generator query.
-        */
-        function (n, v, place, nextReconciliation) {
-          if(!place) {
+          if(!settings.geonames.reconcile || n.place.length < 3) {
             nextReconciliation(null, n, v);
             return;
           }
-          neo4j.query(
-              'MERGE (k:entity:location { geonameId:{geonameId} })'
-            + ' ON CREATE SET '
-            + '  k.creation_date = timestamp(), '
-            + '  k.geonames_query = {q}, '
-            + '  k.geonames_countryId = {countryId}, '
-            + '  k.geonames_countryName = {countryName}, '
-            + '  k.geonames_countryCode = {countryCode}, '
-            + '  k.geonames_toponymName = {toponymName}, '
-            + '  k.geonames_lat = {lat}, '
-            + '  k.geonames_lng = {lng} '
-            + ' ON MATCH SET'
-            + '  k.last_modification_date = timestamp(), '
-            + '  k.geonames_query = {q}, '
-            + '  k.geonames_countryId = {countryId}, '
-            + '  k.geonames_countryName = {countryName}, '
-            + '  k.geonames_countryCode = {countryCode}, '
-            + '  k.geonames_toponymName = {toponymName}, '
-            + '  k.geonames_lat = {lat}, '
-            + '  k.geonames_lng = {lng} '
-            + 'RETURN k', place,
-            function(err, nodes) {
-              if(err) {
-                console.log(err);
-                throw(err);
-              } else {
-                batch.relate(n, 'helds_in', nodes[0], {upvote: 1, downvote:0});
+          if(geonames[n.place]) {
+            console.log('loading cached geonames results for', n.place);
+            helpers.enrichResource(n, geonames[n.place], function (err, nodes) {
+              if (err)
+                throw err;
+              nextReconciliation(null, n, v);
+            });
+            return;
+          }
+
+          helpers.geonames(n.place, function(err, nodes) {
+            if(err == helpers.IS_EMPTY) {
+              neo4j.query(queries.merge_automatic_inquiries,{
+                content: 'Reconciliation: fill #place with lat/lon for **' + n.place + '**'
+              }, function(err, nodes) {
+                if(err)
+                  throw err;
+
+                //batch.relate(nodes[0], 'questions', v, {upvote: 1, downvote:0});
                 nextReconciliation(null, n, v);
-              }
-          });
+              });
+              return;
+            }
+
+            if (err)
+              throw err;
+
+            geonames[n.place] = nodes[0];
+            //console.log('place', n.place, 'reconciled to', nodes[0], ',', nodes[0].geocode_countryName);
+            
+            helpers.enrichResource(n, nodes[0], function (err, nodes) {
+              if (err)
+                throw err;
+              nextReconciliation(null, n, v);
+            });
+          });   
         },
         /*
           Migrate IC file from dataset folder.
@@ -322,6 +245,7 @@ async.waterfall([
             return;
           }
           var entities = [],
+              unknowns = 0, // unknowns entities...
               relationships; // extract entities in resource
           if(items.object.length) {
             for(var i in items.object) {
@@ -329,30 +253,53 @@ async.waterfall([
               entity.region  = items.object[i].region;
               if(items.object[i].markers)
                 entity.markers  = items.object[i].markers;
-              //console.log('MMM', items.object[i].identification);
               if(items.object[i].identification) {
                 entity.identification  = items.object[i].identification._;
                 entity.uri  = items.object[i].identification.$.id;
+                if(!entity.uri || entity.uri == '')
+                  if(entity.identification && entity.identification != 'unknown') {
+                    console.log('----',entity.identification, items.object[i].identification)
+                    throw entity.identification
+                  }
+                // if(!entity.uri || entity.uri == '')// && entity.identification && entity.identification.length > 2 && entity.identification != 'unknown')
+                //   console.log('----',entity.identification, items.object[i].identification)
               }
+
+              
               entities.push(entity);
             };
           } else {
-            entities.push({
-              region: items.object.region,
-              identification: items.object.identification._
-            })
+            var entity = {
+              region: items.object.region
+            };
+
+            if(items.object.markers)
+              entity.markers  = items.object.markers;
+            
+            if(items.object.identification) {
+              entity.identification  = items.object.identification._;
+              entity.uri  = items.object.identification.$.id;
+              if(!entity.uri || entity.uri == '')
+                if(entity.identification && entity.identification != 'unknown') {
+                  console.log('----',entity.identification, items.object.identification)
+                  throw entity.identification
+                }
+            }
+            entities.push(entity);
           };
           
           relationships = async.queue(function (entity, nextRelationship) {
-            console.log('connecting ',entity.uri, 'with', n.url);
             if(!entity.uri || entity.uri == '') {
+              unknowns++;
+              if(!lacking_people[''+entity.identification])
+                lacking_people[''+entity.identification] = [];
+              lacking_people['' + entity.identification].push(n.url);
               nextRelationship();
               return 
             }
-            neo4j.query(
-                'MATCH (a:entity { uri:{uri}}), (n:resource {url:{url}})'
-              + 'MERGE (a)-[r:appears_in]->(n)'
-              + 'RETURN r',
+            console.log('connecting ',entity.uri, 'with', n.url);
+
+            neo4j.query(queries.merge_relationship_entity_resource_by_uri,
               {
                 uri: entity.uri,
                 url: n.url
@@ -364,16 +311,19 @@ async.waterfall([
             );
           }, 4);
           
-          relationships.push( entities, function(){})
+          relationships.push(entities, function(){
+
+          });
+
           relationships.drain = function() {
             // add markdown info on resource.
+            v.unknowns = unknowns;
             v.markdown = YAML.stringify(entities, 2);
             neo4j.save(v, function(err, node) {
               if(err)
                 throw err;
               nextReconciliation(null, n, v);
             })
-            
           }
         },
         /*
@@ -382,65 +332,39 @@ async.waterfall([
           @param v - the version node
         */
         function (n, v, nextReconciliation) {
-          var date = n.date.match(/(\d*)[\sert\-]*(\d*)\s*([^\s]*)\s?(\d{4})/),
-              start_date,
-              end_date;
-          if(!date) {
+          if(n.date.length < 4) {
             nextReconciliation();
             return;
           }
-            
-          if(!date[1].length && !date[3].length) {
-            start_date = moment.utc([1, 'janvier', date[4]].join(' '), 'LL');
-            end_date   = moment(start_date).add(1, 'year').subtract(1, 'minutes');
-          } else if(!date[1].length) {
-            start_date = moment.utc([1,date[3], date[4]].join(' '), 'LL');
-            end_date   = moment(start_date).add(1, 'month').subtract(1, 'minutes');
-          } else {
-            start_date = moment.utc([date[1],date[3], date[4]].join(' '), 'LL');
-            if(date[2].length)
-              end_date = moment.utc([date[2],date[3], date[4]].join(' '), 'LL')
-                .add(24, 'hours')
-                .subtract(1, 'minutes');
-            else
-              end_date = moment(start_date)
-                .add(24, 'hours')
-                .subtract(1, 'minutes');
-          }
 
-          n.start_date = start_date.format();
-          n.start_time = start_date.format('X');
-          n.end_date = end_date.format();
-          n.end_time = end_date.format('X');
-
-          // console.log(n.date)
-          // console.log('     ',start_date.format());
-          // console.log('     ',start_date.format('X'));
-          // console.log('     ',end_date.format());
-          // console.log('     ',end_date.format('X'));
-            
-          neo4j.save(n, function(err, node) {
-            if(err)
+          helpers.reconcileHumanDate(n.date, 'fr', function(err, dates) {
+            if(err) {
+              console.log(n)
               throw err;
-            nextReconciliation();
-          })
-
+            }
+              
+            n = _.assign(n, dates);
+            neo4j.save(n, function(err, node) {
+              if(err)
+                throw err;
+              nextReconciliation();
+            })
+          });
         }
       ], callback);
-    }, 8);
+    }, 2);
 
-    q.push(pictures, function (err) {if(err)console.log(err)});
+    q.push(_.take(pictures, pictures.length), function (err) {if(err)console.log(err)}); // pictures 
 
     // assign a callback
     q.drain = function(err) {
       console.log('all items have been processed');
-      batch.commit(function(err, results) {
-        if(err)
-          throw err;
-        next(null);
-      });
-      
-    }
+
+      fs.writeFileSync('./lacking_references.log', JSON.stringify(lacking_references, null, 2));
+      fs.writeFileSync('./lacking_people.log', JSON.stringify(lacking_people, null, 2));
+      //console.log('people',lacking_people);
+      next(null);
+    };
   },
 
 

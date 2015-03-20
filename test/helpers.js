@@ -44,6 +44,14 @@ describe('viaf api', function() {
 
 describe('human date service', function() {
   this.timeout(5000);
+  it('should stranform 90-92 in two years span', function (done) {
+    helpers.reconcileHumanDate('90-92', 'fr', function (err, res) {
+      should.not.exist(err, err);
+      should.equal(res.start_date, '1990-01-01T00:00:00+00:00'); // utc format
+      should.equal(res.end_date,  '1992-12-31T23:59:00+00:00');
+      done();
+    });
+  });
   it('should stranform 1er et 2 juin 1955 in two day span', function (done) {
     helpers.reconcileHumanDate('1er et 2 juin 1955', 'fr', function (err, res) {
       should.not.exist(err, err);
