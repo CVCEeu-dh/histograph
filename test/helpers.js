@@ -84,4 +84,31 @@ describe('human date service', function() {
       done();
     });
   });
+  it('should stranform 1er octobre 1945 in a one day span', function (done) {
+    helpers.reconcileHumanDate('1er octobre 1945', 'fr', function (err, res) {
+      should.not.exist(err, err);
+      should.equal(res.start_date, '1945-10-01T00:00:00+00:00'); // utc format
+      should.equal(res.end_date, '1945-10-01T23:59:00+00:00');
+      done();
+    });
+  });
+
+  it('should stranform vers 1969 in a one day span', function (done) {
+    helpers.reconcileHumanDate('vers 1969', 'fr', function (err, res) {
+      should.not.exist(err, err);
+      should.equal(res.start_date, '1969-01-01T00:00:00+00:00'); // utc format
+      should.equal(res.end_date, '1969-12-31T23:59:00+00:00');
+      done();
+    });
+  });
+
+  it('should stranform Années 1960 in a TEN YEARS span', function (done) {
+    helpers.reconcileHumanDate('Années 1960', 'fr', function (err, res) {
+      should.not.exist(err, err);
+      should.equal(res.start_date, '1960-01-01T00:00:00+00:00'); // utc format
+      should.equal(res.end_date, '1969-12-31T23:59:00+00:00');
+      done();
+    });
+  });
+  
 });

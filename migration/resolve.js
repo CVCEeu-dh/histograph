@@ -31,6 +31,8 @@ var queue = async.waterfall([
     When an inquiry is resolved, we need to delete it.
   */
   function (results, next) {
+    next();
+    return;
     console.log('reloving', results.length, 'inquiries');
     // try again with geonames
     var q = async.queue(function (nodes, callback) {

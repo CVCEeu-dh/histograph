@@ -243,19 +243,29 @@ module.exports = {
 
     moment.locale(lang);
     var monthName = moment().month(0).format('MMMM');
-
+    
     if(!date) {
       // check other patterns
-      var candidate = humanDate.match(/(\d{2,4})[^\d](\d{2,4})/);
+      var candidate = humanDate.match(/(\d{2,4})?[^\d](\d{2,4})/);
       if(!candidate) {
         next(IS_EMPTY);
         return;
       }
-      start_date = moment.utc([1, monthName, candidate[1].length < 4? '19' + candidate[1]:candidate[1]].join(' '), 'LL');
-      end_date = moment.utc([1, monthName, candidate[2].length < 4? '19' + candidate[2]:candidate[2]].join(' '), 'LL');
-      end_date = moment(end_date).add(1, 'year').subtract(1, 'minutes');
-    } else {  
-      if(!date[1].length && !date[3].length) {
+      if(candidate[1].length && candidate[2].length) {
+        start_date = moment.utc([1, monthName, candidate[1].length < 4? '19' + candidate[1]:candidate[1]].join(' '), 'LL');
+        end_date = moment.utc([1, monthName, candidate[2].length < 4? '19' + candidate[2]:candidate[2]].join(' '), 'LL');
+        end_date = moment(end_date).add(1, 'year').subtract(1, 'minutes');
+      } else {
+        start_date = moment.utc([1, monthName, candidate[2].length < 4? '19' + candidate[2]:candidate[2]].join(' '), 'LL');
+        end_date = moment(start_date).add(1, 'year').subtract(1, 'minutes');
+      }
+
+      
+    } else {
+      if(!date[1].length && date[3].length && ['années'].indexOf(date[3].toLowerCase()) !== -1) {
+        start_date = moment.utc([1, monthName, date[4]].join(' '), 'LL');
+        end_date   = moment(start_date).add(10, 'year').subtract(1, 'minutes');
+      } else if(!date[1].length && (!date[3].length || ['vers'].indexOf(date[3].toLowerCase()) !== -1) ) {
         start_date = moment.utc([1, monthName, date[4]].join(' '), 'LL');
         end_date   = moment(start_date).add(1, 'year').subtract(1, 'minutes');
       } else if(!date[1].length) {
@@ -274,9 +284,9 @@ module.exports = {
       }
     }
     result.start_date = start_date.format();
-    result.start_time = start_date.format('X');
+    result.start_time = +start_date.format('X');
     result.end_date = end_date.format();
-    result.end_time = end_date.format('X');
+    result.end_time = +end_date.format('X');
 
     next(null, result);
   }

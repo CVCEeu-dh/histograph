@@ -11,8 +11,10 @@ RETURN n,r
 // get 
 MERGE (inq:inquiry {strategy:'reconciliation', content:{content}})
   ON CREATE SET
+    inq.service={service},
     inq.content={content}
   ON MATCH SET
+    inq.service={service},
     inq.content={content}
   RETURN inq
 
@@ -93,11 +95,13 @@ RETURN ent, res, r
 MERGE (k:resource { url:{url} })
   ON CREATE SET
     k.date = {date},
+    k.reference = {reference},
     k.title = {title},
     k.place = {place},
     k.stakeholders = {stakeholders}
   ON MATCH SET
     k.date = {date},
+    k.reference = {reference},
     k.title = {title},
     k.place = {place},
     k.stakeholders = {stakeholders}
