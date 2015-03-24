@@ -5,23 +5,53 @@
   Check that there are no duplicates for entities: location (geonames plus geocoding api)
   
 */
-var settings = require('../settings'),
+var fs        = require('fs'),
+    settings  = require('../settings'),
     migrationSettings = require('./settings'),
-    request  = require('request'),
-    helpers = require('../helpers'),
-    queries = require('decypher')('./queries/migration.resolve.cyp'),
+    request   = require('request'),
+    helpers   = require('../helpers'),
+    queries   = require('decypher')('./queries/migration.resolve.cyp'),
+    
     neo4j = require('seraph')(settings.neo4j.host),
     async = require('async'),
-    _ = require('lodash'),
+    _     = require('lodash'),
     batch = neo4j.batch();
 
+var csv = require('csv');
 
 var queue = async.waterfall([
+  /**
+    Extract birtdate from resource page in dbpedia by following dbname
+    and transform them as iso dates.
+    Check and correct viaf data.
+  */
+  function (next) {
+    neo4j.query('MATCH (n:person) RETURN n', function (err, nodes) {
+      console.log(nodes[0])
+      // resolve dbpedia?
+      if(!nodes[0].links_wiki.length) {
+        // helpers.dbpedia
+        //http://lookup.dbpedia.org/api/search.asmx/PrefixSearch?QueryClass=person&MaxHits=5&QueryString=Gaston%20Thorn
+      }
+      next()
+    });
+  },
+
+  /**
+    Enrich resource not being annotated with automatical annotation
+
+
+  */
   /**
     evaluate dodis csv file
   */
   function (next) {
-
+    var parser = csv.parse({delimiter: ','}, function(err, data){
+      if(err)
+        throw err
+      console.log(_.take(data, 5));
+    });
+    fs.createReadStream(migrationSettings.metadataPath.dodis).pipe(parser);
   },
   /**
     Print inquiries for overlapping geo

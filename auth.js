@@ -53,7 +53,7 @@ passport.use(new LocalStrategy(function (username, password, done) {
 passport.use(new TwitterStrategy({
     consumerKey: settings.TWITTER_CONSUMER_KEY,
     consumerSecret: settings.TWITTER_CONSUMER_SECRET,
-    callbackURL: "http://localhost:3000/auth/twitter/callback"
+    callbackURL: settings.baseurl + "/auth/twitter/callback"
   },
   function(token, tokenSecret, profile, done) {
     // asynchronous verification, for effect...
@@ -98,7 +98,8 @@ passport.serializeUser(function(user, done) {
     lastname:  user.lastname,
     email:     user.email,
     username:  user.username,
-    id:        user.id
+    id:        user.id,
+    picture:   user.picture
   });
 });
 

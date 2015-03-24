@@ -23,10 +23,9 @@ ORDER BY length(collect( DISTINCT p.name)) DESC
 MATCH (u)-[pr:proposes]-(v)-[ra]-(result) RETURN u,pr,v,ra,result LIMIT 1000;
 
 // timewindow for resources date
-MATCH (n:`resource`)
-WHERE n.start_time >= '796694400' AND n.end_time <= '875750400'
-MATCH (n)-[r]-(t) 
-RETURN n,r,t;
+MATCH (a:`entity`)-[R1:appears_in]-(p:`resource`)-[R2:appears_in]-(b:`entity`)
+WHERE a <> b AND a.name = 'Joseph Bech' AND  p.start_time >= -591840000 AND p.end_time <= -586569600
+RETURN a,b,R1, R2,p
 
 // betwenness centrality measurement
 MATCH p = allShortestPaths(a:`entity`-[r..*]->b:`entity`)
@@ -44,3 +43,14 @@ ORDER BY length(collect(p.url)) DESC
 MATCH (a:`entity`)-[R1:appears_in]-(p:`resource`)-[R2:appears_in]-(b:`entity`)
 WHERE a <> b AND a.name = 'Joseph Bech'
 RETURN a,b,R1, R2,p
+
+// find IRRECONCILIABLE places
+MATCH (a:location)-[r1]-(n:`resource`)-[r2]-(b:location)
+WHERE a <> b AND has(a.geonames_id) AND has(b.geocode_id) AND a.geonames_countryCode <> b.geocode_countryId RETURN a,r1,n,r2,b;
+
+// find IRRECONCILIABLE places
+MATCH (a:location)-[r1]-(n:`resource`)-[r2]-(b:location)
+WHERE a <> b AND has(a.geonames_id)
+AND has(b.geocode_id)
+AND a.geonames_countryCode = b.geocode_countryId
+AND a.geonames_toponymName <> b.geocode_toponymName RETURN a,r1,n,r2,b;

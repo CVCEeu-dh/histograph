@@ -58,6 +58,33 @@ module.exports = {
     return this.encrypt(password, options).key == encrypted;
   },
 
+  /**
+    Call dbpedia service and translate its xml to a more human json content
+  */
+  dbpedia: function(fullname, next) {
+    request.get('http://lookup.dbpedia.org/api/search.asmx/PrefixSearch?QueryClass=person&MaxHits=5&QueryString='
+      + encodeURIComponent(fullname),
+      function (err, res, body) {
+        if(err) {
+          next(err);
+          return;
+        }
+
+        xml.parseString(body, function(err, result) {
+          if(err) {
+            next(err); // this should never happen /D
+            return;
+          }
+
+          if(!result || !result.ArrayOfResult || !result.ArrayOfResult.Result) {
+            next(IS_EMPTY);
+            return;
+          }
+          next(null, result.ArrayOfResult.Result);
+        });
+      }
+    );
+  },
 
   /**
     Create a Viaf entity:person node for you

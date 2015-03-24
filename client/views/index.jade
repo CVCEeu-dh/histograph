@@ -1,10 +1,34 @@
 html
   head
     title!= title
-    script(type='text/javascript', src='/socket.io/socket.io.js')
+    link(href='/css/bootstrap.min.css', rel='stylesheet')
+    link(href='/css/style.css', rel='stylesheet')
+    script(src='/socket.io/socket.io.js')
+    script(src='//use.typekit.net/fwe7tir.js')
+    script.
+      try{Typekit.load();}catch(e){}
+
+
 
   body
-    h1!= message
-
     script(type='text/javascript').
       var socket = io();
+
+    header hg 
+      if user.username
+        a(href='#/profile')
+          img(src=user.picture)
+          span!=user.username
+
+        ul
+          li
+            a(href='#')
+              span settings
+          li
+            a(href='#')
+              span logout
+    
+    #user
+    if !user.username
+      form
+        a(href='/auth/twitter', class='btn btn-default') signup with twitter

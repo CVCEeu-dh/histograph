@@ -204,7 +204,28 @@ describe('authenticate the user, succeed', function() {
         done();
       });
   })
+});
 
+
+
+describe('get resource items available to the user', function() {
+
+  it('should show a list of 50 resources', function (done) {
+    session
+      .get('/api/resource')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exists(err);
+        console.log(' resoucre ', res.body)
+        done();
+      });
+  });
+});
+
+
+
+describe('delete the user', function() {
   it('should remove the user with email world@globetrotter.it', function (done) {
     neo4j.query('MATCH(n:user {email:{email}}) DELETE n', {
       email: 'world@globetrotter.it'

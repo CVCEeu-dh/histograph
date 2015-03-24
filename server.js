@@ -6,6 +6,7 @@
 */
 var express      = require('express'),        // call express
     session      = require('express-session'),
+    
     settings     = require('./settings'),
 
     app          = exports.app = express(),                 // define our app using express
@@ -18,7 +19,7 @@ var express      = require('express'),        // call express
     
     ctrl         = require('require-all')(__dirname + '/controllers'),
 
-    port         = process.env.PORT || 3000,
+    port         = process.env.PORT || 8000,
 
     clientRouter = express.Router(),
     apiRouter    = express.Router(),
@@ -26,8 +27,17 @@ var express      = require('express'),        // call express
     _            = require('lodash');        // set our port
 
 
+// initilalize session middleware
+var sessionMiddleware = session({
+  name: 'hg.sid',
+  secret: settings.secret.cookie,
+  trustProxy: false,
+  resave: true,
+  saveUninitialized: true
+})
+
 // configure logger
-app.use(morgan('dev'));
+// app.use(morgan('dev'));
 
 // configure static files and jade templates
 app.use(express.static('./client/src'));
@@ -41,13 +51,7 @@ app.use(bodyParser.json());
 
 // configure app to use sessions
 app.use(cookieParser());
-app.use(session({
-  name: 'hg.sid',
-  secret: settings.secret.cookie,
-  trustProxy: false,
-  resave: true,
-  saveUninitialized: true
-}));
+app.use(sessionMiddleware);
 
 
 app.use(auth.passport.initialize());
@@ -77,7 +81,10 @@ express.response.error = function(statusCode, err) {
 */
 clientRouter.route('/').
   get(function(req, res) { // test route to make sure everything is working (accessed at GET http://localhost:8080/api)
-    res.render('index', { message: 'hooray! welcome to our api!' });   
+    res.render('index', {
+      user: req.user || 'anonymous',
+      message: 'hooray! welcome to our api!'
+    });   
   });
 
 clientRouter.route('/login')
@@ -184,16 +191,30 @@ app.use('/api', apiRouter); // api endpoint. we should be auth to pass this poin
 
 /*
 
+  Let's add route specific for models
+  ===
+
+*/
+apiRouter.route('/resource')
+  .get(ctrl.resource.getItems)
+
+/*
+
  START THE SERVER and strat listening with socket.io
 
 */
 var server = app.listen(port),
-    io = require('socket.io').listen(server);
+    io = require('socket.io')
+          .listen(server)
+          .use(function (socket, next) {
+            sessionMiddleware(socket.request, {}, next);
+          })
 
 // import io events otherwise
 io.on('connection', function(socket){
+  // console.log('socket.request.session.passport.user', socket.request.session)
   var cookie_string = socket.request.headers.cookie;
-  console.log('a user connected', cookie_string);
+  //  console.log('a user connected', cookie_string);
   
 
 });
