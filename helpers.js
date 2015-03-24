@@ -31,6 +31,27 @@ module.exports = {
     return res.error(400, err.message);
   },
   /**
+    Handle causes and stacktraces provided by seraph Query and rawQuery.
+    @err the err OBJECT provided by cypher
+    @res the express response object
+  */
+  cypherQueryError: function(err, res) {
+    // for(i in err)
+    //   console.log(i)
+    // console.log('@helpers.cypherQueryError', err.neo4jException, err.statusCode, err.neo4jCause)
+    switch(err.neo4jException) {
+      case 'EntityNotFoundException':
+        return res.error(404, {
+          message:  err.neo4jCause.message,
+          exception: err.neo4jException
+        });
+      default:
+        return res.error(err.statusCode, err);
+    };
+  },
+
+
+  /**
     encrypt a password ccording to local settings secret and a random salt.
   */
   encrypt: function(password, options) {

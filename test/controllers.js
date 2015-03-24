@@ -210,14 +210,39 @@ describe('authenticate the user, succeed', function() {
 
 describe('get resource items available to the user', function() {
 
-  it('should show a list of 50 resources', function (done) {
+  it('should show a list of 20 resources', function (done) {
     session
       .get('/api/resource')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
         should.not.exists(err);
-        console.log(' resoucre ', res.body)
+        //console.log(' resoucre ', res.body)
+        done();
+      });
+  });
+
+  it('should return a NOT FOUND error via API', function (done) {
+    session
+      .get('/api/resource/512000000')
+      .expect('Content-Type', /json/)
+      .expect(404)
+      .end(function (err, res) {
+        should.equal(res.body.status, 'error');
+        should.equal(res.statusCode, 404)
+        done();
+      });
+  });
+
+  it('should give the specified resource', function (done) {
+    session
+      .get('/api/resource/512')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exists(err);
+        should.exists(res.body.result.item);
+        should.equal(res.body.status, 'ok', res.body);
         done();
       });
   });
@@ -232,7 +257,7 @@ describe('delete the user', function() {
     }, function(err, res) {
       if(err)
         console.log(err)
-      console.log('result', res)
+      //console.log('result', res)
       done();
     })
     

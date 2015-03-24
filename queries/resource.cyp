@@ -1,3 +1,10 @@
+// name: get_resource
+// get resource with its version and comments
+START r=node({id})
+WITH r
+  MATCH (r)--(v:version)
+  RETURN r,v
+
 // name: get_resources
 // get resources with number of comments, if any
 MATCH (r:resource)--(v:version)

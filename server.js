@@ -75,7 +75,6 @@ express.response.error = function(statusCode, err) {
   });
 };
 
-
 /*
   Client router configuration
 */
@@ -197,6 +196,8 @@ app.use('/api', apiRouter); // api endpoint. we should be auth to pass this poin
 */
 apiRouter.route('/resource')
   .get(ctrl.resource.getItems)
+apiRouter.route('/resource/:id')
+  .get(ctrl.resource.getItem)
 
 /*
 
