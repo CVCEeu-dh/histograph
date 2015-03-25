@@ -280,6 +280,18 @@ module.exports = {
     });
   },
 
+  /*
+    Return this moment ISO timestamp and this moment EPOCH ms timestamp
+  */
+  now: function() {
+    var now = moment.utc(),
+        result = {};
+    
+    result.date = now.format();
+    result.time = +now.format('X');
+    return result;
+  },
+  
   /**
     Dummy Time transformation with moment.
   */

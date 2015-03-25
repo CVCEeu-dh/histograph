@@ -204,6 +204,8 @@ apiRouter.route('/resource')
   .get(ctrl.resource.getItems)
 apiRouter.route('/resource/:id')
   .get(ctrl.resource.getItem)
+apiRouter.route('/resource/:id/comments') // POST
+  .post(ctrl.resource.createComment)
 
 /*
 
@@ -211,7 +213,7 @@ apiRouter.route('/resource/:id')
 
 */
 var server = app.listen(port),
-    io = require('socket.io')
+    io = exports.io = require('socket.io')
           .listen(server)
           .use(function (socket, next) {
             sessionMiddleware(socket.request, {}, next);

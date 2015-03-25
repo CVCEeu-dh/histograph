@@ -69,3 +69,21 @@ blockquote{
 .username{
   
 }
+
+#inquirer{
+  margin: 10px auto;
+  width: 350px;
+}
+
+.CodeMirror{
+  font-family: inherit;
+  background: #eee;
+  height: auto;
+  padding: 5px 10px;
+}
+
+.CodeMirror-scroll {
+  height: auto;
+  overflow-y: hidden;
+  overflow-x: auto;
+}

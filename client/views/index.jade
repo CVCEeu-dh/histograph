@@ -2,8 +2,10 @@ html
   head
     title!= title
     link(href='/css/bootstrap.min.css', rel='stylesheet')
-    link(href='/css/style.css', rel='stylesheet')
     link(href='/css/annotorious.css', rel='stylesheet')
+    link(href='/css/codemirror.css', rel='stylesheet')
+    link(href='/css/style.css', rel='stylesheet')
+    
     script(src='/socket.io/socket.io.js')
     script(src='//use.typekit.net/fwe7tir.js')
     script.
@@ -36,11 +38,14 @@ html
       else
         div(ng-view)
         
-    script(src='http://annotorious.github.io/latest/annotorious.min.js')
+    script(src='/js/lib/codemirror.js')
+    script(src='/js/lib/annotorious.min.js')
 
     script(src='/js/lib/angular.min.js')
     script(src='/js/lib/angular-route.min.js')
     script(src='/js/lib/angular-resource.min.js')
+    script(src='/js/lib/ui-codemirror.min.js')
+    
     script(src='/js/app.js')
     script(src='/js/services.js')
     script(src='/js/controllers/core.js')

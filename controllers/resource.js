@@ -51,5 +51,31 @@ module.exports = {
     })
   },
 
- 
+  /*
+    create a comment on this resource
+  */
+  createComment: function(req, res) {
+    console.log('ici', req.body.content, req.user);
+    var now = helpers.now();
+
+    // add dummy comments on it.
+    neo4j.query(queries.add_comment_to_resource, {
+      id: +req.body.resource_id,
+      content: req.body.content,
+      tags: req.body.tags,
+      username: req.user.username,
+      creation_date: now.date,
+      creation_time: now.time
+    }, function (err, items) {
+      console.log(err, items);
+      if(err)
+        return helpers.cypherQueryError(err, res);
+      
+      return res.ok({
+      
+      });
+    })
+
+    
+  }
 }

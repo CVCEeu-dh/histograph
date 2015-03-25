@@ -12,6 +12,7 @@ angular
   .module('histograph', [
     'ngRoute',
     'ngResource',
+    'ui.codemirror'
   ])
   .config(function ($routeProvider, $httpProvider) {
     $routeProvider

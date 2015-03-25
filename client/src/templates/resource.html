@@ -19,9 +19,19 @@
   </blockquote>
   
   <div class="discussion">
-    <a class="btn btn-default" ng-click="mention(item)">join discussion</a>
+    <a class="btn btn-default" ng-click="startMention(item)">join discussion</a>
     <span ng-repeat="com in item.comments">
       <span cmlass="username">{{com.user.username}}</span> — {{com.comment.content}}</span>
     
   </div>
 </div>
+
+<div id="inquirer">
+  <div ng-model='comment' ui-codemirror="{
+      lineNumbers: false,
+      theme:'twilight',
+      lineWrapping : true,
+      mode: 'Smalltalk'
+    }"></div>
+    <button class="btn btn-default" ng-click="postMention(item)">comment</button>
+</div> 

@@ -240,11 +240,29 @@ describe('get resource items available to the user', function() {
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
-        console.log(err, res.body.result.item)
+        // console.log(err, res.body.result.item)
         should.not.exists(err);
 
         should.exists(res.body.result.item);
         should.equal(res.body.status, 'ok', res.body);
+        done();
+      });
+  });
+
+  it('should create a comment and attach it to the required resource', function (done) {
+    session
+      .post('/api/resource/512/comments')
+      .send({
+        content : 'A content with some #taa and #location tag',
+        resource_id: 512,
+        tags: ['#taa', '#location']
+      })
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        console.log(err, res.body)
+        //should.not.exists(err);
+
         done();
       });
   });

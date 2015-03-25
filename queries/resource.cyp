@@ -39,3 +39,28 @@ MATCH (r:resource)--(v:version)
 MATCH (r:resource)--(v:version)
   WITH r
   RETURN count(r)
+
+
+// name: add_comment_to_resource
+// add a comment to a resource, by user username. At least one #tag should be provided
+START res=node({id})
+  WITH res 
+    CREATE (com:`comment` {
+      creation_date: {creation_date},
+      creation_time: {creation_time},
+      content: {content},
+      tags: {tags}
+    })
+    CREATE (u:user {username:{username}})-[:says]->(com)
+    CREATE (com)-[:mentions]->(res)
+  WITH u, com, res
+    MATCH (u:user)-[r4:says]-(com)-[r5:mentions]-(res)
+    WITH res, {
+      id: id(com),
+      comment: com,
+      user: u
+    } AS coms
+  RETURN {
+    comments: collect(DISTINCT coms)
+  } AS result
+  
