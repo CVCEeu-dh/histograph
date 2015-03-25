@@ -57,3 +57,15 @@ blockquote{
 .item img{
   max-width: 350px
 }
+
+.tag {
+  margin: 5px;
+  text-decoration: underline;
+}
+.item .tags{
+  margin: 10px 0;
+}
+
+.username{
+  
+}

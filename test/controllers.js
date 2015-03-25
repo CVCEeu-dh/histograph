@@ -240,7 +240,9 @@ describe('get resource items available to the user', function() {
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
+        console.log(err, res.body.result.item)
         should.not.exists(err);
+
         should.exists(res.body.result.item);
         should.equal(res.body.status, 'ok', res.body);
         done();

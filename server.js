@@ -223,5 +223,13 @@ io.on('connection', function(socket){
   var cookie_string = socket.request.headers.cookie;
   //  console.log('a user connected', cookie_string);
   
-
+  socket.on('start:mention', function (data) {
+    console.log(socket.request.session.passport.user.username,
+      'started mentioning',  data);
+    // emit back to already connected people..
+    io.emit('start:mention', {
+      user: socket.request.session.passport.user.username,
+      data: data
+    });
+  });
 });

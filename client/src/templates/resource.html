@@ -1,15 +1,27 @@
 <div class="resource item">
-  <h3><a ng-href="#/r/{{item.id}}">{{r.title || 'untitled'}}</a></h3>
-  {{item.start_date}}
-  {{item.end_date}}
-  <p>
-  {{item.url}}
-  </p>
-  <img ng-src="media/{{item.url}}">
+  <h3><a ng-href="#/r/{{item.id}}">{{item.props.title || 'untitled'}}</a></h3>
+  {{item.props.start_date}}
+  {{item.props.end_date}}
+  
+  <div>
+    <span ng-repeat="location in item.locations">{{location.formatted_address}}</span>
+    <!-- collect comments about places -->
+  </div>
+  
+  <div class="tags">
+    <span ng-repeat="per in item.persons" class='tag person'>{{per.name}}</span>
+    
+  </div>
+  
+  <img ng-src="media/{{item.props.url}}" annotorious>
   <blockquote>
-   {{item.stakeholders}}
+   {{item.props.stakeholders}}
   </blockquote>
-  <pre>
-    {{item.links.version.markdown}}
-  </pre>
+  
+  <div class="discussion">
+    <a class="btn btn-default" ng-click="mention(item)">join discussion</a>
+    <span ng-repeat="com in item.comments">
+      <span cmlass="username">{{com.user.username}}</span> — {{com.comment.content}}</span>
+    
+  </div>
 </div>
