@@ -14,6 +14,8 @@ module.exports = {
     host: 'http://localhost:7474'
   },
 
+  resourcespath: '', // abs location of the media (img) folder
+  
   // if you wish to authenticate people with their twitter account
   TWITTER_CONSUMER_KEY: 'XXXXX',
   TWITTER_CONSUMER_SECRET: 'XXXXX',

@@ -37,7 +37,7 @@ var sessionMiddleware = session({
 })
 
 // configure logger
-// app.use(morgan('dev'));
+app.use(morgan('dev'));
 
 // configure static files and jade templates
 app.use(express.static('./client/src'));
@@ -130,6 +130,13 @@ clientRouter.route('/auth/twitter/callback')
     })(req, res, next)
   });
 
+clientRouter.route('/media/:file')
+  .get(function (req, res, next) {
+    var file = req.params.file;
+    return res.sendFile(settings.mediaPath + '/' + file, { root: __dirname });
+  })
+
+
 /*
 
   Api router configuration
@@ -137,7 +144,6 @@ clientRouter.route('/auth/twitter/callback')
 
 */
 apiRouter.use(function(req, res, next) { // middleware to use for all requests
-  console.log(req.path);
   if (req.isAuthenticated()) {
     return next();
   }

@@ -1,0 +1,15 @@
+<div class="resource item">
+  <h3><a ng-href="#/r/{{item.id}}">{{r.title || 'untitled'}}</a></h3>
+  {{item.start_date}}
+  {{item.end_date}}
+  <p>
+  {{item.url}}
+  </p>
+  <img ng-src="media/{{item.url}}">
+  <blockquote>
+   {{item.stakeholders}}
+  </blockquote>
+  <pre>
+    {{item.links.version.markdown}}
+  </pre>
+</div>

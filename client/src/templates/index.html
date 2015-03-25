@@ -1,0 +1,7 @@
+<div class="resource item" ng-repeat="r in items">
+  <h3><a ng-href="#/r/{{r.id}}">{{r.title || 'untitled'}}</a></h3>
+
+  {{r.start_date}}
+  {{r.end_date}}
+  <img ng-src="media/{{r.url}}">
+</div>

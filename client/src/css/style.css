@@ -42,3 +42,18 @@ header img{
   height: 25px;
   padding: 0 10px 0 20px;
 }
+
+blockquote{
+  font-size: 1em;
+  border: 0px solid transparent;
+  background: #eee;
+}
+
+.item{
+  width: 350px;
+  margin: 35px auto;
+}
+
+.item img{
+  max-width: 350px
+}

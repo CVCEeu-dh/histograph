@@ -10,25 +10,38 @@ html
 
 
 
-  body
+  body(ng-app='histograph')
     script(type='text/javascript').
       var socket = io();
 
-    header hg 
-      if user.username
-        a(href='#/profile')
-          img(src=user.picture)
-          span!=user.username
-
-        ul
-          li
-            a(href='#')
-              span settings
-          li
-            a(href='#')
-              span logout
+    div(ng-controller='CoreCtrl')
     
-    #user
-    if !user.username
-      form
-        a(href='/auth/twitter', class='btn btn-default') signup with twitter
+      header hg 
+        if user.username
+          a(href='#/profile')
+            img(src=user.picture)
+            span!=user.username
+
+          ul
+            li
+              a(href='#')
+                span settings
+            li
+              a(href='#')
+                span logout
+      if !user.username
+          form
+            a(href='/auth/twitter', class='btn btn-default') signup with twitter
+      else
+        div(ng-view)
+        
+
+    script(src='/js/lib/angular.min.js')
+    script(src='/js/lib/angular-route.min.js')
+    script(src='/js/lib/angular-resource.min.js')
+    script(src='/js/app.js')
+    script(src='/js/services.js')
+    script(src='/js/controllers/core.js')
+    script(src='/js/controllers/index.js')
+    script(src='/js/controllers/resource.js')
+    
