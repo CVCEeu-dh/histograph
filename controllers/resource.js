@@ -27,12 +27,12 @@ module.exports = {
       
       var item = items[0].resource;
       //console.log(item)
-      item.versions = _.values(item.versions);
-      item.locations = _.values(item.locations).map(function (d) {
+      item.versions = _.values(item.versions).map(function (d) {
         if(d.yaml)
           d.yaml = YAML.parse(d.yaml);
         return d;
       });
+      item.locations = _.values(item.locations);
       item.persons = _.values(item.persons);
       item.comments = _.values(item.comments);
       item.version = _.find(item.versions, {first: true}); // the original one;

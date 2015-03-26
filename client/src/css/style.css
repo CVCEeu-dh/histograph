@@ -9,14 +9,15 @@
 
 */
 body{
-  font-size:13px;
+  font-size: 13px;
   line-height: 21px;
   color: #1d1d1d;
 }
 
 h1,h2,h3,h4{
   font-weight:normal;
-  font-size: 1em;
+  font-size: 13px;
+  line-height: inherit;
 }
 
 header{
@@ -86,4 +87,8 @@ blockquote{
   height: auto;
   overflow-y: hidden;
   overflow-x: auto;
+}
+
+.btn {
+  font-size: 13px;
 }

@@ -13,7 +13,21 @@
     
   </div>
   
-  <img ng-src="media/{{item.props.url}}" annotorious>
+  <!-- Single button -->
+    <div class="btn-group" dropdown is-open="status.isopen">
+      <button type="button" class="btn btn-default dropdown-toggle" dropdown-toggle ng-disabled="disabled">
+        Button dropdown <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu" role="menu">
+        <li><a href="#">Action</a></li>
+        <li><a href="#">Another action</a></li>
+        <li><a href="#">Something else here</a></li>
+        <li class="divider"></li>
+        <li><a href="#">Separated link</a></li>
+      </ul>
+    </div>
+
+  <img ng-src="media/{{item.props.url}}" annotorious w="item.props.width" h="item.props.height" version="currentVersion">
   <blockquote>
    {{item.props.stakeholders}}
   </blockquote>

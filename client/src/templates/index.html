@@ -1,7 +1,10 @@
 <div class="resource item" ng-repeat="r in items">
-  <h3><a ng-href="#/r/{{r.id}}">{{r.title || 'untitled'}}</a></h3>
+  <h3><a ng-href="#/r/{{r.id}}">{{r.props.title || 'untitled'}}</a></h3>
 
-  {{r.start_date}}
-  {{r.end_date}}
-  <img ng-src="media/{{r.url}}">
+  {{r.props.start_date}}<br/>
+  {{r.props.end_date}}
+  <div class="tags">
+    <span ng-repeat="per in r.persons" class='tag person'>{{per.name}}</span>
+  </div>
+  <img ng-src="media/{{r.props.url}}">
 </div>

@@ -7,9 +7,13 @@
 angular.module('histograph')
   .controller('ResourceCtrl', function ($scope, $log, $routeParams, ResourceFactory, socket) {
     $log.debug('ResourceCtrl ready', $routeParams.id);
+    
     ResourceFactory.get({id:$routeParams.id}, function (res) {
       $log.info('ResourceFactory', res.result);
+      $scope.currentVersion = res.result.item.versions[1];
       $scope.item = res.result.item;
+      // get theaccepted version
+
     });
 
     $scope.comment = "Write something please. Then do not forget to push the button below"
