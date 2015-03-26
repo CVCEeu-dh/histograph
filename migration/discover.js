@@ -1,0 +1,168 @@
+/**
+  Picture resolver.
+  This could be used as run sometimes script.
+  It makes sure that all the images has been treated somehow.
+*/
+var settings  = require('../settings'),
+    helpers   = require('../helpers'),
+    YAML      = require('yamljs'),
+    queries   = require('decypher')('./queries/migration.discover.cyp'),
+    
+    neo4j = require('seraph')(settings.neo4j.host),
+    async = require('async'),
+    _     = require('lodash');
+
+var queue = async.waterfall([
+    /**
+      get the images not having been analysed
+    */
+    function (next) {
+      neo4j.query(queries.get_empty_versions, function (err, nodes) {
+        console.log(queries.get_empty_versions)
+        if(err)
+          throw err;
+        
+        next(null, _.take(nodes, 1))
+      });
+    },
+    /**
+      send the images to the fool analyser: skybiometry.
+    */
+    function (pictures, next) {
+      // local queue, with throttle
+      var q = async.queue(function (picture, nextPicture) {
+        var now = helpers.now(),
+            filepath = settings.mediaPath + '/' + picture.res.url;
+
+        console.log('skybiometry service on url:', picture.res.url, 'remaining', q.length());
+        
+        helpers.skybiometry(filepath, function (err, res) {
+          if(err)
+            throw err;
+          console.log(res);
+          nextPicture()
+        });
+      }, 1);
+
+      q.push(pictures);
+      q.drain = function() {
+        next(null, pictures); 
+      }
+    },
+    /**
+      send the images to the fool analyser: rekognition.
+    */
+    function (pictures, next) {
+      // local queue, with throttle
+      var q = async.queue(function (picture, nextPicture) {
+        var now = helpers.now(),
+            filepath = settings.mediaPath + '/' + picture.res.url;
+
+        if(picture.res.rekognition_annotated) {
+          nextPicture();
+          return;
+        }
+        console.log('rekognition service on url:', picture.res.url, 'remaining', q.length());
+        //console.log(now);
+        helpers.rekognition(filepath, function (err, res) {
+          if(err)
+            throw err;
+          console.log('  face detections:', res.face_detection.length);
+          // console.log(res);
+          // this tranlsates rekognition mechanism to HG internal one
+          var results = res.face_detection.map(function (d) {
+            //console.log(d);
+            var _d = {
+              region: {
+                left: d.boundingbox.tl.x,
+                top: d.boundingbox.tl.y,
+                right: d.boundingbox.tl.x + d.boundingbox.size.width,
+                bottom: d.boundingbox.tl.y + d.boundingbox.size.height,
+              },
+              markers: [],
+              emotion: d.emotion,
+              pose: d.pose,
+              glasses: d.glasses,
+              emotion: d.emotion,
+              sunglasses: d.sunglasses,
+              confidence: d.confidence,
+              identification: 'unknown'
+            };
+
+            if(d.eye_left)
+              _d.markers.push({
+                label: 'LeftEye',
+                x: d.eye_left.x,
+                y: d.eye_left.y
+              });
+            if(d.eye_right)
+              _d.markers.push({
+                label: 'RightEye',
+                x: d.eye_right.x,
+                y: d.eye_right.y
+              });
+            if(d.nose)
+              _d.markers.push({
+                label: 'Nose',
+                x: d.nose.x,
+                y: d.nose.y
+              });
+            if(d.mouth_l)
+              _d.markers.push({
+                label: 'MouthLeft',
+                x: d.mouth_l.x,
+                y: d.mouth_l.y
+              });
+            if(d.mouth_r)
+              _d.markers.push({
+                label: 'MouthRight',
+                x: d.mouth_r.x,
+                y: d.mouth_r.y
+              });
+
+            return _d
+          });
+          // trasnlate recongition to custom
+          neo4j.query(queries.merge_version_from_service, {
+            url: picture.res.url,
+            service: 'rekognition',
+            unknowns: results.length,
+            persons: results.length,
+            creation_date: now.date,
+            creation_time: now.time,
+            yaml: YAML.stringify(results, 2)
+          }, function (err, nodes) {
+            if(err)
+              throw err;
+            console.log('  version saved, #id', nodes[0].id, 'url:', nodes[0].url);
+            // // save
+            neo4j.query(queries.merge_relationship_version_resource, {
+              version_id: nodes[0].id,
+              resource_id: picture.res.id
+            }, function (err, nodes) {
+              if(err)
+                throw err;
+              console.log('  rel saved, #ver_id', nodes[0].ver.id, 'res_url:', nodes[0].res.url);
+              picture.res.rekognition_annotated = true;
+              neo4j.save(picture.res, function (err, nodes) {
+                if(err)
+                  throw err;
+                nextPicture();
+              })
+              
+            })
+            //merge_version_from_service()
+            // create a version
+            // merge its relationship to the relative resource url
+            
+          });
+        })
+      }, 1);
+
+      q.push(pictures);
+      q.drain = next;
+    }
+  ], function (err, result) {
+    // result now equals 'done'    
+    console.log('finished');
+  });
