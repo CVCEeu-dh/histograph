@@ -14,6 +14,37 @@ var settings  = require('../settings'),
 
 var queue = async.waterfall([
     /**
+      
+    */
+    // function (next) {
+    //   neo4j.query(queries.get_versions_annotated_with_people, function (err, nodes) {
+    //     if(err)
+    //       throw err;
+    //     next(null, _.take(nodes, 1));
+    //   });
+    // },
+    // function (triples, next) {
+    //   var batch = neo4j.batch();
+    //   var q = async.queue(function (triple, nextTriple) {
+    //     var indentifications = YAML.parse(triple.ver.markdown);
+    //     for(var i in triple.per) {
+    //       var uri = triple.per[i].uri,
+    //           marker = _.find(indentifications, {uri: uri});
+    //       if(marker)
+    //         // add link
+    //       console.log(marker)
+    //     }
+
+       
+    //   }, 1);
+    //   q.push(triples);
+    //   q.drain = function() {
+    //     console.log('ended');
+    //     batch.commit();
+    //   }
+
+    // },
+    /**
       get the images not having been analysed
     */
     function (next) {

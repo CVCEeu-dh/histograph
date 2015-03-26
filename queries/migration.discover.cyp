@@ -5,6 +5,17 @@ MATCH (ver:`version`)--(res:`resource`)
   RETURN ver, res
 
 
+// name: get_versions_annotated_with_people
+// return the version node giving the image url
+MATCH (ver:`version` {first: true})--(res:`resource`)--(per:`person`)
+  WHERE res.mimetype= 'image'
+RETURN {
+    ver: ver,
+    res: res,
+    per: collect(DISTINCT per)
+  } AS result
+
+
 // name: merge_version_from_service
 // (unique key constraint: url...)
 MERGE (ver:version { url: {url}, service: {service}})

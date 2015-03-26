@@ -28,10 +28,16 @@ module.exports = {
       var item = items[0].resource;
       //console.log(item)
       item.versions = _.values(item.versions);
-      item.locations = _.values(item.locations);
+      item.locations = _.values(item.locations).map(function (d) {
+        if(d.yaml)
+          d.yaml = YAML.parse(d.yaml);
+        return d;
+      });
       item.persons = _.values(item.persons);
       item.comments = _.values(item.comments);
-
+      item.version = _.find(item.versions, {first: true}); // the original one;
+      
+     
       return res.ok({
         item: item
       });
@@ -45,6 +51,9 @@ module.exports = {
       limit: 20,
       offset: 0
     }, function(err, items) {
+      if(err)
+        return helpers.cypherQueryError(err, res);
+      
       return res.ok({
         items: items
       });

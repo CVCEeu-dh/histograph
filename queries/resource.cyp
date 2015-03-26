@@ -28,11 +28,22 @@ START res=node({id})
 
 // name: get_resources
 // get resources with number of comments, if any
-MATCH (r:resource)--(v:version)
-  WITH r
-    SKIP {offset} 
-    LIMIT {limit}
-  RETURN r
+MATCH (res:resource)
+WITH res
+  SKIP {offset} 
+  LIMIT {limit}
+MATCH (ver:`version`)-[r1:describes]-(res)
+OPTIONAL MATCH (res)-[r2:appears_in]-(loc:`location`)
+OPTIONAL MATCH (res)-[r3:appears_in]-(per:`person`)
+  WITH res, ver, loc, per
+    RETURN {
+      id: id(res),
+      props: res,
+      locations: collect(DISTINCT loc),
+      persons: collect(DISTINCT per)
+    } as r
+
+
 
 // name: count_resources
 // count resources having a version, with current filters
