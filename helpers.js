@@ -1,19 +1,22 @@
 /**
   A bunch of useful functions
 */
-var crypto   = require('crypto'),
+var fs       = require('fs')
+    crypto   = require('crypto'),
     settings = require('./settings'),
     request  = require('request'),
     _        = require('lodash'),
     moment   = require('moment'),
 
     IS_EMPTY = 'is_empty',
+    IS_IOERROR  = 'IOError',
 
     reconcile  = require('decypher')('./queries/migration.resolve.cyp'),
     neo4j      = require('seraph')(settings.neo4j.host);
 
 module.exports = {
   IS_EMPTY: IS_EMPTY,
+  IS_IOERROR: IS_IOERROR,
   /**
     Handle causes and stacktraces provided by seraph
     @err the err string provided by cypher
@@ -291,7 +294,7 @@ module.exports = {
     result.time = +now.format('X');
     return result;
   },
-  
+
   /**
     Dummy Time transformation with moment.
   */
@@ -349,6 +352,66 @@ module.exports = {
     result.end_time = +end_date.format('X');
 
     next(null, result);
-  }
+  },
+
+  /**
+    Send a picture to the rekognition service
+  */
+  rekognition: function(filepath, next) {
+    fs.readFile(filepath, function (err, img) {
+      if(err) {
+        next(IS_IOERROR)
+        return;
+      }
+      //console.log('image', filepath)
+      var encoded_image = img.toString('base64');
+      request
+        .post({
+          url: 'http://rekognition.com/func/api/',
+          json: true,
+          form: { 
+            api_key: settings.rekognition.API_KEY,
+            api_secret: settings.rekognition.API_SECRET,
+            jobs: 'face_part_detail_recognize_emotion_beauty_gender_emotion_race_eye_smile_mouth_age_aggressive',
+            base64: encoded_image,
+            name_space: settings.rekognition.NAME_SPACE,
+            user_id: settings.rekognition.USER_ID
+          }
+        }, function (err, res){
+          if(err) {
+            next(err)
+            return;
+          }
+          next(null, res.body)
+        });
+    }); // eof readFile
+  },
+
+  /**
+    Send a picture to the skybiometry face detection service
+  */
+  skybiometry: function(filepath, next) {
+    var form = { 
+          api_key:  settings.skybiometry.API_KEY,
+          api_secret:  settings.skybiometry.API_SECRET,
+          attributes: 'all',
+          detect_all_feature_points:  'true',
+          files: fs.createReadStream(filepath)
+        };
+
+    var req = request
+      .post({
+        url: 'http://api.skybiometry.com/fc/faces/detect',
+        json: true,
+        formData: form
+      }, function (err, res, req){
+        if(err) {
+          next(err)
+          return;
+        }
+        next(null, res.body)
+      });
+    //console.log(req)
+  },
 }
       

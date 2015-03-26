@@ -6,6 +6,7 @@
   "scripts": {
     "migrate": "node ./migration/reconcile.js",
     "resolve": "node ./migration/resolve.js",
+    "discover": "node ./migration/discover.js",
     "test": "mocha test",
     "start": "node ./server.js"
   },
