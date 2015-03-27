@@ -7,6 +7,7 @@
     "migrate": "node ./migration/reconcile.js",
     "resolve": "node ./migration/resolve.js",
     "discover": "node ./migration/discover.js",
+    "import": "node ./migration/import.js",
     "test": "mocha test",
     "start": "node ./server.js"
   },

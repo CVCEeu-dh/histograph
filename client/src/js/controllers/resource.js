@@ -39,4 +39,9 @@ angular.module('histograph')
 
     };
 
+
+    $scope.switchVersion = function(version) {
+      $log.info('resourceCtrl.switchVersion', version)
+      $scope.currentVersion = version;
+    };
   })
