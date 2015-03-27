@@ -413,5 +413,152 @@ module.exports = {
       });
     //console.log(req)
   },
+
+  /**
+    Send a picture to animetrics.com face detection service.
+    remap the results to the common "face" tamplating for version
+  */
+  animetrics: function(filepath, next) {
+    var form = { 
+          api_key:  settings.animetrics.API_KEY,
+          selector:  'FULL',
+          image: fs.createReadStream(filepath)
+        };
+
+    var req = request
+      .post({
+        url: settings.animetrics.endpoint.detect,
+        json: true,
+        formData: form
+      }, function (err, res, req){
+        if(err) {
+          next(err)
+          return;
+        }
+        if(res.body.errors) {
+          next(res.body.errors)
+          return;
+        }
+        console.log(res.body)
+        if(!res.body.images || !res.body.images.length || !res.body.images[0].faces.length) {
+          next(IS_EMPTY);
+          return;
+        };
+        // remap!
+        var image = res.body.images[0];
+
+        image.faces = image.faces.map(function (d) {
+          /** original face information
+          { 
+            topLeftX: 127,
+            topLeftY: 78,
+            width: 132,
+            height: 132,
+            leftEyeCenterX: 166.05,
+            leftEyeCenterY: 130.25,
+            rightEyeCenterX: 208.95,
+            rightEyeCenterY: 129.7,
+            noseTipX: 188.39376294388,
+            noseTipY: 156.96469773918,
+            noseBtwEyesX: 189.20319427534,
+            noseBtwEyesY: 123.70034364528,
+            chinTipX: 193.84846382534,
+            chinTipY: 216.86817213518,
+            leftEyeCornerLeftX: 159.35546875,
+            leftEyeCornerLeftY: 131.00625,
+            leftEyeCornerRightX: 176.78359375,
+            leftEyeCornerRightY: 130.7828125,
+            rightEyeCornerLeftX: 198.9125,
+            rightEyeCornerLeftY: 131.16953125,
+            rightEyeCornerRightX: 215.66171875,
+            rightEyeCornerRightY: 130.284375,
+            rightEarTragusX: 227.25349991883,
+            rightEarTragusY: 139.43476047441,
+            leftEarTragusX: -1,
+            leftEarTragusY: -1,
+            leftEyeBrowLeftX: 151.39518911442,
+            leftEyeBrowLeftY: 124.26248076483,
+            leftEyeBrowMiddleX: 165.65862043483,
+            leftEyeBrowMiddleY: 118.83435907659,
+            leftEyeBrowRightX: 179.35741777102,
+            leftEyeBrowRightY: 119.28268882919,
+            rightEyeBrowLeftX: 200.22669884463,
+            rightEyeBrowLeftY: 119.62440636946,
+            rightEyeBrowMiddleX: 211.94083364907,
+            rightEyeBrowMiddleY: 118.14622570612,
+            rightEyeBrowRightX: 223.75188864653,
+            rightEyeBrowRightY: 123.18666662225,
+            nostrilLeftHoleBottomX: 181.30081536088,
+            nostrilLeftHoleBottomY: 162.28620721508,
+            nostrilRightHoleBottomX: 196.94550715161,
+            nostrilRightHoleBottomY: 162.05359875182,
+            nostrilLeftSideX: 174.71434964629,
+            nostrilLeftSideY: 157.82009230248,
+            nostrilRightSideX: 201.45039014142,
+            nostrilRightSideY: 158.07458166902,
+            lipCornerLeftX: -1,
+            lipCornerLeftY: -1,
+            lipLineMiddleX: -1,
+            lipLineMiddleY: -1,
+            lipCornerRightX: -1,
+            lipCornerRightY: -1,
+            pitch: -0.69633820470046,
+            yaw: -12.586200046938,
+            roll: -0.90004336228229,
+            attributes: { gender: { time: 0.05935, type: 'F', confidence: '80%' } } }
+          
+          */
+          var _d = {
+            region: {
+              left:   d.topLeftX,
+              top:    d.topLeftY,
+              right:  d.topLeftX + d.width,
+              bottom: d.topLeftY + d.height,
+            },
+            markers: [],
+            pose: {
+              pitch: d.pitch,
+              yaw: d.yaw,
+              roll: d.roll
+            },
+          };
+          if(d.leftEyeCenterX)
+            _d.markers.push({
+              label: 'LeftEye',
+              x: d.leftEyeCenterX,
+              y: d.leftEyeCenterY
+            });
+          if(d.rightEyeCenterX)
+            _d.markers.push({
+              label: 'RightEye',
+              x: d.rightEyeCenterX,
+              y: d.rightEyeCenterX
+            });
+          if(d.noseTipX)
+            _d.markers.push({
+              label: 'Nose',
+              x: d.noseTipX,
+              y: d.noseTipY
+            });
+          if(d.lipCornerLeftX)
+            _d.markers.push({
+              label: 'MouthLeft',
+              x: d.lipCornerLeftX,
+              y: d.lipCornerLeftY
+            });
+          if(d.lipCornerRightX)
+            _d.markers.push({
+              label: 'MouthRight',
+              x: d.lipCornerRightX,
+              y: d.lipCornerRightY
+            });
+
+          return _d;
+        })
+        next(null, image)
+      });
+    //console.log(req)
+  },
+  
 }
       

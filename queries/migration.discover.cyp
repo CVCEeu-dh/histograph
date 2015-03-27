@@ -1,3 +1,8 @@
+// name: get_pictures
+// return the resources with mimetype image
+MATCH (res:`resource` {mimetype: 'image'})
+RETURN res
+
 // name: get_empty_versions
 // return the version node giving the image url
 MATCH (ver:`version`)--(res:`resource`)

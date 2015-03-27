@@ -48,38 +48,106 @@ var queue = async.waterfall([
       get the images not having been analysed
     */
     function (next) {
-      neo4j.query(queries.get_empty_versions, function (err, nodes) {
-        console.log(queries.get_empty_versions)
+      neo4j.query(queries.get_pictures, function (err, nodes) {
+        console.log(queries.get_pictures)
         if(err)
           throw err;
         
-        next(null, _.take(nodes, 1))
+        next(null, _.take(nodes, 100))
       });
     },
     /**
-      send the images to the fool analyser: skybiometry.
+      send the images to the animetric analyser
     */
     function (pictures, next) {
-      // local queue, with throttle
       var q = async.queue(function (picture, nextPicture) {
         var now = helpers.now(),
-            filepath = settings.mediaPath + '/' + picture.res.url;
+            filepath = settings.mediaPath + '/' + picture.url;
 
-        console.log('skybiometry service on url:', picture.res.url, 'remaining', q.length());
+        console.log('animetric service on url:', picture.url, 'remaining', q.length());
         
-        helpers.skybiometry(filepath, function (err, res) {
+        if(picture.animetrics_annotated !== undefined) {
+          nextPicture();
+          return;
+        }
+        // call animetrics service and gives back the result.
+        helpers.animetrics(filepath, function (err, res) {
+          console.log(err, res)
+          if(err == helpers.IS_EMPTY) {
+            console.log(' no faces found');
+            picture.animetrics_annotated = false; // let'"s save the fact that we had used the service anyway"
+            neo4j.save(picture, function (err, nodes) {
+              if(err)
+                throw err;
+              nextPicture();
+            })
+            return;
+          }
+
           if(err)
             throw err;
-          console.log(res);
-          nextPicture()
-        });
+          console.log(' found', res.faces, 'faces');
+          neo4j.query(queries.merge_version_from_service, {
+            url: picture.url,
+            service: 'animetrics',
+            unknowns: res.faces.length,
+            persons: res.faces.length,
+            creation_date: now.date,
+            creation_time: now.time,
+            yaml: YAML.stringify(res.faces, 2)
+          }, function (err, nodes) {
+            if(err)
+              throw err;
+            console.log('  version saved, #id', nodes[0].id, 'url:', nodes[0].url);
+            // // save
+            neo4j.query(queries.merge_relationship_version_resource, {
+              version_id: nodes[0].id,
+              resource_id: picture.id
+            }, function (err, nodes) {
+              if(err)
+                throw err;
+              console.log('  rel saved, #ver_id', nodes[0].ver.id, 'res_url:', nodes[0].res.url);
+              picture.animetrics_annotated = true;
+              neo4j.save(picture, function (err, nodes) {
+                if(err)
+                  throw err;
+                nextPicture();
+              })
+              
+            })
+          })
+        })
       }, 1);
-
       q.push(pictures);
       q.drain = function() {
-        next(null, pictures); 
-      }
+        next(null, pictures);
+      };
     },
+
+    /**
+      send the images to the fool analyser: skybiometry.
+    */
+    // function (pictures, next) {
+    //   // local queue, with throttle
+    //   var q = async.queue(function (picture, nextPicture) {
+    //     var now = helpers.now(),
+    //         filepath = settings.mediaPath + '/' + picture.url;
+
+    //     console.log('skybiometry service on url:', picture.url, 'remaining', q.length());
+        
+    //     helpers.skybiometry(filepath, function (err, res) {
+    //       if(err)
+    //         throw err;
+    //       console.log(res);
+    //       nextPicture()
+    //     });
+    //   }, 1);
+
+    //   q.push(pictures);
+    //   q.drain = function() {
+    //     next(null, pictures); 
+    //   }
+    // },
     /**
       send the images to the fool analyser: rekognition.
     */
@@ -87,13 +155,13 @@ var queue = async.waterfall([
       // local queue, with throttle
       var q = async.queue(function (picture, nextPicture) {
         var now = helpers.now(),
-            filepath = settings.mediaPath + '/' + picture.res.url;
+            filepath = settings.mediaPath + '/' + picture.url;
 
-        if(picture.res.rekognition_annotated) {
+        if(picture.rekognition_annotated) {
           nextPicture();
           return;
         }
-        console.log('rekognition service on url:', picture.res.url, 'remaining', q.length());
+        console.log('rekognition service on url:', picture.url, 'remaining', q.length());
         //console.log(now);
         helpers.rekognition(filepath, function (err, res) {
           if(err)
@@ -155,7 +223,7 @@ var queue = async.waterfall([
           });
           // trasnlate recongition to custom
           neo4j.query(queries.merge_version_from_service, {
-            url: picture.res.url,
+            url: picture.url,
             service: 'rekognition',
             unknowns: results.length,
             persons: results.length,
@@ -169,13 +237,13 @@ var queue = async.waterfall([
             // // save
             neo4j.query(queries.merge_relationship_version_resource, {
               version_id: nodes[0].id,
-              resource_id: picture.res.id
+              resource_id: picture.id
             }, function (err, nodes) {
               if(err)
                 throw err;
               console.log('  rel saved, #ver_id', nodes[0].ver.id, 'res_url:', nodes[0].res.url);
-              picture.res.rekognition_annotated = true;
-              neo4j.save(picture.res, function (err, nodes) {
+              picture.rekognition_annotated = true;
+              neo4j.save(picture, function (err, nodes) {
                 if(err)
                   throw err;
                 nextPicture();
