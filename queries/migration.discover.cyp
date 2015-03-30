@@ -1,6 +1,7 @@
 // name: get_pictures
 // return the resources with mimetype image
 MATCH (res:`resource` {mimetype: 'image'})
+WHERE has(res.url)
 RETURN res
 
 // name: get_empty_versions

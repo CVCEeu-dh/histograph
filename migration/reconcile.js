@@ -73,7 +73,7 @@ async.waterfall([
         }
       }, person);
 
-      console.log(flatten(person, {delimiter: '_'}));
+      console.log('remaining', queue.length());
 
       neo4j.query(queries.merge_person_entity, flatten(person, {delimiter: '_'}),
         function(err, node) {

@@ -355,6 +355,9 @@ module.exports = {
   },
 
   /**
+    AlchemyApi connections
+  */
+  /**
     Send a picture to the rekognition service
   */
   rekognition: function(filepath, next) {

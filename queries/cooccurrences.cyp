@@ -54,3 +54,21 @@ WHERE a <> b AND has(a.geonames_id)
 AND has(b.geocode_id)
 AND a.geonames_countryCode = b.geocode_countryId
 AND a.geonames_toponymName <> b.geocode_toponymName RETURN a,r1,n,r2,b;
+
+// networks of resource without "leaves" (just connected nodes)
+MATCH (res:resource)-[r:belongs_to]-()
+  WITH res, collect(r) as rr WHERE length(rr) > 1
+MATCH (res)-[r1:belongs_to]-(n)
+  RETURN n,res,r1;
+
+// the same network, but filtered
+MATCH (res:resource {mimetype:'image'})-[r:belongs_to]-() WITH res, collect(r) as rr WHERE length(rr) > 1 MATCH (res)-[r1:belongs_to]-(n) RETURN n,res,r1;
+
+
+// get stats for resources
+MATCH (n:`resource`)--(loc:location)
+WHERE has(n.stakeholders)
+  and has(loc.geocode_id)
+  and LENGTH(n.place) > 2
+    WITH loc
+    RETURN COUNT(distinct loc)

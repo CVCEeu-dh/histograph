@@ -15,8 +15,8 @@ var  fs       = require('fs'),
     settings  = require('../settings'),
     helpers   = require('../helpers'),
     YAML      = require('yamljs'),
-    csv      = require('csv'),
-    //queries   = require('decypher')('./queries/migration.import.cyp'),
+    csv       = require('csv'),
+    queries   = require('decypher')('./queries/resource.cyp'),
     
     neo4j = require('seraph')(settings.neo4j.host),
     async = require('async'),
@@ -29,8 +29,7 @@ var queue = async.waterfall([
     */
     function (next) {
       var files = fs.readdirSync(process.argv[2]);
-      //console.log(_.take(files, 12));
-
+      
       var q = async.queue(function (filepath, nextFile) {
         var fileparts = path.basename(filepath, '.txt').split('_'),
             doi,
@@ -52,7 +51,8 @@ var queue = async.waterfall([
           + ' res.languages={languages}, '
           + ' res.' + lang + '_url={url} '
           + 'ON MATCH SET '
-          + ' res.' + lang + '_url={url }'
+          + ' res.' + lang + '_url={url},'
+          + ' res.url={url}'
           + 'RETURN res', {
             languages: [lang],
             url: filepath,
@@ -80,7 +80,7 @@ var queue = async.waterfall([
         
       }, 1);
 
-      q.push(_.take(files, 0));
+      q.push(_.take(files, files.length));
       q.drain = function() {
         next();
       }
@@ -90,22 +90,110 @@ var queue = async.waterfall([
         integrate csv files from the top
       
     */
-    function(next) {
+    function (next) {
       var csvs = fs.readdirSync(process.argv[3]);
-
       
       var q = async.queue(function (filepath, nextFile) {
-        console.log('next', path.join(process.argv[3],filepath))
-        var parser = csv.parse({delimiter: ','}, function(err, data){
+        console.log('next', path.join(process.argv[3],filepath),  'q', q.length());
+        // our csv parser mechanism
+        var parser = csv.parse({
+          delimiter: ';',
+          relax: true,
+          columns: function (headers) { // trim headers name - if the have trailing spaces.
+            return headers.map(function (d) {
+              return d.trim();
+            });
+          }
+        }, function (err, data){
           if(err)
-            throw err
-          console.log(_.take(data, 5));
-          nextFile();
+            throw err;
+          
+          // filter data by doi presence (some lines can be empty)
+          data = _.filter(data, 'doi');
+          console.log(data.length)
+          // save a csv node (collection)
+          neo4j.query(queries.merge_collection_by_name, {
+            name: filepath
+          }, function (err, nodes) {
+            if(err)
+              throw (err);
+
+            var collection = nodes[0],
+                mimetypes = {
+                  'Photo': 'image',
+                  'Schéma' : 'diagram',
+                  'Texte': 'text',
+                  'Vidéo': 'video',
+                  'Son'  : 'audio',
+                  'Carte': 'map',
+                  'Tableau': 'table'
+                };
+            // loop async into data
+            var _q = async.queue(function (doi , nextDoi) {
+              // merge resource doi if it exists or if type is Photo or Texte
+              var doiType = doi.type.trim();
+              if(doiType == 'Passport') {
+
+              }
+              if(['Intertitre', 'Unité'].indexOf(doiType) !== -1) {
+                nextDoi();
+                return;
+               
+              };
+              if(['Passport'].indexOf(doiType) !== -1) {
+                nextDoi();
+                return;
+              }
+              if(mimetypes[doiType] == undefined) {
+                nextDoi();
+                return;
+              }
+
+              console.log('skippeing', doi.type, ' --> ', mimetypes[doiType])
+                
+              
+
+              neo4j.query(queries.merge_resource_by_doi, {
+                doi: doi.doi.trim(),
+                name: doi.titre.trim(),
+                caption: doi['légende'].trim(),
+                source: doi.source.trim(),
+                mimetype: mimetypes[doiType]
+              }, function (err, nodes) {
+                if(err) {
+                  console.log(filepath)
+                  throw (err);
+                }
+
+                neo4j.query(queries.merge_relationship_resource_collection, {
+                  collection_id: collection.id,
+                  resource_id: nodes[0].id
+                }, function (err, rels) {
+                  if(err)
+                    throw (err);
+                  nextDoi()
+                })
+
+                
+                
+              });
+              console.log(doi);
+              
+            }, 1);
+
+            _q.push(data);
+            _q.drain = nextFile;
+          });
         });
+        // parse the csv file according to the custom parser
         fs.createReadStream(path.join(process.argv[3],filepath)).pipe(parser);
 
       }, 1);
 
+      q.push(_.take(csvs, csvs.length));
+      q.drain = function() {
+        next();
+      }
 
     }
   ], function() {

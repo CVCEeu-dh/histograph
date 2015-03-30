@@ -29,6 +29,7 @@ START res=node({id})
 // name: get_resources
 // get resources with number of comments, if any
 MATCH (res:resource)
+WHERE has(res.place)
 WITH res
   SKIP {offset} 
   LIMIT {limit}
@@ -74,4 +75,40 @@ START res=node({id})
   RETURN {
     comments: collect(DISTINCT coms)
   } AS result
-  
+
+
+// name: get_resource_by_doi
+// FOR MIGRATION ONLY
+MATCH (res:resource {doi:{doi}})
+RETURN res
+
+
+// name: merge_collection_by_name
+// add a collection (it is basically a tag for resource) FOR MIGRATION ONLY
+MERGE (col:collection {name:{name}})
+RETURN col
+
+
+// name: merge_resource_by_doi
+// add a titre to an altrady existing resource nodes; FOR MIGRATION ONLY
+MERGE (res:resource {doi:{doi}})
+  ON CREATE set
+    res.name = {name},
+    res.caption = {caption},
+    res.source = {source},
+    res.mimetype = {mimetype}
+  ON MATCH set
+    res.name = {name},
+    res.caption = {caption},
+    res.source = {source},
+    res.mimetype = {mimetype}
+RETURN res
+
+
+// name: merge_relationship_resource_collection
+// link a resource with an entity, it it han't been done yet.
+MATCH (col:collection), (res:resource)
+  WHERE id(col)={collection_id} AND id(res)={resource_id}
+WITH col, res
+  MERGE (res)-[r:belongs_to]->(col)
+RETURN col, res

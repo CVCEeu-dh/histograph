@@ -14,7 +14,7 @@ var settings  = require('../settings'),
 
 var queue = async.waterfall([
     /**
-      
+      DEPRECATED: unable to read link properly
     */
     // function (next) {
     //   neo4j.query(queries.get_versions_annotated_with_people, function (err, nodes) {
@@ -53,7 +53,7 @@ var queue = async.waterfall([
         if(err)
           throw err;
         
-        next(null, _.take(nodes, 100))
+        next(null, _.take(nodes, 30))
       });
     },
     /**

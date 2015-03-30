@@ -22,6 +22,7 @@ angular.module('histograph')
         /* draw the current annotation version */
         var draw = function() {
           anno.removeAll();
+          console.log('oooo', scope.version.service)
           for(var i in scope.version.yaml) {
             var geometry = {
               x: scope.version.yaml[i].region.left/(+scope.width),
@@ -32,7 +33,7 @@ angular.module('histograph')
             };
             geometry.width = -geometry.x + scope.version.yaml[i].region.right/(+scope.width);
             geometry.height = -geometry.y + scope.version.yaml[i].region.bottom/(+scope.height);
-            console.log(geometry)
+            console.log(geometry, scope.version.yaml[i].identification)
             anno.addAnnotation({
               src: src,
               text : scope.version.yaml[i].identification,
