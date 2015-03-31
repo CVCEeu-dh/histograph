@@ -113,6 +113,13 @@ module.exports = {
   },
 
   /**
+    Call textrazor service for people/place reconciliation.
+    @return err, res
+   */
+  textrazor: function (text, next) {
+    next(null, {});
+  },
+  /**
     Call alchemyapi service for people/places reconciliation.
     Whenever possible, reconciliate with existing entitites in neo4j db.
    */
@@ -134,19 +141,25 @@ module.exports = {
           knowledgeGraph: 1
         }
       }, function (err, res, body) {
-        console.log(body);
+        console.log(body.status, body.statusInfo);
+        if(body.status == 'ERROR' && body.statusInfo == "unsupported-text-language") {
+          next(null, []); // unsupported latnguage should be a warning, not an error
+          return;
+        }
+
         if(body.status == 'ERROR') {
           next(IS_EMPTY);
           return;
-        };
+        } 
         // console.log(body.entities)
         // get persons
         // console.log('all persons ', _.filter(body.entities, {type: 'Person'}));
 
         var persons =  _.filter(body.entities, {type: 'Person'}),
+            countries =  _.filter(body.entities, {type: 'Country'}),
             entities = [],
             queue;
-
+        console.log(_.map(countries, function(d){return d.text}))
         var queue = async.waterfall([
           // person reconciliation (merge by)
           function (nextReconciliation) {

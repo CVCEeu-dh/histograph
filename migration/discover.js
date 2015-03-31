@@ -47,7 +47,16 @@ var queue = async.waterfall([
             });
           }, 2)
           _q.push(entities);
-          _q.drain = nextResource;
+          _q.drain = function() {
+            resource.alchemyapi_reconciliated = true;
+            neo4j.save(resource, function (err, result) {
+              if(err)
+                throw err;
+
+              nextResource();
+            })
+            
+          }
         });
 
       }, 1);
