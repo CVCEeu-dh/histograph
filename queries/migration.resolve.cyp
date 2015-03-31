@@ -148,8 +148,12 @@ MERGE (k:entity:person { uri:{id} })
 // (unique key constraint: url...)
 MERGE (k:entity:person { links_wiki:{links_wiki} })
   ON CREATE SET
-    k.name = {name}, 
-    k.links_yago = {links_yago}
+    k.name = {name}
   ON MATCH SET
     k.links_yago = {links_yago}
+  RETURN k
+
+// name: merge_person_entity_by_name
+// unknown entitites extracted from text (that is, no disambiguation links are proposed).
+MERGE (k:entity:person { name:{name} })
   RETURN k

@@ -13,6 +13,49 @@ var settings  = require('../settings'),
     _     = require('lodash');
 
 var queue = async.waterfall([
+    // get pictures and documents having a caption
+    function (next) {
+      neo4j.query('MATCH (n:`resource`) WHERE has(n.caption) AND not(has(n.alchemyapi_reconciliated)) RETURN n', function (err, nodes) {
+        if(err)
+          throw err;
+        
+        next(null, _.take(nodes, nodes.length))
+      });
+    },
+
+    /**
+      Nicely add alchemy api service to extract persons from resources having caption (an/or source field)
+    */
+    function (resources, next) {
+      var q = async.queue(function (resource, nextResource) {
+        var now = helpers.now();
+        console.log('resource remaining', q.length())
+        helpers.alchemyapi([
+          resource.name || '',
+          resource.source || '',
+          resource.caption
+        ].join('. '), 'TextGetRankedNamedEntities', function (err, entities) {
+          if(err)
+            throw err;
+          console.log('  persons: ',_.map(entities, 'name'));
+          
+          var _q = async.queue(function (entity, nextEntity) {
+            helpers.enrichResource(resource, entity, function(err, next) {
+              if(err)
+                throw err;
+              nextEntity()
+            });
+          }, 2)
+          _q.push(entities);
+          _q.drain = nextResource;
+        });
+
+      }, 1);
+      q.push(resources);
+      q.drain = function() {
+        console.log('ended')
+      }
+    },
     /**
       DEPRECATED: unable to read link properly
     */

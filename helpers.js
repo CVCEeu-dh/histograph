@@ -121,6 +121,7 @@ module.exports = {
       next(IOError);
       return
     };
+    console.log('  ', service, text);
     
     request
       .post({
@@ -133,7 +134,11 @@ module.exports = {
           knowledgeGraph: 1
         }
       }, function (err, res, body) {
-        //console.log(body)
+        console.log(body);
+        if(body.status == 'ERROR') {
+          next(IS_EMPTY);
+          return;
+        };
         // console.log(body.entities)
         // get persons
         // console.log('all persons ', _.filter(body.entities, {type: 'Person'}));
@@ -146,20 +151,31 @@ module.exports = {
           // person reconciliation (merge by)
           function (nextReconciliation) {
             var q = async.queue(function (person, nextPerson) {
-              if(person.disambiguated.dbpedia)
+              if(person.disambiguated && (person.disambiguated.dbpedia || person.disambiguated.yago))
                 neo4j.query(reconcile.merge_person_entity_by_links_wiki, {
                   name: person.text,
-                  links_wiki: path.basename(person.disambiguated.dbpedia),
-                  links_yago:path.basename(person.disambiguated.yago),
+                  links_wiki: path.basename(person.disambiguated.dbpedia) || '',
+                  links_yago: path.basename(person.disambiguated.yago) || '',
                 }, function (err, nodes) {
                   if(err)
                     throw err;
                   entities = entities.concat(nodes);
                   nextPerson();
                 })
-              else {
+              else if(person.disambiguated) {
+
+                console.log('person disambiguated', person)
                 // find person by name
                 nextPerson();
+              } else {
+                neo4j.query(reconcile.merge_person_entity_by_name, {
+                  name: person.text
+                }, function (err, nodes) {
+                  if(err)
+                    throw err;
+                  entities = entities.concat(nodes);
+                  nextPerson();
+                })
               };   
             }, 1);
 
