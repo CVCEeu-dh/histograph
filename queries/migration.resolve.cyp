@@ -143,3 +143,13 @@ MERGE (k:entity:person { uri:{id} })
     k.links_worldcat = {links_worldcat}, 
     k.links_wiki = {links_wiki}
   RETURN k
+
+// name: merge_person_entity_by_links_wiki
+// (unique key constraint: url...)
+MERGE (k:entity:person { links_wiki:{links_wiki} })
+  ON CREATE SET
+    k.name = {name}, 
+    k.links_yago = {links_yago}
+  ON MATCH SET
+    k.links_yago = {links_yago}
+  RETURN k

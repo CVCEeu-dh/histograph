@@ -236,11 +236,11 @@ describe('get resource items available to the user', function() {
 
   it('should give the specified resource', function (done) {
     session
-      .get('/api/resource/512')
+      .get('/api/resource/17643')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
-        // console.log(err, res.body.result.item)
+        console.log(err, res.body.result.item)
         should.not.exists(err);
 
         should.exists(res.body.result.item);
@@ -251,7 +251,7 @@ describe('get resource items available to the user', function() {
 
   it('should create a comment and attach it to the required resource', function (done) {
     session
-      .post('/api/resource/512/comments')
+      .post('/api/resource/17643/comments')
       .send({
         content : 'A content with some #taa and #location tag',
         resource_id: 512,

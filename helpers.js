@@ -1,7 +1,9 @@
 /**
   A bunch of useful functions
 */
-var fs       = require('fs')
+var fs       = require('fs'),
+    path     = require('path'),
+    async    = require('async'),
     crypto   = require('crypto'),
     settings = require('./settings'),
     request  = require('request'),
@@ -108,6 +110,68 @@ module.exports = {
         });
       }
     );
+  },
+
+  /**
+    Call alchemyapi service for people/places reconciliation.
+    Whenever possible, reconciliate with existing entitites in neo4j db.
+   */
+  alchemyapi: function(text, service, next) {
+    if(settings.alchemyapi.services.indexOf(service) == -1){
+      next(IOError);
+      return
+    };
+    
+    request
+      .post({
+        url: settings.alchemyapi.endpoint.text + service,
+        json: true,
+        form: {
+          text: text,
+          apikey: settings.alchemyapi.key,
+          outputMode: 'json',
+          knowledgeGraph: 1
+        }
+      }, function (err, res, body) {
+        //console.log(body)
+        // console.log(body.entities)
+        // get persons
+        // console.log('all persons ', _.filter(body.entities, {type: 'Person'}));
+
+        var persons =  _.filter(body.entities, {type: 'Person'}),
+            entities = [],
+            queue;
+
+        var queue = async.waterfall([
+          // person reconciliation (merge by)
+          function (nextReconciliation) {
+            var q = async.queue(function (person, nextPerson) {
+              if(person.disambiguated.dbpedia)
+                neo4j.query(reconcile.merge_person_entity_by_links_wiki, {
+                  name: person.text,
+                  links_wiki: path.basename(person.disambiguated.dbpedia),
+                  links_yago:path.basename(person.disambiguated.yago),
+                }, function (err, nodes) {
+                  if(err)
+                    throw err;
+                  entities = entities.concat(nodes);
+                  nextPerson();
+                })
+              else {
+                // find person by name
+                nextPerson();
+              };   
+            }, 1);
+
+            q.push(persons);
+            q.drain = nextReconciliation
+          },
+          // geonames/geocode reconciliation via 
+        ], function() {
+          next(null, entities);
+        });
+      }); // end request.post for alchemyapi service
+    
   },
 
   /**
