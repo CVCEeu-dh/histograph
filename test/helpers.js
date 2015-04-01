@@ -10,6 +10,40 @@
 var helpers = require('../helpers.js'),
     should  = require('should');
 
+
+describe('alchemyapi entity extraction service', function() {
+  it('should merge by wikipedia link', function (done) {
+    // body...
+    helpers.alchemyapi(
+        'Portugal\'s application for accession to the European Economic Community '
+      + '(Lisbon, 28 March 1977). On 28 March 1977, Mário Soares, Prime Minister of Portugal, '
+      + 'formally submits his country’s application for accession to the European '
+      + 'Communities to David Owen, currently President-in-Office of the Council.', 'TextGetRankedNamedEntities', function (err, entities) {
+      console.log('entities', entities);
+      
+      done();
+    })
+    
+  });
+});
+
+
+describe('textrazor api', function() {
+  this.timeout(5000);
+  it('should calls textrazor service and build a new entities from the text', function (done) {
+    helpers.textrazor(
+        'Portugal\'s application for accession to the European Economic Community '
+      + '(Lisbon, 28 March 1977). On 28 March 1977, Mário Soares, Prime Minister of Portugal, '
+      + 'formally submits his country’s application for accession to the European '
+      + 'Communities to David Owen, currently President-in-Office of the Council.',
+      function (err, entities) {
+        console.log('entities', entities);
+        done();
+    });
+  });
+});
+
+
 describe('geocoding api', function() {
   this.timeout(5000);
   it('should calls geocodingapi service and build a new location entity', function (done) {
@@ -20,6 +54,7 @@ describe('geocoding api', function() {
     });
   });
 });
+
 
 describe('geonames api', function() {
   this.timeout(5000);
@@ -32,6 +67,7 @@ describe('geonames api', function() {
   });
 });
 
+
 describe('viaf api', function() {
   this.timeout(5000);
   it('should calls viafapi service and build a new person entity', function (done) {
@@ -41,6 +77,7 @@ describe('viaf api', function() {
     });
   });
 });
+
 
 describe('human date service', function() {
   this.timeout(5000);

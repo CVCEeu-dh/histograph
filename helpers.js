@@ -117,7 +117,58 @@ module.exports = {
     @return err, res
    */
   textrazor: function (text, next) {
-    next(null, {});
+    request
+      .post({
+        url: settings.textrazor.endpoint,
+        json: true,
+        form: {
+          text: text,
+          apiKey: settings.textrazor.key,
+          extractors: 'entities'
+        }
+      }, function (err, res, body) {
+        console.log('TEXTRAZOR', err, body.response.entities.length);
+        var entities = [];
+        var persons =  _.filter(body.response.entities, {type: ['Person']});
+        var places =  _.filter(body.response.entities, {type: ['Place']});
+
+        console.log(_.map(persons, 'entityId'), _.map(places, 'entityId'));
+
+        var queue = async.waterfall([
+          // person reconciliation (merge by)
+          function (nextReconciliation) {
+            var q = async.queue(function (person, nextPerson) {
+              if(person.wikiLink) {
+                neo4j.query(reconcile.merge_person_entity_by_links_wiki, {
+                  name: person.entityId,
+                  links_wiki: path.basename(person.wikiLink),
+                  links_yago: '',
+                }, function (err, nodes) {
+                  if(err)
+                    throw err;
+                  entities = entities.concat(nodes);
+                  nextPerson();
+                })
+              } else {
+                neo4j.query(reconcile.merge_person_entity_by_name, {
+                  name: person.entityId
+                }, function (err, nodes) {
+                  if(err)
+                    throw err;
+                  entities = entities.concat(nodes);
+                  nextPerson();
+                })
+              };   
+            }, 1);
+
+            q.push(persons);
+            q.drain = nextReconciliation
+          },
+          // geonames/geocode reconciliation via 
+        ], function() {
+          next(null, entities);
+        });
+      });
   },
   /**
     Call alchemyapi service for people/places reconciliation.
@@ -125,7 +176,7 @@ module.exports = {
    */
   alchemyapi: function(text, service, next) {
     if(settings.alchemyapi.services.indexOf(service) == -1){
-      next(IOError);
+      next(IS_IOERROR);
       return
     };
     console.log('  ', service, text);

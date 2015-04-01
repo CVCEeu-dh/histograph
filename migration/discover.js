@@ -15,6 +15,54 @@ var settings  = require('../settings'),
 var queue = async.waterfall([
     // get pictures and documents having a caption
     function (next) {
+      neo4j.query('MATCH (n:`resource`) WHERE has(n.caption) AND not(has(n.textrazor_reconciliated)) RETURN n', function (err, nodes) {
+        if(err)
+          throw err;
+        
+        next(null, _.take(nodes, nodes.length))
+      });
+    },
+    /**
+      Nicely add TEXTRAZOR api service to extract persons from resources having caption (an/or source field)
+    */
+    function (resources, next) {
+      var q = async.queue(function (resource, nextResource) {
+        var now = helpers.now();
+        console.log('resource remaining', q.length())
+        helpers.textrazor([
+          resource.name || '',
+          resource.source || '',
+          resource.caption
+        ].join('. '), function (err, entities) {
+          if(err)
+            throw err;
+          
+          var _q = async.queue(function (entity, nextEntity) {
+            helpers.enrichResource(resource, entity, function(err, next) {
+              if(err)
+                throw err;
+              nextEntity()
+            });
+          }, 2);
+          _q.push(entities);
+          _q.drain = function() {
+            resource.textrazor_reconciliated = true;
+            neo4j.save(resource, function (err, result) {
+              if(err)
+                throw err;
+              nextResource();
+            });
+          };
+        });
+
+      }, 1);
+      q.push(resources);
+      q.drain = function() {
+        console.log('ended')
+      }
+    },
+
+    function (next) {
       neo4j.query('MATCH (n:`resource`) WHERE has(n.caption) AND not(has(n.alchemyapi_reconciliated)) RETURN n', function (err, nodes) {
         if(err)
           throw err;
@@ -22,7 +70,6 @@ var queue = async.waterfall([
         next(null, _.take(nodes, nodes.length))
       });
     },
-
     /**
       Nicely add alchemy api service to extract persons from resources having caption (an/or source field)
     */
