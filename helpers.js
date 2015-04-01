@@ -127,7 +127,8 @@ module.exports = {
           extractors: 'entities'
         }
       }, function (err, res, body) {
-        console.log('TEXTRAZOR', err, body.response.entities.length);
+        console.log('TEXTRAZOR', err)
+        console.log(body.response);
         var entities = [];
         var persons =  _.filter(body.response.entities, {type: ['Person']});
         var places =  _.filter(body.response.entities, {type: ['Place']});
