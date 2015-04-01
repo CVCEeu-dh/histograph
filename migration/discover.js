@@ -34,6 +34,13 @@ var queue = async.waterfall([
           resource.source || '',
           resource.caption
         ].join('. '), function (err, entities) {
+          if(err == helpers.IS_LIMIT_REACHED) {
+            // daily limit has been reached
+            q.kill();
+            next()
+            return;
+          }
+
           if(err)
             throw err;
           

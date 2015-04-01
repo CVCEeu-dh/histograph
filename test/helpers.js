@@ -81,7 +81,7 @@ describe('viaf api', function() {
 
 describe('human date service', function() {
   this.timeout(5000);
-  it('should stranform 90-92 in two years span', function (done) {
+  it('should transform 90-92 in two years span', function (done) {
     helpers.reconcileHumanDate('90-92', 'fr', function (err, res) {
       should.not.exist(err, err);
       should.equal(res.start_date, '1990-01-01T00:00:00+00:00'); // utc format
@@ -89,7 +89,7 @@ describe('human date service', function() {
       done();
     });
   });
-  it('should stranform 1er et 2 juin 1955 in two day span', function (done) {
+  it('should transform 1er et 2 juin 1955 in two day span', function (done) {
     helpers.reconcileHumanDate('1er et 2 juin 1955', 'fr', function (err, res) {
       should.not.exist(err, err);
       should.equal(res.start_date, '1955-06-01T00:00:00+00:00'); // utc format
@@ -97,7 +97,7 @@ describe('human date service', function() {
       done();
     });
   });
-  it('should stranform 17 septembre 1987 in a day span', function (done) {
+  it('should transform 17 septembre 1987 in a day span', function (done) {
     helpers.reconcileHumanDate('17 septembre 1987', 'fr', function (err, res) {
       should.not.exist(err, err);
       should.equal(res.start_date, '1987-09-17T00:00:00+00:00'); // utc format
@@ -105,7 +105,7 @@ describe('human date service', function() {
       done();
     });
   });
-  it('should stranform Octobre 1972 in a month span', function (done) {
+  it('should transform Octobre 1972 in a month span', function (done) {
     helpers.reconcileHumanDate('Octobre 1972', 'fr', function (err, res) {
       should.not.exist(err, err);
       should.equal(res.start_date, '1972-10-01T00:00:00+00:00'); // utc format
@@ -113,7 +113,7 @@ describe('human date service', function() {
       done();
     });
   });
-  it('should stranform 12 et 13 juillet 1976 in a two days span', function (done) {
+  it('should transform 12 et 13 juillet 1976 in a two days span', function (done) {
     helpers.reconcileHumanDate('12 et 13 juillet 1976', 'fr', function (err, res) {
       should.not.exist(err, err);
       should.equal(res.start_date, '1976-07-12T00:00:00+00:00'); // utc format
@@ -121,7 +121,7 @@ describe('human date service', function() {
       done();
     });
   });
-  it('should stranform 1er octobre 1945 in a one day span', function (done) {
+  it('should transform 1er octobre 1945 in a one day span', function (done) {
     helpers.reconcileHumanDate('1er octobre 1945', 'fr', function (err, res) {
       should.not.exist(err, err);
       should.equal(res.start_date, '1945-10-01T00:00:00+00:00'); // utc format
@@ -130,7 +130,7 @@ describe('human date service', function() {
     });
   });
 
-  it('should stranform vers 1969 in a one day span', function (done) {
+  it('should transform vers 1969 in a one day span', function (done) {
     helpers.reconcileHumanDate('vers 1969', 'fr', function (err, res) {
       should.not.exist(err, err);
       should.equal(res.start_date, '1969-01-01T00:00:00+00:00'); // utc format
@@ -139,7 +139,7 @@ describe('human date service', function() {
     });
   });
 
-  it('should stranform Années 1960 in a TEN YEARS span', function (done) {
+  it('should transform Années 1960 in a TEN YEARS span', function (done) {
     helpers.reconcileHumanDate('Années 1960', 'fr', function (err, res) {
       should.not.exist(err, err);
       should.equal(res.start_date, '1960-01-01T00:00:00+00:00'); // utc format

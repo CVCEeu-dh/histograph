@@ -144,16 +144,24 @@ MERGE (k:entity:person { uri:{id} })
     k.links_wiki = {links_wiki}
   RETURN k
 
+
 // name: merge_person_entity_by_links_wiki
 // (unique key constraint: url...)
 MERGE (k:entity:person { links_wiki:{links_wiki} })
   ON CREATE SET
-    k.name = {name}
+    k.name = {name},
+    k.services = [{service}]
   ON MATCH SET
-    k.links_yago = {links_yago}
+    k.links_yago = {links_yago},
+    k.services = COALESCE(k.services,[]) + {service}
   RETURN k
+
 
 // name: merge_person_entity_by_name
 // unknown entitites extracted from text (that is, no disambiguation links are proposed).
 MERGE (k:entity:person { name:{name} })
+  ON CREATE SET
+    k.services = [{service}]
+  ON MATCH SET
+    k.services = COALESCE(k.services,[]) + {service}
   RETURN k

@@ -11,6 +11,7 @@ var fs       = require('fs'),
     moment   = require('moment'),
 
     IS_EMPTY = 'is_empty',
+    LIMIT_REACHED = 'LIMIT_REACHED', // when limit of request for free /pauid webservices has been reached.
     IS_IOERROR  = 'IOError',
 
     reconcile  = require('decypher')('./queries/migration.resolve.cyp'),
@@ -19,6 +20,7 @@ var fs       = require('fs'),
 module.exports = {
   IS_EMPTY: IS_EMPTY,
   IS_IOERROR: IS_IOERROR,
+  IS_LIMIT_REACHED: LIMIT_REACHED,
   /**
     Handle causes and stacktraces provided by seraph
     @err the err string provided by cypher
@@ -114,6 +116,8 @@ module.exports = {
 
   /**
     Call textrazor service for people/place reconciliation.
+    When daily limit has been reached, the IS_EMPTY error message will be given to next()
+    If there are no entities, res will contain an empty array but no error will be thrown.
     @return err, res
    */
   textrazor: function (text, next) {
@@ -128,12 +132,18 @@ module.exports = {
         }
       }, function (err, res, body) {
         console.log('TEXTRAZOR', err)
-        console.log(body.response);
+        console.log(body);
+
+        if(body.error) { // probably limit reached. 
+          next(LIMIT_REACHED);
+          return;
+        }
+
         var entities = [];
         var persons =  _.filter(body.response.entities, {type: ['Person']});
-        var places =  _.filter(body.response.entities, {type: ['Place']});
+        var locations =  _.filter(body.response.entities, {type: ['Place']});
 
-        console.log(_.map(persons, 'entityId'), _.map(places, 'entityId'));
+        console.log(_.map(persons, 'entityId'), _.map(locations, 'entityId'));
 
         var queue = async.waterfall([
           // person reconciliation (merge by)
@@ -144,6 +154,7 @@ module.exports = {
                   name: person.entityId,
                   links_wiki: path.basename(person.wikiLink),
                   links_yago: '',
+                  service: 'textrazor'
                 }, function (err, nodes) {
                   if(err)
                     throw err;
@@ -152,7 +163,8 @@ module.exports = {
                 })
               } else {
                 neo4j.query(reconcile.merge_person_entity_by_name, {
-                  name: person.entityId
+                  name: person.entityId,
+                  service: 'textrazor'
                 }, function (err, nodes) {
                   if(err)
                     throw err;
@@ -166,6 +178,39 @@ module.exports = {
             q.drain = nextReconciliation
           },
           // geonames/geocode reconciliation via 
+          // places entity (locations and cities) by using geonames services
+          function (nextReconciliation) {
+            var q = async.queue(function (location, nextLocation) {
+              module.exports.geonames(location.entityId, function (err, nodes){
+                if(err == IS_EMPTY) {
+                  nextLocation();
+                  return;
+                } else if(err)
+                  throw err
+                entities = entities.concat(nodes);
+                nextLocation();
+              })
+            }, 1);
+            q.push(locations);
+            q.drain = nextReconciliation;
+          },
+          // places entities (countries and cities) by using geocoding services
+          function (nextReconciliation) {
+            var q = async.queue(function (location, nextLocation) {
+              module.exports.geocoding(location.entityId, function (err, nodes){
+                if(err == IS_EMPTY) {
+                  nextLocation();
+                  return;
+                } else if(err)
+                  throw err
+                entities = entities.concat(nodes);
+                nextLocation();
+              })
+            }, 1);
+            q.push(locations);
+            q.drain = nextReconciliation;
+          }
+
         ], function() {
           next(null, entities);
         });
@@ -203,38 +248,37 @@ module.exports = {
           next(IS_EMPTY);
           return;
         } 
-        // console.log(body.entities)
+        console.log(body.entities)
         // get persons
         // console.log('all persons ', _.filter(body.entities, {type: 'Person'}));
 
         var persons =  _.filter(body.entities, {type: 'Person'}),
-            countries =  _.filter(body.entities, {type: 'Country'}),
+            locations =  body.entities.filter(function (d){
+              return d.disambiguated && (d.type == 'Country' || d.type == 'City')
+            }),
             entities = [],
             queue;
-        console.log(_.map(countries, function(d){return d.text}))
+        console.log(_.map(locations, function(d){return d.text}))
         var queue = async.waterfall([
           // person reconciliation (merge by)
           function (nextReconciliation) {
             var q = async.queue(function (person, nextPerson) {
-              if(person.disambiguated && (person.disambiguated.dbpedia || person.disambiguated.yago))
+              if(person.disambiguated && (person.disambiguated.dbpedia || person.disambiguated.yago)) {
                 neo4j.query(reconcile.merge_person_entity_by_links_wiki, {
-                  name: person.text,
+                  name: person.disambiguated.name,
                   links_wiki: path.basename(person.disambiguated.dbpedia) || '',
                   links_yago: path.basename(person.disambiguated.yago) || '',
+                  service: 'alchamyapi'
                 }, function (err, nodes) {
                   if(err)
                     throw err;
                   entities = entities.concat(nodes);
                   nextPerson();
                 })
-              else if(person.disambiguated) {
-
-                console.log('person disambiguated', person)
-                // find person by name
-                nextPerson();
               } else {
                 neo4j.query(reconcile.merge_person_entity_by_name, {
-                  name: person.text
+                  name: person.disambiguated? person.disambiguated.name : person.text,
+                  service: 'alchemyapi'
                 }, function (err, nodes) {
                   if(err)
                     throw err;
@@ -247,6 +291,38 @@ module.exports = {
             q.push(persons);
             q.drain = nextReconciliation
           },
+          // places entity (locations and cities) by using geonames services
+          function (nextReconciliation) {
+            var q = async.queue(function (location, nextLocation) {
+              module.exports.geonames(location.disambiguated.name, function (err, nodes){
+                if(err == IS_EMPTY) {
+                  nextLocation();
+                  return;
+                } else if(err)
+                  throw err
+                entities = entities.concat(nodes);
+                nextLocation();
+              })
+            }, 1);
+            q.push(locations);
+            q.drain = nextReconciliation;
+          },
+          // places entities (countries and cities) by using geocoding services
+          function (nextReconciliation) {
+            var q = async.queue(function (location, nextLocation) {
+              module.exports.geocoding(location.disambiguated.name, function (err, nodes){
+                if(err == IS_EMPTY) {
+                  nextLocation();
+                  return;
+                } else if(err)
+                  throw err
+                entities = entities.concat(nodes);
+                nextLocation();
+              })
+            }, 1);
+            q.push(locations);
+            q.drain = nextReconciliation;
+          }
           // geonames/geocode reconciliation via 
         ], function() {
           next(null, entities);
