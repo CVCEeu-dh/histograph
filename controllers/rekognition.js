@@ -5,8 +5,7 @@
   
   Proxy for Rekognition api calls
 */
-var alchemyapi = require('alchemy-api'),
-    settings   = require('../settings'),
+var settings   = require('../settings'),
     multer     = require('multer'),
     request    = require('request'),
 
