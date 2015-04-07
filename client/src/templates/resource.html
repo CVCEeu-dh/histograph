@@ -23,8 +23,9 @@
       <ul class="dropdown-menu" role="menu">
         <li ng-repeat="version in item.versions"><a ng-click="switchVersion(version)">{{version.service || "first version"}}</a>
 
-        <!-- li class="divider"></li>
-        <li><a href="#">Separated link</a></li -->
+        <li class="divider"></li>
+
+        <li><a ng-click="switchVersion(mergedVersion)">merged version</a></li>
       </ul>
     </div>
 

@@ -10,7 +10,20 @@ angular.module('histograph')
     
     ResourceFactory.get({id:$routeParams.id}, function (res) {
       $log.info('ResourceFactory', res.result);
-      $scope.currentVersion = res.result.item.versions[1];
+      // $scope.currentVersion = res.result.item.versions[1];
+      // merge all versions (simply concat annotations and join them with entity URI if any matches identification)
+      var yamls = [];
+      res.result.item.versions.forEach(function(v) {
+        if(typeof v.yaml == 'object')
+          yamls = yamls.concat(v.yaml);
+      });
+
+      $scope.mergedVersion = {
+        service: 'merged',
+        yaml: yamls
+      };
+      $scope.currentVersion = $scope.mergedVersion;
+      
       $scope.item = res.result.item;
       // get theaccepted version
 

@@ -72,3 +72,12 @@ WHERE has(n.stakeholders)
   and LENGTH(n.place) > 2
     WITH loc
     RETURN COUNT(distinct loc)
+
+//
+//
+//  Test history
+//   
+//
+MATCH (a:`entity`)-[R1:appears_in]-(p:`resource`)-[R2:appears_in]-(b:`entity`)
+WHERE a <> b AND a.name = 'Joseph Bech'
+RETURN a,b,R1, R2,p

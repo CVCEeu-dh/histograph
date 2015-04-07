@@ -15,48 +15,65 @@ angular.module('histograph')
       scope: {
         width: '=w',
         height: '=h',
-        version: '=' // which annotation version do you want to see here?
+        version: '=', // which annotation version do you want to see here?
       },
       link : function(scope, element) {
-        var src;
         /* draw the current annotation version */
-        var draw = function() {
+        var src = '';
+        /*
+          draw the corresponding annotation to annotorious
+        */
+        var draw = function (ver) {
           anno.removeAll();
-          console.log('oooo', scope.version.service)
-          for(var i in scope.version.yaml) {
+          console.log('drqw version', ver, src)
+          for(var i in ver.yaml) {
             var geometry = {
-              x: scope.version.yaml[i].region.left/(+scope.width),
-              y: scope.version.yaml[i].region.top/(+scope.height),
+              x: ver.yaml[i].region.left/(+scope.width),
+              y: ver.yaml[i].region.top/(+scope.height),
               
               width: 0.1,
               height: 0.1,
             };
-            geometry.width = -geometry.x + scope.version.yaml[i].region.right/(+scope.width);
-            geometry.height = -geometry.y + scope.version.yaml[i].region.bottom/(+scope.height);
-            console.log(geometry, scope.version.yaml[i].identification)
+            geometry.width = -geometry.x + ver.yaml[i].region.right/(+scope.width);
+            geometry.height = -geometry.y + ver.yaml[i].region.bottom/(+scope.height);
+            console.log(geometry, ver.yaml[i].identification, src)
             anno.addAnnotation({
               src: src,
-              text : scope.version.yaml[i].identification,
+              text : ver.yaml[i].identification || '',
               shapes : [{
                 type : 'rect',
                 geometry : geometry
               }]
             })
           }
-        }
 
-        element.bind("load" , function(e){ 
-          anno.makeAnnotatable(this);
-          src = this.src;
-          draw();
-          // reconcile with entity, if possible.
+          if(ver.service == 'merged') {
+            try {
+              anno.addPlugin('Merge', {src: src});
+            } catch(e){
+              console.log(e)
+            }
+          }
+        };
+
+
+        scope.$watch('version', function (ver) {
+          console.log(ver)
+          if(!ver)
+            return;
+          console.log('versio', element)
+          if(!element[0].complete) {
+            src = element[0].src;
+            element.bind("load" , function (e) { 
+              anno.makeAnnotatable(this);
+              draw(ver);
+            });
+          } else {
+            src = element[0].src;
+            anno.makeAnnotatable(element[0]);
+            draw(ver)
+          };
         });
-
-
-        scope.$watch('version', function (v) {
-          if(v)
-            draw();
-        })
       }
     };
   });
