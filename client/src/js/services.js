@@ -23,6 +23,14 @@ angular.module('histograph')
     });
   })
   /*
+    Add a comment to a resource
+  */
+  .factory('ResourceCommentsFactory', function ($resource) {
+    return $resource('/api/resource/:id/comments', {}, {
+        query: {method: 'GET' },
+    });
+  })
+  /*
     Socket.io service, thqnks to http://briantford.com/blog/angular-socket-io
   */
   .factory('socket', function ($rootScope) {

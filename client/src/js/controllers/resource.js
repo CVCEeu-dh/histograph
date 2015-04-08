@@ -5,11 +5,77 @@
  * # IndexCtrl
  */
 angular.module('histograph')
-  .controller('ResourceCtrl', function ($scope, $log, $routeParams, ResourceFactory, socket) {
+  .controller('ResourceCtrl', function ($scope, $log, $routeParams, ResourceFactory, ResourceCommentsFactory, socket) {
     $log.debug('ResourceCtrl ready', $routeParams.id);
+
     
+
+    
+
+    /**
+      commenting, with socket
+    */
+    $scope.commenting = false; // on commenting = true
+    
+    $scope.comment = {
+      text: "Write something please. Then do not forget to push the button below",
+      tags: ''
+    }
+
+
+    /**
+      Socket
+    */
+
+
+    socket.on('done:commenting', function (result) {
+      $log.info('done:commenting', result);
+    });
+
+    socket.on('continue:commenting', function (result) {
+      $log.info('continue:commenting', result);
+    });
+
+    socket.on('start:commenting', function (result) {
+      $log.info('start:commenting', result.data, $routeParams.id);
+    });
+
+    /*
+      Create a comment, twetterlike wherever you are.
+      (of course you have to comment a resource)
+    */
+    $scope.startMention = function (item) {
+      $log.debug('resource.startMention', item);
+      $scope.commenting = true;
+      socket.emit('start:commenting', item.props, function (result) {
+        $log.info('start:commenting', result);
+      });
+
+    };
+
+    $scope.postMention = function (item) {
+      $log.debug('resource.postMention', item);
+      ResourceCommentsFactory.save({id: $routeParams.id}, {
+        content: $scope.comment.text,
+        tags: ''
+      }, function(res){
+        console.log('postMention', res);
+      })
+    };
+
+
+    $scope.switchVersion = function(version) {
+      $log.info('resourceCtrl.switchVersion', version)
+      $scope.currentVersion = version;
+    };
+
+
+    /**
+      on load
+    */
     ResourceFactory.get({id:$routeParams.id}, function (res) {
       $log.info('ResourceFactory', res.result);
+      $scope.setUser(res.user); // update user
       // $scope.currentVersion = res.result.item.versions[1];
       // merge all versions (simply concat annotations and join them with entity URI if any matches identification)
       var yamls = [];
@@ -28,33 +94,4 @@ angular.module('histograph')
       // get theaccepted version
 
     });
-
-    $scope.comment = "Write something please. Then do not forget to push the button below"
-    /**
-      Socket
-    */
-    socket.on('start:mention', function (result) {
-      $log.info('start:mention', result.data.id, $routeParams.id);
-    });
-
-    /*
-      Create a comment, twetterlike wherever you are.
-      (of course you have to comment a resource)
-    */
-    $scope.startMention = function (item) {
-      $log.debug('core.mention', item);
-      socket.emit('start:mention', item.props, function (result) {
-        $log.info('start:mention', result);
-      });
-    };
-
-    $scope.postMention = function (item) {
-
-    };
-
-
-    $scope.switchVersion = function(version) {
-      $log.info('resourceCtrl.switchVersion', version)
-      $scope.currentVersion = version;
-    };
   })

@@ -12,3 +12,6 @@ var settings   = require('../settings'),
     neo4j      = require('seraph')(settings.neo4j.host);
 
 
+module.exports = function(){
+  return {}
+};

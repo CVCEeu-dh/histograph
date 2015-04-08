@@ -1,3 +1,4 @@
+
 <div class="resource item">
   <h3><a ng-href="#/r/{{item.id}}">{{item.props.title || 'untitled'}}</a></h3>
   {{item.props.start_date}}
@@ -35,19 +36,28 @@
   </blockquote>
   
   <div class="discussion">
-    <a class="btn btn-default" ng-click="startMention(item)">join discussion</a>
-    <span ng-repeat="com in item.comments">
-      <span cmlass="username">{{com.user.username}}</span> — {{com.comment.content}}</span>
+    <div class="comment" ng-repeat="com in item.comments">
+      <span cmlass="username">{{com.user.username}}</span> <span class="date">{{com.comment.creation_date}}</span> — {{com.comment.content}}</div>
+    <a class="btn btn-default btn-block" ng-click="startMention(item)">join discussion</a>
     
   </div>
+  <div id="inquirer" class="{{commenting? 'commenting': ''}}">
+    
+    <div>
+      <img class="user-picture" ng-src='{{user.picture}}'>
+      {{user.username}} {{comment.tag}}
+    </div>
+    <div ng-model='comment.text' ui-codemirror="{
+        lineNumbers: false,
+        theme:'twilight',
+        lineWrapping : true,
+        mode: 'Smalltalk'
+      }"></div>
+      <button class="btn btn-default" ng-click="postMention(item)">comment</button>
+  </div> 
+
+
 </div>
 
-<div id="inquirer">
-  <div ng-model='comment' ui-codemirror="{
-      lineNumbers: false,
-      theme:'twilight',
-      lineWrapping : true,
-      mode: 'Smalltalk'
-    }"></div>
-    <button class="btn btn-default" ng-click="postMention(item)">comment</button>
-</div> 
+<div id="milkyway">graph </div>
+

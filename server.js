@@ -4,22 +4,32 @@
   ===
 
 */
-var express      = require('express'),        // call express
-    session      = require('express-session'),
+var express       = require('express'),        // call express
+    session       = require('express-session'),
     
-    settings     = require('./settings'),
+    settings      = require('./settings'),
 
-    app          = exports.app = express(),                 // define our app using express
-    
-    auth         = require('./auth'), // auth mechanism with passport
-    
-    bodyParser   = require('body-parser'),
-    cookieParser = require('cookie-parser'),
-    morgan       = require('morgan'),
-    
-    ctrl         = require('require-all')(__dirname + '/controllers'),
+    app           = exports.app = express(),                 // define our app using express
+    port          = process.env.PORT || 8000,
+    server        = app.listen(port),
+    io            = require('socket.io')
+                      .listen(server),
 
-    port         = process.env.PORT || 8000,
+    auth          = require('./auth'), // auth mechanism with passport
+    
+    bodyParser    = require('body-parser'),
+    cookieParser  = require('cookie-parser'),
+    morgan        = require('morgan'),    
+
+    ctrl          = require('require-all')({
+                      dirname: __dirname + '/controllers',
+                      filter  :  /(.*).js$/,
+                      resolve : function (f) {
+                        return f(io);
+                      }
+                    }),
+
+    
 
     clientRouter = express.Router(),
     apiRouter    = express.Router(),
@@ -212,26 +222,6 @@ apiRouter.route('/resource/:id/comments') // POST
  START THE SERVER and strat listening with socket.io
 
 */
-var server = app.listen(port),
-    io = exports.io = require('socket.io')
-          .listen(server)
-          .use(function (socket, next) {
-            sessionMiddleware(socket.request, {}, next);
-          })
-
-// import io events otherwise
-io.on('connection', function(socket){
-  // console.log('socket.request.session.passport.user', socket.request.session)
-  var cookie_string = socket.request.headers.cookie;
-  //  console.log('a user connected', cookie_string);
-  
-  socket.on('start:mention', function (data) {
-    console.log(socket.request.session.passport.user.username,
-      'started mentioning',  data);
-    // emit back to already connected people..
-    io.emit('start:mention', {
-      user: socket.request.session.passport.user.username,
-      data: data
-    });
-  });
-});
+io.use(function (socket, next) {
+  sessionMiddleware(socket.request, {}, next);
+})

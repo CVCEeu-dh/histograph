@@ -10,5 +10,12 @@ angular.module('histograph')
   .controller('CoreCtrl', function ($scope, $log, $timeout, socket) {
     $log.debug('CoreCtrl ready');
     
+    // the current user
+    $scope.user = {};
+
+    $scope.setUser = function (user, update) {
+      if(update || !$scope.user.id)
+        $scope.user = user;
+    };
     
   })

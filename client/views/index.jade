@@ -33,8 +33,9 @@ html
               a(href='#')
                 span logout
       if !user.username
-          form
-            a(href='/auth/twitter', class='btn btn-default') signup with twitter
+          div(id='login')
+            form
+              a(href='/auth/twitter', class='btn btn-default') signup with twitter
       else
         div(ng-view)
         

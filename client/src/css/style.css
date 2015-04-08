@@ -22,7 +22,13 @@ h1,h2,h3,h4{
 
 header{
   height: 50px;
-  
+  position: fixed;
+  left:0;
+  right:0;
+  top: 0;
+  background: white;
+  border-bottom: 1px solid #eee;
+  z-index: 1;
   line-height: 50px;
   padding: 0 50px;
 }
@@ -51,12 +57,16 @@ blockquote{
 }
 
 .item{
-  width: 350px;
-  margin: 35px auto;
+  width: 320px;
+  margin: 100px 0 70px 45px;
 }
 
 .item img{
-  max-width: 350px
+  width: 100%;
+}
+
+.item img.user-picture{
+  width: 40px;
 }
 
 .tag {
@@ -67,14 +77,43 @@ blockquote{
   margin: 10px 0;
 }
 
+.item.resource{
+    position: absolute;
+  bottom: 17px;
+  top: 50px;
+  overflow-x: auto;
+  margin: 0;
+  padding: 20px;
+}
+
 .username{
   
 }
 
 #inquirer{
   margin: 10px auto;
-  width: 350px;
+  padding: 20px;
+  display: none;
 }
+
+#inquirer.commenting {
+  display: block;
+}
+
+#milkyway {
+  position: fixed;
+  top: 50px;
+  left: 410px;
+  right: 10px;
+  bottom: 20px;
+  background: #ddd;
+}
+
+.comment {
+  margin: 10px 0;
+  font-size: 12px;
+}
+
 
 .CodeMirror{
   font-family: inherit;
@@ -91,4 +130,11 @@ blockquote{
 
 .btn {
   font-size: 13px;
+}
+
+
+#login{
+  margin: 100px auto;
+  width: 300px;
+  text-align: center;
 }
