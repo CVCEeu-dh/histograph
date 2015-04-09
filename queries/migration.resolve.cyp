@@ -80,10 +80,6 @@ MATCH (ent:entity), (res:resource)
   WHERE id(ent)={entity_id} AND id(res)={resource_id}
 WITH ent, res
   MERGE (ent)-[r:appears_in]->(res)
-    ON CREATE SET
-      r.context = {context}
-    ON MATCH SET
-      r.context = {context}
 RETURN ent, res
 
 

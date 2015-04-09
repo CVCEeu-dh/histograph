@@ -402,9 +402,9 @@ async.waterfall([
           });
 
           relationships.drain = function() {
-            // add markdown info on resource.
+            // add yaml info on resource.
             v.unknowns = unknowns;
-            v.markdown = YAML.stringify(entities, 2);
+            v.yaml = YAML.stringify(entities, 2);
             neo4j.save(v, function(err, node) {
               if(err)
                 throw err;

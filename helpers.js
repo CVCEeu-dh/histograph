@@ -166,7 +166,7 @@ module.exports = {
                       right: person.endingPos
                     };
                     return d;
-                  };
+                  });
 
                   entities = entities.concat(nodes);
                   nextPerson();
@@ -185,7 +185,7 @@ module.exports = {
                       right: person.endingPos
                     };
                     return d;
-                  };
+                  });
 
                   entities = entities.concat(nodes);
                   nextPerson();
@@ -212,7 +212,7 @@ module.exports = {
                     right: location.endingPos
                   };
                   return d;
-                };
+                });
                    // adding LOCAL lazy context here, provided by textrazor
                 entities = entities.concat(nodes);
                 nextLocation();
@@ -236,7 +236,7 @@ module.exports = {
                     right: location.endingPos
                   };
                   return d;
-                };
+                });
                 entities = entities.concat(nodes);
                 nextLocation();
               })
@@ -530,8 +530,7 @@ module.exports = {
 
     neo4j.query(reconcile.merge_relationship_entity_resource, {
       entity_id: entity.id,
-      resource_id: resource.id,
-      context: entity.context || '',
+      resource_id: resource.id
       }, function (err, relationships) {
         if(err) {
           next(err)
