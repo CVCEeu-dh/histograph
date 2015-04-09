@@ -132,7 +132,7 @@ module.exports = {
         }
       }, function (err, res, body) {
         console.log('TEXTRAZOR', err)
-        console.log(body);
+        console.log(body.response.entities);
 
         if(body.error) { // probably limit reached. 
           next(LIMIT_REACHED);
@@ -144,6 +144,7 @@ module.exports = {
         var locations =  _.filter(body.response.entities, {type: ['Place']});
 
         console.log(_.map(persons, 'entityId'), _.map(locations, 'entityId'));
+
 
         var queue = async.waterfall([
           // person reconciliation (merge by)
@@ -158,6 +159,15 @@ module.exports = {
                 }, function (err, nodes) {
                   if(err)
                     throw err;
+                  // enrich with context
+                  nodes = nodes.map(function(d) {
+                    d.context = {
+                      left: person.startingPos,
+                      right: person.endingPos
+                    };
+                    return d;
+                  };
+
                   entities = entities.concat(nodes);
                   nextPerson();
                 })
@@ -168,6 +178,15 @@ module.exports = {
                 }, function (err, nodes) {
                   if(err)
                     throw err;
+                  
+                  nodes = nodes.map(function(d) {
+                    d.context = {
+                      left: person.startingPos,
+                      right: person.endingPos
+                    };
+                    return d;
+                  };
+
                   entities = entities.concat(nodes);
                   nextPerson();
                 })
@@ -186,7 +205,15 @@ module.exports = {
                   nextLocation();
                   return;
                 } else if(err)
-                  throw err
+                  throw err;
+                nodes = nodes.map(function(d) {
+                  d.context = {
+                    left: location.startingPos,
+                    right: location.endingPos
+                  };
+                  return d;
+                };
+                   // adding LOCAL lazy context here, provided by textrazor
                 entities = entities.concat(nodes);
                 nextLocation();
               })
@@ -203,6 +230,13 @@ module.exports = {
                   return;
                 } else if(err)
                   throw err
+                nodes = nodes.map(function(d) {
+                  d.context = {
+                    left: location.startingPos,
+                    right: location.endingPos
+                  };
+                  return d;
+                };
                 entities = entities.concat(nodes);
                 nextLocation();
               })
@@ -492,9 +526,12 @@ module.exports = {
     @next     - your callback with(err, res)
   */
   enrichResource: function(resource, entity, next) {
+    
+
     neo4j.query(reconcile.merge_relationship_entity_resource, {
       entity_id: entity.id,
       resource_id: resource.id,
+      context: entity.context || '',
       }, function (err, relationships) {
         if(err) {
           next(err)

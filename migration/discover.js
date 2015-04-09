@@ -15,7 +15,7 @@ var settings  = require('../settings'),
 var queue = async.waterfall([
     // get pictures and documents having a caption
     function (next) {
-      neo4j.query('MATCH (n:`resource`) WHERE has(n.caption) AND not(has(n.textrazor_reconciliated)) RETURN n', function (err, nodes) {
+      neo4j.query('MATCH (n:`resource`) WHERE has(n.caption) AND not(has(n.textrazor_reconciliated)) RETURN n LIMIT 1000', function (err, nodes) {
         if(err)
           throw err;
         
@@ -65,7 +65,8 @@ var queue = async.waterfall([
       }, 1);
       q.push(resources);
       q.drain = function() {
-        console.log('ended')
+        console.log('ended');
+        // next();
       }
     },
 
