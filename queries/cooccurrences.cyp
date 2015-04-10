@@ -81,3 +81,12 @@ WHERE has(n.stakeholders)
 MATCH (a:`entity`)-[R1:appears_in]-(p:`resource`)-[R2:appears_in]-(b:`entity`)
 WHERE a <> b AND a.name = 'Joseph Bech'
 RETURN a,b,R1, R2,p
+
+// omonyms
+MATCH (n:person)
+OPTIONAL MATCH (per:person)
+WHERE per <> n
+AND n.name = per.name
+WITH per, n
+MATCH (per)-[r1]-(res:resource)-[r2]-(n)
+RETURN per, r1, res, r2, n

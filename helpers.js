@@ -132,7 +132,7 @@ module.exports = {
         }
       }, function (err, res, body) {
         console.log('TEXTRAZOR', err)
-        console.log(body.response.entities);
+        // console.log(body.response.entities.length);
 
         if(body.error) { // probably limit reached. 
           next(LIMIT_REACHED);

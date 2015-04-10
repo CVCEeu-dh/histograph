@@ -20,7 +20,7 @@
     "express": "^4.12.2",
     "express-session": "^1.10.3",
     "jade": "^1.9.2",
-    "lodash": "^3.3.1",
+    "lodash": "^3.6.0",
     "morgan": "^1.5.1",
     "multer": "^0.1.8",
     "passport": "^0.2.1",

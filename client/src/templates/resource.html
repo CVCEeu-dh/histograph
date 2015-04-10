@@ -1,6 +1,6 @@
 
 <div class="resource item">
-  <h3><a ng-href="#/r/{{item.id}}">{{item.props.title || 'untitled'}}</a></h3>
+  <h3><a ng-href="#/r/{{item.id}}">{{item.props.title || item.props.name }}</a></h3>
   {{item.props.start_date}}
   {{item.props.end_date}}
   
@@ -13,7 +13,9 @@
     <span ng-repeat="per in item.persons" class='tag person'>{{per.name}}</span>
     
   </div>
-  
+
+  <div ng-if="item.props.caption">{{item.props.caption}}</div>
+  <div ng-if="item.props.source">{{item.props.source}}</div>
   <!-- Single button -->
 
 
@@ -59,5 +61,5 @@
 
 </div>
 
-<div id="milkyway">graph </div>
+<!-- div id="milkyway">graph </div -->
 

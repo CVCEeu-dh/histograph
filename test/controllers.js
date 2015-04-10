@@ -26,7 +26,7 @@ after(function () {
   session.destroy();
 });
 
-describe('create db constraints for user', function() {
+describe('controllers: create db constraints for user', function() {
   it('should create a Constraint in Neo4j db', function (done) {
     neo4j.query('CREATE CONSTRAINT ON (u:user) ASSERT u.email IS UNIQUE', function(err) {
       should.not.exist(err, err);
@@ -36,7 +36,7 @@ describe('create db constraints for user', function() {
   });
 });
 
-describe('create a new user', function() {
+describe('controllers: create a new user', function() {
   it('should create a new user into the database', function (done) {
     session
       .post('/signup')
@@ -52,6 +52,9 @@ describe('create a new user', function() {
       .expect('Content-Type', /json/)
       .expect(201)
       .end(function (err, res) {
+        if(err)
+          console.log(err)
+        console.log(res.body)
         should.equal(res.body.status, 'ok', res.body)
         done();
       })
@@ -59,7 +62,7 @@ describe('create a new user', function() {
 })
 
 
-describe('authenticate the user, but failing', function() {
+describe('controllers: authenticate the user, but failing', function() {
   it('should fail on password length', function (done) {
     session
       .post('/signup')
@@ -151,7 +154,7 @@ describe('authenticate the user, but failing', function() {
 })
 
 
-describe('authenticate the user, succeed', function() {
+describe('controllers: authenticate the user, succeed', function() {
   it('should change the activation key, via cypher', function (done) {
     neo4j.query('MATCH(n:user {email:{email}}) SET n.activation = {key} RETURN n', {
       email: 'world@globetrotter.it',
@@ -208,7 +211,7 @@ describe('authenticate the user, succeed', function() {
 
 
 
-describe('get resource items available to the user', function() {
+describe('controllers: get resource items available to the user', function() {
 
   it('should show a list of 20 resources', function (done) {
     session
@@ -240,7 +243,7 @@ describe('get resource items available to the user', function() {
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
-        //console.log(err, res.body.result.item)
+        console.log(err, res.body.result.item)
         should.not.exists(err);
 
         should.exists(res.body.result.item);
@@ -270,10 +273,22 @@ describe('get resource items available to the user', function() {
 
 
 
-describe('delete the user', function() {
+describe('controllers: delete the user and their relationships', function() {
+  it('should remove the comments created by the hello-world user', function (done) {
+    neo4j.query('MATCH (n:user {username:{username}})-[r]-(com:comment)-[r2:mentions]-() DELETE com, r2, r', {
+      username: 'hello-world'
+    }, function(err, res) {
+      if(err)
+        console.log(err)
+      //console.log('result', res)
+      done();
+    })
+    
+  });
+
   it('should remove the user with email world@globetrotter.it', function (done) {
-    neo4j.query('MATCH(n:user {email:{email}}) DELETE n', {
-      email: 'world@globetrotter.it'
+    neo4j.query('MATCH (n:user {username:{username}}) OPTIONAL MATCH (n)-[r]-() DELETE n, r', {
+      username: 'hello-world'
     }, function(err, res) {
       if(err)
         console.log(err)

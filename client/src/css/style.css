@@ -57,8 +57,8 @@ blockquote{
 }
 
 .item{
-  width: 320px;
-  margin: 100px 0 70px 45px;
+  width: 380px;
+  margin: 100px auto;
 }
 
 .item img{
@@ -78,12 +78,12 @@ blockquote{
 }
 
 .item.resource{
-    position: absolute;
+  /*  position: absolute;
   bottom: 17px;
   top: 50px;
   overflow-x: auto;
   margin: 0;
-  padding: 20px;
+  padding: 20px;*/
 }
 
 .username{

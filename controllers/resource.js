@@ -6,6 +6,7 @@
 */
 var settings   = require('../settings'),
     queries    = require('decypher')('./queries/resource.cyp'),
+    parser     = require('../parser'),
     helpers    = require('../helpers'),
     YAML       = require('yamljs'),
 
@@ -50,7 +51,9 @@ module.exports = function(io){
       }, function(err, items) {
         if(err)
           return helpers.cypherQueryError(err, res);
-        
+        if(!items.length)
+          return res.error({}); // empty
+
         var item = items[0].resource;
         //console.log(item)
         item.versions = _.values(item.versions).map(function (d) {
@@ -58,6 +61,25 @@ module.exports = function(io){
             d.yaml = YAML.parse(d.yaml);
           return d;
         });
+
+        item.annotations = item.versions
+          .filter(function (d) {
+            return d.service == 'textrazor' // @todo: differenciate version:textannotation to version:imageannotation. mimetype? label?
+          })
+          .map(function (d) {
+            d.annotations = parser.annotate([
+              item.name || '',
+              item.source || '',
+              item.caption || ''
+            ].join('§ '), d.yaml)
+              .split('§ ')
+              .map(function (d, i) {
+                var v = {};
+                v[['name','source', 'caption'][i]] = d
+                return v
+              });
+          });
+        
         item.locations = _.values(item.locations);
         item.persons = _.values(item.persons);
         item.comments = _.values(item.comments);

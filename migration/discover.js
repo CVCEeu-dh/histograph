@@ -15,7 +15,7 @@ var settings  = require('../settings'),
 var queue = async.waterfall([
     // get pictures and documents having a caption
     function (next) {
-      neo4j.query('MATCH (n:`resource`) WHERE has(n.caption) AND not(has(n.textrazor_reconciliated)) RETURN n LIMIT 1', function (err, nodes) {
+      neo4j.query('MATCH (n:`resource`) WHERE has(n.caption) AND not(has(n.textrazor_reconciliated)) RETURN n LIMIT 1000', function (err, nodes) {
         if(err)
           throw err;
         
@@ -62,7 +62,8 @@ var queue = async.waterfall([
             var now = helpers.now();
 
             resource.textrazor_reconciliated = true;
-           
+            if(!resource.url)
+              resource.url = resource[resource.languages[0] + '_url'];
             neo4j.query(queries.merge_version_from_service, {
               url: resource.url,
               service: 'textrazor',
@@ -72,8 +73,11 @@ var queue = async.waterfall([
               creation_time: now.time,
               yaml: YAML.stringify(yaml, 2)
             }, function (err, nodes) {
-              if(err)
+              if(err) {
+                console.log(resource)
                 throw err;
+              }
+                
               console.log('  version saved, #id', nodes[0].id, 'url:', nodes[0].url);
               // // save
               neo4j.query(queries.merge_relationship_version_resource, {
@@ -82,7 +86,7 @@ var queue = async.waterfall([
               }, function (err, nodes) {
                 if(err)
                   throw err;
-                console.log('  rel saved, #ver_id', nodes[0].ver.id, 'res_url:', nodes[0].res.url);
+                console.log('  rel #id',resource.id,' saved, #ver_id', nodes[0].ver.id, 'res_url:', nodes[0].res.url);
                 resource.textrazor_annotated = true;
                 neo4j.save(resource, function (err, result) {
                   if(err)
