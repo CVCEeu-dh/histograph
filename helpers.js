@@ -556,7 +556,7 @@ module.exports = {
     Dummy Time transformation with moment.
   */
   reconcileHumanDate: function(humanDate, lang, next) {
-    var date = humanDate.match(/(\d*)[\sert\-]*(\d*)\s*([^\s]*)\s?(\d{4})/),
+    var date = humanDate.match(/(\d*)[\sert\-]*(\d*)\s*([^\s\(\)]*)\s?(\d{4})/),
         start_date,
         end_date,
         result = {};
@@ -571,30 +571,37 @@ module.exports = {
         next(IS_EMPTY);
         return;
       }
-      if(candidate[1].length && candidate[2].length) {
-        start_date = moment.utc([1, monthName, candidate[1].length < 4? '19' + candidate[1]:candidate[1]].join(' '), 'LL');
-        end_date = moment.utc([1, monthName, candidate[2].length < 4? '19' + candidate[2]:candidate[2]].join(' '), 'LL');
+      
+      if(candidate[1] && candidate[2]) {
+        start_date = moment.utc([1, monthName, candidate[1].length < 4? '19' + candidate[1]:candidate[1]].join(' '), 'D MMMM YYYY').set('hour', 0);
+        end_date = moment.utc([1, monthName, candidate[2].length < 4? '19' + candidate[2]:candidate[2]].join(' '), 'D MMMM YYYY');
         end_date = moment(end_date).add(1, 'year').subtract(1, 'minutes');
       } else {
-        start_date = moment.utc([1, monthName, candidate[2].length < 4? '19' + candidate[2]:candidate[2]].join(' '), 'LL');
+        start_date = moment.utc([1, monthName, candidate[2].length < 4? '19' + candidate[2]:candidate[2]].join(' '), 'D MMMM YYYY').set('hour', 0);
         end_date = moment(start_date).add(1, 'year').subtract(1, 'minutes');
       }
-
+      result.text_date = candidate[0]
       
     } else {
       if(!date[1].length && date[3].length && ['années'].indexOf(date[3].toLowerCase()) !== -1) {
-        start_date = moment.utc([1, monthName, date[4]].join(' '), 'LL');
+        start_date = moment.utc([1, monthName, date[4]].join(' '), 'D MMMM YYYY').set('hour', 0);
         end_date   = moment(start_date).add(10, 'year').subtract(1, 'minutes');
       } else if(!date[1].length && (!date[3].length || ['vers'].indexOf(date[3].toLowerCase()) !== -1) ) {
-        start_date = moment.utc([1, monthName, date[4]].join(' '), 'LL');
+        start_date = moment.utc([1, monthName, date[4]].join(' '), 'D MMMM YYYY').set('hour', 0);
         end_date   = moment(start_date).add(1, 'year').subtract(1, 'minutes');
+      } else if(!date[1].length && date[2].length && date[3].length && date[4].length) {
+        start_date = moment.utc([date[2],date[3], date[4]].join(' '), 'D MMMM YYYY').set('hour', 0);
+        end_date = moment(start_date)
+            .add(24, 'hours')
+            .subtract(1, 'minutes');
       } else if(!date[1].length) {
-        start_date = moment.utc([1,date[3], date[4]].join(' '), 'LL');
+        //console.log(date, [1,date[3], date[4]].join(' '), moment.utc([1,date[3], date[4]].join(' '), 'D MMMM YYYY'))
+        start_date = moment.utc([1,date[3], date[4]].join(' '), 'D MMMM YYYY').set('hour', 0);
         end_date   = moment(start_date).add(1, 'month').subtract(1, 'minutes');
       } else {
-        start_date = moment.utc([date[1],date[3], date[4]].join(' '), 'LL');
+        start_date = moment.utc([date[1],date[3], date[4]].join(' '), 'D MMMM YYYY').set('hour', 0);
         if(date[2].length)
-          end_date = moment.utc([date[2],date[3], date[4]].join(' '), 'LL')
+          end_date = moment.utc([date[2],date[3], date[4]].join(' '), 'D MMMM YYYY')
             .add(24, 'hours')
             .subtract(1, 'minutes');
         else
@@ -602,6 +609,7 @@ module.exports = {
             .add(24, 'hours')
             .subtract(1, 'minutes');
       }
+      result.text_date = date[0]
     }
     result.start_date = start_date.format();
     result.start_time = +start_date.format('X');

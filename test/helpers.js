@@ -147,5 +147,24 @@ describe('human date service', function() {
       done();
     });
   });
-  
+
+  it('should transform (Bonn, 9 juin 1970) in a one day span', function (done) {
+    helpers.reconcileHumanDate('Note interne de la chancellerie allemande sur le traité avec la Pologne (Bonn, 9 juin 1970)', 'fr', function (err, res) {
+      should.not.exist(err, err);
+      should.equal(res.start_date, '1970-06-09T00:00:00+00:00'); // utc format
+      should.equal(res.end_date, '1970-06-09T23:59:00+00:00');
+      done();
+    });
+  });
+
+  it('should transform  e (July 1950 in a one month span', function (done) {
+    helpers.reconcileHumanDate('e (July 1950', 'en', function (err, res) {
+      should.not.exist(err, err);
+      should.equal(res.start_date,  '1950-07-01T00:00:00+00:00'); // utc format
+      should.equal(res.end_date, '1950-07-31T23:59:00+00:00');
+      done();
+    });
+  });
+
+
 });

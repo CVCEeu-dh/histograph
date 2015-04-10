@@ -90,3 +90,11 @@ AND n.name = per.name
 WITH per, n
 MATCH (per)-[r1]-(res:resource)-[r2]-(n)
 RETURN per, r1, res, r2, n
+
+// recommendation system ,et oui
+START res=node(3168)
+MATCH (res)-[r1:appears_in]-(ent:entity)-[r2:appears_in]-(res2:resource)
+WITH res, res2, collect(ent) as entities, length(collect(ent)) as similarity
+ORDER BY similarity DESC
+RETURN res2, similarity
+LIMIT 20
