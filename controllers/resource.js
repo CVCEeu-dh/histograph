@@ -67,17 +67,20 @@ module.exports = function(io){
             return d.service == 'textrazor' // @todo: differenciate version:textannotation to version:imageannotation. mimetype? label?
           })
           .map(function (d) {
-            d.annotations = parser.annotate([
-              item.name || '',
-              item.source || '',
-              item.caption || ''
+            var annotations = parser.annotate([
+              item.props.name || '',
+              item.props.source || '',
+              item.props.caption || ''
             ].join('§ '), d.yaml)
-              .split('§ ')
-              .map(function (d, i) {
-                var v = {};
-                v[['name','source', 'caption'][i]] = d
-                return v
-              });
+              .split('§ ');
+
+            d.annotations = {
+              name: annotations[0],
+              source: annotations[1],
+              caption: annotations[2]
+            };
+
+            return d;
           });
         
         item.locations = _.values(item.locations);

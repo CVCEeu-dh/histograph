@@ -69,7 +69,9 @@ angular.module('histograph')
       $scope.currentVersion = version;
     };
 
-
+    $scope.switchAnnotation = function(annotation) {
+      $scope.currentAnnotation = annotation;
+    }
     /**
       on load
     */
@@ -91,6 +93,9 @@ angular.module('histograph')
       $scope.currentVersion = $scope.mergedVersion;
       
       $scope.item = res.result.item;
+      
+      if($scope.item.annotations.length)
+        $scope.currentAnnotation = $scope.item.annotations[0];
       // get theaccepted version
 
     });
