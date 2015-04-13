@@ -10,7 +10,9 @@
     "import": "node ./migration/import.js",
     "test": "mocha test",
     "start": "node ./server.js",
-    "dates": "node ./scripts/dates.js"
+    "dates": "node ./scripts/dates.js",
+    "locations": "node ./scripts/locations.js",
+    "crowdsourcing": "node ./scripts/crowdsourcing.js"
   },
   "author": "daniele.guido@cvce.eu",
   "license": "ISC",
