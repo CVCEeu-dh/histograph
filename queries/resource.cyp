@@ -2,10 +2,10 @@
 // get resource with its version and comments
 START res=node({id})
   WITH res
-    MATCH (ver:`version`)-[r1:describes]-(res)
-      OPTIONAL MATCH (res)-[r2:appears_in]-(loc:`location`)
-      OPTIONAL MATCH (res)-[r3:appears_in]-(per:`person`)
-      OPTIONAL MATCH (u:user)-[r4:says]-(com)-[r5:mentions]-(res)
+    OPTIONAL MATCH (ver:`version`)-[r1:describes]-(res)
+    OPTIONAL MATCH (res)-[r2:appears_in]-(loc:`location`)
+    OPTIONAL MATCH (res)-[r3:appears_in]-(per:`person`)
+    OPTIONAL MATCH (u:user)-[r4:says]-(com)-[r5:mentions]-(res)
   
   WITH  ver, res, loc, per, u, com, {
       id: id(com),

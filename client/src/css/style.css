@@ -8,15 +8,19 @@
             '               -._:'              .;'          
 
 */
+html{
+  height: 100%
+}
 body{
   font-size: 12px;
   line-height: 21px;
   color: #1d1d1d;
+  height: 100%;
 }
 
 h1,h2,h3,h4{
   font-weight:normal;
-  font-size: 13px;
+  font-size: 12px;
   line-height: inherit;
 }
 
@@ -56,9 +60,13 @@ blockquote{
   background: #eee;
 }
 
+.view{
+  margin-top: 50px;
+}
+
 .item{
-  width: 380px;
-  margin: 100px auto;
+  max-width: 460px;
+  margin: 0 auto 100px auto;
 }
 
 .item img{
@@ -78,12 +86,19 @@ blockquote{
 }
 
 .item.resource{
-  /*  position: absolute;
-  bottom: 17px;
-  top: 50px;
-  overflow-x: auto;
-  margin: 0;
-  padding: 20px;*/
+  
+}
+
+.item .source a{
+  background: cyan;
+}
+
+.see-also{
+  
+}
+/* related items */
+.related{
+  margin: 40px 0px;
 }
 
 .username{
@@ -111,7 +126,7 @@ blockquote{
 
 .comment {
   margin: 10px 0;
-  font-size: 12px;
+  font-size: 11px;
 }
 
 
@@ -129,7 +144,7 @@ blockquote{
 }
 
 .btn {
-  font-size: 13px;
+  font-size: 12px;
 }
 
 

@@ -76,7 +76,7 @@ angular.module('histograph')
       on load
     */
     ResourceFactory.get({id:$routeParams.id}, function (res) {
-      $log.info('ResourceFactory', res.result);
+      $log.info('ResourceFactory', res);
       $scope.setUser(res.user); // update user
       // $scope.currentVersion = res.result.item.versions[1];
       // merge all versions (simply concat annotations and join them with entity URI if any matches identification)
@@ -96,6 +96,12 @@ angular.module('histograph')
       
       if($scope.item.annotations.length)
         $scope.currentAnnotation = $scope.item.annotations[0];
+      else 
+        $scope.currentAnnotation = { annotations: {
+            source: $scope.item.props.source || '',
+            caption: $scope.item.props.caption || '',
+          }
+        }
       // get theaccepted version
 
       // get related

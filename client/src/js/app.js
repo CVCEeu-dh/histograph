@@ -14,7 +14,6 @@ angular
     'ngResource',
     'ui.bootstrap',
     'ui.codemirror',
-    'hc.marked'
   ])
   .config(function ($routeProvider, $httpProvider) {
     $routeProvider
