@@ -208,12 +208,16 @@ app.use('/api', apiRouter); // api endpoint. we should be auth to pass this poin
 
   Let's add route specific for models
   ===
-
+  
+  Cfr. controllers/resource.js
+  Cfr Neo4j queries: queries/resources.cyp
 */
 apiRouter.route('/resource')
   .get(ctrl.resource.getItems)
 apiRouter.route('/resource/:id')
   .get(ctrl.resource.getItem)
+apiRouter.route('/resource/:id/related')
+  .get(ctrl.resource.getRelatedItems)
 apiRouter.route('/resource/:id/comments') // POST
   .post(ctrl.resource.createComment)
 

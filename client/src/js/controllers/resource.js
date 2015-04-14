@@ -5,7 +5,7 @@
  * # IndexCtrl
  */
 angular.module('histograph')
-  .controller('ResourceCtrl', function ($scope, $log, $routeParams, ResourceFactory, ResourceCommentsFactory, socket) {
+  .controller('ResourceCtrl', function ($scope, $log, $routeParams, ResourceFactory, ResourceCommentsFactory, ResourceRelatedFactory, socket) {
     $log.debug('ResourceCtrl ready', $routeParams.id);
 
     
@@ -98,5 +98,10 @@ angular.module('histograph')
         $scope.currentAnnotation = $scope.item.annotations[0];
       // get theaccepted version
 
+      // get related
+      ResourceRelatedFactory.get({id:$routeParams.id}, function (res) {
+        $log.info('ResourceRelatedFactory', res.result);
+        $scope.related = res.result.items
+      });
     });
   })

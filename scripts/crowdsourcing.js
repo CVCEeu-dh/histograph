@@ -21,7 +21,7 @@ var queue = async.waterfall([
     // CROWDsourcing #1: check that the context contains the date and that the date span calculated matched something useful
     // GET all the resources having a date
     function (next) {
-      neo4j.query('MATCH (n:`resource`) WHERE has(n.date) RETURN n LIMIT 50', function (err, resources) {
+      neo4j.query('MATCH (n:`resource`) WHERE has(n.date) RETURN n LIMIT 500', function (err, resources) {
         if(err)
           throw err;
         // csv cascades

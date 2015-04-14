@@ -45,6 +45,23 @@ OPTIONAL MATCH (res)-[r3:appears_in]-(per:`person`)
     } as r
 
 
+// name: get_similar_resources
+// get resources that match well with a given one
+// recommendation system ,et oui
+START res=node({id})
+  MATCH (res)-[r1:appears_in]-(ent:entity)-[r2:appears_in]-(res2:resource)
+  WITH res, res2, abs(res.start_time-res2.start_time) as proximity, collect(ent) as entities, length(collect(ent)) as similarity
+  ORDER BY similarity DESC, proximity ASC
+  WITH res2, similarity, proximity
+    SKIP {offset} 
+    LIMIT {limit}
+  RETURN {
+    id: id(res2),
+    props: res2,
+    similarity: similarity,
+    proximity: proximity
+  } AS result
+
 
 // name: count_resources
 // count resources having a version, with current filters

@@ -23,6 +23,14 @@ angular.module('histograph')
     });
   })
   /*
+    GET related resources
+  */
+  .factory('ResourceRelatedFactory', function ($resource) {
+    return $resource('/api/resource/:id/related', {}, {
+        query: {method: 'GET' },
+    });
+  })
+  /*
     Add a comment to a resource
   */
   .factory('ResourceCommentsFactory', function ($resource) {

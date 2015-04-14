@@ -1,4 +1,5 @@
 
+
 <div class="resource item">
   <h3><a ng-href="#/r/{{item.id}}">{{item.props.title || item.props.name }}</a></h3>
   {{item.props.start_date}}
@@ -27,7 +28,7 @@
 
   <!-- Single button -->
 
-
+  <div ng-if='item.mimetype=="image"'>
     <div class="btn-group" dropdown is-open="status.isopen" tooltip="view a different version">
       <button type="button" class="btn btn-default dropdown-toggle" dropdown-toggle ng-disabled="disabled">
         {{currentVersion.service || "accepted"}}<span class="caret"></span>
@@ -41,7 +42,8 @@
       </ul>
     </div>
 
-  <img ng-src="media/{{item.props.url}}" annotorious w="item.props.width" h="item.props.height" version="currentVersion">
+  <img  ng-src="media/{{item.props.url}}" annotorious w="item.props.width" h="item.props.height" version="currentVersion">
+  </div>
   <blockquote>
    {{item.props.stakeholders}}
   </blockquote>
@@ -70,5 +72,29 @@
 
 </div>
 
+<div class="seealso">
+  <div class="item related" ng-repeat="item in related">
+    <h4><a ng-href="#/r/{{item.id}}">{{item.props.title || item.props.name }}</a></h4>
+  {{item.props.start_date}}
+  {{item.props.end_date}}
+  
+  <div class="tags locations">
+    <span ng-repeat="location in item.locations">
+
+      <a ng-if="location.geocode_id" class="tag location" >{{location.geocode_formatted_address}}</a>
+
+      <a ng-if="location.geonames_id" class="tag location" >{{location.geonames_toponymName}}, {{location.geonames_countryName}}</a> <span ng-if="!$last">-</span> 
+    <!-- collect comments about places -->
+  </div>
+  
+  <div class="tags">
+    <span ng-repeat="per in item.persons" class='tag person'>{{per.name}}</span>
+  </div>
+
+  <img ng-src="media/{{item.props.url}}" annotorious w="item.props.width" h="item.props.height" version="currentVersion">
+  <blockquote>
+   {{item.props.stakeholders}}
+  </blockquote>
+</div>
 <!-- div id="milkyway">graph </div -->
 

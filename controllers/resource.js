@@ -112,6 +112,25 @@ module.exports = function(io){
     },
 
     /*
+      get other max 10 similar resources based on:
+      1. co-occurrence presence of the different entities
+      2. date proximity
+    */
+    getRelatedItems: function (req, res) {
+      neo4j.query(queries.get_similar_resources, {
+        id: +req.params.id,
+        limit: 20,
+        offset: 0
+      }, function(err, items) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({
+          items: items
+        });
+      });
+    },
+
+    /*
       create a comment on this resource
     */
     createComment: function(req, res) {
