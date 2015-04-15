@@ -117,11 +117,11 @@ blockquote{
 
 #milkyway {
   position: fixed;
-  top: 50px;
-  left: 410px;
-  right: 10px;
+  top: 70px;
+  left: 50%;
+  right: 20px;
   bottom: 20px;
-  background: #ddd;
+  background: #e8e8e8;
 }
 
 .comment {

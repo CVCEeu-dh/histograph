@@ -17,5 +17,12 @@ angular.module('histograph')
       if(update || !$scope.user.id)
         $scope.user = user;
     };
-    
+
+    /*
+      Will automatically update the graph view
+      according tho the nodes edges propsed here.
+    */
+    $scope.setGraph = function(graph) {
+      $scope.graph = graph;
+    };
   })

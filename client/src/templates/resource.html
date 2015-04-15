@@ -1,6 +1,6 @@
-<div style="position: relative"><div class="container-fluid">
+<div style="position: relative; width: 50%"><div class="container-fluid">
   <div class="row">
-    <div class="col-md-4 col-md-offset-2">
+    <div class="col-md-8">
       <div ng-if="item" class="resource item">
         <h3><a ng-href="#/r/{{item.id}}">{{item.props.title || item.props.name }}</a></h3>
         {{item.props|guessInterval}}
@@ -66,14 +66,14 @@
         </div> 
       </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-4">
       <div class="see-also">
-        <div class="related" ng-repeat="item in related">
-          <h4><a ng-href="#/r/{{item.id}}">{{item.props.title || item.props.name }}</a></h4>
-          {{item.props|guessInterval}}
+        <div class="related" ng-repeat="relatedItem in related">
+          <h4><a ng-href="#/r/{{relatedItem.id}}">{{relatedItem.props.title || relatedItem.props.name }}</a></h4>
+          {{relatedItem.props|guessInterval}} ({{item.props|guessDifference:relatedItem.props}})
           
           <div class="tags locations">
-            <span ng-repeat="location in item.locations">
+            <span ng-repeat="location in relatedItem.locations">
 
               <a ng-if="location.geocode_id" class="tag location" >{{location.geocode_formatted_address}}</a>
 
@@ -82,18 +82,19 @@
           </div>
           
           <div class="tags">
-            <span ng-repeat="per in item.persons" class='tag person'>{{per.name}}</span>
+            <span ng-repeat="per in relatedItem.persons" class='tag person'>{{per.name}}</span>
           </div>
 
-          <img  ng-if='item.props.mimetype=="image"' ng-src="media/{{item.props.url}}" >
+          <img  ng-if='relatedItem.props.mimetype=="image"' ng-src="media/{{relatedItem.props.url}}" >
           <blockquote>
-           {{item.props.stakeholders || item.props.caption}}
+           {{relatedItem.props.stakeholders || relatedItem.props.caption}}
           </blockquote>
         </div>
       </div>
     </div>
+    
   </div>
 </div>
 </div>
-<!-- div id="milkyway">graph </div -->
+
 
