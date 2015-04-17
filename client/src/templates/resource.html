@@ -1,8 +1,8 @@
-<div style="position: relative; width: 50%"><div class="container-fluid">
+<div style="position: relative; width: 56%"><div class="container-fluid">
   <div class="row">
-    <div class="col-md-8">
+    <div class="col-md-7">
       <div ng-if="item" class="resource item">
-        <h3><a ng-href="#/r/{{item.id}}">{{item.props.title || item.props.name }}</a></h3>
+        <h3 class="sans"><a ng-href="#/r/{{item.id}}">{{item.props.title || item.props.name }}</a></h3>
         {{item.props|guessInterval}}
         <div class="tags locations">
           <span ng-repeat="location in item.locations">
@@ -18,8 +18,8 @@
         </div>
 
         <div ng-if="currentAnnotation">
-          <div class="caption" annotator marked="currentAnnotation.annotations.caption" ></div>
-          <div class="source" annotator marked="currentAnnotation.annotations.source" ></div>  
+          <div class="caption" annotator context="item" marked="currentAnnotation.annotations.caption" ></div>
+          <div class="source" annotator context="item" marked="currentAnnotation.annotations.source" ></div>  
         </div>
 
         <!-- Single button -->
@@ -66,7 +66,7 @@
         </div> 
       </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-5">
       <div class="see-also">
         <div class="related" ng-repeat="relatedItem in related">
           <h4><a ng-href="#/r/{{relatedItem.id}}">{{relatedItem.props.title || relatedItem.props.name }}</a></h4>

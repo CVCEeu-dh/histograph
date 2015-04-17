@@ -24,7 +24,7 @@ angular.module('histograph')
                 singleHover: true,
                 minNodeSize: 2,
                 maxNodeSize: 5,
-                labelThreshold: 0
+                labelThreshold: 5
               }
             });
             // Creating camera
@@ -35,6 +35,7 @@ angular.module('histograph')
           container: element[0]
         });
 
+        // once the container has benn added, add the commands
         // Helper rescale functions, with easing.
         function rescale() {
           sigma.misc.animation.camera(
@@ -50,7 +51,6 @@ angular.module('histograph')
 
           if(!graph || !graph.nodes)
             return;
-          console.log('oh ye', graph)
           // stopping the timeout
           clearTimeout(timeout);
 
@@ -58,20 +58,26 @@ angular.module('histograph')
           si.killForceAtlas2();
           // Reading new graph
           si.graph.clear().read(graph);
-          console.log('nodes', si.graph.nodes())
+          var layoutDuration = 4* si.graph.nodes().length * si.graph.edges().length
+          $log.info('::sigma n. nodes', si.graph.nodes().length, ' n. edges', si.graph.edges().length, 'runninn layout atlas for', layoutDuration/1000, 'seconds')
+          
           // local Degree for size
-          si.graph.nodes().forEach(function(n) {
-            n.size = si.graph.degree(n.id);
-          });
+          // si.graph.nodes().forEach(function(n) {
+          //   n.size = si.graph.degree(n.id);
+          // });
           rescale();
-          si.refresh()
-          si.startForceAtlas2({});
+          si.refresh();
+          si.startForceAtlas2({
+            linLogMode  : true
+          });
+          $log.info('::sigma force atlas started')
+          
           timeout = setTimeout(function() {
             $log.info('::sigma kill force atlas on graph')
             si.killForceAtlas2();
             // kill force atlas 2 according to the edge/nodes density ratio.
             // a user can always start over the graph computatyion
-          }, 11 * graph.edges.length);
+          }, layoutDuration );
         });
 
 

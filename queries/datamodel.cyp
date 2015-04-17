@@ -1,5 +1,6 @@
 // create contstraints
 CREATE CONSTRAINT ON (u:user) ASSERT u.email IS UNIQUE
+CREATE CONSTRAINT ON (u:user) ASSERT u.username IS UNIQUE
 
 CREATE(u1:user  {name: 'user1', email:'user1@email.com'})
 CREATE(r1:resource  {name:'r1'})

@@ -12,7 +12,7 @@ html{
   height: 100%
 }
 body{
-  font-size: 12px;
+  font-size: 11px;
   line-height: 21px;
   color: #1d1d1d;
   height: 100%;
@@ -69,6 +69,13 @@ blockquote{
   margin: 0 auto 100px auto;
 }
 
+.item h3 a{
+  font-weight: bold;
+  font-size: 18px;
+  line-height: 30px;
+  color: #151515;
+}
+
 .item img{
   width: 100%;
 }
@@ -85,16 +92,20 @@ blockquote{
   margin: 10px 0;
 }
 
-.item.resource{
-  
-}
-
 .item .source a{
   background: cyan;
 }
 
-.see-also{
-  
+.item.resource{
+  border: 1px solid #eee;
+  margin: 20px auto 100px auto;
+  padding: 0 20px 10px 20px;
+}
+
+
+
+.see-also img{
+  width: 100%;
 }
 /* related items */
 .related{
@@ -118,7 +129,7 @@ blockquote{
 #milkyway {
   position: fixed;
   top: 70px;
-  left: 50%;
+  left: 56%;
   right: 20px;
   bottom: 20px;
   background: #e8e8e8;

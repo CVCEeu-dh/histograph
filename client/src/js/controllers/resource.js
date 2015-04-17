@@ -29,7 +29,16 @@ angular.module('histograph')
 
 
     socket.on('done:commenting', function (result) {
-      $log.info('done:commenting', result);
+      
+      // add the comment at the bottom
+      if(result.resource_id != $routeParams.id)
+        return;
+      if(result.data.comment) {
+        $log.info('done:commenting', result);
+        $scope.item.comments.push(result.data);
+      } else {
+        $log.error('done:commenting', 'comment invalid, please check');
+      }
     });
 
     socket.on('continue:commenting', function (result) {
@@ -105,52 +114,83 @@ angular.module('histograph')
       // get theaccepted version
 
       // get related
-      ResourceRelatedFactory.get({id:$routeParams.id}, function (res) {
-        $log.info('ResourceRelatedFactory', res.result);
-        $scope.related = res.result.items
+      ResourceRelatedFactory.get({id:$routeParams.id}, function (resRelated) {
+        $log.info('ResourceRelatedFactory', 'succees');
+        $scope.related = resRelated.result.items;
+        var graph = {
+          nodes: [],
+          edges: []
+        };
+        // fill graph object with related top 100 results
+        var entities = {};
+        
+        // add current item ...
+
+        graph.nodes.push({
+          id: res.result.item.id,
+          label: $scope.item.props.name || $scope.item.props.title,
+          type: 'res',
+          x: Math.random()*50,
+          y: Math.random()*50,
+          size: 10
+        });
+
+        for(var i in res.result.item.persons) {
+          graph.edges.push({
+            id: +(res.result.item.id+'.'+res.result.item.persons[i].id),
+            source: res.result.item.persons[i].id,
+            target:  res.result.item.id
+          });
+          if(!entities[res.result.item.persons[i].id]){
+            entities[res.result.item.persons[i].id] = {
+              id: res.result.item.persons[i].id,
+              label: res.result.item.persons[i].name,
+              x: 0,
+              y: 0,
+              size: 0
+            };
+            graph.nodes.push(entities[res.result.item.persons[i].id]);
+          }
+          entities[res.result.item.persons[i].id].size++;
+        }
+
+        resRelated.result.items.forEach(function (d) {
+          graph.nodes.push({
+            id: d.id,
+            label: d.props.name || d.props.title,
+            type: 'res',
+            x: Math.random()*50,
+            y: Math.random()*50,
+            size: Math.max(d.ratings.entity_silmilarity || 0,.3)
+          });
+
+          for(var i in d.persons) {
+            graph.edges.push({
+              id: +(d.id+'.'+d.persons[i].id),
+              source: d.persons[i].id,
+              target: d.id
+            });
+            if(!entities[d.persons[i].id]){
+              entities[d.persons[i].id] = {
+                id: d.persons[i].id,
+                label: d.persons[i].name,
+                x: 0,
+                y: 0,
+                size: 0
+              };
+              graph.nodes.push(entities[d.persons[i].id]);
+            }
+            entities[d.persons[i].id].size++;
+          };
+        });
+
+        $scope.setGraph(graph);
+
+
+
+
       });
 
-      $scope.setGraph({
-        "nodes": [
-          {
-            "id": "n0",
-            "label": "A node",
-            "x": 0,
-            "y": 0,
-            "size": 3
-          },
-          {
-            "id": "n1",
-            "label": "Another node",
-            "x": 3,
-            "y": 1,
-            "size": 2
-          },
-          {
-            "id": "n2",
-            "label": "And a last one",
-            "x": 1,
-            "y": 3,
-            "size": 1
-          }
-        ],
-        "edges": [
-          {
-            "id": "e0",
-            "source": "n0",
-            "target": "n1"
-          },
-          {
-            "id": "e1",
-            "source": "n1",
-            "target": "n2"
-          },
-          {
-            "id": "e2",
-            "source": "n2",
-            "target": "n0"
-          }
-        ]
-      });
+      
     });
   })

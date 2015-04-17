@@ -48,19 +48,34 @@ OPTIONAL MATCH (res)-[r3:appears_in]-(per:`person`)
 // name: get_similar_resources
 // get resources that match well with a given one
 // recommendation system ,et oui
-START res=node({id})
-  MATCH (res)-[r1:appears_in]-(ent:entity)-[r2:appears_in]-(res2:resource)
-  WITH res, res2, abs(res.start_time-res2.start_time) as proximity, collect(ent) as entities, length(collect(ent)) as similarity
-  ORDER BY similarity DESC, proximity ASC
-  WITH res2, similarity, proximity
-    SKIP {offset} 
-    LIMIT {limit}
+START res = node({id})
+MATCH (res)-[*1..2]-(res2:resource)
+  OPTIONAL MATCH (per:person)-[r2]-(res2)
+  OPTIONAL MATCH (loc:location)-[r4]-(res2)
+WHERE res <> res2
+  WITH res, res2,
+    abs(res.start_time-res2.start_time) as proximity,
+  collect(DISTINCT per) as persons,
+    collect(DISTINCT loc) as locations
+  WITH res2, persons, locations, proximity,
+    length(persons) as person_similarity,
+    length(locations)*0.3 as location_similarity
+  WITH res2, persons, locations, proximity, person_similarity, location_similarity, person_similarity + location_similarity as entity_similarity
+
   RETURN {
     id: id(res2),
     props: res2,
-    similarity: similarity,
-    proximity: proximity
+    persons: persons,
+    locations: locations,
+    ratings: {
+      location_similarity: location_similarity,
+      person_similarity: person_similarity,
+      entity_similarity: entity_similarity,
+      proximity: proximity
+    }
   } AS result
+  ORDER BY entity_similarity DESC, proximity ASC, person_similarity DESC, location_similarity DESC
+  LIMIT 25
 
 
 // name: count_resources

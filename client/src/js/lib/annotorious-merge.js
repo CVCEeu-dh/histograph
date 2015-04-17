@@ -4,7 +4,6 @@
  * @param {Object=} options the config options
  */
 annotorious.plugin.Merge = function(options) {
-  console.log('ouhc', anno.getAnnotations())
   /* return true if intersectiona rea is greater than */
   var annotations = anno.getAnnotations(),
       overlaps = {}, // key: annotation id, value: a list of annotation id that overlaps
@@ -48,7 +47,7 @@ annotorious.plugin.Merge = function(options) {
     }
 
   }
-  console.log(overlaps, root_overlap)
+  //onsole.log(overlaps, root_overlap)
 
 }
 
