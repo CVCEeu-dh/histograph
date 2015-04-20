@@ -1,9 +1,23 @@
+HG
+===
+! __wip__
 
+HG is the new Histograph, a node-express application. FOr the moment is just a sandbox.
 
 ## installation
+Once cloned, 
+	
+	npm install
 
-npm install
-npm test
+Then copy paste the settings.example.js to settings.js
+	
+	cp settings.example.js setttings.js
+
+Modify fields accordingly, then test in order to check that everything has been installed.
+
+	npm test
+	
+
 
 in order to test recognition api, please add two jpg file inside the test folder
 test.jpg
