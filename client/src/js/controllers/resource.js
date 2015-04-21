@@ -129,17 +129,19 @@ angular.module('histograph')
         graph.nodes.push({
           id: res.result.item.id,
           label: $scope.item.props.name || $scope.item.props.title,
+          color: "#6891A2",
           type: 'res',
           x: Math.random()*50,
           y: Math.random()*50,
-          size: 10
+          //size: 10
         });
 
         for(var i in res.result.item.persons) {
           graph.edges.push({
             id: +(res.result.item.id+'.'+res.result.item.persons[i].id),
             source: res.result.item.persons[i].id,
-            target:  res.result.item.id
+            target:  res.result.item.id,
+            color: "#a3a3a3"
           });
           if(!entities[res.result.item.persons[i].id]){
             entities[res.result.item.persons[i].id] = {
@@ -147,7 +149,8 @@ angular.module('histograph')
               label: res.result.item.persons[i].name,
               x: 0,
               y: 0,
-              size: 0
+              color: "#D44A33",
+              //size: 0
             };
             graph.nodes.push(entities[res.result.item.persons[i].id]);
           }
@@ -158,17 +161,19 @@ angular.module('histograph')
           graph.nodes.push({
             id: d.id,
             label: d.props.name || d.props.title,
+            color: "#6891A2",
             type: 'res',
             x: Math.random()*50,
             y: Math.random()*50,
-            size: Math.max(d.ratings.entity_silmilarity || 0,.3)
+            // size: Math.max(d.ratings.entity_silmilarity || 0,.3)
           });
 
           for(var i in d.persons) {
             graph.edges.push({
               id: +(d.id+'.'+d.persons[i].id),
               source: d.persons[i].id,
-              target: d.id
+              target: d.id,
+              color: "#a3a3a3"
             });
             if(!entities[d.persons[i].id]){
               entities[d.persons[i].id] = {
@@ -176,7 +181,8 @@ angular.module('histograph')
                 label: d.persons[i].name,
                 x: 0,
                 y: 0,
-                size: 0
+                color: "#D44A33",
+                //size: 1
               };
               graph.nodes.push(entities[d.persons[i].id]);
             }

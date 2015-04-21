@@ -39,6 +39,14 @@ angular.module('histograph')
     });
   })
   /*
+    GET cooccurrences
+  */
+  .factory('CooccurrencesFactory', function ($resource) {
+    return $resource('/api/cooccurrences', {}, {
+        query: {method: 'GET' },
+    });
+  })
+  /*
     Socket.io service, thqnks to http://briantford.com/blog/angular-socket-io
   */
   .factory('socket', function ($rootScope) {

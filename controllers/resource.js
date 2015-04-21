@@ -17,29 +17,30 @@ var settings   = require('../settings'),
 
 module.exports = function(io){
   // io socket event listener
-  io.on('connection', function(socket){
-    // console.log('socket.request.session.passport.user', socket.request.session)
-    var cookie_string = socket.request.headers.cookie;
-    //  console.log('a user connected', cookie_string);
+  if(io)
+    io.on('connection', function(socket){
+      // console.log('socket.request.session.passport.user', socket.request.session)
+      var cookie_string = socket.request.headers.cookie;
+      //  console.log('a user connected', cookie_string);
 
-    socket.on('start:commenting', function (data) {
-      console.log(socket.request.session.passport.user.username, 'is writing a comment on', data.id);
-      // emit back to already connected people..
-      io.emit('start:commenting', {
-        user: socket.request.session.passport.user.username,
-        data: data.id
+      socket.on('start:commenting', function (data) {
+        console.log(socket.request.session.passport.user.username, 'is writing a comment on', data.id);
+        // emit back to already connected people..
+        io.emit('start:commenting', {
+          user: socket.request.session.passport.user.username,
+          data: data.id
+        });
+      });
+
+      socket.on('continue:commenting', function (data) {
+        console.log(socket.request.session.passport.user.username, 'is writing a comment on', data.id);
+        // emit back to already connected people..
+        io.emit('continue:commenting', {
+          user: socket.request.session.passport.user.username,
+          data: data.id
+        })
       });
     });
-
-    socket.on('continue:commenting', function (data) {
-      console.log(socket.request.session.passport.user.username, 'is writing a comment on', data.id);
-      // emit back to already connected people..
-      io.emit('continue:commenting', {
-        user: socket.request.session.passport.user.username,
-        data: data.id
-      })
-    });
-  });
 
   return {
     /*
@@ -117,19 +118,65 @@ module.exports = function(io){
       2. date proximity
     */
     getRelatedItems: function (req, res) {
-      neo4j.query(queries.get_similar_resources, {
+      // first of all get same person / time proximity measure
+      neo4j.query(queries.get_similar_resource_ids_by_entities, {
         id: +req.params.id,
-        limit: 20,
-        offset: 0
-      }, function(err, items) {
-        if(err)
-          return helpers.cypherQueryError(err, res);
-        return res.ok({
-          items: items
+        limit: 100,
+      }, function(err, ids) {
+        // resort
+        // var _ids = {};
+        // for(var i=0; i<ids.length; i++) {
+        //   if(!_ids[ids[i].id])
+        //     _ids[ids[i].id] = ids[i]
+        //   _ids[ids[i].id]
+        // }
+        
+        neo4j.query(queries.get_resources_by_ids, {
+          ids: _.map(_.take(ids, 50), 'id'),
+          limit: 50,
+          offset: 0
+        }, function(err, items) {
+          if(err)
+            return helpers.cypherQueryError(err, res);
+          return res.ok({
+            items: items
+          });
         });
+        
+        
+      })
+      
+      
+      
+      // neo4j.query(queries.get_similar_resources, {
+      //   id: +req.params.id,
+      //   limit: 20,
+      //   offset: 0
+      // }, function(err, items) {
+      //   if(err)
+      //     return helpers.cypherQueryError(err, res);
+      //   return res.ok({
+      //     items: items
+      //   });
+      // });
+    },
+    
+    /**
+      We should move this to entities instead.
+    */
+    getCooccurrences: function (req, res) {
+      neo4j.query(queries.get_cooccurrences, {
+        skip: 0,
+        limit: +req.params.limit || 1000,
+      }, function(err, items){
+        if(err)
+            return helpers.cypherQueryError(err, res);
+          return res.ok({
+            items: items
+          });
       });
     },
-
+    
     /*
       create a comment on this resource
     */

@@ -243,7 +243,7 @@ describe('controllers: get resource items available to the user', function() {
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
-        console.log(err, res.body.result.item)
+        //console.log(err, res.body.result.item)
         should.not.exists(err);
 
         should.exists(res.body.result.item);
@@ -251,7 +251,20 @@ describe('controllers: get resource items available to the user', function() {
         done();
       });
   });
-
+  
+  it('should show a list of 100 related resources', function (done) {
+    session
+      .get('/api/resource/19413/related')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        console.log(err)
+        should.not.exists(err);
+        //console.log(' resoucre ', res.body)
+        done();
+      });
+  });
+  
   it('should create a comment and attach it to the required resource', function (done) {
     session
       .post('/api/resource/17643/comments')
@@ -263,8 +276,8 @@ describe('controllers: get resource items available to the user', function() {
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
-        console.log(err, res.body)
-        //should.not.exists(err);
+        // console.log(err, res.body)
+        should.equal(res.body.result.items.length, 25, res.body.result)
 
         done();
       });

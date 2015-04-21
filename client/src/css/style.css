@@ -71,8 +71,8 @@ blockquote{
 
 .item h3 a{
   font-weight: bold;
-  font-size: 18px;
-  line-height: 30px;
+  /*font-size: 18px;
+  line-height: 30px;*/
   color: #151515;
 }
 
@@ -97,7 +97,7 @@ blockquote{
 }
 
 .item.resource{
-  border: 1px solid #eee;
+  /*border: 1px solid #eee;*/
   margin: 20px auto 100px auto;
   padding: 0 20px 10px 20px;
 }

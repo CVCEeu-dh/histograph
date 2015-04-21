@@ -61,6 +61,20 @@ angular.module('histograph')
       }
       return delta.humanize(true);
     }
+  })
+  // filter items array by returning ONLY items that are int the compare list
+  .filter('only', function() {
+    return function(items, compare) {
+      var filtered = []
+        ids = compare.map(function (d) {
+          return d.id;
+        });
+      angular.forEach(items, function (d) {
+        if(ids.indexOf(d.id) !== -1)
+          filtered.push(d);
+      })
+      return filtered;
+    }
   });
 
 

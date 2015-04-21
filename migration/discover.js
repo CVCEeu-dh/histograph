@@ -62,8 +62,15 @@ var queue = async.waterfall([
             var now = helpers.now();
 
             resource.textrazor_reconciliated = true;
-            if(!resource.url)
-              resource.url = resource[resource.languages[0] + '_url'];
+            // sometimes resources lack fields ...
+            if(!resource.url) {
+              if(resource.languages && resource.languages.length) {
+                resource.url = resource[resource.languages[0] + '_url'];
+              } else {
+                resource.url = ''; // fnotfound... to be checked
+              }
+            }
+
             neo4j.query(queries.merge_version_from_service, {
               url: resource.url,
               service: 'textrazor',

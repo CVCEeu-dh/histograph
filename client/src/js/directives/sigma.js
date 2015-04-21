@@ -23,7 +23,7 @@ angular.module('histograph')
               settings: {
                 singleHover: true,
                 minNodeSize: 2,
-                maxNodeSize: 5,
+                maxNodeSize: 10,
                 labelThreshold: 5
               }
             });
@@ -58,13 +58,14 @@ angular.module('histograph')
           si.killForceAtlas2();
           // Reading new graph
           si.graph.clear().read(graph);
+           
           var layoutDuration = 4* si.graph.nodes().length * si.graph.edges().length
           $log.info('::sigma n. nodes', si.graph.nodes().length, ' n. edges', si.graph.edges().length, 'runninn layout atlas for', layoutDuration/1000, 'seconds')
           
           // local Degree for size
-          // si.graph.nodes().forEach(function(n) {
-          //   n.size = si.graph.degree(n.id);
-          // });
+          si.graph.nodes().forEach(function(n) {
+            n.size = si.graph.degree(n.id);
+          });
           rescale();
           si.refresh();
           si.startForceAtlas2({

@@ -4,14 +4,14 @@
       <div ng-if="item" class="resource item">
         <h3 class="sans"><a ng-href="#/r/{{item.id}}">{{item.props.title || item.props.name }}</a></h3>
         {{item.props|guessInterval}}
-        <div class="tags locations">
+        <!-- div class="tags locations">
           <span ng-repeat="location in item.locations">
             <a ng-if="location.geocode_id" class="tag location" >{{location.geocode_formatted_address}}</a>
             <a ng-if="location.geonames_id" class="tag location" >{{location.geonames_toponymName}}, {{location.geonames_countryName}}</a>
             <span ng-if="!$last">-</span>
           </span>
-          <!-- collect comments about places -->
-        </div>
+          
+        </div -->
     
         <div class="tags">
           <span ng-repeat="per in item.persons" class='tag person'>{{per.name}}</span>
@@ -72,20 +72,20 @@
           <h4><a ng-href="#/r/{{relatedItem.id}}">{{relatedItem.props.title || relatedItem.props.name }}</a></h4>
           {{relatedItem.props|guessInterval}} ({{item.props|guessDifference:relatedItem.props}})
           
-          <div class="tags locations">
+          <!--div class="tags locations">
             <span ng-repeat="location in relatedItem.locations">
 
               <a ng-if="location.geocode_id" class="tag location" >{{location.geocode_formatted_address}}</a>
 
               <a ng-if="location.geonames_id" class="tag location" >{{location.geonames_toponymName}}, {{location.geonames_countryName}}</a> <span ng-if="!$last">-</span> 
-            <!-- collect comments about places -->
-          </div>
+            
+          </div-->
           
-          <div class="tags">
+          <div class="tags" sources="" targets="">
             <span ng-repeat="per in relatedItem.persons" class='tag person'>{{per.name}}</span>
           </div>
 
-          <img  ng-if='relatedItem.props.mimetype=="image"' ng-src="media/{{relatedItem.props.url}}" >
+          <img ng-if='relatedItem.props.mimetype=="image"' ng-src="media/{{relatedItem.props.url}}" >
           <blockquote>
            {{relatedItem.props.stakeholders || relatedItem.props.caption}}
           </blockquote>

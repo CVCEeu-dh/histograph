@@ -220,7 +220,8 @@ apiRouter.route('/resource/:id/related')
   .get(ctrl.resource.getRelatedItems)
 apiRouter.route('/resource/:id/comments') // POST
   .post(ctrl.resource.createComment)
-
+apiRouter.route('/cooccurrences')
+  .get(ctrl.resource.getCooccurrences)
 /*
 
  START THE SERVER and strat listening with socket.io

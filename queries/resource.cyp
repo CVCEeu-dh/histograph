@@ -45,13 +45,55 @@ OPTIONAL MATCH (res)-[r3:appears_in]-(per:`person`)
     } as r
 
 
+// name: get_resources_by_ids
+// get resources with number of comments, if any
+MATCH (res:resource)
+WHERE id(res) in {ids}
+WITH res
+  SKIP {offset}
+  LIMIT {limit}
+MATCH (ver:`version`)-[r1:describes]-(res)
+OPTIONAL MATCH (res)-[r2:appears_in]-(loc:`location`)
+OPTIONAL MATCH (res)-[r3:appears_in]-(per:`person`)
+  WITH res, ver, loc, per
+    RETURN {
+      id: id(res),
+      props: res,
+      locations: collect(DISTINCT loc),
+      persons: collect(DISTINCT per)
+    } as r
+
+
+// name: get_similar_resource_ids_by_entities
+// get top 100 similar resources sharing the same persons, orderd by time proximity if this info is available
+START res = node({id})
+MATCH (res)--(per:person)--(res2:resource)
+WITH res, per, res2,
+length(collect(per)) as per_sim,
+length([]) as loc_sim,
+abs(coalesce(res.start_time, 1000000000) - coalesce(res2.start_time, 0)) as time_proximity
+ORDER BY per_sim DESC, time_proximity ASC
+LIMIT 100
+RETURN DISTINCT id(res2) as id, per_sim, loc_sim, time_proximity
+UNION ALL
+START res=node({id})
+MATCH (res)--(loc:location)--(res2:resource)
+WITH res, loc, res2,
+length(collect(loc)) as loc_sim,
+length([]) as per_sim,
+abs(coalesce(res.start_time, 1000000000) - coalesce(res2.start_time, 0)) as time_proximity
+ORDER BY loc_sim DESC, time_proximity ASC
+LIMIT 100
+RETURN DISTINCT id(res2) as id, per_sim, loc_sim, time_proximity
+
+
 // name: get_similar_resources
 // get resources that match well with a given one
 // recommendation system ,et oui
 START res = node({id})
 MATCH (res)-[*1..2]-(res2:resource)
-  OPTIONAL MATCH (per:person)-[r2]-(res2)
-  OPTIONAL MATCH (loc:location)-[r4]-(res2)
+  OPTIONAL MATCH (per:person)--(res2)
+  OPTIONAL MATCH (loc:location)--(res2)
 WHERE res <> res2
   WITH res, res2,
     abs(res.start_time-res2.start_time) as proximity,
@@ -59,7 +101,7 @@ WHERE res <> res2
     collect(DISTINCT loc) as locations
   WITH res2, persons, locations, proximity,
     length(persons) as person_similarity,
-    length(locations)*0.3 as location_similarity
+    length(locations) * 0.01 as location_similarity
   WITH res2, persons, locations, proximity, person_similarity, location_similarity, person_similarity + location_similarity as entity_similarity
 
   RETURN {
@@ -145,3 +187,25 @@ MATCH (col:collection), (res:resource)
 WITH col, res
   MERGE (res)-[r:belongs_to]->(col)
 RETURN col, res
+
+
+// name: get_cooccurrences
+//
+MATCH (p1:person)-[r1:appears_in]-(res:resource)-[r2:appears_in]-(p2:person)
+WITH p1, p2, length(collect(DISTINCT res)) as w
+RETURN {
+    source: {
+      id: id(p1),
+      type: HEAD(labels(p1)),
+      name: p1.name
+    },
+    target: {
+      id: id(p2),
+      type: HEAD(labels(p2)),
+      name: p2.name
+    },
+    weight: w
+  } as result
+ORDER BY w DESC
+SKIP {skip}
+LIMIT {limit}
