@@ -19,7 +19,9 @@ var express       = require('express'),        // call express
     
     bodyParser    = require('body-parser'),
     cookieParser  = require('cookie-parser'),
-    morgan        = require('morgan'),    
+    
+    fs            = require('fs'),
+    morgan        = require('morgan'),    // logging puropse
 
     ctrl          = require('require-all')({
                       dirname: __dirname + '/controllers',
@@ -46,8 +48,11 @@ var sessionMiddleware = session({
   saveUninitialized: true
 })
 
+console.log('logs',settings.paths.accesslog);
 // configure logger
-app.use(morgan('dev'));
+app.use(morgan('combined', {
+  stream: fs.createWriteStream(settings.paths.accesslog, {flags: 'a'})
+}));
 
 // configure static files and jade templates
 app.use(express.static('./client/src'));

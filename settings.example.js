@@ -9,6 +9,10 @@ module.exports = {
     salt: 'salt secret for password', // password salt
     activation: 'activation salt for activation link', // password salt
   },
+  
+  paths: {
+    accesslog: './logs/access.log'
+  },
 
   neo4j : {
     host: 'http://localhost:7474'
