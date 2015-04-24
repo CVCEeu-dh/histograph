@@ -22,11 +22,11 @@ var settings   = require('../settings'),
 var queue = async.waterfall([
     // get pictures and documents having a caption
     function (next) {
-      neo4j.query('MATCH (n:`resource`) WHERE not(has(n.date)) RETURN n SKIP 1000 LIMIT 1000', function (err, nodes) {
+      neo4j.query('MATCH (n:`resource`) WHERE not(has(n.date)) OR n.date = "-" RETURN n', function (err, nodes) {
         if(err)
           throw err;
         
-        next(null, _.take(nodes, nodes.length))
+        next(null, _.takeRight(nodes, 3324))
       });
     },
     
@@ -35,11 +35,15 @@ var queue = async.waterfall([
 
       var q = async.queue(function (resource, nextResource) {
         var context = resource.name || resource.title;
+        context = resource.caption_en || resource.caption_en;
+        
+        console.log(resource.id, ' remaining', q.length())
+        console.log('context', context)
         if(!context) {
           nextResource();
           return;
         }
-
+        
         var language = langdetect.detect(context).shift().shift(),
             dates =  chrono.parse(context);
 
@@ -59,7 +63,7 @@ var queue = async.waterfall([
               end_date: dates.end_date,
               end_time: dates.end_time
             });
-            console.log(resource)
+            // console.log(resource)
             neo4j.save(resource, function(err, node) {
               if(err) {
                 console.log(n);
@@ -93,7 +97,7 @@ var queue = async.waterfall([
           nextResource();
         });
 
-      }, 1);
+      }, 5);
       q.push(resources)
       q.drain = function(){
         next(null, remainings)

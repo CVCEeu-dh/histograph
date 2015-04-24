@@ -9,9 +9,11 @@ var settings        = require('./settings'),
     passport        = require('passport'),
 
     LocalStrategy   = require('passport-local').Strategy,
-    TwitterStrategy = require('passport-twitter').Strategy;
+    TwitterStrategy = require('passport-twitter').Strategy,
+    GoogleStrategy  = require('passport-google-oauth').OAuth2Strategy,
+    
 
-    decypher        = require('decypher'),
+    queries        = require('decypher')('./queries/user.cyp'),
 
     neo4j           = require('seraph')(settings.neo4j.host);
 
@@ -56,10 +58,6 @@ passport.use(new TwitterStrategy({
     callbackURL: settings.baseurl + "/auth/twitter/callback"
   },
   function(token, tokenSecret, profile, done) {
-    // asynchronous verification, for effect...
-    //console.log('token', token, 'profile', profile);
-
-    // create or get if any
     neo4j.query('MERGE (k:user { email:{email} }) ON CREATE SET k.status={status}, k.picture={picture}, k.username={username}, k.firstname={firstname}, k.strategy={strategy}, k.about={about}, k.salt={salt}, k.password={password} RETURN k', {
       email: '@' + profile.displayName,
       username: '@' + profile.displayName,
@@ -77,18 +75,40 @@ passport.use(new TwitterStrategy({
       var user = res[0];
       return done(null, user);
     });
-
-    // process.nextTick(function () {
-      
-    //   // To keep the example simple, the user's Twitter profile is returned to
-    //   // represent the logged-in user.  In a typical application, you would want
-    //   // to associate the Twitter account with a user record in your database,
-    //   // and return that user instead. ()
-    //   return done(null, profile);
-    // });
   }
 ));
 
+
+/*
+  Auth mechanism for google
+*/
+passport.use(new GoogleStrategy({
+    clientID: settings.google.clientId,
+    clientSecret: settings.google.clientSecret,
+    callbackURL:  settings.baseurl + "/auth/google/callback"
+  },
+  function(accessToken, refreshToken, profile, done) {
+    neo4j.query(queries.merge_user, {
+      email: 'g@' + profile.id,
+      username: profile.displayName,
+      firstname: profile.displayName,
+      gender: profile.gender,
+      salt: '',
+      password:'',
+      status: 'enabled',
+      strategy: 'google',
+      about: '' + profile.description || '',
+      picture: profile.photos? profile.photos.pop().value: '',
+    },  function(err, res) {
+      console.log(err, res);
+      if(err)
+        return done(err);
+      console.log(res)
+      var user = res[0];
+      return done(null, user);
+    });
+  }
+));
 
 
 

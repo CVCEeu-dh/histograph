@@ -125,6 +125,8 @@ clientRouter.route('/signup')
 clientRouter.route('/activate')
   .get(ctrl.user.activate)
 
+
+// twitter oauth mechanism
 clientRouter.route('/auth/twitter')
   .get(auth.passport.authenticate('twitter'));
 
@@ -139,6 +141,24 @@ clientRouter.route('/auth/twitter/callback')
       });
     })(req, res, next)
   });
+
+
+// google oauth mechanism
+clientRouter.route('/auth/google')
+  .get(auth.passport.authenticate('google',  { scope: 'https://www.googleapis.com/auth/plus.login' }));
+
+clientRouter.route('/auth/google/callback')
+  .get(function (req, res, next) {
+    auth.passport.authenticate('google', function(err, user, info) {
+      //console.log('user', user); // handle errors
+      req.logIn(user, function(err) {
+        if (err)
+          return next(err);
+        return res.redirect('/');
+      });
+    })(req, res, next)
+  });
+
 
 clientRouter.route('/media/:file')
   .get(function (req, res, next) {
