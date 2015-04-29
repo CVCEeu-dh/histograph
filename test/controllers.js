@@ -254,7 +254,7 @@ describe('controllers: get resource items available to the user', function() {
   
   it('should show a list of 100 related resources', function (done) {
     session
-      .get('/api/resource/19413/related')
+      .get('/api/resource/11167/related')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {

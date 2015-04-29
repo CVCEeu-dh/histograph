@@ -61,7 +61,11 @@ blockquote{
 }
 
 .view{
-  margin-top: 50px;
+  position: absolute;
+  top: 50px;
+  bottom: 20px;
+  left:0;
+  width: 100%;
 }
 
 .item{
@@ -102,7 +106,10 @@ blockquote{
   padding: 0 20px 10px 20px;
 }
 
-
+.see-also{
+  height:100%;
+  overflow-y: scroll;
+}
 
 .see-also img{
   width: 100%;

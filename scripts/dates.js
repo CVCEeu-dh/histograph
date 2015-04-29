@@ -22,11 +22,11 @@ var settings   = require('../settings'),
 var queue = async.waterfall([
     // get pictures and documents having a caption
     function (next) {
-      neo4j.query('MATCH (n:`resource`) WHERE not(has(n.date)) OR n.date = "-" RETURN n', function (err, nodes) {
+      neo4j.query('MATCH (n:`resource`) WHERE not(has(n.start_date)) AND has(n.date) RETURN n', function (err, nodes) {
         if(err)
           throw err;
         
-        next(null, _.takeRight(nodes, 3324))
+        next(null, _.takeRight(nodes, nodes.length))
       });
     },
     
@@ -35,7 +35,7 @@ var queue = async.waterfall([
 
       var q = async.queue(function (resource, nextResource) {
         var context = resource.name || resource.title;
-        context = resource.caption_en || resource.caption_en;
+        context = context || resource.caption_fr || resource.caption_en;
         
         console.log(resource.id, ' remaining', q.length())
         console.log('context', context)
@@ -44,10 +44,12 @@ var queue = async.waterfall([
           return;
         }
         
-        var language = langdetect.detect(context).shift().shift(),
+        var languages = langdetect.detect(context);
+        
+        var language = languages.length? langdetect.detect(context).shift().shift() : 'en',
             dates =  chrono.parse(context);
 
-        //console.log(context, language, resource.id, 're', q.length())
+        console.log(context, language, resource.id, 're', q.length())
         
         if(!dates.length) {
           helpers.reconcileHumanDate(context, language, function(err, dates){

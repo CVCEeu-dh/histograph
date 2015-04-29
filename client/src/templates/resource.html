@@ -2,8 +2,10 @@
   <div class="row">
     <div class="col-md-7">
       <div ng-if="item" class="resource item">
-        <h3 class="sans"><a ng-href="#/r/{{item.id}}">{{item.props.title || item.props.name }}</a></h3>
+        <h3 class="" data-id='{{item.id}}'><a ng-href="#/r/{{item.id}}">{{item.props.title || item.props.name }}</a></h3>
+        <a data-id='{{item.id}}'> view on graph</a>
         {{item.props|guessInterval}}
+        
         <!-- div class="tags locations">
           <span ng-repeat="location in item.locations">
             <a ng-if="location.geocode_id" class="tag location" >{{location.geocode_formatted_address}}</a>
@@ -14,7 +16,7 @@
         </div -->
     
         <div class="tags">
-          <span ng-repeat="per in item.persons" class='tag person'>{{per.name}}</span>
+          <span ng-repeat="per in item.persons" data-id='{{per.id}}' class='tag person'>{{per.name}}</span>
         </div>
 
         <div ng-if="currentAnnotation">
@@ -70,6 +72,7 @@
       <div class="see-also">
         <div class="related" ng-repeat="relatedItem in related">
           <h4><a ng-href="#/r/{{relatedItem.id}}">{{relatedItem.props.title || relatedItem.props.name }}</a></h4>
+          <a data-id='{{relatedItem.id}}'>view on graph</a>
           {{relatedItem.props|guessInterval}} ({{item.props|guessDifference:relatedItem.props}})
           
           <!--div class="tags locations">
@@ -82,7 +85,7 @@
           </div-->
           
           <div class="tags" sources="" targets="">
-            <span ng-repeat="per in relatedItem.persons" class='tag person'>{{per.name}}</span>
+            <span ng-repeat="per in relatedItem.persons"  data-id='{{per.id}}'  class='tag person'>{{per.name}}</span>
           </div>
 
           <img ng-if='relatedItem.props.mimetype=="image"' ng-src="media/{{relatedItem.props.url}}" >

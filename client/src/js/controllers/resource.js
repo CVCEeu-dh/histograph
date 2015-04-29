@@ -9,8 +9,16 @@ angular.module('histograph')
     $log.debug('ResourceCtrl ready', $routeParams.id);
 
     
-
-    
+    /**
+      controller to directive 
+      change the focusId( cfr sigma directive) with either resource or entity id
+      and enlighten it on the network
+    */
+    $scope.sigmaFocus = function(id) {
+      $log.info('ResourceCtrl .sigmaFocus', id);
+      $scope.focusId = id;
+      $scope.$broadcast('focuson', {id:id});
+    }
 
     /**
       commenting, with socket

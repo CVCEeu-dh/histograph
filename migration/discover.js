@@ -34,7 +34,9 @@ var queue = async.waterfall([
           resource.source || '',
           resource.caption
         ].join('. '), function (err, entities) {
+           console.log('textrazor answered')
           if(err == helpers.IS_LIMIT_REACHED) {
+            console.log('daily limit reached')
             // daily limit has been reached
             q.kill();
             next()
@@ -72,7 +74,7 @@ var queue = async.waterfall([
             }
 
             neo4j.query(queries.merge_version_from_service, {
-              url: resource.url,
+              url: resource.url || '',
               service: 'textrazor',
               unknowns: 0,
               persons: 0,
@@ -93,11 +95,12 @@ var queue = async.waterfall([
               }, function (err, nodes) {
                 if(err)
                   throw err;
-                console.log('  rel #id',resource.id,' saved, #ver_id', nodes[0].ver.id, 'res_url:', nodes[0].res.url);
+                console.log('  res #id',resource.id,' saved, #ver_id', nodes[0].ver.id, 'res_url:', nodes[0].res.url);
                 resource.textrazor_annotated = true;
                 neo4j.save(resource, function (err, result) {
                   if(err)
                     throw err;
+                  console.log('  rel #id',resource.id,' saved.');
                   nextResource();
                 });
                 

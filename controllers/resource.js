@@ -123,14 +123,15 @@ module.exports = function(io){
         id: +req.params.id,
         limit: 100,
       }, function(err, ids) {
-        // resort
-        // var _ids = {};
-        // for(var i=0; i<ids.length; i++) {
-        //   if(!_ids[ids[i].id])
-        //     _ids[ids[i].id] = ids[i]
-        //   _ids[ids[i].id]
-        // }
-        
+        // remap the ids according to a specific order
+        var sorted = _.sortByOrder(_.map(_.groupBy(ids, 'id'), function (group) {
+          return {
+            id: group[0].id,
+            dt: group[0].time_proximity,
+            rating: group.length * (_.sum(group, 'per_sim') + _.sum(group, 'loc_sim')*.1)
+          }
+        }), ['rating', 'dt'], [false, true]);
+        // get the list of resources matching the TOP 50 ids
         neo4j.query(queries.get_resources_by_ids, {
           ids: _.map(_.take(ids, 50), 'id'),
           limit: 50,
@@ -138,8 +139,13 @@ module.exports = function(io){
         }, function(err, items) {
           if(err)
             return helpers.cypherQueryError(err, res);
+          var ratings = _.indexBy(sorted, 'id');
           return res.ok({
-            items: items
+            items: _.sortByOrder(_.map(items, function (d) {
+              d.rating = ratings[d.id].rating
+              d.dt = ratings[d.id].dt
+              return d;
+            }), ['rating', 'dt'], [false, true] )
           });
         });
         

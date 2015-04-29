@@ -68,22 +68,22 @@ OPTIONAL MATCH (res)-[r3:appears_in]-(per:`person`)
 // get top 100 similar resources sharing the same persons, orderd by time proximity if this info is available
 START res = node({id})
 MATCH (res)--(per:person)--(res2:resource)
-WITH res, per, res2,
+WITH res, res2,
 length(collect(per)) as per_sim,
-length([]) as loc_sim,
+0 as loc_sim,
 abs(coalesce(res.start_time, 1000000000) - coalesce(res2.start_time, 0)) as time_proximity
 ORDER BY per_sim DESC, time_proximity ASC
-LIMIT 100
+LIMIT {limit}
 RETURN DISTINCT id(res2) as id, per_sim, loc_sim, time_proximity
 UNION ALL
 START res=node({id})
 MATCH (res)--(loc:location)--(res2:resource)
-WITH res, loc, res2,
+WITH res, res2,
 length(collect(loc)) as loc_sim,
 length([]) as per_sim,
 abs(coalesce(res.start_time, 1000000000) - coalesce(res2.start_time, 0)) as time_proximity
 ORDER BY loc_sim DESC, time_proximity ASC
-LIMIT 100
+LIMIT {limit}
 RETURN DISTINCT id(res2) as id, per_sim, loc_sim, time_proximity
 
 

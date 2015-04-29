@@ -21,7 +21,7 @@ var queue = async.waterfall([
     // CROWDsourcing #1: check that the context contains the date and that the date span calculated matched something useful
     // GET all the resources having a date
     function (next) {
-      neo4j.query('MATCH (n:`resource`) WHERE has(n.date) AND not(has(n.start_time)) RETURN count(n)', function (err, resources) {
+      neo4j.query('MATCH (n:`resource`) WHERE has(n.date) AND has(n.start_time) RETURN n', function (err, resources) {
         if(err)
           throw err;
         // csv cascades
@@ -29,7 +29,7 @@ var queue = async.waterfall([
           return {
             question: 'check the date',
             date: d.date,
-            context: _.without([d.name, d.title, d.source], undefined, '').join('\n'),
+            context: _.without([d.name, d.title, d.source, d.title_en, d.title_fr, d.caption_fr, d.caption_en], undefined, '').join('\n'),
             start_date: d.start_date,
             end_date: d.end_date,
             resource_doi: d.doi,
