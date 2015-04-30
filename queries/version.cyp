@@ -1,6 +1,6 @@
 // name: merge_version_from_service
 // (unique key constraint: url...)
-MERGE (ver:version { resource: {resource_id}, service: {service}, language:{language} })
+MERGE (ver:version:annotation { resource: {resource_id}, service: {service}, language:{language} })
   ON CREATE SET
     ver.creation_date = {creation_date},
     ver.creation_time = {creation_time},

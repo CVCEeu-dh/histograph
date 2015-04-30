@@ -5,6 +5,7 @@
  */
 var settings  = require('../settings'),
     helpers   = require('../helpers.js'),
+    parser    = require('../parser.js'),
     neo4j     = require('seraph')(settings.neo4j.host),
     
     rQueries  = require('decypher')('./queries/resource.cyp'),
@@ -16,8 +17,63 @@ var settings  = require('../settings'),
 
 
 module.exports = {
-  get: function(properties, next) {
-    
+  /**
+    get a complete resource object (with versions, comments etc...).
+    @param language - 'en' or 'fr' or other two chars language identifier 
+   */
+  get: function(id, language, next) {
+    neo4j.query(rQueries.get_resource_by_language, {
+      id: +id,
+      language: language
+    }, function(err, items) {
+      if(err) {
+        next(err);
+      } 
+      if(!items.length) {
+        next(helpers.IS_EMPTY);
+        return;
+      }
+      
+      var item = items[0].resource;
+      
+      // yaml parsing
+      item.positionings = _.map(_.values(item.positionings), function (d) {
+        if(d.yaml)
+          d.yaml = YAML.parse(d.yaml);
+        return d;
+      });
+      
+      // yaml parsing and annotation
+      item.annotations = _.map(_.values(item.annotations), function (d) {
+        if(d.yaml)
+          d.yaml = YAML.parse(d.yaml);
+        
+        var content = [
+          d['title_'+ language] || '',
+          d['caption_'+ language] || ''
+        ].join('§ ');
+        
+        var annotations = parser.annotate(content, d.yaml).split('§ ');
+        
+        d.annotated = {
+          title: annotations[0],
+          source: annotations[1]
+        };
+        return d;
+      });
+      
+      item.places = _.values(item.places);  
+      item.locations = _.values(item.locations);
+      item.persons = _.values(item.persons);
+      item.comments = _.values(item.comments);
+      item.collections = _.values(item.collections);
+      next(null, item);
+    });  
+  },
+  search: function(options, next) {
+    // at least options.search should be given.
+    // note that if there is a solr endpoint, this endpoint should be used.
+    // you can retrieve later the actual resources by doi.
   },
   create: function(properties, next) {
 

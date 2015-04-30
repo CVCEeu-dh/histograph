@@ -31,44 +31,4 @@ describe('parser: split a string, add annotations.', function() {
 
     done()
   });
-
-  it('should correctly parse the second more complex yaml', function (done) {
-    this.timeout(15000);
-    // body...
-    helpers.textrazor('Alois Mock and Gyula Horn open the Iron Curtain between Austria and Hungary (27 June 1989)§ On 27 June 1989, Alois Mock, Austrian Foreign Minister (left), and his Hungarian counterpart, Gyula Horn, together open the Iron Curtain separating Austria and Hungary.§ APA, die Bildagentur der Austria Presse Agentur'.split('§ ').join('. '), function (err, entities) {
-      console.log('textrazor answered')
-      if(err == helpers.IS_LIMIT_REACHED) {
-        console.log('daily limit reached')
-            // daily limit has been reached
-        return;
-      }
-      if(err)
-        throw err;
-      
-      var yaml = [];
-      for(var i in entities)
-        yaml.push({
-          id: entities[i].id, // local entity id, or uri?
-          context: entities[i].context
-        });
-      console.log(yaml)
-      points = parser.yaml('-\n    id: 34632\n    context: {left: 14, right: 19}\n-\n    id: 34632\n    context: {left: 14, right: 28}\n-\n    id: 25958\n    context: {left: 32, right: 44}\n-\n    id: 25958\n    context: {left: 38, right: 44}\n-\n    id: 26998\n    context: {left: 113, right: 125}\n-\n    id: 25958\n    context: {left: 119, right: 125}\n-\n    id: 25958\n    context: {left: 148, right: 160}\n-\n    id: 25958\n    context: {left: 154, right: 160}\n-\n    id: 34632\n    context: {left: 242, right: 247}\n-\n    id: 34632\n    context: {left: 242, right: 256}\n-\n    id: 33767\n    context: {left: 259, right: 263}\n-\n    id: 34633\n    context: {left: 14, right: 19}\n-\n    id: 34633\n    context: {left: 14, right: 28}\n-\n    id: 26963\n    context: {left: 32, right: 44}\n-\n    id: 26963\n    context: {left: 38, right: 44}\n-\n    id: 26999\n    context: {left: 113, right: 125}\n-\n    id: 26963\n    context: {left: 119, right: 125}\n-\n    id: 26963\n    context: {left: 148, right: 160}\n-\n    id: 26963\n    context: {left: 154, right: 160}\n-\n    id: 34633\n    context: {left: 242, right: 247}\n-\n    id: 34633\n    context: {left: 242, right: 256}\n-\n    id: 33768\n    context: {left: 259, right: 263}\n');
-      console.log(points)
-      should.equal(points.length, 12);
-
-      done()
-      
-    });
-  });
-
-  it('should correctly rebuild the chain based on the yaml', function (done) {
-    // note that the chain is joined with '§ '
-    var text = 'Alois Mock and Gyula Horn open the Iron Curtain between Austria and Hungary (27 June 1989)§ On 27 June 1989, Alois Mock, Austrian Foreign Minister (left), and his Hungarian counterpart, Gyula Horn, together open the Iron Curtain separating Austria and Hungary.§ APA, die Bildagentur der Austria Presse Agentur';
-
-    var annotated = parser.annotate(text, points);
-    
-    //console.log('str',annotated)
-    
-    done()
-  });
 });
