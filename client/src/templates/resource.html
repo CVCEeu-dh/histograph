@@ -19,7 +19,7 @@
           <span ng-repeat="per in item.persons" data-id='{{per.id}}' class='tag person'>{{per.name}}</span>
         </div>
 
-        <div ng-if="currentAnnotation">
+        <div ng-if="currentAnnotation">annotated {{currentAnnotation.annotations.caption}}
           <div class="caption" annotator context="item" marked="currentAnnotation.annotations.caption" ></div>
           <div class="source" annotator context="item" marked="currentAnnotation.annotations.source" ></div>  
         </div>

@@ -25,7 +25,7 @@ angular.module('histograph')
         scope.$watch('graph', function (graph) {
           if(!graph || !graph.nodes)
             return;
-          $log.info('::timeline n. nodes ', graph.nodes);
+          $log.info('::timeline n. nodes ');
           
           // computate min and max
           

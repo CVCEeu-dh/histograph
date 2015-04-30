@@ -59,6 +59,7 @@ angular.module('histograph')
           if(!val)
             return;
           // organise(merge) entitites
+          console.log(scope.marked)
           entities = scope.context.locations.concat(scope.context.persons)
           
           element.html(marked(scope.marked, {

@@ -18,7 +18,8 @@ module.exports = {
     points = _.sortBy(points, function(d){
       return d.context.left + d.context.right
     });
-
+    
+    
     // array of left plus right splitpoint to chunk the string
     splitpoints = _.sortBy(_.unique([0, content.length].concat(
       _.map(points, function(d){
@@ -30,7 +31,7 @@ module.exports = {
     ), function(d) {
       return d
     });
-
+    
     for(var i = 0; i < splitpoints.length - 1; i++) {
       chunks.push({
         s: content.slice(splitpoints[i], splitpoints[i + 1]),
@@ -39,7 +40,7 @@ module.exports = {
         links: _.map(_.filter(points, {context:{left:splitpoints[i]}}), 'id')
       })
     };
-
+    
     // join chunks as markdown string like a pro
     return _.reduce(chunks, function(reduced, c) {
       var res = [reduced.s || reduced];

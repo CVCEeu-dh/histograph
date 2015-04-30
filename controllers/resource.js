@@ -83,7 +83,11 @@ module.exports = function(io){
 
             return d;
           });
-        
+          
+        item.versions = item.versions.filter(function (d) {
+          return d.service != 'textrazor' // @todo: differenciate version:textannotation to version:imageannotation. mimetype? label?
+        });
+          
         item.locations = _.values(item.locations);
         item.persons = _.values(item.persons);
         item.comments = _.values(item.comments);

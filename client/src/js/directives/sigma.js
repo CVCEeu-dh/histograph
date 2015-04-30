@@ -24,7 +24,7 @@ angular.module('histograph')
                 singleHover: true,
                 minNodeSize: 2,
                 maxNodeSize: 10,
-                labelThreshold: 4
+                labelThreshold: 5.2
               }
             });
             // Creating camera
@@ -65,8 +65,8 @@ angular.module('histograph')
 
         
         // check for changes
-        scope.$watch('graph', function (graph) {
-
+        scope.$watch('graph', function (graph, previousGraph) {
+          $log.info('::sigma @graph changed');
           if(!graph || !graph.nodes)
             return;
           // stopping the timeout
@@ -74,6 +74,26 @@ angular.module('histograph')
 
           // Killing ForceAtlas2, anyway
           si.killForceAtlas2();
+          
+          // calculate differences in x,y for the previous graph, if any
+          if(previousGraph) {
+            $log.info('::sigma --> reposition previous nodes', graph, previousGraph)
+            
+            var nodesMap = {};
+            // map current graph
+            graph.nodes.filter(function (d, i) {
+              nodesMap[d.id] = i;
+            });
+                
+            previousGraph.nodes.filter(function (d) {
+              if(nodesMap[d.id]) { // was already present
+                graph.nodes[nodesMap[d.id]].x = d.x;
+                graph.nodes[nodesMap[d.id]].y = d.y;
+              }
+            }); 
+          }
+      
+      
           // Reading new graph
           si.graph.clear().read(graph);
            
@@ -84,7 +104,8 @@ angular.module('histograph')
           si.graph.nodes().forEach(function(n) {
             n.size = si.graph.degree(n.id) + 1;
           });
-          rescale();
+          if(!previousGraph)
+            rescale();
           si.refresh();
           si.startForceAtlas2({
            

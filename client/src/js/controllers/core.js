@@ -21,6 +21,8 @@ angular.module('histograph')
     /*
       Will automatically update the graph view
       according tho the nodes edges propsed here.
+      @param graph    - a collection of nodes and edges given as lists
+      
     */
     $scope.setGraph = function(graph) {
       $scope.graph = graph;
