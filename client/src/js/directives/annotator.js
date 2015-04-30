@@ -51,7 +51,7 @@ angular.module('histograph')
           localEntities = localEntities.map(function (d) {
             return d.name
           }).join(' - ')
-          return '<a tooltip="' + localEntities + '">' + text + '</a>';
+          return '<a tooltip-append-to-body="true" tooltip="' + localEntities + '">' + text + '</a>';
         };
 
 

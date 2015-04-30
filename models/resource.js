@@ -28,10 +28,7 @@ module.exports = {
     }, function(err, items) {
       if(err) {
         next(err);
-      } 
-      if(!items.length) {
-        next(helpers.IS_EMPTY);
-        return;
+        return
       }
       
       var item = items[0].resource;
@@ -49,10 +46,10 @@ module.exports = {
           d.yaml = YAML.parse(d.yaml);
         
         var content = [
-          d['title_'+ language] || '',
-          d['caption_'+ language] || ''
+          item.props['title_'+ language] || '',
+          item.props['caption_'+ language] || ''
         ].join('§ ');
-        
+        console.log('eee', content, item)
         var annotations = parser.annotate(content, d.yaml).split('§ ');
         
         d.annotated = {
@@ -67,6 +64,7 @@ module.exports = {
       item.persons = _.values(item.persons);
       item.comments = _.values(item.comments);
       item.collections = _.values(item.collections);
+
       next(null, item);
     });  
   },

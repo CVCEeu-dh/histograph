@@ -4,7 +4,7 @@ START res=node({id})
   WITH res
     OPTIONAL MATCH (ann:`annotation` {language:{language}})-[:describes]-(res)
     OPTIONAL MATCH (ver:`positioning`)-[:describes]-(res)
-    OPTIONAL MATCH (res)-[:appears_in]-(pla:`place`)
+    OPTIONAL MATCH (res)-[:appears_in{is_event_place:true}]-(pla:`location`)
     OPTIONAL MATCH (res)-[:appears_in]-(loc:`location`)
     OPTIONAL MATCH (res)-[:appears_in]-(per:`person`)
     OPTIONAL MATCH (res)-[:belongs_to]-(col:collection)

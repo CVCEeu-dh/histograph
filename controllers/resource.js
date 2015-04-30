@@ -12,7 +12,8 @@ var settings   = require('../settings'),
 
     _          = require('lodash'),
 
-    neo4j      = require('seraph')(settings.neo4j.host);
+    neo4j      = require('seraph')(settings.neo4j.host),
+    resource   = require('../models/resource');
     
 
 module.exports = function(io){
@@ -45,55 +46,12 @@ module.exports = function(io){
   return {
     /*
       get a single resources, along with comments and inquiries (with relationships).
+      todo: get different language according to the different param.
     */
     getItem: function (req, res) {
-      neo4j.query(queries.get_resource, {
-        id: +req.params.id
-      }, function(err, items) {
+      resource.get(req.params.id, 'en', function(err, item) {
         if(err)
           return helpers.cypherQueryError(err, res);
-        if(!items.length)
-          return res.error({}); // empty
-
-        var item = items[0].resource;
-        //console.log(item)
-        item.versions = _.values(item.versions).map(function (d) {
-          if(d.yaml)
-            d.yaml = YAML.parse(d.yaml);
-          return d;
-        });
-
-        item.annotations = item.versions
-          .filter(function (d) {
-            return d.service == 'textrazor' // @todo: differenciate version:textannotation to version:imageannotation. mimetype? label?
-          })
-          .map(function (d) {
-            var annotations = parser.annotate([
-              item.props.name || '',
-              item.props.source || '',
-              item.props.caption || ''
-            ].join('§ '), d.yaml)
-              .split('§ ');
-
-            d.annotations = {
-              name: annotations[0],
-              source: annotations[1],
-              caption: annotations[2]
-            };
-
-            return d;
-          });
-          
-        item.versions = item.versions.filter(function (d) {
-          return d.service != 'textrazor' // @todo: differenciate version:textannotation to version:imageannotation. mimetype? label?
-        });
-          
-        item.locations = _.values(item.locations);
-        item.persons = _.values(item.persons);
-        item.comments = _.values(item.comments);
-        item.version = _.find(item.versions, {first: true}); // the original one;
-        
-       
         return res.ok({
           item: item
         });
@@ -214,7 +172,7 @@ module.exports = function(io){
         });
 
         return res.ok({
-          items: items[0].comments
+          items: _.values(items[0].comments)
         });
       })
     }

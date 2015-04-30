@@ -42,6 +42,12 @@ var validate = function(form, fields) {
 
 module.exports = function(io) {
   return {
+    // set user fav language. the resources will be 
+    setLanguage: function (req, res) {
+      return res.json({
+        user: req.session
+      });
+    },
     /*
       give some information about current session
     */

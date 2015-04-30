@@ -239,6 +239,8 @@ app.use('/api', apiRouter); // api endpoint. we should be auth to pass this poin
 */
 apiRouter.route('/resource')
   .get(ctrl.resource.getItems)
+apiRouter.route('/resource')
+  .get(ctrl.resource.getItems)
 apiRouter.route('/resource/:id')
   .get(ctrl.resource.getItem)
 apiRouter.route('/resource/:id/related')

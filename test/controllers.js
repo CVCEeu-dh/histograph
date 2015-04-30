@@ -239,7 +239,7 @@ describe('controllers: get resource items available to the user', function() {
 
   it('should give the specified resource', function (done) {
     session
-      .get('/api/resource/17643')
+      .get('/api/resource/11160')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
@@ -267,7 +267,7 @@ describe('controllers: get resource items available to the user', function() {
   
   it('should create a comment and attach it to the required resource', function (done) {
     session
-      .post('/api/resource/17643/comments')
+      .post('/api/resource/11160/comments')
       .send({
         content : 'A content with some #taa and #location tag',
         resource_id: 512,
@@ -276,9 +276,10 @@ describe('controllers: get resource items available to the user', function() {
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
-        // console.log(err, res.body)
-        should.equal(res.body.result.items.length, 25, res.body.result)
-
+        should.exist(res.body.result.items.length)
+        should.exist(res.body.result.items[0].id)
+        should.equal(res.body.result.items[0].user.username, 'hello-world')
+        
         done();
       });
   });
