@@ -249,6 +249,9 @@ apiRouter.route('/resource/:id/comments') // POST
   .post(ctrl.resource.createComment)
 apiRouter.route('/cooccurrences')
   .get(ctrl.resource.getCooccurrences)
+  
+apiRouter.route('/suggest')
+  .get(ctrl.suggest.simple)
 /*
 
  START THE SERVER and strat listening with socket.io

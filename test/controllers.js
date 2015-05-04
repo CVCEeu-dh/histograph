@@ -286,6 +286,23 @@ describe('controllers: get resource items available to the user', function() {
 });
 
 
+describe('controllers: suggest queries', function() {
+  
+  it('should get some suggestions for helmut kohl and mitterrand', function (done) {
+    session
+      .get('/api/suggest?query=helmut kohl mitterrand')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err);
+        should.not.exist(err);
+        should.exist(res.body.result.items.length);
+        done()
+      });
+  });
+});
+
 
 describe('controllers: delete the user and their relationships', function() {
   it('should remove the comments created by the hello-world user', function (done) {

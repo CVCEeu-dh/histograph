@@ -16,6 +16,29 @@ var settings  = require('../settings'),
     _         = require('lodash');
 
 
+var Resource = function() {
+  this.id; 
+  this.source;
+  this.date;
+  this.languages = [];
+  this.start_date;
+  this.end_date;
+  this.start_time;
+  this.end_time;
+  
+  this.title_search;
+  this.caption_search;
+  
+  this.positionings = [];
+  this.annotations = [];
+  this.places = [];
+  this.locations = [];
+  this.persons = [];
+  this.comments = [];
+  this.collections = [];
+};
+
+
 module.exports = {
   /**
     get a complete resource object (with versions, comments etc...).
@@ -73,12 +96,22 @@ module.exports = {
     // note that if there is a solr endpoint, this endpoint should be used.
     // you can retrieve later the actual resources by doi.
   },
+  /*
+    Create a Resource item.
+    Some properties are compulsory.
+    @return (err, resource:Resource)
+  */
   create: function(properties, next) {
 
   },
+  
   update: function(id, properties, next) {
 
   },
+  /*
+    Change the resoruce label to :trash in order to manually
+    @return (err, resource:Resource)
+  */
   remove: function(id, next) {
     
   },
