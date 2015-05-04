@@ -7,9 +7,10 @@
  * It is the parent of the other controllers.
  */
 angular.module('histograph')
-  .controller('CoreCtrl', function ($scope, $log, $timeout, socket) {
+  .controller('CoreCtrl', function ($scope, $log, $timeout, $http, socket) {
     $log.debug('CoreCtrl ready');
     
+    var suggestionTimeout = 0;
     // the current user
     $scope.user = {};
 
@@ -26,5 +27,16 @@ angular.module('histograph')
     */
     $scope.setGraph = function(graph) {
       $scope.graph = graph;
+    };
+    
+    $scope.suggest = function(query) {
+      $log.info('CoreCtrl -> suggest', query);
+      return $http.get('/api/suggest', {
+        params: {
+          query: query
+        }
+      }).then(function(response){
+        return response.data.result.items
+      });
     };
   })

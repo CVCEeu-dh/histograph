@@ -20,22 +20,37 @@ html
   body(ng-app='histograph')
     script(type='text/javascript').
       var socket = io();
+    script(type='text/ng-template', id='suggest.html').
+      <a ng-if="match.model.type == 'resource'" href="#/r/{{match.model.id}}">
+        <span bind-html-unsafe="match.model.title | typeaheadHighlight:query"></span>
+      </a>
 
     div(ng-controller='CoreCtrl')
     
-      header hg 
+      header 
         if user.username
-          a(href='#/profile')
-            img(src=user.picture)
-            span!=user.username
-
-          ul
-            li
+           
+          
+          div(class='row')
+            div(class='col-sm-5') hg
+              a(href='#/profile')
+                img(src=user.picture)
+                span!=user.username
+            div(class='col-sm-3')
+              div(id='search-field')
+                div(class='input-group')
+                  input(type='text', ng-model='asyncSelected', class='form-control', placeholder='Search for...', typeahead='item for items in suggest($viewValue)', typeahead-wait-ms='500', typeahead-template-url='suggest.html')
+                  span(class='input-group-btn')
+                    button(class='btn btn-default', type='button') search
+            div(class='col-sm-2')
               a(href='#')
                 span settings
-            li
+            div(class='col-sm-2')
               a(href='#')
                 span logout
+        else
+          p hg
+          
       if !user.username
           div(id='login')
             form

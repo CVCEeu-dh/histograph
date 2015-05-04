@@ -171,3 +171,46 @@ blockquote{
   width: 300px;
   text-align: center;
 }
+
+
+/*
+  
+  Search Field
+  ~~~~~~~~~~~~
+
+*/
+#search-field{
+  padding-top: 10px;
+}
+#search-field input{
+  height: 30px;
+  font-size: 11px;
+  line-height: 30px;
+}
+
+#search-field button{
+  height: 30px;
+  font-size: 11px;
+  line-height: 11px;
+
+}
+
+/*
+  
+  Search Field DRopdown menu
+  ~~~~~~~~~~~~
+
+*/
+.dropdown-menu{
+  max-width: 100%;
+    
+}
+.dropdown-menu li{
+  padding: 5px;
+}
+
+.dropdown-menu>li>a{
+  font-size:11px;
+  line-height: 20px;
+  white-space: normal
+}

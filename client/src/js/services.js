@@ -47,6 +47,12 @@ angular.module('histograph')
     });
   })
   /*
+    Get/Update/Delete one resource
+  */
+  .factory('SuggestFactory', function ($resource) {
+    return $resource('/api/suggest');
+  })
+  /*
     Socket.io service, thqnks to http://briantford.com/blog/angular-socket-io
   */
   .factory('socket', function ($rootScope) {
