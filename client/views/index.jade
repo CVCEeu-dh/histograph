@@ -20,10 +20,18 @@ html
   body(ng-app='histograph')
     script(type='text/javascript').
       var socket = io();
+    
     script(type='text/ng-template', id='suggest.html').
       <a ng-if="match.model.type == 'resource'" href="#/r/{{match.model.id}}">
         <span bind-html-unsafe="match.model.title | typeaheadHighlight:query"></span>
       </a>
+      
+    script(type='text/ng-template', id='inquirer.html').
+      <div>ge</div>
+      <div class="form-group">
+        <label>Popup Title:</label>
+        this is a test
+      </div>
 
     div(ng-controller='CoreCtrl')
     
@@ -32,7 +40,8 @@ html
            
           
           div(class='row')
-            div(class='col-sm-5') hg
+            div(class='col-sm-5')
+              a(href='#/') hg
               a(href='#/profile')
                 img(src=user.picture)
                 span!=user.username
@@ -49,7 +58,7 @@ html
               a(href='#')
                 span logout
         else
-          p hg
+          a(href='#/')  hg
           
       if !user.username
           div(id='login')
@@ -87,5 +96,5 @@ html
     script(src='/js/directives/annotator.js') 
     script(src='/js/directives/annotorious.js') 
     script(src='/js/directives/sigma.js')   
-    script(src='/js/directives/timeline.js')   
+    script(src='/js/directives/timeline.js')
     

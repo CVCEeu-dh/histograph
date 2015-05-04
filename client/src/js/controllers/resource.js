@@ -29,8 +29,34 @@ angular.module('histograph')
       text: "Write something please. Then do not forget to push the button below",
       tags: ''
     }
-
-
+    
+    // label should be in place if tag is an angular object.
+    $scope.startCommenting = function(item, tag, label){
+      $scope.commenting = true;
+      if(tag){
+        if(typeof tag == 'string') {
+          $scope.comment.tags = ['#' + tag];
+          $scope.comment.text = '#' + tag;
+        } else {
+          $scope.comment.tags = ['#' + label + '-' + tag.id]
+          $scope.comment.text = '#' + label + '-' + tag.id;
+        }
+      } else {
+        $scope.comment.text = "something";
+      }
+      $log.info('ResourceCtrl -> startCommenting()');
+      
+      socket.emit('start:commenting', item.props, function (result) {
+        
+      });
+    };
+    
+    $scope.stopCommenting = function(item, tag, label){
+        $scope.commenting = false;
+        $scope.comment.tags = [];
+        $scope.comment.text = ""
+    };
+    
     /**
       Socket
     */
@@ -43,6 +69,7 @@ angular.module('histograph')
         return;
       if(result.data.comment) {
         $log.info('done:commenting', result);
+        result.data.props = result.data.comment;
         $scope.item.comments.push(result.data);
       } else {
         $log.error('done:commenting', 'comment invalid, please check');
@@ -72,12 +99,13 @@ angular.module('histograph')
 
     $scope.postMention = function (item) {
       $log.debug('resource.postMention', item);
-      ResourceCommentsFactory.save({id: $routeParams.id}, {
-        content: $scope.comment.text,
-        tags: ''
-      }, function(res){
-        console.log('postMention', res);
-      })
+      if($scope.comment.text.trim().length > 0)
+        ResourceCommentsFactory.save({id: $routeParams.id}, {
+          content: $scope.comment.text,
+          tags:  $scope.comment.tags
+        }, function(res){
+          console.log('postMention', res);
+        })
     };
 
 
