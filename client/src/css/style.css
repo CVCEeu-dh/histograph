@@ -76,7 +76,7 @@ a:hover{
 .view{
   position: absolute;
   top: 50px;
-  bottom: 20px;
+  bottom: 0px;
   left:0;
   width: 100%;
   background: #f0f0f0;
@@ -100,6 +100,10 @@ a:hover{
 
 .item img.user-picture{
   width: 40px;
+}
+
+.item .collection{
+  color: #959595;
 }
 
 .tag {
@@ -126,6 +130,10 @@ a:hover{
   /*border: 1px solid #eee;*/
   margin: 40px auto 0px auto;
   padding: 0 20px 10px 20px;
+}
+
+.item .collections{
+  margin-bottom: 10px
 }
 
 #perspective{
@@ -312,7 +320,10 @@ a:hover{
 
 /*
   
- Tinyscrollbar
+ History
   ~~~~~~~~~~~~
 
 */
+#history{
+  position:relative;  
+}

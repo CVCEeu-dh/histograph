@@ -82,6 +82,13 @@ angular.module('histograph')
       
       return +input.match(/\d+/);
     }
+  })
+  // humanize filenames if needed, strip bogus .
+  .filter('humanize', function() {
+    return function(input) {
+      
+      return input.replace('_', ' ').replace(/\.\w+$/, '');
+    }
   });
 
 

@@ -11,6 +11,10 @@ angular.module('histograph')
     $log.debug('CoreCtrl ready');
     
     var suggestionTimeout = 0;
+    
+    // the paths followed by a single user
+    $scope.trails = [];
+        
     // the current user
     $scope.user = {};
 
@@ -39,4 +43,48 @@ angular.module('histograph')
         return response.data.result.items
       });
     };
+    
+    /**
+     Following the trail
+     */
+    var Trail = function(path, start, index, level) {
+      this.paths = [{
+        path:  path,
+        start: start
+      }];
+      this.index = index || 0;
+      this.level = level || 0;
+      this.start = start;
+    };
+    
+    $scope.$on('$locationChangeSuccess', function(e, path) {
+      $log.debug('CoreCtrl @locationChangeSuccess', path)
+      var now = (new Date()).getTime();
+      
+      if(!$scope.trails.length) { // hey this is your first trail
+        $scope.trails.push(new Trail(path, now));
+        return;
+      };
+      
+      var trail;
+      // check if the paths already exists in past trail and it is not the last one.
+      for(var i = $scope.trails.length - 1; i > -1; i--) {
+        for(var j = $scope.trails[i].paths.length - 1; j > -1 ; j--) {
+          if($scope.trails[i].paths[j].path === path) { // create a new trail
+            trail = new Trail(path, now, j, i);
+            $scope.trails.push(trail);
+            break;
+          }
+        }
+        if(trail)
+          break;
+      };
+      
+      // the path is totally new, append it to the last trail paths
+      if(!trail) 
+        $scope.trails[$scope.trails.length - 1].paths.push({
+          path: path,
+          start: now
+        });
+    });
   })

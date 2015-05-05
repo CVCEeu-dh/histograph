@@ -38,7 +38,6 @@ angular.module('perfect_scrollbar', []).directive('perfectScrollbar',
       });
 
       function update(event) {
-        console.log('updating')
         $scope.$evalAsync(function() {
           if ($attr.scrollDown == 'true' && event != 'mouseenter') {
             setTimeout(function () {

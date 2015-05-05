@@ -26,4 +26,8 @@ angular
         templateUrl: 'templates/resource.html',
         controller: 'ResourceCtrl'
       })
+      .when('/c/:id', {
+        templateUrl: 'templates/collection.html',
+        controller: 'CollectionCtrl'
+      })
   })

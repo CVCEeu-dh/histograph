@@ -92,8 +92,10 @@ angular.module('histograph')
               }
             }); 
           }
-      
-      
+          $log.info('::sigma --> brand new nodes', graph.nodes.map(function(d) {
+            return d.id
+          }))
+          
           // Reading new graph
           si.graph.clear().read(graph);
            

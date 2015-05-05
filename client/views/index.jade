@@ -58,6 +58,9 @@ html
             div(class='col-sm-2')
               a(href='#')
                 span logout
+          div(id='history')
+            div(history='', trails='trails')
+              
         else
           a(href='#/')  hg
           
@@ -71,7 +74,8 @@ html
         div(id='milkyway', sigma, graph='graph')
         div(id='timeline', timeline, graph='graph')
 
-    script(src='/js/lib/jquery-2.1.3.min.js')  
+    script(src='/js/lib/jquery-2.1.3.min.js') 
+    script(src='/js/lib/d3.min.js')  
     script(src='/js/lib/codemirror.js')
     script(src='/js/lib/annotator.min.js')
     script(src='/js/lib/annotorious.min.js')
@@ -96,8 +100,10 @@ html
     script(src='/js/controllers/core.js')
     script(src='/js/controllers/index.js')
     script(src='/js/controllers/resource.js')
+    script(src='/js/controllers/collection.js')
     script(src='/js/directives/annotator.js') 
     script(src='/js/directives/annotorious.js') 
     script(src='/js/directives/sigma.js')   
     script(src='/js/directives/timeline.js')
+    script(src='/js/directives/history.js')
     

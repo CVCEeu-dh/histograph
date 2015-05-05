@@ -163,17 +163,7 @@ angular.module('histograph')
         // fill graph object with related top 100 results
         var entities = {};
         
-        // add current item ...
-
-        graph.nodes.push({
-          id: res.result.item.id,
-          label: $scope.item.props.name || $scope.item.props.title,
-          color: "#6891A2",
-          type: 'res',
-          x: Math.random()*50,
-          y: Math.random()*50,
-          //size: 10
-        });
+        
 
         for(var i in res.result.item.persons) {
           graph.edges.push({
@@ -228,7 +218,22 @@ angular.module('histograph')
             entities[d.persons[i].id].size++;
           };
         });
-
+        
+        var resource_in_related = graph.nodes.filter(function(d){
+          return d.id == res.result.item.id;
+        });
+        // add current item only if there is no 
+        if(!resource_in_related.length)
+          graph.nodes.push({
+            id: res.result.item.id,
+            label: $scope.item.props.name || $scope.item.props.title,
+            color: "#6891A2",
+            type: 'res',
+            x: Math.random()*50,
+            y: Math.random()*50,
+            //size: 10
+          });
+        
         $scope.setGraph(graph);
 
 

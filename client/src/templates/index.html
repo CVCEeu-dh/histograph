@@ -1,4 +1,4 @@
-<div id="perspective" >
+<div id="perspective" perfect-scrollbar wheel-propagation="true" refresh-on-change="item.props" suppress-scroll-x="true" wheel-speed="20">
   <div ng-if="item" ng-repeat="item in items" class="resource item">
     <h3 class="sans"><a ng-href="#/r/{{item.id}}">{{item.props.title || item.props.name }}</a></h3>
     {{item.props|guessInterval}}
