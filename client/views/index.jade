@@ -40,12 +40,12 @@ html
            
           
           div(class='row')
-            div(class='col-sm-5')
+            div(class='col-sm-4')
               a(href='#/') hg
               a(href='#/profile')
                 img(src=user.picture)
                 span!=user.username
-            div(class='col-sm-3')
+            div(class='col-sm-4')
               div(id='search-field')
                 div(class='input-group')
                   input(type='text', ng-model='asyncSelected', class='form-control', placeholder='Search for...', typeahead='item for items in suggest($viewValue)', typeahead-wait-ms='500', typeahead-template-url='suggest.html')

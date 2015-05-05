@@ -11,10 +11,10 @@
            --><span ng-if="!$last">-</span>
         </span>
           
-    
-        <div class="tags">
+        
+        <span ng-if="item.persons.length" class="tags"> — <i>in the document</i>:
           <span  ng-repeat="per in item.persons" data-id='{{per.id}}' ng-click="startCommenting(item, per, 'person')" class='tag person'>{{per.name}}</span>
-        </div>
+        </span>
         <a data-id='{{item.id}}'> view on graph</a>
         
         <div ng-if="currentAnnotation">
@@ -39,15 +39,19 @@
             <img  ng-src="media/{{item.props.url}}" annotorious w="item.props.width" h="item.props.height" version="currentVersion">
           </div>
         </div>
-        <blockquote>
+        <blockquote ng-if="item.props.stakeholders||item.props.caption">
          {{item.props.stakeholders||item.props.caption}}
         </blockquote>
     
-        <div class="discussion">
+        <div class="discussion" ng-if="item.comments.length > 0">
           <div class="comment" ng-repeat="com in item.comments">
-            <span cmlass="username">{{com.user.username}}</span> <span class="date">{{com.props.creation_date}}</span> — {{com.props.content}}</div>
-            {{com.props.content}}
+            <span class="username">
+              <a ng-href='#/u/{{com.user.username}}'>{{com.user.username}}</a>
+            </span>
+            <span class="date">{{com.props.creation_date | date : 'longDate'}}</span> — {{com.props.content}}
             <span  ng-repeat="tag in com.props.tags" class='tag'>{{tag}}</span>
+          </div>
+            
         </div>
         
       </div>
@@ -99,9 +103,9 @@
       
     </div-->
     
-    <div class="tags" sources="" targets="">
+    <span class="tags" ng-if="relatedItem.persons"> — <i>in the document</i>:
       <span ng-repeat="per in relatedItem.persons"  data-id='{{per.id}}'  class='tag person'>{{per.name}}</span>
-    </div>
+    </span>
 
     <img ng-if='relatedItem.props.mimetype=="image"' ng-src="media/{{relatedItem.props.url}}" >
     <blockquote>
