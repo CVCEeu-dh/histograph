@@ -14,6 +14,7 @@ angular
     'ngResource',
     'ui.bootstrap',
     'ui.codemirror',
+    'perfect_scrollbar'
   ])
   .config(function ($routeProvider, $httpProvider) {
     $routeProvider

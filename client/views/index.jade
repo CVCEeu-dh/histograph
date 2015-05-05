@@ -3,6 +3,7 @@ html
     title!= title
 
     link(href='/css/bootstrap.min.css', rel='stylesheet')
+    link(href='/css/perfect-scrollbar.min.css', rel='stylesheet')
     link(href='/css/annotator.css', rel='stylesheet')
     link(href='/css/annotorious.css', rel='stylesheet')
     link(href='/css/codemirror.css', rel='stylesheet')
@@ -79,13 +80,15 @@ html
     script(src='/js/lib/moment.min.js')
     script(src='/js/lib/sigma.min.js')
     script(src='/js/lib/sigma.layout.forceAtlas2.min.js')
-
+    script(src='/js/lib/perfect-scrollbar.min.js')
+    script(src='/js/lib/perfect-scrollbar.with-mousewheel.min.js')
     script(src='/js/lib/angular.min.js')
     script(src='/js/lib/angular-route.min.js')
     script(src='/js/lib/angular-resource.min.js')
     
     script(src='/js/lib/ui-codemirror.min.js')
     script(src='/js/lib/ui-bootstrap-tpls.min.js')
+    script(src='/js/lib/angular-perfect-scrollbar.js')
     
     script(src='/js/app.js')
     script(src='/js/services.js')

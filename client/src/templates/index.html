@@ -1,52 +1,36 @@
-<div style="position: relative; width: 56%"><div class="container-fluid">
-  <div class="row">
-    <div class="col-md-7">
-      <div ng-if="item" ng-repeat="item in items" class="resource item">
-        <h3 class="sans"><a ng-href="#/r/{{item.id}}">{{item.props.title || item.props.name }}</a></h3>
-        {{item.props|guessInterval}}
-        <!-- div class="tags locations">
-          <span ng-repeat="location in item.locations">
-            <a ng-if="location.geocode_id" class="tag location" >{{location.geocode_formatted_address}}</a>
-            <a ng-if="location.geonames_id" class="tag location" >{{location.geonames_toponymName}}, {{location.geonames_countryName}}</a>
-            <span ng-if="!$last">-</span>
-          </span>
-          
-        </div -->
-    
-        <div class="tags">
-          <span ng-repeat="per in item.persons" class='tag person'>{{per.name}}</span>
-        </div>
+<div id="perspective" >
+  <div ng-if="item" ng-repeat="item in items" class="resource item">
+    <h3 class="sans"><a ng-href="#/r/{{item.id}}">{{item.props.title || item.props.name }}</a></h3>
+    {{item.props|guessInterval}}
+    <!-- div class="tags locations">
+      <span ng-repeat="location in item.locations">
+        <a ng-if="location.geocode_id" class="tag location" >{{location.geocode_formatted_address}}</a>
+        <a ng-if="location.geonames_id" class="tag location" >{{location.geonames_toponymName}}, {{location.geonames_countryName}}</a>
+        <span ng-if="!$last">-</span>
+      </span>
+      
+    </div -->
 
-        <div ng-if="currentAnnotation">
-          <div class="caption" annotator context="item" marked="currentAnnotation.annotations.caption" ></div>
-          <div class="source" annotator context="item" marked="currentAnnotation.annotations.source" ></div>  
-        </div>
+    <div class="tags">
+      <span ng-repeat="per in item.persons" class='tag person'>{{per.name}}</span>
+    </div>
 
-        <!-- Single button -->
-        <div ng-if='item.props.mimetype=="image"'>
-          <div class="btn-group" dropdown is-open="status.isopen" tooltip="view a different version">
-            <button type="button" class="btn btn-default dropdown-toggle" dropdown-toggle ng-disabled="disabled">
-              {{currentVersion.service || "accepted"}}<span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu" role="menu">
-              <li ng-repeat="version in item.versions"><a ng-click="switchVersion(version)">{{version.service || "first version"}}</a>
+    <div ng-if="currentAnnotation">
+      <div class="caption" annotator context="item" marked="currentAnnotation.annotations.caption" ></div>
+      <div class="source" annotator context="item" marked="currentAnnotation.annotations.source" ></div>  
+    </div>
 
-              <li class="divider"></li>
-
-              <li><a ng-click="switchVersion(mergedVersion)">merged version</a></li>
-            </ul>
-          </div>
-          <div>
-            <img  ng-src="media/{{item.props.url}}" annotorious w="item.props.width" h="item.props.height" version="currentVersion">
-          </div>
-        </div>
-        <blockquote>
-         {{item.props.stakeholders||item.props.caption}}
-        </blockquote>
-    
-        
+    <!-- Single button -->
+    <div ng-if='item.props.mimetype=="image"'>
+      
+      <div>
+        <img  ng-src="media/{{item.props.url}}" annotorious w="item.props.width" h="item.props.height" version="currentVersion">
       </div>
     </div>
+    <blockquote>
+     {{item.props.stakeholders||item.props.caption}}
+    </blockquote>
+
+    
   </div>
- </div>
 </div>

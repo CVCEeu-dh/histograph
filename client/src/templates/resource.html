@@ -1,4 +1,4 @@
-<div id="perspective">
+<div id="perspective" perfect-scrollbar wheel-propagation="true" refresh-on-change="item.props" suppress-scroll-x="true" wheel-speed="20">
   
       <div ng-if="item" class="resource item">
         <h3 class="" data-id='{{item.id}}'><a ng-href="#/r/{{item.id}}">{{item.props.title || item.props.name || item.props.title_en || item.props.title_fr}}</a></h3>
@@ -49,7 +49,7 @@
               <a ng-href='#/u/{{com.user.username}}'>{{com.user.username}}</a>
             </span>
             <span class="date">{{com.props.creation_date | date : 'longDate'}}</span> — {{com.props.content}}
-            <span  ng-repeat="tag in com.props.tags" class='tag'>{{tag}}</span>
+            <span  ng-repeat="tag in com.props.tags" class='tag' data-id='{{tag|idify}}'>{{tag}}</span>
           </div>
             
         </div>
@@ -88,7 +88,7 @@
   <a class="btn btn-primary" ng-click="startMention(item)">join discussion</a>
 </div>
 
-<div id="see-also">
+<div id="see-also" perfect-scrollbar wheel-propagation="true" refresh-on-change="related" suppress-scroll-x="true" wheel-speed="20">
   <div class="related" ng-repeat="relatedItem in related">
     <h4><a ng-href="#/r/{{relatedItem.id}}">{{relatedItem.props.title || relatedItem.props.name }}</a></h4>
     <a data-id='{{relatedItem.id}}'>view on graph</a>

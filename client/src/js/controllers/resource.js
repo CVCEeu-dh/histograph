@@ -99,13 +99,16 @@ angular.module('histograph')
 
     $scope.postMention = function (item) {
       $log.debug('resource.postMention', item);
-      if($scope.comment.text.trim().length > 0)
+      if($scope.comment.text.trim().length > 0 && $scope.commenting) {
+        $scope.commenting = false;
         ResourceCommentsFactory.save({id: $routeParams.id}, {
           content: $scope.comment.text,
           tags:  $scope.comment.tags
         }, function(res){
+          
           console.log('postMention', res);
         })
+      }
     };
 
 

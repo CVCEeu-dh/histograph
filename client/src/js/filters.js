@@ -75,6 +75,13 @@ angular.module('histograph')
       })
       return filtered;
     }
+  })
+  // extract the first numeric path from a given string. Mostly used for ID in comment tags.
+  .filter('idify', function() {
+    return function(input) {
+      
+      return +input.match(/\d+/);
+    }
   });
 
 
