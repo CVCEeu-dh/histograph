@@ -196,14 +196,6 @@ apiRouter.route('/another').
     res.ok({ message: 'hooray! another!' });   
   });
 
-// api session info
-apiRouter.route('/user/session')
-  .get(ctrl.user.session)
-
-// apiRouter.route('/user')
-//   .post(ctrl.user.create)
-
-
 
 // face recognition tests
 apiRouter.route('/alchemyapi/image-face-tags')
@@ -221,8 +213,8 @@ apiRouter.route('/skybiometry/face-detect')
 
 /*
 
- Register our routes
- ===
+  Registering routes ...
+  ======================
 
 */
 app.use('/', clientRouter); // client router
@@ -231,11 +223,25 @@ app.use('/api', apiRouter); // api endpoint. we should be auth to pass this poin
 
 /*
 
-  Let's add route specific for models
-  ===
+  Controller: user
+  ----------------
+  
+  Cfr. controllers/user.js
+  Cfr Neo4j queries: [@todo]
+  
+*/
+apiRouter.route('/user/session')// api session info
+  .get(ctrl.user.session)
+  
+  
+/*
+
+  Controller: resource
+  ----------------------
   
   Cfr. controllers/resource.js
-  Cfr Neo4j queries: queries/resources.cyp
+  Cfr Neo4j queries: queries/resource.cyp
+  
 */
 apiRouter.route('/resource')
   .get(ctrl.resource.getItems)
@@ -247,15 +253,47 @@ apiRouter.route('/resource/:id/related')
   .get(ctrl.resource.getRelatedItems)
 apiRouter.route('/resource/:id/comments') // POST
   .post(ctrl.resource.createComment)
-apiRouter.route('/cooccurrences')
+apiRouter.route('/cooccurrences') // @todo move to entity controller.
   .get(ctrl.resource.getCooccurrences)
-  
-apiRouter.route('/suggest')
-  .get(ctrl.suggest.simple)
+
+
 /*
 
- START THE SERVER and strat listening with socket.io
+  Controller: collection
+  ----------------------
+  
+  Cfr. controllers/collection.js
+  Cfr Neo4j queries: queries/collection.cyp
+  
+*/
+apiRouter.route('/collection')
+  .get(ctrl.collection.getItems)
+apiRouter.route('/collection/:id')
+  .get(ctrl.collection.getItem)
 
+
+/*
+
+  Controller: suggest
+  ----------------------
+  
+  This controller answers every typeahead request.
+  
+  Cfr. controllers/suggest.js
+  Cfr Neo4j queries: queries/collection.cyp
+  
+*/
+apiRouter.route('/suggest')
+  .get(ctrl.suggest.simple)
+  
+/*
+  
+  Socket io config
+  ------
+  
+  listen to connections with socket.io.
+  Cfr. controllers/*.js to find how io has been implemented.
+  
 */
 io.use(function (socket, next) {
   sessionMiddleware(socket.request, {}, next);

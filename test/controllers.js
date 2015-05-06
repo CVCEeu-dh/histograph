@@ -303,6 +303,23 @@ describe('controllers: suggest queries', function() {
   });
 });
 
+describe('controllers: play with collections', function() {
+  
+  it('should get a single collection item', function (done) {
+    session
+      .get('/api/collection/11137')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err);
+        should.not.exist(err);
+        should.exist(res.body.result.item);
+        done()
+      });
+  });
+});
+
 
 describe('controllers: delete the user and their relationships', function() {
   it('should remove the comments created by the hello-world user', function (done) {
