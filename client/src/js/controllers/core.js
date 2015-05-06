@@ -44,8 +44,35 @@ angular.module('histograph')
       });
     };
     
-    /**
-     Following the trail
+    /*
+      Open entity contextual menu
+      ---------------------------
+      
+    */
+    $scope.target;
+    /*
+      Open the contextual menu for something.
+      
+      @param e        - passed with $event, allow to repoisition the pop object
+      @param item     - the item which contain the tag or the label.
+      @param tag      - the entity instance for precise commenting purposes.
+      @param hashtag  - istead of using target, a hashtag
+    */
+    $scope.toggleMenu = function(e, item, tag, hashtag) {
+      console.log(arguments)
+      $scope.target = {
+        event: e,
+        item: item,
+        tag: tag,
+        hashtag: hashtag
+      };
+    };
+    
+    
+    /*
+    
+      Following the trail
+      -------------------
      */
     var Trail = function(path, start, index, level) {
       this.paths = [{

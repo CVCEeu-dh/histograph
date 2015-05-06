@@ -39,6 +39,12 @@ angular.module('histograph')
     });
   })
   /*
+    Get/Update/Delete one collection
+  */
+  .factory('CollectionFactory', function ($resource) {
+    return $resource('/api/collection/:id', {}, {});
+  })
+  /*
     GET cooccurrences
   */
   .factory('CooccurrencesFactory', function ($resource) {

@@ -1,1 +1,13 @@
-collection
+<div id="perspective" perfect-scrollbar wheel-propagation="true" refresh-on-change="item.props" suppress-scroll-x="true" wheel-speed="20">
+  <div class="collection item">
+    <h3 class="" data-id='{{collection.id}}'>
+      <a href="" ng-click="">
+    {{collection.props.name|humanize}}
+  
+      </a>
+    </h3>
+    {{collection.resources}} documents, 
+     {{collection.comments.length}} comments,
+     {{collection.users.length}} active researchers
+  </div>
+</div>

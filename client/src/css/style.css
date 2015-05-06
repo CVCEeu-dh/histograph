@@ -126,7 +126,7 @@ a:hover{
   color: #151515;
 }
 
-.item.resource{
+.item.resource, .item.collection{
   /*border: 1px solid #eee;*/
   margin: 40px auto 0px auto;
   padding: 0 20px 10px 20px;
@@ -326,4 +326,49 @@ a:hover{
 */
 #history{
   position:relative;  
+}
+
+
+
+/*
+  
+  Pop magic popover
+  ~~~~~~~~~~~~
+
+*/
+#pop{
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 40px;
+  width: 160px;
+  background: #E8E8E7;
+  border: 1px solid #C5C5C6;
+  border-radius: 3px;
+  z-index: 10;
+  box-shadow: 0 5px 10px rgba(0,0,0,.175);
+  opacity: .9;
+  transition: opacity .22s ease-in-out;
+}
+
+#pop:hover{
+  opacity: 1;  
+}
+
+#pop .btn.action{
+  width: 40px;
+  height: 38px;
+  padding: 0;
+  border: 0px transparent;
+  border-radius: 0;
+  
+}
+
+#pop .btn.action:hover{
+  color: white;
+  background: rgba(234,53,48, .7);
+}
+
+#pop .btn.action span{
+  line-height: 38px;
 }

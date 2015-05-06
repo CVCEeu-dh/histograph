@@ -28,6 +28,12 @@ angular
       })
       .when('/c/:id', {
         templateUrl: 'templates/collection.html',
-        controller: 'CollectionCtrl'
+        controller: 'CollectionCtrl',
+        resolve: {
+          collection: function(CollectionFactory, $route) {
+            console.log('ohlala', $route.current.params.id);
+            return CollectionFactory.get({id: $route.current.params.id}).$promise;
+          }
+        }
       })
   })
