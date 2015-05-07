@@ -8,9 +8,10 @@
   
   node .\scripts\discover.js --entityid=
   
-  or
+  or bulk discover
   
-  node .\scripts\discover.js
+  node .\scripts\discover.js --entities=500
+  node .\scripts\discover.js --resources=500
 */
 
 var settings = require('../settings'),
@@ -25,7 +26,6 @@ var settings = require('../settings'),
     
 
 console.log(options);
-
 if(options.resourceid) {
   if(isNaN(options.resourceid))
     throw 'check your --resourceid value. Should be an integer id!'
@@ -41,14 +41,46 @@ if(options.entityid) {
     throw 'check your --entityid value. Should be an integer id!'
 
   entity.discover(options.entityid, function(err, res) {
-    console.log(res)
+    console.log(res);
   })
   return;
 }
 
+if(options.entities && !isNaN(options.entities)) {
+  var queue = async.waterfall([
+    // get pictures and documents having a caption
+    function (next) {
+      neo4j.query('MATCH (n:`person`) WHERE length(n.links_wiki) > 0 and not(has(n.languages)) RETURN n LIMIT {limit}', {
+        limit: options.entities
+      }, function (err, nodes) {
+        if(err)
+          throw err;
+        next(null, nodes);
+      });
+    },
+    /**
+      Nicely add TEXTRAZOR api service to extract persons from resources having caption (an/or source field)
+    */
+    function (nodes, next) {
+      var q = async.queue(function (node, nextNode) {
+        console.log('entities remaining', q.length(), '/', nodes.length)
+        entity.discover(node.id, function(err, res) {
+          if(err)
+            throw err;
+          console.log(res.id, res.name, res.links_wiki, res.languages);
+          setTimeout(nextNode, 1675);
+        })
+      }, 1);
+      q.push(nodes);
+      q.drain = next;
+    }
+  ], function () {
+    console.log('completed');
+  });
+}
 
-
-var queue = async.waterfall([
+if(options.resource) {
+  var queue = async.waterfall([
     // get pictures and documents having a caption
     function (next) {
       neo4j.query('MATCH (n:`resource`) WHERE not(has(n.textrazor_annotated)) RETURN n LIMIT 500', function (err, nodes) {
@@ -82,4 +114,5 @@ var queue = async.waterfall([
     }
   ], function () {
     console.log('completed');
-  })
+  });
+}

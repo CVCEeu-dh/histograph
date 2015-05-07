@@ -6,6 +6,7 @@ var fs       = require('fs'),
     async    = require('async'),
     crypto   = require('crypto'),
     settings = require('./settings'),
+    services = require('./services'),
     request  = require('request'),
     _        = require('lodash'),
     moment   = require('moment'),
@@ -112,6 +113,70 @@ module.exports = {
         });
       }
     );
+  },
+  /*
+    Transform a wiki object to a valid person data
+    
+  */
+  dbpediaPerson: function(link, next) {
+    services.dbpedia({
+      link: link
+    }, function(err, wiki){
+      if(err) {
+        next(err);
+        return;
+      };
+      if(_.size(wiki) == 0) {
+        
+        next(IS_EMPTY);
+        return;
+      };
+      var languages = [],
+          props = {
+            thumbnail:   'http://dbpedia.org/ontology/thumbnail',
+            birth_date:  'http://dbpedia.org/property/dateOfBirth',
+            death_date:  'http://dbpedia.org/property/dateOfDeath',
+            birth_place: 'http://dbpedia.org/property/placeOfBirth',
+            death_place: 'http://dbpedia.org/property/placeOfDeath',
+            description: 'http://dbpedia.org/property/shortDescription',
+            abstracts:   'http://dbpedia.org/ontology/abstract'
+          };
+      // find fields and complete the properties dict
+      _.forIn(props, function (v, k, o) {
+        o[k] = _.flattenDeep(_.compact(_.pluck(wiki, v)))
+        if(k != 'abstracts')
+          o[k] =_.first(o[k]);
+      });
+      // find  abstracts for specific languages
+      _.filter(props.abstracts, function(d) {
+        if(d.lang && settings.languages.indexOf(d.lang) !== -1) {
+          props['abstract_' + d.lang] = d;
+          languages.push(d.lang);
+        }
+      })
+      // delete the big useless abstracts
+      delete props.abstracts;
+     
+      // extract the juice and clean undefined
+      _.forIn(props, function (v, k, o) {
+        if(o[k] === undefined) {
+          delete o[k];
+        } else if(o[k].datatype == 'http://www.w3.org/2001/XMLSchema#date') {
+          var _k = k.split('_').shift(),
+              _date = module.exports.reconcileDate(v.value, 'YYYY-MM-DD'); // new k
+          delete o[k];
+          for(var i in _date){
+            o[_k + '_' + i] = _date[i]
+          }
+        } else {
+          o[k] = v.value;
+        }
+      });
+      //console.log(props)
+      // abstract languages
+      props.languages = _.unique(languages); 
+      next(null, props);
+    });
   },
 
   /**
@@ -551,7 +616,25 @@ module.exports = {
     result.time = +now.format('X');
     return result;
   },
-
+  
+  /*
+    Transform a date in the current db format and return a dict of date and time
+    @date   - string e.g "1921-11-27"
+    @format - the parser e.g "MM-DD-YYYY"
+    @next [optional] - callback. if it is not provided, send back the result.
+  */
+  reconcileDate: function(date, format, next) {
+    var d = moment.utc(date, format),
+        result = {
+          date: d.format(),
+          time: d.format('X')
+        };
+    if(next)
+      next(null, result);
+    else
+      return result;
+  },
+  
   /**
     Dummy Time transformation with moment.
   */

@@ -11,7 +11,9 @@ var async    = require('async'),
     fs       = require('fs'),
     
     settings = require('./settings'),
-    request  = require('request');
+    request  = require('request'),
+    
+    _        = require('lodash');
     
     
 // 
@@ -21,8 +23,10 @@ module.exports = {
       next('settings.dbpedia.endpoint not found')
       return;
     };
-      
-    var url = settings.dbpedia.endpoint + options.link + '.json';
+    
+    var url   = settings.dbpedia.endpoint + options.link + '.json',
+        level = options.level || 0;// recursion level, see below
+    console.log('dbpediq service:', url);
     request
       .get({
         url: url,//url,
@@ -31,8 +35,25 @@ module.exports = {
           'Accept':  'application/json'
         },
       }, function (err, res, body) {
-        if(err)
+        if(err) {
           next(err);
+          return;
+        }
+        
+        var redirect = _.first(_.flattenDeep(_.compact(_.pluck(body, 'http://dbpedia.org/ontology/wikiPageRedirects'))));
+        
+        if(redirect && redirect.value && level < 1) {
+          var link = redirect.value.split('/').pop();
+          console.log('following redirection, level', level, 'link', link)
+          setTimeout(function(){
+            module.exports.dbpedia({
+              link: link,
+              level: level + 1
+            }, next);
+          }, 2300);
+          return;
+        };
+        
         next(null, body)
       })
   },
