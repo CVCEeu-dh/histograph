@@ -4,7 +4,7 @@
   ===
   commandline usage:
   
-  mocha -g 'model:collection'
+  mocha -g 'model:entity'
 
 */
 'use strict';
