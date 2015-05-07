@@ -74,7 +74,7 @@ html
         div(ng-view, class='view')
         div(id='milkyway', sigma, graph='graph')
         div(id='timeline', timeline, graph='graph')
-        div(id='pop', popit, target="target")
+        div(id='pop', popit, target="target", comment="startCommenting(item, tag, hashtag)")
           div(class='btn-group')
             a(class='btn action', title='visit')
               span(class='fa fa-plus')
@@ -82,8 +82,18 @@ html
               span(class='fa fa-thumbs-o-down')
             a(class='btn action', title='vote down')
               span(class='fa fa-thumbs-o-up')
-            a(class='btn action', title='comment')
+            a(class='btn action', title='comment', data-action='comment')
               span(class='fa fa-comment-o')
+        div(id='inquirer', class="{{commenting? 'commenting': ''}}")
+          div
+            img(class='user-picture', ng-src='{{user.picture}}')
+            p {{user.username}} {{comment.tags}}
+          div(ng-model='comment.text', ui-codemirror="{lineNumbers: false,theme:'twilight',lineWrapping : true,mode: 'Smalltalk'}")
+          div(style='text-align:center')
+            div(class='btn-group', role='group', aria-label='...')
+              button(class='btn btn-primary', ng-click='postComment()') comment
+              button(ng-if='comment.tags.length' class='btn btn-default') signale
+              button(class='btn btn-default', ng-click='stopCommenting()') close
 
     script(src='/js/lib/jquery-2.1.3.min.js') 
     script(src='/js/lib/d3.min.js')  

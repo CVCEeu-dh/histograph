@@ -1,5 +1,6 @@
 /*
-  Available external Services
+  Available external Services.
+  Separation of concern: cfr helpers to transform these services in useful methods...
   
   IN-->OUT
   options, next --> [] array of stuff
@@ -56,6 +57,35 @@ module.exports = {
         
         next(null, body)
       })
+  },
+  
+  /*
+    VIAF reconciliation service.
+    @param options.link
+  */
+  viaf: function(options, next) {
+    if(!settings.dbpedia || !settings.dbpedia.endpoint) {
+      next('settings.dbpedia.endpoint not found')
+      return;
+    };
+    if(isNaN(options.link)) {
+      next('viaf link should be a numeric identifier')
+      return;
+    };
+    
+    var url = settings.viaf.endpoint + options.link + '/' + settings.viaf.format;
+    console.log(url);
+    request
+      .get({
+        url: url
+      }, function (err, res, body) {
+        if(err) {
+          next(err);
+          return;
+        }
+        
+        next(null, body);
+      });
   },
   
   yagoaida: function(options, next) {

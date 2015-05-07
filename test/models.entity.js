@@ -17,9 +17,9 @@ var settings = require('../settings'),
 describe('model:entity ', function() {
   it('should return a signle entity', function (done) {
     entity.get(20381, '', function(err, res){
-      if(err)
-        throw err;
-      done()
+      should.not.exist(err, err);
+      should.equal(res.id, 20381);
+      done();
     })
   });
 });

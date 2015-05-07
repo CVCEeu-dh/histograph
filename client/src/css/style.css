@@ -338,6 +338,7 @@ a:hover{
 */
 #pop{
   position: fixed;
+  display: none;
   top: 0;
   left: 0;
   height: 40px;

@@ -54,9 +54,8 @@ module.exports = {
             node.links_wiki = encodeURIComponent(node.links_wiki);
             console.log('wiki link changed!', node.links_wiki)
           }
-            
-          
-          helpers.dbpediaPerson(node.links_wiki, function(err, res) {
+
+          helpers.dbpediaPerson(node.links_wiki, function (err, res) {
             node = _.merge(node, res);
             // cleaning services
             if(node.services && node.services.length)
@@ -67,9 +66,21 @@ module.exports = {
                 next(err);
                 return;
               }
-              nextTask();
+              nextTask(null, node);
             })
             
+          });
+        },
+        // 
+        function (node, nextTask) {
+          console.log('viaf check', node.links_viaf)
+          if(!node.links_viaf) {
+            nextTask()
+            return
+          };
+          
+          helpers.viafPerson(node.links_viaf, function (err, res) {
+            console.log(res);
           });
         }
       ], function(){

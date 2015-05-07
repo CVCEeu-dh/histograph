@@ -10,6 +10,7 @@ var fs       = require('fs'),
     request  = require('request'),
     _        = require('lodash'),
     moment   = require('moment'),
+    xml      = require('xml2js'),
 
     IS_EMPTY = 'is_empty',
     LIMIT_REACHED = 'LIMIT_REACHED', // when limit of request for free /pauid webservices has been reached.
@@ -89,6 +90,7 @@ module.exports = {
 
   /**
     Call dbpedia service and translate its xml to a more human json content
+    @to be tested, ideed
   */
   dbpedia: function(fullname, next) {
     request.get('http://lookup.dbpedia.org/api/search.asmx/PrefixSearch?QueryClass=person&MaxHits=5&QueryString='
@@ -115,7 +117,7 @@ module.exports = {
     );
   },
   /*
-    Transform a wiki object to a valid person data
+    Transform a wiki object to a valid entity:person data
     
   */
   dbpediaPerson: function(link, next) {
@@ -127,7 +129,6 @@ module.exports = {
         return;
       };
       if(_.size(wiki) == 0) {
-        
         next(IS_EMPTY);
         return;
       };
@@ -178,7 +179,29 @@ module.exports = {
       next(null, props);
     });
   },
-
+  
+  /*
+    Transform a viaf object to valid entity:person data
+  */
+  viafPerson: function(link, next) {
+    services.viaf({
+      link: link
+    }, function (err, content) {
+      if(err) {
+        next(err);
+        return;
+      };
+      xml.parseString(content, {explicitArray: true}, function(err, res) {
+        if(err) {
+          next(err);
+          return;
+        };
+        // get birthdate / deathdate and nationalities..
+        next(null, {})
+      })
+      
+    })
+  },
   /**
     Call textrazor service for people/place reconciliation.
     When daily limit has been reached, the IS_EMPTY error message will be given to next()

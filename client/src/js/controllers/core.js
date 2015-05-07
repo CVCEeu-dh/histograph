@@ -7,7 +7,7 @@
  * It is the parent of the other controllers.
  */
 angular.module('histograph')
-  .controller('CoreCtrl', function ($scope, $log, $timeout, $http, socket) {
+  .controller('CoreCtrl', function ($scope, $log, $timeout, $http, socket, ResourceCommentsFactory) {
     $log.debug('CoreCtrl ready');
     
     var suggestionTimeout = 0;
@@ -68,7 +68,59 @@ angular.module('histograph')
       };
     };
     
+    /*
+      Commenting, everywhere
+      ----------------------
+    */
+    $scope.commenting = false; // on commenting = true
+    $scope.commented = {};
     
+    $scope.comment = {
+      text: "Write something please. Then do not forget to push the button below",
+      tags: ''
+    }
+    
+    // label should be in place if tag is an angular object.
+    $scope.startCommenting = function(item, tag, label){
+      $scope.commenting = true;
+      $scope.commented = item;
+      if(tag){
+        if(typeof tag == 'string') {
+          $scope.comment.tags = ['#' + tag];
+          $scope.comment.text = '#' + tag;
+        } else {
+          $scope.comment.tags = ['#' + label + '-' + tag.id]
+          $scope.comment.text = '#' + label + '-' + tag.id;
+        }
+      } else {
+        $scope.comment.text = "something";
+      }
+      $log.info('ResourceCtrl -> startCommenting()');
+      
+      socket.emit('start:commenting', item.props, function (result) {
+        
+      });
+    };
+    
+    $scope.postComment = function () {
+      $log.debug('resource.postMention', $scope.commented);
+      if($scope.comment.text.trim().length > 0 && $scope.commenting) {
+        $scope.commenting = false;
+        ResourceCommentsFactory.save({id: $scope.commented.id}, {
+          content: $scope.comment.text,
+          tags:  $scope.comment.tags
+        }, function(res){
+          
+          console.log('postMention', res);
+        })
+      }
+    };
+    
+    $scope.stopCommenting = function(item, tag, label){
+        $scope.commenting = false;
+        $scope.comment.tags = [];
+        $scope.comment.text = ""
+    };
     /*
     
       Following the trail

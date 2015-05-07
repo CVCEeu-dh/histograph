@@ -17,7 +17,7 @@
           
         
         <span ng-if="item.persons.length" class="tags"> — <i>in the document</i>:
-          <span popover="{{per}}" ng-repeat="per in item.persons" data-id='{{per.id}}' ng-click="startCommenting(item, per, 'person')" class='tag person'>{{per.name}}</span>
+          <span ng-repeat="per in item.persons" data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.name}} - {{per.description}} ({{per.birth_date | date:"yyyy"}} - {{per.death_date | date:"yyyy"}})' ng-click="toggleMenu($event, item, per, 'person')" class='tag person'>{{per.name}}</span>
         </span>
         <a data-id='{{item.id}}'> view on graph</a>
         
@@ -61,27 +61,7 @@
       </div>
 </div>
 
-<div id="inquirer" class="{{commenting? 'commenting': ''}}">
-  <div>
-    <img class="user-picture" ng-src='{{user.picture}}'>
-    {{user.username}} {{comment.tags}}
-  </div>
-  <div ng-model='comment.text' ui-codemirror="{
-      lineNumbers: false,
-      theme:'twilight',
-      lineWrapping : true,
-      mode: 'Smalltalk'
-    }">
-  </div>
-  <div style="text-align:center">
-    <div class="btn-group"  role="group" aria-label="...">
-      <button class="btn btn-primary" ng-click="postMention(item)">comment</button>
-      <button ng-if="comment.tags.length" class="btn btn-default">this is not what it is</button>
-      <button class="btn btn-default" ng-click="stopCommenting()">close</button>
-    </div>
-    
-  </div>
-</div>
+
         
 <div id="perspective-actions">
   <div class="btn-group"  role="group" aria-label="...">

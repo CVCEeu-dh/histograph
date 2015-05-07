@@ -14,7 +14,8 @@ angular.module('histograph')
     return {
       restrict : 'A',
       scope:{
-        target: '='
+        target: '=',
+        comment: '&comment'
       },
       link : function(scope, element, attrs) {
         var el = $(element[0]),
@@ -71,7 +72,20 @@ angular.module('histograph')
           .mouseleave(function() {
             timer = setTimeout(hide, delay);
           })
-        
+        /*
+          Commenting!
+        */
+        el.on('click', '[data-action=comment]', function(){
+          console.log('commenting', scope.target);
+          var args = {
+                item: scope.target.item,
+                tag: scope.target.tag,
+                hashtag: scope.target.hashtag
+              };
+             
+          scope.comment(args);
+          
+        })
       }
     }
   });

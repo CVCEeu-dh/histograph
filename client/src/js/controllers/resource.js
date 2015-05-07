@@ -22,46 +22,8 @@ angular.module('histograph')
 
     /**
       commenting, with socket
+    
     */
-    $scope.commenting = false; // on commenting = true
-    
-    $scope.comment = {
-      text: "Write something please. Then do not forget to push the button below",
-      tags: ''
-    }
-    
-    // label should be in place if tag is an angular object.
-    $scope.startCommenting = function(item, tag, label){
-      $scope.commenting = true;
-      if(tag){
-        if(typeof tag == 'string') {
-          $scope.comment.tags = ['#' + tag];
-          $scope.comment.text = '#' + tag;
-        } else {
-          $scope.comment.tags = ['#' + label + '-' + tag.id]
-          $scope.comment.text = '#' + label + '-' + tag.id;
-        }
-      } else {
-        $scope.comment.text = "something";
-      }
-      $log.info('ResourceCtrl -> startCommenting()');
-      
-      socket.emit('start:commenting', item.props, function (result) {
-        
-      });
-    };
-    
-    $scope.stopCommenting = function(item, tag, label){
-        $scope.commenting = false;
-        $scope.comment.tags = [];
-        $scope.comment.text = ""
-    };
-    
-    /**
-      Socket
-    */
-
-
     socket.on('done:commenting', function (result) {
       
       // add the comment at the bottom
@@ -96,20 +58,20 @@ angular.module('histograph')
       });
 
     };
-
-    $scope.postMention = function (item) {
-      $log.debug('resource.postMention', item);
-      if($scope.comment.text.trim().length > 0 && $scope.commenting) {
-        $scope.commenting = false;
-        ResourceCommentsFactory.save({id: $routeParams.id}, {
-          content: $scope.comment.text,
-          tags:  $scope.comment.tags
-        }, function(res){
+    
+    // $scope.postMention = function (item) {
+    //   $log.debug('resource.postMention', item);
+    //   if($scope.comment.text.trim().length > 0 && $scope.commenting) {
+    //     $scope.commenting = false;
+    //     ResourceCommentsFactory.save({id: $routeParams.id}, {
+    //       content: $scope.comment.text,
+    //       tags:  $scope.comment.tags
+    //     }, function(res){
           
-          console.log('postMention', res);
-        })
-      }
-    };
+    //       console.log('postMention', res);
+    //     })
+    //   }
+    // };
 
 
     $scope.switchVersion = function(version) {
