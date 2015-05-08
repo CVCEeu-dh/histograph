@@ -179,7 +179,36 @@ module.exports = {
       next(null, props);
     });
   },
-  
+  /*
+    Transform a wiki object to a valid entity:person data
+  */
+  lookupPerson: function(query, next) {
+    services.lookup({
+      query: query,
+      class: 'person'
+    }, function (err, wiki) {
+      if(err) {
+        next(err);
+        return;
+      };
+      if(wiki.results.length == 0) {
+        next(IS_EMPTY);
+        return;
+      };
+      var props = {};
+      
+      if(wiki.results[0].label)
+        props.name = wiki.results[0].label;
+      
+      if(wiki.results[0].description)
+        props.description = wiki.results[0].description
+      
+      if(wiki.results[0].uri)
+        props.links_wiki = wiki.results[0].uri.split('/').pop();
+      
+      next(null, props);
+    });
+  },
   /*
     Transform a viaf object to valid entity:person data
   */

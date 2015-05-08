@@ -17,7 +17,23 @@ module.exports = {
   neo4j : {
     host: 'http://localhost:7474'
   },
-
+  
+  dbpedia: {
+    endpoint: 'http://dbpedia.org/data/',
+    lookup: {
+      endpoint: 'http://lookup.dbpedia.org/api/search.asmx/PrefixSearch'
+    }
+  },
+  
+  viaf: {
+    endpoint: 'http://www.viaf.org/viaf/',
+    format: 'viaf.xml'
+  },
+  
+  yagoaida: {
+    endpoint: 'https://gate.d5.mpi-inf.mpg.de/aida/service/disambiguate' 
+  },
+  
   resourcespath: '', // abs location of the media (img) folder
   
   // if you wish to authenticate people with their twitter account

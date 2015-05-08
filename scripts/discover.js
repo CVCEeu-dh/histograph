@@ -50,7 +50,7 @@ if(options.entities && !isNaN(options.entities)) {
   var queue = async.waterfall([
     // get pictures and documents having a caption
     function (next) {
-      neo4j.query('MATCH (n:`person`) WHERE length(n.links_wiki) > 0 and not(has(n.languages)) RETURN n LIMIT {limit}', {
+      neo4j.query('MATCH (n:`person`) WHERE not(has(n.birth_date)) RETURN n LIMIT {limit}', {
         limit: options.entities
       }, function (err, nodes) {
         if(err)

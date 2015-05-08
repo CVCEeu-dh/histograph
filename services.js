@@ -60,6 +60,47 @@ module.exports = {
   },
   
   /*
+    dbpedia lookup PrefixSearch service
+    @param options.query
+  */
+  lookup: function(options, next) {
+    if(!settings.dbpedia || !settings.dbpedia.lookup || !settings.dbpedia.lookup.endpoint) {
+      next('settings.dbpedia.lookup.endpoint not found')
+      return;
+    };
+    var options = _.assign({
+      query: '',
+      class: 'person', // e.g. person
+      limit: 1
+    }, options);
+    
+    if(options.query.match(/[^a-zA-Z_\-'%0-9,\.]/g)) {
+      options.query = encodeURIComponent(options.query);
+    }
+
+    request.get({
+      url: settings.dbpedia.lookup.endpoint,
+      qs: {
+        QueryString: options.query,
+        MaxHits: options.limit,
+        QueryClass: options.class,
+      },
+      json: true,
+      headers: {
+        'Accept':  'application/json'
+      }
+    }, function (err, res, body) {
+      if(err) {
+        next(err);
+        return;
+      }
+      
+      next(null, body)
+    });
+  
+  },
+  
+  /*
     VIAF reconciliation service.
     @param options.link
   */

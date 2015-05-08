@@ -45,9 +45,38 @@ module.exports = {
       }
       
       var q = async.waterfall([
+        // check if the entity has a proper wiki link
         function (nextTask) {
-          if(!node.links_wiki) {
-            nextTask()
+          if((node.links_wiki && node.links_wiki.length > 0) || node.name.split(' ').length < 2) {
+            nextTask(null, node);
+            return
+          }
+          helpers.lookupPerson(node.name, function (err, res) {
+            if(err) {
+              console.log('error', err)
+              nextTask(null, node)
+              return;
+            }
+            console.log(err)
+            node = _.merge(node, res);
+            if(node.services && node.services.length)
+              node.services = _.unique(node.services);
+            console.log(node, 'wikipedia')
+            neo4j.save(node, function(err, res) {
+              if(err) {
+                console.log('error')
+                next(err);
+                return;
+              }
+              nextTask(null, node);
+            })
+          });
+        },
+        // download wiki data
+        function (node, nextTask) {
+          if(!node.links_wiki || node.links_wiki.length == 0) {
+            console.log('entity does not have a wiki link, skipping')
+            nextTask(null, node)
             return
           };
           if(node.links_wiki.match(/[^a-zA-Z_\-'%0-9,\.]/g)) {
@@ -56,7 +85,13 @@ module.exports = {
           }
 
           helpers.dbpediaPerson(node.links_wiki, function (err, res) {
+            if(err) {
+              console.log('error', err)
+              nextTask(null, node)
+              return;
+            }
             node = _.merge(node, res);
+            console.log('merging nodes')
             // cleaning services
             if(node.services && node.services.length)
               node.services = _.unique(node.services);
@@ -71,16 +106,18 @@ module.exports = {
             
           });
         },
-        // 
+        // dbpedia lookup ... ? If it is more than 2 words.
+        
         function (node, nextTask) {
           console.log('viaf check', node.links_viaf)
           if(!node.links_viaf) {
-            nextTask()
+            nextTask(null, node)
             return
           };
           
           helpers.viafPerson(node.links_viaf, function (err, res) {
             console.log(res);
+            nextTask(null, node)
           });
         }
       ], function(){
