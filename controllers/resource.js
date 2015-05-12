@@ -175,6 +175,21 @@ module.exports = function(io){
           items: _.values(items[0].comments)
         });
       })
+    },
+    
+    /*
+      remap neo4j items to nice resource objects
+      @return list of resource objects
+    */
+    model: function(items) {
+      return items.map(function (d) {
+        d.locations = _.values(d.locations || {});
+        d.person    = _.values(d.persons || {});
+        d.place     = _.values(d.places || {});
+        d.comments  = _.values(d.comments || {});
+        return d;
+      });
     }
+    
   }
 }

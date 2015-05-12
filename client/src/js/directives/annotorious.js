@@ -18,7 +18,7 @@ angular.module('histograph')
         version: '=', // which annotation version do you want to see here?
       },
       link : function(scope, element) {
-        return;
+        
         /* draw the current annotation version */
         var src = '';
         /*

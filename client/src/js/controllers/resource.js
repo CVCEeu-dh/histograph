@@ -100,7 +100,7 @@ angular.module('histograph')
         service: 'merged',
         yaml: yamls
       };
-      $scope.currentVersion = $scope.mergedVersion;
+      $scope.currentVersion = res.result.item.positionings[0];//$scope.mergedVersion;
       
       $scope.item = res.result.item;
       

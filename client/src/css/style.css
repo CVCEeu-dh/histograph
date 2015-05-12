@@ -109,9 +109,20 @@ a:hover{
 .tag {
   margin: 0 8px 0 0;
   text-decoration: none;
-  border-bottom: 1px solid #151515;
+  background:#eee;
+  cursor: pointer;
+  transition: background .3s ease-out;
 }
 
+.tag:hover{
+  background:#ddd;
+}
+
+
+
+.tag.selected{
+  background: #ccc;
+}
 
 .item .source a{
   background: cyan;

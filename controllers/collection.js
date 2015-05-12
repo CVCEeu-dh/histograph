@@ -52,7 +52,7 @@ module.exports = function(io){
         limit: req.params.limit
       };
       
-      collection.getItems(options, function(err, item) {
+      collection.getItems(options, function (err, item) {
         if(err)
           return helpers.cypherQueryError(err, res);
         return res.ok({
@@ -60,5 +60,18 @@ module.exports = function(io){
         });
       })
     },
+    
+    getRelatedResources: function (req, res) {
+      collection.getRelatedResources(+req.params.id, {
+        limit: +req.params.limit||10,
+        offset: +req.params.offset||0
+      }, function (err, items) {
+         if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({
+          items: items
+        });
+      });
+    }
   };
 };

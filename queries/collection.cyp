@@ -67,3 +67,22 @@ RETURN {
 } AS collection
 ORDER BY collection.users DESC, collection.comments DESC
 LIMIT 10
+
+
+// name:get_related_resources
+// get related nodes that are connected somehow
+MATCH (col:collection)
+WHERE id(col) = {id}
+WITH col
+  OPTIONAL MATCH (res:resource)-[r:belongs_to]->(col)
+  OPTIONAL MATCH (res)-[r1:appears_in]-(pla:`place`)
+  OPTIONAL MATCH (res)-[r2:appears_in]-(loc:`location`)
+  OPTIONAL MATCH (res)-[r3:appears_in]-(per:`person`)
+WITH col, res, pla, loc, per
+  RETURN {
+    id: id(res),
+    props: res,
+    locations: collect(DISTINCT loc),
+    persons: collect(DISTINCT per)
+  } as result
+SKIP {offset} LIMIT {limit}

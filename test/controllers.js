@@ -318,6 +318,20 @@ describe('controllers: play with collections', function() {
         done()
       });
   });
+  
+  it('should get a single collection related resources', function (done) {
+    session
+      .get('/api/collection/11137/resources')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log('ERROR', err);
+        should.not.exist(err);
+        should.exist(res.body.result.items);
+        done()
+      });
+  });
 });
 
 

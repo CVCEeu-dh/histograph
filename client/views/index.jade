@@ -72,12 +72,12 @@ html
               a(href='/auth/google', class='btn btn-default') signup with google plus
       else
         div(ng-view, class='view')
-        div(id='milkyway', sigma, graph='graph')
+        div(id='milkyway', sigma, graph='graph', redirect='redirect(path)')
         div(id='timeline', timeline, graph='graph')
         div(id='pop', popit, target="target", comment="startCommenting(item, tag, hashtag)")
           div(class='btn-group')
-            a(class='btn action', title='visit')
-              span(class='fa fa-plus')
+            a(class='btn action', title='visit', tooltip='visit entity page')
+              span(class='fa fa-link')
             a(class='btn action', title='vote up')
               span(class='fa fa-thumbs-o-down')
             a(class='btn action', title='vote down')

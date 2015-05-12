@@ -41,24 +41,27 @@ angular.module('histograph')
           timer = setTimeout(hide, delay);
           
           el.css({
-            top: pos.top + h,
+            top: pos.top + h + 10,
             left: pos.left
           });
           
           el.show(); 
         };
         
-        
+        var pt;
         // on graph change, change the timeline as well
         scope.$watch('target', function (d) {
           if(!d)
             return;
-          
+          if(pt)
+            pt.removeClass('selected');
           t   = $(d.event.target);
           pos = t.offset();
           h   = t.height();
           w   = t.width();
+          pt = t;
           
+          t.addClass('selected');
           $log.info('::pop knockover', t , pos, h, w);
           show(); 
         });

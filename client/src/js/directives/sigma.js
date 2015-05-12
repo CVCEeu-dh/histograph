@@ -9,11 +9,12 @@
  * directive to show a grapgh of nodes and edges thanks to @Yomguithereal!!! 
  */
 angular.module('histograph')
-  .directive('sigma', function($log) {
+  .directive('sigma', function($log, $location) {
     return {
       restrict : 'A',
       scope:{
-        graph: '='
+        graph: '=',
+        redirect: '&'
       },
       link : function(scope, element, attrs) {
         // Creating sigma instance
@@ -34,6 +35,7 @@ angular.module('histograph')
           camera: 'main',
           container: element[0]
         });
+        
         
         /*
           Center the camera on focusId and enlighten the
@@ -130,7 +132,14 @@ angular.module('histograph')
         });
         
         // click on node made the resource align to the top
-        
+        si.bind('clickNode', function(e){
+          $log.info('::sigma @clickNode', e.data.node.id, e.data.node.type || 'entity', e.data.node.label);
+          if(e.data.node.type == 'res') {
+            $log.info('::sigma redirect to', '/r/' + e.data.node.id);
+            scope.redirect({path: '/r/' + e.data.node.id})
+          }
+            
+        })
         
       }
     }

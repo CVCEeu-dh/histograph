@@ -7,7 +7,7 @@
  * It is the parent of the other controllers.
  */
 angular.module('histograph')
-  .controller('CoreCtrl', function ($scope, $log, $timeout, $http, socket, ResourceCommentsFactory) {
+  .controller('CoreCtrl', function ($scope, $location, $log, $timeout, $http, socket, ResourceCommentsFactory) {
     $log.debug('CoreCtrl ready');
     
     var suggestionTimeout = 0;
@@ -22,7 +22,14 @@ angular.module('histograph')
       if(update || !$scope.user.id)
         $scope.user = user;
     };
-
+    
+    /**
+     handle redirection from directive
+     */
+    $scope.redirect = function(path) {
+      $log.info('CoreCtrl redirect to', path)
+      $location.path(path)
+    };
     /*
       Will automatically update the graph view
       according tho the nodes edges propsed here.

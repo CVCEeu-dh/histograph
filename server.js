@@ -267,9 +267,11 @@ apiRouter.route('/cooccurrences') // @todo move to entity controller.
   
 */
 apiRouter.route('/collection')
-  .get(ctrl.collection.getItems)
+  .get(ctrl.collection.getItems);
 apiRouter.route('/collection/:id')
-  .get(ctrl.collection.getItem)
+  .get(ctrl.collection.getItem);
+apiRouter.route('/collection/:id/resources')
+  .get(ctrl.collection.getRelatedResources);
 
 
 /*

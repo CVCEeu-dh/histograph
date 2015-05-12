@@ -9,7 +9,7 @@ var settings  = require('../settings'),
     neo4j     = require('seraph')(settings.neo4j.host),
     
     queries   = require('decypher')('./queries/collection.cyp'),
-    
+
     async     = require('async'),
     _         = require('lodash');
 
@@ -50,5 +50,32 @@ module.exports = {
       }
       next(null, items);
     });  
+  },
+  /*
+    According to the given label
+  */
+  getRelatedResources: function(id, properties, next) {
+    var options = _.merge({
+      id: id,
+      offset: 0,
+      limit: 10
+    }, properties);
+    console.log(options)
+    neo4j.query(queries.get_related_resources, options, function (err, items) {
+      if(err) {
+        next(err);
+        return
+      }
+      next(null, items.map(function (d) {
+        d.locations = _.values(d.locations || {});
+        d.person    = _.values(d.persons || {});
+        d.place     = _.values(d.places || {});
+        return d;
+      }));
+    });  
+  },
+  
+  getRelatedItems: function(){
+    
   },
 };

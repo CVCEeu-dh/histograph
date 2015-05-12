@@ -27,7 +27,7 @@
 
         <!-- Single button -->
         <div ng-if='item.props.mimetype=="image"'>
-          <div class="btn-group" dropdown is-open="status.isopen" tooltip="view a different version">
+          <div ng-if="versions.length > 1" class="btn-group" dropdown is-open="status.isopen" tooltip="view a different version">
             <button type="button" class="btn btn-default dropdown-toggle" dropdown-toggle ng-disabled="disabled">
               {{currentVersion.service || "accepted"}}<span class="caret"></span>
             </button>

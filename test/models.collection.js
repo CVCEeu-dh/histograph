@@ -36,4 +36,11 @@ describe('model:collection ', function() {
       done()
     });
   })
+  it('should return a list of resource items', function (done) {
+    collection.getRelatedResources(12275, {}, function(err, res){
+      console.log(err)
+      done()
+    });
+  })
+  
 });
