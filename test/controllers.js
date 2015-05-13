@@ -321,7 +321,7 @@ describe('controllers: play with collections', function() {
   
   it('should get a single collection related resources', function (done) {
     session
-      .get('/api/collection/11137/resources')
+      .get('/api/collection/11137/related/resources')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
@@ -332,7 +332,38 @@ describe('controllers: play with collections', function() {
         done()
       });
   });
+  
+  it('should get a single collection graph object', function (done) {
+    session
+      .get('/api/collection/11137/graph')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log('ERROR', err);
+        should.not.exist(err);
+        should.exist(res.body.result.graph);
+        done()
+      });
+  });
 });
+
+describe('controllers: play with entities', function() {
+  it('should get a single entity item', function (done) {
+    session
+      .get('/api/entity/20381')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err);
+        should.not.exist(err);
+        should.exist(res.body.result.item);
+        should.equal(res.body.result.item.id, 20381);
+        done()
+      });
+  });
+})
 
 
 describe('controllers: delete the user and their relationships', function() {

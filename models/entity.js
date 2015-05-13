@@ -23,8 +23,11 @@ module.exports = {
         next(err);
         return;
       }
+      
       // select current abstract based on the language chosen, fallback to english
-      next(null, node)
+      next(null, module.exports.model(node, {
+        language: language
+      }));
     })
   },
   /**
@@ -57,7 +60,6 @@ module.exports = {
               nextTask(null, node)
               return;
             }
-            console.log(err)
             node = _.merge(node, res);
             if(node.services && node.services.length)
               node.services = _.unique(node.services);
@@ -131,4 +133,33 @@ module.exports = {
   disambiguate: function(id, next) {
     
   },
+  model: function(item, options) {
+    var d = {},
+        keys = [
+          'id',
+          'name',
+          'thumbnail',
+          'languages',
+          'description',
+          'death_date',
+          'birth_date',
+          'death_time',
+          'birth_time'
+        ]
+    // clone only some property from the original cypher item
+    keys.forEach(function (key) {
+      if(item[key])
+        d[key] = item[key]
+    });
+    // deal with language
+    if(!item.languages)
+      return d;
+    
+    if(options.language && item.languages.indexOf(options.language) !== -1) {
+      d.abstract = item['abstract_' + options.language];
+    } else if(item.languages.length) {
+      d.abstract = item['abstract_' + item.languages[0]];
+    }
+    return d
+  }
 };

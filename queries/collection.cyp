@@ -71,18 +71,39 @@ LIMIT 10
 
 // name:get_related_resources
 // get related nodes that are connected somehow
+MATCH (res:resource)-[r:belongs_to]->(col)
+WHERE id(col) = {id}
+WITH res, col
+  OPTIONAL MATCH (res)-[r1:appears_in]-(pla:`place`)
+  OPTIONAL MATCH (res)-[r3:appears_in]-(per:`person`)
+WITH col, res, pla, per
+  RETURN {
+    id: id(res),
+    props: res,
+    places: extract(n IN collect(DISTINCT pla)| {id: id(n), name: n.name }),
+    persons: extract(n IN collect(DISTINCT per)| {id: id(n), name: n.name })
+  } as result
+SKIP {offset} LIMIT {limit}
+
+
+// name:get_collection_graph
+// get lighter version for graph purposes
 MATCH (col:collection)
 WHERE id(col) = {id}
 WITH col
   OPTIONAL MATCH (res:resource)-[r:belongs_to]->(col)
   OPTIONAL MATCH (res)-[r1:appears_in]-(pla:`place`)
-  OPTIONAL MATCH (res)-[r2:appears_in]-(loc:`location`)
   OPTIONAL MATCH (res)-[r3:appears_in]-(per:`person`)
-WITH col, res, pla, loc, per
-  RETURN {
-    id: id(res),
-    props: res,
-    locations: collect(DISTINCT loc),
-    persons: collect(DISTINCT per)
+WITH res,
+  extract(n IN COLLECT(DISTINCT pla)| {id: id(n), name: n.name }) as places,
+  extract(n IN COLLECT(DISTINCT per)| {id: id(n), name: n.name }) as persons
+WITH res, persons, places,
+  {
+    res: { id: id(res), name: COALESCE(res.title_en,res.title_fr,res.title,res.name, '') },
+    pla: places,
+    per: persons
   } as result
-SKIP {offset} LIMIT {limit}
+WITH result, length(result.per) as entities
+ORDER BY entities DESC
+RETURN result
+LIMIT 500

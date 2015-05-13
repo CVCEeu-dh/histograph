@@ -23,9 +23,9 @@ angular.module('histograph')
               //container: element[0],
               settings: {
                 singleHover: true,
-                minNodeSize: 2,
-                maxNodeSize: 10,
-                labelThreshold: 5.2
+                // minNodeSize: 2,
+                // maxNodeSize: 10,
+                labelThreshold: 4.9
               }
             });
             // Creating camera
@@ -101,12 +101,12 @@ angular.module('histograph')
           // Reading new graph
           si.graph.clear().read(graph);
            
-          var layoutDuration = 4* si.graph.nodes().length * si.graph.edges().length
+          var layoutDuration = Math.min(4* si.graph.nodes().length * si.graph.edges().length, 20000)
           $log.info('::sigma n. nodes', si.graph.nodes().length, ' n. edges', si.graph.edges().length, 'runninn layout atlas for', layoutDuration/1000, 'seconds')
           
           // local Degree for size
           si.graph.nodes().forEach(function(n) {
-            n.size = si.graph.degree(n.id) + 1;
+            n.size = n.type == 'person'? si.graph.degree(n.id) + 1: 1;
           });
           if(!previousGraph)
             rescale();

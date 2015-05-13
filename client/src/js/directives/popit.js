@@ -15,7 +15,8 @@ angular.module('histograph')
       restrict : 'A',
       scope:{
         target: '=',
-        comment: '&comment'
+        comment: '&comment',
+        redirect: '&'
       },
       link : function(scope, element, attrs) {
         var el = $(element[0]),
@@ -87,6 +88,18 @@ angular.module('histograph')
               };
              
           scope.comment(args);
+          
+        })
+        el.on('click', '[data-action=link]', function(){
+          console.log('link', scope.target);
+          var args = {
+                item: scope.target.item,
+                tag: scope.target.tag,
+                hashtag: scope.target.hashtag
+              };
+          scope.redirect({
+            path: '/e/' +  scope.target.tag.id
+          })
           
         })
       }

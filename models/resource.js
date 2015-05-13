@@ -72,7 +72,7 @@ module.exports = {
           item.props['title_'+ language] || '',
           item.props['caption_'+ language] || ''
         ].join('§ ');
-        console.log('eee', content, item)
+        
         var annotations = parser.annotate(content, d.yaml).split('§ ');
         
         d.annotated = {

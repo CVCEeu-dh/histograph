@@ -15,6 +15,7 @@ var settings   = require('../settings'),
     
 // todo: create a new resource, discover its content, then retrieve its representation
 describe('model:collection ', function() {
+  this.timeout(5000)
   it('should return a list of collections, with limit and offset', function (done) {
     collection.getItems({}, function(err, res){
       if(err)
@@ -39,6 +40,15 @@ describe('model:collection ', function() {
   it('should return a list of resource items', function (done) {
     collection.getRelatedResources(12275, {}, function(err, res){
       console.log(err)
+      done()
+    });
+  })
+  it('should return the graph object of resource items', function (done) {
+    
+    collection.getGraph(12275, {}, function(err, res){
+      should.not.exist(err)
+      should.exist(res.edges.length)
+      should.exist(res.nodes.length)
       done()
     });
   })

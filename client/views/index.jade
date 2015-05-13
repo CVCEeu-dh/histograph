@@ -68,15 +68,15 @@ html
       if !user.username
           div(id='login')
             form
-              a(href='/auth/twitter', class='btn btn-default') signup with twitter
-              a(href='/auth/google', class='btn btn-default') signup with google plus
+              a(ng-href='/auth/twitter?next={{locationPath}}', class='btn btn-default') signup with twitter
+              a(ng-href='/auth/google?next={{locationPath}}', class='btn btn-default') signup with google plus
       else
         div(ng-view, class='view')
         div(id='milkyway', sigma, graph='graph', redirect='redirect(path)')
         div(id='timeline', timeline, graph='graph')
-        div(id='pop', popit, target="target", comment="startCommenting(item, tag, hashtag)")
+        div(id='pop', popit, target="target", redirect='redirect(path)', comment="startCommenting(item, tag, hashtag)")
           div(class='btn-group')
-            a(class='btn action', title='visit', tooltip='visit entity page')
+            a(class='btn action', title='visit', data-action='link', tooltip='visit entity page')
               span(class='fa fa-link')
             a(class='btn action', title='vote up')
               span(class='fa fa-thumbs-o-down')
@@ -110,6 +110,7 @@ html
     script(src='/js/lib/angular.min.js')
     script(src='/js/lib/angular-route.min.js')
     script(src='/js/lib/angular-resource.min.js')
+    script(src='/js/lib/angular-cookies.min.js')
     
     script(src='/js/lib/ui-codemirror.min.js')
     script(src='/js/lib/ui-bootstrap-tpls.min.js')
@@ -121,6 +122,7 @@ html
     script(src='/js/controllers/core.js')
     script(src='/js/controllers/index.js')
     script(src='/js/controllers/resource.js')
+    script(src='/js/controllers/entity.js')
     script(src='/js/controllers/collection.js')
     script(src='/js/directives/annotator.js') 
     script(src='/js/directives/annotorious.js') 

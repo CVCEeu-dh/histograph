@@ -9,6 +9,7 @@
 angular.module('histograph')
   .controller('CoreCtrl', function ($scope, $location, $log, $timeout, $http, socket, ResourceCommentsFactory) {
     $log.debug('CoreCtrl ready');
+    $scope.locationPath = $location.path(); 
     
     var suggestionTimeout = 0;
     
@@ -28,7 +29,8 @@ angular.module('histograph')
      */
     $scope.redirect = function(path) {
       $log.info('CoreCtrl redirect to', path)
-      $location.path(path)
+      $location.path(path);
+      $scope.$apply();
     };
     /*
       Will automatically update the graph view
@@ -37,6 +39,7 @@ angular.module('histograph')
       
     */
     $scope.setGraph = function(graph) {
+      $log.info('CoreCtrl -> setGraph', graph.nodes.length, 'nodes', graph.edges.length, 'edges')
       $scope.graph = graph;
     };
     

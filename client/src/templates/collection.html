@@ -1,4 +1,4 @@
-<div id="perspective" perfect-scrollbar wheel-propagation="true" refresh-on-change="item.props" suppress-scroll-x="true" wheel-speed="20">
+<div id="perspective" perfect-scrollbar wheel-propagation="true" refresh-on-change="collection.props" suppress-scroll-x="true" wheel-speed="20">
   <div class="collection item">
     <h3 class="" data-id='{{collection.id}}'>
       <a href="" ng-click="">
@@ -9,5 +9,81 @@
     {{collection.resources}} documents, 
      {{collection.comments.length}} comments,
      {{collection.users.length}} active researchers
+     
+    <div ng-if="collection.last_commented_resource" class="resource item">
+         
+        <h4 class="" data-id='{{collection.last_commented_resource.id}}'><a ng-href="#/r/{{collection.last_commented_resource.id}}">{{collection.last_commented_resource.props.title || collection.last_commented_resource.props.name || collection.last_commented_resource.props.title_en || collection.last_commented_resource.props.title_fr}}</a></h4>
+        <div class="collections">
+          <div class="collection" ng-repeat="collection in collection.last_commented_resource.collections"><a ng-href="#/c/{{collection.id}}">{{collection.name|humanize}}</a></div>
+        </div>
+        <span ng-click="startCommenting(item, 'date')">{{collection.last_commented_resource.props|guessInterval}}</span>
+        
+        <span ng-repeat="location in collection.last_commented_resource.places">
+          <a class="tag location" ng-click="toggleMenu($event, item, location, 'place')">{{location.name}}</a><!-- 
+          <a ng-if="location.geocode_id" ng-click="toggleInquirer(location)" class="tag location" >{{location.geocode_formatted_address}}</a>
+          <a ng-if="location.geonames_id" class="tag location" >{{location.geonames_toponymName}}, {{location.geonames_countryName}}</a>
+           --><span ng-if="!$last">-</span>
+        </span>
+          
+        
+        <span ng-if="collection.last_commented_resource.persons.length" class="tags"> — <i>in the document</i>:
+          <span ng-repeat="per in collection.last_commented_resource.persons" data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.name}} - {{per.description}} ({{per.birth_date | date:"yyyy"}} - {{per.death_date | date:"yyyy"}})' ng-click="toggleMenu($event, item, per, 'person')" class='tag person'>{{per.name}}</span>
+        </span>
+        <a data-id='{{collection.last_commented_resource.id}}'> view on graph</a>
+        
+        <div ng-if="currentAnnotation">
+          <div class="caption" annotator context="item" marked="currentAnnotation.annotated.source" ></div>
+        </div>
+
+        <!-- Single button -->
+        <div ng-if='collection.last_commented_resource.props.mimetype=="image"'>
+          <div ng-if="versions.length > 1" class="btn-group" dropdown is-open="status.isopen" tooltip="view a different version">
+            <button type="button" class="btn btn-default dropdown-toggle" dropdown-toggle ng-disabled="disabled">
+              {{currentVersion.service || "accepted"}}<span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+              <li ng-repeat="version in collection.last_commented_resource.versions"><a ng-click="switchVersion(version)">{{version.service || "first version"}}</a>
+
+              <li class="divider"></li>
+
+              <li><a ng-click="switchVersion(mergedVersion)">merged version</a></li>
+            </ul>
+          </div>
+          <div>
+            <img  ng-src="media/{{collection.last_commented_resource.props.url}}" w="collection.last_commented_resource.props.width" h="collection.last_commented_resource.props.height" version="currentVersion">
+          </div>
+        </div>
+        <blockquote ng-if="collection.last_commented_resource.props.stakeholders||collection.last_commented_resource.props.caption">
+         {{collection.last_commented_resource.props.stakeholders||collection.last_commented_resource.props.caption}}
+        </blockquote>
+    
+        <div class="discussion"></div>
+        
+  </div>
+</div>
+
+<div id="see-also" fperfect-scrollbar wheel-propagation="true" refresh-on-change="related" suppress-scroll-x="true" wheel-speed="20">
+  <div class="related" ng-repeat="relatedItem in related">
+    <h4><a ng-href="#/r/{{relatedItem.id}}">{{relatedItem.props.title || relatedItem.props.name || relatedItem.props.title_en}}</a></h4>
+    <a data-id='{{relatedItem.id}}'>view on graph</a>
+    {{relatedItem.props|guessInterval}}
+    
+    <!--div class="tags locations">
+      <span ng-repeat="location in relatedItem.locations">
+
+        <a ng-if="location.geocode_id" class="tag location" >{{location.geocode_formatted_address}}</a>
+
+        <a ng-if="location.geonames_id" class="tag location" >{{location.geonames_toponymName}}, {{location.geonames_countryName}}</a> <span ng-if="!$last">-</span> 
+      
+    </div-->
+    
+    <span class="tags" ng-if="relatedItem.persons"> — <i>in the document</i>:
+      <span ng-repeat="per in relatedItem.persons"  data-id='{{per.id}}'  ng-click="toggleMenu($event, relatedItem, per)" class='tag person'>{{per.name}}</span>
+    </span>
+
+    <img ng-if='relatedItem.props.mimetype=="image"' ng-src="media/{{relatedItem.props.url}}" >
+    <blockquote>
+     {{relatedItem.props.stakeholders || relatedItem.props.caption}}
+    </blockquote>
   </div>
 </div>

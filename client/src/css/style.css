@@ -98,6 +98,11 @@ a:hover{
   width: 100%;
 }
 
+.item .abstract{
+  max-height:200px;
+  overflow: hidden;
+}
+
 .item img.user-picture{
   width: 40px;
 }
@@ -137,7 +142,7 @@ a:hover{
   color: #151515;
 }
 
-.item.resource, .item.collection{
+.item.resource, .item.collection, .item.entity{
   /*border: 1px solid #eee;*/
   margin: 40px auto 0px auto;
   padding: 0 20px 10px 20px;
@@ -152,7 +157,10 @@ a:hover{
   width: 36%;
   top:  50px;
   bottom: 60px;
-  overflow: hidden;
+  /*overflow: hidden;*/
+  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   background: white;
 }
 
@@ -174,11 +182,14 @@ a:hover{
 
 #see-also{
   position: fixed;
-  width: 22%;
+  width: 32%;
   left: 36%;
   bottom: 0px;
   top:  50px;
-  overflow-y: hidden;
+  /*overflow: hidden;*/
+  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   padding: 0px 20px 0 15px;
   border-left: 1px solid #d4d4d4;
 
@@ -197,7 +208,7 @@ a:hover{
   margin-top: 0;
 }
 
-.related h4 a{
+.related h4 a, .item h4 a{
   color: #151515;
   font-weight: bold;
   font-size: 13px;
@@ -235,7 +246,7 @@ a:hover{
 #milkyway {
   position: fixed;
   top: 70px;
-  left: 58%;
+  left: 68%;
   right: 20px;
   bottom: 20px;
   background: #e8e8e8;

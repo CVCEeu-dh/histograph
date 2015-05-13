@@ -12,9 +12,10 @@ angular
   .module('histograph', [
     'ngRoute',
     'ngResource',
+    'ngCookies',
     'ui.bootstrap',
     'ui.codemirror',
-    'perfect_scrollbar'
+    //'perfect_scrollbar'
   ])
   .config(function ($routeProvider, $httpProvider) {
     $routeProvider
@@ -26,13 +27,31 @@ angular
         templateUrl: 'templates/resource.html',
         controller: 'ResourceCtrl'
       })
+      .when('/e/:id', {
+        templateUrl: 'templates/entity.html',
+        controller: 'EntityCtrl',
+        resolve: {
+          entity: function(EntityFactory, $route) {
+            return EntityFactory.get({
+              id: $route.current.params.id
+            }).$promise;
+          },
+        }
+      })
       .when('/c/:id', {
         templateUrl: 'templates/collection.html',
         controller: 'CollectionCtrl',
         resolve: {
           collection: function(CollectionFactory, $route) {
-            console.log('ohlala', $route.current.params.id);
-            return CollectionFactory.get({id: $route.current.params.id}).$promise;
+            return CollectionFactory.get({
+              id: $route.current.params.id
+            }).$promise;
+          },
+          resources: function(CollectionRelatedFactory, $route) {
+            return CollectionRelatedFactory.get({
+              id: $route.current.params.id,
+              model: 'resources'
+            }, {}).$promise;
           }
         }
       })

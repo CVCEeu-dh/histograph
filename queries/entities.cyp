@@ -1,3 +1,9 @@
+// name: get_entity
+// 
+MATCH(e:entity) WHERE id(e) = {id}
+RETURN e
+
+
 // name: get_person_cooccurrences
 //
 MATCH (p1:person)-[r1:appears_in]-(res:resource)-[r2:appears_in]-(p2:person)

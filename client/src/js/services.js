@@ -44,6 +44,18 @@ angular.module('histograph')
   .factory('CollectionFactory', function ($resource) {
     return $resource('/api/collection/:id', {}, {});
   })
+  .factory('CollectionRelatedFactory', function ($resource) {
+    return $resource('/api/collection/:id/related/:model', {}, {});
+  })
+  .factory('CollectionVizFactory', function ($resource) {
+    return $resource('/api/collection/:id/:viz', {}, {});
+  })
+  /*
+    Get/Update/Delete one entity
+  */
+  .factory('EntityFactory', function ($resource) {
+    return $resource('/api/entity/:id', {}, {});
+  })
   /*
     GET cooccurrences
   */

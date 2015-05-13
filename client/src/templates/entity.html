@@ -1,0 +1,15 @@
+<div id="perspective" perfect-scrollbar wheel-propagation="true" refresh-on-change="item.props" suppress-scroll-x="true" wheel-speed="20">
+  
+      <div ng-if="item" class="entity item">
+        
+        <h3><a>{{item.name}}</a></h3>
+        {{item.description}}
+        <div class="abstract">
+          {{item.abstract}}
+        </div>
+        <img ng-if="item.thumbnail" ng-src="{{item.thumbnail}}">
+        <blockquote ng-if="item.abstract">
+         {{item.name}} - {{item.description}}
+        </blockquote>
+      </div>
+</div>

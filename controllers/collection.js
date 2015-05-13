@@ -72,6 +72,17 @@ module.exports = function(io){
           items: items
         });
       });
+    },
+    
+    // get graph of resources and other stugff, a graph object of nodes and edges
+    getGraph: function (req, res) {
+      collection.getGraph(+req.params.id, {}, function (err, graph) {
+         if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({
+          graph: graph
+        });
+      }) 
     }
   };
 };

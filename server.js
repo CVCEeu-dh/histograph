@@ -133,7 +133,14 @@ clientRouter.route('/activate')
 
 // twitter oauth mechanism
 clientRouter.route('/auth/twitter')
-  .get(auth.passport.authenticate('twitter'));
+  .get(function (req, res, next) {
+    if(req.query.next) {
+      req.session.redirectAfterLogin = req.query.next;
+      console.log(req.query, req.params, req.session)
+    }
+    
+    auth.passport.authenticate('twitter')(req, res, next)
+  });
 
 clientRouter.route('/auth/twitter/callback')
   .get(function (req, res, next) {
@@ -142,6 +149,11 @@ clientRouter.route('/auth/twitter/callback')
       req.logIn(user, function(err) {
         if (err)
           return next(err);
+        if(req.session.redirectAfterLogin) {
+          console.log('redirect to', req.session.redirectAfterLogin)
+          return res.redirect('/#' + req.session.redirectAfterLogin)
+        }
+          
         return res.redirect('/');
       });
     })(req, res, next)
@@ -259,6 +271,18 @@ apiRouter.route('/cooccurrences') // @todo move to entity controller.
 
 /*
 
+  Controller: entity
+  ----------------------
+  
+  Cfr. controllers/entity.js
+  Cfr Neo4j queries: queries/entity.cyp
+  
+*/
+apiRouter.route('/entity/:id')
+  .get(ctrl.entity.getItem)
+
+/*
+
   Controller: collection
   ----------------------
   
@@ -270,7 +294,9 @@ apiRouter.route('/collection')
   .get(ctrl.collection.getItems);
 apiRouter.route('/collection/:id')
   .get(ctrl.collection.getItem);
-apiRouter.route('/collection/:id/resources')
+apiRouter.route('/collection/:id/graph')
+  .get(ctrl.collection.getGraph);
+apiRouter.route('/collection/:id/related/resources')
   .get(ctrl.collection.getRelatedResources);
 
 
