@@ -56,6 +56,12 @@ angular.module('histograph')
   .factory('EntityFactory', function ($resource) {
     return $resource('/api/entity/:id', {}, {});
   })
+  .factory('EntityRelatedFactory', function ($resource) {
+    return $resource('/api/entity/:id/related/:model', {}, {});
+  })
+  .factory('EntityVizFactory', function ($resource) {
+    return $resource('/api/entity/:id/:viz', {}, {});
+  })
   /*
     GET cooccurrences
   */

@@ -36,6 +36,18 @@ angular
               id: $route.current.params.id
             }).$promise;
           },
+          persons: function(EntityRelatedFactory, $route) {
+            return EntityRelatedFactory.get({
+              id: $route.current.params.id,
+              model: 'persons'
+            }, {}).$promise;
+          },
+          resources: function(EntityRelatedFactory, $route) {
+            return EntityRelatedFactory.get({
+              id: $route.current.params.id,
+              model: 'resources'
+            }, {}).$promise;
+          }
         }
       })
       .when('/c/:id', {

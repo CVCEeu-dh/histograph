@@ -53,6 +53,23 @@ module.exports = {
     });  
   },
   
+  getRelatedPersons: function(id, properties, next) {
+    var options = _.merge({
+      id: +id,
+      offset: 0,
+      limit: 20
+    }, properties);
+
+    neo4j.query(queries.get_related_persons, options, function (err, items) {
+      if(err) {
+        next(err);
+        return
+      }
+
+      next(null, items);
+    });  
+  },
+  
   getGraph: function (id, properties, next) {
     var options = _.merge({
       id: +id,

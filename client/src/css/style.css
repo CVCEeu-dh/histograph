@@ -99,8 +99,6 @@ a:hover{
 }
 
 .item .abstract{
-  max-height:200px;
-  overflow: hidden;
 }
 
 .item img.user-picture{
@@ -152,6 +150,34 @@ a:hover{
   margin-bottom: 10px
 }
 
+.item.entity h3, .item.entity .description{
+  text-align: center
+}
+
+.item.entity .description{
+  font-style: italic
+}
+
+.item.entity .abstract{
+  margin-top: 20px;
+}
+
+.item.entity .tags{
+  margin-top: 20px;
+}
+
+.item.entity .profile-pic{
+  border: 1px solid #d4d4d4;
+  
+  width: 120px;
+  /* margin-left: -60px; */
+  border-radius: 120px;
+  overflow: hidden;
+  height: 120px;
+  background: #d4d4d4;
+  margin: 0px auto;
+}
+
 #perspective{
   position: fixed;
   width: 36%;
@@ -174,6 +200,9 @@ a:hover{
   padding: 10px 20px;
   text-align: center;
 }
+
+
+
 /*
 
   related items
@@ -191,9 +220,22 @@ a:hover{
   overflow-y: auto;
   overflow-x: hidden;
   padding: 0px 20px 0 15px;
-  border-left: 1px solid #d4d4d4;
+  /*border-left: 1px solid #d4d4d4;*/
 
 }
+/*
+#see-also-header{
+  position: fixed;
+  width: 32%;
+  left: 36%;
+  top:  50px;
+  height: 30px;
+  overflow: hidden;
+  line-height: 30px;
+  text-align: center;
+  z-index: 6;
+  background: #d4d4d4;
+}*/
 
 
 #see-also img{

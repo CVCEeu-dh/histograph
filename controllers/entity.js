@@ -52,6 +52,19 @@ module.exports = function(io){
       });
     }, // get graph of resources and other stugff, a graph object of nodes and edges
     
+    getRelatedPersons: function (req, res) {
+      entity.getRelatedPersons(req.params.id, {
+        limit: 10,
+        offset: 0
+      }, function (err, items) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({
+          items: items
+        });
+      });
+    }, // get graph of resources and other stugff, a graph object of nodes and edges
+    
     getGraph: function (req, res) {
       entity.getGraph(req.params.id, {}, function (err, graph) {
          if(err)

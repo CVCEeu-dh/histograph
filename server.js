@@ -282,8 +282,11 @@ apiRouter.route('/entity/:id')
   .get(ctrl.entity.getItem)
 apiRouter.route('/entity/:id/related/resources')
   .get(ctrl.entity.getRelatedResources);
+apiRouter.route('/entity/:id/related/persons')
+  .get(ctrl.entity.getRelatedPersons);
 apiRouter.route('/entity/:id/graph')
   .get(ctrl.entity.getGraph);
+
   
 /*
 

@@ -23,8 +23,6 @@ angular.module('histograph')
               //container: element[0],
               settings: {
                 singleHover: true,
-                minNodeSize: 2,
-                maxNodeSize: 6,
                 labelThreshold: 4.9
               }
             });
@@ -104,10 +102,17 @@ angular.module('histograph')
           var layoutDuration = Math.min(4* si.graph.nodes().length * si.graph.edges().length, 20000)
           $log.info('::sigma n. nodes', si.graph.nodes().length, ' n. edges', si.graph.edges().length, 'runninn layout atlas for', layoutDuration/1000, 'seconds')
           
+          // computating other values for nodes (not only degree), min and max values
+          // var stats = si.graph.HITS(true),
+          //     authority = {min: -Infinity, max: Infinity};
+          
+          // $log.info('::sigma authority', authority)
           // local Degree for size
           si.graph.nodes().forEach(function(n) {
-            console.log('sigma', n.type);
-            n.size = n.type == 'res'? 1 : si.graph.degree(n.id) + 1.5;
+            // if(authority.max > 0)
+            //   n.size = 1 + (stats[n.id].authority/(authority.max-authority.min))*6
+            // else
+              n.size = n.type == 'res'? 1 : si.graph.degree(n.id) + 1.5;
           });
           if(!previousGraph)
             rescale();
@@ -135,9 +140,9 @@ angular.module('histograph')
         // click on node made the resource align to the top
         si.bind('clickNode', function(e){
           $log.info('::sigma @clickNode', e.data.node.id, e.data.node.type || 'entity', e.data.node.label);
-          if(e.data.node.type == 'res') {
+          if(e.data.node.type == 'resource') {
             $log.info('::sigma redirect to', '/r/' + e.data.node.id);
-            scope.redirect({path: '/r/' + e.data.node.id})
+            //scope.redirect({path: '/r/' + e.data.node.id})
           }
             
         })

@@ -30,4 +30,12 @@ describe('model:entity ', function() {
       done();
     })
   });
+  
+  it('should return some related persons', function (done) {
+    entity.getRelatedResources(26706, {}, function (err, res){
+      should.not.exist(err, err);
+      should.exist(res.length)
+      done();
+    })
+  });
 });

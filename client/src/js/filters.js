@@ -89,6 +89,22 @@ angular.module('histograph')
       
       return input.replace('_', ' ').replace(/\.\w+$/, '');
     }
+  })
+  .filter('datesOfAPerson', function() {
+    return function(birth_time,death_time) {
+      
+      var start_date_a = moment.utc(birth_time, 'x'),
+          start_date_b = moment.utc(death_time, 'x'),
+          delta = moment.duration(start_date_b.diff(start_date_a));
+      
+      return [
+        '(', 
+          start_date_a.isValid()? start_date_a.format('ll'): ' ? ',
+        ' — ',
+          start_date_b.isValid()? start_date_b.format('ll'): ' ... ',
+        ')'
+      ].join(''); // count years
+    }
   });
 
 

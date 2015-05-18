@@ -71,6 +71,7 @@ html
               a(ng-href='/auth/twitter?next={{locationPath}}', class='btn btn-default') signup with twitter
               a(ng-href='/auth/google?next={{locationPath}}', class='btn btn-default') signup with google plus
       else
+        //- div(id='see-also-header') related stuff
         div(ng-view, class='view')
         div(id='milkyway', sigma, graph='graph', redirect='redirect(path)')
         div(id='timeline', timeline, graph='graph')
@@ -105,6 +106,7 @@ html
     script(src='/js/lib/moment.min.js')
     script(src='/js/lib/sigma.min.js')
     script(src='/js/lib/sigma.layout.forceAtlas2.min.js')
+    script(src='/js/lib/sigma.statistics.HITS.js')
     script(src='/js/lib/perfect-scrollbar.min.js')
     script(src='/js/lib/perfect-scrollbar.with-mousewheel.min.js')
     script(src='/js/lib/angular.min.js')

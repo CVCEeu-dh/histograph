@@ -72,3 +72,38 @@ WITH result, length(result.per) as entities
 ORDER BY entities DESC
 RETURN result
 LIMIT {limit}
+
+
+// name:get_related_persons
+// get related persons that are connected with the entity, sorted by frequence
+MATCH (ent)-[:appears_in]->(res:resource)
+WHERE id(ent) = {id}
+WITH ent, res
+  OPTIONAL MATCH (per:person)-[:appears_in]->(res)
+RETURN {
+  id: id(per),
+  props: per,
+  type: LAST(labels(per)),
+  coappear: COUNT(DISTINCT res)
+} as results ORDER BY results.coappear DESC LIMIT 10
+
+// name:get_related_places
+// get related persons that are connected with the entity, sorted by frequence
+MATCH (ent)-[:appears_in]->(res:resource)
+WHERE id(ent) = {id}
+WITH ent, res
+  OPTIONAL MATCH (per:place)-[:appears_in]->(res)
+RETURN {
+  id: id(per),
+  props: per,
+  type: LAST(labels(per)),
+  coappear: COUNT(DISTINCT res)
+} as results ORDER BY results.coappear DESC LIMIT 10
+
+
+// name: get_timeline
+// get timebased resources id where the entioty a^^ears
+MATCH (ent)-[:appears_in]->(res:resource)
+WHERE id(ent) = {id} AND has(res.start_time)
+RETURN {id:id(res), start_time: res.start_time }
+ORDER BY res.start_time

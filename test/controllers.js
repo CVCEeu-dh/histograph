@@ -377,7 +377,21 @@ describe('controllers: play with entities', function() {
       });
   });
   
-  it('should get a single collection graph object', function (done) {
+  it('should get a single entity related persons', function (done) {
+    session
+      .get('/api/entity/20381/related/persons')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log('ERROR', err);
+        should.not.exist(err);
+        should.exist(res.body.result.items);
+        done()
+      });
+  });
+  
+  it('should get a single entity graph object', function (done) {
     session
       .get('/api/entity/20381/graph')
       .expect('Content-Type', /json/)
