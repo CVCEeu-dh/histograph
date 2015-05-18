@@ -60,7 +60,7 @@ module.exports = {
       offset: 0,
       limit: 10
     }, properties);
-    console.log(options)
+
     neo4j.query(queries.get_related_resources, options, function (err, items) {
       if(err) {
         next(err);

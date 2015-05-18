@@ -30,7 +30,7 @@ module.exports = function(io){
     */
     getItem: function (req, res) {
       var language = req.query.language || 'en';
-      entity.get(req.params.id, language, function(err, item) {
+      entity.get(req.params.id, language, function (err, item) {
         if(err)
           return helpers.cypherQueryError(err, res);
         return res.ok({
@@ -39,5 +39,27 @@ module.exports = function(io){
       })
     },
     
+    getRelatedResources: function (req, res) {
+      entity.getRelatedResources(req.params.id, {
+        limit: 10,
+        offset: 0
+      }, function (err, items) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({
+          items: items
+        });
+      });
+    }, // get graph of resources and other stugff, a graph object of nodes and edges
+    
+    getGraph: function (req, res) {
+      entity.getGraph(req.params.id, {}, function (err, graph) {
+         if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({
+          graph: graph
+        });
+      }) 
+    }
   }
 }

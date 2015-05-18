@@ -33,18 +33,19 @@ angular.module('histograph')
         
         // make the tooltip disappear if clicked on other pop
         function hide() {
-          //el.hide();
+          el.removeClass('disappearing').hide();
         }
         
         
         function show() {
           clearTimeout(timer);
-          timer = setTimeout(hide, delay);
           
-          el.css({
+          el.addClass('disappearing').css({
             top: pos.top + h + 10,
             left: pos.left
           });
+          
+          timer = setTimeout(hide, delay);
           
           el.show(); 
         };

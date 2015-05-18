@@ -30,6 +30,66 @@ module.exports = {
       }));
     })
   },
+  
+  getRelatedResources: function(id, properties, next) {
+    var options = _.merge({
+      id: +id,
+      offset: 0,
+      limit: 20
+    }, properties);
+
+    neo4j.query(queries.get_related_resources, options, function (err, items) {
+      if(err) {
+        next(err);
+        return
+      }
+
+      next(null, items.map(function (d) {
+        d.locations = _.values(d.locations || {});
+        d.persons   = _.values(d.persons || {});
+        d.places    = _.values(d.places || {});
+        return d;
+      }));
+    });  
+  },
+  
+  getGraph: function (id, properties, next) {
+    var options = _.merge({
+      id: +id,
+      limit: 500
+    }, properties);
+    
+    neo4j.query(queries.get_graph, options, function (err, items) {
+      if(err) {
+        next(err);
+        return
+      }
+      
+      var graph = {
+        nodes: [],
+        edges: []
+      };
+      var index = {};
+      
+      for(var i = 0; i < items.length; i++) {
+        graph.nodes.push(items[i].res);
+        for(var j in items[i].per ) {
+          if(!index[items[i].per[j].id]) {
+            index[items[i].per[j].id] = items[i].per[j];
+            index[items[i].per[j].id].type = 'person';
+            graph.nodes.push( items[i].per[j])
+          }
+          graph.edges.push({
+            id: items[i].res.id+'.'+items[i].per[j].id,
+            source: items[i].res.id,
+            target: items[i].per[j].id,
+            color: "#a3a3a3"
+          })
+        }
+      }
+      next(null, graph)
+    })
+  },
   /**
    Enrich the entity by using dbpedia data (and yago).
    Since entities comes from Resource.discover activities, they're enriched with
@@ -41,7 +101,7 @@ module.exports = {
    */
   discover: function(id, next) {
     // quetly does textrazor entity extraction.
-    neo4j.read(id, function(err, node) {
+    neo4j.read(id, function (err, node) {
       if(err) {
         next(err);
         return;

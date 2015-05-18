@@ -363,6 +363,33 @@ describe('controllers: play with entities', function() {
         done()
       });
   });
+  it('should get a single entity related resources', function (done) {
+    session
+      .get('/api/entity/20381/related/resources')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log('ERROR', err);
+        should.not.exist(err);
+        should.exist(res.body.result.items);
+        done()
+      });
+  });
+  
+  it('should get a single collection graph object', function (done) {
+    session
+      .get('/api/entity/20381/graph')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log('ERROR', err);
+        should.not.exist(err);
+        should.exist(res.body.result.graph);
+        done()
+      });
+  });
 })
 
 

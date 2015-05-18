@@ -23,8 +23,8 @@ angular.module('histograph')
               //container: element[0],
               settings: {
                 singleHover: true,
-                // minNodeSize: 2,
-                // maxNodeSize: 10,
+                minNodeSize: 2,
+                maxNodeSize: 6,
                 labelThreshold: 4.9
               }
             });
@@ -106,7 +106,8 @@ angular.module('histograph')
           
           // local Degree for size
           si.graph.nodes().forEach(function(n) {
-            n.size = n.type == 'person'? si.graph.degree(n.id) + 1: 1;
+            console.log('sigma', n.type);
+            n.size = n.type == 'res'? 1 : si.graph.degree(n.id) + 1.5;
           });
           if(!previousGraph)
             rescale();
