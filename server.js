@@ -339,7 +339,11 @@ apiRouter.route('/suggest')
   .get(ctrl.suggest.simple)
 apiRouter.route('/suggest/all-shortest-paths/:ids')
   .get(ctrl.suggest.allShortestPaths)
-  
+apiRouter.route('/suggest/unknown-node/:id')
+  .get(ctrl.suggest.getUnknownNode)
+apiRouter.route('/suggest/neighbors/:ids')
+  .get(ctrl.suggest.getNeighbors)
+
 /*
   
   Socket io config

@@ -7,7 +7,7 @@
  * It is the parent of the other controllers.
  */
 angular.module('histograph')
-  .controller('CoreCtrl', function ($scope, $location, $log, $timeout, $http, socket, ResourceCommentsFactory) {
+  .controller('CoreCtrl', function ($scope, $location, $log, $timeout, $http, socket, ResourceCommentsFactory, SuggestFactory) {
     $log.debug('CoreCtrl ready');
     $scope.locationPath = $location.path(); 
     
@@ -72,7 +72,7 @@ angular.module('histograph')
       @param hashtag  - istead of using target, a hashtag
     */
     $scope.toggleMenu = function(e, item, tag, hashtag) {
-      console.log(arguments)
+      $log.info('CoreCtrl -> toggleMenu()', e, item, tag)
       $scope.target = {
         event: e,
         item: item,
@@ -191,9 +191,27 @@ angular.module('histograph')
       --------
      */
      $scope.queue = function(item) {
-      $scope.playlist.push(item);
-      $scope.queueStatus = 'active';
-      $scope.$apply();
+      // load item by id ...
+      $log.info('CoreCtrl -> queue', item)
+      if(typeof item == 'object') {
+        $scope.playlist.push(item);
+        $scope.queueStatus = 'active';
+      } else {
+        SuggestFactory.getUnknownNode({
+          id:item
+        }).then(function (res) {
+          $scope.playlist.push(res.data.result.item);
+          $scope.queueStatus = 'active';
+           try{$scope.$apply();}catch(e) {
+        $log.error('scope has already been updated', e)
+      }
+        })
+      }
+      try{
+        $scope.$apply();
+      } catch(e) {
+        $log.error('scope has already been updated', e)
+      }
      }
      
      $scope.hideQueue = function(item) {

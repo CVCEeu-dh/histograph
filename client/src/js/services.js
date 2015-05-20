@@ -80,7 +80,10 @@ angular.module('histograph')
       },
       allShortestPaths: function(options) {
         return $http.get('/api/suggest/all-shortest-paths/' + options.ids);
-      }
+      },
+      getUnknownNode: function(options) {
+        return $http.get('/api/suggest/unknown-node/' + options.id);
+      },
     }
   })
   /*

@@ -43,3 +43,36 @@ RETURN {
 order by coherence DESC, adequancy ASC, distance ASC
 SKIP {offset}
 LIMIT {limit}
+
+
+// name: get_unknown_node
+// given a simple ID, return the complete node (id, props)
+MATCH (n)
+WHERE id(n) = {id}
+RETURN {
+  id: id(n),
+  props: n,
+  type: LAST(labels(n))
+} as result
+
+
+// name: get_neighbors
+// [33828,26750,26389,33759,33758, 26441, 27631, 11173]
+MATCH (a)-[r]-(b)
+WHERE id(a) in {ids} AND last(labels(b)) in {labels}
+RETURN {
+  source: {
+    id: id(a),
+    name: COALESCE(b.name, b.title_en, b.title_fr),
+    start_time: a.start_time,
+    end_time: a.end_time,
+    type: last(labels(a))
+  },
+  target: {
+    id: id(b),
+    name: COALESCE(b.name, b.title_en, b.title_fr),
+    start_time: b.start_time,
+    end_time: b.end_time,
+    type: last(labels(b))
+  }
+} LIMIT {limit}

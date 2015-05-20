@@ -55,6 +55,46 @@ module.exports =  function(io){
         });
       })
     },
+    
+    /**
+      
+    */
+    getUnknownNode: function (req, res) {
+      neo4j.query(queries.get_unknown_node, {
+        id: +req.params.id
+      }, function (err, items) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({
+          item: _.first(items)
+        });
+      })
+    },
+    /*
+    */
+    getNeighbors: function (req, res) {
+       var ids = req.params.ids.split(',').filter(function (d) {
+        return !isNaN(d)
+      }).map(function (d) {
+        return +d;
+      });
+      
+      if(!ids.length)
+        return res.error({})
+      neo4j.query(queries.get_neighbors, {
+        ids: ids,
+        labels: ['person', 'place', 'location', 'resource', 'collection'],
+        limit: 1000
+      }, function (err, items) {
+        console.log(err)
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({
+          items: items
+        });
+      })
+    },
+    
      /**
       search the query among:resources and entities. Return a list of objects, max. 3 per 'entities and 5 for resources.
       Norammly if the user clicks on "submit free search" he will be sent to search page wich will display top search results.

@@ -332,6 +332,34 @@ describe('controllers: suggest queries', function() {
         done()
       });
   });
+  
+  it('should get an unknown node based on id', function (done) {
+    session
+      .get('/api/suggest/unknown-node/26441')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err);
+        should.not.exist(err);
+        should.exist(res.body.result.item);
+        done()
+      });
+  });
+  
+  it('should get the neighbors at distance 1 of four nodes', function (done) {
+    session
+      .get('/api/suggest/neighbors/26441,27631,11173')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err);
+        should.not.exist(err);
+        should.exist(res.body.result.items.length);
+        done()
+      });
+  });
 });
 
 describe('controllers: play with collections', function() {

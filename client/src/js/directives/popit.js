@@ -34,7 +34,7 @@ angular.module('histograph')
         
         // make the tooltip disappear if clicked on other pop
         function hide() {
-          //el.removeClass('disappearing').hide();
+          el.hide();
         }
         
         
@@ -46,7 +46,7 @@ angular.module('histograph')
             left: pos.left
           });
           
-          timer = setTimeout(hide, delay);
+          // timer = setTimeout(hide, delay);
           
           el.show(); 
         };
@@ -58,30 +58,46 @@ angular.module('histograph')
             return;
           if(pt)
             pt.removeClass('selected');
-          t   = $(d.event.target);
-          pos = t.offset();
-          h   = t.height();
-          w   = t.width();
-          pt = t;
+          if(!d.event) {
+            hide();
+            return;
+          }
+            
+          if(d.event.target) {
+            t   = $(d.event.target);
+            pos = t.offset();
+            h   = t.height();
+            w   = t.width();
+            pt = t;
+            t.addClass('selected');
+          } else {
+            pos = { 
+              top: d.event.clientY ,
+              left: d.event.clientX - 80
+            };
+            h = -60;
+            
+          }
           
-          t.addClass('selected');
-          $log.info('::pop knockover', t , pos, h, w);
+          
+          $log.info('::pop @watch ', t , pos, h, w);
           show(); 
         });
         
         // $(document).off('click', makeDisappear);
         // $(document).on('click', makeDisappear);
-        el
-          .mouseenter(function(){
-            clearTimeout(timer);
-          })
-          .mouseleave(function() {
-            timer = setTimeout(hide, delay);
-          })
+        // el
+        //   .mouseenter(function(){
+        //     clearTimeout(timer);
+        //   })
+        //   .mouseleave(function() {
+        //     timer = setTimeout(hide, delay);
+        //   })
         /*
           Commenting!
         */
         el.on('click', '[data-action=comment]', function(){
+          hide();
           console.log('commenting', scope.target);
           var args = {
                 item: scope.target.item,
@@ -93,6 +109,7 @@ angular.module('histograph')
           
         })
         el.on('click', '[data-action=link]', function(){
+          hide();
           console.log('link', scope.target);
           var args = {
                 item: scope.target.item,

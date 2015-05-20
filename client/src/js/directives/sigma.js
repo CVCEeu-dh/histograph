@@ -15,7 +15,7 @@ angular.module('histograph')
       template: ''+
         '<div id="playground"></div>' +
         '<div id="commands">' +
-          '<div class="action" ng-click="togglePlay()"><i class="fa fa-{{status==\'RUNNING\' ? \'stop\': \'play\'}}"></i></div>' +
+          '<div class="action {{status==\'RUNNING\'? \'bounceIn animated\': \'\'}}" ng-click="togglePlay()"><i class="fa fa-{{status==\'RUNNING\' ? \'stop\': \'play\'}}"></i></div>' +
           '<div class="action" ng-click="rescale()"><i class="fa fa-dot-circle-o"></i></div>' +
           '<div class="action" ng-click="zoomin()"><i class="fa fa-plus"></i></div>' +
           '<div class="action" ng-click="zoomout()"><i class="fa fa-minus"></i></div>' +
@@ -23,7 +23,8 @@ angular.module('histograph')
       scope:{
         graph: '=',
         controller: '=',
-        redirect: '&'
+        redirect: '&',
+        toggleMenu: '&togglemenu'
       },
       link : function(scope, element, attrs) {
         // Creating sigma instance
@@ -177,12 +178,35 @@ angular.module('histograph')
           @todo
         */
         si.bind('clickNode', function(e){
+          stop();
+          
           $log.info('::sigma @clickNode', e.data.node.id, e.data.node.type || 'entity', e.data.node.label);
           if(e.data.node.type == 'resource') {
             $log.info('::sigma redirect to', '/r/' + e.data.node.id);
             //scope.redirect({path: '/r/' + e.data.node.id})
           }  
+          switch(e.data.node.type) {
+            case 'person':
+            case 'personKnown':
+              scope.toggleMenu({e: e.data.captor, item:null, tag:e.data.node, hashtag:'person' })
+              $log.info('::sigma entity', e.data.captor);
+              break;
+            case 'resource':
+            case 'resourceKnown':
+              $log.info('::sigma resource');
+              break;  
+          }
+          scope.$apply();
         });
+        
+        si.bind('overNode', function(e) {
+          //console.log('overNode', e.data, e)
+        })
+        
+        si.bind('clickStage', function(e) {
+          scope.toggleMenu({});
+          scope.$apply();
+        })
         
         /*
         

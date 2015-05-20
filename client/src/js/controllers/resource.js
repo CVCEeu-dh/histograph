@@ -141,6 +141,7 @@ angular.module('histograph')
               x: 0,
               y: 0,
               color: "#D44A33",
+              type: 'person',
               //size: 0
             };
             graph.nodes.push(entities[res.result.item.persons[i].id]);
@@ -153,7 +154,7 @@ angular.module('histograph')
             id: d.id,
             label: d.props.name || d.props.title,
             color: "#6891A2",
-            type: 'res',
+            type: 'resource',
             x: Math.random()*50,
             y: Math.random()*50,
             // size: Math.max(d.ratings.entity_silmilarity || 0,.3)
@@ -170,6 +171,7 @@ angular.module('histograph')
               entities[d.persons[i].id] = {
                 id: d.persons[i].id,
                 label: d.persons[i].name,
+                type: 'person',
                 x: 0,
                 y: 0,
                 color: "#D44A33",
