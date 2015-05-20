@@ -73,8 +73,15 @@ angular.module('histograph')
   /*
     Get/Update/Delete one resource
   */
-  .factory('SuggestFactory', function ($resource) {
-    return $resource('/api/suggest');
+  .factory('SuggestFactory', function ($http) {
+    return {
+      get: function() {
+        return $http.get('/api/suggest');
+      },
+      allShortestPaths: function(options) {
+        return $http.get('/api/suggest/all-shortest-paths/' + options.ids);
+      }
+    }
   })
   /*
     Socket.io service, thqnks to http://briantford.com/blog/angular-socket-io

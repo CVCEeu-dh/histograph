@@ -73,7 +73,7 @@ html
       else
         //- div(id='see-also-header') related stuff
         div(ng-view, class='view')
-        div(id='milkyway', sigma, graph='graph', redirect='redirect(path)')
+        div(id='milkyway', sigma, graph='graph', class='{{currentCtrl == "AllShortestPathsCtrl"? "extended": ""}}', controller='currentCtrl' redirect='redirect(path)')
         div(id='timeline', timeline, graph='graph')
         div(id='pop', popit, target="target", redirect='redirect(path)', comment="startCommenting(item, tag, hashtag)", queue="queue(item)")
           div(class='action-group')
@@ -130,11 +130,14 @@ html
     script(src='/js/app.js')
     script(src='/js/services.js')
     script(src='/js/filters.js')
+    
     script(src='/js/controllers/core.js')
     script(src='/js/controllers/index.js')
     script(src='/js/controllers/resource.js')
     script(src='/js/controllers/entity.js')
     script(src='/js/controllers/collection.js')
+    script(src='/js/controllers/all-shortest-paths.js')
+        
     script(src='/js/directives/annotator.js') 
     script(src='/js/directives/annotorious.js') 
     script(src='/js/directives/sigma.js')   

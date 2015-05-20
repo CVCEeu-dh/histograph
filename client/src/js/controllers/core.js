@@ -149,8 +149,13 @@ angular.module('histograph')
       this.start = start;
     };
     
+    $scope.$on('$routeChangeSuccess', function(e, r) {
+      $log.debug('CoreCtrl @routeChangeSuccess', r.$$route.controller);
+      $scope.currentCtrl = r.$$route.controller;
+    });
+    
     $scope.$on('$locationChangeSuccess', function(e, path) {
-      $log.debug('CoreCtrl @locationChangeSuccess', path)
+      $log.debug('CoreCtrl @locationChangeSuccess', path);
       var now = (new Date()).getTime();
       
       if(!$scope.trails.length) { // hey this is your first trail

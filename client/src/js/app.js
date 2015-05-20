@@ -67,4 +67,15 @@ angular
           }
         }
       })
+      .when('/ap/:ids', {
+        templateUrl: 'templates/all-shortest-paths.html',
+        controller: 'AllShortestPathsCtrl',
+        resolve: {
+          allShortestPaths: function(SuggestFactory, $route) {
+            return SuggestFactory.allShortestPaths({
+              ids: $route.current.params.ids
+            });
+          }
+        }
+      })
   })

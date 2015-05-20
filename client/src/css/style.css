@@ -216,7 +216,7 @@ a:hover{
   overflow: auto;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 0px 20px 0 15px;
+  padding: 0px 10px 0 25px;
   /*border-left: 1px solid #d4d4d4;*/
 
 }
@@ -275,29 +275,72 @@ a:hover{
   display: none;
 }
 
-#inquirer.commenting {
+#inquirer.commenting{
   display: block;
 }
 
-
-
-
-#milkyway {
+/*
+  
+  Milkyway and playground for sigmajs
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  
+*/
+#milkyway{
   position: fixed;
   top: 70px;
   left: 68%;
   right: 20px;
   bottom: 20px;
   background: #e8e8e8;
+  -webkit-transition: left .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
+     -moz-transition: left .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+       -o-transition: left .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+          transition: left .3s cubic-bezier(0.65, 0.05, 0.36, 1);
 }
 
-.comment {
+#milkyway.extended{
+  left: 36%;
+}
+
+#milkyway #playground{
+  width: 100%;
+  height: 100%;
+}
+
+#milkyway #commands{
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  width: 30px;
+  height: 120px;
+  background: #fff;
+  z-index: 2;
+}
+
+#milkyway #commands .action{
+  width: 30px;
+  height: 30px;
+  text-align: center;
+    line-height: 30px;
+    cursor: pointer
+}
+
+.fa{
+    line-height: inherit
+}
+
+.comment{
   margin: 10px;
   padding: 7px 6px 3px 6px;
   border-top: 1px solid #e8e8e8;
 }
 
-
+/*
+  
+  Codemirror
+  ~~~~~~~~~~
+  
+*/
 .CodeMirror{
   font-family: inherit;
   background: #eee;
