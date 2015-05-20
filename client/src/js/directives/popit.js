@@ -16,7 +16,8 @@ angular.module('histograph')
       scope:{
         target: '=',
         comment: '&comment',
-        redirect: '&'
+        redirect: '&',
+        queue : '&'
       },
       link : function(scope, element, attrs) {
         var el = $(element[0]),
@@ -33,7 +34,7 @@ angular.module('histograph')
         
         // make the tooltip disappear if clicked on other pop
         function hide() {
-          el.removeClass('disappearing').hide();
+          //el.removeClass('disappearing').hide();
         }
         
         
@@ -103,6 +104,16 @@ angular.module('histograph')
           })
           
         })
+        // add current "tag" item to playlist. availabile only if there is a tag item
+        el.on('click', '[data-action=queue]', function(){
+          $log.info('::pop -> queue id', scope.target.tag.id);
+             
+          scope.queue({
+            item: scope.target.tag.id
+          });
+          
+        })
+        
       }
     }
   });

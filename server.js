@@ -73,12 +73,20 @@ app.use(auth.passport.initialize());
 app.use(auth.passport.session());
 
 // enrich express responses
-express.response.ok = function(result) {
-  return this.json({
+express.response.ok = function(result, info, warnings) {
+  var res = {
     status: 'ok',
     user: this.req.user,
     result: result
-  });
+  };
+  
+  if(info)
+    res.info = info;
+  
+  if(warnings)
+    res.warnings = warnings
+  
+  return this.json(res);
 };
 
 express.response.error = function(statusCode, err) {
@@ -190,10 +198,19 @@ clientRouter.route('/media/:file')
   ===
 
 */
-apiRouter.use(function(req, res, next) { // middleware to use for all requests
+apiRouter.use(function (req, res, next) { // middleware to use for all requests
   if (req.isAuthenticated()) {
+    // understand some basic query parameters and output metadata about the request
+    var params = {};
+    
+    if(req.query.limit) {
+      // check every items here, otherwise block the flow
+      
+    }
+    
     return next();
   }
+  
   return res.error(403);
 });
 
@@ -320,6 +337,8 @@ apiRouter.route('/collection/:id/related/resources')
 */
 apiRouter.route('/suggest')
   .get(ctrl.suggest.simple)
+apiRouter.route('/suggest/all-shortest-paths/:ids')
+  .get(ctrl.suggest.allShortestPaths)
   
 /*
   

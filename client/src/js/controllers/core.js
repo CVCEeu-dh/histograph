@@ -15,7 +15,10 @@ angular.module('histograph')
     
     // the paths followed by a single user
     $scope.trails = [];
-        
+    
+    // playlist of nodes ... :D
+    $scope.playlist = [];
+    
     // the current user
     $scope.user = {};
 
@@ -176,4 +179,26 @@ angular.module('histograph')
           start: now
         });
     });
+    
+     /*
+    
+      Playlist
+      --------
+     */
+     $scope.queue = function(item) {
+      $scope.playlist.push(item);
+      $scope.queueStatus = 'active';
+      $scope.$apply();
+     }
+     
+     $scope.hideQueue = function(item) {
+      $scope.queueStatus = 'sleep';
+     }
+     
+     $scope.toggleQueue = function(item) {
+      if($scope.queueStatus == 'sleep')
+        $scope.queueStatus = 'active';
+      else
+        $scope.queueStatus = 'sleep';
+     }
   })

@@ -258,7 +258,8 @@ describe('controllers: get resource items available to the user', function() {
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
-        console.log(err)
+        if(err)
+          console.log(err)
         should.not.exists(err);
         //console.log(' resoucre ', res.body)
         done();
@@ -298,6 +299,36 @@ describe('controllers: suggest queries', function() {
           console.log(err);
         should.not.exist(err);
         should.exist(res.body.result.items.length);
+        done()
+      });
+  });
+  
+  it('should get the path between four nodes', function (done) {
+    session
+      .get('/api/suggest/all-shortest-paths/26441,27631,11173?limit=33')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err);
+        should.not.exist(err);
+        should.exist(res.body.result.items.length);
+        done()
+      });
+  });
+  
+  it('should return warning because of malformed ids', function (done) {
+    session
+      .get('/api/suggest/all-shortest-paths/26441,27631,111734aa?limit=37')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err);
+        should.not.exist(err);
+        should.exist(res.body.result.items.length);
+        should.equal(res.body.info.limit, 37);
+        should.equal(res.body.result.items.length, 37); // limit has been respected?
         done()
       });
   });
