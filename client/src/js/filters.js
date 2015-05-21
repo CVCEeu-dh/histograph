@@ -109,7 +109,6 @@ angular.module('histograph')
   .filter('map', function() {
     return function(input, key) {
       return input.map(function (d) {
-        console.log(d,key)
         return d[key]
       }).join(',')
     }

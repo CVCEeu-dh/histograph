@@ -75,8 +75,9 @@ angular.module('histograph')
           (that is, the class 'extended' ahs been added to the element)
         */
         scope.$watch('controller', function (ctrl) {
-          $log.info('::sigma @controller changed');
+          $log.log('::sigma @controller changed');
           setTimeout(function() {
+            rescale();
             si.refresh();
           }, 320);
         });
@@ -86,13 +87,13 @@ angular.module('histograph')
           Redraw the current graph, calculate the force layout min duration
         */
         scope.$watch('graph', function (graph, previousGraph) {
-          $log.info('::sigma @graph changed');
+          $log.log('::sigma @graph changed');
           if(!graph || !graph.nodes)
             return;
           stop();
           // calculate differences in x,y for the previous graph, if any
           if(previousGraph) {
-            $log.info('::sigma --> reposition previous nodes', graph, previousGraph)
+            $log.log('::sigma --> reposition previous nodes', graph, previousGraph)
             
             var nodesMap = {};
             // map current graph
@@ -108,7 +109,7 @@ angular.module('histograph')
             }); 
           }
           
-          // $log.info('::sigma --> brand new nodes', graph.nodes.map(function(d) {
+          // $log.log('::sigma --> brand new nodes', graph.nodes.map(function(d) {
           //   return d.id
           // }))
           
@@ -116,7 +117,7 @@ angular.module('histograph')
           si.graph.clear().read(graph);
           // calculate a default duration 
           layoutDuration = Math.max(Math.min(4* si.graph.nodes().length * si.graph.edges().length, maxlayoutDuration),minlayoutDuration)
-          $log.info('::sigma n. nodes', si.graph.nodes().length, ' n. edges', si.graph.edges().length, 'runninn layout atlas for', layoutDuration/1000, 'seconds')
+          $log.log('::sigma n. nodes', si.graph.nodes().length, ' n. edges', si.graph.edges().length, 'runninn layout atlas for', layoutDuration/1000, 'seconds')
           
           
           
@@ -126,7 +127,7 @@ angular.module('histograph')
           // var stats = si.graph.HITS(true),
           //     authority = {min: -Infinity, max: Infinity};
           
-          // $log.info('::sigma authority', authority)
+          // $log.log('::sigma authority', authority)
           // local Degree for size
           si.graph.nodes().forEach(function(n) {
             // if(authority.max > 0)
@@ -138,7 +139,7 @@ angular.module('histograph')
           if(!previousGraph)
             rescale();
           si.refresh();
-          $log.info('::sigma force atlas started')
+          $log.log('::sigma force atlas started')
           play()
           
           
@@ -151,7 +152,7 @@ angular.module('histograph')
         
         */
         scope.togglePlay = function() {
-          $log.info('::sigma -> togglePlay', scope.status);
+          $log.log('::sigma -> togglePlay', scope.status);
           if(scope.status == IS_RUNNING) {
             stop();
           } else {
@@ -169,10 +170,8 @@ angular.module('histograph')
           DOM click [data-id]
           check for focus changes
         */
-        $(document).on('click', '[data-id]', function(e){
-          var id = $(this).attr('data-id');
-          focus(id);
-        });
+        $(document).on('click', '[data-id]', focus);
+        // deprecaded, we do not understand what happens $(document).on('mouseenter', '[data-id]', focus);
         /*
           sigma clickNode
           @todo
@@ -180,27 +179,27 @@ angular.module('histograph')
         si.bind('clickNode', function(e){
           stop();
           
-          $log.info('::sigma @clickNode', e.data.node.id, e.data.node.type || 'entity', e.data.node.label);
+          $log.log('::sigma @clickNode', e.data.node.id, e.data.node.type || 'entity', e.data.node.label);
           if(e.data.node.type == 'resource') {
-            $log.info('::sigma redirect to', '/r/' + e.data.node.id);
+            $log.log('::sigma redirect to', '/r/' + e.data.node.id);
             //scope.redirect({path: '/r/' + e.data.node.id})
           }  
           switch(e.data.node.type) {
             case 'person':
             case 'personKnown':
               scope.toggleMenu({e: e.data.captor, item:null, tag:e.data.node, hashtag:'person' })
-              $log.info('::sigma entity', e.data.captor);
+              $log.log('::sigma entity', e.data.captor);
               break;
             case 'resource':
             case 'resourceKnown':
-              $log.info('::sigma resource');
+              $log.log('::sigma resource');
               break;  
           }
           scope.$apply();
         });
         
-        si.bind('overNode', function(e) {
-          //console.log('overNode', e.data, e)
+        si.bind('clickEdge', function(e) {
+          console.log('overEdge', e.data, e)
         })
         
         si.bind('clickStage', function(e) {
@@ -220,6 +219,12 @@ angular.module('histograph')
           node
         */
         function focus(nodeId) {
+          $log.info('::sigma --> focus()', nodeId)
+          if(typeof nodeId == 'object') { // it is an event ideed
+            
+            nodeId = $(this).attr('data-id');
+          }
+          
           var node = si.graph.nodes(nodeId);
           
           sigma.misc.animation.camera(
@@ -229,7 +234,7 @@ angular.module('histograph')
               y: node['read_cammain:y'],
               ratio: 0.5
             },
-            {duration: 150}
+            {duration: 250}
           );
         }
         /*
@@ -322,6 +327,20 @@ angular.module('histograph')
           );
           context.fill();
           context.closePath();
+          if( node[prefix + 'size'] > 3) {
+            context.fillStyle = "#fff";
+            context.beginPath();
+            context.arc(
+              node[prefix + 'x'],
+              node[prefix + 'y'],
+              1,
+              0,
+              Math.PI * 2,
+              true
+            );
+            context.fill();
+            context.closePath();
+          }
         };
         
         /*
@@ -343,7 +362,7 @@ angular.module('histograph')
           context.arc(
             node[prefix + 'x'],
             node[prefix + 'y'],
-            node[prefix + 'size'] + 5,
+            node[prefix + 'size'] + 8,
             0,
             Math.PI * 2,
             true
@@ -352,7 +371,31 @@ angular.module('histograph')
           context.closePath();
             
           context.lineWidth = node.borderWidth || 1;
-          context.strokeStyle = node.borderColor || '#444';
+          context.strokeStyle = node.borderColor || '#c8c8c8';
+          context.stroke();
+          
+          
+        };
+        /*
+          sigma canvas edge renderer
+          
+        */
+        sigma.canvas.edges.def = function(edge, source, target, context, settings) {
+          var color = "#661000",
+              prefix = settings('prefix') || '';
+      
+          context.strokeStyle = color;
+          context.lineWidth = edge[prefix + 'size'] || 1;
+          context.beginPath();
+          context.moveTo(
+            source[prefix + 'x'],
+            source[prefix + 'y']
+          );
+          context.lineTo(
+            target[prefix + 'x'],
+            target[prefix + 'y']
+          );
+          
           context.stroke();
         };
       }

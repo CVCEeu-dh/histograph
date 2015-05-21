@@ -75,14 +75,22 @@ angular.module('histograph')
   */
   .factory('SuggestFactory', function ($http) {
     return {
-      get: function() {
-        return $http.get('/api/suggest');
+      get: function(options) {
+        return $http.get('/api/suggest', {
+          params: options
+        });
       },
       allShortestPaths: function(options) {
         return $http.get('/api/suggest/all-shortest-paths/' + options.ids);
       },
       getUnknownNode: function(options) {
         return $http.get('/api/suggest/unknown-node/' + options.id);
+      },
+      getUnknownNodes: function(options) {
+        return $http.get('/api/suggest/unknown-nodes/' + options.ids);
+      },
+      neighbors: function(options) {
+        return $http.get('/api/suggest/neighbors/' + options.ids);
       },
     }
   })

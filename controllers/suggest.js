@@ -70,6 +70,29 @@ module.exports =  function(io){
         });
       })
     },
+    
+    getUnknownNodes: function (req, res) {
+      var ids = req.params.ids.split(',').filter(function (d) {
+        return !isNaN(d)
+      }).map(function (d) {
+        return +d;
+      });
+      if(!ids.length)
+        return res.error({})
+      
+      neo4j.query(queries.get_unknown_nodes, {
+        ids: ids
+      }, function (err, items) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({
+          items: items
+        }, {
+          ids: ids
+        });
+      })
+    },
+    
     /*
     */
     getNeighbors: function (req, res) {
@@ -91,6 +114,8 @@ module.exports =  function(io){
           return helpers.cypherQueryError(err, res);
         return res.ok({
           items: items
+        }, {
+          ids: ids
         });
       })
     },

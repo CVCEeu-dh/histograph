@@ -328,7 +328,8 @@ a:hover{
 }
 
 .fa{
-    line-height: inherit
+  font-size: 15px;
+  line-height: inherit
 }
 
 .comment{
@@ -405,9 +406,12 @@ a:hover{
 }
 
 .dropdown-menu>li>a{
-  font-size:11px;
+  font-size:12px;
   line-height: 20px;
-  white-space: normal
+  white-space: normal;
+}
+.dropdown-menu>li>a:hover{
+  border: 0px transparent;
 }
 
 
@@ -580,9 +584,13 @@ a:hover{
   
 }
 
+#playlist-wrapper{
+  position: absolute;
+}
+
 .playlist-item{
   background:  #353535;
-  
+  position: relative;
   display: inline-block;
   width: 180px;
   margin: 0 10px;
@@ -601,6 +609,20 @@ a:hover{
   position: absolute;
   top: 0px;
   margin-left: 60px;
+}
+
+.playlist-item .action{
+  position: absolute;
+  right: 5px;
+  top: 2px;
+  color: white;
+  width: 20px;
+  cursor: pointer
+}
+
+.playlist-item .action:hover{
+  color: white;
+  border-bottom: 0px transparent;
 }
 
 /*

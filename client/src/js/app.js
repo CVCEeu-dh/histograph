@@ -15,6 +15,7 @@ angular
     'ngCookies',
     'ui.bootstrap',
     'ui.codemirror',
+    // 'mgcrea.ngStrap'
     //'perfect_scrollbar'
   ])
   .config(function ($routeProvider, $httpProvider) {
@@ -74,6 +75,28 @@ angular
           allShortestPaths: function(SuggestFactory, $route) {
             return SuggestFactory.allShortestPaths({
               ids: $route.current.params.ids
+            });
+          }
+        }
+      })
+      .when('/neighbors/:ids', {
+        templateUrl: 'templates/neighbors.html',
+        controller: 'NeighborsCtrl',
+        resolve: {
+          neighbors: function(SuggestFactory, $route) {
+            return SuggestFactory.neighbors({
+              ids: $route.current.params.ids
+            });
+          }
+        }
+      })
+      .when('/search/:query', {
+        templateUrl: 'templates/search.html',
+        controller: 'SearchCtrl',
+        resolve: {
+          matches: function(SuggestFactory, $route) {
+            return SuggestFactory.get({
+              query: $route.current.params.query
             });
           }
         }

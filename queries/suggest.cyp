@@ -7,7 +7,7 @@ RETURN {
   type:  HEAD(labels(n)),
   mimetype: n.mimetype,
   languages: n.languages,
-  title: n.title_en
+  title: COALESCE(n.title_en, n.title_fr)
 } AS result
 LIMIT {limit_resources}
 UNION
@@ -16,7 +16,7 @@ WHERE 'entity' IN labels(n)
 RETURN {
   id: id(n),
   labels: labels(n),
-  type:  TAIL(labels(n)),
+  type:  LAST(labels(n)),
   mimetype: n.mimetype,
   languages: n.languages,
   title: COALESCE(n.name)
@@ -56,6 +56,17 @@ RETURN {
 } as result
 
 
+// name: get_unknown_nodes
+// given a list of IDs, return the complete nodes (id, props)
+MATCH (n)
+WHERE id(n) in {ids}
+RETURN {
+  id: id(n),
+  props: n,
+  type: LAST(labels(n))
+} as result
+LIMIT 1000
+
 // name: get_neighbors
 // [33828,26750,26389,33759,33758, 26441, 27631, 11173]
 MATCH (a)-[r]-(b)
@@ -63,7 +74,7 @@ WHERE id(a) in {ids} AND last(labels(b)) in {labels}
 RETURN {
   source: {
     id: id(a),
-    name: COALESCE(b.name, b.title_en, b.title_fr),
+    name: COALESCE(a.name, a.title_en, a.title_fr),
     start_time: a.start_time,
     end_time: a.end_time,
     type: last(labels(a))

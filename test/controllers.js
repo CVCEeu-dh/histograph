@@ -16,7 +16,9 @@ var settings = require('../settings'),
       app: app
     }),
 
-    session;
+    session,
+    
+    _ = require('lodash');
 
 before(function () {
   session = new Session();
@@ -343,6 +345,20 @@ describe('controllers: suggest queries', function() {
           console.log(err);
         should.not.exist(err);
         should.exist(res.body.result.item);
+        done()
+      });
+  });
+  
+  it('should get an unknown node based on ids', function (done) {
+    session
+      .get('/api/suggest/unknown-nodes/26441,27631')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err);
+        should.not.exist(err);
+        should.equal(_.map(res.body.result.items, 'id').join(), [26441, 27631].join());
         done()
       });
   });

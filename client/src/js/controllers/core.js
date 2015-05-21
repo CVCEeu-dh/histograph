@@ -48,11 +48,13 @@ angular.module('histograph')
     
     $scope.suggest = function(query) {
       $log.info('CoreCtrl -> suggest', query);
+
       return $http.get('/api/suggest', {
         params: {
           query: query
         }
       }).then(function(response){
+        console.log(response)
         return response.data.result.items
       });
     };
@@ -150,7 +152,7 @@ angular.module('histograph')
     };
     
     $scope.$on('$routeChangeSuccess', function(e, r) {
-      $log.debug('CoreCtrl @routeChangeSuccess', r.$$route.controller);
+      $log.debug('CoreCtrl @routeChangeSuccess', r, r.$$route.controller);
       $scope.currentCtrl = r.$$route.controller;
     });
     
@@ -214,14 +216,61 @@ angular.module('histograph')
       }
      }
      
-     $scope.hideQueue = function(item) {
+    $scope.hideQueue = function(item) {
       $scope.queueStatus = 'sleep';
-     }
+    }
+    /*
+      playlist syncQueue
+      check that the playlist is filled with the given ids.
+      Otherwise take care of sync.
+      @param ids  - array of integer node ids
+    */
+    $scope.syncQueue = function(ids) {
+      if(ids.length != $scope.playlist.length) {
+        SuggestFactory.getUnknownNodes({
+          ids: ids
+        }).then(function (res) {
+          $scope.playlist = res.data.result.items;
+          $scope.queueStatus = 'active';
+        });
+      };
+    };
      
-     $scope.toggleQueue = function(item) {
-      if($scope.queueStatus == 'sleep')
-        $scope.queueStatus = 'active';
-      else
-        $scope.queueStatus = 'sleep';
-     }
+    $scope.toggleQueue = function(item) {
+    if($scope.queueStatus == 'sleep')
+      $scope.queueStatus = 'active';
+    else
+      $scope.queueStatus = 'sleep';
+    }
+    
+    // remove from playlist, then redirect.
+    $scope.removeFromQueue = function(item) {
+      $log.debug('NeighborsCtrl -> removeFromQueue()', item.id);
+      var ids = [];
+      for(var i = 0; i < $scope.playlist.length; i++) {
+        if($scope.playlist[i].id == item.id) {
+          $log.log('    remove', $scope.playlist[i].id);
+          $scope.playlist.splice(i, 1);
+          
+        } else { // only for redirection purposes
+          ids.push($scope.playlist[i].id);
+        }
+      }
+      if($scope.currentCtrl == 'NeighborsCtrl') {
+        $log.log('    redirect to: /#/neighbors/'+ids.join(',')); 
+        $location.path('/neighbors/'+ids.join(','));
+      } else if($scope.currentCtrl == 'AllShortestPathsCtrl') {
+        $log.log('    redirect to: /#/ap/'+ids.join(','));
+        $location.path('/ap/'+ids.join(','));
+      }
+      // $scope.playlist.forEach(function (d) {
+      //   if(d.id == item.id) {
+          
+      //   }
+      //     delete d;
+      // });
+      
+      $log.debug('NeighborsCtrl redirect ', $scope.currentCtrl);
+    };
+    
   })

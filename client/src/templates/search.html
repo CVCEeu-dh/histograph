@@ -1,0 +1,25 @@
+<div id="see-also">
+  <div class="related" ng-repeat="relatedItem in related">
+    <h4><a ng-href="#/r/{{relatedItem.id}}">{{relatedItem.props.title || relatedItem.props.name || relatedItem.props.title_en}}</a></h4>
+    <a data-id='{{relatedItem.id}}'>view on graph</a>
+    
+    
+    <!--div class="tags locations">
+      <span ng-repeat="location in relatedItem.locations">
+
+        <a ng-if="location.geocode_id" class="tag location" >{{location.geocode_formatted_address}}</a>
+
+        <a ng-if="location.geonames_id" class="tag location" >{{location.geonames_toponymName}}, {{location.geonames_countryName}}</a> <span ng-if="!$last">-</span> 
+      
+    </div-->
+    
+    <span class="tags" ng-if="relatedItem.persons"> — <i>in the document</i>:
+      <span ng-repeat="per in relatedItem.persons"  data-id='{{per.id}}'  ng-click="toggleMenu($event, relatedItem, per)" class='tag person'>{{per.name}}</span>
+    </span>
+
+    <img ng-if='relatedItem.props.mimetype=="image"' ng-src="media/{{relatedItem.props.url}}" >
+    <blockquote>
+     {{relatedItem.props.stakeholders || relatedItem.props.caption}}
+    </blockquote>
+  </div>
+</div>

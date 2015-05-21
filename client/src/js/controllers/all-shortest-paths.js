@@ -9,7 +9,8 @@ angular.module('histograph')
     $log.debug('AllShortestPathsCtrl ready', $routeParams.ids, allShortestPaths);
     
     $scope.AllShortestPaths = allShortestPaths.data.result.items;
-    // build graph on shortest paths ...
+    
+    $scope.syncQueue($routeParams.ids);
     
     var graph = {
           nodes: [],
