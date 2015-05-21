@@ -113,5 +113,25 @@ angular.module('histograph')
       }).join(',')
     }
   })
+  // according to language, give the title a real title
+  .filter('title', function() {
+    return function(props, language) {
+      var primary = props['title_' + language];
+      
+      if(primary)
+        return primary
+      
+      var defaultName = props.name;
+      
+      if(defaultName)
+        return defaultName;
+      
+      // return the first in another language
+      if(!props.languages || !props.languages.length)
+        return 'Untitled';
+      
+      return props['title_' + props[languages][0]]
+    }
+  })
 
 

@@ -92,6 +92,11 @@ angular.module('histograph')
       neighbors: function(options) {
         return $http.get('/api/suggest/neighbors/' + options.ids);
       },
+      getResources: function(options) {
+        return $http.get('/api/suggest/resources', {
+          params: options
+        });
+      },
     }
   })
   /*

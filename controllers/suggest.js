@@ -14,6 +14,31 @@ var settings  = require('../settings'),
     _         = require('lodash');
 
 
+/*
+  Tiny helper to tranform words in a valid lucenequery
+  according to ccurrent lucene indexes
+*/
+function toLucene(query) {
+  var q = '*' + query.split(/[^\w]/).map(function (d) {
+    return d.trim().toLowerCase()
+  }).join('*') + '*';
+  return ['title_search:', q,
+          ' OR caption_search:', q,
+          ' OR name:', q,
+         ].join('')
+}
+
+/*
+  Transform a comma separated list of id candidate in a javascript array of Integer IDS
+*/
+function toIds(ids) {
+  return ids.split(',').filter(function (d) {
+    return !isNaN(d)
+  }).map(function (d) {
+    return +d;
+  });
+}
+
 module.exports =  function(io){
   return {
     /*
@@ -21,11 +46,7 @@ module.exports =  function(io){
       api/suggest/
     */
     allShortestPaths: function(req, res) {
-      var ids = req.params.ids.split(',').filter(function (d) {
-        return !isNaN(d)
-      }).map(function (d) {
-        return +d;
-      });
+      var ids = toIds(req.params.ids);
       
       if(!ids.length)
         return res.error({})
@@ -72,11 +93,7 @@ module.exports =  function(io){
     },
     
     getUnknownNodes: function (req, res) {
-      var ids = req.params.ids.split(',').filter(function (d) {
-        return !isNaN(d)
-      }).map(function (d) {
-        return +d;
-      });
+      var ids = toIds(req.params.ids);
       if(!ids.length)
         return res.error({})
       
@@ -96,11 +113,7 @@ module.exports =  function(io){
     /*
     */
     getNeighbors: function (req, res) {
-       var ids = req.params.ids.split(',').filter(function (d) {
-        return !isNaN(d)
-      }).map(function (d) {
-        return +d;
-      });
+      var ids = toIds(req.params.ids);
       
       if(!ids.length)
         return res.error({})
@@ -109,7 +122,6 @@ module.exports =  function(io){
         labels: ['person', 'place', 'location', 'resource', 'collection'],
         limit: 1000
       }, function (err, items) {
-        console.log(err)
         if(err)
           return helpers.cypherQueryError(err, res);
         return res.ok({
@@ -126,7 +138,7 @@ module.exports =  function(io){
       carefully divided by
       next(err=null, [])
      */
-    simple: function(req, res) {
+    suggest: function(req, res) {
       var q = '*' + req.query.query.split(/[^\w]/).map(function (d) {
         return d.trim().toLowerCase()}).join('*') + '*';
       
@@ -151,6 +163,54 @@ module.exports =  function(io){
           })
         });
       })
+    },
+    
+    /*
+      Caption and title multilanguage search.
+      @todo: use the solr endpoint wherever available.
+    */
+    resources: function(req, res) {
+      var offset = +req.query.offset || 0,
+          limit  = +req.query.limit || 20;
+      // get countabilly
+      async.parallel({
+        get_matching_resources_count: function (callback) {
+          neo4j.query(queries.get_matching_resources_count, {
+            query: toLucene(req.query.query),
+          }, function (err, items) {
+            if(err)
+              callback(err);
+            else
+              callback(null, items);
+          })
+        },
+        get_matching_resources: function (callback) {
+          neo4j.query(queries.get_matching_resources, {
+            query: toLucene(req.query.query),
+            offset: offset,
+            limit: limit
+          }, function (err, items) {
+            if(err)
+              callback(err);
+            else
+              callback(null, items);
+          })
+        }
+      }, function (err, results) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        
+        return res.ok({
+          items: results.get_matching_resources.map(function (d) {
+            d.props.languages = _.values(d.props.languages)
+            return d;
+          }),
+        }, {
+          total_count: results.get_matching_resources_count.total_count,
+          offset: offset,
+          limit: limit
+        });
+      });
     }
   }
 }

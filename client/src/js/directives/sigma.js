@@ -359,10 +359,11 @@ angular.module('histograph')
           // Adding a border
           
           context.beginPath();
+          context.setLineDash([3]);
           context.arc(
             node[prefix + 'x'],
             node[prefix + 'y'],
-            node[prefix + 'size'] + 8,
+            node[prefix + 'size'] + 3,
             0,
             Math.PI * 2,
             true
@@ -371,7 +372,7 @@ angular.module('histograph')
           context.closePath();
             
           context.lineWidth = node.borderWidth || 1;
-          context.strokeStyle = node.borderColor || '#c8c8c8';
+          context.strokeStyle = node.borderColor || '#444';
           context.stroke();
           
           

@@ -5,10 +5,12 @@
  * # SearchCtrl
  */
 angular.module('histograph')
-  .controller('SearchCtrl', function ($scope, $log, $routeParams, socket, matches) {
-    $log.debug('SearchCtrl ready', $routeParams.query, matches);
+  .controller('SearchCtrl', function ($scope, $log, $routeParams, socket, resources) {
+    $log.debug('SearchCtrl ready', $routeParams.query, resources);
     
-    $scope.related = matches.data.result.items;
+    $scope.related = resources.data.result.items;
+    
+    $scope.setGraph({nodes:[],edges:[]})
   });
     
     

@@ -7,7 +7,7 @@
  * It is the parent of the other controllers.
  */
 angular.module('histograph')
-  .controller('CoreCtrl', function ($scope, $location, $log, $timeout, $http, socket, ResourceCommentsFactory, SuggestFactory) {
+  .controller('CoreCtrl', function ($scope, $location, $routeParams, $log, $timeout, $http, socket, ResourceCommentsFactory, SuggestFactory) {
     $log.debug('CoreCtrl ready');
     $scope.locationPath = $location.path(); 
     
@@ -21,6 +21,10 @@ angular.module('histograph')
     
     // the current user
     $scope.user = {};
+    
+    // the current search query, if any
+    $scope.query =  $routeParams.query || '';
+    
 
     $scope.setUser = function (user, update) {
       if(update || !$scope.user.id)
@@ -154,6 +158,9 @@ angular.module('histograph')
     $scope.$on('$routeChangeSuccess', function(e, r) {
       $log.debug('CoreCtrl @routeChangeSuccess', r, r.$$route.controller);
       $scope.currentCtrl = r.$$route.controller;
+      
+      $scope.query = $routeParams.query || '';
+    
     });
     
     $scope.$on('$locationChangeSuccess', function(e, path) {
@@ -192,9 +199,9 @@ angular.module('histograph')
       Playlist
       --------
      */
-     $scope.queue = function(item) {
+     $scope.queue = function(item, inprog) {
       // load item by id ...
-      $log.info('CoreCtrl -> queue', item)
+      $log.info('CoreCtrl -> queue', item, inprog? 'do not force update scope': 'force scope update')
       if(typeof item == 'object') {
         $scope.playlist.push(item);
         $scope.queueStatus = 'active';
@@ -204,16 +211,12 @@ angular.module('histograph')
         }).then(function (res) {
           $scope.playlist.push(res.data.result.item);
           $scope.queueStatus = 'active';
-           try{$scope.$apply();}catch(e) {
-        $log.error('scope has already been updated', e)
-      }
+          if(!inprog)
+            $scope.$apply();
         })
       }
-      try{
+      if(!inprog)
         $scope.$apply();
-      } catch(e) {
-        $log.error('scope has already been updated', e)
-      }
      }
      
     $scope.hideQueue = function(item) {

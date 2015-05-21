@@ -94,9 +94,11 @@ angular
         templateUrl: 'templates/search.html',
         controller: 'SearchCtrl',
         resolve: {
-          matches: function(SuggestFactory, $route) {
-            return SuggestFactory.get({
-              query: $route.current.params.query
+          resources: function(SuggestFactory, $route) {
+            // clean limit here
+            return SuggestFactory.getResources({
+              query: $route.current.params.query,
+              limit: 30
             });
           }
         }

@@ -326,7 +326,7 @@ apiRouter.route('/collection/:id/related/resources')
 
 /*
 
-  Controller: suggest
+  Controller: search & suggest
   ----------------------
   
   This controller answers every typeahead request.
@@ -336,7 +336,9 @@ apiRouter.route('/collection/:id/related/resources')
   
 */
 apiRouter.route('/suggest')
-  .get(ctrl.suggest.simple)
+  .get(ctrl.suggest.suggest)
+apiRouter.route('/suggest/resources')
+  .get(ctrl.suggest.resources)
 apiRouter.route('/suggest/all-shortest-paths/:ids')
   .get(ctrl.suggest.allShortestPaths)
 apiRouter.route('/suggest/unknown-node/:id')

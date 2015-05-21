@@ -2,7 +2,7 @@
   <div class="related" ng-repeat="relatedItem in related">
     <h4><a ng-href="#/r/{{relatedItem.id}}">{{relatedItem.props.title || relatedItem.props.name || relatedItem.props.title_en}}</a></h4>
     <a data-id='{{relatedItem.id}}'>view on graph</a>
-    
+    <a ng-click='queue(relatedItem.id, true)'>add to playlist</a>
     
     <!--div class="tags locations">
       <span ng-repeat="location in relatedItem.locations">

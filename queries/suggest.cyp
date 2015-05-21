@@ -87,3 +87,35 @@ RETURN {
     type: last(labels(b))
   }
 } LIMIT {limit}
+
+
+// name: get_matching_resources_count
+// get resources by query
+start n=node:node_auto_index({query})
+WHERE 'resource' in labels(n)
+RETURN count(n) as total_count
+
+// name: get_matching_resources
+// get resources by query
+start n=node:node_auto_index({query})
+WHERE 'resource' in labels(n)
+RETURN {
+  id: id(n),
+  props: n,
+  type: 'resource'
+} AS result
+SKIP {offset}
+LIMIT {limit}
+
+
+// name: get_matching_entities
+// get resources by query
+start n=node:node_auto_index({query})
+WHERE 'entity' in labels(n)
+RETURN {
+  id: id(n),
+  props: n,
+  type: last(labels(n))
+} AS result
+SKIP {offset}
+LIMIT {limit}

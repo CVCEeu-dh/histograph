@@ -126,7 +126,8 @@ angular.module('histograph')
           $log.info('::pop -> queue id', scope.target.tag.id);
              
           scope.queue({
-            item: scope.target.tag.id
+            item: scope.target.tag.id,
+            inprog: true
           });
           
         })

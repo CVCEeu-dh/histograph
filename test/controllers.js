@@ -305,6 +305,20 @@ describe('controllers: suggest queries', function() {
       });
   });
   
+  it('should get matches for helmut kohl and mitterrand', function (done) {
+    session
+      .get('/api/suggest/resources?query=helmut kohl mitterrand')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err);
+        should.not.exist(err);
+        should.exist(res.body.result.items.length);
+        done()
+      });
+  });
+  
   it('should get the path between four nodes', function (done) {
     session
       .get('/api/suggest/all-shortest-paths/26441,27631,11173?limit=33')

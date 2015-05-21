@@ -52,9 +52,9 @@ html
             div(class='col-sm-4')
               div(id='search-field')
                 div(class='input-group')
-                  input(type='text', ng-model='asyncSelected', class='form-control', placeholder='Search for...', typeahead='item for items in suggest($viewValue)', typeahead-wait-ms='200', typeahead-template-url='suggest.html')
+                  input(type='text', ng-model='query', class='form-control', placeholder='Search for...', typeahead='item for items in suggest($viewValue)', typeahead-wait-ms='200', typeahead-template-url='suggest.html')
                   span(class='input-group-btn')
-                    button(class='btn btn-default', type='button') search
+                    a(class='btn btn-default', type='button', ng-href='/#/search/{{query}}') search
             div(class='col-sm-2')
               a(href='#')
                 span settings
@@ -74,15 +74,15 @@ html
               a(ng-href='/auth/google?next={{locationPath}}', class='btn btn-default') signup with google plus
       else
         //- div(id='see-also-header') related stuff
-        div(ng-view, class='view')
+        div(ng-view, class='view {{currentCtrl}}')
         
         
         
-        div(id='milkyway', sigma, graph='graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentCtrl == "AllShortestPathsCtrl" || currentCtrl == "NeighborsCtrl"? "extended": ""}}', controller='currentCtrl' redirect='redirect(path)')
+        div(id='milkyway', sigma, graph='graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentCtrl == "AllShortestPathsCtrl" || currentCtrl == "NeighborsCtrl" || currentCtrl == "SearchCtrl"? "extended": ""}}', controller='currentCtrl' redirect='redirect(path)')
           
         div(id='timeline', timeline, graph='graph')
           
-        div(id='pop', popit, target="target", redirect='redirect(path)', comment="startCommenting(item, tag, hashtag)", queue="queue(item)")
+        div(id='pop', popit, target="target", redirect='redirect(path)', comment="startCommenting(item, tag, hashtag)", queue="queue(item, inprog)")
           div(class='action-group')
             a(class=' action', title='visit', data-action='link', tooltip='visit entity page')
               span(class='fa fa-link')
@@ -114,7 +114,13 @@ html
                 div(class='pic', tooltip='visit person page')
                   a(ng-href='/#/e/{{item.id}}')
                     img(ng-src='{{item.props.thumbnail}}', ng-if='item.props.thumbnail')
-                h5 {{item.props.name}}
+                h5 {{item.props | title : 'en' : 24 }}
+                a(class='action', ng-click='removeFromQueue(item)', tooltip='remove from this set')
+                  i(class='fa fa-times-circle')
+              div(class='playlist-item-wrapper', ng-if='item.type == "resource"')
+                div(class='pic', tooltip='visit resource page')
+                  a(ng-href='/#/r/{{item.id}}') R
+                h5 {{item.props | title : 'en': 12 }}
                 a(class='action', ng-click='removeFromQueue(item)', tooltip='remove from this set')
                   i(class='fa fa-times-circle')
                 
