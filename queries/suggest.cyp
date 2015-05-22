@@ -1,27 +1,18 @@
 // name: lucene_query
 //
-start n=node:node_auto_index({query})
-WHERE 'resource' IN labels(n)
+start n=node:node_auto_index({resource_query})
 RETURN {
   id: id(n),
-  type:  HEAD(labels(n)),
-  mimetype: n.mimetype,
-  languages: n.languages,
-  title: COALESCE(n.title_en, n.title_fr)
+  props: n
 } AS result
-LIMIT {limit_resources}
+LIMIT {limit}
 UNION
-start n=node:node_auto_index({query})
-WHERE 'entity' IN labels(n)
+start n=node:node_auto_index({person_query})
 RETURN {
   id: id(n),
-  labels: labels(n),
-  type:  LAST(labels(n)),
-  mimetype: n.mimetype,
-  languages: n.languages,
-  title: COALESCE(n.name)
+  props: n
 } AS result
-LIMIT {limit_entities}
+LIMIT {limit}
 
 
 // name: all_shortest_paths
@@ -119,3 +110,14 @@ RETURN {
 } AS result
 SKIP {offset}
 LIMIT {limit}
+
+
+// name: get_suggestions
+//
+MATCH (n:resource)
+WHERE n.title_search =~ {query} OR n.caption_search =~ {query}
+RETURN { id: id(n), props: n } LIMIT {limit}
+UNION
+MATCH (n:entity)
+WHERE n.name =~ {query}
+RETURN { id: id(n), props: n } LIMIT {limit}

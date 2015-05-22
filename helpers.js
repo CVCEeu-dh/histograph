@@ -546,7 +546,8 @@ module.exports = {
         next(IS_EMPTY);
         return;
       };
-      console.log(body.geonames[0].toponymName, body.geonames[0].countryName, 'for', address);
+      var name = [body.geonames[0].toponymName, body.geonames[0].countryName].join(', ');
+      console.log(name, 'OR', body.geonames[0].toponymName, body.geonames[0].countryName, 'for', address);
       neo4j.query(reconcile.merge_geonames_entity, _.assign({
           geonames_id: body.geonames[0].geonameId,
           q: geonamesURL,
@@ -576,10 +577,11 @@ module.exports = {
     @next your callback with(err, res)
   */
   geocoding: function(address, next) {
-    request.get({
-      url: 'https://maps.googleapis.com/maps/api/geocode/json?key='
+    var url = 'https://maps.googleapis.com/maps/api/geocode/json?key='
           + settings.geocoding.key
-          + '&address=' + encodeURIComponent(address),
+          + '&address=' + encodeURIComponent(address);
+    request.get({
+      url: url,
       json: true
     }, function (err, res, body) {
       if(err) {
@@ -587,7 +589,12 @@ module.exports = {
         return;
       }
       
+      console.log(url)
       if(!body.results.length) {
+        if(body.error_message) {
+          next(body.error_message)
+          return;
+        } 
         next(IS_EMPTY);
         return;
       };
@@ -600,11 +607,18 @@ module.exports = {
         locality =  _.find(body.results[0].address_components, function (d){
           return d.types[0] == 'locality';
         });
-      
+      // the entity name
+      var name_partials = [];
+      if(locality && locality.long_name)
+        name_partials.push(locality.long_name);
+      if(country && country.long_name)
+        name_partials.push(country.long_name);
+      var name = name_partials.length? name_partials.join(', '): body.results[0].formatted_address;
+
       // update the nodee
       neo4j.query(reconcile.merge_geocoding_entity, {
         geocode_id: body.results[0].place_id,
-
+        name: name,
         q: 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(address),
         
         countryName: country? country.long_name: '',

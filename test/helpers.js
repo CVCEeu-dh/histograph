@@ -11,44 +11,45 @@ var helpers = require('../helpers.js'),
     should  = require('should');
 
 
-describe('alchemyapi entity extraction service', function() {
-  it('should merge by wikipedia link', function (done) {
-    // body...
-    helpers.alchemyapi(
-        'Portugal\'s application for accession to the European Economic Community '
-      + '(Lisbon, 28 March 1977). On 28 March 1977, Mário Soares, Prime Minister of Portugal, '
-      + 'formally submits his country’s application for accession to the European '
-      + 'Communities to David Owen, currently President-in-Office of the Council.', 'TextGetRankedNamedEntities', function (err, entities) {
-      console.log('entities', entities);
+// describe('alchemyapi entity extraction service', function() {
+//   it('should merge by wikipedia link', function (done) {
+//     // body...
+//     helpers.alchemyapi(
+//         'Portugal\'s application for accession to the European Economic Community '
+//       + '(Lisbon, 28 March 1977). On 28 March 1977, Mário Soares, Prime Minister of Portugal, '
+//       + 'formally submits his country’s application for accession to the European '
+//       + 'Communities to David Owen, currently President-in-Office of the Council.', 'TextGetRankedNamedEntities', function (err, entities) {
+//       console.log('entities', entities);
       
-      done();
-    })
+//       done();
+//     })
     
-  });
-});
+//   });
+// });
 
 
-describe('textrazor api', function() {
-  this.timeout(5000);
-  it('should calls textrazor service and build a new entities from the text', function (done) {
-    helpers.textrazor(
-        'Portugal\'s application for accession to the European Economic Community '
-      + '(Lisbon, 28 March 1977). On 28 March 1977, Mário Soares, Prime Minister of Portugal, '
-      + 'formally submits his country’s application for accession to the European '
-      + 'Communities to David Owen, currently President-in-Office of the Council.',
-      function (err, entities) {
-        console.log('entities', entities);
-        done();
-    });
-  });
-});
+// describe('textrazor api', function() {
+//   this.timeout(5000);
+//   it('should calls textrazor service and build a new entities from the text', function (done) {
+//     helpers.textrazor(
+//         'Portugal\'s application for accession to the European Economic Community '
+//       + '(Lisbon, 28 March 1977). On 28 March 1977, Mário Soares, Prime Minister of Portugal, '
+//       + 'formally submits his country’s application for accession to the European '
+//       + 'Communities to David Owen, currently President-in-Office of the Council.',
+//       function (err, entities) {
+//         console.log('entities', entities);
+//         done();
+//     });
+//   });
+// });
 
 
 describe('geocoding api', function() {
   this.timeout(5000);
   it('should calls geocodingapi service and build a new location entity', function (done) {
-    helpers.geocoding('quai d\'Orsay, Paris', function (err, res) {
+    helpers.geocoding('ruel Lepic, Paris', function (err, res) {
       should.not.exist(err, err);
+      console.log(res)
       should.exist(res[0].geocode_id, res);
       done();
     });
@@ -60,8 +61,11 @@ describe('geonames api', function() {
   this.timeout(5000);
   it('should calls geocodingapi service and build a new location entity', function (done) {
     helpers.geonames('Paris', function (err, res) {
+      console.log(res)
       should.not.exist(err, err);
       should.exist(res[0].geonames_id, res);
+      should.exist(res[0].name_search);
+      should.exist(res[0].name);
       done();
     });
   });

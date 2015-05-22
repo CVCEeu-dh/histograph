@@ -23,6 +23,8 @@ MERGE (inq:inquiry {strategy:'reconciliation', content:{content}})
 // get 
 MERGE (k:entity:location { geocode_id:{geocode_id}})
   ON CREATE SET
+    k.name = {name},
+    k.name_search = {name},
     k.creation_date = timestamp(),
     k.geocode_query = {q},
     k.geocode_countryId = {countryId},
@@ -36,6 +38,8 @@ MERGE (k:entity:location { geocode_id:{geocode_id}})
     k.geocode_bounds_sw_lat = {sw_lat},
     k.geocode_bounds_sw_lng = {sw_lng}
   ON MATCH SET
+    k.name = {name},
+    k.name_search = {name},
     k.last_modification_date = timestamp(),
     k.geocode_query = {q},
     k.geocode_countryId = {countryId},
@@ -54,6 +58,8 @@ MERGE (k:entity:location { geocode_id:{geocode_id}})
 // get 
 MERGE (k:entity:location { geonames_id:{geonames_id} })
   ON CREATE SET
+    k.name = {name},
+    k.name_search = {name},
     k.creation_date = timestamp(),
     k.geonames_query = {q},
     k.geonames_countryId = {countryId},
@@ -63,6 +69,8 @@ MERGE (k:entity:location { geonames_id:{geonames_id} })
     k.geonames_lat = {lat},
     k.geonames_lng = {lng}
   ON MATCH SET
+    k.name = {name},
+    k.name_search = {name},
     k.last_modification_date = timestamp(),
     k.geonames_query = {q},
     k.geonames_countryId = {countryId},
@@ -149,9 +157,11 @@ MERGE (k:entity:person { uri:{id} })
 // (unique key constraint: url...)
 MERGE (k:entity:person { links_wiki:{links_wiki} })
   ON CREATE SET
+    k.name_search = {name},
     k.name = {name},
     k.services = [{service}]
   ON MATCH SET
+    k.name_search = {name},
     k.links_yago = {links_yago},
     k.services = COALESCE(k.services,[]) + {service}
   RETURN k
@@ -161,7 +171,9 @@ MERGE (k:entity:person { links_wiki:{links_wiki} })
 // unknown entitites extracted from text (that is, no disambiguation links are proposed).
 MERGE (k:entity:person { name:{name} })
   ON CREATE SET
+    k.name_search = {name},
     k.services = [{service}]
   ON MATCH SET
+    k.name_search = {name},
     k.services = COALESCE(k.services,[]) + {service}
   RETURN k

@@ -213,10 +213,21 @@ angular.module('histograph')
           $scope.queueStatus = 'active';
           if(!inprog)
             $scope.$apply();
+          var ids = $scope.playlist.map(function (d) {
+            return d.id
+          });
+          if($scope.currentCtrl == 'NeighborsCtrl') {
+            $log.log('    redirect to: /#/neighbors/'+ids.join(',')); 
+            $location.path('/neighbors/'+ids.join(','));
+          } else if($scope.currentCtrl == 'AllShortestPathsCtrl') {
+            $log.log('    redirect to: /#/ap/'+ids.join(','));
+            $location.path('/ap/'+ids.join(','));
+          }
         })
       }
       if(!inprog)
         $scope.$apply();
+      
      }
      
     $scope.hideQueue = function(item) {

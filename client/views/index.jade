@@ -24,11 +24,15 @@ html
       var socket = io();
     
     script(type='text/ng-template', id='suggest.html').
-      <div ng-if="match.model.type == 'resource'">
-        <a ng-href="#/r/{{match.model.id}}" bind-html-unsafe="match.model.title | typeaheadHighlight:query"></a>
-        <a class='action' ng-click='$parent.$parent.$parent.queue(match.model.id)'>ttt<i class='fa fa-play-circle-o'></i></a>
-        {{$parent.$parent.name}}
+      <div>
+        <a ng-href='/#/{{match.model.props.type_search=="resource" ? "r": "e"}}/{{match.model.id}}'>
+          {{match.model.props | title: 'en'}}
+        </a>
+        <span ng-click='$parent.$parent.$parent.$parent.queue(match.model.id, true)'>
+          <i class='fa fa-play-circle-o'></i>
+        </span>
       </div>
+      
       
     script(type='text/ng-template', id='inquirer.html').
       <div>ge</div>
@@ -53,6 +57,7 @@ html
               div(id='search-field')
                 div(class='input-group')
                   input(type='text', ng-model='query', class='form-control', placeholder='Search for...', typeahead='item for items in suggest($viewValue)', typeahead-wait-ms='200', typeahead-template-url='suggest.html')
+                  //- input(type='text', ng-model='query', class='form-control', placeholder='Search for...', bs-typeahead, bs-options='item for items in suggest($viewValue)', data-container='body',data-delay='{ show: 500, hide: 1000000 }')
                   span(class='input-group-btn')
                     a(class='btn btn-default', type='button', ng-href='/#/search/{{query}}') search
             div(class='col-sm-2')
@@ -109,18 +114,19 @@ html
             span(class="fa fa-angle-up")
           div(ng-if='playlist.length == 0') ... select some element to start playlist ...
           div(id='playlist-queue')
-            div(class='playlist-item', data-id='{{item.id}}' ng-repeat='item in playlist')
+            div(class='playlist-item', ng-repeat='item in playlist', tooltip='{{item.props | title }}')
               div(class='playlist-item-wrapper', ng-if='item.type == "person"')
-                div(class='pic', tooltip='visit person page')
+                div(class='pic')
                   a(ng-href='/#/e/{{item.id}}')
                     img(ng-src='{{item.props.thumbnail}}', ng-if='item.props.thumbnail')
-                h5 {{item.props | title : 'en' : 24 }}
+                h5(data-id='{{item.id}}') {{item.props | title : 'en' : 24 }}
                 a(class='action', ng-click='removeFromQueue(item)', tooltip='remove from this set')
                   i(class='fa fa-times-circle')
               div(class='playlist-item-wrapper', ng-if='item.type == "resource"')
-                div(class='pic', tooltip='visit resource page')
-                  a(ng-href='/#/r/{{item.id}}') R
-                h5 {{item.props | title : 'en': 12 }}
+                div(class='pic')
+                  a(ng-href='/#/r/{{item.id}}')
+                    img(ng-if='item.props.mimetype == "image" && item.props.url', ng-src='media/{{item.props.url}}')
+                h5(data-id='{{item.id}}') {{item.props | title : 'en': 12 }}
                 a(class='action', ng-click='removeFromQueue(item)', tooltip='remove from this set')
                   i(class='fa fa-times-circle')
                 
@@ -148,8 +154,8 @@ html
     script(src='/js/lib/angular-cookies.min.js')
     
     script(src='/js/lib/ui-codemirror.min.js')
-    //- script(src='/js/lib/angular-strap.min.js')
-    //- script(src='/js/lib/angular-strap.tpl.min.js')
+    script(src='/js/lib/angular-strap.min.js')
+    script(src='/js/lib/angular-strap.tpl.min.js')
     script(src='/js/lib/ui-bootstrap-tpls.min.js')
     script(src='/js/lib/angular-perfect-scrollbar.js')
     

@@ -22,10 +22,17 @@ function toLucene(query) {
   var q = '*' + query.split(/[^\w]/).map(function (d) {
     return d.trim().toLowerCase()
   }).join('*') + '*';
-  return ['title_search:', q,
-          ' OR caption_search:', q,
-          ' OR name:', q,
-         ].join('')
+  return q;
+  
+}
+/*
+  Tiny helper to tranform words in a valid neo4j regexp
+*/
+function toRegexp(query) {
+  var q = '(?i).*' + query.split(/[^\w]/).map(function (d) {
+    return d.trim().toLowerCase()
+  }).join('.*') + '.*';
+  return q;
 }
 
 /*
@@ -139,26 +146,26 @@ module.exports =  function(io){
       next(err=null, [])
      */
     suggest: function(req, res) {
-      var q = '*' + req.query.query.split(/[^\w]/).map(function (d) {
-        return d.trim().toLowerCase()}).join('*') + '*';
+      var q = toLucene(req.query.query);
       
+  
       neo4j.query(queries.lucene_query, {
-        query: [
-          'title_search:',
-            q,
-          ' OR caption_search:',
-            q,
-          ' OR name:',
-            q,
+        resource_query: [
+          'type_search: resource AND (',
+          'title_search:', q,
+          ' OR caption_search:', q,
+          ')'
         ].join(''),
-        limit_resources: 5,
-        limit_entities: 5
+        person_query: 'name_search:' + q,
+        limit: req.query.limit || 4
       }, function (err, items) {
         if(err)
           return helpers.cypherQueryError(err, res);
+        console.log(items.length)
         return res.ok({
+          
           items: items.map(function (d) {
-            d.languages = _.values(d.languages)
+            d.props.languages = _.values(d.props.languages)
             return d;
           })
         });
@@ -171,12 +178,19 @@ module.exports =  function(io){
     */
     resources: function(req, res) {
       var offset = +req.query.offset || 0,
-          limit  = +req.query.limit || 20;
+          limit  = +req.query.limit || 20,
+          q      = toLucene(req.query.query),
+          query  = [
+              'type_search: resource AND (',
+              'title_search:', q,
+              ' OR caption_search:', q,
+              ')'
+            ].join('');
       // get countabilly
       async.parallel({
         get_matching_resources_count: function (callback) {
           neo4j.query(queries.get_matching_resources_count, {
-            query: toLucene(req.query.query),
+            query: query,
           }, function (err, items) {
             if(err)
               callback(err);
@@ -186,7 +200,7 @@ module.exports =  function(io){
         },
         get_matching_resources: function (callback) {
           neo4j.query(queries.get_matching_resources, {
-            query: toLucene(req.query.query),
+            query: query,
             offset: offset,
             limit: limit
           }, function (err, items) {

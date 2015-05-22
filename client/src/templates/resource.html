@@ -19,7 +19,7 @@
         <span ng-if="item.persons.length" class="tags"> — <i>in the document</i>:
           <span ng-repeat="per in item.persons" data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.name}} - {{per.description}} ({{per.birth_date | date:"yyyy"}} - {{per.death_date | date:"yyyy"}})' ng-click="toggleMenu($event, item, per, 'person')" class='tag person'>{{per.name}}</span>
         </span>
-        <a data-id='{{item.id}}'> view on graph</a>
+        <a data-id='{{item.id}}'> view on graph</a> or <a ng-click='queue(item.id, true)'> add to playlist</a>
         
         <div ng-if="currentAnnotation">
           <div class="caption" annotator context="item" marked="currentAnnotation.annotated.source" ></div>
@@ -71,9 +71,9 @@
 </div>
 
 <div id="see-also" perfect-scrollbar wheel-propagation="true" refresh-on-change="related" suppress-scroll-x="true" wheel-speed="20">
-  <div class="related" ng-repeat="relatedItem in related">
+  <div class="related" ng-repeat="relatedItem in related"> 
     <h4><a ng-href="#/r/{{relatedItem.id}}">{{relatedItem.props.title || relatedItem.props.name || relatedItem.props.title_en}}</a></h4>
-    <a data-id='{{relatedItem.id}}'>view on graph</a>
+    <a data-id='{{relatedItem.id}}'>view on graph</a> or <a ng-click='queue(relatedItem.id, true)'> add to playlist</a>
     {{relatedItem.props|guessInterval}} ({{item.props|guessDifference:relatedItem.props}})
     
     <!--div class="tags locations">
@@ -93,6 +93,7 @@
     <blockquote>
      {{relatedItem.props.stakeholders || relatedItem.props.caption}}
     </blockquote>
+    
   </div>
 </div>
 </div>

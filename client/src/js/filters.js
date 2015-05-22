@@ -134,7 +134,7 @@ angular.module('histograph')
       if(!props.languages || !props.languages.length)
         return 'Untitled';
       
-      return props['title_' + props[languages][0]]
+      return props['title_' + props.languages[0]]
     }
   })
 

@@ -406,13 +406,23 @@ a:hover{
 }
 .dropdown-menu li{
   padding: 5px;
+  line-height: 20px;
+  position:relative;
+  display: block
 }
 
-.dropdown-menu>li>a{
-  font-size:12px;
+.dropdown-menu li a{
+  font-size:13px;
   line-height: 20px;
   white-space: normal;
 }
+
+.dropdown-menu li span{
+  position: absolute;
+  right: 5px;
+  top: 5px;
+}
+
 .dropdown-menu>li>a:hover{
   border: 0px transparent;
 }
@@ -600,11 +610,17 @@ a:hover{
   margin: 0 10px;
   box-shadow: 0px 2px 6px rgba(0,0,0,.4);
 }
+
 .playlist-item .pic{
   height: 50px;
   width: 50px;
   overflow: hidden;
 }
+
+.playlist-item .pic a{
+  display: block;
+}
+
 .playlist-item img{
   max-width: 50px;
   min-height: 50px;
