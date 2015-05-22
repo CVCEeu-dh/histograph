@@ -505,6 +505,7 @@ a:hover{
   right: 0;
   height: 80px;
   background: #191c1d;
+  z-index: 4;
   -webkit-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
      -moz-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
        -o-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);

@@ -115,8 +115,12 @@ angular.module('histograph')
   })
   // according to language, give the title a real title
   .filter('title', function() {
-    return function(props, language) {
+    return function(props, language, cutAt) {
       var primary = props['title_' + language];
+      
+      function cutter(input) {
+        
+      };
       
       if(primary)
         return primary
