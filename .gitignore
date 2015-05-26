@@ -9,3 +9,5 @@ settings.js
 *.csv
 
 contents
+
+__*.*
