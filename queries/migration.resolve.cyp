@@ -24,7 +24,7 @@ MERGE (inq:inquiry {strategy:'reconciliation', content:{content}})
 MERGE (k:entity:location { geocode_id:{geocode_id}})
   ON CREATE SET
     k.name = {name},
-    k.name_search = {name},
+    k.name_search = {name_search},
     k.creation_date = timestamp(),
     k.geocode_query = {q},
     k.geocode_countryId = {countryId},
@@ -39,7 +39,7 @@ MERGE (k:entity:location { geocode_id:{geocode_id}})
     k.geocode_bounds_sw_lng = {sw_lng}
   ON MATCH SET
     k.name = {name},
-    k.name_search = {name},
+    k.name_search = {name_search},
     k.last_modification_date = timestamp(),
     k.geocode_query = {q},
     k.geocode_countryId = {countryId},

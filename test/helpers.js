@@ -46,11 +46,21 @@ var helpers = require('../helpers.js'),
 
 describe('geocoding api', function() {
   this.timeout(5000);
-  it('should calls geocodingapi service and build a new location entity', function (done) {
+  it('should call geocodingapi service and build a new location entity', function (done) {
     helpers.geocoding('ruel Lepic, Paris', function (err, res) {
       should.not.exist(err, err);
-      console.log(res)
+      // console.log(res)
       should.exist(res[0].geocode_id, res);
+      done();
+    });
+  });
+  it('should call geocodingapi service and build a new location entity starting from a COuntry', function (done) {
+    helpers.geocoding('Italia', function (err, res) {
+      should.not.exist(err, err);
+      // console.log(res)
+      should.exist(res[0].geocode_id, res);
+      should.equal(res[0].name, 'Italy');
+      should.equal(res[0].name_search, 'italy');
       done();
     });
   });

@@ -589,7 +589,7 @@ module.exports = {
         return;
       }
       
-      console.log(url)
+      // console.log(url)
       if(!body.results.length) {
         if(body.error_message) {
           next(body.error_message)
@@ -619,6 +619,7 @@ module.exports = {
       neo4j.query(reconcile.merge_geocoding_entity, {
         geocode_id: body.results[0].place_id,
         name: name,
+        name_search: name.toLowerCase(),
         q: 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(address),
         
         countryName: country? country.long_name: '',
