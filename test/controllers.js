@@ -286,6 +286,22 @@ describe('controllers: get resource items available to the user', function() {
         done();
       });
   });
+  
+  it('should get a single resource MONOPARTITE graph object', function (done) {
+    session
+      .get('/api/resource/11160/graph?type=monopartite-entity')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log('ERROR', err);
+        should.not.exist(err);
+        console.log(res.body)
+        should.exist(res.body.result.graph);
+        done()
+      });
+  });
+  
 });
 
 
@@ -489,6 +505,20 @@ describe('controllers: play with entities', function() {
         if(err)
           console.log('ERROR', err);
         should.not.exist(err);
+        should.exist(res.body.result.graph);
+        done()
+      });
+  });
+  it('should get a single entity MONOPARTITE graph object', function (done) {
+    session
+      .get('/api/entity/20381/graph?type=monopartite-entity')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log('ERROR', err);
+        should.not.exist(err);
+        console.log(res.body)
         should.exist(res.body.result.graph);
         done()
       });

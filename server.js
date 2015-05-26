@@ -282,6 +282,8 @@ apiRouter.route('/resource/:id/related')
   .get(ctrl.resource.getRelatedItems)
 apiRouter.route('/resource/:id/comments') // POST
   .post(ctrl.resource.createComment)
+apiRouter.route('/resource/:id/graph')
+  .get(ctrl.resource.getGraph);
 apiRouter.route('/cooccurrences') // @todo move to entity controller.
   .get(ctrl.resource.getCooccurrences)
 

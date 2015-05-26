@@ -39,6 +39,53 @@ module.exports = {
     }
     return res.error(400, err.message);
   },
+  
+  /**
+    Given a query and its cypher params, do wonderful stuff.
+    The query MUST resturn a list of (source,target,weight) triads.
+    @param query  - cypher query
+    @param params - cypher query params
+    @return (err, graph) - error, or a graph of nodes and edges
+  */
+  cypherGraph: function(query, params, next) {
+    neo4j.query(query, params, function (err, items) {
+      if(err) {
+        next(err);
+        return;
+      }
+      
+      var graph = {
+        nodes: [],
+        edges: []
+      };
+      var index = {};
+      
+      for(var i = 0; i < items.length; i++) {
+        if(!index[items[i].source.id]) {
+          index[items[i].source.id] = items[i].source;
+          graph.nodes.push(index[items[i].source.id]);
+        }
+        if(!index[items[i].target.id]) {
+          index[items[i].target.id] = items[i].target;
+          graph.nodes.push(index[items[i].target.id]);
+        }
+        
+        var edgeId = _.sortBy([items[i].target.id, items[i].source.id]).join('.');
+            
+        if(!index[edgeId]) {
+          graph.edges.push({
+            id: edgeId,
+            source: items[i].source.id,
+            target: items[i].target.id,
+            weight: items[i].weight
+          });
+        }
+      }
+      next(null, graph);
+    })
+  },
+  
+  
   /**
     Handle causes and stacktraces provided by seraph Query and rawQuery.
     @err the err OBJECT provided by cypher
@@ -191,22 +238,29 @@ module.exports = {
         next(err);
         return;
       };
-      if(wiki.results.length == 0) {
+      if(!wiki.results.length) {
         next(IS_EMPTY);
         return;
       };
-      var props = {};
       
-      if(wiki.results[0].label)
-        props.name = wiki.results[0].label;
+      var results = [];
       
-      if(wiki.results[0].description)
-        props.description = wiki.results[0].description
-      
-      if(wiki.results[0].uri)
-        props.links_wiki = wiki.results[0].uri.split('/').pop();
-      
-      next(null, props);
+      for(var i=0; i < wiki.results.length; i++) {
+        var props = {};
+        
+        if(wiki.results[i].label)
+          props.name = wiki.results[i].label;
+        
+        if(wiki.results[i].description)
+          props.description = wiki.results[i].description
+        
+        if(wiki.results[i].uri)
+          props.links_wiki = wiki.results[i].uri.split('/').pop();
+        
+        results.push(props)
+      }
+
+      next(null, results);
     });
   },
   /*
@@ -270,6 +324,7 @@ module.exports = {
               if(person.wikiLink) {
                 neo4j.query(reconcile.merge_person_entity_by_links_wiki, {
                   name: person.entityId,
+                  name_search: person.entityId.toLowerCase(),
                   links_wiki: path.basename(person.wikiLink),
                   links_yago: '',
                   service: 'textrazor'

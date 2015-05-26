@@ -13,23 +13,31 @@ angular.module('histograph')
     $scope.relatedPersons    = persons.result.items;
     
     // cooccurrences
-    
+    $scope.graphType = 'monopartite-entity'
     // sync graph
-    EntityVizFactory.get({
-      id: $routeParams.id,
-      viz: 'graph'
-    }, {}, function(res) {
-      res.result.graph.nodes.map(function (d) {
-        d.color  = d.type == 'person'? "#D44A33": "#6891A2";
-        d.type = d.type || 'res';
-        d.x = Math.random()*50;
-        d.y = Math.random()*50;
-        d.label = d.name;
-        return d;
-      })
-      $log.debug('EntityCtrl set graph',res.result.graph.nodes);
-      
-      // once done, load the other viz
-      $scope.setGraph(res.result.graph)
-    });
+    $scope.drawGraph = function() {
+      EntityVizFactory.get({
+        id: $routeParams.id,
+        viz: 'graph',
+        type: $scope.graphType,
+        limit: 2000
+      }, function(res) {
+        $log.log('res', res)
+        res.result.graph.nodes.map(function (d) {
+          d.color  = d.type == 'person'? "#D44A33": "#6891A2";
+          d.type   = d.type || 'res';
+          d.x = Math.random()*50;
+          d.y = Math.random()*50;
+          //d.label = d.name;
+          return d;
+        })
+        $log.debug('EntityCtrl set graph',res.result.graph.nodes);
+        
+        // once done, load the other viz
+        $scope.setGraph(res.result.graph)
+      });
+    };
+    
+    $scope.$watch('graphType', $scope.drawGraph)
+    
   });

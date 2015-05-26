@@ -11,6 +11,8 @@ var settings  = require('../settings'),
     neo4j     = require('seraph')(settings.neo4j.host),
     queries   = require('decypher')('./queries/entity.cyp'),
     
+    crowdsourcing = require('../crowdsourcing/entity.js'),
+    
     async     = require('async'),
     _         = require('lodash');
     
@@ -69,7 +71,56 @@ module.exports = {
       next(null, items);
     });  
   },
-  
+  /**
+    Monopartite graph
+  */
+  getGraphPersons: function(id, properties, next) {
+    var options = _.merge({
+      id: +id, 
+      limit: 100
+    }, properties);
+    // build a nodes edges graph
+    neo4j.query(queries.get_graph_persons, options, function (err, items) {
+      if(err) {
+        next(err);
+        return
+      }
+      
+      var graph = {
+        nodes: [],
+        edges: []
+      };
+      var index = {};
+      
+      for(var i = 0; i < items.length; i++) {
+        
+        if(!index[items[i].source.id]) {
+          index[items[i].source.id] = items[i].source;
+          graph.nodes.push(index[items[i].source.id]);
+        }
+        if(!index[items[i].target.id]) {
+          index[items[i].target.id] = items[i].target;
+          graph.nodes.push(index[items[i].target.id]);
+        }
+        
+        var edgeId = items[i].target.id + '.' + items[i].source.id;
+        
+        if(!index[edgeId]) {
+          graph.edges.push({
+            id: edgeId,
+            source: items[i].source.id,
+            target: items[i].target.id,
+            weight: items[i].weight
+          });
+        }
+      }
+      console.log(index)
+      next(null, graph);
+    })
+  },
+  /**
+    Bipartite graph of entity and resources
+  */
   getGraph: function (id, properties, next) {
     var options = _.merge({
       id: +id,
@@ -107,6 +158,97 @@ module.exports = {
       next(null, graph)
     })
   },
+  /** check if the entity NAME actually correspond to the dbpedia lookup result of its links_wiki
+  */
+  inspect: function(id, properties, next) {
+    var errors   = [],
+        warnings = [];
+       
+    neo4j.read(id, function (err, node) {
+      if(err) {
+        next(err);
+        return;
+      }
+      
+      var q = async.waterfall([
+        // check if the entity has a proper wiki link
+        function (nextTask) {
+          if(!node.links_wiki || !node.links_wiki.length > 0) {
+            warnings.push({
+              need: 'it has not a links_wiki',
+              cause: {
+                notFound: node.name
+              }
+            });
+            
+            nextTask(null, node);
+            return;
+          }
+          // download the first lookup
+          helpers.lookupPerson(node.name, function (err, persons) {
+            if(err == helpers.IS_EMPTY) {
+              // wiki links is not dbpedia lookup (that is, has been manually set)
+              nextTask();
+              return;
+            } else if(err) {
+              next(err);
+              return;
+            }
+            if(persons.length > 1) {
+              crowdsourcing.personDisambiguate(node, persons, function (err, res) {
+                if(err) {
+                  next(err);
+                  return;
+                }
+                errors.push({
+                  need: 'disambiguate multiple dbpedia resources',
+                  cause: {
+                    tooManyResults: persons.length
+                  }
+                });
+                nextTask();
+              });
+              
+            } else if(persons[0].name != node.name) {
+              crowdsourcing.personDisambiguate(node, persons, function (err, res) {
+                if(err) {
+                  next(err);
+                  return;
+                }
+                errors.push({
+                  need: 'verify dbpedia identity',
+                  cause: {
+                    nameDiffer: [persons[0].name, node.name]
+                  }
+                });
+                nextTask();
+              });
+            } else if(persons[0].links_wiki != node.links_wiki) {
+              crowdsourcing.personDisambiguate(node, persons, function (err, res) {
+                if(err) {
+                  next(err);
+                  return;
+                }
+                errors.push({
+                  need: 'verify dbpedia link',
+                  cause: {
+                    linkDiffer: [persons[0].links_wiki, node.links_wiki]
+                  }
+                });
+                nextTask();
+              });
+            } else {
+              nextTask();
+            }
+            // output a crowdsourcing activity: who is this person according to dbpedia?
+          });
+        }
+      
+      ], function() {
+        next(null, node, errors, warnings);
+      });
+    })
+  },
   /**
    Enrich the entity by using dbpedia data (and yago).
    Since entities comes from Resource.discover activities, they're enriched with
@@ -131,17 +273,22 @@ module.exports = {
             nextTask(null, node);
             return
           }
-          helpers.lookupPerson(node.name, function (err, res) {
+          helpers.lookupPerson(node.name, function (err, persons) {
             if(err) {
               console.log('error', err)
               nextTask(null, node)
               return;
             }
-            node = _.merge(node, res);
+            if(persons.length > 1) {
+              console.log(persons);
+              throw err
+              return;
+            } 
+            node = _.merge(node, persons[0]);
             if(node.services && node.services.length)
               node.services = _.unique(node.services);
             console.log(node, 'wikipedia')
-            neo4j.save(node, function(err, res) {
+            neo4j.save(node, function (err, res) {
               if(err) {
                 console.log('error')
                 next(err);

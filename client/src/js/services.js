@@ -30,6 +30,9 @@ angular.module('histograph')
         query: {method: 'GET' },
     });
   })
+  .factory('ResourceVizFactory', function ($resource) {
+    return $resource('/api/resource/:id/:viz');
+  })
   /*
     Add a comment to a resource
   */
@@ -48,7 +51,10 @@ angular.module('histograph')
     return $resource('/api/collection/:id/related/:model', {}, {});
   })
   .factory('CollectionVizFactory', function ($resource) {
-    return $resource('/api/collection/:id/:viz', {}, {});
+    return $resource('/api/collection/:id/:viz', {
+      id: '@id',
+      viz: '@viz'
+    });
   })
   /*
     Get/Update/Delete one entity

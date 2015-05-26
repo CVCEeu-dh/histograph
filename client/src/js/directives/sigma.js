@@ -40,7 +40,7 @@ angular.module('histograph')
             si = new sigma({
               settings: {
                 singleHover: true,
-                labelThreshold: 4.9
+                labelThreshold: 4
               }
             }),
             camera = si.addCamera('main'),
@@ -348,7 +348,7 @@ angular.module('histograph')
           Sigma type specific Renderers
           ---
         */
-        sigma.canvas.nodes.resource = function(node, context, settings) {
+        sigma.canvas.nodes.resource = sigma.canvas.nodes.person= function(node, context, settings) {
           drawNode(node, context, settings)
         };
         
@@ -382,7 +382,7 @@ angular.module('histograph')
           
         */
         sigma.canvas.edges.def = function(edge, source, target, context, settings) {
-          var color = "#661000",
+          var color = "#d4d4d4",
               prefix = settings('prefix') || '';
       
           context.strokeStyle = color;

@@ -74,12 +74,38 @@ RETURN result
 LIMIT {limit}
 
 
+// name: get_graph_persons
+// monopartite graph of people
+MATCH (n)-[r]-(t:resource)
+ WHERE id(n) = {id}
+WITH t
+ MATCH (p1:person)-[:appears_in]-(t)-[:appears_in]-(p2:person)
+WITH p1, p2, length(collect(DISTINCT t)) as w
+
+RETURN {
+    source: {
+      id: id(p1),
+      type: LAST(labels(p1)),
+      label: p1.name
+    },
+    target: {
+      id: id(p2),
+      type: LAST(labels(p2)),
+      label: p2.name
+    },
+    weight: w 
+  } as result
+ORDER BY w DESC
+LIMIT {limit}
+
+
 // name:get_related_persons
 // get related persons that are connected with the entity, sorted by frequence
 MATCH (ent)-[:appears_in]->(res:resource)
 WHERE id(ent) = {id}
 WITH ent, res
-  OPTIONAL MATCH (per:person)-[:appears_in]->(res)
+  MATCH (per:person)-[:appears_in]->(res)
+  WHERE per <> ent
 RETURN {
   id: id(per),
   props: per,

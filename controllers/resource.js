@@ -176,7 +176,40 @@ module.exports = function(io){
         });
       })
     },
-    
+     getGraph: function (req, res) {
+      
+      var type = 'bipartite';
+      
+      // get the right graph
+      if(req.query.type) {
+        if(['monopartite-entity', 'monopartite-resource'].indexOf(req.query.type) == -1) {
+          return res.error({type: req.query.type + 'not found'});
+        }
+        type = req.query.type
+      }
+      
+      if(type == 'bipartite') {
+        resource.getGraphPersons(req.params.id, {}, function (err, graph) {
+           if(err)
+            return helpers.cypherQueryError(err, res);
+          return res.ok({
+            graph: graph
+          }, {
+            type: type
+          });
+        });
+      } else if(type == 'monopartite-entity') {
+        resource.getGraphPersons(req.params.id, {}, function (err, graph) {
+           if(err)
+            return helpers.cypherQueryError(err, res);
+          return res.ok({
+            graph: graph
+          }, {
+            type: type
+          });
+        });
+      }
+    },
     /*
       remap neo4j items to nice resource objects
       @return list of resource objects

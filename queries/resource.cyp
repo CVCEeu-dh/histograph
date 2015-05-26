@@ -242,3 +242,29 @@ RETURN {
 ORDER BY w DESC
 SKIP {skip}
 LIMIT {limit}
+
+
+// name: get_graph_persons
+//
+MATCH (n)-[r]-(per:person)
+  WHERE id(n) = {id}
+WITH per
+  MATCH (per)--(res:resource)
+WITH res
+  MATCH (p1:person)-[:appears_in]-(res)-[:appears_in]-(p2:person)
+WITH p1, p2, length(collect(DISTINCT res)) as w
+RETURN {
+  source: {
+    id: id(p1),
+    type: LAST(labels(p1)),
+    label: p1.name
+  },
+  target: {
+    id: id(p2),
+    type: LAST(labels(p2)),
+    label: p2.name
+  },
+  weight: w 
+} as result
+ORDER BY w DESC
+LIMIT {limit}

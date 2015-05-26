@@ -66,13 +66,39 @@ module.exports = function(io){
     }, // get graph of resources and other stugff, a graph object of nodes and edges
     
     getGraph: function (req, res) {
-      entity.getGraph(req.params.id, {}, function (err, graph) {
-         if(err)
-          return helpers.cypherQueryError(err, res);
-        return res.ok({
-          graph: graph
+      
+      var type = 'bipartite';
+      
+      // get the right graph
+      if(req.query.type) {
+        if(['monopartite-entity', 'monopartite-resource'].indexOf(req.query.type) == -1) {
+          return res.error({type: req.query.type + 'not found'});
+        }
+        type = req.query.type
+      }
+      
+      
+      if(type == 'bipartite') {
+        entity.getGraph(req.params.id, {}, function (err, graph) {
+           if(err)
+            return helpers.cypherQueryError(err, res);
+          return res.ok({
+            graph: graph
+          }, {
+            type: type
+          });
         });
-      }) 
+      } else if(type == 'monopartite-entity') {
+        entity.getGraphPersons(req.params.id, {}, function (err, graph) {
+           if(err)
+            return helpers.cypherQueryError(err, res);
+          return res.ok({
+            graph: graph
+          }, {
+            type: type
+          });
+        });
+      }
     }
   }
 }

@@ -31,6 +31,13 @@ describe('model:entity ', function() {
     })
   });
   
+  it('should inspect an entity', function (done) {
+    entity.inspect(17628, {}, function (err, res){
+      
+      done();
+    })
+  });
+  
   it('should return some related persons', function (done) {
     entity.getRelatedResources(26706, {}, function (err, res){
       should.not.exist(err, err);

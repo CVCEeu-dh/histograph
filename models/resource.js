@@ -115,6 +115,23 @@ module.exports = {
   remove: function(id, next) {
     
   },
+  /**
+    Monopartite graph
+  */
+  getGraphPersons: function(id, properties, next) {
+    var options = _.merge({
+      id: +id, 
+      limit: 100
+    }, properties);
+    
+    helpers.cypherGraph(rQueries.get_graph_persons, options, function (err, graph) {
+      if(err) {
+        next(err);
+        return
+      };
+      next(null, graph);
+    });
+  },
   /*
     The long chain of the discovery. Perform TEXTRAZOR on some field of our darling resource and GEOCODE/GEONAMES for the selected geolocations
   */

@@ -157,11 +157,11 @@ MERGE (k:entity:person { uri:{id} })
 // (unique key constraint: url...)
 MERGE (k:entity:person { links_wiki:{links_wiki} })
   ON CREATE SET
-    k.name_search = {name},
+    k.name_search = {name_search},
     k.name = {name},
     k.services = [{service}]
   ON MATCH SET
-    k.name_search = {name},
+    k.name_search = {name_search},
     k.links_yago = {links_yago},
     k.services = COALESCE(k.services,[]) + {service}
   RETURN k
