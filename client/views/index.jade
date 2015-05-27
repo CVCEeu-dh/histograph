@@ -47,12 +47,25 @@ html
         if user.username
            
           
-          div(class='row')
+          div(class='row', ng-cloak)
             div(class='col-sm-4')
               a(href='#/') hg
               a(href='#/profile')
                 img(src=user.picture)
-                span!=user.username
+                span {{user.username}} 
+                
+             
+              div(class='inline', dropdown, dropdown-append-to-body='true', is-open='status.isopen')
+                span(dropdown-toggle, ng-disabled='disabled')
+                  {{ language }}
+                  i(class='fa fa-down')
+      
+                ul(class='dropdown-menu', role='menu', )
+                  li(ng-repeat='lang in availableLanguages', ng-click='setLanguage(lang)') {{lang}}
+                
+                
+                
+                
             div(class='col-sm-4')
               div(id='search-field')
                 div(class='input-group')
@@ -78,10 +91,24 @@ html
               a(ng-href='/auth/twitter?next={{locationPath}}', class='btn btn-default') signup with twitter
               a(ng-href='/auth/google?next={{locationPath}}', class='btn btn-default') signup with google plus
       else
-        //- div(id='see-also-header') related stuff
-        div(ng-view, class='view {{currentCtrl}}')
+        div(class='view {{currentCtrl}}')
+          div(ng-view)
         
         
+          div(id='see-also', class='{{currentCtrl}}', ng-cloak)
+            div(ng-repeat='relatedItem in relatedItems', class='related')
+              h4
+                a(ng-href='#/r/{{relatedItem.id}}', ng-bind-html='relatedItem.props | title : language')
+              a(data-id='{{relatedItem.id}}') view on graph
+              div
+                span(class='date') {{relatedItem.props|guessInterval}}
+                span(ng-if='relatedItem.persons', class='tags') — 
+                  i in the document:
+                  span(ng-repeat='per in relatedItem.persons', data-id='{{per.id}}', ng-click='toggleMenu($event, relatedItem, per)', class='tag person') {{per.name}}
+              
+              img(ng-if='relatedItem.props.mimetype=="image"', ng-src="{{relatedItem.props | url : language}}")
+              blockquote {{relatedItem.props | abstract : language}}
+            
         
         div(id='milkyway', sigma, graph='graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentCtrl == "AllShortestPathsCtrl" || currentCtrl == "NeighborsCtrl" || currentCtrl == "SearchCtrl"? "extended": ""}}', controller='currentCtrl' redirect='redirect(path)')
           

@@ -55,6 +55,10 @@ angular.module('histograph')
       var start_date_a = moment.utc(input.start_date),
           start_date_b = moment.utc(compare.start_date),
           delta = moment.duration(start_date_b.diff(start_date_a));
+      
+      if(!start_date_a.isValid() || !start_date_b.isValid())
+        return 'no date';
+      
       if(Math.abs(delta) < 1000 * 60) {
         return 'same date';
         
@@ -114,27 +118,90 @@ angular.module('histograph')
     }
   })
   // according to language, give the title a real title
-  .filter('title', function() {
+  .filter('title', function($sce) {
     return function(props, language, cutAt) {
       var primary = props['title_' + language];
       
-      function cutter(input) {
-        
-      };
-      
       if(primary)
-        return primary
+        return $sce.trustAsHtml(primary);
       
       var defaultName = props.name;
       
       if(defaultName)
-        return defaultName;
+        return $sce.trustAsHtml(defaultName);
       
       // return the first in another language
       if(!props.languages || !props.languages.length)
         return 'Untitled';
       
-      return props['title_' + props.languages[0]]
+      return $sce.trustAsHtml(props['title_' + props.languages[0]])
+    }
+  })
+  // according to language, give the caption a real caption
+  .filter('caption', function($sce) {
+    return function(props, language, cutAt) {
+      var primary = props['caption_' + language];
+      
+      var wrapper = function(text) {
+        return $sce.trustAsHtml(text)
+      };
+      
+      if(primary)
+        return wrapper(primary);
+      
+      var defaultName = props.name;
+      
+      if(defaultName)
+        return wrapper(defaultName);
+      
+      // return the first in another language
+      if(!props.languages || !props.languages.length)
+        return 'caption';
+      
+      return wrapper(props['caption_' + props.languages[0]])
+    }
+  })
+  .filter('abstract', function($sce) {
+    return function(props, language, cutAt) {
+      var primary = props['abstract_' + language];
+      
+      var wrapper = function(text) {
+        return $sce.trustAsHtml(text)
+      };
+      
+      if(primary)
+        return wrapper(primary);
+      
+      var defaultName = props.name;
+      
+      if(defaultName)
+        return wrapper(defaultName);
+      
+      // return the first in another language
+      if(!props.languages || !props.languages.length)
+        return 'abstract';
+      
+      return wrapper(props['abstract_' + props.languages[0]])
+    }
+  })
+  /**
+    Return a valid url for the given mimetype and props.
+    IT allows to handle localisation without changing the global language.
+  */
+  .filter('url', function($sce) {
+    return function(props, language, cutAt) {
+      if(props.mimetype == 'image')
+        return 'media/' + props.url;
+      
+      if(!props.languages || !props.languages.length)
+        return ''; // noty found...
+      
+      var primary = props[language + '_url'];
+        
+      if(primary)
+        return primary;
+      
+      return 'txt/' + props[props.languages[0] + '_url']
     }
   })
 

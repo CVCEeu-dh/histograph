@@ -30,11 +30,42 @@ module.exports = function(io){
     */
     getItem: function (req, res) {
       var language = req.query.language || 'en';
-      entity.get(req.params.id, language, function (err, item) {
+      entity.get(req.params.id, function (err, item) {
         if(err)
           return helpers.cypherQueryError(err, res);
         return res.ok({
           item: item
+        });
+      })
+    },
+    /*
+      Create a comment specific for the entity ?
+    */
+    createComment: function(req, res) {
+      console.log('ici', req.body.content, req.user);
+      var now = helpers.now();
+
+      // add dummy comments on it.
+      neo4j.query(queries.add_comment_to_resource, {
+        id: +req.params.id,
+        content: req.body.content,
+        tags: req.body.tags,
+        username: req.user.username,
+        creation_date: now.date,
+        creation_time: now.time
+      }, function (err, items) {
+        console.log(err, items);
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        // emit the event for those connected on resource. to be refactored.
+        io.emit('done:commenting', {
+          user: req.user.username,
+          resource_id: +req.params.id, 
+          data: items[0].comments[0]
+        });
+
+        return res.ok({
+          items: _.values(items[0].comments)
         });
       })
     },

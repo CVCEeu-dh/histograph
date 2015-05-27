@@ -1,6 +1,12 @@
 // name: get_entity
 //
-
+MATCH (ent:entity)
+  WHERE id(ent) = {id}
+RETURN {
+  id: id(ent),
+  type: LAST(labels(ent)),
+  props: ent
+}
 
 // name: get_person_cooccurrences
 //

@@ -1,3 +1,36 @@
+// name: get_resource
+// get resource with its version and comments
+MATCH (res) WHERE id(res) = {id}
+  WITH res
+    OPTIONAL MATCH (ann:`annotation`)-[:describes]-(res)
+    OPTIONAL MATCH (ver:`positioning`)-[:describes]-(res)
+    OPTIONAL MATCH (res)-[:appears_in{is_event_place:true}]-(pla:`location`)
+    OPTIONAL MATCH (res)-[:appears_in]-(loc:`location`)
+    OPTIONAL MATCH (res)-[:appears_in]-(per:`person`)
+    OPTIONAL MATCH (res)-[:belongs_to]-(col:collection)
+    OPTIONAL MATCH (u:user)-[:says]-(com)-[:mentions]-(res)
+  
+  WITH ann, ver, res, pla, loc, per, u, col, {
+      id: id(com),
+      props: com,
+      user: u
+    } AS coms
+
+  WITH ann, ver, res, pla, loc, per, col, coms
+    RETURN {
+      resource: {
+        id: id(res),
+        props: res,
+        positionings: collect(DISTINCT ver),
+        annotations: collect(DISTINCT ann),
+        places: collect(DISTINCT pla),
+        locations: collect(DISTINCT loc),
+        persons: collect(DISTINCT per),
+        comments: collect(DISTINCT coms),
+        collections: collect(DISTINCT col)
+      }
+    } AS result
+    
 // name: get_resource_by_language
 // get resource with its version and comments
 START res=node({id})
@@ -28,33 +61,6 @@ START res=node({id})
         persons: collect(DISTINCT per),
         comments: collect(DISTINCT coms),
         collections: collect(DISTINCT col)
-      }
-    } AS result
-    
-// name: get_resource
-// get resource with its version and comments
-START res=node({id})
-  WITH res
-    OPTIONAL MATCH (ver:`version`)-[r1:describes]-(res)
-    OPTIONAL MATCH (res)-[r2:appears_in]-(loc:`location`)
-    OPTIONAL MATCH (res)-[r3:appears_in]-(per:`person`)
-    OPTIONAL MATCH (u:user)-[r4:says]-(com)-[r5:mentions]-(res)
-  
-  WITH  ver, res, loc, per, u, com, {
-      id: id(com),
-      comment: com,
-      user: u
-    } AS coms
-
-  WITH ver, res, loc, per, coms
-    RETURN {
-      resource: {
-        id: id(res),
-        props: res,
-        versions: collect(DISTINCT ver),
-        locations: collect(DISTINCT loc),
-        persons: collect(DISTINCT per),
-        comments: collect(DISTINCT coms)
       }
     } AS result
 

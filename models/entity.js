@@ -19,17 +19,21 @@ var settings  = require('../settings'),
     
 
 module.exports = {
-  get: function(id, language, next) {
-    neo4j.read(id, function(err, node) {
+  get: function(id, next) {
+    neo4j.query(queries.get_entity, {
+      id: +id
+    }, function (err, node) {
       if(err) {
         next(err);
         return;
       }
-      
+      if(!node.length) {
+        next(helpers.IS_EMPTY);
+        return;
+      }
+        
       // select current abstract based on the language chosen, fallback to english
-      next(null, module.exports.model(node, {
-        language: language
-      }));
+      next(null, node[0]);
     })
   },
   
@@ -80,41 +84,11 @@ module.exports = {
       limit: 100
     }, properties);
     // build a nodes edges graph
-    neo4j.query(queries.get_graph_persons, options, function (err, items) {
+    helpers.cypherGraph(queries.get_graph_persons, options, function (err, graph) {
       if(err) {
         next(err);
         return
       }
-      
-      var graph = {
-        nodes: [],
-        edges: []
-      };
-      var index = {};
-      
-      for(var i = 0; i < items.length; i++) {
-        
-        if(!index[items[i].source.id]) {
-          index[items[i].source.id] = items[i].source;
-          graph.nodes.push(index[items[i].source.id]);
-        }
-        if(!index[items[i].target.id]) {
-          index[items[i].target.id] = items[i].target;
-          graph.nodes.push(index[items[i].target.id]);
-        }
-        
-        var edgeId = items[i].target.id + '.' + items[i].source.id;
-        
-        if(!index[edgeId]) {
-          graph.edges.push({
-            id: edgeId,
-            source: items[i].source.id,
-            target: items[i].target.id,
-            weight: items[i].weight
-          });
-        }
-      }
-      console.log(index)
       next(null, graph);
     })
   },
@@ -126,6 +100,7 @@ module.exports = {
       id: +id,
       limit: 500
     }, properties);
+    
     
     neo4j.query(queries.get_graph, options, function (err, items) {
       if(err) {

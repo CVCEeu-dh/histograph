@@ -9,7 +9,7 @@ angular.module('histograph')
     $log.debug('EntityCtrl ready', +$routeParams.id, entity.result.item.name);
     
     $scope.item = entity.result.item;
-    $scope.related    = resources.result.items;
+    $scope.setRelatedItems(resources.result.items);
     $scope.relatedPersons    = persons.result.items;
     
     // cooccurrences

@@ -49,7 +49,9 @@ module.exports = function(io){
       todo: get different language according to the different param.
     */
     getItem: function (req, res) {
-      resource.get(req.params.id, 'en', function(err, item) {
+      resource.get(req.params.id, function(err, item) {
+        if(err == helpers.IS_EMPTY)
+          return res.error(404);
         if(err)
           return helpers.cypherQueryError(err, res);
         return res.ok({

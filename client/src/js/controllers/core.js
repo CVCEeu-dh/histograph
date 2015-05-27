@@ -26,12 +26,34 @@ angular.module('histograph')
     $scope.query =  $routeParams.query || '';
     
     
+    
     $scope.$on(EVENTS.USE_USER, function (e, user) {
-      $log.debug('CoreCtrl @EVENTS.USE_USER', user);
       if($scope.user.id != user.id) {
+        $log.debug('CoreCtrl @EVENTS.USE_USER', user);
         $scope.user = user;
       }
     })
+    
+    $scope.relatedItems = [];
+    /*
+      Handle smart related items.
+      Please cehck that each controller clean or replace this list
+    */
+    $scope.setRelatedItems = function(relatedItems) {
+      $log.debug('CoreCtrl > setRelatedItems', relatedItems.length);
+      $scope.relatedItems = relatedItems;
+    };
+    
+    // currrent FAV language, in 2 chars format.
+    $scope.language = 'en';
+    
+    $scope.availableLanguages = [
+      'en', 'fr', 'de'
+    ];
+    
+    $scope.setLanguage = function(lang) {
+      $scope.language = lang
+    }
     
     /**
      handle redirection from directive

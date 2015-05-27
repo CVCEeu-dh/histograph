@@ -90,6 +90,7 @@ angular.module('histograph')
     $log.info('ResourceCtrl', resource);
     
     // merge all versions (simply concat annotations and join them with entity URI if any matches identification)
+    
     var yamls = [];
     resource.result.item.positionings.forEach(function(v) {
       if(typeof v.yaml == 'object')
@@ -103,18 +104,10 @@ angular.module('histograph')
     
     $scope.currentVersion =  resource.result.item.positionings[0];//$scope.mergedVersion;
     
-    if($scope.item.annotations.length)
-      $scope.currentAnnotation = $scope.item.annotations[0];
-    else {
-      $scope.currentAnnotation = { annotations: {
-          source: $scope.item.props.source || '',
-          caption: $scope.item.props.caption || '',
-        }
-      }
-    }
+    
       // get theaccepted version
     
-    $scope.related = resources.result.items;
+    $scope.setRelatedItems(resources.result.items);
     
     $scope.graphType = 'monopartite-entity'
     
@@ -135,5 +128,22 @@ angular.module('histograph')
       
       // once done, load the other viz
       $scope.setGraph(res.result.graph)
+    });
+    
+    /**
+      Annotations
+      watch language
+    */
+    $scope.$watch('language', function (language) {
+      if($scope.item.annotations.length) {
+        // evaluate according to language ...
+        for( var i in $scope.item.annotations) {
+          if($scope.item.annotations[i].language == $scope.language) {
+            $scope.currentAnnotation = $scope.item.annotations[i];
+            break;
+          }
+        }
+        
+      }
     });
   })

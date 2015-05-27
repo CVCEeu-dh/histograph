@@ -1,23 +1,25 @@
 <div id="perspective" perfect-scrollbar wheel-propagation="true" refresh-on-change="item.props" suppress-scroll-x="true" wheel-speed="20">
   
       <div ng-if="item" class="entity item">
-        <div  ng-if="item.thumbnail" class="profile-pic">
+        <div  ng-if="item.props.thumbnail" class="profile-pic">
           <div class="profile-pic-wrapper">
             
-            <img ng-src="{{item.thumbnail}}">
+            <img ng-src="{{item.props.thumbnail}}">
           </div>
         </div>
-        <h3><a>{{item.name}}</a></h3>
+        <h3><a>{{item.props | title : language}}</a></h3>
         
         
         
-        <div class="description">{{item.description}} {{item.birth_time | datesOfAPerson : item.death_time}}</div>
+        <div class="description">{{item.props.description}} {{item.props.birth_time | datesOfAPerson : item.props.death_time}}</div>
         
         <div class="actions">
           <div class="btn-group">
             <button class='btn btn-default' tooltip-append-to-body="true" tooltip="this is a mistake"><i class="fa fa-bug"></i></button>
             <button class="btn btn-default" tooltip-append-to-body="true" tooltip="discute this entity" comment="comment(item)"><i class="fa fa-comment-o"></i></button>
-            <button class="btn btn-default" tooltip-append-to-body="true"  tooltip="compare"><i class="fa fa-play-circle-o"></i></button>
+           <button class="btn btn-default" tooltip-append-to-body="true" tooltip="add to playlist" ng-click="queue(item.id, true)">
+              <i class="fa fa-play-circle-o"></i>
+            </button>
           </div>
         </div>
         
@@ -26,7 +28,7 @@
         </div>
         
         <blockquote class="abstract">
-          <p><b>source: wikipedia</b> — {{item.abstract}}</p>
+          <p><b>source: wikipedia</b> — {{item.props | abstract : language }}</p>
         </blockquote>
         <!-- 
         <blockquote ng-if="item.abstract">
@@ -35,28 +37,3 @@
       </div>
 </div>
 
-<div id="see-also" fperfect-scrollbar wheel-propagation="true" refresh-on-change="related" suppress-scroll-x="true" wheel-speed="20">
-  <div class="related" ng-repeat="relatedItem in related">
-    <h4><a ng-href="#/r/{{relatedItem.id}}">{{relatedItem.props.title || relatedItem.props.name || relatedItem.props.title_en}}</a></h4>
-    <a data-id='{{relatedItem.id}}'>view on graph</a>
-    {{relatedItem.props|guessInterval}}
-    
-    <!--div class="tags locations">
-      <span ng-repeat="location in relatedItem.locations">
-
-        <a ng-if="location.geocode_id" class="tag location" >{{location.geocode_formatted_address}}</a>
-
-        <a ng-if="location.geonames_id" class="tag location" >{{location.geonames_toponymName}}, {{location.geonames_countryName}}</a> <span ng-if="!$last">-</span> 
-      
-    </div-->
-    
-    <span class="tags" ng-if="relatedItem.persons"> — <i>in the document</i>:
-      <span ng-repeat="per in relatedItem.persons"  data-id='{{per.id}}'  ng-click="toggleMenu($event, relatedItem, per)" class='tag person'>{{per.name}}</span>
-    </span>
-
-    <img ng-if='relatedItem.props.mimetype=="image"' ng-src="media/{{relatedItem.props.url}}" >
-    <blockquote>
-     {{relatedItem.props.stakeholders || relatedItem.props.caption}}
-    </blockquote>
-  </div>
-</div>

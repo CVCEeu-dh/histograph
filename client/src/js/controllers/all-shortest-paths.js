@@ -12,6 +12,8 @@ angular.module('histograph')
     
     $scope.syncQueue($routeParams.ids);
     
+    $scope.setRelatedItems([]);
+    
     var graph = {
           nodes: [],
           edges: []

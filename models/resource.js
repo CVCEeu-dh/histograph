@@ -42,16 +42,21 @@ var Resource = function() {
 module.exports = {
   /**
     get a complete resource object (with versions, comments etc...).
-    @param language - 'en' or 'fr' or other two chars language identifier 
+    @param id - numeric identifier only
    */
-  get: function(id, language, next) {
-    neo4j.query(rQueries.get_resource_by_language, {
-      id: +id,
-      language: language
+  get: function(id, next) {
+    neo4j.query(rQueries.get_resource, {
+      id: +id
     }, function(err, items) {
+      
       if(err) {
+        console.log(err.neo4jError)
         next(err);
         return
+      }
+      if(items.length == 0) {
+        next(helpers.IS_EMPTY);
+        return;
       }
       
       var item = items[0].resource;
@@ -69,8 +74,8 @@ module.exports = {
           d.yaml = YAML.parse(d.yaml);
         
         var content = [
-          item.props['title_'+ language] || '',
-          item.props['caption_'+ language] || ''
+          item.props['title_'+ d.language] || '',
+          item.props['caption_'+ d.language] || ''
         ].join('§ ');
         
         var annotations = parser.annotate(content, d.yaml).split('§ ');
@@ -150,7 +155,7 @@ module.exports = {
             res['caption_'+ language] || ''
           ].join('. ');
           
-          if(content.length < 10 || ['en', 'fr'].indexOf(language) === -1) { // not enough content
+          if(content.length < 10) { // not enough content
             nextLanguage();
             return;
           }

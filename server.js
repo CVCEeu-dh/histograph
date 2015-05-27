@@ -185,11 +185,23 @@ clientRouter.route('/auth/google/callback')
     })(req, res, next)
   });
 
-
 clientRouter.route('/media/:file')
   .get(function (req, res, next) {
-    var file = req.params.file;
+    var file = req.params.file|| '';
+    file = req.params.file
+            .split('/')
+            .join('');
     return res.sendFile(settings.mediaPath + '/' + file, { root: __dirname });
+  })
+
+clientRouter.route('/txt/:file')
+  .get(function (req, res, next) {
+    var file = req.params.file|| '';
+    // clean parameter
+    file = req.params.file
+            .split('/')
+            .join('');
+    return res.sendFile(settings.paths.txt + '/' + file, { root: __dirname });
   })
 
 

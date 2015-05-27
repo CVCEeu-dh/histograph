@@ -9,7 +9,7 @@
  * Main module of the application. require marked
  */
 angular.module('histograph')
-  .directive('annotator', function($compile) {
+  .directive('annotator', function($compile, $log) {
     return {
       restrict : 'A',
       scope:{
@@ -17,6 +17,7 @@ angular.module('histograph')
         context: '='
       },
       link : function(scope, element, attrs) {
+        
         Annotator.Plugin.HelloWorld = (function() {
 
           function HelloWorld(element, options) {
@@ -59,7 +60,8 @@ angular.module('histograph')
           if(!val)
             return;
           // organise(merge) entitites
-          console.log(scope.marked)
+          $log.log('::annotator @marked changed', val);
+          
           entities = scope.context.locations.concat(scope.context.persons)
           
           element.html(marked(scope.marked, {
