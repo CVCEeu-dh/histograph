@@ -127,8 +127,9 @@ clientRouter.route('/login')
 clientRouter.route('/logout')
   .get(function(req, res){
     req.logout();
-    return res.ok({
-      user: res.user
+    res.render('index', {
+      user: req.user || 'anonymous',
+      message: 'hooray! welcome to our api!'
     });
   });
 

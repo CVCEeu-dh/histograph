@@ -305,7 +305,7 @@ angular.module('histograph')
           context.arc(
             node[prefix + 'x'],
             node[prefix + 'y'],
-            node[prefix + 'size'] + 3,
+            node[prefix + 'size'] + 5,
             0,
             Math.PI * 2,
             true
@@ -320,7 +320,7 @@ angular.module('histograph')
           context.arc(
             node[prefix + 'x'],
             node[prefix + 'y'],
-            node[prefix + 'size'],
+            node[prefix + 'size'] + 2,
             0,
             Math.PI * 2,
             true

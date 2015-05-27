@@ -7,7 +7,7 @@
  * It is the parent of the other controllers.
  */
 angular.module('histograph')
-  .controller('CoreCtrl', function ($scope, $location, $routeParams, $log, $timeout, $http, socket, ResourceCommentsFactory, SuggestFactory) {
+  .controller('CoreCtrl', function ($scope, $location, $routeParams, $log, $timeout, $http, socket, ResourceCommentsFactory, SuggestFactory, EVENTS) {
     $log.debug('CoreCtrl ready');
     $scope.locationPath = $location.path(); 
     
@@ -25,11 +25,13 @@ angular.module('histograph')
     // the current search query, if any
     $scope.query =  $routeParams.query || '';
     
-
-    $scope.setUser = function (user, update) {
-      if(update || !$scope.user.id)
+    
+    $scope.$on(EVENTS.USE_USER, function (e, user) {
+      $log.debug('CoreCtrl @EVENTS.USE_USER', user);
+      if($scope.user.id != user.id) {
         $scope.user = user;
-    };
+      }
+    })
     
     /**
      handle redirection from directive

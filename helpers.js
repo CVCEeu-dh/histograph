@@ -62,17 +62,18 @@ module.exports = {
       
       for(var i = 0; i < items.length; i++) {
         if(!index[items[i].source.id]) {
-          index[items[i].source.id] = items[i].source;
-          graph.nodes.push(index[items[i].source.id]);
+          index[items[i].source.id] = 1;//items[i].source;
+          graph.nodes.push(items[i].source);
         }
         if(!index[items[i].target.id]) {
-          index[items[i].target.id] = items[i].target;
-          graph.nodes.push(index[items[i].target.id]);
+          index[items[i].target.id] = 1;//items[i].target;
+          graph.nodes.push(items[i].target);
         }
         
         var edgeId = _.sortBy([items[i].target.id, items[i].source.id]).join('.');
-            
+        
         if(!index[edgeId]) {
+          index[edgeId] = 1;
           graph.edges.push({
             id: edgeId,
             source: items[i].source.id,

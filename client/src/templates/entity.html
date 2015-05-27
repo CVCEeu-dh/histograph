@@ -8,16 +8,25 @@
           </div>
         </div>
         <h3><a>{{item.name}}</a></h3>
+        
+        
+        
         <div class="description">{{item.description}} {{item.birth_time | datesOfAPerson : item.death_time}}</div>
-        <div class="tags">
+        
+        <div class="actions">
+          <div class="btn-group">
+            <button class='btn btn-default' tooltip-append-to-body="true" tooltip="this is a mistake"><i class="fa fa-bug"></i></button>
+            <button class="btn btn-default" tooltip-append-to-body="true" tooltip="discute this entity" comment="comment(item)"><i class="fa fa-comment-o"></i></button>
+            <button class="btn btn-default" tooltip-append-to-body="true"  tooltip="compare"><i class="fa fa-play-circle-o"></i></button>
+          </div>
+        </div>
+        
+        <div class="tags" ng-if="relatedPersons.length > 0">Appearing with:  
         <span class="tag" ng-click="toggleMenu($event, item, person, 'person')" ng-repeat="person in relatedPersons">{{person.props.name}} ({{person.coappear}})</span>
         </div>
         
         <blockquote class="abstract">
-          {{item.abstract}}
-          <p>
-          source: dbpedia
-        </p>
+          <p><b>source: wikipedia</b> — {{item.abstract}}</p>
         </blockquote>
         <!-- 
         <blockquote ng-if="item.abstract">

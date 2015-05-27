@@ -89,8 +89,6 @@ angular.module('histograph')
     
     $log.info('ResourceCtrl', resource);
     
-    $scope.setUser(resource.user); // (should be done automatically )
-    
     // merge all versions (simply concat annotations and join them with entity URI if any matches identification)
     var yamls = [];
     resource.result.item.positionings.forEach(function(v) {

@@ -90,8 +90,8 @@ a:hover{
 
 .item h3 a{
   font-weight: bold;
-  font-size: 18px;
-  line-height: 24px;
+  font-size: 28px;
+  line-height: 32px;
   color: #151515;
 }
 
@@ -108,6 +108,11 @@ a:hover{
 
 .item .collection{
   color: #959595;
+}
+
+.item .actions{
+  text-align: center;
+  margin-top: 15px;  
 }
 
 .tag {

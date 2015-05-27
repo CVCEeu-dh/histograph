@@ -18,6 +18,9 @@ angular
     // 'mgcrea.ngStrap'
     //'perfect_scrollbar'
   ])
+  .constant("EVENTS", {
+    USE_USER: 'use_user'
+  })
   .config(function ($routeProvider, $httpProvider) {
     $routeProvider
       .when('/', {
@@ -116,4 +119,24 @@ angular
           }
         }
       })
+  
+  
+  })
+  .config(function ($httpProvider) {
+    $httpProvider.interceptors.push(function ($q, $log, $rootScope, EVENTS) {
+      return {
+        response: function(response) {
+          if(response.data.user)
+            $rootScope.$broadcast(EVENTS.USE_USER, response.data.user);
+          return response
+        },
+        responseError: function(rejection) {
+          if(rejection.status === 403) {
+            $log.error('redirecting, authorization problems');
+            location.reload(true);
+          }
+          return $q.reject(rejection);
+        }
+      };
+    });
   })
