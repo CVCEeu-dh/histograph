@@ -95,8 +95,8 @@ a:hover{
 
 .item h3 a{
   font-weight: bold;
-  font-size: 28px;
-  line-height: 32px;
+  font-size: 18px;
+  line-height: 24px;
   color: #151515;
 }
 
@@ -159,6 +159,10 @@ a:hover{
 
 .item .collections{
   margin-bottom: 10px
+}
+
+.item.resource h3 {
+  margin: 20px 0;  
 }
 
 .item.entity h3, .item.entity .description{
