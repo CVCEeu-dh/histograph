@@ -275,7 +275,7 @@ module.exports = {
         next(err);
         return;
       };
-      xml.parseString(content, {explicitArray: true}, function(err, res) {
+      xml.parseString(content, {explicitArray: true}, function (err, res) {
         if(err) {
           next(err);
           return;

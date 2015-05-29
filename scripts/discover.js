@@ -33,7 +33,8 @@ if(options.resourceid) {
     throw 'check your --resourceid value. Should be an integer id!'
 
   resource.discover(options.resourceid, function(err, res) {
-    console.log(res)
+    // console.log(res)
+    console.log(clc.blackBright('discovering'), res.id, clc.cyan('done'))
   })
   return;
 }
@@ -43,7 +44,7 @@ if(options.entityid) {
     throw 'check your --entityid value. Should be an integer id!'
 
   entity.discover(options.entityid, function(err, res) {
-    console.log(res);
+    console.log(clc.blackBright('discovering entity'), res.id, clc.cyan('done'))
   })
   return;
 }

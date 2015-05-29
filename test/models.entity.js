@@ -22,6 +22,14 @@ describe('model:entity ', function() {
       done();
     })
   });
+  it('should return 404', function (done) {
+    entity.get(17151, function (err, res){
+      console.log(err)
+      should.not.exist(res);
+      done();
+    })
+  });
+  
   
   it('should return some related resources', function (done) {
     entity.getRelatedResources(26706, {}, function (err, res){

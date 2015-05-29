@@ -31,7 +31,9 @@ module.exports = function(io){
     getItem: function (req, res) {
       var language = req.query.language || 'en';
       entity.get(req.params.id, function (err, item) {
-        if(err)
+        if(err == helpers.IS_EMPTY)
+          return res.error(404);
+        if(err) 
           return helpers.cypherQueryError(err, res);
         return res.ok({
           item: item
@@ -42,7 +44,7 @@ module.exports = function(io){
       Create a comment specific for the entity ?
     */
     createComment: function(req, res) {
-      console.log('ici', req.body.content, req.user);
+      // console.log('ici', req.body.content, req.user);
       var now = helpers.now();
 
       // add dummy comments on it.

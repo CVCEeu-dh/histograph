@@ -12,7 +12,7 @@ var settings  = require('../settings'),
     queries   = require('decypher')('./queries/entity.cyp'),
     
     crowdsourcing = require('../crowdsourcing/entity.js'),
-    
+    clc       = require('cli-color'),
     async     = require('async'),
     _         = require('lodash');
     
@@ -242,12 +242,14 @@ module.exports = {
       }
       
       var q = async.waterfall([
+        
         // check if the entity has a proper wiki link
         function (nextTask) {
           if((node.links_wiki && node.links_wiki.length > 0) || node.name.split(' ').length < 2) {
             nextTask(null, node);
             return
           }
+          
           helpers.lookupPerson(node.name, function (err, persons) {
             if(err) {
               console.log('error', err)
@@ -284,21 +286,25 @@ module.exports = {
             node.links_wiki = encodeURIComponent(node.links_wiki);
             console.log('wiki link changed!', node.links_wiki)
           }
+          console.log(clc.blackBright('following'), node.links_wiki)
 
           helpers.dbpediaPerson(node.links_wiki, function (err, res) {
             if(err) {
-              console.log('error', err)
+              console.log(clc.red('error'), err)
               nextTask(null, node)
               return;
             }
-            node = _.merge(node, res);
-            console.log('merging nodes')
+            // in order to avoid the neo4jerror on empty array.
+            if(res.languages.length > 0) {
+              node = _.merge(node, res);
+              //console.log('merging nodes', node)
+            }
             // cleaning services
             if(node.services && node.services.length)
               node.services = _.unique(node.services);
             neo4j.save(node, function(err, res) {
               if(err) {
-                console.log('error')
+                console.log(clc.red('error'), err.neo4jError.message)
                 next(err);
                 return;
               }
@@ -310,18 +316,18 @@ module.exports = {
         // dbpedia lookup ... ? If it is more than 2 words.
         
         function (node, nextTask) {
-          console.log('viaf check', node.links_viaf)
+          // console.log('viaf check', node.links_viaf)
           if(!node.links_viaf) {
             nextTask(null, node)
             return
           };
           
           helpers.viafPerson(node.links_viaf, function (err, res) {
-            console.log(res);
+            //console.log(res);
             nextTask(null, node)
           });
         }
-      ], function(){
+      ], function(err) {
         next(null, node);
       });
     })

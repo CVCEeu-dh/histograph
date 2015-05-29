@@ -12,6 +12,7 @@ var async    = require('async'),
     fs       = require('fs'),
     path     = require('path'),
     
+    clc      = require('cli-color'),
     settings = require('./settings'),
     request  = require('request'),
     
@@ -28,7 +29,7 @@ module.exports = {
     
     var url   = settings.dbpedia.endpoint + options.link + '.json',
         level = options.level || 0;// recursion level, see below
-    console.log('dbpediq service:', url);
+    console.log(clc.blackBright('dbpedia service:'), url);
     request
       .get({
         url: url,//url,
@@ -46,7 +47,12 @@ module.exports = {
         
         if(redirect && redirect.value && level < 1) {
           var link = redirect.value.split('/').pop();
-          console.log('following redirection, level', level, 'link', link)
+          if(options.link == link) {
+            // no need to scrape again...
+            next(null, body);
+            return
+          }
+          console.log(clc.blackBright('following redirection, level'), clc.cyan(level), clc.blackBright('link'), clc.cyan(link))
           setTimeout(function(){
             module.exports.dbpedia({
               link: link,
@@ -169,16 +175,17 @@ module.exports = {
     };
     
     var url = settings.viaf.endpoint + options.link + '/' + settings.viaf.format;
-    console.log(url);
+    console.log(clc.blackBright('viaf service'), url);
     request
       .get({
         url: url
       }, function (err, res, body) {
         if(err) {
+          console.log(clc.red('error'), err);
           next(err);
           return;
         }
-        console.log(body)
+        //console.log(body)
         next(null, body);
       });
   },
