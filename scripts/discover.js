@@ -20,6 +20,8 @@ var settings = require('../settings'),
     resource = require('../models/resource'),
     entity   = require('../models/entity'),
     
+    clc      = require('cli-color'),
+    
     neo4j    = require('seraph')(settings.neo4j.host),
     async    = require('async'),
     _        = require('lodash');
@@ -83,7 +85,7 @@ if(options.resource) {
   var queue = async.waterfall([
     // get pictures and documents having a caption
     function (next) {
-      neo4j.query('MATCH (n:`resource`) WHERE not(has(n.textrazor_annotated)) RETURN n LIMIT 500', function (err, nodes) {
+      neo4j.query('MATCH (n:`resource`) WHERE not(has(n.yago_annotated)) RETURN n LIMIT 500', function (err, nodes) {
         if(err)
           throw err;
         var limit;
@@ -95,16 +97,18 @@ if(options.resource) {
     */
     function (nodes, next) {
       var q = async.queue(function (node, nextNode) {
-        console.log('resource remaining', q.length())
+        console.log(clc.blackBright('resource remaining'), clc.white.bgMagenta(q.length()))
         resource.discover(node.id, function(err, res) {
           if(err)
             throw err;
-          console.log(res);
-          res.textrazor_annotated = true;
+          
+          res.yago_annotated = true;
           neo4j.save(res, function (err, n) {
             if(err)
               throw err;
-            nextNode();
+            console.log('node', n.id, clc.cyanBright('saved'))
+            console.log(clc.blackBright('waiting for the next resource ...'))
+            setTimeout(nextNode, 1675);
           })
           
         });
@@ -113,6 +117,7 @@ if(options.resource) {
       q.drain = next;
     }
   ], function () {
-    console.log('completed');
+    console.log(clc.cyanBright('waterfall completed'));
+    console.log()
   });
 }

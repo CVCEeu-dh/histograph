@@ -18,9 +18,17 @@ angular.module('histograph')
       },
       link : function(scope, element, attrs) {
         $log.log('::lazi-text ready', scope.url);
-        $http.get('/txt/' + scope.url).then(function(res) {
-          element.html(res.data);
-        });
+        
+        
+        scope.$watch('url', function(url) {
+          if(!url)
+            return;
+          element.html('loading ...');
+          $http.get('/txt/' + scope.url).then(function(res) {
+            
+            element.html(res.data.replace(/\n/g, '<br/>'));
+          });
+        })
       }
     }
   })

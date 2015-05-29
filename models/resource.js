@@ -58,7 +58,6 @@ module.exports = {
         next(helpers.IS_EMPTY);
         return;
       }
-      
       var item = items[0].resource;
       
       // yaml parsing
@@ -69,7 +68,9 @@ module.exports = {
       });
       
       // yaml parsing and annotation
-      item.annotations = _.map(_.values(item.annotations), function (d) {
+      item.annotations = _.map(_.filter(_.values(item.annotations), function(d) {
+        return d.yaml && d.yaml.length > 0
+      }), function (d) {
         if(d.yaml)
           d.yaml = YAML.parse(d.yaml);
         
@@ -78,6 +79,9 @@ module.exports = {
           item.props['caption_'+ d.language] || ''
         ].join('§ ');
         
+        if(!d.yaml.length){
+          return d;
+        }
         var annotations = parser.annotate(content, d.yaml).split('§ ');
         
         d.annotated = {
@@ -138,7 +142,9 @@ module.exports = {
     });
   },
   /*
-    The long chain of the discovery. Perform TEXTRAZOR on some field of our darling resource and GEOCODE/GEONAMES for the selected geolocations
+    The long chain of the discovery.
+    Perform TEXTRAZOR on some field of our darling resource and 
+    GEOCODE/GEONAMES for the found PLACES entities
   */
   discover: function(id, next) {
     // quetly does textrazor entity extraction.
@@ -160,6 +166,59 @@ module.exports = {
             return;
           }
           
+          helpers.yagoaida(content, function (err, entities) {
+            if(err)
+              throw err;
+            console.log('helpers.yagoaid entities ', entities.length);
+            var yaml = [];
+            // save the resource-entities relationship and prepare the annotation
+            var _q = async.queue(function (entity, nextEntity) {
+              yaml.push({
+                id: entity.id, // local entity id, or uri?
+                context: entity.context
+              });
+              helpers.enrichResource(res, entity, function (err, next) {
+                if(err)
+                  throw err;
+                nextEntity();
+              });
+            }, 2);
+            
+            _q.push(entities);
+            _q.drain = function() {
+              var now = helpers.now(),
+                  persons = entities.filter(function (d) {
+                    return (!d.geocode_id && !d.geonames_id)
+                  });
+              // add the proper version according to the language
+              neo4j.query(vQueries.merge_version_from_service, {
+                resource_id: res.id,
+                service: 'yagoaida',
+                unknowns: persons.length,
+                persons: persons.length,
+                creation_date: now.date,
+                creation_time: now.time,
+                language: language,
+                yaml: YAML.stringify(yaml, 2)
+              }, function (err, nodes) {
+                // console.log(err, vQueries.merge_version_from_service)
+                if(err)
+                  throw err;
+                // merge the version and the res
+                neo4j.query(vQueries.merge_relationship_version_resource, {
+                  version_id: nodes[0].id,
+                  resource_id: res.id
+                }, function (err, nodes) {
+                  if(err)
+                    throw err;
+                  console.log('  res #id',res.id,' saved, #ver_id', nodes[0].ver.id, 'res_url:', nodes[0].res.url);
+                  // out
+                  nextLanguage();
+                });
+              }); // eof vQueries.merge_version_from_service
+            }; // eof drain async
+          });
+          return;
           // merge textrazor different version
           helpers.textrazor(content, function(err, entities) {
             if(err == helpers.IS_LIMIT_REACHED) {

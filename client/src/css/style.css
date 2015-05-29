@@ -165,6 +165,12 @@ a:hover{
   margin: 20px 0;  
 }
 
+.item .full-text{
+      background-color: #f5f5f5;
+  padding: 15px 15px;
+  position: relative;
+}
+
 .item.entity h3, .item.entity .description{
   text-align: center;
   max-width: 210px;

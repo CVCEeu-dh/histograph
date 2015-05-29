@@ -10,6 +10,7 @@
 */
 var async    = require('async'),
     fs       = require('fs'),
+    path     = require('path'),
     
     settings = require('./settings'),
     request  = require('request'),
@@ -99,7 +100,60 @@ module.exports = {
     });
   
   },
-  
+  /*
+    Textrazor entities extraction service from a given text.
+    usage:
+    require(services)
+    services.textrazor({text: '...'}, function (err, entities) {
+      ...
+      {
+            entityId: ,
+            startingPos: ,
+            endingPos: ,
+            matchedText: ,
+            type: ,
+            wikiLink: }
+    })      
+    @param options - MUST contain text
+    
+  */
+  textrazor: function(options, next) {
+    if(!settings.textrazor || !settings.textrazor.endpoint) {
+      next('settings.textrazor.endpoint not found')
+      return;
+    };
+    if(!options.text) {
+      next('textrazor text suould be a long text')
+      return;
+    };
+    
+    request
+      .post({
+        url: settings.textrazor.endpoint,
+        json: true,
+        form: {
+          text: options.text,
+          apiKey: settings.textrazor.key,
+          extractors: 'entities'
+        }
+      }, function (err, res, body) {
+        if(err) {
+          next(err);
+          return;
+        }
+        console.log(body.response)
+        next(null, body.response.entities.map(function (d) {
+          return {
+            entityId: d.entityId,
+            startingPos: d.startingPos,
+            endingPos: d.endingPos,
+            matchedText: d.matchedText,
+            type: d.type,
+            wikiLink: path.basename(d.wikiLink)
+          };
+        }));
+      })
+  },
   /*
     VIAF reconciliation service.
     @param options.link
@@ -124,7 +178,7 @@ module.exports = {
           next(err);
           return;
         }
-        
+        console.log(body)
         next(null, body);
       });
   },
@@ -134,7 +188,7 @@ module.exports = {
       next('settings.yagoaida.endopoint not found')
       return;
     }
-    console.log(settings.yagoaida.endpoint, options.text)
+    // console.log('AIDA')
     request
       .post({
         url: settings.yagoaida.endpoint,
@@ -146,11 +200,24 @@ module.exports = {
           text: options.text
         }
       }, function (err, res, body) {
-        console.log('yagoaida', err, body)
-        
         if(err)
           next(err);
-        
+        // FLATTEN YAGO entities by providing only entitites having "best entity"
+        var entities = body.mentions.filter(function (d) {
+          return d.bestEntity && d.bestEntity.kbIdentifier;
+        }).map(function (d) {
+          var _d = _.merge({
+            startingPos: d.offset,
+            endingPos: d.offset + d.length,
+            matchedText: d.name
+          }, body.entityMetadata[d.bestEntity.kbIdentifier]);
+          
+          if(_d.url)
+            _d.wikiLink = path.basename(_d.url);
+          // console.log(body.entityMetadata[d.bestEntity.kbIdentifier])
+          return _d;
+        });
+        next(null, entities);
       });
   }
   

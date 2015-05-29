@@ -201,7 +201,7 @@ angular.module('histograph')
       if(primary)
         return primary;
       
-      return 'txt/' + props[props.languages[0] + '_url']
+      return props[props.languages[0] + '_url']
     }
   })
 

@@ -286,6 +286,7 @@ module.exports = {
       
     })
   },
+ 
   /**
     Call textrazor service for people/place reconciliation.
     When daily limit has been reached, the IS_EMPTY error message will be given to next()
@@ -422,6 +423,152 @@ module.exports = {
           next(null, entities);
         });
       });
+  },
+  /**
+    A listo fo useful text filters
+  */
+  text: {
+    /*
+      Transform spaces in undescore a url in a wiki url
+      accordiong to http://en.wikipedia.org/wiki/Wikipedia:Page_name#Spaces.2C_underscores_and_character_coding
+      convention. This is usefule when dealing with different stuff.
+    */
+    wikify: function (url) {
+      return path.basename(url).replace(/%20/g, '_');
+    }
+  },
+  /**
+    A bunch of useful geolocalisation helpers
+  */
+  geo: {
+    
+    /*
+      Computate the haversine distance between two points in the geosphere
+    */
+    distance: function(A, B) {
+      function toRadians(n) {
+        return n * Math.PI / 180;
+      };
+      
+      var R = 6371000, // metres
+          φ1 = toRadians(A.lat),
+          φ2 = toRadians(B.lat),
+          Δφ = toRadians(B.lat-A.lat),
+          Δλ = toRadians(B.lng-A.lng),
+          a, c;
+
+      a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+          Math.cos(φ1) * Math.cos(φ2) *
+          Math.sin(Δλ/2) * Math.sin(Δλ/2);
+      c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+      return Math.round(R * c);
+    }
+  },
+   /**
+    Call yagoaida neo4j helper for people/place reconciliation.
+    If there are no entities, res will contain an empty array but no error will be thrown.
+    @return err, res
+   */
+  yagoaida: function (text, next) {
+    console.log(text);
+    services.yagoaida({
+      text: text
+    }, function (err, candidates) {
+      
+      var entities = [],
+          persons =  _.filter(candidates, {
+            type: ['YAGO_yagoLegalActor']
+          }),
+          locations =  _.filter(candidates, {
+            type: ['YAGO_yagoGeoEntity']
+          });
+      
+      async.waterfall([
+        // 1. person
+        //
+        function (nextReconciliation) {
+          var q = async.queue(function (person, nextPerson) {
+            if(person.wikiLink) {
+              neo4j.query(reconcile.merge_person_entity_by_links_wiki, {
+                name: person.entityId.replace(/_/g, ' '),
+                links_wiki: module.exports.text.wikify(person.wikiLink) ,
+                links_yago: '',
+                service: 'yagoaida'
+              }, function (err, nodes) {
+                if(err)
+                  throw err;
+                // enrich with context
+                nodes = nodes.map(function(d) {
+                  d.context = {
+                    left: person.startingPos,
+                    right: person.endingPos
+                  };
+                  return d;
+                });
+                entities = entities.concat(nodes);
+                nextPerson();
+              })
+            } else { // find by name ??
+              nextPerson();
+            }
+          }, 1);
+          q.push(persons);
+          q.drain = nextReconciliation;
+        },
+        // 2. geonames/geocode reconciliation via 
+        // places entity (locations and cities) by using geonames services
+        function (nextReconciliation) {
+          var q = async.queue(function (location, nextLocation) {
+            module.exports.geonames(location.matchedText, function (err, nodes){
+              if(err == IS_EMPTY) {
+                nextLocation();
+                return;
+              } else if(err)
+                throw err;
+              nodes = nodes.map(function(d) {
+                d.context = {
+                  left: location.startingPos,
+                  right: location.endingPos
+                };
+                return d;
+              });
+                 // adding LOCAL lazy context here, provided by textrazor
+              entities = entities.concat(nodes);
+              nextLocation();
+            })
+          }, 1);
+          q.push(locations);
+          q.drain = nextReconciliation;
+        },
+        // 3. geocidign
+        // places entities (countries and cities) by using geocoding services
+        function (nextReconciliation) {
+          var q = async.queue(function (location, nextLocation) {
+            module.exports.geocoding(location.matchedText, function (err, nodes){
+              if(err == IS_EMPTY) {
+                nextLocation();
+                return;
+              } else if(err)
+                throw err
+              nodes = nodes.map(function(d) {
+                d.context = {
+                  left: location.startingPos,
+                  right: location.endingPos
+                };
+                return d;
+              });
+              entities = entities.concat(nodes);
+              nextLocation();
+            })
+          }, 1);
+          q.push(locations);
+          q.drain = nextReconciliation;
+        }
+      ], function() {
+        next(null, entities);
+      });
+    })
   },
   /**
     Call alchemyapi service for people/places reconciliation.

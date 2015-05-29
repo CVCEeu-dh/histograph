@@ -10,7 +10,33 @@
 var helpers = require('../helpers.js'),
     should  = require('should');
 
-
+describe('helpers: text & geo filters', function() {
+  it('should transform wiki url into underscored ones', function (done) {
+    should.equal(helpers.text.wikify('Pierre%20Werner'), 'Pierre_Werner');
+    done();
+  });
+  
+  it('should computate the distance between two geo point', function (done) {
+    var distanceFromParisToLuxembourg = helpers.geo.distance({
+          lat: 48.85341,
+          lng: 2.3488,
+        }, {
+          lat: 49.61167,
+          lng: 6.13,
+        }),
+    
+        distanceFromRomeToLuxembourg = helpers.geo.distance({
+          lat: 41.89193,
+          lng: 12.51133,
+        }, {
+          lat: 49.61167,
+          lng: 6.13,
+        });;
+    should.equal(distanceFromParisToLuxembourg/1000, 287.168);
+    should.equal(distanceFromRomeToLuxembourg/1000, 990.105);
+    done();
+  });
+});
 // describe('alchemyapi entity extraction service', function() {
 //   it('should merge by wikipedia link', function (done) {
 //     // body...
@@ -44,7 +70,7 @@ var helpers = require('../helpers.js'),
 // });
 
 
-describe('geocoding api', function() {
+describe('helpers: geocoding api', function() {
   this.timeout(5000);
   it('should call geocodingapi service and build a new location entity', function (done) {
     helpers.geocoding('ruel Lepic, Paris', function (err, res) {
@@ -67,7 +93,7 @@ describe('geocoding api', function() {
 });
 
 
-describe('geonames api', function() {
+describe('helpers: geonames api', function() {
   this.timeout(5000);
   it('should calls geocodingapi service and build a new location entity', function (done) {
     helpers.geonames('Paris', function (err, res) {
