@@ -259,11 +259,51 @@ angular.module('histograph')
      */
      $scope.queue = function(item, inprog) {
       // load item by id ...
-      $log.info('CoreCtrl -> queue', item, inprog? 'do not force update scope': 'force scope update')
+      
+      var itemId = typeof item == 'object'? item.id: item,
+          isAlreadyInQueue = false,
+          ids = []; // this will contain the list of ids in case the controller needs redirection
+          
+      $log.info('CoreCtrl -> queue', itemId, inprog? 'do not force update scope': 'force scope update')
+      
+      for(var i = 0; i < $scope.playlist.length; i++) {
+        if($scope.playlist[i].id == itemId) {
+          $log.log('    ', itemId, 'is already presend in readlist, skipping ...')
+          isAlreadyInQueue = true;
+          break;
+        }
+      }
+      
+      var shouldRedirect = function() {
+         if($scope.currentCtrl == 'NeighborsCtrl') {
+          $log.log('    redirect to: /#/neighbors/'+ids.join(',')); 
+          $location.path('/neighbors/'+ids.join(','));
+        } else if($scope.currentCtrl == 'AllShortestPathsCtrl') {
+          $log.log('    redirect to: /#/ap/'+ids.join(','));
+          $location.path('/ap/'+ids.join(','));
+        }
+      };
+      
+      if(isAlreadyInQueue) {
+        $scope.queueStatus = 'active';
+        ids = $scope.playlist.map(function (d) {
+          return d.id
+        });
+        if(!inprog)
+          $scope.$apply();
+        
+        shouldRedirect();
+        return;
+      }
+      
+      // otherwise add item to queue...
       if(typeof item == 'object') {
         $scope.playlist.push(item);
         $scope.queueStatus = 'active';
-      } else {
+        if(!inprog)
+          $scope.$apply();
+        shouldRedirect();
+      } else { // we need to load the item first, then we can update queue status
         SuggestFactory.getUnknownNode({
           id:item
         }).then(function (res) {
@@ -271,22 +311,11 @@ angular.module('histograph')
           $scope.queueStatus = 'active';
           if(!inprog)
             $scope.$apply();
-          var ids = $scope.playlist.map(function (d) {
-            return d.id
-          });
-          if($scope.currentCtrl == 'NeighborsCtrl') {
-            $log.log('    redirect to: /#/neighbors/'+ids.join(',')); 
-            $location.path('/neighbors/'+ids.join(','));
-          } else if($scope.currentCtrl == 'AllShortestPathsCtrl') {
-            $log.log('    redirect to: /#/ap/'+ids.join(','));
-            $location.path('/ap/'+ids.join(','));
-          }
+          // collect the ids in order to get the right redirect location
+          shouldRedirect();
         })
       }
-      if(!inprog)
-        $scope.$apply();
-      
-     }
+    };
      
     $scope.hideQueue = function(item) {
       $scope.queueStatus = 'sleep';
@@ -319,11 +348,12 @@ angular.module('histograph')
     $scope.removeFromQueue = function(item) {
       $log.debug('NeighborsCtrl -> removeFromQueue()', item.id);
       var ids = [];
+      
       for(var i = 0; i < $scope.playlist.length; i++) {
         if($scope.playlist[i].id == item.id) {
           $log.log('    remove', $scope.playlist[i].id);
           $scope.playlist.splice(i, 1);
-          
+          i = i-1;
         } else { // only for redirection purposes
           ids.push($scope.playlist[i].id);
         }

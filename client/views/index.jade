@@ -92,7 +92,7 @@ html
                 a(ng-href='/auth/twitter?next={{locationPath}}', class='btn btn-default') login with twitter
                 a(ng-href='/auth/google?next={{locationPath}}', class='btn btn-default') login with google plus
       else
-        div(class='view {{currentCtrl}}')
+        div(class='view {{currentCtrl}} {{queueStatus}}')
           div(ng-view)
         
         
@@ -118,7 +118,7 @@ html
               blockquote {{relatedItem.props | abstract : language}}
             
         
-        div(id='milkyway', sigma, graph='graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentCtrl == "AllShortestPathsCtrl" || currentCtrl == "NeighborsCtrl" || currentCtrl == "SearchCtrl"? "extended": ""}}', controller='currentCtrl' redirect='redirect(path)')
+        div(id='milkyway', sigma, graph='graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentCtrl == "AllShortestPathsCtrl" || currentCtrl == "NeighborsCtrl" || currentCtrl == "SearchCtrl"? "extended": ""}} {{queueStatus}}', controller='currentCtrl' redirect='redirect(path)')
           
         div(id='timeline', timeline, graph='graph')
           
@@ -164,7 +164,7 @@ html
                 
           div(id='playlist-actions', class='btn-group')
             a(ng-href='/#/ap/{{playlist | map:"id"}}', tooltip-append-to-body='true', tooltip='explore connections between your readlist', class='btn btn-primary')
-              i(class='fa fa-save')
+              i(class='fa fa-diamond')
             a(ng-href='/#/neighbors/{{playlist | map:"id"}}', tooltip-append-to-body='true', tooltip='explore neighborhood of your readlist', class='btn btn-primary')
               i(class='fa fa-rocket')
             a(ng-href='/#/neighbors/{{playlist | map:"id"}}', tooltip-append-to-body='true', tooltip='save your readlist', class='btn btn-primary')

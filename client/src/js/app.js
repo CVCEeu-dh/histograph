@@ -85,7 +85,7 @@ angular
         }
       })
       .when('/ap/:ids', {
-        templateUrl: 'templates/all-shortest-paths.html',
+        templateUrl: 'templates/neighbors.html',
         controller: 'AllShortestPathsCtrl',
         resolve: {
           allShortestPaths: function(SuggestFactory, $route) {

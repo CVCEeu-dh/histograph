@@ -88,6 +88,10 @@ a:hover{
   overflow-y : scroll;
 }
 
+.view.active{
+  bottom: 80px;
+}
+
 .item{
   max-width: 460px;
   margin: 0 auto 100px auto;
@@ -214,6 +218,16 @@ a:hover{
   border-right: 1px solid #d4d4d4;
 }
 
+#perspective.reduced{
+  width: 25%;
+  background: transparent;
+  padding: 20px;
+}
+
+#perspective.active{
+  bottom: 80px;
+}
+
 #perspective-actions{
   position: fixed;
   bottom:0;
@@ -243,8 +257,12 @@ a:hover{
   /*border-left: 1px solid #d4d4d4;*/
 
 }
-#see-also.AllShortestPathsCtrl , #see-also.SearchCtrl, #see-also.NeighborsCtrl {
-  margin-left: 0%;
+#see-also.AllShortestPathsCtrl , #see-also.NeighborsCtrl {
+  margin-left: 25%;
+  width: 25%;
+}
+#see-also.SearchCtrl {
+  margin-left:0;
 }
 /*
 #see-also-header{
@@ -298,6 +316,10 @@ a:hover{
   border-width: 0;
 }
 
+.related img{
+  width: 100%;
+}
+
 .username{
   
 }
@@ -343,7 +365,12 @@ a:hover{
 }
 
 #milkyway.extended{
-  left: 36%;
+  left: 50%;
+  
+}
+
+#milkyway.active{
+  bottom: 80px;
 }
 
 #milkyway #playground{
