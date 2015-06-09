@@ -32,14 +32,6 @@ html
           <i class='fa fa-play-circle-o'></i>
         </span>
       </div>
-      
-      
-    script(type='text/ng-template', id='inquirer.html').
-      <div> ge</div>
-      <div class="form-group">
-        <label> Popup Title:</label>
-        this is a test
-      </div>
 
     div(ng-controller='CoreCtrl')
       if user.username
@@ -145,7 +137,7 @@ html
               button(class='btn btn-default', ng-click='stopCommenting()') close
         
         div(id='playlist', ng-class='queueStatus')
-          div(id='playlist-resume', ng-click='toggleQueue()')
+          div(id='playlist-resume', tooltip-append-to-body='true', tooltip='toggle read queue' ng-click='toggleQueue()')
             span(class="fa fa-angle-up")
           div(ng-if='playlist.length == 0') ... select some element to start playlist ...
           div(id='playlist-queue')

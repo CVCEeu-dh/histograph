@@ -49,15 +49,33 @@ module.exports = function(io){
       todo: get different language according to the different param.
     */
     getItem: function (req, res) {
-      resource.get(req.params.id, function(err, item) {
-        if(err == helpers.IS_EMPTY)
-          return res.error(404);
-        if(err)
-          return helpers.cypherQueryError(err, res);
-        return res.ok({
-          item: item
+      // get multiple resources if there is a list of resources.
+      var ids = helpers.text.toIds(req.params.id);
+      // not valid list of ids
+      if(ids.length == 0)
+        return res.error(404);
+      if(ids.length == 1)
+        resource.get(req.params.id, function (err, item) {
+          if(err == helpers.IS_EMPTY)
+            return res.error(404);
+          if(err)
+            return helpers.cypherQueryError(err, res);
+          return res.ok({
+            item: item
+          });
+        })
+      else
+        resource.getByIds(ids, function (err, items) {
+          if(err == helpers.IS_EMPTY)
+            return res.error(404);
+          if(err)
+            return helpers.cypherQueryError(err, res);
+          return res.ok({
+            items: items
+          }, {
+            ids: ids
+          });
         });
-      })
     },
     /*
       get some, based on the limit/offset settings

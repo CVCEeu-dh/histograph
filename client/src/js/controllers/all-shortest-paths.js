@@ -5,14 +5,14 @@
  * # AllShortestPathsCtrl
  */
 angular.module('histograph')
-  .controller('AllShortestPathsCtrl', function ($scope, $log, $routeParams, socket, allShortestPaths) {
-    $log.debug('AllShortestPathsCtrl ready', $routeParams.ids, allShortestPaths);
+  .controller('AllShortestPathsCtrl', function ($scope, $log, $routeParams, socket, allShortestPaths, ResourceFactory) {
+    $log.log('AllShortestPathsCtrl ready', $routeParams.ids, allShortestPaths);
     
     $scope.AllShortestPaths = allShortestPaths.data.result.items;
     
     $scope.syncQueue($routeParams.ids);
     
-    $scope.setRelatedItems([]);
+    
     
     var graph = {
           nodes: [],
@@ -55,6 +55,24 @@ angular.module('histograph')
         
       }
     })
+    
+    // get ids to call
+    var resourcesToLoad = graph.nodes.filter(function (d) {
+      return d.type == 'resource';
+    }).map(function (d) {
+      return d.id;
+    });
+    $log.log('AllShortestPathsCtrl load related items ',resourcesToLoad );
+    if(resourcesToLoad.length)
+      ResourceFactory.get({
+        id: resourcesToLoad.join(',')
+      }, function(res) {
+        
+        $scope.setRelatedItems(res.result.items);
+      })
+    else
+      $scope.setRelatedItems([])
+    
     console.log(graph)
     $scope.setGraph(graph)
   });

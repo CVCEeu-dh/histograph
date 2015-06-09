@@ -254,6 +254,20 @@ describe('controllers: get resource items available to the user', function() {
       });
   });
   
+  it('should return the specified resources', function (done) {
+    session
+      .get('/api/resource/18368,11160')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exists(err);
+
+        should.exists(res.body.result.items);
+        should.equal(res.body.status, 'ok', res.body);
+        done();
+      });
+  });
+  
   it('should show a list of 100 related resources', function (done) {
     session
       .get('/api/resource/11167/related')

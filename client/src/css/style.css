@@ -86,6 +86,10 @@ a:hover{
   width: 100%;
   background: #f0f0f0;
   overflow-y : scroll;
+  -webkit-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
+     -moz-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+       -o-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+          transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1);
 }
 
 .view.active{
@@ -216,6 +220,10 @@ a:hover{
   overflow-x: hidden;
   background: white;
   border-right: 1px solid #d4d4d4;
+  -webkit-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
+     -moz-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+       -o-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+          transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1);
 }
 
 #perspective.reduced{
@@ -618,14 +626,13 @@ a:hover{
 
 #playlist-resume{
   position:absolute;
-  top: -15px;
+  top: -55px;
   width: 50px;
-  height: 30px;
-  border-radius: 5px;
-  line-height: 30px;
+  height: 50px;
+  border-radius: 50px;
   left: 50%;
   margin-left: -25px;
-  background: #191c1d;
+  background: rgba(25, 28, 29, 0.85);
   color: #e8e8e8;
   cursor: pointer;
   text-align: center;
@@ -637,7 +644,7 @@ a:hover{
 }
 
 #playlist-resume span{
-  line-height: 20px;
+  line-height: 50px;
   -webkit-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
      -moz-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
        -o-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
@@ -649,10 +656,10 @@ a:hover{
   
 }
 
-#playlist.active #playlist-resume span{
-  -webkit-transform:rotate(180deg) translateY(-3px);
-  -ms-transform:rotate(180deg) translateY(-3px); /* IE 9 */
-          transform:  rotate(180deg) translateY(-3px);
+#playlist.active #playlist-resume {
+  -webkit-transform:rotate(180deg);
+  -ms-transform:rotate(180deg); /* IE 9 */
+          transform:  rotate(180deg);
 }
 
 #playlist-actions{

@@ -91,15 +91,18 @@ WHERE id(res) in {ids}
 WITH res
   SKIP {offset}
   LIMIT {limit}
-MATCH (ver:`version`)-[r1:describes]-(res)
-OPTIONAL MATCH (res)-[r2:appears_in]-(loc:`location`)
-OPTIONAL MATCH (res)-[r3:appears_in]-(per:`person`)
-  WITH res, ver, loc, per
+MATCH (ver:`version`)-[:describes]-(res)
+OPTIONAL MATCH (res)-[:appears_in]-(loc:`location`)
+OPTIONAL MATCH (res)-[:appears_in]-(pla:`place`)
+OPTIONAL MATCH (res)-[:appears_in]-(per:`person`)
+  WITH res, ver, loc, per, pla
     RETURN {
       id: id(res),
       props: res,
+      type: 'resource',
       locations: collect(DISTINCT loc),
-      persons: collect(DISTINCT per)
+      persons: collect(DISTINCT per),
+      places: collect(DISTINCT pla)
     } as r
 
 

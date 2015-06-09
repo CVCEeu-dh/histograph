@@ -138,7 +138,7 @@ angular.module('histograph')
             n.color = colors[n.type] || "#353535"
             n.size = n.type == 'res'? 1 : si.graph.degree(n.id) + 1.5;
           });
-          if(!previousGraph)
+          //if(!previousGraph)
             rescale();
           si.refresh();
           $log.log('::sigma force atlas started')
@@ -188,6 +188,8 @@ angular.module('histograph')
           }  
           switch(e.data.node.type) {
             case 'person':
+            case 'place':
+            case 'location':
             case 'personKnown':
               scope.toggleMenu({e: e.data.captor, item:null, tag:e.data.node, hashtag:'person' })
               $log.log('::sigma entity', e.data.captor);

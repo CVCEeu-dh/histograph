@@ -435,6 +435,18 @@ module.exports = {
     */
     wikify: function (url) {
       return path.basename(url).replace(/%20/g, '_');
+    },
+    
+    /*
+      Transform a string of possible IDS in a list of valid,
+      NUMERIC identifiers
+    */
+    toIds: function (ids) {
+      return ids.split(',').filter(function (d) {
+        return !isNaN(d)
+      }).map(function (d) {
+        return +d;
+      });
     }
   },
   /**

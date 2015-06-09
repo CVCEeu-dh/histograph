@@ -100,6 +100,33 @@ module.exports = {
       next(null, item);
     });  
   },
+  /*
+    Provide here a list of valid ids
+  */
+  getByIds: function(ids, next) {
+    neo4j.query(rQueries.get_resources_by_ids, {
+        ids: ids,
+        limit: ids.length,
+        offset: 0
+    }, function (err, items) {
+      if(err) {
+        console.log(err.neo4jError)
+        next(err);
+        return;
+      }
+      if(items.length == 0) {
+        next(helpers.IS_EMPTY);
+        return;
+      }
+      next(null, _.map(items, function (item) {
+        item.places = _.values(item.places); 
+        item.locations = _.values(item.locations); 
+        item.persons = _.values(item.persons); 
+        return item;
+      }));
+    });
+  },
+  
   search: function(options, next) {
     // at least options.search should be given.
     // note that if there is a solr endpoint, this endpoint should be used.

@@ -19,6 +19,9 @@ angular.module('histograph')
     // playlist of nodes ... :D
     $scope.playlist = [];
     
+    // playlist ids
+    $scope.playlistIds = [];
+    
     // the current user
     $scope.user = {};
     
@@ -54,6 +57,8 @@ angular.module('histograph')
     $scope.relatedItems = [];
     
     $scope.setRelatedItems = function(relatedItems) {
+      if(!relatedItems)
+        return
       $log.log('CoreCtrl > setRelatedItems', relatedItems.length);
       $scope.relatedItems = relatedItems;
     };
@@ -261,62 +266,54 @@ angular.module('histograph')
       // load item by id ...
       
       var itemId = typeof item == 'object'? item.id: item,
-          isAlreadyInQueue = false,
-          ids = []; // this will contain the list of ids in case the controller needs redirection
+          indexOfItemId = $scope.playlistIds.indexOf(itemId),
+          isAlreadyInQueue = indexOfItemId != -1;
+           // if the itemId is in the $scope.playlistIds, which is its index?
+          // this will contain the list of ids in case the controller needs redirection
           
       $log.info('CoreCtrl -> queue', itemId, inprog? 'do not force update scope': 'force scope update')
-      
-      for(var i = 0; i < $scope.playlist.length; i++) {
-        if($scope.playlist[i].id == itemId) {
-          $log.log('    ', itemId, 'is already presend in readlist, skipping ...')
-          isAlreadyInQueue = true;
-          break;
-        }
-      }
-      
-      var shouldRedirect = function() {
-         if($scope.currentCtrl == 'NeighborsCtrl') {
-          $log.log('    redirect to: /#/neighbors/'+ids.join(',')); 
-          $location.path('/neighbors/'+ids.join(','));
-        } else if($scope.currentCtrl == 'AllShortestPathsCtrl') {
-          $log.log('    redirect to: /#/ap/'+ids.join(','));
-          $location.path('/ap/'+ids.join(','));
-        }
-      };
+      $log.log('   ', itemId, isAlreadyInQueue?'is already presend in readlist, skipping ...': 'should be added')
       
       if(isAlreadyInQueue) {
         $scope.queueStatus = 'active';
-        ids = $scope.playlist.map(function (d) {
-          return d.id
-        });
         if(!inprog)
           $scope.$apply();
-        
-        shouldRedirect();
         return;
       }
       
       // otherwise add item to queue...
       if(typeof item == 'object') {
         $scope.playlist.push(item);
+        $scope.playlistIds.push(item.id);
         $scope.queueStatus = 'active';
         if(!inprog)
           $scope.$apply();
-        shouldRedirect();
+        $scope.queueRedirect();
       } else { // we need to load the item first, then we can update queue status
         SuggestFactory.getUnknownNode({
-          id:item
+          id: itemId
         }).then(function (res) {
           $scope.playlist.push(res.data.result.item);
+          $scope.playlistIds.push(res.data.result.item.id);
           $scope.queueStatus = 'active';
           if(!inprog)
             $scope.$apply();
           // collect the ids in order to get the right redirect location
-          shouldRedirect();
+          $scope.queueRedirect();
         })
       }
     };
      
+    $scope.queueRedirect = function() {
+      if($scope.currentCtrl == 'NeighborsCtrl') {
+        $log.log('    redirect to: /#/neighbors/'+$scope.playlistIds.join(',')); 
+        $location.path('/neighbors/'+$scope.playlistIds.join(','));
+      } else if($scope.currentCtrl == 'AllShortestPathsCtrl') {
+        $log.log('    redirect to: /#/ap/'+$scope.playlistIds.join(','));
+        $location.path('/ap/'+$scope.playlistIds.join(','));
+      }
+    };
+    
     $scope.hideQueue = function(item) {
       $scope.queueStatus = 'sleep';
     }
@@ -332,6 +329,11 @@ angular.module('histograph')
           ids: ids
         }).then(function (res) {
           $scope.playlist = res.data.result.items;
+          
+          $scope.playlistIds = res.data.result.items.map(function (d) {
+            return d.id;
+          });
+          
           $scope.queueStatus = 'active';
         });
       };
