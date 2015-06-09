@@ -29,15 +29,28 @@ describe('services: ', function() {
   //   });
   // })
    
-  // it('should connect to the endpoint and return a result', function (done) {
-  //   this.timeout(25000)
-  //   services.yagoaida({
-  //     text: 'Born in 1932 in Kaunas, Vytautas Landsbergis, former opponent of the Soviet Communist regime in Lithuania and founder of Sajudis, the pro-independence movement, was President of Lithuania from 1990 to 1992 and Chairman of the Lithuanian Parliament from 1992 to 1996. He has been a Member of the European Parliament since 2004.'
-  //   }, function(err, entities){
-  //       if(err)
-  //         throw err;
-  //     console.log(entities)
-  //     done()
-  //   });
-  // })
+  it('should connect to the endpoint and return a result', function (done) {
+    this.timeout(25000)
+    services.yagoaida({
+      text: 'Born in 1932 in Kaunas, Vytautas Landsbergis, former opponent of the Soviet Communist regime in Lithuania and founder of Sajudis, the pro-independence movement, was President of Lithuania from 1990 to 1992 and Chairman of the Lithuanian Parliament from 1992 to 1996. He has been a Member of the European Parliament since 2004.'
+    }, function(err, entities){
+        if(err)
+          throw err;
+      // persons 
+      var persons = entities.filter(function(d) {
+        return d.type.map( function(t){
+          return t.replace(/\d/g, '');
+        }).indexOf('YAGO_wordnet_person_') !== -1
+      })
+      
+      var locations = entities.filter(function(d) {
+        return d.type.map( function(t){
+          return t.replace(/\d/g, '');
+        }).indexOf('YAGO_wordnet_administrative_district_') !== -1
+      })
+      // remap candidates: person with YAGO super special bis
+      console.log(locations.map(function (d){return d.matchedText}))
+      done()
+    });
+  })
 });

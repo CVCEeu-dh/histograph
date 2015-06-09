@@ -477,13 +477,17 @@ module.exports = {
     }, function (err, candidates) {
       
       var entities = [],
-          persons =  _.filter(candidates, {
-            type: ['YAGO_yagoLegalActor']
+          persons = candidates.filter(function(d) {
+            return d.type.map( function(t){
+              return t.replace(/\d/g, '');
+            }).indexOf('YAGO_wordnet_person_') !== -1
           }),
-          locations =  _.filter(candidates, {
-            type: ['YAGO_yagoGeoEntity']
+          locations = candidates.filter(function(d) {
+            return d.type.map( function(t){
+              return t.replace(/\d/g, '');
+            }).indexOf('YAGO_wordnet_administrative_district_') !== -1
           });
-      
+      // console.log(persons)
       async.waterfall([
         // 1. person
         //

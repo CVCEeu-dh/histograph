@@ -249,7 +249,7 @@ module.exports = {
             nextTask(null, node);
             return
           }
-          
+          console.log('lookup person', node.name)
           helpers.lookupPerson(node.name, function (err, persons) {
             if(err) {
               console.log('error', err)

@@ -243,7 +243,7 @@ a:hover{
   /*border-left: 1px solid #d4d4d4;*/
 
 }
-#see-also.AllShortestPathsCtrl , #see-also.SearchCtrl {
+#see-also.AllShortestPathsCtrl , #see-also.SearchCtrl, #see-also.NeighborsCtrl {
   margin-left: 0%;
 }
 /*
@@ -266,16 +266,18 @@ a:hover{
 }
 
 .related{
+  position: relative;
   margin: 20px 0px;
   background-color: white;
   padding: 20px 15px 1px 15px;
   border: 1px solid #e8e8e8;
   background-clip: padding-box;
-  border-radius: 2px
+  border-radius: 2px;
 }
 
 .related h4{
   margin-top: 0;
+  margin-right: 20px;
 }
 
 .related h4 a, .item h4 a{
@@ -283,6 +285,17 @@ a:hover{
   font-weight: bold;
   font-size: 13px;
   line-height: 21px;
+}
+
+.related .actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+
+.related .actions .action{
+    border-radius: 0;
+  border-width: 0;
 }
 
 .username{
@@ -395,6 +408,15 @@ a:hover{
   margin: 100px auto;
   width: 300px;
   text-align: center;
+}
+
+#login h5{
+  margin-bottom: 50px;
+}
+
+#logo{
+  font-size: 28px;
+  line-height: 56px;
 }
 
 
@@ -637,7 +659,11 @@ a:hover{
   display: inline-block;
   width: 180px;
   margin: 0 10px;
-  box-shadow: 0px 2px 6px rgba(0,0,0,.4);
+  border-radius: 2px;
+  /*box-shadow: 0px 2px 6px rgba(0,0,0,.4);*/
+  -webkit-box-shadow: 0 1px 1px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.04);
+  -moz-box-shadow: 0 1px 1px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.04);
+  box-shadow: 0 1px 1px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.04);
 }
 
 .playlist-item .pic{
@@ -664,7 +690,9 @@ a:hover{
   margin-top: 5px;
   margin-right: 20px;
   height: 45px;
-  overflow: hidden
+  overflow: hidden;
+  font-family: 'proxima-nova';
+  text-shadow: 1px 1px #151515;
 }
 
 .playlist-item .action{

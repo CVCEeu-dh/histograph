@@ -66,7 +66,7 @@ if(options.entities && !isNaN(options.entities)) {
     */
     function (nodes, next) {
       var q = async.queue(function (node, nextNode) {
-        console.log('entities remaining', q.length(), '/', nodes.length)
+         console.log(clc.blackBright('entities remaining'), clc.white.bgMagenta(q.length()));
         entity.discover(node.id, function(err, res) {
           if(err)
             throw err;
@@ -78,7 +78,7 @@ if(options.entities && !isNaN(options.entities)) {
       q.drain = next;
     }
   ], function () {
-    console.log('completed');
+    console.log(clc.blackBright('discovering entities'), clc.cyan('done'))
   });
 }
 
@@ -86,7 +86,7 @@ if(options.resource) {
   var queue = async.waterfall([
     // get pictures and documents having a caption
     function (next) {
-      neo4j.query('MATCH (n:`resource`) WHERE not(has(n.yago_annotated)) RETURN n LIMIT 500', function (err, nodes) {
+      neo4j.query('MATCH (a:resource) WHERE NOT (a)<-[:describes]-() RETURN a LIMIT 100', function (err, nodes) {
         if(err)
           throw err;
         var limit;

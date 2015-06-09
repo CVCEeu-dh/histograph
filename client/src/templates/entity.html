@@ -7,11 +7,12 @@
             <img ng-src="{{item.props.thumbnail}}">
           </div>
         </div>
-        <h3><a>{{item.props | title : language}}</a></h3>
+        <h3><a>{{item.props | title : language}} </a></h3>
         
         
-        
-        <div class="description">{{item.props.description}} {{item.props.birth_time | datesOfAPerson : item.props.death_time}}</div>
+        <div ng-if="item.type == 'location' && item.props.geonames_id" class="description">position: {{item.geocode_lat}}, {{item.geocode_lng}}</div>
+        <div ng-if="item.type == 'location' && item.props.geocode_id" class="description">position: {{item.props.geocode_lat}}, {{item.props.geocode_lng}}</div>
+        <div ng-if="item.type == 'person'" class="description">{{item.props.description}} {{item.props.birth_time | datesOfAPerson : item.props.death_time}}</div>
         
         <div class="actions">
           <div class="btn-group">
@@ -29,8 +30,8 @@
           <span ng-repeat="lang in item.props.languages" ng-click='setLanguage(lang)'>{{lang}} </span>
         </span>
         
-        <blockquote class="abstract">
-          <p><b>source: wikipedia</b> — {{item.props | abstract : language }}</p>
+        <blockquote ng-if='item.props.links_wiki' class="abstract">
+          <p><b>source: wikipedia {{item.props.links_wiki}}</b> — {{item.props | abstract : language }}</p>
         </blockquote>
         <!-- 
         <blockquote ng-if="item.abstract">

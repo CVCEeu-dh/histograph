@@ -63,7 +63,9 @@
         <blockquote ng-if="item.props.stakeholders||item.props.caption">
          {{item.props.stakeholders||item.props.caption}}
         </blockquote>
-    
+        
+        <div class="doi">{{item.props.doi}}</div>
+        
         <div class="discussion" ng-if="item.comments.length > 0">
           <div class="comment" ng-repeat="com in item.comments">
             <span class="username">
@@ -79,14 +81,4 @@
 </div>
 
 
-        
-<div id="perspective-actions">
-  <div class="btn-group"  role="group" aria-label="...">
-    <a class="btn btn-primary" ng-click="startMention(item)">join discussion</a>
-    <a class="btn btn-default" ng-click="startInquiry(item)">start inquiry</a>
-  </div>
-</div>
-
-
-
-
+  

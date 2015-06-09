@@ -176,7 +176,7 @@ module.exports =  function(io){
       Caption and title multilanguage search.
       @todo: use the solr endpoint wherever available.
     */
-    resources: function(req, res) {
+    resources: function (req, res) {
       var offset = +req.query.offset || 0,
           limit  = +req.query.limit || 20,
           q      = toLucene(req.query.query),
@@ -225,6 +225,83 @@ module.exports =  function(io){
           limit: limit
         });
       });
+    },
+    
+    /*
+      Caption and title multilanguage search.
+      @todo: use the solr endpoint wherever available.
+    */
+    entities: function (req, res) {
+      var offset = +req.query.offset || 0,
+          limit  = +req.query.limit || 20,
+          q      = toLucene(req.query.query),
+          query  = [
+              
+              'name_search:', q,
+            ].join('');
+      //console.log("query", query)
+      // get countabilly
+      async.parallel({
+        get_matching_entities_count: function (callback) {
+          neo4j.query(queries.get_matching_entities_count, {
+            query: query,
+          }, function (err, items) {
+            if(err)
+              callback(err);
+            else
+              callback(null, items);
+          })
+        },
+        get_matching_entities: function (callback) {
+          neo4j.query(queries.get_matching_entities, {
+            query: query,
+            offset: offset,
+            limit: limit
+          }, function (err, items) {
+            if(err)
+              callback(err);
+            else
+              callback(null, items);
+          })
+        }
+      }, function (err, results) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        
+        return res.ok({
+          items: results.get_matching_entities.map(function (d) {
+            d.props.languages = _.values(d.props.languages)
+            return d;
+          }),
+        }, {
+          total_count: results.get_matching_entities_count.total_count,
+          offset: offset,
+          limit: limit
+        });
+      });
+    },
+    
+    getGraph: function (req, res) {
+      var offset = +req.query.offset || 0,
+          limit  = +req.query.limit || 20,
+          q      = toLucene(req.query.query),
+          query  = [
+              'title_search:', q,
+              ' OR caption_search:', q,
+              ' OR name_search:', q,
+            ].join('');
+            
+      // build a nodes edges graph
+      helpers.cypherGraph(queries.get_graph_matching_entities, {
+        query: query, 
+        limit: 100
+      }, function (err, graph) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({
+          graph: graph
+        });
+      })
     }
   }
 }

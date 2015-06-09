@@ -103,10 +103,12 @@ express.response.error = function(statusCode, err) {
 */
 clientRouter.route('/').
   get(function(req, res) { // test route to make sure everything is working (accessed at GET http://localhost:8080/api)
-    res.render('index', {
-      user: req.user || 'anonymous',
-      message: 'hooray! welcome to our api!'
-    });   
+   
+      res.render('index', {
+        user: req.user || 'anonymous',
+        message: 'hooray! welcome to our api!'
+      });
+    
   });
 
 clientRouter.route('/login')
@@ -354,6 +356,10 @@ apiRouter.route('/suggest')
   .get(ctrl.suggest.suggest)
 apiRouter.route('/suggest/resources')
   .get(ctrl.suggest.resources)
+apiRouter.route('/suggest/entities')
+  .get(ctrl.suggest.entities)
+apiRouter.route('/suggest/graph')
+  .get(ctrl.suggest.getGraph)
 apiRouter.route('/suggest/all-shortest-paths/:ids')
   .get(ctrl.suggest.allShortestPaths)
 apiRouter.route('/suggest/unknown-node/:id')

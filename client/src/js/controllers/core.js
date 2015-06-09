@@ -22,9 +22,22 @@ angular.module('histograph')
     // the current user
     $scope.user = {};
     
+    // current headers for a given column. Cfr setHeader
+    $scope.headers = {
+      seealso: 'related document'
+    };
+    
+    $scope.setHeader = function(key, value) {
+      $scope.headers[key] = value;
+    }
+    
     // the current search query, if any
     $scope.query =  $routeParams.query || '';
     
+    // set query and redirect to search controller
+    $scope.setQuery = function() {
+      alert('ooooo')
+    }
     
     
     $scope.$on(EVENTS.USE_USER, function (e, user) {
@@ -34,17 +47,29 @@ angular.module('histograph')
       }
     })
     
-    $scope.relatedItems = [];
     /*
-      Handle smart related items.
+      Handle smart related items, with pagination. dispatch event USE_PAGE
       Please cehck that each controller clean or replace this list
     */
+    $scope.relatedItems = [];
+    
     $scope.setRelatedItems = function(relatedItems) {
-      $log.debug('CoreCtrl > setRelatedItems', relatedItems.length);
+      $log.log('CoreCtrl > setRelatedItems', relatedItems.length);
       $scope.relatedItems = relatedItems;
     };
     
-    // currrent FAV language, in 2 chars format.
+    
+    $scope.relatedPage = 1;
+    $scope.relatedCount = 0; // total number of items
+    $scope.setRelatedPagination = function(options) {
+      $log.log('CoreCtrl > setRelatedPagination', options)
+      $scope.relatedCount = options.total_count;
+    }
+    
+    /*
+      language handlers
+      Please cehck that each controller clean or replace this list
+    */
     $scope.language = 'en';
     
     $scope.availableLanguages = [
@@ -184,7 +209,16 @@ angular.module('histograph')
       $scope.currentCtrl = r.$$route.controller;
       
       $scope.query = $routeParams.query || '';
-    
+      switch($scope.currentCtrl) { // move to translation engine
+        case 'SearchCtrl': 
+          $scope.headers.seealso = 'search results';
+          break;
+        default: 
+          $scope.headers.seealso = 'related documents'
+          break;
+      }
+      // set header andccording to the controllers
+      
     });
     
     $scope.$on('$locationChangeSuccess', function(e, path) {

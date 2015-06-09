@@ -162,9 +162,13 @@ module.exports = {
           ].join('. ');
           
           if(content.length < 10) { // not enough content
+            console.log('not enough content, skipping', res)
             nextLanguage();
             return;
-          }
+          };
+          
+          // waterfall
+          
           
           helpers.yagoaida(content, function (err, entities) {
             if(err)
@@ -218,8 +222,8 @@ module.exports = {
               }); // eof vQueries.merge_version_from_service
             }; // eof drain async
           });
-          return;
-          // merge textrazor different version
+          // console.log('textrazor')
+          /*
           helpers.textrazor(content, function(err, entities) {
             if(err == helpers.IS_LIMIT_REACHED) {
               console.log('daily limit reached')
@@ -280,6 +284,7 @@ module.exports = {
               }); // eof vQueries.merge_version_from_service
             }; // eof drain async
           });
+          */
         },1);
         q.push(res.languages);
         q.drain = function() {

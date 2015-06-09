@@ -98,6 +98,11 @@ RETURN {
 SKIP {offset}
 LIMIT {limit}
 
+// name: get_matching_entities_count
+// get resources by query
+start n=node:node_auto_index({query})
+WHERE 'entity' in labels(n)
+RETURN count(n) as total_count
 
 // name: get_matching_entities
 // get resources by query
@@ -111,6 +116,25 @@ RETURN {
 SKIP {offset}
 LIMIT {limit}
 
+// name: get_graph_matching_entities
+//
+START p1=node:node_auto_index({query})
+MATCH (p1)-[r:appears_in]-(p2)
+WHERE ('resource' IN labels(p1) OR 'person' IN labels(p1)) AND ('resource' IN labels(p2) OR 'person' IN labels(p2))
+RETURN {
+  source: {
+    id: id(p1),
+    type: LAST(labels(p1)),
+    label: COALESCE(p1.name, p1.title_en, p1.title_fr, p1.title_de, p1.title_search)
+  },
+  target: {
+    id: id(p2),
+    type: LAST(labels(p2)),
+    label: COALESCE(p2.name, p2.title_en, p2.title_fr, p2.title_de, p2.title_search)
+  },
+  weight: 1 
+} as result
+LIMIT {limit}
 
 // name: get_suggestions
 //

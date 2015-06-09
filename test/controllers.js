@@ -56,7 +56,7 @@ describe('controllers: create a new user', function() {
       .end(function (err, res) {
         if(err)
           console.log(err)
-        console.log(res.body)
+        //console.log(res.body)
         should.equal(res.body.status, 'ok', res.body)
         done();
       })
@@ -296,7 +296,7 @@ describe('controllers: get resource items available to the user', function() {
         if(err)
           console.log('ERROR', err);
         should.not.exist(err);
-        console.log(res.body)
+        // console.log(res.body)
         should.exist(res.body.result.graph);
         done()
       });
@@ -331,6 +331,35 @@ describe('controllers: suggest queries', function() {
           console.log(err);
         should.not.exist(err);
         should.exist(res.body.result.items.length);
+        done()
+      });
+  });
+  
+  it('should get entities matching for helmut kohl', function (done) {
+    session
+      .get('/api/suggest/entities?query=helmut kohl')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err);
+        should.not.exist(err);
+        //console.log(res.body.result.items)
+        should.exist(res.body.result.items.length);
+        done()
+      });
+  });
+  
+  it('should get a nice graph describing matching for helmut kohl', function (done) {
+    session
+      .get('/api/suggest/graph?query=helmut kohl')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err);
+        should.not.exist(err);
+        should.exist(res.body.result.graph);
         done()
       });
   });
@@ -518,7 +547,7 @@ describe('controllers: play with entities', function() {
         if(err)
           console.log('ERROR', err);
         should.not.exist(err);
-        console.log(res.body)
+        
         should.exist(res.body.result.graph);
         done()
       });

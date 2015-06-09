@@ -35,16 +35,16 @@ html
       
       
     script(type='text/ng-template', id='inquirer.html').
-      <div>ge</div>
+      <div> ge</div>
       <div class="form-group">
-        <label>Popup Title:</label>
+        <label> Popup Title:</label>
         this is a test
       </div>
 
     div(ng-controller='CoreCtrl')
-    
-      header 
-        if user.username
+      if user.username
+        header 
+        
            
           
           div(class='row', ng-cloak)
@@ -68,11 +68,12 @@ html
                 
             div(class='col-sm-4')
               div(id='search-field')
-                div(class='input-group')
-                  input(type='text', ng-model='query', class='form-control', placeholder='Search for...', typeahead='item for items in suggest($viewValue)', typeahead-wait-ms='200', typeahead-template-url='suggest.html')
-                  //- input(type='text', ng-model='query', class='form-control', placeholder='Search for...', bs-typeahead, bs-options='item for items in suggest($viewValue)', data-container='body',data-delay='{ show: 500, hide: 1000000 }')
-                  span(class='input-group-btn')
-                    a(class='btn btn-default', type='button', ng-href='/#/search/{{query}}') search
+                form(ng-submit='setQuery(query)')
+                  div(class='input-group')
+                    input(type='text', ng-model='query', class='form-control', placeholder='Search for...', typeahead='item for items in suggest($viewValue)', typeahead-wait-ms='200', typeahead-template-url='suggest.html')
+                    //- input(type='text', ng-model='query', class='form-control', placeholder='Search for...', bs-typeahead, bs-options='item for items in suggest($viewValue)', data-container='body',data-delay='{ show: 500, hide: 1000000 }')
+                    span(class='input-group-btn')
+                      a(class='btn btn-default', type='button', ng-href='/#/search/{{query}}') search
             div(class='col-sm-2')
               a(href='#')
                 span settings
@@ -81,25 +82,32 @@ html
                 span logout
           div(id='history')
             div(history='', trails='trails')
-              
-        else
-          a(href='#/')  hg
           
       if !user.username
           div(id='login')
+            div(id='logo') hg
+            h5 welcome to histograph
             form
-              a(ng-href='/auth/twitter?next={{locationPath}}', class='btn btn-default') signup with twitter
-              a(ng-href='/auth/google?next={{locationPath}}', class='btn btn-default') signup with google plus
+              div(class="btn-group-vertical", role="group")
+                a(ng-href='/auth/twitter?next={{locationPath}}', class='btn btn-default') login with twitter
+                a(ng-href='/auth/google?next={{locationPath}}', class='btn btn-default') login with google plus
       else
         div(class='view {{currentCtrl}}')
           div(ng-view)
         
         
           div(id='see-also', class='{{currentCtrl}}', ng-cloak)
+            h3 {{headers.seealso}}
+            //- pagination(boundary-links='true', total-items='relatedCount || 0' ng-model='relatedPage' class='pagination-sm' previous-text='<' next-text='>' first-text='<<' last-text='>>')
+            
             div(ng-repeat='relatedItem in relatedItems', class='related')
               h4
                 a(ng-href='#/r/{{relatedItem.id}}', ng-bind-html='relatedItem.props | title : language')
-              a(data-id='{{relatedItem.id}}') view on graph
+                  
+              div(class='actions')
+                button(class='btn btn-default action', tooltip='add to playlist', tooltip-append-to-body="true", ng-click='queue(relatedItem.id, true)')
+                  i(class='fa fa-play-circle-o')
+            
               div
                 span(class='date') {{relatedItem.props|guessInterval}}
                 span(ng-if='relatedItem.persons', class='tags') — 
@@ -146,14 +154,14 @@ html
                 div(class='pic')
                   a(ng-href='/#/e/{{item.id}}')
                     img(ng-src='{{item.props.thumbnail}}', ng-if='item.props.thumbnail')
-                h5(data-id='{{item.id}}') {{item.props | title : 'en' : 24 }}
+                h5(data-id='{{item.id}}') {{item.props | title : language : 24 }}
                 a(class='action', ng-click='removeFromQueue(item)', tooltip='remove from this set')
                   i(class='fa fa-times-circle')
               div(class='playlist-item-wrapper', ng-if='item.type == "resource"')
                 div(class='pic')
                   a(ng-href='/#/r/{{item.id}}')
                     img(ng-if='item.props.mimetype == "image" && item.props.url', ng-src='media/{{item.props.url}}')
-                h5(data-id='{{item.id}}') {{item.props | title : 'en': 12 }}
+                h5(data-id='{{item.id}}') {{item.props | title : language : 12 }}
                 a(class='action', ng-click='removeFromQueue(item)', tooltip='remove from this set')
                   i(class='fa fa-times-circle')
                 

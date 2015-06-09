@@ -103,6 +103,11 @@ angular.module('histograph')
           params: options
         });
       },
+      getGraph: function(options) {
+        return $http.get('/api/suggest/graph', {
+          params: options
+        });
+      } 
     }
   })
   /*
