@@ -350,35 +350,38 @@ angular.module('histograph')
           Sigma type specific Renderers
           ---
         */
-        sigma.canvas.nodes.resource = sigma.canvas.nodes.person= function(node, context, settings) {
+        sigma.canvas.nodes.personKnown = 
+        sigma.canvas.nodes.resourceKnown =
+        sigma.canvas.nodes.resource =
+        sigma.canvas.nodes.person = function(node, context, settings) {
           drawNode(node, context, settings)
         };
         
-        sigma.canvas.nodes.personKnown = 
-        sigma.canvas.nodes.resourceKnown = function(node, context, settings) {
-          var prefix = settings('prefix') || '';
-          drawNode(node, context, settings);
-          // Adding a border
+        // sigma.canvas.nodes.personKnown = 
+        // sigma.canvas.nodes.resourceKnown = function(node, context, settings) {
+        //   var prefix = settings('prefix') || '';
+        //   drawNode(node, context, settings);
+        //   // Adding a border
           
-          context.beginPath();
-          context.setLineDash([3]);
-          context.arc(
-            node[prefix + 'x'],
-            node[prefix + 'y'],
-            node[prefix + 'size'] + 3,
-            0,
-            Math.PI * 2,
-            true
-          );
+        //   context.beginPath();
+        //   context.setLineDash([3]);
+        //   context.arc(
+        //     node[prefix + 'x'],
+        //     node[prefix + 'y'],
+        //     node[prefix + 'size'] + 3,
+        //     0,
+        //     Math.PI * 2,
+        //     true
+        //   );
 
-          context.closePath();
+        //   context.closePath();
             
-          context.lineWidth = node.borderWidth || 1;
-          context.strokeStyle = node.borderColor || '#444';
-          context.stroke();
+        //   context.lineWidth = node.borderWidth || 1;
+        //   context.strokeStyle = node.borderColor || '#444';
+        //   context.stroke();
           
           
-        };
+        // };
         /*
           sigma canvas edge renderer
           

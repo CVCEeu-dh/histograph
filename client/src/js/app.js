@@ -16,7 +16,7 @@ angular
     'ui.bootstrap',
     'ui.codemirror',
     // 'mgcrea.ngStrap'
-    //'perfect_scrollbar'
+    'perfect_scrollbar'
   ])
   .constant("EVENTS", {
     USE_USER: 'use_user'
