@@ -26,20 +26,37 @@ module.exports = function(io){
   return {
     /*
       get a single resources, along with comments and inquiries (with relationships).
-      todo: get different language according to the different param.
+      
     */
     getItem: function (req, res) {
-      var language = req.query.language || 'en';
-      entity.get(req.params.id, function (err, item) {
-        if(err == helpers.IS_EMPTY)
-          return res.error(404);
-        if(err) 
-          return helpers.cypherQueryError(err, res);
-        return res.ok({
-          item: item
+      var ids = helpers.text.toIds(req.params.id);
+      // not valid list of ids
+      if(ids.length == 0)
+        return res.error(404);
+      if(ids.length == 1)
+        entity.get(req.params.id, function (err, item) {
+          if(err == helpers.IS_EMPTY)
+            return res.error(404);
+          if(err) 
+            return helpers.cypherQueryError(err, res);
+          return res.ok({
+            item: item
+          });
+        })
+      else
+        entity.getByIds(ids, function (err, items) {
+          if(err == helpers.IS_EMPTY)
+            return res.error(404);
+          if(err)
+            return helpers.cypherQueryError(err, res);
+          return res.ok({
+            items: items
+          }, {
+            ids: ids
+          });
         });
-      })
     },
+    
     /*
       Create a comment specific for the entity ?
     */

@@ -36,7 +36,30 @@ module.exports = {
       next(null, node[0]);
     })
   },
-  
+  /*
+    Provide here a list of valid ids
+  */
+  getByIds: function(ids, next) {
+    neo4j.query(queries.get_entities_by_ids, {
+        ids: ids,
+        limit: ids.length,
+        offset: 0
+    }, function (err, items) {
+      if(err) {
+        console.log(err.neo4jError)
+        next(err);
+        return;
+      }
+      if(items.length == 0) {
+        next(helpers.IS_EMPTY);
+        return;
+      }
+      next(null, _.map(items, function (item) {
+        item.languages = _.values(item.languages); 
+        return item;
+      }));
+    });
+  },
   getRelatedResources: function(id, properties, next) {
     var options = _.merge({
       id: +id,

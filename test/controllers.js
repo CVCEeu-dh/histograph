@@ -511,6 +511,20 @@ describe('controllers: play with entities', function() {
         done()
       });
   });
+  it('should get some entities by id', function (done) {
+    session
+      .get('/api/entity/20381,26560,26248')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err);
+        should.not.exist(err);
+        should.exist(res.body.result.items.length);
+        console.log(_.map(res.body.result.items, 'id'))
+        done()
+      });
+  });
   it('should get a single entity related resources', function (done) {
     session
       .get('/api/entity/20381/related/resources')

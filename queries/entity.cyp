@@ -8,6 +8,22 @@ RETURN {
   props: ent
 }
 
+// name: get_entities_by_ids
+//
+MATCH (ent:entity)
+WHERE id(ent) IN {ids}
+WITH ent
+OPTIONAL MATCH (ent)--(res:resource)
+WITH ent, length(collect(DISTINCT res)) as resources
+RETURN {
+  id: id(ent),
+    type: LAST(labels(ent)),
+    props: ent,
+    resources: resources
+} as result
+SKIP {offset}
+LIMIT {limit}
+
 // name: get_person_cooccurrences
 //
 MATCH (p1:person)-[r1:appears_in]-(res:resource)-[r2:appears_in]-(p2:person)

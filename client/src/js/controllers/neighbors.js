@@ -5,7 +5,7 @@
  * # NeighborsCtrl
  */
 angular.module('histograph')
-  .controller('NeighborsCtrl', function ($scope, $log, $routeParams, socket, neighbors, ResourceFactory) {
+  .controller('NeighborsCtrl', function ($scope, $log, $routeParams, socket, neighbors, ResourceFactory, EntityFactory) {
     $log.debug('NeighborsCtrl ready', $routeParams.ids, neighbors);
     
     $scope.neighbors = neighbors.data.result.items;
@@ -66,17 +66,29 @@ angular.module('histograph')
     
     // get ids to call
     var resourcesToLoad = graph.nodes.filter(function (d) {
-      return d.type == 'resource';
-    }).map(function (d) {
-      return d.id;
-    });
-    $log.log('NeighborsCtrl load related items ',resourcesToLoad );
+          return d.type == 'resource';
+        }).map(function (d) {
+          return d.id;
+        });
+    var entityToLoad = graph.nodes.filter(function (d) {
+          return d.type == 'place' || d.type == 'person' || d.type == 'location';
+        }).map(function (d) {
+          return d.id;
+        });
+    
+    $log.log('NeighborsCtrl load related items ',resourcesToLoad, entityToLoad );
     if(resourcesToLoad.length)
       ResourceFactory.get({
         id: resourcesToLoad.join(',')
-      }, function(res) {
-        
-        $scope.setRelatedItems(res.result.items);
+      }, function (resA) {
+        if(entityToLoad.length)
+          EntityFactory.get({
+            id: entityToLoad.join(',')
+          }, function (resB) {
+            $scope.setRelatedItems(resB.result.items.concat(resA.result.items));
+          })
+        else
+           $scope.setRelatedItems(resA.result.items)
       })
     else
       $scope.setRelatedItems([])
