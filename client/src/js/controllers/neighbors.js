@@ -37,7 +37,7 @@ angular.module('histograph')
         known = neighbors.data.info.ids.indexOf(d.source.id) !== -1;
         index.nodes[d.source.id] = {
           id: '' + d.source.id,
-          label: d.source.name,
+          label: d.source.name || d.source.label,
           x: Math.random()*50,
           y: Math.random()*50,
           type: d.source.type + (known? 'Known': '')
@@ -49,7 +49,7 @@ angular.module('histograph')
         known = neighbors.data.info.ids.indexOf(d.target.id) !== -1;
         index.nodes[d.target.id] = {
           id: '' + d.target.id,
-          label: d.target.name,
+          label: d.target.name || d.target.label,
           x: Math.random()*50,
           y: Math.random()*50,
           type: d.target.type + (known? 'Known': '')

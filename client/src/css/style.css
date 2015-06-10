@@ -273,7 +273,7 @@ a:hover{
   margin-left:0;
 }
 #see-also.IndexCtrl {
-  margin-left:20%;
+  margin-left:0%;
   width: 30%;
 }
 /*
@@ -332,6 +332,18 @@ a:hover{
   width: 100%;
 }
 
+.related .profile-pic{
+  border: 1px solid #d4d4d4;
+  width: 60px;
+  margin-left: 0;
+  border-radius: 60px;
+  overflow: hidden;
+  height: 60px;
+  background: #d4d4d4;
+  margin-right: 10px;
+  float: left;
+}
+
 .username{
   
 }
@@ -376,9 +388,12 @@ a:hover{
           transition: left .3s cubic-bezier(0.65, 0.05, 0.36, 1);
 }
 
-#milkyway.extended{
+#milkyway.AllShortestPathsCtrl, #milkyway.NeighborsCtrl, #milkyway.SearchCtrl{
   left: 50%;
-  
+}
+
+#milkyway.IndexCtrl{
+  left: 30%;
 }
 
 #milkyway.active{
@@ -692,7 +707,7 @@ a:hover{
   bottom: 0;
   border-left: 1px solid #353535;
   top: 0;
-  width: 190px;
+  width: 140px;
   padding: 15px 15px;
 }
 
@@ -704,7 +719,7 @@ a:hover{
 
 #playlist-queue{
   position:absolute;
-  right: 190px;
+  right: 140px;
   bottom: 0px;
   top: 15px;
   left: 5px;

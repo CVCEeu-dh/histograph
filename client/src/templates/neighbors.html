@@ -1,6 +1,7 @@
 <div id="perspective" class="{{queueStatus}} reduced">
   elements in queue
-  <div class="related" ng-repeat="relatedItem in playlist">       
+  <div class="related" ng-repeat="relatedItem in playlist" ng-if="relatedItem.type == 'resource'" data-id='{{relatedItem.id}}'>
+       
     <h4>
       <a ng-href="#/r/{{relatedItem.id}}" ng-bind-html="relatedItem.props | title : language"></a>
     </h4>
@@ -17,6 +18,34 @@
     
     <blockquote>
       {{relatedItem.props | abstract : language}}
+    </blockquote>
+              
+    <a data-id='{{relatedItem.id}}'>view on graph</a>
+  </div>
+  
+  <div class="related entity" ng-repeat="relatedItem in playlist" ng-if="relatedItem.type != 'resource'">
+    {{relatedItem.type}}    
+    <div  ng-if="relatedItem.props.thumbnail" class="profile-pic">
+      <div class="profile-pic-wrapper">
+        
+        <img ng-src="{{relatedItem.props.thumbnail}}">
+      </div>
+    </div>
+    <h4>
+      <a ng-href="#/e/{{relatedItem.id}}" ng-bind-html="relatedItem.props | title : language"></a>
+    </h4>
+    
+    <div class='actions'>
+      <button class='btn btn-default action' tooltip='remove from readlist' tooltip-append-to-body="true" ng-click='removeFromQueue(relatedItem)'>
+        <i class='fa fa-times-circle'></i>
+      </button>
+    </div>
+    
+    
+    <img ng-if='relatedItem.props.mimetype=="image"', ng-src="{{relatedItem.props | url : language}}">
+    
+    <blockquote>
+      {{relatedItem.props | abstract : language : 100}}
     </blockquote>
               
     <a data-id='{{relatedItem.id}}'>view on graph</a>

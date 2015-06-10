@@ -65,14 +65,14 @@ WHERE id(a) in {ids} AND last(labels(b)) in {labels}
 RETURN {
   source: {
     id: id(a),
-    name: COALESCE(a.name, a.title_en, a.title_fr),
+    label: COALESCE(a.name, a.title_en, a.title_fr),
     start_time: a.start_time,
     end_time: a.end_time,
     type: last(labels(a))
   },
   target: {
     id: id(b),
-    name: COALESCE(b.name, b.title_en, b.title_fr),
+    label: COALESCE(b.name, b.title_en, b.title_fr),
     start_time: b.start_time,
     end_time: b.end_time,
     type: last(labels(b))

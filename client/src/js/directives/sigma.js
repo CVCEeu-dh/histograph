@@ -187,6 +187,9 @@ angular.module('histograph')
           check for focus changes
         */
         $(document).on('click', '[data-id]', focus);
+        // $(document).on('mouseenter', '[data-id]', function(e) {
+          
+        // });
         // deprecaded, we do not understand what happens $(document).on('mouseenter', '[data-id]', focus);
         /*
           sigma clickNode
