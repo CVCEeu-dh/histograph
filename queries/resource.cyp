@@ -238,18 +238,18 @@ WITH p1, p2, length(collect(DISTINCT res)) as w
 RETURN {
     source: {
       id: id(p1),
-      type: HEAD(labels(p1)),
-      name: p1.name
+      type: LAST(labels(p1)),
+      label: COALESCE(p1.name, p1.title_en, p1.title_fr)
     },
     target: {
       id: id(p2),
-      type: HEAD(labels(p2)),
-      name: p2.name
+      type: LAST(labels(p2)),
+      label: COALESCE(p2.name, p2.title_en, p2.title_fr)
     },
     weight: w
   } as result
 ORDER BY w DESC
-SKIP {skip}
+SKIP {offset}
 LIMIT {limit}
 
 

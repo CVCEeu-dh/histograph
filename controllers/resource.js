@@ -153,15 +153,16 @@ module.exports = function(io){
       We should move this to entities instead.
     */
     getCooccurrences: function (req, res) {
-      neo4j.query(queries.get_cooccurrences, {
-        skip: 0,
-        limit: +req.params.limit || 1000,
-      }, function(err, items){
-        if(err)
-            return helpers.cypherQueryError(err, res);
-          return res.ok({
-            items: items
-          });
+      helpers.cypherGraph(queries.get_cooccurrences, {
+        offset: 0,
+        limit: 500
+      }, function (err, graph) {
+        if(err) {
+          return helpers.cypherQueryError(err, res);
+        };
+        return res.ok({
+          graph: graph
+        });
       });
     },
     
