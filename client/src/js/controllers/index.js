@@ -11,13 +11,16 @@ angular.module('histograph')
     
     ResourcesFactory.get(function (res) {
       $log.info('ResourceFactory', res.result.items.length, res.result.items[0]);
-      $scope.items = res.result.items;
+      $scope.setRelatedItems(res.result.items);
     });
     
     /*
       Set graph title
     */
-    $scope.setHeader('graph', 'cooccurrences network of people appearing in the same documents');
+    $scope.setHeader({
+      graph: 'cooccurrences network of people connected if they appear in the same document',
+      seealso: 'A list of resources to start with'
+    });
     
     /*
       clean previous graph

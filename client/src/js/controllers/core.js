@@ -32,7 +32,11 @@ angular.module('histograph')
     };
     
     $scope.setHeader = function(key, value) {
-      $scope.headers[key] = value;
+      if(typeof key == 'object') {
+        for(var i in key)
+          $scope.headers[i] = key[i];
+      } else
+        $scope.headers[key] = value;
     }
     
     // the current search query, if any

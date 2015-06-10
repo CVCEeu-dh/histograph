@@ -272,6 +272,10 @@ a:hover{
 #see-also.SearchCtrl {
   margin-left:0;
 }
+#see-also.IndexCtrl {
+  margin-left:20%;
+  width: 30%;
+}
 /*
 #see-also-header{
   position: fixed;
@@ -416,7 +420,7 @@ a:hover{
 }
 
 #milkyway #tips>div{
-  background-color: rgba(56, 58, 59, 0.05);
+  background-color: rgba(218, 218, 218, 0.8);
   padding: 10px 17px;
   border-radius: 2px;
   font-family: 'proxima-nova';

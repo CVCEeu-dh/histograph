@@ -85,7 +85,7 @@ html
                 a(ng-href='/auth/google?next={{locationPath}}', class='btn btn-default') login with google plus
       else
         div(class='view {{currentCtrl}} {{queueStatus}}')
-          div(ng-view)
+          div(ng-view, autoscroll='true')
         
         
           div(id='see-also', class='{{currentCtrl}}', ng-cloak)
@@ -110,7 +110,7 @@ html
               blockquote {{relatedItem.props | abstract : language}}
             
         
-        div(id='milkyway', sigma, graph='graph', tips='headers.graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentCtrl == "AllShortestPathsCtrl" || currentCtrl == "NeighborsCtrl" || currentCtrl == "SearchCtrl"? "extended": ""}} {{queueStatus}}', controller='currentCtrl' redirect='redirect(path)')
+        div(id='milkyway', sigma, graph='graph', tips='headers.graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentCtrl == "AllShortestPathsCtrl" || currentCtrl == "NeighborsCtrl" || currentCtrl == "SearchCtrl" || currentCtrl == "IndexCtrl"? "extended": ""}} {{queueStatus}}', controller='currentCtrl' redirect='redirect(path)')
           
         div(id='timeline', timeline, graph='graph')
           
