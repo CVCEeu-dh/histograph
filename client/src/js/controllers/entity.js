@@ -5,12 +5,18 @@
  * # IndexCtrl
  */
 angular.module('histograph')
-  .controller('EntityCtrl', function ($scope, $log, $routeParams, socket, entity, resources, persons, EntityVizFactory) {
+  .controller('EntityCtrl', function ($scope, $log, $routeParams, socket, $filter, entity, resources, persons, EntityVizFactory) {
     $log.debug('EntityCtrl ready', +$routeParams.id, entity.result.item.name);
     
     $scope.item = entity.result.item;
     $scope.setRelatedItems(resources.result.items);
     $scope.relatedPersons    = persons.result.items;
+    
+     /*
+      Set graph title
+    */
+    $scope.setHeader('graph', 'cooccurring entities for '+ $filter('title')(entity.result.item.props, $scope.language, 24) + '"');
+    
     
     // cooccurrences
     $scope.graphType = 'monopartite-entity'

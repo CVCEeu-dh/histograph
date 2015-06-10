@@ -110,7 +110,7 @@ html
               blockquote {{relatedItem.props | abstract : language}}
             
         
-        div(id='milkyway', sigma, graph='graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentCtrl == "AllShortestPathsCtrl" || currentCtrl == "NeighborsCtrl" || currentCtrl == "SearchCtrl"? "extended": ""}} {{queueStatus}}', controller='currentCtrl' redirect='redirect(path)')
+        div(id='milkyway', sigma, graph='graph', tips='headers.graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentCtrl == "AllShortestPathsCtrl" || currentCtrl == "NeighborsCtrl" || currentCtrl == "SearchCtrl"? "extended": ""}} {{queueStatus}}', controller='currentCtrl' redirect='redirect(path)')
           
         div(id='timeline', timeline, graph='graph')
           
@@ -145,10 +145,13 @@ html
               div(class='playlist-item', ng-repeat='item in playlist')
                 div(class='playlist-item-wrapper')
                   div(class='pic', ng-if='item.type == "person"')
-                    a(ng-href='/#/e/{{item.id}}')
+                    a(ng-href='/#/e/{{item.id}}', tooltip-append-to-body='true', tooltip='visit person page')
                       img(ng-src='{{item.props.thumbnail}}', ng-if='item.props.thumbnail')
+                  div(class='pic', ng-if='item.type == "location" || item.type == "place"')
+                    a(ng-href='/#/e/{{item.id}}', tooltip-append-to-body='true', tooltip='visit location page')
+                      
                   div(class='pic', ng-if='item.type == "resource"')
-                    a(ng-href='/#/r/{{item.id}}')
+                    a(ng-href='/#/r/{{item.id}}', tooltip-append-to-body='true', tooltip='visit resource page')
                       img(ng-if='item.props.mimetype == "image" && item.props.url', ng-src='media/{{item.props.url}}')
                   h5(data-id='{{item.id}}', tooltip-append-to-body='true', tooltip='{{item.props | title : language }}') {{item.props | title : language : 24 }}
                   a(class='action', ng-click='removeFromQueue(item)', tooltip-append-to-body='true', tooltip='remove from this set')

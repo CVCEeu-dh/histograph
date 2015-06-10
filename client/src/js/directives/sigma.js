@@ -14,6 +14,7 @@ angular.module('histograph')
       restrict : 'A',
       template: ''+
         '<div id="playground"></div>' +
+        '<div id="tips" ng-if="tips.length > 0"><div>{{tips}}</div></div>' +
         '<div id="commands">' +
           '<div class="action {{status==\'RUNNING\'? \'bounceIn animated\': \'\'}}" ng-click="togglePlay()"><i class="fa fa-{{status==\'RUNNING\' ? \'stop\': \'play\'}}"></i></div>' +
           '<div class="action" ng-click="rescale()"><i class="fa fa-dot-circle-o"></i></div>' +
@@ -22,6 +23,7 @@ angular.module('histograph')
         '</div>',
       scope:{
         graph: '=',
+        tips: '=',
         controller: '=',
         redirect: '&',
         toggleMenu: '&togglemenu'
@@ -42,6 +44,8 @@ angular.module('histograph')
                 singleHover: true,
                 labelThreshold: 0,
                 labelSizeRatio: 3.5,
+                //labelSize: 'fixed',
+                //defaultLabelSize: '12'
                 labelSize: ''
               }
             }),

@@ -12,7 +12,10 @@ angular.module('histograph')
     
     $scope.syncQueue($routeParams.ids);
     
-    
+    /*
+      Set graph title
+    */
+    $scope.setHeader('graph', 'items connecting your queued ones (shortest paths)');
     
     var graph = {
           nodes: [],

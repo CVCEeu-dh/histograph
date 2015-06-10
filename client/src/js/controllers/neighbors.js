@@ -14,6 +14,12 @@ angular.module('histograph')
     
     
     
+    /*
+      Set graph title
+    */
+    $scope.setHeader('graph', 'closest items for your queued ones');
+    
+   
     var graph = {
         nodes: [],
         edges: []

@@ -15,8 +15,8 @@ angular.module('histograph')
       limit: resources.data.info.limit,
       offset: resources.data.info.offset
     });
+    $scope.setHeader('graph', 'network of search results for "'+ $routeParams.query+'"');
     
-    $log.debug('GET GRAPH');
     SuggestFactory.getGraph({
         query: $routeParams.query,
         limit: 2000

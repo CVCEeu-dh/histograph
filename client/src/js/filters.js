@@ -120,21 +120,33 @@ angular.module('histograph')
   // according to language, give the title a real title
   .filter('title', function($sce) {
     return function(props, language, cutAt) {
-      var primary = props['title_' + language];
+      var primary = props['title_' + language],
+          wrapper = function(text) {
+            // cutat
+            if(isNaN(cutAt))
+              return $sce.trustAsHtml(text);
+            //trim the string to the maximum length
+            var t = text.substr(0, cutAt);
+            //re-trim if we are in the middle of a word
+            if(t.length > cutAt)
+              t = t.substr(0, Math.min(t.length, t.lastIndexOf(' '))) + ' ...'
+            // if there is a cut at, we will strip the html
+            return t;
+          };
       
       if(primary)
-        return $sce.trustAsHtml(primary);
+        return wrapper(primary);
       
       var defaultName = props.name;
       
       if(defaultName)
-        return $sce.trustAsHtml(defaultName);
+        return wrapper(defaultName);
       
       // return the first in another language
       if(!props.languages || !props.languages.length)
         return 'Untitled';
       
-      return $sce.trustAsHtml(props['title_' + props.languages[0]])
+      return wrapper(props['title_' + props.languages[0]])
     }
   })
   // according to language, give the caption a real caption

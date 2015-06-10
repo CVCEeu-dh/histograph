@@ -27,7 +27,8 @@ angular.module('histograph')
     
     // current headers for a given column. Cfr setHeader
     $scope.headers = {
-      seealso: 'related document'
+      seealso: '',
+      graph: ''
     };
     
     $scope.setHeader = function(key, value) {

@@ -5,9 +5,13 @@
  * # IndexCtrl
  */
 angular.module('histograph')
-  .controller('ResourceCtrl', function ($scope, $log, $routeParams, resource, resources, ResourceVizFactory, ResourceCommentsFactory, socket) {
+  .controller('ResourceCtrl', function ($scope, $log, $routeParams, $filter, resource, resources, ResourceVizFactory, ResourceCommentsFactory, socket) {
     $log.debug('ResourceCtrl ready', $routeParams.id, 'loaded', resource.result.item.id);
 
+    /*
+      Set graph title
+    */
+    $scope.setHeader('graph', 'neighborhood for the document "' + $filter('title')(resource.result.item.props, $scope.language, 24) + '"');
     
     /**
       controller to directive 
