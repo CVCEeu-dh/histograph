@@ -175,7 +175,7 @@ module.exports = {
   */
   discover: function(id, next) {
     // quetly does textrazor entity extraction.
-    neo4j.read(id, function(err, res) {
+    neo4j.read(id, function (err, res) {
       if(err) {
         next(err);
         return;
@@ -317,6 +317,9 @@ module.exports = {
         q.drain = function() {
           next(null, res);
         }
+      } else {
+        console.log('no language found...', res)
+        next(helpers.IS_EMPTY)
       }
     });
     //helpers.

@@ -31,9 +31,11 @@ console.log(options);
 if(options.resourceid) {
   if(isNaN(options.resourceid))
     throw 'check your --resourceid value. Should be an integer id!'
-
-  resource.discover(options.resourceid, function(err, res) {
+  console.log(clc.blackBright('discovering resource ..',options.resourceid))
+  resource.discover(options.resourceid, function (err, res) {
     // console.log(res)
+    if(err)
+      throw err;
     console.log(clc.blackBright('discovering'), res.id, clc.cyan('done'))
   })
   return;

@@ -92,7 +92,7 @@ html
             h3 {{headers.seealso}}
             //- pagination(boundary-links='true', total-items='relatedCount || 0' ng-model='relatedPage' class='pagination-sm' previous-text='<' next-text='>' first-text='<<' last-text='>>')
             
-            div(ng-repeat='relatedItem in relatedItems', class='related', data-id='{{relatedItem.id}}')
+            div(ng-repeat='relatedItem in relatedItems', class='related')
               h4
                 a(ng-href='#/r/{{relatedItem.id}}', ng-bind-html='relatedItem.props | title : language')
                   

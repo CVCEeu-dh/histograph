@@ -108,12 +108,12 @@ RETURN {
     source: {
       id: id(p1),
       type: LAST(labels(p1)),
-      label: COALESCE(p1.name, title_en,p1.title_fr,p1.title, '')
+      label: COALESCE(p1.name, p1.title_en, p1.title_fr,p1.title, '')
     },
     target: {
       id: id(p2),
       type: LAST(labels(p2)),
-      label: COALESCE(p2.name, p2.title_en,p2.title_fr,p2.title, '')
+      label: COALESCE(p2.name, p2.title_en, p2.title_fr,p2.title, '')
     },
     weight: w 
   } as result
