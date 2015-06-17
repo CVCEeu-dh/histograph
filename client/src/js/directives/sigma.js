@@ -247,16 +247,19 @@ angular.module('histograph')
           }
           
           var node = si.graph.nodes(nodeId);
-          
-          sigma.misc.animation.camera(
-            si.cameras.main,
-            {
-              x: node['read_cammain:x'],
-              y: node['read_cammain:y'],
-              ratio: 0.5
-            },
-            {duration: 250}
-          );
+          try{
+            sigma.misc.animation.camera(
+              si.cameras.main,
+              {
+                x: node['read_cammain:x'],
+                y: node['read_cammain:y'],
+                ratio: 0.5
+              },
+              {duration: 250}
+            );
+          } catch(e) {
+            
+          }
         }
         /*
           sigma rescale

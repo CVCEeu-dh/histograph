@@ -40,11 +40,12 @@ angular.module('histograph')
     }
     
     // the current search query, if any
-    $scope.query =  $routeParams.query || '';
+    // $scope.query =  $routeParams.query || '';
     
     // set query and redirect to search controller
     $scope.setQuery = function() {
-      alert('ooooo')
+       $log.log('CoreCtrl > setQuery',  $scope.query);
+      $location.path('search/' + $scope.query);
     }
     
     
@@ -218,10 +219,11 @@ angular.module('histograph')
     $scope.$on('$routeChangeSuccess', function(e, r) {
       $log.debug('CoreCtrl @routeChangeSuccess', r, r.$$route.controller);
       $scope.currentCtrl = r.$$route.controller;
+      $scope.showSpinner = false;
       
-      $scope.query = $routeParams.query || '';
       switch($scope.currentCtrl) { // move to translation engine
-        case 'SearchCtrl': 
+        case 'SearchCtrl':
+          $scope.query = $routeParams.query || '';
           $scope.headers.seealso = 'search results';
           break;
         default: 
@@ -279,6 +281,9 @@ angular.module('histograph')
         });
     });
     
+    $scope.$on('$locationChangeStart', function() {
+      $scope.showSpinner = true;
+    });
      /*
     
       Playlist
