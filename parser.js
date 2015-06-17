@@ -7,6 +7,43 @@ var YAML = require('yamljs'),
 
 module.exports = {
   /**
+    Neo4j Chypher filter query parser. REplace the {?<neo4jVariableName>}
+    with proper WHERE chain.
+  */
+  agentBrown: function(cypherQuery, filters) {
+    var _concatenate = false,
+        methods = {
+          lt: '<=',
+          gt: '>=',
+          slt: '<', 
+          sgt: '>',
+          equals: '=',
+          differs: '<>',
+          pattern: '=~' // MUST be replaced by a neo4j valid regexp.
+        };
+        
+    return cypherQuery.replace(/\{(AND|OR)?\?([a-z_A-Z]+):([a-z_A-Z]+)__([a-z_A-Z]+)\}/g, function (m, operand, node, property, method) {
+      var chunk = '';
+      
+      if(!methods[method])  
+        throw method + ' method is not available supported method, choose between ' + JSON.stringify(methods);
+      
+      if(!filters[property])
+        return '';
+      
+      if(_concatenate && operand == undefined)
+        _concatenate = false; // start with WHERE
+      
+      if(!_concatenate)
+        chunk = ['WHERE', node + '.' + property, methods[method], filters[property]].join(' ') 
+      else 
+        chunk = [operand, node + '.' + property, methods[method], filters[property]].join(' ');
+      
+      _concatenate = true;
+      return chunk;
+    })
+  },
+  /**
    annotate a string acciording to the splitpoints.
    points is a Yaml
    */

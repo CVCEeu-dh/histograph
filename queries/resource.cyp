@@ -68,7 +68,7 @@ START res=node({id})
 // name: get_resources
 // get resources with number of comments, if any
 MATCH (res:resource)
-WHERE has(res.place)
+{?res:start_time__gt} {AND?res:end_time__lt}
 WITH res
   SKIP {offset} 
   LIMIT {limit}

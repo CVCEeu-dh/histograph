@@ -2,7 +2,8 @@
   
   Testing parser
   ===
-
+  
+  usage: mocha -g 'parsers:'
 */
 'use strict';
 
@@ -10,7 +11,7 @@ var parser  = require('../parser.js'),
     helpers = require('../helpers.js'),
     should  = require('should');
 
-describe('parser: split a string, add annotations.', function() {
+describe('parsers: split a string, add annotations.', function() {
   var points;
 
   it('should correctly parse the yaml', function (done) {
@@ -29,6 +30,15 @@ describe('parser: split a string, add annotations.', function() {
 
     should.equal(annotated, "European Parliament Resolution on the Treaty of [Nice](25867,18317) and the future of [the ](27023,27025)[European Union](27023,27025) (31 May 2001)§ European Parliament resolution of 31 May 2001 incorporating Parliament’s opinion on the Treaty of [Nice](25867,18317) and the Declaration on the Future of [Europe](27034,27035). The European Parliament notes that the Treaty of [Nice](25867,18317) removes the last remaining formal obstacle to enlargement but considers that a Union of 27 or more Member States requires more thoroughgoing reforms in order to guarantee democracy, effectiveness, transparency, clarity and governability§ Mention par défaut (oeuvres du domaine public).");
 
+    done()
+  });
+
+  it('should correctly rebuild the CYPHER query based on WHERE clause', function (done) {
+    var filteredQuery = parser.agentBrown('MATCH (nod) {?nod:start_time__gt} {AND?nod:end_time__lt} RETURN N', {
+      start_time: 56908878,
+      end_time: 556908879
+    });
+    console.log(filteredQuery);
     done()
   });
 });

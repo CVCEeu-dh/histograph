@@ -19,13 +19,15 @@ angular
     'perfect_scrollbar'
   ])
   .constant("EVENTS", {
-    USE_USER: 'use_user'
+    USE_USER: 'use_user',
+    API_PARAMS_CHANGED: 'api_params_changed'
   })
   .config(function ($routeProvider, $httpProvider) {
     $routeProvider
       .when('/', {
         templateUrl: 'templates/index.html',
-        controller: 'IndexCtrl'
+        controller: 'IndexCtrl',
+        reloadOnSearch: false
       })
       .when('/r/:id', {
         templateUrl: 'templates/resource.html',

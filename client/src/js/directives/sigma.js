@@ -44,7 +44,7 @@ angular.module('histograph')
                 singleHover: true,
                 labelThreshold: 0,
                 labelSizeRatio: 3.5,
-                labelSize: 'fixed',
+                // labelSize: 'fixed',
                 defaultLabelSize: '12',
                 labelHoverShadowColor: '#a5a5a5',
                 labelHoverShadowBlur: 16,

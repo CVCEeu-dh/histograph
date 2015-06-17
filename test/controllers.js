@@ -215,7 +215,7 @@ describe('controllers: authenticate the user, succeed', function() {
 
 describe('controllers: get resource items available to the user', function() {
 
-  it('should show a list of 20 resources', function (done) {
+  it('should show a list of 50 resources', function (done) {
     session
       .get('/api/resource')
       .expect('Content-Type', /json/)
@@ -223,6 +223,32 @@ describe('controllers: get resource items available to the user', function() {
       .end(function (err, res) {
         should.not.exists(err);
         //console.log(' resoucre ', res.body)
+        done();
+      });
+  });
+  
+  it('should show a list of 20 resources from a specific date', function (done) {
+    session
+      .get('/api/resource?from=1988-01-01&to=1988-01-02')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exists(err);
+        should.equal(res.body.info.params.start_date, '1988-01-01T00:00:00.000Z');
+        should.equal(res.body.info.params.end_date, '1988-01-02T00:00:00.000Z');
+        should.equal(res.body.info.params.start_time, 567993600);
+        done();
+      });
+  });
+  
+  it('should throw a FORM error - Bad request', function (done) {
+    session
+      .get('/api/resource?from=nonsisa')
+      .expect('Content-Type', /json/)
+      .expect(400)
+      .end(function (err, res) {
+        should.not.exists(err);
+        console.log(' resoucre ', res.body, err)
         done();
       });
   });

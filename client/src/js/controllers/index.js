@@ -38,5 +38,7 @@ angular.module('histograph')
       });
       $log.log('IndexCtrl CooccurrencesFactory returned a graph of',res.result.graph.nodes.length, 'nodes');
       $scope.setGraph(res.result.graph)
-    })
+    });
+    
+    
   })

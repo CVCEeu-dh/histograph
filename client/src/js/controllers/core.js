@@ -48,12 +48,7 @@ angular.module('histograph')
     }
     
     
-    $scope.$on(EVENTS.USE_USER, function (e, user) {
-      if($scope.user.id != user.id) {
-        $log.debug('CoreCtrl @EVENTS.USE_USER', user);
-        $scope.user = user;
-      }
-    })
+   
     
     /*
       Handle smart related items, with pagination. dispatch event USE_PAGE
@@ -214,6 +209,12 @@ angular.module('histograph')
       this.start = start;
     };
     
+    /*
+    
+      Events listeners
+      ----
+    
+    */
     $scope.$on('$routeChangeSuccess', function(e, r) {
       $log.debug('CoreCtrl @routeChangeSuccess', r, r.$$route.controller);
       $scope.currentCtrl = r.$$route.controller;
@@ -229,6 +230,22 @@ angular.module('histograph')
       }
       // set header andccording to the controllers
       
+    });
+    /*
+      change the given user, programmatically. Cfr httpProvider config in app.js
+    */
+    $scope.$on(EVENTS.USE_USER, function (e, user) {
+      if($scope.user.id != user.id) {
+        $log.debug('CoreCtrl @EVENTS.USE_USER', user);
+        $scope.user = user;
+      }
+    });
+    /*
+      handle reoute update, e.g on search
+    */
+    $scope.$on('$routeUpdate', function(next, current) { 
+      $log.debug('CoreCtrl', '@routeUpdate', next, current);
+      $scope.$broadcast(EVENTS.API_PARAMS_CHANGED);
     });
     
     $scope.$on('$locationChangeSuccess', function(e, path) {

@@ -8,6 +8,7 @@ var settings   = require('../settings'),
     queries    = require('decypher')('./queries/resource.cyp'),
     parser     = require('../parser'),
     helpers    = require('../helpers'),
+    validator  = require('../validator'),
     YAML       = require('yamljs'),
 
     _          = require('lodash'),
@@ -81,15 +82,21 @@ module.exports = function(io){
       get some, based on the limit/offset settings
     */
     getItems: function (req, res) {
-      neo4j.query(queries.get_resources, {
-        limit: 20,
-        offset: 0
-      }, function(err, items) {
+      validator.queryParams(req.query, function (err, params, warnings) {
         if(err)
-          return helpers.cypherQueryError(err, res);
-        
-        return res.ok({
-          items: items
+          return helpers.formError(err, res);
+        var query = parser.agentBrown(queries.get_resources, params)
+        neo4j.query(query, params,function(err, items) {
+          console.log(err)
+          if(err)
+            return helpers.cypherQueryError(err, res);
+          
+          return res.ok({
+            items: items
+          }, {
+            params: params,
+            warnings: warnings
+          });
         });
       })
     },

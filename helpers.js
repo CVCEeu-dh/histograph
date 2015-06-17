@@ -106,7 +106,13 @@ module.exports = {
         return res.error(err.statusCode, err);
     };
   },
-
+  
+  /**
+    Handle Form errors (Bad request)
+  */
+  formError: function(err, res) {
+    return res.error(400, err);
+  },
 
   /**
     encrypt a password ccording to local settings secret and a random salt.
