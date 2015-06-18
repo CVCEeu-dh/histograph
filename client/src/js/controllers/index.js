@@ -5,12 +5,12 @@
  * # IndexCtrl
  */
 angular.module('histograph')
-  .controller('IndexCtrl', function (resources, $scope, $log, $timeout, ResourcesFactory, CooccurrencesFactory, cleanService, EVENTS) {
+  .controller('IndexCtrl', function ($scope, $log, $timeout, ResourcesFactory, CooccurrencesFactory, cleanService, EVENTS) {
     
     $log.debug('IndexCtrl ready', $scope.params);
     $scope.$parent.showSpinner = false;
     
-    $scope.setRelatedItems(resources.result.items); 
+   
     /*
       Reload resources according to scope params
     */
@@ -62,5 +62,5 @@ angular.module('histograph')
       $log.log('IndexCtrl @API_PARAMS_CHANGED', $scope.params);
       $scope.sync();
     });
-    $scope.syncGraph();
+    $scope.sync();
   })

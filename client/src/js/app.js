@@ -28,12 +28,7 @@ angular
       .when('/', {
         templateUrl: 'templates/index.html',
         controller: 'IndexCtrl',
-        reloadOnSearch: false,
-        resolve: {
-          resources: function(ResourceFactory, $route, cleanService) {
-            return ResourceFactory.get(cleanService.params($route.current.params)).$promise;
-          },
-        }
+        reloadOnSearch: false
       })
       .when('/r/:id', {
         templateUrl: 'templates/resource.html',
