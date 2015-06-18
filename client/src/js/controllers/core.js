@@ -7,7 +7,7 @@
  * It is the parent of the other controllers.
  */
 angular.module('histograph')
-  .controller('CoreCtrl', function ($scope, $location, $routeParams, $log, $timeout, $http, socket, ResourceCommentsFactory, SuggestFactory, EVENTS) {
+  .controller('CoreCtrl', function ($scope, $location, $route, $log, $timeout, $http, socket, ResourceCommentsFactory, SuggestFactory, cleanService, EVENTS) {
     $log.debug('CoreCtrl ready');
     $scope.locationPath = $location.path(); 
     
@@ -40,10 +40,6 @@ angular.module('histograph')
       } else
         $scope.headers[key] = value;
     }
-    
-    $scope.setParams = function(params) {
-      $scope.params = params;
-    };
     
     // the current search query, if any
     // $scope.query =  $routeParams.query || '';
@@ -220,9 +216,12 @@ angular.module('histograph')
     
     */
     $scope.$on('$routeChangeSuccess', function(e, r) {
-      $log.debug('CoreCtrl @routeChangeSuccess', r, r.$$route.controller);
+      $log.debug('CoreCtrl @routeChangeSuccess', r.params, r.$$route.controller);
       $scope.currentCtrl = r.$$route.controller;
       $scope.showSpinner = false;
+      
+      // set initial params here
+      $scope.params = cleanService.params(r.params)
       
       switch($scope.currentCtrl) { // move to translation engine
         case 'SearchCtrl':
@@ -252,9 +251,9 @@ angular.module('histograph')
        handle reoute update, e.g on search
     */
     $scope.$on('$routeUpdate', function(next, current) { 
-      $log.debug('CoreCtrl', '@routeUpdate', next, current, $routeParams);
+      $log.debug('CoreCtrl', '@routeUpdate', next, current);
       
-      $scope.params = angular.copy($routeParams);
+      $scope.params = angular.copy(next.params);
       // verify @todo filtering here
       $scope.$broadcast(EVENTS.API_PARAMS_CHANGED);
     });

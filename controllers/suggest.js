@@ -161,7 +161,7 @@ module.exports =  function(io){
       }, function (err, items) {
         if(err)
           return helpers.cypherQueryError(err, res);
-        console.log(items.length)
+        
         return res.ok({
           
           items: items.map(function (d) {

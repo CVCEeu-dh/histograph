@@ -7,6 +7,7 @@ var fs       = require('fs'),
     crypto   = require('crypto'),
     settings = require('./settings'),
     services = require('./services'),
+    parser   = require('./parser'),
     request  = require('request'),
     _        = require('lodash'),
     moment   = require('moment'),
@@ -85,7 +86,23 @@ module.exports = {
       next(null, graph);
     })
   },
-  
+   /**
+    Given a query, extract one useful timeline.
+    The query MUST return a list of (timestamp,weight) couples.
+    @param query  - cypher query
+    @param params - cypher and agentBrown query params
+    @return (err, graph) - error, or a graph of nodes and edges
+  */
+  cypherTimeline: function(query, params, next) {
+    var query = parser.agentBrown(query, params);
+    neo4j.query(query, params, function (err, items) {
+      if(err) {
+        next(err);
+        return;
+      }
+      next(null, items);
+    })
+  },
   
   /**
     Handle causes and stacktraces provided by seraph Query and rawQuery.

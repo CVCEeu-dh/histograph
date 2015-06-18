@@ -289,8 +289,8 @@ apiRouter.route('/user/session')// api session info
 */
 apiRouter.route('/resource')
   .get(ctrl.resource.getItems)
-apiRouter.route('/resource')
-  .get(ctrl.resource.getItems)
+apiRouter.route('/resource/timeline')
+  .get(ctrl.resource.getTimeline)
 apiRouter.route('/resource/:id')
   .get(ctrl.resource.getItem)
 apiRouter.route('/resource/:id/related')

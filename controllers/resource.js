@@ -86,7 +86,7 @@ module.exports = function(io){
         if(err)
           return helpers.formError(err, res);
         var query = parser.agentBrown(queries.get_resources, params);
-        console.log(query)
+        // console.log(query)
         neo4j.query(query, params,function(err, items) {
           console.log(err)
           if(err)
@@ -161,17 +161,24 @@ module.exports = function(io){
       We should move this to entities instead.
     */
     getCooccurrences: function (req, res) {
-      helpers.cypherGraph(queries.get_cooccurrences, {
-        offset: 0,
-        limit: 500
-      }, function (err, graph) {
-        if(err) {
-          return helpers.cypherQueryError(err, res);
-        };
-        return res.ok({
-          graph: graph
+      validator.queryParams(req.query, function (err, params, warnings) {
+        if(err)
+          return helpers.formError(err, res);
+        var query = parser.agentBrown(queries.get_cooccurrences, params);
+        
+        
+        helpers.cypherGraph(query, {
+          offset: 0,
+          limit: 500
+        }, function (err, graph) {
+          if(err) {
+            return helpers.cypherQueryError(err, res);
+          };
+          return res.ok({
+            graph: graph
+          });
         });
-      });
+      })
     },
     
     /*
@@ -238,6 +245,24 @@ module.exports = function(io){
           });
         });
       }
+    },
+    
+    getTimeline: function (req, res) {
+      validator.queryParams(req.query, function (err, params, warnings) {
+        if(err)
+          return helpers.formError(err, res);
+        
+        resource.getTimeline(params, function (err, timeline) {
+          if(err)
+            return helpers.cypherQueryError(err, res);
+          return res.ok({
+            timeline: timeline
+          }, {
+            params: params,
+            warnings: warnings
+          });
+        });
+      });
     },
     /*
       remap neo4j items to nice resource objects

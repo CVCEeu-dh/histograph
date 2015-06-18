@@ -248,7 +248,7 @@ describe('controllers: get resource items available to the user', function() {
       .expect(400)
       .end(function (err, res) {
         should.not.exists(err);
-        console.log(' resoucre ', res.body, err)
+        should.exists(res.body.error)
         done();
       });
   });
@@ -323,6 +323,34 @@ describe('controllers: get resource items available to the user', function() {
         should.exist(res.body.result.items[0].id)
         should.equal(res.body.result.items[0].user.username, 'hello-world')
         
+        done();
+      });
+  });
+  
+  it('should return the timeline of resources, filtered', function (done) {
+    session
+      .get('/api/resource/timeline?from=1988-01-01&to=1998-01-02')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err)
+        should.not.exists(err);
+        should.exist(res.body.result.timeline)
+        done();
+      });
+  });
+  
+  it('should return the graph of cooccurrences, filtered', function (done) {
+    session
+      .get('/api/cooccurrences?from=1988-01-01&to=1988-01-02')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err)
+        should.not.exists(err);
+        //console.log(' resoucre ', res.body)
         done();
       });
   });
@@ -547,7 +575,7 @@ describe('controllers: play with entities', function() {
           console.log(err);
         should.not.exist(err);
         should.exist(res.body.result.items.length);
-        console.log(_.map(res.body.result.items, 'id'))
+        
         done()
       });
   });

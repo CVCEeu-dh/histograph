@@ -168,6 +168,18 @@ module.exports = {
       next(null, graph);
     });
   },
+  
+  /**
+    Timeline
+  */
+  getTimeline: function(properties, next) {
+    helpers.cypherTimeline(rQueries.get_timeline, properties, function (err, timeline) {
+      if(err)
+        next(err);
+      else
+        next(null, timeline);
+    });
+  },
   /*
     The long chain of the discovery.
     Perform TEXTRAZOR on some field of our darling resource and 

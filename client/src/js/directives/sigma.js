@@ -290,7 +290,8 @@ angular.module('histograph')
             adjustSizes :true,
             linLogMode: true,
             startingIterations : 20,
-            gravity : 0.5
+            gravity : 0.5,
+            edgeWeightInfluence : 1
           });
           $log.debug('::sigma -> play()')
         }

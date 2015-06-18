@@ -17,7 +17,7 @@ var settings = require('../settings'),
 describe('model:resource ', function() {
   
   it('should get a correct representation of a resource', function (done) {
-    resource.get(11160, function(err, res){
+    resource.get(11160, function (err, res) {
       if(err)
         throw err;
       should.equal(res.id, 11160)
@@ -28,7 +28,7 @@ describe('model:resource ', function() {
     })
   })
   it('should get a correct representation of a resource', function (done) {
-    resource.get(1, function(err, res){
+    resource.get(1, function (err, res) {
       if(err)
         throw err;
       should.equal(res.id, 1)
@@ -38,8 +38,14 @@ describe('model:resource ', function() {
       done()
     })
   })
+  it('should return the timeline of resources', function (done) {
+    resource.getTimeline({}, function (err, res) {
+      should.not.exist(err);
+      done()
+    })
+  })
   it('should get a NOT found error', function (done) {
-    resource.get(111600000000, function(err, res){
+    resource.get(111600000000, function (err, res) {
       should.exist(err)
       done()
     })

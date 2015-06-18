@@ -72,10 +72,9 @@ MATCH (res:resource)
 WITH res
   SKIP {offset} 
   LIMIT {limit}
-MATCH (ver:`version`)-[r1:describes]-(res)
 OPTIONAL MATCH (res)-[r2:appears_in]-(loc:`location`)
 OPTIONAL MATCH (res)-[r3:appears_in]-(per:`person`)
-  WITH res, ver, loc, per
+  WITH res, loc, per
     RETURN {
       id: id(res),
       props: res,
@@ -234,6 +233,7 @@ RETURN col, res
 // name: get_cooccurrences
 //
 MATCH (p1:person)-[r1:appears_in]-(res:resource)-[r2:appears_in]-(p2:person)
+{?res:start_time__gt} {AND?res:end_time__lt}
 WITH p1, p2, length(collect(DISTINCT res)) as w
 RETURN {
     source: {
@@ -277,3 +277,12 @@ RETURN {
 } as result
 ORDER BY w DESC
 LIMIT {limit}
+
+
+// name: get_timeline
+//
+MATCH (res:resource)
+{?res:start_time__gt} {AND?res:end_time__lt}
+WITH res.start_time as t, length(COLLECT(res)) as weight
+WHERE t IS NOT NULL
+RETURN t, weight
