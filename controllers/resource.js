@@ -85,7 +85,8 @@ module.exports = function(io){
       validator.queryParams(req.query, function (err, params, warnings) {
         if(err)
           return helpers.formError(err, res);
-        var query = parser.agentBrown(queries.get_resources, params)
+        var query = parser.agentBrown(queries.get_resources, params);
+        console.log(query)
         neo4j.query(query, params,function(err, items) {
           console.log(err)
           if(err)

@@ -129,6 +129,15 @@ describe('human date service', function() {
       done();
     });
   });
+  it('should transform from 1933 to 1951 in a looot of years span', function (done) {
+    helpers.reconcileHumanDate('from 1933 to 1951', 'fr', function (err, res) {
+      should.not.exist(err, err);
+      should.equal(res.start_date, '1990-01-01T00:00:00+00:00'); // utc format
+      should.equal(res.end_date,  '1992-12-31T23:59:00+00:00');
+      done();
+    });
+  });
+  
   it('should transform 1er et 2 juin 1955 in two day span', function (done) {
     helpers.reconcileHumanDate('1er et 2 juin 1955', 'fr', function (err, res) {
       should.not.exist(err, err);

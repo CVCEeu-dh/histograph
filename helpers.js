@@ -943,8 +943,9 @@ module.exports = {
       // check other patterns
       var candidate = humanDate.match(/(\d{2,4})?[^\d](\d{2,4})/);
       if(!candidate) {
-        next(IS_EMPTY);
-        return;
+        if(next)
+          next(IS_EMPTY);
+        return false;
       }
       
       if(candidate[1] && candidate[2]) {
@@ -990,8 +991,10 @@ module.exports = {
     result.start_time = +start_date.format('X');
     result.end_date = end_date.format();
     result.end_time = +end_date.format('X');
-
-    next(null, result);
+    
+    if(next)
+      next(null, result);
+    return result;
   },
 
   /**

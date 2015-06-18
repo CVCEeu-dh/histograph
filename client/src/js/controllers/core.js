@@ -13,6 +13,8 @@ angular.module('histograph')
     
     var suggestionTimeout = 0;
     
+    $scope.params = {}; //  this would contain limit, offset, from, to and other API params. Cfr. EVENT.API_PARAMS_CHANGED
+    
     // the paths followed by a single user
     $scope.trails = [];
     
@@ -39,6 +41,10 @@ angular.module('histograph')
         $scope.headers[key] = value;
     }
     
+    $scope.setParams = function(params) {
+      $scope.params = params;
+    };
+    
     // the current search query, if any
     // $scope.query =  $routeParams.query || '';
     
@@ -47,9 +53,6 @@ angular.module('histograph')
        $log.log('CoreCtrl > setQuery',  $scope.query);
       $location.path('search/' + $scope.query);
     }
-    
-    
-   
     
     /*
       Handle smart related items, with pagination. dispatch event USE_PAGE
@@ -242,18 +245,28 @@ angular.module('histograph')
         $scope.user = user;
       }
     });
+    
     /*
-      handle reoute update, e.g on search
+      listener $routeUpdate
+      ---
+       handle reoute update, e.g on search
     */
     $scope.$on('$routeUpdate', function(next, current) { 
-      $log.debug('CoreCtrl', '@routeUpdate', next, current);
+      $log.debug('CoreCtrl', '@routeUpdate', next, current, $routeParams);
+      
+      $scope.params = angular.copy($routeParams);
+      // verify @todo filtering here
       $scope.$broadcast(EVENTS.API_PARAMS_CHANGED);
     });
     
+    
+    
+    
     $scope.$on('$locationChangeSuccess', function(e, path) {
       $log.debug('CoreCtrl @locationChangeSuccess', path);
-      var now = (new Date()).getTime();
       
+      var now = (new Date()).getTime();
+      $scope.showSpinner = false;
       if(!$scope.trails.length) { // hey this is your first trail
         $scope.trails.push(new Trail(path, now));
         return;

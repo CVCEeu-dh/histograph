@@ -22,12 +22,18 @@ angular
     USE_USER: 'use_user',
     API_PARAMS_CHANGED: 'api_params_changed'
   })
+  
   .config(function ($routeProvider, $httpProvider) {
     $routeProvider
       .when('/', {
         templateUrl: 'templates/index.html',
         controller: 'IndexCtrl',
-        reloadOnSearch: false
+        reloadOnSearch: false,
+        resolve: {
+          resources: function(ResourceFactory, $route, cleanService) {
+            return ResourceFactory.get(cleanService.params($route.current.params)).$promise;
+          },
+        }
       })
       .when('/r/:id', {
         templateUrl: 'templates/resource.html',

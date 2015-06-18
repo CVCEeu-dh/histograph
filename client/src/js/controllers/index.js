@@ -5,14 +5,21 @@
  * # IndexCtrl
  */
 angular.module('histograph')
-  .controller('IndexCtrl', function ($scope, $log, $timeout, ResourcesFactory, CooccurrencesFactory) {
+  .controller('IndexCtrl', function (resources, $scope, $log, $timeout, ResourcesFactory, CooccurrencesFactory, cleanService, EVENTS) {
     
     $log.debug('IndexCtrl ready');
+    $scope.$parent.showSpinner = false;
     
-    ResourcesFactory.get(function (res) {
-      $log.info('ResourceFactory', res.result.items.length, res.result.items[0]);
-      $scope.setRelatedItems(res.result.items);
-    });
+    $scope.setRelatedItems(resources.result.items); 
+    /*
+      Reload resources according to scope params
+    */
+    $scope.sync = function() {
+      ResourcesFactory.get(cleanService.params($scope.params), function (res) {
+        $log.info('ResourceFactory', res.result.items.length, res.result.items[0]);
+        $scope.setRelatedItems(res.result.items);
+      });
+    };
     
     /*
       Set graph title
@@ -40,5 +47,12 @@ angular.module('histograph')
       $scope.setGraph(res.result.graph)
     });
     
-    
+    /*
+      listener: EVENTS.API_PARAMS_CHANGED
+      some query parameter has changed, reload the list accordingly.
+    */
+    $scope.$on(EVENTS.API_PARAMS_CHANGED, function() {
+      $log.log('IndexCtrl @API_PARAMS_CHANGED', $scope.params);
+      $scope.sync();
+    });
   })

@@ -7,6 +7,16 @@
  */
 angular.module('histograph')
   /*
+    Check & clean service
+  */
+  .factory('cleanService', function() {
+    return {
+      params: function(params) {
+        return params;
+      }
+    };
+  })
+  /*
     Get a list of resource
   */
   .factory('ResourcesFactory', function ($resource) {

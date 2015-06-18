@@ -44,6 +44,7 @@
     "minimist": "^1.1.1",
     "moment": "^2.9.0",
     "node-csv": "^0.1.2",
+    "prompt": "^0.2.14",
     "should": "^5.2.0",
     "supertest": "^0.15.0",
     "supertest-session": "0.0.7",
