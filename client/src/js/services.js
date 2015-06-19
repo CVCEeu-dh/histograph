@@ -32,6 +32,11 @@ angular.module('histograph')
         query: {method: 'GET' },
     });
   })
+  .factory('ResourceVizFactory', function ($resource) {
+    return $resource('/api/resource/:viz', {}, {
+        query: {method: 'GET' },
+    });
+  })
   /*
     GET related resources
   */
@@ -40,8 +45,17 @@ angular.module('histograph')
         query: {method: 'GET' },
     });
   })
-  .factory('ResourceVizFactory', function ($resource) {
-    return $resource('/api/resource/:id/:viz');
+  /*
+    Should contain all viz methods available (GET only vis)
+  */
+  .factory('VisualizationFactory', function ($http) {
+    return {
+      resource: function(viz, options) {
+        return $http.get('/api/resource/' +viz, {
+          params: options
+        });
+      }
+    }
   })
   /*
     Add a comment to a resource

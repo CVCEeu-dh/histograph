@@ -37,7 +37,7 @@ header{
   top: 0;
   background: white;
   border-bottom: 1px solid #d4d4d4;
-  z-index: 1;
+  z-index: 5;
   line-height: 50px;
   font-size:13px;
   padding: 0 50px;
@@ -80,7 +80,7 @@ a:hover{
 
 .view{
   position: absolute;
-  top: 50px;
+  top: 100px;
   bottom: 0px;
   left:0;
   width: 100%;
@@ -212,7 +212,7 @@ a:hover{
 #perspective{
   position: fixed;
   width: 36%;
-  top:  50px;
+  top:  100px;
   bottom: 0px;
   /*overflow: hidden;*/
   overflow: auto;
@@ -377,7 +377,7 @@ a:hover{
 */
 #milkyway{
   position: fixed;
-  top: 70px;
+  top: 120px;
   left: 68%;
   right: 20px;
   bottom: 20px;
@@ -4116,4 +4116,63 @@ Copyright (c) 2015 Daniel Eden
 
 #loading.active{
   opacity: 1;
+}
+
+/*
+  
+  TIMELINE
+
+*/
+#timeline {
+  position: fixed;
+  top: 50px;
+  left: 0;
+  right: 0;
+  background-color: #E8E8E7;
+  z-index: 4;
+  height: 50px;
+  
+}
+#timeline svg{
+  background-color: #d8d8d8;
+}
+
+#timeline .viewer {
+  margin: 0px 150px;
+}
+#timeline .tooltip {
+  top: 50px;
+  background: #555;
+  color: white;
+  text-align: center
+}
+
+#timeline .date{
+  position: absolute;
+  width: 110px;
+  top: 20px;
+}
+
+#timeline .date.left{
+  left: 30px;
+  text-align: right;
+}
+
+#timeline .date.right{
+  right: 30px;
+  text-align: left;
+}
+
+#timeline path{
+  fill: none;
+  stroke: #555;
+}
+#timeline rect{
+  fill: #555;
+}
+
+#timeline .brush .extent {
+  stroke: #fff;
+  fill-opacity: .125;
+  shape-rendering: crispEdges;
 }

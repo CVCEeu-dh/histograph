@@ -7,7 +7,7 @@
  * It is the parent of the other controllers.
  */
 angular.module('histograph')
-  .controller('CoreCtrl', function ($scope, $location, $route, $log, $timeout, $http, socket, ResourceCommentsFactory, SuggestFactory, cleanService, EVENTS) {
+  .controller('CoreCtrl', function ($scope, $location, $route, $log, $timeout, $http, socket, ResourceCommentsFactory, SuggestFactory, cleanService, VisualizationFactory, EVENTS, VIZ) {
     $log.debug('CoreCtrl ready');
     $scope.locationPath = $location.path(); 
     
@@ -17,6 +17,9 @@ angular.module('histograph')
     
     // the paths followed by a single user
     $scope.trails = [];
+    
+    // the global timeline of resource presence.
+    $scope.timeline;
     
     // playlist of nodes ... :D
     $scope.playlist = [];
@@ -242,6 +245,16 @@ angular.module('histograph')
       if($scope.user.id != user.id) {
         $log.debug('CoreCtrl @EVENTS.USE_USER', user);
         $scope.user = user;
+        /*
+          First load only,
+          or to be updated whenever a
+          CHANGES in resource set occurs
+        */
+        VisualizationFactory.resource(VIZ.TIMELINE).then(function (res) {
+          $log.info('CoreCtrl @EVENTS.USE_USER VisualizationFactory', res);
+          $scope.timeline = res.data.result.timeline;
+          
+        });
       }
     });
     
@@ -253,7 +266,7 @@ angular.module('histograph')
     $scope.$on('$routeUpdate', function(next, current) { 
       $log.debug('CoreCtrl', '@routeUpdate', next, current);
       
-      $scope.params = angular.copy(next.params);
+      $scope.params = angular.copy(current.params);
       // verify @todo filtering here
       $scope.$broadcast(EVENTS.API_PARAMS_CHANGED);
     });
@@ -415,5 +428,6 @@ angular.module('histograph')
       
       $log.debug('NeighborsCtrl redirect ', $scope.currentCtrl);
     };
+    
     
   })

@@ -16,8 +16,9 @@ angular.module('histograph')
     */
     $scope.sync = function() {
       $scope.setGraph({nodes:[], edges:[]});
-      ResourcesFactory.get(cleanService.params($scope.params), function (res) {
-        $log.info('ResourceFactory', res.result.items.length, res.result.items[0]);
+      
+      ResourcesFactory.get($scope.params, function (res) {
+        $log.info('ResourceFactory', $scope.params, 'returned', res.result.items.length);
         $scope.setRelatedItems(res.result.items);
         
         $scope.syncGraph();
@@ -25,7 +26,7 @@ angular.module('histograph')
     };
     
     $scope.syncGraph = function() {
-      CooccurrencesFactory.get(cleanService.params($scope.params),function (res){
+      CooccurrencesFactory.get($scope.params, function (res){
           res.result.graph.nodes.map(function (d) {
             d.color  = d.type == 'person'? "#D44A33": "#6891A2";
             d.type   = d.type || 'res';
@@ -63,4 +64,14 @@ angular.module('histograph')
       $scope.sync();
     });
     $scope.sync();
+    
+    /*
+      listener: $scope.timeline
+      load the contextual timeline, if some filters are specified.
+    */
+    $scope.$watch('timeline', function (timeline) {
+      if(!timeline)
+        return;
+      $log.log('IndexCtrl @timeline ready');
+    });
   })

@@ -22,7 +22,9 @@ angular
     USE_USER: 'use_user',
     API_PARAMS_CHANGED: 'api_params_changed'
   })
-  
+  .constant("VIZ", {
+    TIMELINE: 'timeline'
+  })
   .config(function ($routeProvider, $httpProvider) {
     $routeProvider
       .when('/', {
