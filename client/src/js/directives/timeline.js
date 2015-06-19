@@ -9,7 +9,7 @@
  * directive to show a grapgh of nodes and edges thanks to @Yomguithereal!!! 
  */
 angular.module('histograph')
-  .directive('timeline', function($log, $window) {
+  .directive('timeline', function($log, $window,$location) {
     return {
       restrict : 'A',
       scope:{
@@ -18,6 +18,7 @@ angular.module('histograph')
       },
       template: '<div class="date left"></div><div class="date right"></div><div class="mouse tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div><div class="viewer"></div>',
       link : function(scope, element, attrs) {
+        
         var δ = { css:{}, ƒ:{}};
         
         δ.padding = {
@@ -88,8 +89,19 @@ angular.module('histograph')
                 return δ.ƒ.y(d.weight);
               })
               .y1(30);
-    
+          
           δ.brush.on("brush", function() {
+            var extent = δ.brush.extent()
+            clearTimeout(δ.brushTimer);
+            δ.brushTimer = setTimeout(function(){
+              //console.log(d3.time.format("%Y-%m-%d")(extent[0]))
+              $location.search({
+                from: d3.time.format("%Y-%m-%d")(extent[0]),
+                to: d3.time.format("%Y-%m-%d")(extent[1])
+              });
+              scope.$apply();
+            }, 1000)
+            
             //console.log("brushing babe", δ.brush.extent())
           });
           
