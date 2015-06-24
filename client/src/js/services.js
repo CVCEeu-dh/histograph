@@ -33,7 +33,7 @@ angular.module('histograph')
     });
   })
   .factory('ResourceVizFactory', function ($resource) {
-    return $resource('/api/resource/:viz', {}, {
+    return $resource('/api/resource/:id/:viz', {}, {
         query: {method: 'GET' },
     });
   })

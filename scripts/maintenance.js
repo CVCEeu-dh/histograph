@@ -5,7 +5,9 @@
   
   
 */
-var settings = require('../settings'),
+var fs = require('fs'),
+    csv = require('csv'),
+    settings = require('../settings'),
     helpers  = require('../helpers')
     options  = require('minimist')(process.argv.slice(2)),
     
@@ -223,6 +225,50 @@ if(options.links_wiki) {
       })
     
     },
+  ], function() {
+    console.log(clc.cyanBright('waterfall completed'));
+    console.log()
+  });
+}
+
+/*
+  print out the list of persons as josn file along with their properties in order to look for similarities
+*/
+if(options.entities) {
+  async.waterfall([
+    function get_entities (next) {
+      neo4j.query(queries.export_people, function (err, nodes){
+        if(err)
+          throw err
+        var fields = [
+          "id",
+          "doi",
+          "name",
+          "name_disambiguated",
+          "description",
+          "birth_date",
+          "birth_time",
+          "death_date",
+          "death_time",
+          "birth_place",
+          "death_place",
+          "links_wiki",
+          "links_worldcat",
+          "links_viaf",
+          "abstract"
+        ];
+        fs.writeFileSync(settings.paths.crowdsourcing + '/people.json', JSON.stringify( nodes,null, 2));
+        csv.stringify(nodes, {delimiter: '\t', columns: fields, header:true}, function (err, data) {
+          fs.writeFile( settings.paths.crowdsourcing + '/' + 'people.export.csv',
+             data, function (err) {
+            if(err)
+              throw err;
+            next();
+          })
+        });
+      })
+     
+    }
   ], function() {
     console.log(clc.cyanBright('waterfall completed'));
     console.log()

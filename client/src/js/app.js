@@ -138,7 +138,7 @@ angular
         responseError: function(rejection) {
           if(rejection.status === 403) {
             $log.error('redirecting, authorization problems');
-            location.reload(true);
+            // location.reload(true);
           }
           return $q.reject(rejection);
         }

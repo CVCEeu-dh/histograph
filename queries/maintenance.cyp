@@ -35,3 +35,25 @@ RETURN {
   related_id: id(related),
   r:r
 } as result
+
+// name: export_people
+// get all entity:person in order to refine them.
+MATCH (n:person)
+WITH n
+RETURN {
+  id: id(n),
+  doi: n.doi,
+  name: n.name,
+  name_disambiguated: COALESCE(n.name_disambiguated, n.name),
+  description: n.description,
+  birth_date: n.birth_date,
+  birth_time: n.birth_time,
+  death_date: n.death_date,
+  death_time: n.death_time,
+  birth_place: n.birth_place,
+  death_place: n.death_place,
+  links_wiki: n.links_wiki,
+  links_worldcat: n.links_worldcat,
+  links_viaf: n.links_viaf,
+  abstract: COALESCE(n.abstract_en, n.abstract_fr, n.abstract_de)
+} as per
