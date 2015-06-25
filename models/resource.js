@@ -192,6 +192,16 @@ module.exports = {
         next(err);
         return;
       }
+      if(!res.languages && res.source && res.name) {
+        // guess language
+        var Langdetect = require('languagedetect'),
+            langdetect = new Langdetect('iso2'),
+            languages = langdetect.detect(res.source),
+            language = languages.length? _.first(_.first(languages)) : 'en';
+        res.languages = [language];
+        res['title_'+language] =  res.name;
+        res['caption_'+language] =  res.source;
+      }
       // should specify the different languages.
       if(res.languages && res.languages.length) {
         var q = async.queue(function (language, nextLanguage) {
@@ -330,7 +340,8 @@ module.exports = {
           next(null, res);
         }
       } else {
-        console.log('no language found...', res)
+        console.log('no language found...', res);
+        
         next(helpers.IS_EMPTY)
       }
     });
