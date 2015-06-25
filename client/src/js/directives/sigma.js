@@ -289,7 +289,7 @@ angular.module('histograph')
           si.startForceAtlas2({
             adjustSizes :true,
             linLogMode: true,
-            startingIterations : 20,
+            startingIterations : 10,
             gravity : 0.5,
             edgeWeightInfluence : 1
           });
