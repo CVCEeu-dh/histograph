@@ -49,10 +49,14 @@ angular.module('histograph')
             return text
           }
           // rewrite localentities better.
-          localEntities = localEntities.map(function (d) {
-            return d.name
-          }).join(' - ')
-          return '<a tooltip-append-to-body="true" tooltip="' + localEntities + '">' + text + '</a>';
+          return '<a tooltip-append-to-body="true" data-type="'+ 
+            localEntities.map(function (d){
+              console.log('dididididididi', d)
+              return d.type
+            }).join(',') +'" data-id="' +href +'" tooltip="' +
+            localEntities.map(function (d) {
+              return d.name
+            }).join(' - ') + '">' + text + '</a>';
         };
 
 

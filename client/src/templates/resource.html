@@ -58,7 +58,7 @@
           </div>
         </div>
         
-        <div class="full-text" lazytext url='item.props|url:language'></div>
+        <div class="full-text" ng-if='item.props.mimetype!="image"' lazytext url='item.props|url:language'></div>
         
         <blockquote ng-if="item.props.stakeholders||item.props.caption">
          {{item.props.stakeholders||item.props.caption}}

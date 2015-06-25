@@ -1,35 +1,23 @@
 // name: get_resource
 // get resource with its version and comments
 MATCH (res) WHERE id(res) = {id}
-  WITH res
-    OPTIONAL MATCH (ann:`annotation`)-[:describes]-(res)
-    OPTIONAL MATCH (ver:`positioning`)-[:describes]-(res)
-    OPTIONAL MATCH (res)-[:appears_in{is_event_place:true}]-(pla:`location`)
-    OPTIONAL MATCH (res)-[:appears_in]-(loc:`location`)
-    OPTIONAL MATCH (res)-[:appears_in]-(per:`person`)
-    OPTIONAL MATCH (res)-[:belongs_to]-(col:collection)
-    OPTIONAL MATCH (u:user)-[:says]-(com)-[:mentions]-(res)
-  
-  WITH ann, ver, res, pla, loc, per, u, col, {
-      id: id(com),
-      props: com,
-      user: u
-    } AS coms
-
-  WITH ann, ver, res, pla, loc, per, col, coms
+WITH res
+    OPTIONAL MATCH (ver)-[:describes]->(res)
+    OPTIONAL MATCH (ent)-[:appears_in]->(res)
+    OPTIONAL MATCH (res)-[:belongs_to]->(col)
+    OPTIONAL MATCH (com)-[:mentions]->(res)
+  WITH ver, res, ent, col, length(COLLECT(distinct com)) as coms
     RETURN {
       resource: {
         id: id(res),
         props: res,
-        positionings: collect(DISTINCT ver),
-        annotations: collect(DISTINCT ann),
-        places: collect(DISTINCT pla),
-        locations: collect(DISTINCT loc),
-        persons: collect(DISTINCT per),
-        comments: collect(DISTINCT coms),
-        collections: collect(DISTINCT col)
+        versions: EXTRACT(p in COLLECT(DISTINCT ver)|{name: p.name, id:id(p), yaml:p.yaml, language:p.language, type: last(labels(p))}),
+        entities: EXTRACT(p in COLLECT(DISTINCT ent)|{name: p.name, id:id(p), type: last(labels(p))}),
+        collections: EXTRACT(p in COLLECT(DISTINCT col)|{name: p.name, id:id(p), type: 'collection'}),
+        comments: coms
       }
     } AS result
+    
     
 // name: get_resource_by_language
 // get resource with its version and comments

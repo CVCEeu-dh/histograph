@@ -203,7 +203,6 @@ describe('controllers: authenticate the user, succeed', function() {
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function(err, res) { //
-        console.log('needs supertest session to work...')
         should.equal(res.body.status, 'ok');
         should.equal(res.body.user.email, 'world@globetrotter.it');
         done();
@@ -229,7 +228,7 @@ describe('controllers: get resource items available to the user', function() {
   
   it('should show a list of 20 resources from a specific date', function (done) {
     session
-      .get('/api/resource?from=1988-01-01&to=1988-01-02')
+      .get('/api/resource?from=1988-01-01&to=1988-01-02&limit=20')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
@@ -248,9 +247,9 @@ describe('controllers: get resource items available to the user', function() {
       .expect(200)
       .end(function (err, res) {
         should.not.exists(err);
-        console.log(_.map(res.body.result.items, function(d){return d.props.start_date}))
+        //console.log(_.map(res.body.result.items, function(d){return d.props.start_date}))
         should.equal(res.body.info.params.start_date, '1988-01-01T00:00:00.000Z');
-        should.equal(res.body.info.params.end_date, '1988-01-02T00:00:00.000Z');
+        should.equal(res.body.info.params.end_date, '1989-01-03T00:00:00.000Z');
         should.equal(res.body.info.params.start_time, 567993600);
         
         done();

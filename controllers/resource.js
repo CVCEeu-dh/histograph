@@ -88,7 +88,6 @@ module.exports = function(io){
         var query = parser.agentBrown(queries.get_resources, params);
         // console.log(query)
         neo4j.query(query, params,function(err, items) {
-          console.log(err)
           if(err)
             return helpers.cypherQueryError(err, res);
           
@@ -108,53 +107,44 @@ module.exports = function(io){
       2. date proximity
     */
     getRelatedItems: function (req, res) {
-      // first of all get same person / time proximity measure
-      neo4j.query(queries.get_similar_resource_ids_by_entities, {
-        id: +req.params.id,
-        limit: 100,
-      }, function(err, ids) {
-        // remap the ids according to a specific order
-        var sorted = _.sortByOrder(_.map(_.groupBy(ids, 'id'), function (group) {
-          return {
-            id: group[0].id,
-            dt: group[0].time_proximity,
-            rating: group.length * (_.sum(group, 'per_sim') + _.sum(group, 'loc_sim')*.1)
-          }
-        }), ['rating', 'dt'], [false, true]);
-        // get the list of resources matching the TOP 50 ids
-        neo4j.query(queries.get_resources_by_ids, {
-          ids: _.map(_.take(ids, 50), 'id'),
-          limit: 50,
-          offset: 0
-        }, function(err, items) {
-          if(err)
-            return helpers.cypherQueryError(err, res);
-          var ratings = _.indexBy(sorted, 'id');
-          return res.ok({
-            items: _.sortByOrder(_.map(items, function (d) {
-              d.rating = ratings[d.id].rating
-              d.dt = ratings[d.id].dt
-              return d;
-            }), ['rating', 'dt'], [false, true] )
+      validator.queryParams(req.query, function (err, params, warnings) {
+        if(err)
+          return helpers.formError(err, res);
+        
+        // first of all get same person / time proximity measure
+        neo4j.query(queries.get_similar_resource_ids_by_entities, {
+          id: +req.params.id,
+          limit: params.limit,
+        }, function(err, ids) {
+          // remap the ids according to a specific order
+          var sorted = _.sortByOrder(_.map(_.groupBy(ids, 'id'), function (group) {
+            return {
+              id: group[0].id,
+              dt: group[0].time_proximity,
+              rating: group.length * (_.sum(group, 'per_sim') + _.sum(group, 'loc_sim')*.1)
+            }
+          }), ['rating', 'dt'], [false, true]);
+          // get the list of resources matching the TOP 50 ids
+          neo4j.query(queries.get_resources_by_ids, {
+            ids: _.map(_.take(ids, 50), 'id'),
+            limit: 50,
+            offset: 0
+          }, function(err, items) {
+            if(err)
+              return helpers.cypherQueryError(err, res);
+            var ratings = _.indexBy(sorted, 'id');
+            return res.ok({
+              items: _.sortByOrder(_.map(items, function (d) {
+                d.rating = ratings[d.id].rating
+                d.dt = ratings[d.id].dt
+                return d;
+              }), ['rating', 'dt'], [false, true] )
+            });
           });
-        });
-        
-        
+          
+          
+        })
       })
-      
-      
-      
-      // neo4j.query(queries.get_similar_resources, {
-      //   id: +req.params.id,
-      //   limit: 20,
-      //   offset: 0
-      // }, function(err, items) {
-      //   if(err)
-      //     return helpers.cypherQueryError(err, res);
-      //   return res.ok({
-      //     items: items
-      //   });
-      // });
     },
     
     /**
@@ -185,7 +175,7 @@ module.exports = function(io){
       create a comment on this resource
     */
     createComment: function(req, res) {
-      console.log('ici', req.body.content, req.user);
+      //console.log('ici', req.body.content, req.user);
       var now = helpers.now();
 
       // add dummy comments on it.
@@ -197,7 +187,7 @@ module.exports = function(io){
         creation_date: now.date,
         creation_time: now.time
       }, function (err, items) {
-        console.log(err, items);
+        //console.log(err, items);
         if(err)
           return helpers.cypherQueryError(err, res);
         // emit the event for those connected on resource. to be refactored.

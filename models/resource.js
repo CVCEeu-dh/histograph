@@ -61,27 +61,23 @@ module.exports = {
       var item = items[0].resource;
       
       // yaml parsing
-      item.positionings = _.map(_.values(item.positionings), function (d) {
+      var versions = _.map(_.filter(_.values(item.versions),function(d) {
+        //filter
+        return d.yaml && d.yaml.length > 0
+      }), function (d) {
+        //map
         if(d.yaml)
           d.yaml = YAML.parse(d.yaml);
         return d;
       });
       
-      // yaml parsing and annotation
-      item.annotations = _.map(_.filter(_.values(item.annotations), function(d) {
-        return d.yaml && d.yaml.length > 0
-      }), function (d) {
-        if(d.yaml)
-          d.yaml = YAML.parse(d.yaml);
-        
+      item.positionings = _.filter(versions, {type:'positioning'});
+      item.annotations = _.map(_.filter(versions, {type:'annotation'}), function (d) {
         var content = [
           item.props['title_'+ d.language] || '',
           item.props['caption_'+ d.language] || ''
         ].join('§ ');
         
-        if(!d.yaml.length){
-          return d;
-        }
         var annotations = parser.annotate(content, d.yaml).split('§ ');
         
         d.annotated = {
@@ -90,11 +86,10 @@ module.exports = {
         };
         return d;
       });
-      
-      item.places = _.values(item.places);  
-      item.locations = _.values(item.locations);
-      item.persons = _.values(item.persons);
-      item.comments = _.values(item.comments);
+      var entitites = _.values(item.entities);
+      item.places = _.filter(entitites, {type: 'place'});  
+      item.locations = _.filter(entitites, {type: 'location'});
+      item.persons = _.filter(entitites, {type: 'person'});
       item.collections = _.values(item.collections);
 
       next(null, item);
