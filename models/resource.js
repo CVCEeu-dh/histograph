@@ -187,11 +187,11 @@ module.exports = {
         next(err);
         return;
       }
-      if(!res.languages && res.source && res.name) {
+      if(!res.languages && _.compact([res.name, res.source, res.caption]).length) {
         // guess language
         var Langdetect = require('languagedetect'),
             langdetect = new Langdetect('iso2'),
-            languages = langdetect.detect(res.source),
+            languages = langdetect.detect(_.compact([res.name, res.source, res.caption]).join('. ')),
             language = languages.length? _.first(_.first(languages)) : 'en';
         res.languages = [language];
         res['title_'+language] =  res.name;
