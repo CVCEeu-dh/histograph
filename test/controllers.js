@@ -281,7 +281,7 @@ describe('controllers: get resource items available to the user', function() {
       });
   });
 
-  it('should give the specified resource', function (done) {
+  it('should return the specified resource', function (done) {
     session
       .get('/api/resource/11160')
       .expect('Content-Type', /json/)

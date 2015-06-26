@@ -97,8 +97,8 @@ angular.module('histograph')
   .filter('datesOfAPerson', function() {
     return function(birth_time,death_time) {
       
-      var start_date_a = moment.utc(birth_time, 'x'),
-          start_date_b = moment.utc(death_time, 'x'),
+      var start_date_a = moment.utc(birth_time, 'X'),
+          start_date_b = moment.utc(death_time, 'X'),
           delta = moment.duration(start_date_b.diff(start_date_a));
       
       return [
