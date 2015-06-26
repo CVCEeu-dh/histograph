@@ -452,6 +452,15 @@ module.exports = {
   */
   text: {
     /*
+      Return the current language for the text provided, if available
+    */
+    language: function(text, defaultLanguage) {
+      var Langdetect = require('languagedetect'),
+          langdetect = new Langdetect('iso2'),
+          languages = langdetect.detect(text);
+      return languages.length? _.first(_.first(languages)) : (defaultLanguage || 'en');
+    },
+    /*
       Transform spaces in undescore a url in a wiki url
       accordiong to http://en.wikipedia.org/wiki/Wikipedia:Page_name#Spaces.2C_underscores_and_character_coding
       convention. This is usefule when dealing with different stuff.
