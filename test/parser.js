@@ -38,7 +38,15 @@ describe('parsers: split a string, add annotations.', function() {
       start_time: 56908878,
       end_time: 556908879
     });
-    console.log(filteredQuery);
+    should.equal(filteredQuery, 'MATCH (nod) WHERE nod.start_time >= 56908878 AND nod.end_time <= 556908879 RETURN N')
+    done()
+  });
+  
+  it('should correctly rebuild the CYPHER query based on template', function (done) {
+    var filteredQuery = parser.agentBrown('MATCH (nod) SET {each:language in languages} {:title_%(language)} = {{:title_%(language)}} {/each} RETURN N', {
+      languages: ['en', 'fr', 'de', 'it']
+    });
+    should.equal(filteredQuery, 'MATCH (nod) SET  title_en = {title_en} ,  title_fr = {title_fr} ,  title_de = {title_de} ,  title_it = {title_it}  RETURN N')
     done()
   });
 });

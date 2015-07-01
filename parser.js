@@ -22,26 +22,52 @@ module.exports = {
           pattern: '=~' // MUST be replaced by a neo4j valid regexp.
         };
         
-    return cypherQuery.replace(/\{(AND|OR)?\?([a-z_A-Z]+):([a-z_A-Z]+)__([a-z_A-Z]+)\}/g, function (m, operand, node, property, method) {
-      var chunk = '';
-      
-      if(!methods[method])  
-        throw method + ' method is not available supported method, choose between ' + JSON.stringify(methods);
-      
-      if(!filters[property])
-        return '';
-      
-      if(_concatenate && operand == undefined)
-        _concatenate = false; // start with WHERE
-      
-      if(!_concatenate)
-        chunk = ['WHERE', node + '.' + property, methods[method], filters[property]].join(' ') 
-      else 
-        chunk = [operand, node + '.' + property, methods[method], filters[property]].join(' ');
-      
-      _concatenate = true;
-      return chunk;
-    })
+    return cypherQuery
+        .replace(/\{each:([a-zA-Z_]+)\sin\s([a-zA-Z_]+)\}(.*){\/each}/g, function (m, item, collection, contents) {
+          // replace loop {each:language in languages} {:title_%(language)} = {{:title_%(language)}} {/each} with join.
+          // produce something like
+          // title_en = {title_en}, title_fr = {title_fr}
+          // which should be cypher compatible.
+          // This function call recursively agentBrown() 
+          var template = [];
+          
+          for(var i in filters[collection]) {
+            var f = {};
+            f[item] = filters[collection][i];
+            template.push(module.exports.agentBrown(contents, f));
+          }
+          return template.join(', ');
+        })
+        .replace(/\{:([a-z_A-Z%\(\)\s]+)\}/g, function (m, placeholder){
+          // replace dynamic variables, e.g to write ent.title_en WHERE 'en' is dynaically assigned,
+          // write as query
+          // ent.{sub:title_%(language) % language}
+          // and provide the filters with language
+          return placeholder.replace(/%\(([a-z_A-Z]+)\)/g, function (m, property) {
+            return filters[property]
+          });
+        })
+        .replace(/\{(AND|OR)?\?([a-z_A-Z]+):([a-z_A-Z]+)__([a-z_A-Z]+)\}/g, function (m, operand, node, property, method) {
+          // replace WHERE clauses
+          var chunk = '';
+          
+          if(!methods[method])  
+            throw method + ' method is not available supported method, choose between ' + JSON.stringify(methods);
+          
+          if(!filters[property])
+            return '';
+          
+          if(_concatenate && operand == undefined)
+            _concatenate = false; // start with WHERE
+          
+          if(!_concatenate)
+            chunk = ['WHERE', node + '.' + property, methods[method], filters[property]].join(' ') 
+          else 
+            chunk = [operand, node + '.' + property, methods[method], filters[property]].join(' ');
+          
+          _concatenate = true;
+          return chunk;
+        })
   },
   /**
    annotate a string acciording to the splitpoints.
