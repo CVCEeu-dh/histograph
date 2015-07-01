@@ -49,4 +49,13 @@ describe('parsers: split a string, add annotations.', function() {
     should.equal(filteredQuery, 'MATCH (nod) SET  title_en = {title_en} ,  title_fr = {title_fr} ,  title_de = {title_de} ,  title_it = {title_it}  RETURN N')
     done()
   });
+  
+  it('should correctly rebuild the CYPHER query based on template', function (done) {
+    var filteredQuery = parser.agentBrown('\n{each:language in languages}\nres.{:title_%(language)} = {{:title_%(language)}},\nres.{:caption_%(language)} = {{:caption_%(language)}}{/each}\n', {
+      languages: ['en', 'fr', 'de', 'it']
+    });
+  
+    console.log(filteredQuery);
+    done()
+  });
 });

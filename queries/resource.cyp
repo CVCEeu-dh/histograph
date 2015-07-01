@@ -209,6 +209,35 @@ MERGE (res:resource {doi:{doi}})
 RETURN res
 
 
+// name: merge_resource
+// also assign a default curator for the resource
+MERGE (res:resource {doi:{doi}})
+  ON CREATE set
+    res.name = {name},
+    res.mimetype = {mimetype},
+    res.creation_date = {creation_date},
+    res.creation_time = {creation_time},
+    res.languages = {languages},
+    {each:language in languages} 
+      res.{:title_%(language)} = {{:title_%(language)}},
+      res.{:caption_%(language)} = {{:caption_%(language)}}
+    {/each}
+WITH res
+MATCH (u:user {username: {username}})
+  MERGE (u)-[r:curates]->(res)
+RETURN {
+  id: id(res),
+  props: res,
+  curated_by: u.username
+}
+
+// name: remove_resource
+// WARNING!!!! destroy everything related to the resource, as if it never existed. Should not be used while comments are in place
+MATCH (n:resource {doi:{doi}})
+OPTIONAL MATCH (n)-[r]-()
+DELETE n, r
+
+
 // name: merge_relationship_resource_collection
 // link a resource with an entity, it it han't been done yet.
 MATCH (col:collection), (res:resource)

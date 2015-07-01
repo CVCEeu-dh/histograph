@@ -50,7 +50,8 @@ module.exports = {
       language: helpers.text.language([properties.name, properties.description].join('. ')),
       creation_date: now.date,
       creation_time: now.time,
-      username: properties.user.username
+      username: properties.user.username,
+      doi: properties.doi
     }, function (err, node) {
       if(err) {
         next(err);

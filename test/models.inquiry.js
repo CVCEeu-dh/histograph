@@ -10,12 +10,18 @@
 'use strict';
 
 var settings = require('../settings'),
-    user = require('../models/user'),
-    inquiry = require('../models/inquiry'),
+
+    inquiry  = require('../models/inquiry'),
+    resource = require('../models/resource'),
+    user     = require('../models/user'),
+    
     should  = require('should');
+    
+    
     
 describe('model:inquiry ', function() {
   var __inq, // the local inquiry object created for fun
+      __resource, // the local resource object that can be inquiried
       __user;
 
   it('should create the dummy test user', function (done){
@@ -34,12 +40,33 @@ describe('model:inquiry ', function() {
       __user = user;
       done();
     });
+  });
+  
+  it('should create a new resource', function (done){
+    resource.create({
+      name: 'another untitled',
+      doi: 'automatic doi generation',
+      mimetype: 'text',
+      title_en: 'A nice title',
+      title_fr: 'Un beau titre',
+      caption_en: 'Something useful',
+      caption_fr: 'Quelque chose d\'utile',
+      languages: ['en', 'fr'],
+      user: __user,
+    }, function (err, resource) {
+      if(err)
+        throw err;
+      __resource = resource;
+      done();
+    });
   })
+  
   it('should create a new inquiry (field validation should be done at controller level)', function (done) {
     inquiry.create({
       name: 'This is a test',
       description: 'This is a description',
-      user: __user
+      user: __user,
+      doi: __resource.props.doi
     }, function (err, inq) {
       if(err)
         throw err;
@@ -70,6 +97,13 @@ describe('model:inquiry ', function() {
   
   it('should delete the inquiry', function (done) {
     inquiry.remove(__inq.id, function (err) {
+      should.not.exist(err);
+      done();
+    })
+  });
+  
+  it('should delete the resource', function (done) {
+    resource.remove(__resource.props.doi, function (err) {
       should.not.exist(err);
       done();
     })

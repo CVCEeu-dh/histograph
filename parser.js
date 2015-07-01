@@ -21,16 +21,16 @@ module.exports = {
           differs: '<>',
           pattern: '=~' // MUST be replaced by a neo4j valid regexp.
         };
-        
+    
     return cypherQuery
-        .replace(/\{each:([a-zA-Z_]+)\sin\s([a-zA-Z_]+)\}(.*){\/each}/g, function (m, item, collection, contents) {
+        .replace(/\n/g, ' ')
+        .replace(/\{each:([a-zA-Z_]+)\sin\s([a-zA-Z_]+)\}(.*)\{\/each\}/g, function (m, item, collection, contents) {
           // replace loop {each:language in languages} {:title_%(language)} = {{:title_%(language)}} {/each} with join.
           // produce something like
           // title_en = {title_en}, title_fr = {title_fr}
           // which should be cypher compatible.
           // This function call recursively agentBrown() 
           var template = [];
-          
           for(var i in filters[collection]) {
             var f = {};
             f[item] = filters[collection][i];
@@ -38,7 +38,7 @@ module.exports = {
           }
           return template.join(', ');
         })
-        .replace(/\{:([a-z_A-Z%\(\)\s]+)\}/g, function (m, placeholder){
+        .replace(/\{:([a-z_A-Z%\(\)\s]+)\}/g, function (m, placeholder) {
           // replace dynamic variables, e.g to write ent.title_en WHERE 'en' is dynaically assigned,
           // write as query
           // ent.{sub:title_%(language) % language}

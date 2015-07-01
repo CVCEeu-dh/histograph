@@ -133,7 +133,26 @@ module.exports = {
     @return (err, resource:Resource)
   */
   create: function(properties, next) {
-
+    var now = helpers.now(),
+        query = parser.agentBrown(rQueries.merge_resource, {
+          languages: properties.languages
+        });
+    
+    neo4j.query(query, _.assign(properties,{
+      creation_date: now.date,
+      creation_time: now.time,
+      username: properties.user.username
+    }), function (err, node) {
+      if(err) {
+        next(err);
+        return;
+      }
+      if(!node.length) {
+        next(helpers.IS_EMPTY);
+        return;
+      }
+      next(null, node[0]);
+    })
   },
   
   update: function(id, properties, next) {
@@ -143,8 +162,15 @@ module.exports = {
     Change the resoruce label to :trash in order to manually
     @return (err, resource:Resource)
   */
-  remove: function(id, next) {
-    
+  remove: function(doi, next) {
+    neo4j.query(rQueries.remove_resource, {
+      doi: doi
+    }, function(err) {
+      if(err)
+        next(err);
+      else
+        next();
+    });
   },
   /**
     Monopartite graph

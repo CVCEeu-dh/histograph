@@ -19,6 +19,9 @@ ON CREATE SET
 WITH inq
 MATCH (u:user {username: {username}})
   MERGE (u)-[r:proposes]->(inq)
+WITH inq, u
+MATCH (res {doi: {doi}})
+  MERGE (inq)-[r:questions]->(res)
 RETURN {
   id: id(inq),
   props: inq,
