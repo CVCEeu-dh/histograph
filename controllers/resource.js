@@ -10,6 +10,7 @@ var settings   = require('../settings'),
     helpers    = require('../helpers'),
     validator  = require('../validator'),
     YAML       = require('yamljs'),
+    async      = require('async'),
 
     _          = require('lodash'),
 
@@ -107,44 +108,61 @@ module.exports = function(io){
       2. date proximity
     */
     getRelatedItems: function (req, res) {
-      validator.queryParams(req.query, function (err, params, warnings) {
-        if(err)
-          return helpers.formError(err, res);
-        
-        // first of all get same person / time proximity measure
-        neo4j.query(queries.get_similar_resource_ids_by_entities, {
-          id: +req.params.id,
-          limit: params.limit,
-        }, function(err, ids) {
-          // remap the ids according to a specific order
-          var sorted = _.sortByOrder(_.map(_.groupBy(ids, 'id'), function (group) {
-            return {
-              id: group[0].id,
-              dt: group[0].time_proximity,
-              rating: group.length * (_.sum(group, 'per_sim') + _.sum(group, 'loc_sim')*.1)
-            }
-          }), ['rating', 'dt'], [false, true]);
-          // get the list of resources matching the TOP 50 ids
-          neo4j.query(queries.get_resources_by_ids, {
-            ids: _.map(_.take(ids, 50), 'id'),
+      var form = validator.request(req, {
             limit: 50,
             offset: 0
-          }, function(err, items) {
-            if(err)
-              return helpers.cypherQueryError(err, res);
-            var ratings = _.indexBy(sorted, 'id');
-            return res.ok({
-              items: _.sortByOrder(_.map(items, function (d) {
-                d.rating = ratings[d.id].rating
-                d.dt = ratings[d.id].dt
-                return d;
-              }), ['rating', 'dt'], [false, true] )
-            });
           });
+      
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      // get the total available
+     
+      async.parallel({
+        totalItems: function(callback){
+          neo4j.query(queries.count_similar_resource_ids_by_entities,  {
+            id: +form.params.id
+          }, function (err, result) {
+            if(err)
+              callback(err);
+            else
+              callback(null, result.total_items);
+          });
+        },
+        ids: function(callback){
+          neo4j.query(queries.get_similar_resource_ids_by_entities, {
+            id: +form.params.id,
+            limit: +form.params.limit,
+            offset: +form.params.offset
+          }, function (err, ids) {
+            if(err)
+              callback(err)
+            else
+              callback(null, _.map(ids, 'id'));
+          })
+        }
+      }, function (err, results) {
+        // results is now equals to: {one: 1, two: 2}
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        
+        neo4j.query(queries.get_resources_by_ids, {
+          ids: results.ids,
+          limit: results.ids.length,
+          offset: 0
+        }, function (err, items) {
+          if(err)
+            return helpers.cypherQueryError(err, res);
           
-          
-        })
-      })
+          var hItems = _.indexBy(items, 'id');
+          return res.ok({
+            items: _.map(results.ids, function (d) {
+              return hItems[d]
+            })
+          }, {
+            total_items: results.totalItems
+          });
+        });
+      }); 
     },
     
     /**
@@ -196,6 +214,36 @@ module.exports = function(io){
         });
         return res.ok({
           item: inquiry
+        });
+      })
+    },
+    /*
+      return the list of related inquiries
+    */
+    getRelatedInquiry: function(req, res) {
+      var inquiry   = require('../models/inquiry'), 
+          form = validator.request(req, {
+            limit: 20,
+            offset: 0
+          });
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      inquiry.getMany({
+        resource_id: +form.params.id,
+        limit: form.params.limit,
+        offset: form.params.offset
+      }, function (err, inquiry) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        io.emit('done:create_inquiry', {
+          user: req.user.username,
+          doi: +req.params.id, 
+          data: inquiry
+        });
+        return res.ok({
+          item: inquiry
+        }, {
+          params: form.params
         });
       })
     },
