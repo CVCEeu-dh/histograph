@@ -116,53 +116,11 @@ module.exports = function(io){
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       // get the total available
-     
-      async.parallel({
-        totalItems: function(callback){
-          neo4j.query(queries.count_similar_resource_ids_by_entities,  {
-            id: +form.params.id
-          }, function (err, result) {
-            if(err)
-              callback(err);
-            else
-              callback(null, result.total_items);
-          });
-        },
-        ids: function(callback){
-          neo4j.query(queries.get_similar_resource_ids_by_entities, {
-            id: +form.params.id,
-            limit: +form.params.limit,
-            offset: +form.params.offset
-          }, function (err, ids) {
-            if(err)
-              callback(err)
-            else
-              callback(null, _.map(ids, 'id'));
-          })
-        }
-      }, function (err, results) {
-        // results is now equals to: {one: 1, two: 2}
+      resource.getRelatedResources(form.params, function (err, items, info) {
         if(err)
           return helpers.cypherQueryError(err, res);
-        
-        neo4j.query(queries.get_resources_by_ids, {
-          ids: results.ids,
-          limit: results.ids.length,
-          offset: 0
-        }, function (err, items) {
-          if(err)
-            return helpers.cypherQueryError(err, res);
-          
-          var hItems = _.indexBy(items, 'id');
-          return res.ok({
-            items: _.map(results.ids, function (d) {
-              return hItems[d]
-            })
-          }, {
-            total_items: results.totalItems
-          });
-        });
-      }); 
+        return res.ok({items: items}, info);
+      });
     },
     
     /**
@@ -230,18 +188,14 @@ module.exports = function(io){
         return helpers.formError(form.errors, res);
       inquiry.getMany({
         resource_id: +form.params.id,
-        limit: form.params.limit,
-        offset: form.params.offset
-      }, function (err, inquiry) {
+        limit: +form.params.limit,
+        offset: +form.params.offset
+      }, function (err, items) {
         if(err)
           return helpers.cypherQueryError(err, res);
-        io.emit('done:create_inquiry', {
-          user: req.user.username,
-          doi: +req.params.id, 
-          data: inquiry
-        });
+        
         return res.ok({
-          item: inquiry
+          items: items
         }, {
           params: form.params
         });

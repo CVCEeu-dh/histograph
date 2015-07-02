@@ -402,6 +402,7 @@ describe('controllers: inquiries', function() {
         done()
       });
   })
+  
   it('should create a new inquiry', function (done) {
     session
       .post('/api/resource/11160/related/inquiry')
@@ -420,6 +421,20 @@ describe('controllers: inquiries', function() {
         
         
         done();
+      });
+  })
+  
+  it('should get a list of inquiries related to a resource', function (done) {
+    session
+      .get('/api/resource/11160/related/inquiry?limit=10')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err);
+        should.not.exist(err);
+        should.exist(res.body.result.items.length);
+        done()
       });
   })
 });
