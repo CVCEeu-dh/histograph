@@ -19,7 +19,9 @@ module.exports = {
           sgt: '>',
           equals: '=',
           differs: '<>',
-          pattern: '=~' // MUST be replaced by a neo4j valid regexp.
+          pattern: '=~', // MUST be replaced by a neo4j valid regexp.
+          
+          ID: 'id(node) ='
         };
     
     return cypherQuery
@@ -49,21 +51,30 @@ module.exports = {
         })
         .replace(/\{(AND|OR)?\?([a-z_A-Z]+):([a-z_A-Z]+)__([a-z_A-Z]+)\}/g, function (m, operand, node, property, method) {
           // replace WHERE clauses
-          var chunk = '';
+          var chunk = '',
+              segments = [
+                node + '.' + property,
+                methods[method],
+                filters[property]
+              ];
           
           if(!methods[method])  
             throw method + ' method is not available supported method, choose between ' + JSON.stringify(methods);
-          
+            
           if(!filters[property])
             return '';
+          
+          if(method == 'ID')
+            segments = [methods[method].replace('node', node), filters[property]];
           
           if(_concatenate && operand == undefined)
             _concatenate = false; // start with WHERE
           
+          
           if(!_concatenate)
-            chunk = ['WHERE', node + '.' + property, methods[method], filters[property]].join(' ') 
+            chunk = ['WHERE'].concat(segments).join(' ') 
           else 
-            chunk = [operand, node + '.' + property, methods[method], filters[property]].join(' ');
+            chunk = [operand].concat(segments).join(' ');
           
           _concatenate = true;
           return chunk;

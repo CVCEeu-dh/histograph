@@ -34,11 +34,29 @@ describe('parsers: split a string, add annotations.', function() {
   });
 
   it('should correctly rebuild the CYPHER query based on WHERE clause', function (done) {
-    var filteredQuery = parser.agentBrown('MATCH (nod) {?nod:start_time__gt} {AND?nod:end_time__lt} RETURN N', {
+    var q1 = parser.agentBrown('MATCH (nod) {?nod:start_time__gt} {AND?nod:end_time__lt} RETURN N', {
       start_time: 56908878,
       end_time: 556908879
     });
-    should.equal(filteredQuery, 'MATCH (nod) WHERE nod.start_time >= 56908878 AND nod.end_time <= 556908879 RETURN N')
+    
+    should.equal(q1, 'MATCH (nod) WHERE nod.start_time >= 56908878 AND nod.end_time <= 556908879 RETURN N')
+    
+    var q2 = parser.agentBrown(
+      'MATCH (inq:inquiry)--(res:resource) '+
+      ' {?res:resource_id__ID} '+
+      'RETURN count(*)', {
+        
+      });
+    should.equal(q2, 'MATCH (inq:inquiry)--(res:resource)   RETURN count(*)')
+    
+    var q3 = parser.agentBrown(
+      'MATCH (inq:inquiry)--(res:resource) '+
+      ' {?res:resource_id__ID} '+
+      'RETURN count(*)', {
+        resource_id: 1203
+      });
+    should.equal(q3, 'MATCH (inq:inquiry)--(res:resource)  WHERE id(res) = 1203 RETURN count(*)');
+    
     done()
   });
   
@@ -51,11 +69,10 @@ describe('parsers: split a string, add annotations.', function() {
   });
   
   it('should correctly rebuild the CYPHER query based on template', function (done) {
-    var filteredQuery = parser.agentBrown('\n{each:language in languages}\nres.{:title_%(language)} = {{:title_%(language)}},\nres.{:caption_%(language)} = {{:caption_%(language)}}{/each}\n', {
+    var q1 = parser.agentBrown('\n{each:language in languages}\nres.{:title_%(language)} = {{:title_%(language)}},\nres.{:caption_%(language)} = {{:caption_%(language)}}{/each}\n', {
       languages: ['en', 'fr', 'de', 'it']
     });
-  
-    console.log(filteredQuery);
+    should.equal(q1.trim(),   'res.title_en = {title_en}, res.caption_en = {caption_en},  res.title_fr = {title_fr}, res.caption_fr = {caption_fr},  res.title_de = {title_de}, res.caption_de = {caption_de},  res.title_it = {title_it}, res.caption_it = {caption_it}');
     done()
   });
 });
