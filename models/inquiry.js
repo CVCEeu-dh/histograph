@@ -39,7 +39,8 @@ module.exports = {
   */
   getMany: function(params, next) {
     var query = parser.agentBrown(queries.get_inquiries, params);
-    neo4j.query(queries.get_inquiries, params, function (err, nodes) {
+    
+    neo4j.query(query, params, function (err, nodes) {
       if(err) {
         next(err);
         return;

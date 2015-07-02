@@ -193,7 +193,7 @@ module.exports = {
   /**
     Timeline
   */
-  getTimeline: function(properties, next) {
+  getTimeline: function (properties, next) {
     helpers.cypherTimeline(rQueries.get_timeline, properties, function (err, timeline) {
       if(err)
         next(err);
@@ -201,6 +201,59 @@ module.exports = {
         next(null, timeline);
     });
   },
+  
+  getRelatedResources: function (properties, next) {
+    async.parallel({
+      totalItems: function(callback){
+        neo4j.query(rQueries.count_similar_resource_ids_by_entities,  {
+          id: +properties.id
+        }, function (err, result) {
+          if(err)
+            callback(err);
+          else
+            callback(null, result.total_items);
+        });
+      },
+      ids: function(callback){
+        neo4j.query(rQueries.get_similar_resource_ids_by_entities, {
+          id: +properties.id,
+          limit: +properties.limit,
+          offset: +properties.offset
+        }, function (err, ids) {
+          if(err)
+            callback(err)
+          else
+            callback(null, _.map(ids, 'id'));
+        })
+      }
+    }, function (err, results) {
+      // results is now equals to: {one: 1, two: 2}
+      if(err) {
+        next(err);
+        return;
+      }
+      
+      neo4j.query(rQueries.get_resources_by_ids, {
+        ids: results.ids,
+        limit: results.ids.length,
+        offset: 0
+      }, function (err, items) {
+        if(err) {
+          next(err);
+          return;
+        }
+        
+        var hItems = _.indexBy(items, 'id');
+        next(null, _.map(results.ids, function (d) {
+            return hItems[d]
+        }),{
+          total_items: results.totalItems
+        });
+      });
+    }); 
+    
+  },
+  
   /*
     The long chain of the discovery.
     Perform TEXTRAZOR on some field of our darling resource and 
