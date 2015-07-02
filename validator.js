@@ -96,13 +96,32 @@ module.exports = {
   /*
     Validate request.body against POST data.
     It uses validate and provide the right validation to the right field.
+    @param params   - predefined params
+    
   */
-  request: function(req, next) {
+  request: function(req, params, next) {
     var errors     = {},
         safeParams = {},
-        params     = _.assign(req.query, req.body, req.params),
+        params     = _.merge(params || {}, req.query || {}, req.body || {}, req.params || {}),
         
         fields     = [
+          {
+            field: 'limit',
+            check: 'isInt',
+            args: [
+              1,
+              50
+            ],
+            error: 'should be a number in range 1 to max 50'
+          },
+          {
+            field: 'offset',
+            check: 'isInt',
+            args: [
+              0
+            ],
+            error: 'should be a number in range 1 to max 50'
+          },
           {
             field: 'name',
             check: 'isLength',
