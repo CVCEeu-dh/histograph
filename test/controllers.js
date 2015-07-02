@@ -312,21 +312,21 @@ describe('controllers: get resource items available to the user', function() {
   
   it('should show a list of 100 related resources', function (done) {
     session
-      .get('/api/resource/11167/related')
+      .get('/api/resource/11167/related/resource?limit=100')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
         if(err)
           console.log(err)
         should.not.exists(err);
-        //console.log(' resoucre ', res.body)
+        should.exist(res.body.result.items);
         done();
       });
   });
   
   it('should create a comment and attach it to the required resource', function (done) {
     session
-      .post('/api/resource/11160/comments')
+      .post('/api/resource/11160/related/comment')
       .send({
         content : 'A content with some #taa and #location tag',
         resource_id: 512,
@@ -404,7 +404,7 @@ describe('controllers: inquiries', function() {
   })
   it('should create a new inquiry', function (done) {
     session
-      .post('/api/resource/11160/inquiry')
+      .post('/api/resource/11160/related/inquiry')
       .send({
         name: 'this is a test inquiry',
         description: 'please provide the resource with something important'

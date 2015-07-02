@@ -66,7 +66,7 @@ describe('model:inquiry ', function() {
       name: 'This is a test',
       description: 'This is a description',
       user: __user,
-      doi: __resource.props.doi
+      doi: __resource.id
     }, function (err, inq) {
       if(err)
         throw err;
