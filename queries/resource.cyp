@@ -93,27 +93,43 @@ OPTIONAL MATCH (res)-[:appears_in]-(per:`person`)
     } as r
 
 
+// name: count_similar_resource_ids_by_entities
+// get top 100 similar resources sharing the same persons, orderd by time proximity if this info is available
+MATCH (res)
+WHERE id(res) = {id}
+WITH res
+OPTIONAL MATCH (res)--(per:person)--(r)
+OPTIONAL MATCH (res)--(loc:location)--(r)
+WHERE id(r) <> id(res)
+WITH DISTINCT r,
+{
+  id: id(r),
+  shared_persons: length(collect(DISTINCT per)),
+  shared_locations: length(collect(DISTINCT loc))
+} as candidate
+WHERE candidate.shared_persons > 0 OR candidate.shared_locations > 0
+RETURN count(candidate) as total_items
+
+
 // name: get_similar_resource_ids_by_entities
 // get top 100 similar resources sharing the same persons, orderd by time proximity if this info is available
-START res = node({id})
-MATCH (res)--(per:person)--(res2:resource)
-WITH res, res2,
-length(collect(per)) as per_sim,
-0 as loc_sim,
-abs(coalesce(res.start_time, 1000000000) - coalesce(res2.start_time, 0)) as time_proximity
-ORDER BY per_sim DESC, time_proximity ASC
+MATCH (res)
+WHERE id(res) = {id}
+WITH res
+OPTIONAL MATCH (res)--(per:person)--(r)
+OPTIONAL MATCH (res)--(loc:location)--(r)
+WHERE id(r) <> id(res)
+WITH DISTINCT r,
+{
+  id: id(r),
+  dt: abs(coalesce(res.start_time, 1000000000) - coalesce(r.start_time, 0)),
+  shared_persons: length(collect(DISTINCT per)),
+  shared_locations: length(collect(DISTINCT loc))
+} as candidate
+ORDER BY candidate.dt ASC, candidate.shared_persons DESC, candidate.shared_locations DESC
+SKIP {offset}
 LIMIT {limit}
-RETURN DISTINCT id(res2) as id, per_sim, loc_sim, time_proximity
-UNION ALL
-START res=node({id})
-MATCH (res)--(loc:location)--(res2:resource)
-WITH res, res2,
-length(collect(loc)) as loc_sim,
-length([]) as per_sim,
-abs(coalesce(res.start_time, 1000000000) - coalesce(res2.start_time, 0)) as time_proximity
-ORDER BY loc_sim DESC, time_proximity ASC
-LIMIT {limit}
-RETURN DISTINCT id(res2) as id, per_sim, loc_sim, time_proximity
+RETURN candidate
 
 
 // name: get_similar_resources

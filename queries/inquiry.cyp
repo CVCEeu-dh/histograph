@@ -9,15 +9,22 @@ RETURN {
 }
 
 
+// name: count_inquiries
+//
+MATCH (inq:inquiry)--(res:resource)
+{?res:resource_id__ID}
+RETURN count(*)
+
 // name: get_inquiries
 //
-MATCH (inq:inquiry)--(u:user)
-WITH inq, u
+MATCH (inq:inquiry)--(res:resource)
+{?res:resource_id__ID}
+WITH inq, res
 ORDER BY inq.creation_date DESC
 SKIP {offset}
 LIMIT {limit}
-WITH inq, u
-MATCH (inq)--(res:resource)
+WITH inq, res
+MATCH (inq)--(u:user)
 RETURN {
   id: id(inq),
   props: inq,
