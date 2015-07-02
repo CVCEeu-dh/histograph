@@ -38,14 +38,6 @@ angular.module('histograph')
     });
   })
   /*
-    GET related resources
-  */
-  .factory('ResourceRelatedFactory', function ($resource) {
-    return $resource('/api/resource/:id/related', {}, {
-        query: {method: 'GET' },
-    });
-  })
-  /*
     Should contain all viz methods available (GET only vis)
   */
   .factory('VisualizationFactory', function ($http) {
@@ -61,9 +53,15 @@ angular.module('histograph')
     Add a comment to a resource
   */
   .factory('ResourceCommentsFactory', function ($resource) {
-    return $resource('/api/resource/:id/comments', {}, {
+    return $resource('/api/resource/:id/related/comment', {}, {
         query: {method: 'GET' },
     });
+  })
+  /*
+    Add / get :model related to resource
+  */
+  .factory('ResourceRelatedFactory', function ($resource) {
+    return $resource('/api/resource/:id/related/:model');
   })
   /*
     Get/Update/Delete one collection

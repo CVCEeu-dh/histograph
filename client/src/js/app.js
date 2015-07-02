@@ -44,8 +44,27 @@ angular
           resources: function(ResourceRelatedFactory, $route) {
             return ResourceRelatedFactory.get({
               id: $route.current.params.id,
-              model: 'resources'
-            }, {}).$promise;
+              model: 'resource',
+              limit: 10
+            }).$promise;
+          },
+        }
+      })
+      .when('/r/:id/inquiries', {
+        templateUrl: 'templates/inquiries.html',
+        controller: 'InquiriesCtrl',
+        resolve: {
+          resource: function(ResourceFactory, $route) {
+            return ResourceFactory.get({
+              id: $route.current.params.id
+            }).$promise;
+          },
+          inquiries: function(ResourceRelatedFactory, $route) {
+            return ResourceRelatedFactory.get({
+              id: $route.current.params.id,
+              model: 'inquiry',
+              limit: 10
+            }).$promise;
           },
         }
       })

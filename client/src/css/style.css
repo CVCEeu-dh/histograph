@@ -269,6 +269,10 @@ a:hover{
   margin-left: 25%;
   width: 25%;
 }
+#see-also.InquiriesCtrl{
+  margin-left: 70%;
+  width: 30%;
+}
 #see-also.SearchCtrl {
   margin-left:0;
 }
@@ -394,6 +398,10 @@ a:hover{
 
 #milkyway.IndexCtrl{
   left: 30%;
+}
+
+#milkyway.InquiriesCtrl{
+  display: none;
 }
 
 #milkyway.active{

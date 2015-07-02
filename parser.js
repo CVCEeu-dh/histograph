@@ -58,7 +58,7 @@ module.exports = {
                 filters[property]
               ];
           
-          if(!methods[method])  
+          if(!methods[method])
             throw method + ' method is not available supported method, choose between ' + JSON.stringify(methods);
             
           if(!filters[property])

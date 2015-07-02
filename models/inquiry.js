@@ -46,10 +46,6 @@ module.exports = {
         return;
       }
       
-      if(!nodes.length) {
-        next(helpers.IS_EMPTY);
-        return;
-      }
       // select current abstract based on the language chosen, fallback to english
       next(null, nodes);
     })
