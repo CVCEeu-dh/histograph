@@ -6,6 +6,7 @@
  */
 var settings  = require('../settings'),
     helpers   = require('../helpers.js'),
+    parser    = require('../parser.js'),
     
     neo4j     = require('seraph')(settings.neo4j.host),
     queries   = require('decypher')('./queries/inquiry.cyp'),
@@ -31,6 +32,25 @@ module.exports = {
       }
       // select current abstract based on the language chosen, fallback to english
       next(null, node[0]);
+    })
+  },
+  /*
+    Available params are limit, offset, order by.
+  */
+  getMany: function(params, next) {
+    var query = parser.agentBrown(queries.get_inquiries, params);
+    neo4j.query(queries.get_inquiries, params, function (err, nodes) {
+      if(err) {
+        next(err);
+        return;
+      }
+      
+      if(!nodes.length) {
+        next(helpers.IS_EMPTY);
+        return;
+      }
+      // select current abstract based on the language chosen, fallback to english
+      next(null, nodes);
     })
   },
   /*

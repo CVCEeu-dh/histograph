@@ -24,6 +24,35 @@ module.exports = {
   IS_EMPTY: IS_EMPTY,
   IS_IOERROR: IS_IOERROR,
   IS_LIMIT_REACHED: LIMIT_REACHED,
+  /*
+    Handlers for express response (cfr. models/)
+    @param err
+    @param res    - express response
+    @param items  - array of items to return
+    @param params - the validated params describing the result
+    
+  */
+  models:{
+    getOne: function (err, res, item) {
+      if(err == IS_EMPTY)
+        return res.error(404);
+      if(err)
+        return module.exports.cypherQueryError(err, res);
+      return res.ok({
+        item: item
+      });
+    },
+    getMany: function (err, res, items, params, warnings) {
+      if(err && err != IS_EMPTY)
+        return module.exports.cypherQueryError(err, res);
+      return res.ok({
+        items: items || []
+      }, {
+        params: params,
+        warnings: warnings
+      });
+    }
+  }, 
   /**
     Handle causes and stacktraces provided by seraph
     @err the err string provided by cypher
@@ -128,6 +157,7 @@ module.exports = {
     Handle Form errors (Bad request)
   */
   formError: function(err, res) {
+    console.log(err)
     return res.error(400, err);
   },
 

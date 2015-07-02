@@ -1,12 +1,52 @@
 /**
   
-  Api params glue
+  Basic request params validation
   ===
 
 */
 var YAML = require('yamljs'),
-    _    = require('lodash');
-    moment    = require('moment');
+    _    = require('lodash'),
+    validator  = require('validator'),
+    moment     = require('moment');
+
+/*
+  Verify that for each field in form, everything looks good.
+  @params form    - req.body and/or req.params
+  @params fields  - array of validation techniques per field.
+  @return true or the array of not valid fields
+*/
+function verify(form, fields, options) {
+  var options = options || {},
+      errors = [];
+      
+  if(options.strict) {
+    for(var i in fields) {
+      if(fields[i].optional && !form[fields[i].field])
+        continue;
+      if(!validator[fields[i].check].apply(this, [form[fields[i].field]].concat(fields[i].args))) {
+        errors.push(fields[i]);
+      }
+    }
+  } else {
+    var indexes = _.map(fields, 'field');
+    
+    for(var i in form) {
+      var index = indexes.indexOf(i);
+      if(index == -1)
+        continue;
+      // console.log(indexes, index, fields[index], i)
+      // console.log(i, form[i], fields[index].check)
+      if(!validator[fields[index].check].apply(this, [form[i]].concat(fields[index].args))) {
+        fields[index].value = form[i];
+        errors.push(fields[index]);
+      }
+    }
+  }
+      
+  if(errors.length)
+    return errors;
+  return true;
+};
 
 
 module.exports = {
@@ -51,5 +91,69 @@ module.exports = {
       next(null, safeParams, warnings);
     else
       next(errors);
+  },
+  
+  /*
+    Validate request.body against POST data.
+    It uses validate and provide the right validation to the right field.
+  */
+  request: function(req, next) {
+    var errors     = {},
+        safeParams = {},
+        params     = _.assign(req.query, req.body, req.params),
+        
+        fields     = [
+          {
+            field: 'name',
+            check: 'isLength',
+            args: [
+              3,
+              160
+            ],
+            error: 'should be at least 3 to 160 chars',
+            optional: true
+          },
+          {
+            field: 'description',
+            check: 'isLength',
+            args: [
+              3,
+              250
+            ],
+            error: 'should be at least 3 to 250 chars'
+          },
+          {
+            field: 'password',
+            check: 'isLength',
+            args: [
+              8,
+              32
+            ],
+            error: 'password have to ...'
+          }
+        ],
+        result;
+    
+    result = verify(params, fields);
+    // errors?
+    if(result !== true) {
+      if(next)
+        next(result);
+      else
+        return {
+          isValid: false,
+          errors: result
+        };
+    }
+    // sanitize here the params if required (e.g, limit and offset if they're exagerated etc..)...
+    safeParams = params;
+    
+    if(next)
+      next(null, safeParams);
+    else
+      return {
+        isValid: true,
+        params: safeParams
+      };
   }
 };

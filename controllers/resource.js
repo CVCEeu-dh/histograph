@@ -172,6 +172,34 @@ module.exports = function(io){
     },
     
     /*
+      create a new inquiry on this resource
+    */
+    createInquiry: function (req, res) {
+      var inquiry   = require('../models/inquiry'), 
+          form = validator.request(req);
+      
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      inquiry.create({
+        name: form.params.name,
+        description: form.params.description,
+        doi: +form.params.id,
+        user: req.user
+      }, function (err, inquiry) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        io.emit('done:create_inquiry', {
+          user: req.user.username,
+          doi: +req.params.id, 
+          data: inquiry
+        });
+        return res.ok({
+          item: inquiry
+        });
+      })
+    },
+    /*
       create a comment on this resource
     */
     createComment: function(req, res) {

@@ -388,6 +388,41 @@ describe('controllers: get resource items available to the user', function() {
   
 });
 
+describe('controllers: inquiries', function() {
+  it('should get some inquiries', function (done) {
+    session
+      .get('/api/inquiry?limit=10')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        // if(err)
+        //   console.log(err);
+        should.not.exist(err);
+        should.exist(res.body.result.items.length);
+        done()
+      });
+  })
+  it('should create a new inquiry', function (done) {
+    session
+      .post('/api/resource/11160/inquiry')
+      .send({
+        name: 'this is a test inquiry',
+        description: 'please provide the resource with something important'
+      })
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exist(err);
+        should.equal(res.body.user.username, 'hello-world')
+        should.equal(res.body.result.item.proposed_by, 'hello-world')
+        if(err)
+          console.log(err)   
+        
+        
+        done();
+      });
+  })
+});
 
 describe('controllers: suggest queries', function() {
   
@@ -656,6 +691,18 @@ describe('controllers: play with entities', function() {
 describe('controllers: delete the user and their relationships', function() {
   it('should remove the comments created by the hello-world user', function (done) {
     neo4j.query('MATCH (n:user {username:{username}})-[r]-(com:comment)-[r2:mentions]-() DELETE com, r2, r', {
+      username: 'hello-world'
+    }, function(err, res) {
+      if(err)
+        console.log(err)
+      //console.log('result', res)
+      done();
+    })
+    
+  });
+  
+  it('should remove the inquiries created by the hello-world user', function (done) {
+    neo4j.query('MATCH (n:user {username:{username}})-[r]-(inq:inquiry)-[r2:questions]-() DELETE inq, r2, r', {
       username: 'hello-world'
     }, function(err, res) {
       if(err)

@@ -87,6 +87,17 @@ describe('model:inquiry ', function() {
     })
   });
   
+  it('should return the list of inquiries just created', function (done) {
+    inquiry.getMany({
+      limit: 50,
+      offset: 0
+    }, function (err, inq) {
+      if(err)
+        throw err;
+      done()
+    })
+  });
+  
   it('should delete the user', function (done) {
     user.remove({email: __user.email}, function (err) {
       if(err)

@@ -277,7 +277,20 @@ app.use('/api', apiRouter); // api endpoint. we should be auth to pass this poin
 apiRouter.route('/user/session')// api session info
   .get(ctrl.user.session)
   
+
+/*
+
+  Controller: inquiry
+  -------------------
   
+  Cfr. controllers/inquiry.js
+  Cfr Neo4j queries: queries/inquiry.cyp
+  
+*/
+apiRouter.route('/inquiry')
+  .get(ctrl.inquiry.getItems)
+
+
 /*
 
   Controller: resource
@@ -297,6 +310,8 @@ apiRouter.route('/resource/:id/related')
   .get(ctrl.resource.getRelatedItems)
 apiRouter.route('/resource/:id/comments') // POST
   .post(ctrl.resource.createComment)
+apiRouter.route('/resource/:id/inquiry')
+  .post(ctrl.resource.createInquiry)
 apiRouter.route('/resource/:id/graph')
   .get(ctrl.resource.getGraph);
 apiRouter.route('/cooccurrences') // @todo move to entity controller.
