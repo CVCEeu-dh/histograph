@@ -306,12 +306,13 @@ apiRouter.route('/resource/timeline')
   .get(ctrl.resource.getTimeline)
 apiRouter.route('/resource/:id')
   .get(ctrl.resource.getItem)
-apiRouter.route('/resource/:id/related')
+apiRouter.route('/resource/:id/related/resource')
   .get(ctrl.resource.getRelatedItems)
-apiRouter.route('/resource/:id/comments') // POST
+apiRouter.route('/resource/:id/related/comment') // POST
   .post(ctrl.resource.createComment)
-apiRouter.route('/resource/:id/inquiry')
+apiRouter.route('/resource/:id/related/inquiry')
   .post(ctrl.resource.createInquiry)
+  .get(ctrl.resource.getRelatedInquiry)
 apiRouter.route('/resource/:id/graph')
   .get(ctrl.resource.getGraph);
 apiRouter.route('/cooccurrences') // @todo move to entity controller.
