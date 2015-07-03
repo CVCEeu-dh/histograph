@@ -166,7 +166,12 @@ module.exports = {
     }
     // sanitize here the params if required (e.g, limit and offset if they're exagerated etc..)...
     safeParams = params;
-    
+    if(safeParams.id)
+      safeParams.id = +safeParams.id;
+    if(safeParams.limit)
+      safeParams.limit = +safeParams.limit;
+    if(safeParams.offset)
+      safeParams.offset = +safeParams.offset;
     if(next)
       next(null, safeParams);
     else
