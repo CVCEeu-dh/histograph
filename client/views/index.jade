@@ -91,7 +91,17 @@ html
           div(id='see-also', class='{{currentCtrl}}', ng-cloak)
             h3 {{headers.seealso}}
             //- pagination(boundary-links='true', total-items='relatedCount || 0' ng-model='relatedPage' class='pagination-sm' previous-text='<' next-text='>' first-text='<<' last-text='>>')
-            
+            div(ng-if="currentCtrl == 'InquiryCreateCtrl'")
+              p new inquiry
+              form
+                div title
+                input(type='text', ng-model='inquiry.name', id='inquiry-name', class='tk-proxima-nova')
+                div content
+                div(ng-model='inquiry.description', ui-codemirror='{lineNumbers: false, lineWrapping : true, mode: "xml"}')
+                div(style='text-align:center')
+                  div(class='btn-group', role='group', aria-label='...')
+                    button(class='btn btn-primary', ng-click='createInquiry()') create inquiry
+                  
             div(ng-repeat='relatedItem in relatedItems', class='related')
               h4
                 a(ng-href='#/r/{{relatedItem.id}}', ng-bind-html='relatedItem.props | title : language')
@@ -199,7 +209,7 @@ html
     script(src='/js/controllers/index.js')
     script(src='/js/controllers/search.js')
     script(src='/js/controllers/resource.js')
-    script(src='/js/controllers/inquiries.js')
+    script(src='/js/controllers/inquiry.js')
     script(src='/js/controllers/entity.js')
     script(src='/js/controllers/collection.js')
     script(src='/js/controllers/all-shortest-paths.js')

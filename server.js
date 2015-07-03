@@ -289,7 +289,8 @@ apiRouter.route('/user/session')// api session info
 */
 apiRouter.route('/inquiry')
   .get(ctrl.inquiry.getItems)
-
+apiRouter.route('/inquiry/:id')
+  .get(ctrl.inquiry.getItem)
 
 /*
 

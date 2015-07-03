@@ -33,14 +33,14 @@ module.exports = {
     
   */
   models:{
-    getOne: function (err, res, item) {
+    getOne: function (err, res, item, info) {
       if(err == IS_EMPTY)
         return res.error(404);
       if(err)
         return module.exports.cypherQueryError(err, res);
       return res.ok({
         item: item
-      });
+      }, info || {});
     },
     getMany: function (err, res, items, params, warnings) {
       if(err && err != IS_EMPTY)

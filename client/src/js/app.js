@@ -68,6 +68,28 @@ angular
           },
         }
       })
+      .when('/r/:id/new/inquiry', {
+        templateUrl: 'templates/inquiries.html',
+        controller: 'InquiryCreateCtrl',
+        resolve: {
+          resource: function(ResourceFactory, $route) {
+            return ResourceFactory.get({
+              id: $route.current.params.id
+            }).$promise;
+          }
+        }
+      })
+      .when('/i/:inquiry_id', {
+        templateUrl: 'templates/inquiries.html',
+        controller: 'InquiryCtrl',
+        resolve: {
+          inquiry: function(InquiryFactory, $route) {
+            return InquiryFactory.get({
+              id: $route.current.params.inquiry_id
+            }).$promise;
+          }
+        }
+      })
       .when('/e/:id', {
         templateUrl: 'templates/entity.html',
         controller: 'EntityCtrl',

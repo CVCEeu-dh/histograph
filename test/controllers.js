@@ -389,6 +389,8 @@ describe('controllers: get resource items available to the user', function() {
 });
 
 describe('controllers: inquiries', function() {
+  var __inquiry = {};
+  
   it('should get some inquiries', function (done) {
     session
       .get('/api/inquiry?limit=10')
@@ -414,13 +416,29 @@ describe('controllers: inquiries', function() {
       .expect(200)
       .end(function (err, res) {
         should.not.exist(err);
+        
         should.equal(res.body.user.username, 'hello-world')
         should.equal(res.body.result.item.proposed_by, 'hello-world')
         if(err)
           console.log(err)   
-        
+        __inquiry = res.body.result.item;
         
         done();
+      });
+  })
+  
+  it('should get the inquiry just created', function (done) {
+    session
+      .get('/api/inquiry/' + __inquiry.id)
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err);
+        should.not.exist(err);
+        
+        should.exist(res.body.result.item);
+        done()
       });
   })
   

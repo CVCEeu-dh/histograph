@@ -153,6 +153,7 @@ a:hover{
 .item .caption{
   color: #959595;
   margin-bottom: 10px;
+  position:relative;
 }
 .item .caption a{
   border-bottom: 1px solid transparent;
@@ -220,10 +221,10 @@ a:hover{
   overflow-x: hidden;
   background: white;
   border-right: 1px solid #d4d4d4;
-  -webkit-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
-     -moz-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1);
-       -o-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1);
-          transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+  -webkit-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1), width .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
+     -moz-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1), width .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+       -o-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1), width .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+          transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1), width .3s cubic-bezier(0.65, 0.05, 0.36, 1);
 }
 
 #perspective.reduced{
@@ -247,6 +248,9 @@ a:hover{
   text-align: center;
 }
 
+.view.InquiriesCtrl #perspective, .view.InquiryCtrl #perspective, .view.InquiryCreateCtrl #perspective{
+  width: 50%;
+}
 
 
 /*
@@ -263,15 +267,18 @@ a:hover{
   overflow-x: hidden;
   padding: 0px 10px 0 25px;
   /*border-left: 1px solid #d4d4d4;*/
-
+  -webkit-transition: margin-left .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
+   -moz-transition: margin-left .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+     -o-transition: margin-left .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+        transition: margin-left .3s cubic-bezier(0.65, 0.05, 0.36, 1);
 }
 #see-also.AllShortestPathsCtrl , #see-also.NeighborsCtrl {
   margin-left: 25%;
   width: 25%;
 }
-#see-also.InquiriesCtrl{
-  margin-left: 70%;
-  width: 30%;
+#see-also.InquiriesCtrl, #see-also.InquiryCtrl, #see-also.InquiryCreateCtrl {
+  margin-left: 50%;
+  width: 50%;
 }
 #see-also.SearchCtrl {
   margin-left:0;
@@ -279,6 +286,22 @@ a:hover{
 #see-also.IndexCtrl {
   margin-left:0%;
   width: 30%;
+}
+
+#inquiry-name{
+  width: 100%;
+  padding: 5px 15px;
+  border: 1px solid #e8e8e8;
+  background: #fcfcfc;
+  font-size: 13px;
+  line-height: 21px;
+  font-weight: bold;
+}
+
+#inquiry-name:focus {
+  outline: none;
+  background: #fff;
+  border: 1px solid #d4d4d4;
 }
 /*
 #see-also-header{
@@ -400,7 +423,7 @@ a:hover{
   left: 30%;
 }
 
-#milkyway.InquiriesCtrl{
+#milkyway.InquiriesCtrl, #milkyway.InquiryCtrl, #milkyway.InquiryCreateCtrl{
   display: none;
 }
 
@@ -470,15 +493,32 @@ a:hover{
 */
 .CodeMirror{
   font-family: inherit;
-  background: #eee;
+  background-color: #eee;
   height: auto;
   padding: 5px 10px;
+  border: 1px solid #e8e8e8;
 }
 
 .CodeMirror-scroll {
   height: auto;
-  overflow-y: hidden;
-  overflow-x: auto;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+
+.CodeMirror{
+  background: #fcfcfc;
+}
+
+.CodeMirror.CodeMirror-focused{
+  background: #fff;
+  border: 1px solid #d4d4d4;
+}
+
+.Codemirror pre{
+  background: transparent url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAKCAYAAAB8OZQwAAAAFklEQVQIW2NkwAIYh4rghw8f/qO7FQBLtAPahi1RggAAAABJRU5ErkJggg==);
+  background-position: bottom;
+  background-repeat: repeat-x;
 }
 
 .btn {

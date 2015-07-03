@@ -6,7 +6,8 @@ WITH res
     OPTIONAL MATCH (ent)-[:appears_in]->(res)
     OPTIONAL MATCH (res)-[:belongs_to]->(col)
     OPTIONAL MATCH (com)-[:mentions]->(res)
-  WITH ver, res, ent, col, length(COLLECT(distinct com)) as coms
+    OPTIONAL MATCH (inq)-[:questions]->(res)
+  WITH ver, res, ent, col, com, inq
     RETURN {
       resource: {
         id: id(res),
@@ -14,7 +15,8 @@ WITH res
         versions: EXTRACT(p in COLLECT(DISTINCT ver)|{name: p.name, id:id(p), yaml:p.yaml, language:p.language, type: last(labels(p))}),
         entities: EXTRACT(p in COLLECT(DISTINCT ent)|{name: p.name, id:id(p), type: last(labels(p))}),
         collections: EXTRACT(p in COLLECT(DISTINCT col)|{name: p.name, id:id(p), type: 'collection'}),
-        comments: coms
+        comments: count(distinct com),
+        inquiries: count(distinct inq)
       }
     } AS result
     

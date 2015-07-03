@@ -1,11 +1,18 @@
 // name: get_inquiry
 // get inquiry by id or slug title
-MATCH (inq:inquiry)--(u:user)
+MATCH (inq:inquiry)
 WHERE id(inq) = {id}
+WITH inq
+MATCH (inq)-[:questions]-(res)
+WITH inq, res
+OPTIONAL MATCH (inq)-[:answers]-(com)
 RETURN {
   id: id(inq),
+  type: 'inquiry',
   props: inq,
-  proposed_by: u.username
+  proposed_by: inq.proposed_by,
+  questioning: id(res),
+  answers: count(com)
 }
 
 
@@ -27,9 +34,10 @@ WITH inq, res
 MATCH (inq)--(u:user)
 RETURN {
   id: id(inq),
+  type: 'inquiry',
   props: inq,
   proposed_by: u.username,
-  questioning: res.doi
+  questioning: id(res)
 }
 
 

@@ -7,7 +7,7 @@
  * It is the parent of the other controllers.
  */
 angular.module('histograph')
-  .controller('CoreCtrl', function ($scope, $location, $route, $log, $timeout, $http, socket, ResourceCommentsFactory, SuggestFactory, cleanService, VisualizationFactory, EVENTS, VIZ) {
+  .controller('CoreCtrl', function ($scope, $location, $route, $log, $timeout, $http, $routeParams, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, EVENTS, VIZ) {
     $log.debug('CoreCtrl ready');
     $scope.locationPath = $location.path(); 
     
@@ -29,6 +29,12 @@ angular.module('histograph')
     
     // the current user
     $scope.user = {};
+    
+    // the current inquiry
+    $scope.inquiry = {
+      name: '',
+      description: 'Basic Multiline description\nWith more text than expected'
+    }
     
     // current headers for a given column. Cfr setHeader
     $scope.headers = {
@@ -197,6 +203,27 @@ angular.module('histograph')
         $scope.comment.tags = [];
         $scope.comment.text = ""
     };
+    
+    /*
+    
+      Inquiries, everywhere.
+      ----------------------
+    */
+    $scope.createInquiry = function() {
+      // validate content, otherwise launch alarm!
+      $log.debug('CoreCtrl -> createInquiry()', $scope.inquiry);
+      if($scope.inquiry.name.trim().length > 3)
+        ResourceRelatedFactory.save({
+          id: $routeParams.id,
+          model: 'inquiry'
+        }, angular.copy($scope.inquiry), function (data) {
+          $log.debug('CoreCtrl -> createInquiry() success', data.result.item.id);
+          // redirect...
+          $location.path('/i/' + data.result.item.id)
+        })
+      
+    }
+    
     /*
     
       Following the trail
