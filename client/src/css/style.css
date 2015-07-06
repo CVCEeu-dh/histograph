@@ -360,12 +360,24 @@ a:hover{
 }
 
 .related .profile-pic{
-  border: 1px solid #d4d4d4;
+  border: 0px transparent;
   width: 40px;
   margin-left: 0;
   border-radius: 40px;
   overflow: hidden;
   height: 40px;
+  background: #d4d4d4;
+  margin-right: 10px;
+  float: left;
+}
+
+.comment .profile-pic{
+  border: 1px solid #d4d4d4;
+  width: 16px;
+  margin-left: 0;
+  border-radius: 0px;
+  overflow: hidden;
+  height: 16px;
   background: #d4d4d4;
   margin-right: 10px;
   float: left;

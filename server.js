@@ -289,11 +289,26 @@ apiRouter.route('/user/session')// api session info
 */
 apiRouter.route('/inquiry')
   .get(ctrl.inquiry.getItems)
-apiRouter.route('/inquiry/:id')
+apiRouter.route('/inquiry/:id(\\d+)')
   .get(ctrl.inquiry.getItem)
-apiRouter.route('/inquiry/:id/related/comment') // POST
+apiRouter.route('/inquiry/:id(\\d+)/related/comment') // POST
   .post(ctrl.inquiry.createComment)
   .get(ctrl.inquiry.getRelatedComment)
+
+
+/*
+
+  Controller: inquiry
+  -------------------
+  
+  Cfr. controllers/inquiry.js
+  Cfr Neo4j queries: queries/inquiry.cyp
+  
+*/
+apiRouter.route('/comment/:id(\\d+)/upvote')
+  .post(ctrl.comment.upvote)
+apiRouter.route('/comment/:id(\\d+)/downvote')
+  .post(ctrl.comment.downvote)
 
 /*
 
@@ -308,16 +323,16 @@ apiRouter.route('/resource')
   .get(ctrl.resource.getItems)
 apiRouter.route('/resource/timeline')
   .get(ctrl.resource.getTimeline)
-apiRouter.route('/resource/:id')
+apiRouter.route('/resource/:id([\\d,]+)')
   .get(ctrl.resource.getItem)
-apiRouter.route('/resource/:id/related/resource')
+apiRouter.route('/resource/:id(\\d+)/related/resource')
   .get(ctrl.resource.getRelatedItems)
-apiRouter.route('/resource/:id/related/comment') // POST
+apiRouter.route('/resource/:id(\\d+)/related/comment') // POST
   .post(ctrl.resource.createComment)
-apiRouter.route('/resource/:id/related/inquiry')
+apiRouter.route('/resource/:id(\\d+)/related/inquiry')
   .post(ctrl.resource.createInquiry)
   .get(ctrl.resource.getRelatedInquiry)
-apiRouter.route('/resource/:id/graph')
+apiRouter.route('/resource/:id(\\d+)/graph')
   .get(ctrl.resource.getGraph);
 apiRouter.route('/cooccurrences') // @todo move to entity controller.
   .get(ctrl.resource.getCooccurrences)

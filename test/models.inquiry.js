@@ -12,6 +12,7 @@
 var settings = require('../settings'),
 
     inquiry  = require('../models/inquiry'),
+    comment  = require('../models/comment'),
     resource = require('../models/resource'),
     user     = require('../models/user'),
     
@@ -22,7 +23,8 @@ var settings = require('../settings'),
 describe('model:inquiry ', function() {
   var __inq, // the local inquiry object created for fun
       __resource, // the local resource object that can be inquiried
-      __user;
+      __user,
+      __comment;
 
   it('should create the dummy test user', function (done){
     user.create({
@@ -106,7 +108,32 @@ describe('model:inquiry ', function() {
       if(err)
         throw err;
       should.equal(com.props.content, 'This is a comment for test inquiry');
+      __comment = com;
       done()
+    })
+  });
+  
+  it('should upvote a comment for the new inquiry', function (done) {
+    comment.update(__comment.id, {
+      upvoted_by: __user.username
+    }, function (err, com) {
+      if(err)
+        throw err;
+      should.equal(com.props.content, 'This is a comment for test inquiry');
+      done()
+    })
+  });
+  it('should downvote a comment for the new inquiry', function (done) {
+    comment.update(__comment.id, {
+      downvoted_by: __user.username
+    }, function (err, com) {
+      if(err)
+        throw err;
+      should.equal(com.props.content, 'This is a comment for test inquiry');
+      should.equal(com.props.celebrity, 1); // only one user modified this.
+      should.equal(com.props.score, 0);
+      
+      done();
     })
   });
   

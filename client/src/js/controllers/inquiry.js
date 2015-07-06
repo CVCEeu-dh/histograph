@@ -41,17 +41,17 @@ angular.module('histograph')
     
     // load related items
     InquiryRelatedFactory.get({
-      id: $routeParams.id,
+      id: +$scope.inquiry.id,
       model: 'comment'
     }, function(data) {
-      console.log(data)
-      
+      $scope.relatedItems = data.result.items;
     })
     
-    
-    
-    //$scope.setInquiry(inquiry.result.item.props);
-    $scope.setRelatedItems([inquiry.result.item]); // will put comments here
+    // listeners for creations
+    socket.on('done:create_comment', function (result) {
+      // a comment has been added.
+      $log.log('socket@done:create_comment / InquiryCtrl', result);
+    });
     
     
      // new inquiry

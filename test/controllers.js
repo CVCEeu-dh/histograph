@@ -389,7 +389,8 @@ describe('controllers: get resource items available to the user', function() {
 });
 
 describe('controllers: inquiries', function() {
-  var __inquiry = {};
+  var __inquiry = {},
+      __comment = {};
   
   it('should get some inquiries', function (done) {
     session
@@ -440,7 +441,43 @@ describe('controllers: inquiries', function() {
         
         if(err)
           console.log(err)   
-        
+        __comment = res.body.result.item;
+        done();
+      });
+  })
+  
+  it('should downvote the new comment', function (done) {
+    session
+      .post('/api/comment/' + __comment.id + '/downvote')
+      .send({
+        upvoted_by: __inquiry.proposed_by
+      })
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err)   
+        should.not.exist(err);
+        should.equal(res.body.result.item.props.score, -1)
+        should.equal(res.body.result.item.props.celebrity, 1)
+        done();
+      });
+  })
+  
+  it('should upvote the new comment', function (done) {
+    session
+      .post('/api/comment/' + __comment.id + '/upvote')
+      .send({
+        upvoted_by: __inquiry.proposed_by
+      })
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err);
+        should.not.exist(err);
+        should.equal(res.body.result.item.props.score, 0)
+        should.equal(res.body.result.item.props.celebrity, 1)
         done();
       });
   })

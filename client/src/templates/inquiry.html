@@ -13,13 +13,16 @@
       <a ng-href="#/i/{{inquiry.id}}" ng-bind-html="inquiry.props.name | marked"></a>
     </h4>
     <blockquote ng-bind-html="inquiry.props.description | marked"></blockquote>
+    
+    <div ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/comment-lite.html"' class='comment'></div>
+    
     <form>
-      <h4>your answer</h4>
+      <h4>propose your answer</h4>
       <div ng-model='comment.content' ui-codemirror='{lineNumbers: false, lineWrapping : true, mode: "xml"}'></div>
-      <div style='text-align:center'>
+      <div style='text-align:center; margin-top: 10px'>
         <div class='btn-group' role='group' aria-label='...'>
           <button class='btn btn-primary' ng-click='createComment()'>
-           create comment
+           propose
           </button>
         </div>  
       </div>  

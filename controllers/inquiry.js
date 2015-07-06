@@ -60,14 +60,13 @@ module.exports = function(io) {
         io.emit('done:create_comment', {
           user: req.user.username,
           doi: +req.params.id, 
-          data: inquiry
+          data: comment
         });
         return res.ok({
           item: comment
         });
       })
     },
-    
     /*
       return the list of related inquiries
     */

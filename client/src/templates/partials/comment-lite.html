@@ -1,1 +1,11 @@
-comment
+
+
+<div ng-if="relatedItem.written_by.picture" class="profile-pic">
+  <div class="profile-pic-wrapper">
+    
+    <img ng-src="{{relatedItem.written_by.picture}}">
+  </div>
+</div>
+{{relatedItem.written_by.username}} — {{relatedItem.props.creation_date | date : 'longDate'}}
+
+<blockquote ng-bind-html="relatedItem.props.content | marked"></blockquote>

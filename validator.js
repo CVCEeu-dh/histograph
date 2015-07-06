@@ -106,6 +106,14 @@ module.exports = {
         
         fields     = [
           {
+            field: 'id',
+            check: 'isInt',
+            args: [
+              0
+            ],
+            error: 'id not valid'
+          },
+          {
             field: 'limit',
             check: 'isInt',
             args: [
