@@ -69,7 +69,7 @@ angular
         }
       })
       .when('/r/:id/new/inquiry', {
-        templateUrl: 'templates/inquiries.html',
+        templateUrl: 'templates/inquiry.new.html',
         controller: 'InquiryCreateCtrl',
         resolve: {
           resource: function(ResourceFactory, $route) {
@@ -80,7 +80,7 @@ angular
         }
       })
       .when('/i/:inquiry_id', {
-        templateUrl: 'templates/inquiries.html',
+        templateUrl: 'templates/inquiry.html',
         controller: 'InquiryCtrl',
         resolve: {
           inquiry: function(InquiryFactory, $route) {

@@ -5,19 +5,54 @@
  * # IndexCtrl
  */
 angular.module('histograph')
-  .controller('InquiryCtrl', function ($scope, $log, $routeParams, inquiry, ResourceFactory, socket) {
-    $log.debug('InquiryCtrl ready', $routeParams.id, 'loaded', inquiry);
-     /**
+  .controller('InquiryCtrl', function ($scope, $log, $routeParams, inquiry, ResourceFactory, InquiryRelatedFactory, socket) {
+    $log.debug('InquiryCtrl reource id:', $routeParams.id, 'inquiry loaded', inquiry);
+    
+    $scope.comment = {};
+    /*
+    
+      Create a new comment
+      ----------------------
+    */
+    $scope.createComment = function() {
+      $log.debug('InquiryCtrl -> createComment()', $scope.comment);
+      
+      InquiryRelatedFactory.save({
+        id: $scope.inquiry.id,
+        model: 'comment'
+      }, {
+        content: $scope.comment.content
+      }, function(data) {
+        $log.debug('InquiryCtrl -> createComment() success', data);
+        $scope.comment = {};  
+      })
+    };
+    /**
       on load
     */
+    $scope.inquiry = inquiry.result.item;
+    // get the related resource
     ResourceFactory.get({
-      id: +inquiry.result.item.questioning
+      id: +$scope.inquiry.questioning
     }, function(data){
       $scope.item = data.result.item;
+    });
+    
+    
+    // load related items
+    InquiryRelatedFactory.get({
+      id: $routeParams.id,
+      model: 'comment'
+    }, function(data) {
+      console.log(data)
+      
     })
+    
+    
     
     //$scope.setInquiry(inquiry.result.item.props);
     $scope.setRelatedItems([inquiry.result.item]); // will put comments here
+    
     
      // new inquiry
     /*
@@ -29,15 +64,42 @@ angular.module('histograph')
       edges: []
     })
   })
-  .controller('InquiryCreateCtrl', function ($scope, $log, $routeParams, resource, socket) {
+  .controller('InquiryCreateCtrl', function ($scope, $log, $routeParams, $location, resource, ResourceRelatedFactory, socket) {
     $log.debug('InquiryCreateCtrl ready', $routeParams.id, 'loaded');
-     /**
+    
+    /*
+    
+      Create a new inquiry
+      ----------------------
+    */
+    $scope.createInquiry = function() {
+      // validate content, otherwise launch alarm!
+      $log.debug('InquiryCreateCtrl -> createInquiry()', $scope.inquiry);
+      if($scope.inquiry.name.trim().length > 3) {
+        ResourceRelatedFactory.save({
+          id: $routeParams.id,
+          model: 'inquiry'
+        }, angular.copy($scope.inquiry), function (data) {
+          $log.debug('InquiryCreateCtrl -> createInquiry() success', data.result.item.id);
+          // redirect...
+          $location.path('/i/' + data.result.item.id)
+        })
+      };
+    }
+    
+    /**
       on load
     */
     $scope.item = resource.result.item;
-    $scope.setRelatedItems([]);
     
-     // new inquiry
+    /*
+      the current inquiry
+    */
+    $scope.inquiry = {
+      name: '',
+      description: 'Basic Multiline description\nWith more text than expected'
+    }
+    
     /*
       Set graph title
     */
@@ -45,7 +107,7 @@ angular.module('histograph')
     $scope.setGraph({
       nodes: [],
       edges: []
-    })
+    });
   })
   .controller('InquiriesCtrl', function ($scope, $log, $routeParams, resource, inquiries, socket) {
     $log.debug('InquiriesCtrl ready', $routeParams.id, 'loaded', inquiries);
@@ -53,8 +115,8 @@ angular.module('histograph')
       on load
     */
     $scope.item = resource.result.item;
-    $scope.setRelatedItems(inquiries.result.items);
-    
+    //$scope.setRelatedItems(inquiries.result.items);
+    $scope.relatedItems = inquiries.result.items
      // new inquiry
     /*
       Set graph title

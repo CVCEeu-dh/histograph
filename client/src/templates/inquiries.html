@@ -1,1 +1,8 @@
-<div ng-include src="'templates/resource.html'"></div>
+<div id="perspective" class="{{queueStatus}}" ng-include src="'templates/partials/resource.html'"></div>
+<div id='see-also' class='{{currentCtrl}}' ng-cloak>
+  
+  <a class="btn btn-primary" tooltip-append-to-body="true" tooltip="create a new inquiry" ng-href="#/r/{{item.id}}/new/inquiry">
+              create inquiry <i class="fa fa-comment-o"></i>
+            </a>
+  <div ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/inquiry-lite.html"' class='related'></div>
+</div>

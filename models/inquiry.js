@@ -62,6 +62,7 @@ module.exports = {
     var now = helpers.now();
     
     neo4j.query(queries.merge_inquiry, {
+      slug: helpers.text.slugify(properties.user.username + ' ' + properties.name),
       name: properties.name,
       description: properties.description,
       language: helpers.text.language([properties.name, properties.description].join('. ')),

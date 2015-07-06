@@ -1,0 +1,18 @@
+<div id="perspective" class="{{queueStatus}}" ng-include src="'templates/partials/resource.html'"></div>
+<div id='see-also' class='{{currentCtrl}}' ng-cloak>
+  {{inquiry}}
+  <form>
+    <h4>title</h4>
+    <input type='text'  ng-model='inquiry.name'  id='inquiry-name'  class='tk-proxima-nova' />
+    <h4>content</h4>
+    <div ng-model='inquiry.description' ui-codemirror='{lineNumbers: false, lineWrapping : true, mode: "xml"}'></div>
+    <div style='text-align:center'>
+      <div class='btn-group' role='group' aria-label='...'>
+        <button class='btn btn-primary' ng-click='createInquiry()'>
+         create inquiry
+        </button>
+      </div>  
+    </div>  
+  </form>
+  
+</div>

@@ -293,6 +293,7 @@ apiRouter.route('/inquiry/:id')
   .get(ctrl.inquiry.getItem)
 apiRouter.route('/inquiry/:id/related/comment') // POST
   .post(ctrl.inquiry.createComment)
+  .get(ctrl.inquiry.getRelatedComment)
 
 /*
 

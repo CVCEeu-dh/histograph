@@ -32,6 +32,7 @@ SKIP {offset}
 LIMIT {limit}
 WITH inq, res
 MATCH (inq)-[:proposes]-(u:user)
+WITH DISTINCT inq, res, u
 RETURN {
   id: id(inq),
   type: 'inquiry',
@@ -45,8 +46,9 @@ RETURN {
 
 // name: merge_inquiry
 // create inquiry (safely merge if the inquiry already exists by slug title.
-MERGE (inq:inquiry {name: {name}, questioning: {doi}})
+MERGE (inq:inquiry {slug: {slug}, questioning: {doi}})
 ON CREATE SET
+  inq.name          = {name},
   inq.description   = {description},
   inq.language      = {language},
   inq.creation_date = {creation_date},

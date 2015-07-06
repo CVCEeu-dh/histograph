@@ -71,6 +71,12 @@ angular.module('histograph')
     return $resource('/api/inquiry/:id');
   })
   /*
+    Add / get :model related to inquiries
+  */
+  .factory('InquiryRelatedFactory', function ($resource) {
+    return $resource('/api/inquiry/:id/related/:model');
+  })
+  /*
     Get/Update/Delete one collection
   */
   .factory('CollectionFactory', function ($resource) {

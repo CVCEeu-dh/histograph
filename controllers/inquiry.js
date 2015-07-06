@@ -68,7 +68,32 @@ module.exports = function(io) {
       })
     },
     
-    
+    /*
+      return the list of related inquiries
+    */
+    getRelatedComment: function(req, res) {
+      var comment   = require('../models/comment'), 
+          form = validator.request(req, {
+            limit: 20,
+            offset: 0
+          });
+
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      comment.getMany({
+        related_to: +form.params.id,
+        limit: +form.params.limit,
+        offset: +form.params.offset
+      }, function (err, items) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({
+          items: items
+        }, {
+          params: form.params
+        });
+      })
+    },
     /*
       create an inquiry. Cfr resource create related inquiry instead.
     */

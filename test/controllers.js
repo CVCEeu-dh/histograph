@@ -445,6 +445,21 @@ describe('controllers: inquiries', function() {
       });
   })
   
+  it('should get the list of comments related to an inquiry', function (done) {
+    session
+      .get('/api/inquiry/' + __inquiry.id + '/related/comment?limit=12')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err);
+        should.not.exist(err);
+        should.exist(res.body.result.items.length);
+        should.equal(res.body.info.params.limit, 12);
+        done()
+      });
+  })
+  
   it('should get the inquiry just created', function (done) {
     session
       .get('/api/inquiry/' + __inquiry.id)
@@ -472,7 +487,8 @@ describe('controllers: inquiries', function() {
         should.exist(res.body.result.items.length);
         done()
       });
-  })
+  });
+  
 });
 
 describe('controllers: suggest queries', function() {

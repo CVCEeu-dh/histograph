@@ -1,0 +1,29 @@
+<div id="perspective" class="{{queueStatus}}" ng-include src="'templates/partials/resource.html'"></div>
+<div id='see-also' class='{{currentCtrl}}' ng-cloak>
+  
+  <div class="related">  
+    <div ng-if="inquiry.proposed_by.picture" class="profile-pic">
+      <div class="profile-pic-wrapper">
+        
+        <img ng-src="{{inquiry.proposed_by.picture}}">
+      </div>
+    </div>
+    {{inquiry.proposed_by.username}} — {{inquiry.props.creation_date | date : 'longDate'}}
+    <h4>
+      <a ng-href="#/i/{{inquiry.id}}" ng-bind-html="inquiry.props.name | marked"></a>
+    </h4>
+    <blockquote ng-bind-html="inquiry.props.description | marked"></blockquote>
+    <form>
+      <h4>your answer</h4>
+      <div ng-model='comment.content' ui-codemirror='{lineNumbers: false, lineWrapping : true, mode: "xml"}'></div>
+      <div style='text-align:center'>
+        <div class='btn-group' role='group' aria-label='...'>
+          <button class='btn btn-primary' ng-click='createComment()'>
+           create comment
+          </button>
+        </div>  
+      </div>  
+    </form>
+    
+  </div>
+</div>

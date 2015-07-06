@@ -1,0 +1,19 @@
+<h4>
+  <a ng-href='#/r/{{relatedItem.id}}' ng-bind-html='relatedItem.props | title : language'></a>
+</h4>
+
+<div class='actions'>
+  <button class='btn btn-default action' tooltip='add to playlist' tooltip-append-to-body="true" ng-click='queue(relatedItem.id, true)'>
+    <i class='fa fa-play-circle-o'></i>
+  </button>
+</div>
+              
+<div>
+  <span class='date'> {{relatedItem.props|guessInterval}}</span>
+  <span ng-if='relatedItem.persons.length' class='tags'> — <i> in the document</i>:
+    <span ng-repeat='per in relatedItem.persons' data-id='{{per.id}}' ng-click='toggleMenu($event, relatedItem, per)' class='tag person'> {{per.name}}</span>
+  </span>
+</div>
+         
+<img ng-if='relatedItem.props.mimetype=="image"' ng-src="{{relatedItem.props | url : language}}">
+<blockquote> {{relatedItem.props | abstract : language}}</blockquote>

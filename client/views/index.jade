@@ -41,7 +41,7 @@ html
           
           div(class='row', ng-cloak)
             div(class='col-sm-4')
-              a(href='#/') hg
+              a(href='#/') hg v.0.1
               a(href='#/profile')
                 img(src=user.picture)
                 span {{user.username}} 
@@ -88,41 +88,53 @@ html
           div(ng-view, autoscroll='true')
         
         
-          div(id='see-also', class='{{currentCtrl}}', ng-cloak)
-            h3 {{headers.seealso}}
-            //- pagination(boundary-links='true', total-items='relatedCount || 0' ng-model='relatedPage' class='pagination-sm' previous-text='<' next-text='>' first-text='<<' last-text='>>')
+          //- div(id='see-also', class='{{currentCtrl}}', ng-cloak)
+          //-   h3 {{headers.seealso}}
+          //-   //- pagination(boundary-links='true', total-items='relatedCount || 0' ng-model='relatedPage' class='pagination-sm' previous-text='<' next-text='>' first-text='<<' last-text='>>')
+          //-   //- change header of the see-also section.
+          //-   div(ng-if="currentCtrl == 'InquiryCreateCtrl'")
+          //-     p new inquiry
+          //-     form
+          //-       div title
+          //-       input(type='text', ng-model='inquiry.name', id='inquiry-name', class='tk-proxima-nova')
+          //-       div content
+          //-       div(ng-model='inquiry.description', ui-codemirror='{lineNumbers: false, lineWrapping : true, mode: "xml"}')
+          //-       div(style='text-align:center')
+          //-         div(class='btn-group', role='group', aria-label='...')
+          //-           button(class='btn btn-primary', ng-click='createInquiry()') create inquiry
+          //-   //- change header of the see-also section.
+          //-   div(ng-if="currentCtrl == 'InquiryCtrl'")
+          //-     p Main inquiry.
             
-            div(ng-if="currentCtrl == 'InquiryCreateCtrl'")
-              p new inquiry
-              form
-                div title
-                input(type='text', ng-model='inquiry.name', id='inquiry-name', class='tk-proxima-nova')
-                div content
-                div(ng-model='inquiry.description', ui-codemirror='{lineNumbers: false, lineWrapping : true, mode: "xml"}')
-                div(style='text-align:center')
-                  div(class='btn-group', role='group', aria-label='...')
-                    button(class='btn btn-primary', ng-click='createInquiry()') create inquiry
+          //-   div(ng-repeat='relatedItem in relatedItems', class='related')
+          //-     div(ng-if='relatedItem.type == "resource"')
+          //-       h4
+          //-         a(ng-href='#/r/{{relatedItem.id}}', ng-bind-html='relatedItem.props | title : language')
                   
-            div(ng-repeat='relatedItem in relatedItems', class='related')
-              div(ng-if='relatedItem.type == "resource"')
-                h4
-                  a(ng-href='#/r/{{relatedItem.id}}', ng-bind-html='relatedItem.props | title : language')
-                  
-                div(class='actions')
-                  button(class='btn btn-default action', tooltip='add to playlist', tooltip-append-to-body="true", ng-click='queue(relatedItem.id, true)')
-                    i(class='fa fa-play-circle-o')
+          //-       div(class='actions')
+          //-         button(class='btn btn-default action', tooltip='add to playlist', tooltip-append-to-body="true", ng-click='queue(relatedItem.id, true)')
+          //-           i(class='fa fa-play-circle-o')
               
-                div
-                  span(class='date') {{relatedItem.props|guessInterval}}
-                  span(ng-if='relatedItem.persons', class='tags') — 
-                    i in the document:
-                    span(ng-repeat='per in relatedItem.persons', data-id='{{per.id}}', ng-click='toggleMenu($event, relatedItem, per)', class='tag person') {{per.name}}
+          //-       div
+          //-         span(class='date') {{relatedItem.props|guessInterval}}
+          //-         span(ng-if='relatedItem.persons', class='tags') — 
+          //-           i in the document:
+          //-           span(ng-repeat='per in relatedItem.persons', data-id='{{per.id}}', ng-click='toggleMenu($event, relatedItem, per)', class='tag person') {{per.name}}
                 
-                img(ng-if='relatedItem.props.mimetype=="image"', ng-src="{{relatedItem.props | url : language}}")
-                blockquote {{relatedItem.props | abstract : language}}
+          //-       img(ng-if='relatedItem.props.mimetype=="image"', ng-src="{{relatedItem.props | url : language}}")
+          //-       blockquote {{relatedItem.props | abstract : language}}
                 
-              div(ng-if='relatedItem.type == "inquiry"', ng-include='"templates/partials/inquiry-lite.html"')
-                
+          //-     div(ng-if='relatedItem.type == "inquiry"', ng-include='"templates/partials/inquiry-lite.html"')
+            
+          //-   div(ng-if="currentCtrl == 'InquiryCtrl'")
+          //-     p new comment
+          //-     form
+          //-       div your answer
+          //-       div(ng-model='comment.content', ui-codemirror='{lineNumbers: false, lineWrapping : true, mode: "xml"}')
+          //-       div(style='text-align:center')
+          //-         div(class='btn-group', role='group', aria-label='...')
+          //-           button(class='btn btn-primary', ng-click='createObservation()') answer
+              
         
         div(id='milkyway', sigma, graph='graph', tips='headers.graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentCtrl}} {{queueStatus}}', controller='currentCtrl' redirect='redirect(path)')
           
