@@ -8,7 +8,7 @@ html
     link(href='/css/annotator.css', rel='stylesheet')
     link(href='/css/annotorious.css', rel='stylesheet')
     link(href='/css/codemirror.css', rel='stylesheet')
-
+      
     link(href='/css/style.css', rel='stylesheet')
   
     script(src='/socket.io/socket.io.js')
@@ -91,6 +91,7 @@ html
           div(id='see-also', class='{{currentCtrl}}', ng-cloak)
             h3 {{headers.seealso}}
             //- pagination(boundary-links='true', total-items='relatedCount || 0' ng-model='relatedPage' class='pagination-sm' previous-text='<' next-text='>' first-text='<<' last-text='>>')
+            
             div(ng-if="currentCtrl == 'InquiryCreateCtrl'")
               p new inquiry
               form
@@ -103,22 +104,25 @@ html
                     button(class='btn btn-primary', ng-click='createInquiry()') create inquiry
                   
             div(ng-repeat='relatedItem in relatedItems', class='related')
-              h4
-                a(ng-href='#/r/{{relatedItem.id}}', ng-bind-html='relatedItem.props | title : language')
+              div(ng-if='relatedItem.type == "resource"')
+                h4
+                  a(ng-href='#/r/{{relatedItem.id}}', ng-bind-html='relatedItem.props | title : language')
                   
-              div(class='actions')
-                button(class='btn btn-default action', tooltip='add to playlist', tooltip-append-to-body="true", ng-click='queue(relatedItem.id, true)')
-                  i(class='fa fa-play-circle-o')
-            
-              div
-                span(class='date') {{relatedItem.props|guessInterval}}
-                span(ng-if='relatedItem.persons', class='tags') — 
-                  i in the document:
-                  span(ng-repeat='per in relatedItem.persons', data-id='{{per.id}}', ng-click='toggleMenu($event, relatedItem, per)', class='tag person') {{per.name}}
+                div(class='actions')
+                  button(class='btn btn-default action', tooltip='add to playlist', tooltip-append-to-body="true", ng-click='queue(relatedItem.id, true)')
+                    i(class='fa fa-play-circle-o')
               
-              img(ng-if='relatedItem.props.mimetype=="image"', ng-src="{{relatedItem.props | url : language}}")
-              blockquote {{relatedItem.props | abstract : language}}
-            
+                div
+                  span(class='date') {{relatedItem.props|guessInterval}}
+                  span(ng-if='relatedItem.persons', class='tags') — 
+                    i in the document:
+                    span(ng-repeat='per in relatedItem.persons', data-id='{{per.id}}', ng-click='toggleMenu($event, relatedItem, per)', class='tag person') {{per.name}}
+                
+                img(ng-if='relatedItem.props.mimetype=="image"', ng-src="{{relatedItem.props | url : language}}")
+                blockquote {{relatedItem.props | abstract : language}}
+                
+              div(ng-if='relatedItem.type == "inquiry"', ng-include='"templates/partials/inquiry-lite.html"')
+                
         
         div(id='milkyway', sigma, graph='graph', tips='headers.graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentCtrl}} {{queueStatus}}', controller='currentCtrl' redirect='redirect(path)')
           

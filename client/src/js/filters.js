@@ -224,5 +224,16 @@ angular.module('histograph')
       return props[props.languages[0] + '_url']
     }
   })
+  /*
+    Return the html marked version of the field.
+  */
+  .filter('marked', function ($sce) {
+    return function(text) {
+      console.log(marked(text))
+      if(typeof text == 'string')
+        return $sce.trustAsHtml(marked(text));
+      else '';
+    }
+  })
 
 

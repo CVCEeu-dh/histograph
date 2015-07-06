@@ -1,7 +1,11 @@
 <div id="perspective" class="{{queueStatus}}">
   
       <div ng-if="item" class="resource item">
-         
+        <div class='counters'>
+          <a ng-href='#/r/{{item.id}}/inquiries'><label>{{item.inquiries}}</label> inquiries </a><!-- <br/>
+          <a ng-href='#/r/{{item.id}}/inquiries'>comments <label>{{item.comments}}</label></a> -->
+          
+        </div>
         <h3 class="" data-id='{{item.id}}'><a ng-href="#/r/{{item.id}}" ng-bind-html="item.props | title:language"></a></h3>
         <div class="collections">
           <div class="collection" ng-repeat="collection in item.collections"><a ng-href="#/c/{{collection.id}}">{{collection.name|humanize}}</a></div>
