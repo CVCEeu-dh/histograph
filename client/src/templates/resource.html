@@ -29,7 +29,10 @@
         
         <div class="actions">
           <div class="btn-group">
-            <a class="btn btn-default" tooltip-append-to-body="true" tooltip="create a new inquiry" ng-href="#/r/{{item.id}}/new/inquiry">
+            <a ng-if="item.inquiries > 0" class="btn btn-default" tooltip-append-to-body="true" tooltip="view inquiries" ng-href="#/r/{{item.id}}/inquiries">
+              <i class="fa fa-comment-o"></i>
+            </a>
+            <a ng-if="item.inquiries == 0" class="btn btn-default" tooltip-append-to-body="true" tooltip="create a new inquiry" ng-href="#/r/{{item.id}}/new/inquiry">
               <i class="fa fa-comment-o"></i>
             </a>
             <button class="btn btn-default" tooltip-append-to-body="true" tooltip="add to playlist" ng-click="queue(item.id, true)">

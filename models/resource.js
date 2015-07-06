@@ -223,7 +223,7 @@ module.exports = {
           if(err)
             callback(err)
           else
-            callback(null, _.map(ids, 'id'));
+            callback(null, _.compact(_.map(ids, 'id')));
         })
       }
     }, function (err, results) {

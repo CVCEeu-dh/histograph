@@ -1,16 +1,16 @@
 // name: get_inquiry
 // get inquiry by id or slug title
-MATCH (inq:inquiry)
+MATCH (inq)
 WHERE id(inq) = {id}
 WITH inq
-MATCH (inq)-[:questions]-(res)
-WITH inq, res
+MATCH (u)-[:proposes]->(inq)-[:questions]-(res)
+WITH u, inq, res
 OPTIONAL MATCH (inq)-[:answers]-(com)
 RETURN {
   id: id(inq),
   type: 'inquiry',
   props: inq,
-  proposed_by: inq.proposed_by,
+  proposed_by: u,
   questioning: id(res),
   answers: count(com)
 }
@@ -31,12 +31,12 @@ ORDER BY inq.creation_date DESC
 SKIP {offset}
 LIMIT {limit}
 WITH inq, res
-MATCH (inq)--(u:user)
+MATCH (inq)-[:proposes]-(u:user)
 RETURN {
   id: id(inq),
   type: 'inquiry',
   props: inq,
-  proposed_by: u.username,
+  proposed_by: u,
   questioning: id(res)
 }
 
@@ -45,7 +45,7 @@ RETURN {
 
 // name: merge_inquiry
 // create inquiry (safely merge if the inquiry already exists by slug title.
-MERGE (inq:inquiry {name: {name}})
+MERGE (inq:inquiry {name: {name}, questioning: {doi}})
 ON CREATE SET
   inq.description   = {description},
   inq.language      = {language},
@@ -68,9 +68,41 @@ RETURN {
 } as result
 
 
+// name: merge_inquiry_comment
+// create a new inquiry comment - how to avoid comment spamming? slug param contain the id of the inquiry as well.
+MATCH (inq:inquiry)--(res:resource), (u:user {username: {username}})
+WHERE id(inq) = {id}
+  MERGE (u)-[r:follows]->(inq)
+WITH inq, u, res
+  MERGE (com:comment:observation {slug: {slug}})
+    ON CREATE SET
+      com.content       = {content},
+      com.language      = {language},
+      com.creation_date = {creation_date},
+      com.creation_time = {creation_time},
+      com.answered_by   = {username}
+    ON MATCH SET
+      com.content       = {content},
+      com.language      = {language}
+WITH inq, com, u, res
+  MERGE (com)-[r:answers]->(inq)
+WITH inq, com, u, res
+  MERGE (u)-[r:writes]->(com)
+RETURN {
+  id: id(com),
+  props: com,
+  written_by: u,
+  answering: inq,
+  questioning: res
+} as result
+
+
+
 // name: remove_inquiry
 // WARNING!!!! destroy everything related to the inquiry, as if it never existed. Should not be used while comments are in place
 MATCH (n:inquiry)
 WHERE id(n) = {id}
-OPTIONAL MATCH (n)-[r]-()
-DELETE n, r
+
+OPTIONAL MATCH (n)-[r1]-(com:comment)-[r2]-()
+OPTIONAL MATCH (n)-[r3]-()
+DELETE n, r1, com, r2, r3

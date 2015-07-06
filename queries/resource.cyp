@@ -60,6 +60,7 @@ START res=node({id})
 MATCH (res:resource)
 {?res:start_time__gt} {AND?res:end_time__lt}
 WITH res
+  ORDER BY res.creation_date DESC
   SKIP {offset} 
   LIMIT {limit}
 OPTIONAL MATCH (res)-[r2:appears_in]-(loc:`location`)
@@ -68,6 +69,7 @@ OPTIONAL MATCH (res)-[r3:appears_in]-(per:`person`)
     RETURN {
       id: id(res),
       props: res,
+      type: 'resource',
       locations: collect(DISTINCT loc),
       persons: collect(DISTINCT per)
     } as r
@@ -216,15 +218,42 @@ RETURN col
 MERGE (res:resource {doi:{doi}})
   ON CREATE set
     res.name = {name},
-    res.caption = {caption},
-    res.source = {source},
-    res.mimetype = {mimetype}
+    res.mimetype = {mimetype},
+    res.creation_date = {creation_date},
+    res.creation_time = {creation_time},
+    res.languages = {languages},
+    {if:start_time}
+      res.start_time = {start_time},
+      res.end_time   = {end_time},
+      res.start_date = {start_date},
+      res.end_date   = {end_date},
+      res.date       = {text_date},
+    {/if}
+    {each:language in languages} 
+      res.{:title_%(language)} = {{:title_%(language)}},
+      res.{:caption_%(language)} = {{:caption_%(language)}}
+    {/each}
   ON MATCH set
     res.name = {name},
-    res.caption = {caption},
-    res.source = {source},
-    res.mimetype = {mimetype}
-RETURN res
+    res.mimetype = {mimetype},
+    res.creation_date = {creation_date},
+    res.creation_time = {creation_time},
+    res.languages = {languages},
+    {if:start_time}
+      res.start_time = {start_time},
+      res.end_time   = {end_time},
+      res.start_date = {start_date},
+      res.end_date   = {end_date},
+      res.date       = {text_date},
+    {/if}
+    {each:language in languages} 
+      res.{:title_%(language)} = {{:title_%(language)}},
+      res.{:caption_%(language)} = {{:caption_%(language)}}
+    {/each}
+RETURN {
+  id: id(res),
+  props: res
+}
 
 
 // name: merge_resource

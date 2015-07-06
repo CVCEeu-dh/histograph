@@ -25,8 +25,16 @@ module.exports = {
         };
     
     return cypherQuery
-        .replace(/\n/g, ' ')
-        .replace(/\{each:([a-zA-Z_]+)\sin\s([a-zA-Z_]+)\}(.*)\{\/each\}/g, function (m, item, collection, contents) {
+        .replace(/[\n\r]/g, ' ')
+        .replace(/\{if:([a-zA-Z_]+)\}((?:(?!\{\/if).)*)\{\/if\}/g, function (m, item, contents) {
+          // replace if template.
+          // console.log(arguments)
+          if(filters[item])
+            return module.exports.agentBrown(contents, filters);
+          else 
+            return '';
+        })
+        .replace(/\{each:([a-zA-Z_]+)\sin\s([a-zA-Z_]+)\}((?:(?!\{\/each).)*)\{\/each\}/g, function (m, item, collection, contents) {
           // replace loop {each:language in languages} {:title_%(language)} = {{:title_%(language)}} {/each} with join.
           // produce something like
           // title_en = {title_en}, title_fr = {title_fr}

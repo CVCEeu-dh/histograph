@@ -42,6 +42,32 @@ module.exports = function(io) {
         return helpers.models.getMany(err, res, items, form.params);
       });
     },
+    /*
+      create a new comment on this inquiry
+    */
+    createComment: function (req, res) {
+      var form    = validator.request(req);
+      
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      inquiry.createComment(+form.params.id, {
+        content: form.params.content,
+        user: req.user
+      }, function (err, comment) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        io.emit('done:create_comment', {
+          user: req.user.username,
+          doi: +req.params.id, 
+          data: inquiry
+        });
+        return res.ok({
+          item: comment
+        });
+      })
+    },
+    
     
     /*
       create an inquiry. Cfr resource create related inquiry instead.

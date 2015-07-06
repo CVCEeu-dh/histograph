@@ -98,6 +98,19 @@ describe('model:inquiry ', function() {
     })
   });
   
+  it('should create a comment for the new inquiry', function (done) {
+    inquiry.createComment(__inq.id, {
+      content: 'This is a comment for test inquiry',
+      user: __user
+    }, function (err, com) {
+      if(err)
+        throw err;
+      should.equal(com.props.content, 'This is a comment for test inquiry');
+      done()
+    })
+  });
+  
+  
   it('should delete the user', function (done) {
     user.remove({email: __user.email}, function (err) {
       if(err)
@@ -120,7 +133,7 @@ describe('model:inquiry ', function() {
     })
   });
   
-  it('should throw a not found since the inquiry has already been created', function (done) {
+  it('should throw a not found since the inquiry has just been removed', function (done) {
     inquiry.get(__inq.id, function (err) {
       should.exist(err);
       should.equal(err, 'is_empty')

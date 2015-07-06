@@ -427,6 +427,24 @@ describe('controllers: inquiries', function() {
       });
   })
   
+  it('should create a new comment', function (done) {
+    session
+      .post('/api/inquiry/' + __inquiry.id + '/related/comment')
+      .send({
+        content: 'this is a test comment'
+      })
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exist(err);
+        
+        if(err)
+          console.log(err)   
+        
+        done();
+      });
+  })
+  
   it('should get the inquiry just created', function (done) {
     session
       .get('/api/inquiry/' + __inquiry.id)
@@ -735,7 +753,8 @@ describe('controllers: delete the user and their relationships', function() {
   });
   
   it('should remove the inquiries created by the hello-world user', function (done) {
-    neo4j.query('MATCH (n:user {username:{username}})-[r]-(inq:inquiry)-[r2:questions]-() DELETE inq, r2, r', {
+    neo4j.query('MATCH (n:user {username:{username}})-[r]-(inq:inquiry)-[r2:questions]-()' +
+      ' OPTIONAL MATCH (inq)-[r3]-(com:comment)-[r4]-() DELETE inq, r2, r, com, r3, r4', {
       username: 'hello-world'
     }, function(err, res) {
       if(err)

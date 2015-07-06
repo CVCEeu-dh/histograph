@@ -489,6 +489,22 @@ module.exports = {
           languages = langdetect.detect(text);
       return languages.length? _.first(_.first(languages)) : (defaultLanguage || 'en');
     },
+    
+    slugify:function(text) {
+      var from = 'àáäâèéëêìíïîòóöôùúüûñç',
+          to   = 'aaaaeeeeiiiioooouuuunc',
+          text = text.toLowerCase();
+          
+      for (var i=0, l=from.length ; i<l ; i++) {
+        text = text.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i));
+      }
+      
+      return text.toLowerCase()
+        .replace(/[^a-z]/g, '-')
+        .replace(/-{1,}/g,'-')
+        .replace(/-$/,'')
+        .replace(/^-/, '');
+    },
     /*
       Transform spaces in undescore a url in a wiki url
       accordiong to http://en.wikipedia.org/wiki/Wikipedia:Page_name#Spaces.2C_underscores_and_character_coding
