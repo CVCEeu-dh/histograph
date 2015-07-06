@@ -82,10 +82,9 @@ WITH inq, u, res
       com.language      = {language},
       com.creation_date = {creation_date},
       com.creation_time = {creation_time},
-      com.answered_by   = {username}
-    ON MATCH SET
-      com.content       = {content},
-      com.language      = {language}
+      com.answered_by   = {username},
+      com.score         = 0,
+      com.celebrity     = 0
 WITH inq, com, u, res
   MERGE (com)-[r:answers]->(inq)
 WITH inq, com, u, res
@@ -99,7 +98,31 @@ RETURN {
 } as result
 
 
+// name: merge_inquiry_vote
+MATCH (inq:inquiry)--(res:resource), (u:user {username: {username}})
+WHERE id(inq) = {id}
+  MERGE (u)-[r:follows]->(inq)
+WITH inq, u, res
+  MERGE (com:comment:vote {slug: {slug}})
+    ON CREATE SET
+      com.content = {content},
+      com.creation_date = {creation_date},
+      com.creation_time = {creation_time}
+    ON MATCH SET
+      com.content = {content},
+      com.last_modification_date = {last_modification_date},
+      com.last_modification_time = {last_modification_time}
+WITH inq, u, res, com
+  MERGE (u)-[r:votes]->(com)-[r:discusses]->(inq)
+RETURN {
+  id: id(com),
+  props: com,
+  written_by: u,
+  answering: inq,
+  questioning: res
+} as result
 
+  
 // name: remove_inquiry
 // WARNING!!!! destroy everything related to the inquiry, as if it never existed. Should not be used while comments are in place
 MATCH (n:inquiry)

@@ -1,12 +1,17 @@
-
-<div ng-if="relatedItem.proposed_by.picture" class="profile-pic">
+<div class="related inquiry">
+<!-- <div ng-if="relatedItem.proposed_by.picture" class="profile-pic">
   <div class="profile-pic-wrapper">
     
     <img ng-src="{{relatedItem.proposed_by.picture}}">
   </div>
+</div> -->
+  <div class="type">inquiry</div>
+  <h4>
+    <a ng-href="#/i/{{relatedItem.id}}" ng-bind-html="relatedItem.props.name | marked"></a>
+  </h4>
+  
+  <div class="author"> by <a ng-href="/#/u/{{inquiry.proposed_by.username}}">{{relatedItem.proposed_by.username}}</a> — {{relatedItem.props.creation_date | date : 'longDate'}}, <b>{{relatedItem.answers}} </b> answers
+  </div>
+  <div class="content" ng-bind-html="relatedItem.props.description | marked"></div>
+  <div class="more"><a ng-href="#/i/{{relatedItem.id}}">read more, or propose an answer</a></div>
 </div>
-{{relatedItem.proposed_by.username}} — {{relatedItem.props.creation_date | date : 'longDate'}}
-<h4>
-  <a ng-href="#/i/{{relatedItem.id}}" ng-bind-html="relatedItem.props.name | marked"></a>
-</h4>
-<blockquote ng-bind-html="relatedItem.props.description | marked"></blockquote>

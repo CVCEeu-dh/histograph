@@ -5,7 +5,7 @@
  * # IndexCtrl
  */
 angular.module('histograph')
-  .controller('InquiryCtrl', function ($scope, $log, $routeParams, inquiry, ResourceFactory, InquiryRelatedFactory, socket) {
+  .controller('InquiryCtrl', function ($scope, $log, $routeParams, inquiry, ResourceFactory, CommentFactory, InquiryRelatedFactory, socket) {
     $log.debug('InquiryCtrl reource id:', $routeParams.id, 'inquiry loaded', inquiry);
     
     $scope.comment = {};
@@ -27,6 +27,24 @@ angular.module('histograph')
         $scope.comment = {};  
       })
     };
+    /**
+      vote up
+    */
+    $scope.upvote = function(comment) {
+      console.log(comment)
+      CommentFactory.upvote(comment).then(function(res) {
+        console.log(res)
+      });
+    }
+    $scope.downvote = function(comment) {
+      console.log(comment)
+      CommentFactory.downvote(comment).then(function(res) {
+        console.log(res)
+      });
+    }
+    /**
+      vote down
+    */
     /**
       on load
     */

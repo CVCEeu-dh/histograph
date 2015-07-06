@@ -1,18 +1,20 @@
 <div id="perspective" class="{{queueStatus}}" ng-include src="'templates/partials/resource.html'"></div>
 <div id='see-also' class='{{currentCtrl}}' ng-cloak>
-  
-  <div class="related">  
-    <div ng-if="inquiry.proposed_by.picture" class="profile-pic">
+  <div ng-include src="'templates/partials/inquiry-toolbar.html'"></div>
+  <div class="related inquiry">
+    <div class="type">inquiry</div>
+    <h3 ng-bind-html="inquiry.props.name | marked"></h3>
+    <p class="subtitle">an inquiry on "{{item.props | title : language}}"</p>
+    <!-- <div ng-if="inquiry.proposed_by.picture" class="profile-pic">
       <div class="profile-pic-wrapper">
         
         <img ng-src="{{inquiry.proposed_by.picture}}">
       </div>
+    </div> -->
+    <div class="author"> by <a ng-href="/#/u/{{inquiry.proposed_by.username}}">{{inquiry.proposed_by.username}}</a> — {{inquiry.props.creation_date | date : 'longDate'}}, <b>{{inquiry.answers}} </b> answers
     </div>
-    {{inquiry.proposed_by.username}} — {{inquiry.props.creation_date | date : 'longDate'}}
-    <h4>
-      <a ng-href="#/i/{{inquiry.id}}" ng-bind-html="inquiry.props.name | marked"></a>
-    </h4>
-    <blockquote ng-bind-html="inquiry.props.description | marked"></blockquote>
+    
+    <div class="content" ng-bind-html="inquiry.props.description | marked"></div>
     
     <div ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/comment-lite.html"' class='comment'></div>
     

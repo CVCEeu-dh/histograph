@@ -135,7 +135,7 @@ module.exports = {
             check: 'isLength',
             args: [
               3,
-              160
+              500
             ],
             error: 'should be at least 3 to 160 chars',
             optional: true
@@ -145,7 +145,7 @@ module.exports = {
             check: 'isLength',
             args: [
               3,
-              250
+              2500
             ],
             error: 'should be at least 3 to 250 chars'
           },

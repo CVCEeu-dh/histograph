@@ -1,0 +1,7 @@
+<div class="toolbar">
+  <a ng-href="/#/r/{{item.id}}/inquiries"> inquiries ({{item.inquiries}})</a> 
+  <span ng-if="inquiry"> / {{inquiry.props.name}}</span> |
+  <a ng-href="#/r/{{item.id}}/new/inquiry">
+    create inquiry <i class="fa fa-comment-o"></i>
+  </a>
+</div>

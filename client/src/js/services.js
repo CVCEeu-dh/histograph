@@ -112,6 +112,19 @@ angular.module('histograph')
     });
   })
   /*
+    vote up vote down delete one comment
+  */
+  .factory('CommentFactory', function ($http) {
+    return {
+      upvote: function(options) {
+        return $http.post('/api/comment/' + options.id + '/upvote');
+      },
+      downvote: function(options) {
+        return $http.post('/api/comment/' + options.id + '/downvote');
+      },
+    }
+  })
+  /*
     Get/Update/Delete one resource
   */
   .factory('SuggestFactory', function ($http) {

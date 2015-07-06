@@ -17,7 +17,7 @@ html{
 }
 body{
   font-size: 12px;
-  line-height: 18px;
+  line-height: 20px;
   color: #1d1d1d;
   height: 100%;
   overflow: hidden;
@@ -220,7 +220,7 @@ a:hover{
   overflow-y: auto;
   overflow-x: hidden;
   background: white;
-  border-right: 1px solid #d4d4d4;
+  /*border-right: 1px solid #d4d4d4;*/
   -webkit-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1), width .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
      -moz-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1), width .3s cubic-bezier(0.65, 0.05, 0.36, 1);
        -o-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1), width .3s cubic-bezier(0.65, 0.05, 0.36, 1);
@@ -267,11 +267,18 @@ a:hover{
   overflow-x: hidden;
   padding: 0px 10px 0 25px;
   /*border-left: 1px solid #d4d4d4;*/
-  -webkit-transition: margin-left .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
+  /*-webkit-transition: margin-left .3s cubic-bezier(0.65, 0.05, 0.36, 1); 
    -moz-transition: margin-left .3s cubic-bezier(0.65, 0.05, 0.36, 1);
      -o-transition: margin-left .3s cubic-bezier(0.65, 0.05, 0.36, 1);
-        transition: margin-left .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+        transition: margin-left .3s cubic-bezier(0.65, 0.05, 0.36, 1);*/
 }
+
+#see-also .toolbar{
+  background-color: #E8E8E7;
+  margin: 10px 0;
+  padding: 10px;
+}
+
 #see-also.AllShortestPathsCtrl , #see-also.NeighborsCtrl {
   margin-left: 25%;
   width: 25%;
@@ -327,9 +334,13 @@ a:hover{
   margin: 20px 0px;
   background-color: white;
   padding: 20px 15px 1px 15px;
-  border: 1px solid #e8e8e8;
+  border: 1px solid white;
   background-clip: padding-box;
   border-radius: 2px;
+}
+
+.related .type{
+  color: #a5a5a5;
 }
 
 .related h4{
@@ -359,6 +370,55 @@ a:hover{
   width: 100%;
 }
 
+.inquiry {
+  padding: 0px;
+}
+
+.inquiry form {
+  margin: 10px 30px;
+}
+
+.inquiry .author{
+  margin: 10px 30px;
+}
+
+.inquiry h3{
+  margin: 10px 30px;
+  font-weight: bold;
+  font-size: 18px;
+  line-height: 24px;
+  color: #151515;
+}
+
+.inquiry h4{
+  margin: 10px 30px;
+}
+
+.inquiry .type {
+  margin: 30px 30px 0px 30px;
+}
+
+.inquiry .subtitle {
+  margin: 10px 30px;
+}
+
+.inquiry .more {
+  text-align:center;
+  margin: 10px 30px 20px 30px;
+}
+
+.inquiry blockquote{
+  font-style: normal;
+  margin-top: 10px;
+  position:relative;
+}
+
+.inquiry .content {
+  color: #101010;
+  font-style: normal;
+  margin: 10px 30px;
+  position:relative;
+}
 .related .profile-pic{
   border: 0px transparent;
   width: 40px;
@@ -371,16 +431,49 @@ a:hover{
   float: left;
 }
 
+.comment{
+  margin: 0px;
+  padding: 10px 0px;
+  border-top: 1px solid #e8e8e8;
+  position:relative;
+}
+
 .comment .profile-pic{
   border: 1px solid #d4d4d4;
   width: 16px;
   margin-left: 0;
-  border-radius: 0px;
+  border-radius: 16px;
   overflow: hidden;
   height: 16px;
   background: #d4d4d4;
   margin-right: 10px;
   float: left;
+}
+
+.comment > .inner{
+  padding-left: 35px;
+}
+.comment > .actions{
+  left: 0px;
+  top: 10px;
+}
+.comment > .actions button{
+  width: 25px;
+  height: 25px;
+  padding: 0;
+  text-align: center;
+  line-height: 25px;
+}
+.comment > .actions div{
+  width: 25px;
+  height: 25px;
+  padding: 0;
+  text-align: center;
+  line-height: 25px;
+}
+.comment > .actions button .fa{
+  font-size: 20px;
+  line-height: 20px;
 }
 
 .username{
@@ -491,11 +584,7 @@ a:hover{
   line-height: inherit
 }
 
-.comment{
-  margin: 10px;
-  padding: 7px 6px 3px 6px;
-  border-top: 1px solid #e8e8e8;
-}
+
 
 /*
   
@@ -867,6 +956,9 @@ a:hover{
   ~~~~~~~~~~~~~~~~~~~~~~~~
   
 */
+.tooltip {
+  pointer-events: none;
+}
 .tooltip .tooltip-inner {
   line-height: 18px;
   font-size: 12px;

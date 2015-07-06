@@ -120,6 +120,8 @@ angular.module('histograph')
   // according to language, give the title a real title
   .filter('title', function($sce) {
     return function(props, language, cutAt) {
+      if(!props)
+        return "";
       var primary = props['title_' + language],
           wrapper = function(text) {
             // cutat
@@ -229,7 +231,6 @@ angular.module('histograph')
   */
   .filter('marked', function ($sce) {
     return function(text) {
-      console.log(marked(text))
       if(typeof text == 'string')
         return $sce.trustAsHtml(marked(text));
       else '';
