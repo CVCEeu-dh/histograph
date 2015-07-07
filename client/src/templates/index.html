@@ -1,0 +1,8 @@
+<!-- <div id="perspective" class="{{queueStatus}}" ng-include src="'templates/partials/resource.html'"></div> -->
+
+<div id='see-also' class='{{currentCtrl}}' ng-cloak>
+  <div ng-include src="'templates/partials/resource-toolbar.html'"></div>
+  <div ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/resource-lite.html"'></div>
+</div>
+
+  

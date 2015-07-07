@@ -8,6 +8,21 @@
  *
  * Main module of the application.
  */
+ CodeMirror.defineSimpleMode("hg", {
+    start: [
+      { regex: /#/,    push: "tag", token: "tag" },
+      { regex: /@/,    push: "user", token: "comment" }
+    ],
+    tag: [
+      { regex: /\s/, pop: true, token: "tag" },
+      { regex: /./, token: "tag" }
+    ],
+    user: [
+      { regex: /\s/, pop: true, token: "comment" },
+      { regex: /./, token: "comment" }
+    ]
+  });
+
 angular
   .module('histograph', [
     'ngRoute',

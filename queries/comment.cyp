@@ -10,7 +10,7 @@ RETURN count(*)
 MATCH (com:comment)--(n)
 {?n:related_to__ID}
 WITH com, n 
-ORDER BY com.creation_time DESC
+ORDER BY com.score DESC, com.celebrity DESC, com.creation_time ASC
 SKIP {offset}
 LIMIT {limit}
 WITH com, n

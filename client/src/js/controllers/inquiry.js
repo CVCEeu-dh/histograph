@@ -56,6 +56,8 @@ angular.module('histograph')
       $scope.item = data.result.item;
     });
     
+    // list of ids, without any scope
+    var relatedItemsIds = [];
     
     // load related items
     InquiryRelatedFactory.get({
@@ -63,14 +65,42 @@ angular.module('histograph')
       model: 'comment'
     }, function(data) {
       $scope.relatedItems = data.result.items;
+      relatedItemsIds = data.result.items.map(function (d) {return d.id});
     })
     
-    // listeners for creations
+    /*
+      listeners for creations
+    */
     socket.on('done:create_comment', function (result) {
       // a comment has been added.
       $log.log('socket@done:create_comment / InquiryCtrl', result);
+      if(result.doi == $scope.inquiry.id) {
+        InquiryRelatedFactory.get({
+          id: +$scope.inquiry.id,
+          model: 'comment'
+        }, function(data) {
+          $scope.relatedItems = data.result.items;
+        })
+      }
+      // create and sort?
+      // if(relatedItemsIds.indexOf(result.data.id) == -1
+      // for(var i in $scope.relatedItems) {
+      //   if($scope.relatedItems[i].id == result.data.id) {
+      //     $scope.relatedItems[i] = result.data;
+      //   }
+      // }
     });
     
+    socket.on('done:update_comment', function (result) {
+      // check if you're looking at the same
+      $log.log('socket@done:update_comment / InquiryCtrl #comment_id =', result.data.id);
+      
+      for(var i in $scope.relatedItems) {
+        if($scope.relatedItems[i].id == result.data.id) {
+          $scope.relatedItems[i] = result.data;
+        }
+      }
+    });
     
      // new inquiry
     /*

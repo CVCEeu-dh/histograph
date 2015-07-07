@@ -283,7 +283,7 @@ angular.module('histograph')
       $log.debug('CoreCtrl @locationChangeSuccess', path);
       
       var now = (new Date()).getTime();
-      $scope.showSpinner = false;
+      $scope.showSpinner = true;
       if(!$scope.trails.length) { // hey this is your first trail
         $scope.trails.push(new Trail(path, now));
         return;

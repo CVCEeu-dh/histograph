@@ -20,7 +20,7 @@
     
     <form>
       <h4>propose your answer</h4>
-      <div ng-model='comment.content' ui-codemirror='{lineNumbers: false, lineWrapping : true, mode: "xml"}'></div>
+      <div ng-model='comment.content' mirror="getHints(query, type)" ui-codemirror='{lineNumbers: false, lineWrapping : true, mode: "hg"}'></div>
       <div style='text-align:center; margin-top: 10px'>
         <div class='btn-group' role='group' aria-label='...'>
           <button class='btn btn-primary' ng-click='createComment()'>
