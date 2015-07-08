@@ -6,8 +6,10 @@
  */
 angular.module('histograph')
   .controller('SearchCtrl', function ($scope, $log, $routeParams, socket, resources, SuggestFactory) {
-    $log.debug('SearchCtrl ready', $routeParams.query, resources);
+    $log.debug('SearchCtrl ready, query "', $routeParams.query, '" matches', resources.data.info.total_count, 'documents');
     
+    $scope.pagetitle = 'documents found';
+    $scope.totalItems = resources.data.info.total_count;
     $scope.setRelatedItems(resources.data.result.items);
     
     $scope.setRelatedPagination({

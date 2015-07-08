@@ -25,6 +25,7 @@ angular.module('histograph')
       link : function(scope, element, attrs) {
         var _gasp = $(element[0]), // gasp instance;
             type,            // element type
+            id,              // element id
             parent = {
               type: '',
               id: ''
@@ -39,6 +40,13 @@ angular.module('histograph')
           Show gasp instance
         */
         function show() {
+          // build link acording to type.
+          console.log(type, id, parent.type, parent.id);
+          if(type == 'person') {
+            _gasp.find('[data-action=link]').attr('href', '/#/e/'+id)
+          } else {
+            _gasp.find('[data-action=link]').href()
+          }
           _gasp.css({
             top: pos.top - 80,
             left: pos.left
@@ -62,6 +70,7 @@ angular.module('histograph')
           var el    = $(e.target);
           
           type  = el.attr('gasp-type'); // should be something of date, location, person, etc ...
+          id    = el.attr('data-id');
           
           if(!type) {
             hide()
@@ -74,20 +83,34 @@ angular.module('histograph')
             };
             pos   = { 
               top: e.clientY ,
-              left: e.clientX - 80
+              left: e.clientX - 40
             },
             width = el.width();
           
             $log.log(':: gasper @click', el.attr('gasp-type'));
-          
+            
             show();
           }
         });
-        $('body').on('mouseleave', '[gasp-type]', function(e) {
-          setTimeout(function(){
-            hide();
-          }, 2000);
+        _gasp.find('[data-action=queue]').click(function() {
+          if(id)
+            scope.queue({
+              item: id,
+              inprog: true
+            });
+          else
+            $log.error('cannot queue the give item, id is', id);
         })
+        // $('body').on('mouseleave', '[gasp-type]', function(e) {
+        //   setTimeout(function(){
+        //     hide();
+        //   }, 2000);
+        // })
+        //  $('body').on('mouseenter', '[gasp-type]', function(e) {
+        //   setTimeout(function(){
+        //     hide();
+        //   }, 2000);
+        // })
         /*
           Listener: element click
         */
