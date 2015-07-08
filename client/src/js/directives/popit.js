@@ -10,6 +10,90 @@
  * Quietly used by CoreCtrl.
  */
 angular.module('histograph')
+  /*
+    Jquery Popup.
+  */
+  .directive('gasp', function ($log) {
+    return {
+      restrict : 'A',
+      scope:{
+        target: '=',
+        comment: '&comment',
+        redirect: '&',
+        queue : '&'
+      },
+      link : function(scope, element, attrs) {
+        var _gasp = $(element[0]), // gasp instance;
+            type,            // element type
+            parent = {
+              type: '',
+              id: ''
+            },              // target parent id (e.g. 'resource-1232324')
+            width = 0,             //target width
+            pos   = {              // target center offset relative to the center-middle positon;
+              left: 0,
+              top: 0
+            };
+        
+        /*
+          Show gasp instance
+        */
+        function show() {
+          _gasp.css({
+            top: pos.top - 80,
+            left: pos.left
+          }).show();
+        }
+        
+        function hide() {
+          _gasp.hide(); 
+        }
+        
+        $log.log(':: gasp init');
+        
+        function getGasp() {
+          
+        }
+        /*
+          Listener: body.click
+        */
+        $('body').on('click', function(e) {
+          console.log(arguments)
+          var el    = $(e.target);
+          
+          type  = el.attr('gasp-type'); // should be something of date, location, person, etc ...
+          
+          if(!type) {
+            hide()
+          } else {
+           
+            var parent_parts = el.attr('gasp-parent').split('-');
+            parent  = {
+              type: parent_parts[0],
+              id:   parent_parts[1] 
+            };
+            pos   = { 
+              top: e.clientY ,
+              left: e.clientX - 80
+            },
+            width = el.width();
+          
+            $log.log(':: gasper @click', el.attr('gasp-type'));
+          
+            show();
+          }
+        });
+        $('body').on('mouseleave', '[gasp-type]', function(e) {
+          setTimeout(function(){
+            hide();
+          }, 2000);
+        })
+        /*
+          Listener: element click
+        */
+      }
+    }
+  })
   .directive('popit', function($log, $window) {
     return {
       restrict : 'A',

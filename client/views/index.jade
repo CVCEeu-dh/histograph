@@ -81,8 +81,10 @@ html
             h5 welcome to histograph
             form
               div(class="btn-group-vertical", role="group")
-                a(ng-href='/auth/twitter?next={{locationPath}}', class='btn btn-default') login with twitter
-                a(ng-href='/auth/google?next={{locationPath}}', class='btn btn-default') login with google plus
+                a(ng-href='/auth/twitter?next={{locationPath}}', class='btn btn-default') login with twitter 
+                  i(class='fa fa-twitter')
+                a(ng-href='/auth/google?next={{locationPath}}', class='btn btn-default') login with google 
+                  i(class='fa fa-google-plus')
       else
         div(class='view {{currentCtrl}} {{queueStatus}}')
           div(ng-view, autoscroll='true')
@@ -140,7 +142,18 @@ html
           
         div(id='timeline', timeline, t='timeline', cxt='contextualTimeline')
           
-        div(id='pop', popit, target="target", redirect='redirect(path)', comment="startCommenting(item, tag, hashtag)", queue="queue(item, inprog)")
+        div(id='pop', gasp, target="target", redirect='redirect(path)', comment="startCommenting(item, tag, hashtag)", queue="queue(item, inprog)")
+          div(class='action-group')
+            a(class=' action', title='visit', data-action='link', tooltip='visit entity page')
+              span(class='fa fa-link')
+            a(class=' action', title='vote up')
+              span(class='fa fa-thumbs-o-down')
+            a(class=' action queue', tooltip="add to your current playlist", data-action='queue')
+              span(class='fa fa-play-circle-o')
+            a(class=' action', title='comment', data-action='comment')
+              span(class='fa fa-comment-o')
+        
+         div(id='popit', popit, target="target", redirect='redirect(path)', comment="startCommenting(item, tag, hashtag)", queue="queue(item, inprog)")
           div(class='action-group')
             a(class=' action', title='visit', data-action='link', tooltip='visit entity page')
               span(class='fa fa-link')
