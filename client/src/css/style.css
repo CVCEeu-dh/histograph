@@ -70,9 +70,9 @@ blockquote{
 }
 
 a{
-  color: #B02824;
+  color: #FF5742;
 }
-a:hover{
+a:focus, a:hover{
   color: #151515;
   border-bottom: 1px solid #151515;
   text-decoration: none;
@@ -225,11 +225,15 @@ a:hover{
   overflow-y: auto;
   overflow-x: hidden;
   background: white;
-  /*border-right: 1px solid #d4d4d4;*/
+  border-right: 1px solid #E8E8E7;
   -webkit-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1), width .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
      -moz-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1), width .3s cubic-bezier(0.65, 0.05, 0.36, 1);
        -o-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1), width .3s cubic-bezier(0.65, 0.05, 0.36, 1);
           transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1), width .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+}
+
+#perspective.secondary{
+    background: transparent;
 }
 
 #perspective.reduced{
@@ -257,7 +261,9 @@ a:hover{
   width: 50%;
 }
 
-
+#perspective .related{
+  margin: 20px 20px;
+}
 /*
 
   related items
@@ -278,12 +284,24 @@ a:hover{
         transition: margin-left .3s cubic-bezier(0.65, 0.05, 0.36, 1);*/
 }
 
-#see-also .toolbar{
-  background-color: #E8E8E7;
-  margin: 10px 0;
+.toolbar{
+  color: white;
+  margin: 20px 0 10px 0;
   padding: 10px;
 }
 
+.toolbar .wrapper{
+  text-align: center;
+}
+
+.toolbar h2{
+  color: #151515;
+  font-size: 13px;
+  text-align: center;
+  margin: 0 10px 5px 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e8e8e8;
+}
 #see-also.AllShortestPathsCtrl , #see-also.NeighborsCtrl {
   margin-left: 25%;
   width: 25%;
@@ -295,10 +313,10 @@ a:hover{
 #see-also.SearchCtrl {
   margin-left:0;
 }
-#see-also.IndexCtrl {
+/*#see-also.IndexCtrl {
   margin-left:0%;
   width: 30%;
-}
+}*/
 
 #inquiry-name{
   width: 100%;
@@ -339,7 +357,7 @@ a:hover{
   margin: 20px 0px;
   background-color: white;
   padding: 20px 15px 1px 15px;
-  border: 1px solid white;
+  border: 1px solid #E8E8E7;
   background-clip: padding-box;
   border-radius: 2px;
 }
@@ -363,13 +381,23 @@ a:hover{
 
 .related .actions {
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 10px;
+  right: 10px;
 }
 
 .related .actions .action{
-    border-radius: 0;
+  border-radius: 30px;
   border-width: 0;
+  border: 1px solid #E8E8E7;
+  color: #a5a5a5;
+  width: 30px;
+  padding: 0px;
+  height: 30px;
+}
+
+.related .actions .action:hover{
+  border: 1px solid #d4d4d4;
+  color: #151515;
 }
 
 .related img{
@@ -506,6 +534,14 @@ a:hover{
 #inquirer.commenting{
   display: block;
 }
+/*
+  Empty list
+  ~~~~~~~~~~
+*/
+.empty-list{
+  text-align: center;
+  margin: 20px;
+}
 
 /*
   
@@ -530,9 +566,9 @@ a:hover{
   left: 50%;
 }
 
-#milkyway.IndexCtrl{
+/*#milkyway.IndexCtrl{
   left: 30%;
-}
+}*/
 
 #milkyway.InquiriesCtrl, #milkyway.InquiryCtrl, #milkyway.InquiryCreateCtrl{
   display: none;
@@ -4346,7 +4382,8 @@ Copyright (c) 2015 Daniel Eden
   background-color: #E8E8E7;
   z-index: 4;
   height: 50px;
-  
+  border-bottom: 1px solid #d4d4d4;
+  /*box-shadow:0 1px 6px rgba(0,0,0,.16)*/
 }
 #timeline svg{
   background-color: #d8d8d8;
@@ -4365,7 +4402,7 @@ Copyright (c) 2015 Daniel Eden
 #timeline .date{
   position: absolute;
   width: 110px;
-  top: 20px;
+  top: 15px;
 }
 
 #timeline .date.left{
@@ -4390,4 +4427,35 @@ Copyright (c) 2015 Daniel Eden
   stroke: #fff;
   fill-opacity: .125;
   shape-rendering: crispEdges;
+}
+
+
+/*
+  Bootstrap: pagination;
+
+*/
+.pagination{
+  margin: 0px;
+  background: transparent
+}
+.pagination-sm>li>a, .pagination-sm>li>span {
+  padding: 0;
+  font-size: 12px;
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  line-height: 25px;
+  border: 0px transparent;
+  background: transparent;
+  color: #505050;
+  border-bottom: 1px solid transparent;
+}
+.pagination>.active>a, .pagination>.active>a:focus, .pagination>.active>a:hover, .pagination>.active>span, .pagination>.active>span:focus, .pagination>.active>span:hover{
+  border-bottom: 1px solid #424242;
+  background: transparent;
+  color: #151515;
+}
+.pagination>.disabled>a, .pagination>.disabled>a:focus, .pagination>.disabled>a:hover, .pagination>.disabled>span, .pagination>.disabled>span:focus, .pagination>.disabled>span:hover{
+  background-color: transparent;
+  border: 0px transparent;
 }

@@ -1,7 +1,14 @@
-<div class="toolbar">
+<!-- <div class="toolbar">
   <a ng-href="/#/r/{{item.id}}/inquiries"> inquiries ({{item.inquiries}})</a> 
   <span ng-if="inquiry"> / {{inquiry.props.name}}</span> |
   <a ng-href="#/r/{{item.id}}/new/inquiry">
     create inquiry <i class="fa fa-comment-o"></i>
   </a>
+</div> -->
+<div class="toolbar tk-proxima-nova">
+  <h2>{{totalItems}} {{pagetitle}}</h2> 
+  <div class="wrapper">
+  <pagination boundary-links="true" total-items="totalItems" ng-model="currentPage" class="pagination-sm" max-size="4" previous-text="&lsaquo;" rotate="true" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></pagination>
+  </div>
+  
 </div>

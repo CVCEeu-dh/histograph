@@ -1,5 +1,11 @@
 <div id="perspective" class="{{queueStatus}} reduced">
-  elements in queue
+  <div class="toolbar tk-proxima-nova">
+    <h2>starting from {{playlist.length}} elements</h2> 
+    <!-- <div class="wrapper">
+      <pagination boundary-links="true" total-items="totalItems" ng-model="currentPage" class="pagination-sm" max-size="4" previous-text="&lsaquo;" rotate="true" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></pagination>
+    </div>  -->
+  </div>
+  
   <div class="related" ng-repeat="relatedItem in playlist" ng-if="relatedItem.type == 'resource'" data-id='{{relatedItem.id}}'>
        
     <h4>
@@ -50,4 +56,12 @@
               
     <a data-id='{{relatedItem.id}}'>view on graph</a>
   </div>
+</div>
+<div id='see-also' class='{{currentCtrl}}' ng-cloak>
+  <div ng-include src="'templates/partials/resource-toolbar.html'"></div>
+  <div class="empty-list" ng-if="relatedItems.length == 0">
+    Your path did not match any <i>documents</i>. <span ng-if="relatedEntities && relatedEntities.length > 0">
+    There are {{relatedEntities.length}} <i>entities</i> in your path, but at the moment we do not support this feature!
+  </div>
+  <div ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/resource-lite.html"'></div>
 </div>

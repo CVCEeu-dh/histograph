@@ -6,8 +6,17 @@
  */
 angular.module('histograph')
   .controller('ResourceCtrl', function ($scope, $log, $routeParams, $filter, resource, resources, ResourceVizFactory, ResourceCommentsFactory, socket) {
-    $log.debug('ResourceCtrl ready', $routeParams.id, 'loaded', resource.result.item.id);
-
+    $log.debug('ResourceCtrl ready');
+    
+    /*
+      set see also title
+    */
+    $scope.pagetitle = 'related documents';
+    /*
+      set pagination
+    */
+    $scope.totalItems = resources.info.total_items;
+    $scope.currentPage = 1
     /*
       Set graph title
     */

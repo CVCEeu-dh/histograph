@@ -1,5 +1,14 @@
 <!-- <div id="perspective" class="{{queueStatus}}" ng-include src="'templates/partials/resource.html'"></div> -->
-
+<div id="perspective" class="secondary {{queueStatus}}">
+  
+  <div class="toolbar tk-proxima-nova">
+  <h2>{{totalItems}} inquiries</h2> 
+    <div class="wrapper">
+      <pagination boundary-links="true" total-items="totalItems" ng-model="currentPage" class="pagination-sm" max-size="4" previous-text="&lsaquo;" rotate="true" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></pagination>
+    </div> 
+  </div>
+  <div ng-repeat='relatedItem in inquiries' ng-include='"templates/partials/inquiry-lite.html"'></div>
+</div>
 <div id='see-also' class='{{currentCtrl}}' ng-cloak>
   <div ng-include src="'templates/partials/resource-toolbar.html'"></div>
   <div ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/resource-lite.html"'></div>

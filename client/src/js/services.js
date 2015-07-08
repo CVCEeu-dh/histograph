@@ -63,7 +63,6 @@ angular.module('histograph')
   .factory('ResourceRelatedFactory', function ($resource) {
     return $resource('/api/resource/:id/related/:model');
   })
-  
   /*
     POST Save a new inquiry (modify it) or GET list of inquiries
   */

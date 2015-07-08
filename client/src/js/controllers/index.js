@@ -5,12 +5,11 @@
  * # IndexCtrl
  */
 angular.module('histograph')
-  .controller('IndexCtrl', function ($scope, $log, $timeout, ResourcesFactory, CooccurrencesFactory, cleanService, EVENTS) {
+  .controller('IndexCtrl', function ($scope, $log, $timeout, ResourcesFactory, CooccurrencesFactory, cleanService, InquiryFactory, EVENTS) {
     
     $log.debug('IndexCtrl ready', $scope.params);
-    $scope.$parent.showSpinner = false;
     
-   
+    $scope.pagetitle = 'A list of resources to start with'
     /*
       Reload resources according to scope params
     */
@@ -23,6 +22,11 @@ angular.module('histograph')
         
         $scope.syncGraph();
       });
+      
+      InquiryFactory.get({limit: 20}, function(res) {
+        console.log(res);
+        $scope.inquiries = res.result.items
+      })
     };
     
     $scope.syncGraph = function() {

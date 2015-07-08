@@ -1,0 +1,8 @@
+<div id='see-also' class='{{currentCtrl}}' ng-cloak>
+  <div ng-include src="'templates/partials/resource-toolbar.html'"></div>
+  <div class="empty-list" ng-if="relatedItems.length == 0">
+    Your path did not match any <i>documents</i>. <span ng-if="relatedEntities && relatedEntities.length > 0">
+    There are {{relatedEntities.length}} <i>entities</i> in your path, but at the moment we do not support this feature!
+  </div>
+  <div ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/resource-lite.html"'></div>
+</div>

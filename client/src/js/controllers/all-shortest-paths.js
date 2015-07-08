@@ -12,6 +12,7 @@ angular.module('histograph')
     
     $scope.syncQueue($routeParams.ids);
     
+    $scope.pagetitle = 'documents on the path'
     /*
       Set graph title
     */
@@ -58,14 +59,22 @@ angular.module('histograph')
         
       }
     })
-    
-    // get ids to call
+    // get entities ids to load
+    $scope.relatedEntities = graph.nodes.filter(function (d) {
+      return d.type == 'location' || d.type == 'place' || d.type == 'person';
+    }).map(function (d) {
+      return d.id;
+    });
+    // get some resource ids to load
     var resourcesToLoad = graph.nodes.filter(function (d) {
       return d.type == 'resource';
     }).map(function (d) {
       return d.id;
     });
-    $log.log('AllShortestPathsCtrl load related items ',resourcesToLoad );
+    
+    $log.log('AllShortestPathsCtrl load related items ',resourcesToLoad.length );
+    
+    
     if(resourcesToLoad.length)
       ResourceFactory.get({
         id: resourcesToLoad.join(',')
