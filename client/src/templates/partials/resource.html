@@ -1,8 +1,13 @@
 <div ng-if="item" class="resource item">
-        <div class='counters'>
+        <!-- div class='counters'>
           <a ng-href='#/r/{{item.id}}/inquiries'><label>{{item.inquiries}}</label> inquiries </a><!-- <br/>
           <a ng-href='#/r/{{item.id}}/inquiries'>comments <label>{{item.comments}}</label></a> -->
           
+        <!-- /div -->
+        <div class="type">document
+          <span  ng-if="item.inquiries">—
+          <a ng-href='#/r/{{item.id}}/inquiries' tooltip="view the related {{item.inquiries}} inquiries"><label>{{item.inquiries}}</label> <i class="fa fa-comment"></i></a>
+          </span>
         </div>
         <h3 class="" data-id='{{item.id}}'><a ng-href="#/r/{{item.id}}" ng-bind-html="item.props | title:language"></a></h3>
         <div class="collections">
@@ -19,7 +24,7 @@
           
         
         <span ng-if="item.persons.length" class="tags"> — <i>in the document</i>:
-          <span ng-repeat="per in item.persons" data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.name}} - {{per.description}} ({{per.birth_date | date:"yyyy"}} - {{per.death_date | date:"yyyy"}})' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class='tag person'>{{per.name}}</span>
+          <span ng-repeat="per in item.persons" data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.name}} - {{per.description}} ({{per.birth_date | date:"yyyy"}} - {{per.death_date | date:"yyyy"}})' gasp-type='person-{{per.id}}' gasp-parent='{{item.type}}-{{item.id}}' class='tag person'>{{per.name}}</span>
         </span>
         <span ng-if="item.props.languages.length">  —  <i>available in</i>:
           <span ng-repeat="lang in item.props.languages" ng-click='setLanguage(lang)'>{{lang}} </span>

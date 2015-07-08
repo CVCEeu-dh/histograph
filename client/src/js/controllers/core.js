@@ -7,7 +7,7 @@
  * It is the parent of the other controllers.
  */
 angular.module('histograph')
-  .controller('CoreCtrl', function ($scope, $location, $route, $log, $timeout, $http, $routeParams, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, EVENTS, VIZ) {
+  .controller('CoreCtrl', function ($scope, $location, $timeout, $route, $log, $timeout, $http, $routeParams, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, EVENTS, VIZ, MESSAGES) {
     $log.debug('CoreCtrl ready');
     $scope.locationPath = $location.path(); 
     
@@ -217,6 +217,42 @@ angular.module('histograph')
       this.start = start;
     };
     
+    
+    /*
+    
+      The messenger
+      -------------
+    */
+    $scope.message = '';
+    $scope.messaging = false;
+    var _messengerTimer;
+    $scope.setMessage = function(message, timeout) {
+      timeout = timeout || 5000;
+      $scope.message = message;
+      $scope.messaging = true;
+      clearTimeout(_messengerTimer)
+      _messengerTimer = setTimeout(function() {
+        $scope.messaging = false;
+        $scope.$apply();
+      }, timeout)
+    };
+    
+    $scope.unsetMessage = function(message) {
+      if(message == $scope.message || !message) {
+        clearTimeout(_messengerTimer);
+        _messengerTimer = setTimeout(function() {
+          $scope.messaging = false;
+          $scope.$apply();
+        }, 1000);
+      }
+    }
+    
+    /*
+    
+      The authorizer
+      --------------
+    */
+    
     /*
     
       Events listeners
@@ -224,9 +260,11 @@ angular.module('histograph')
     
     */
     $scope.$on('$routeChangeSuccess', function(e, r) {
-      $log.debug('CoreCtrl @routeChangeSuccess', r.params, r.$$route.controller);
+      $log.log('CoreCtrl @routeChangeSuccess', r.params, r.$$route.controller);
       $scope.currentCtrl = r.$$route.controller;
-      $scope.showSpinner = false;
+      
+      $scope.unsetMessage();
+      // $scope.setMessage(MESSAGES.LOADED, 1500);
       
       // set initial params here
       $scope.params = cleanService.params(r.params)
@@ -263,6 +301,9 @@ angular.module('histograph')
       }
     });
     
+    $scope.$on(EVENTS.USER_NOT_AUTHENTIFIED, function (e) {
+      $scope.unsetMessage(MESSAGES.LOADING);
+    })
     /*
       listener $routeUpdate
       ---
@@ -280,10 +321,11 @@ angular.module('histograph')
     
     
     $scope.$on('$locationChangeSuccess', function(e, path) {
-      $log.debug('CoreCtrl @locationChangeSuccess', path);
+      $log.log('CoreCtrl @locationChangeSuccess', path);
       
       var now = (new Date()).getTime();
-      $scope.showSpinner = true;
+      
+      
       if(!$scope.trails.length) { // hey this is your first trail
         $scope.trails.push(new Trail(path, now));
         return;
@@ -312,7 +354,8 @@ angular.module('histograph')
     });
     
     $scope.$on('$locationChangeStart', function() {
-      $scope.showSpinner = true;
+      $log.log('CoreCtrl @locationChangeStart');
+      $scope.setMessage(MESSAGES.LOADING);
     });
      /*
     
@@ -416,6 +459,9 @@ angular.module('histograph')
         } else { // only for redirection purposes
           ids.push($scope.playlist[i].id);
         }
+      }
+      if($scope.playlist.length == 0) {
+        $scope.queueStatus = '';
       }
       if($scope.currentCtrl == 'NeighborsCtrl') {
         $log.log('    redirect to: /#/neighbors/'+ids.join(',')); 

@@ -35,10 +35,16 @@ angular
   ])
   .constant("EVENTS", {
     USE_USER: 'use_user',
+    USER_NOT_AUTHENTIFIED: 'user_not_authentified',
     API_PARAMS_CHANGED: 'api_params_changed'
   })
   .constant("VIZ", {
     TIMELINE: 'timeline'
+  })
+  .constant("MESSAGES", {
+    LOADING: 'loading, please wait',
+    LOADED: 'loaded',
+    AUTH_REQUIRED: 'please connect with your credentials'
   })
   .config(function ($routeProvider, $httpProvider) {
     $routeProvider
@@ -193,6 +199,7 @@ angular
         },
         responseError: function(rejection) {
           if(rejection.status === 403) {
+            $rootScope.$broadcast(EVENTS.USER_NOT_AUTHENTIFIED);
             $log.error('redirecting, authorization problems');
             // location.reload(true);
           }
