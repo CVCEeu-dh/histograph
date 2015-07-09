@@ -62,6 +62,12 @@ MATCH (res)
   WHERE id(res) = {doi}
 WITH inq, u, res
   MERGE (inq)-[r:questions]->(res)
+  ON CREATE SET
+    res.last_modification_date = {creation_date},
+    res.last_modification_time = {creation_time}
+  ON MATCH SET
+    res.last_modification_date = {creation_date},
+    res.last_modification_time = {creation_time}
 RETURN {
   id: id(inq),
   props: inq,

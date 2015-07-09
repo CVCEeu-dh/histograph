@@ -60,9 +60,10 @@ START res=node({id})
 MATCH (res:resource)
 {?res:start_time__gt} {AND?res:end_time__lt}
 WITH res
-  ORDER BY res.creation_date DESC
+  ORDER BY res.last_modification_time DESC, res.start_time DESC, res.creation_date DESC
   SKIP {offset} 
   LIMIT {limit}
+WITH res
 OPTIONAL MATCH (res)-[r2:appears_in]-(loc:`location`)
 OPTIONAL MATCH (res)-[r3:appears_in]-(per:`person`)
   WITH res, loc, per
@@ -73,6 +74,7 @@ OPTIONAL MATCH (res)-[r3:appears_in]-(per:`person`)
       locations: collect(DISTINCT loc),
       persons: collect(DISTINCT per)
     } as r
+  ORDER BY res.last_modification_time DESC
 
 
 // name: get_resources_by_ids
