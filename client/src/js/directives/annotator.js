@@ -128,7 +128,7 @@ angular.module('histograph')
             return text
           }
           // rewrite localentities better.
-          return '<a tooltip-append-to-body="true" data-type="'+ 
+          return '<a tooltip-append-to-body="true" gasp-type="'+ 
             localEntities.map(function (d){
               return d.type
             }).join(',') +'" data-id="' +href +'" tooltip="' +
@@ -142,7 +142,7 @@ angular.module('histograph')
           if(!val)
             return;
           // organise(merge) entitites
-          $log.log('::annotator @marked changed', val);
+          $log.log('::annotator @marked changed');
           
           entities = scope.context.locations.concat(scope.context.persons)
           

@@ -203,10 +203,20 @@ angular.module('histograph')
           stop();
           
           $log.log('::sigma @clickNode', e.data.node.id, e.data.node.type || 'entity', e.data.node.label);
+          
+          $('body').trigger('sigma.clickNode', {
+            type: e.data.node.type,
+            id: e.data.node.id,
+            captor: e.data.captor
+          })
+          
+          return;
           if(e.data.node.type == 'resource') {
             $log.log('::sigma redirect to', '/r/' + e.data.node.id);
             scope.redirect({path: '/r/' + e.data.node.id})
-          }  
+          }
+          
+          
           switch(e.data.node.type) {
             case 'person':
             case 'place':
@@ -228,8 +238,7 @@ angular.module('histograph')
         })
         
         si.bind('clickStage', function(e) {
-          scope.toggleMenu({});
-          scope.$apply();
+          $('body').trigger('sigma.clickStage');
         })
         
         /*

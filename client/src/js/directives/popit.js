@@ -22,6 +22,7 @@ angular.module('histograph')
         redirect: '&',
         queue : '&'
       },
+      template: '<div class="action-group"><a class="action" href="{{href}}" title="visit" data-action="link" tooltip="{{linkto}}"><span class="fa fa-link"></span></a><a class="action queue" tooltip="add to your current playlist" data-action="queue"><span class="fa fa-play-circle-o"></span></a>',
       link : function(scope, element, attrs) {
         var _gasp = $(element[0]), // gasp instance;
             type,            // element type
@@ -42,16 +43,31 @@ angular.module('histograph')
         function show() {
           // build link acording to type.
           console.log(type, id, parent.type, parent.id);
-          if(type == 'person') {
-            _gasp.find('[data-action=link]').attr('href', '/#/e/'+id)
-          } else {
-            _gasp.find('[data-action=link]').href()
+          switch(type) {
+            case 'person':
+            case 'place':
+            case 'location':
+            case 'personKnown':
+              scope.href = '/#/e/' + id;
+              scope.linkto = 'go to ' + type + ' page';
+              break;
+            case 'resource':
+            case 'resourceKnown':
+              scope.href = '/#/r/'+id;
+              scope.linkto = 'go to document page';
+              break;
+            default:
+              scope.href = '';
+              scope.linkto = "";
+              break;
           }
+          
+          scope.$apply();
           _gasp.css({
             top: pos.top - 80,
             left: pos.left
           }).show();
-        }
+        };
         
         function hide() {
           _gasp.hide(); 
@@ -74,12 +90,13 @@ angular.module('histograph')
           if(!type) {
             hide()
           } else {
-           
+            if(el.attr('gasp-parent')){
             var parent_parts = el.attr('gasp-parent').split('-');
             parent  = {
               type: parent_parts[0],
               id:   parent_parts[1] 
             };
+          }
             pos   = { 
               top: e.clientY ,
               left: e.clientX - 40
@@ -91,6 +108,24 @@ angular.module('histograph')
             show();
           }
         });
+        /*
+          Specific listener for sigma event
+        */
+        $('body').on('sigma.clickNode', function (e, data) {
+          $log.info(':: gasper @sigma.clickNode', data);
+          
+          pos = { 
+            top: data.captor.clientY ,
+            left: data.captor.clientX - 40
+          };
+          type = data.type;
+          id   = data.id;
+          show();
+        });
+        
+        $('body').on('sigma.clickStage', function() {
+          hide();
+        })
         _gasp.find('[data-action=queue]').click(function() {
           if(id)
             scope.queue({
