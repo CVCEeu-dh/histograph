@@ -25,7 +25,7 @@
           
         
         <span ng-if="item.persons.length" class="tags"> — <i>in the document</i>:
-          <span ng-repeat="per in item.persons"><span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.name}} - {{per.description}} ({{per.birth_date | date:"yyyy"}} - {{per.death_date | date:"yyyy"}})' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class='tag person'>{{per.name}}{{$last? '':  ', '}}</span></span>
+          <span ng-repeat="per in item.persons"><span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.props.name}} - {{per.props.description}} ({{per.props.birth_date | date:"yyyy"}} - {{per.props.death_date | date:"yyyy"}})' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class='tag person'>{{per.name}}{{$last? '':  ', '}}</span></span>
         </span>
         <span ng-if="item.props.languages.length">  —  <i>available in</i>:
           <span ng-repeat="lang in item.props.languages" ng-click='setLanguage(lang)'>{{lang}} </span>
