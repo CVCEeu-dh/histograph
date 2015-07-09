@@ -70,6 +70,13 @@ WITH ent, res, pla, per
 ORDER BY res.start_date DESC
 SKIP {offset} LIMIT {limit}
 
+
+// name:count_related_resources
+MATCH (ent)-[:appears_in]->(res:resource)
+WHERE id(ent) = {id}
+RETURN count(res) as total_items
+
+
 // name:get_graph
 // get lighter version for graph purposes, max 500 resources sorted by number of persons
 MATCH (ent)-[:appears_in]->(res:resource)

@@ -123,6 +123,10 @@ angular.module('histograph')
           
           // Reading new graph
           si.graph.clear().read(graph);
+          
+          // exit
+          if(si.graph.nodes().length == 0)
+            return;
           // calculate a default duration 
           layoutDuration = Math.max(Math.min(4* si.graph.nodes().length * si.graph.edges().length, maxlayoutDuration),minlayoutDuration)
           $log.log('::sigma n. nodes', si.graph.nodes().length, ' n. edges', si.graph.edges().length, 'runninn layout atlas for', layoutDuration/1000, 'seconds')

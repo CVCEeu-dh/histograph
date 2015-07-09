@@ -6,7 +6,7 @@
   </a>
 </div> -->
 <div class="toolbar tk-proxima-nova">
-  <h2>{{totalItems}} {{pagetitle}}</h2> 
+  <h2>{{totalItems}} {{pagetitle||'inquiries'}}</h2> 
   <div class="wrapper">
   <pagination boundary-links="true" total-items="totalItems" ng-model="currentPage" class="pagination-sm" max-size="4" previous-text="&lsaquo;" rotate="true" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></pagination>
   </div>

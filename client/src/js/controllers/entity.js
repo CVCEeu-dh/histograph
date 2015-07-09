@@ -12,6 +12,9 @@ angular.module('histograph')
     $scope.setRelatedItems(resources.result.items);
     $scope.relatedPersons    = persons.result.items;
     
+    $scope.pagetitle = 'related documents';
+    $scope.totalItems = resources.info.total_items;
+    
      /*
       Set graph title
     */

@@ -60,25 +60,44 @@ module.exports = {
       }));
     });
   },
-  getRelatedResources: function(id, properties, next) {
-    var options = _.merge({
-      id: +id,
-      offset: 0,
-      limit: 20
-    }, properties);
-
-    neo4j.query(queries.get_related_resources, options, function (err, items) {
+  getRelatedResources: function(properties, next) {
+    async.parallel({
+      totalItems: function(callback) {
+        neo4j.query(queries.count_related_resources,  {
+          id: properties.id
+        }, function (err, result) {
+          if(err)
+            callback(err);
+          else
+            callback(null, result.total_items);
+        });
+      },
+      items: function(callback) {
+        neo4j.query(queries.get_related_resources, {
+          id: properties.id,
+          limit: properties.limit,
+          offset: properties.offset
+        }, function (err, items) {
+          if(err)
+            callback(err)
+          else
+            callback(null, items.map(function (d) {
+              d.locations = _.values(d.locations || {});
+              d.persons   = _.values(d.persons || {});
+              d.places    = _.values(d.places || {});
+              return d;
+            }));
+        })
+      }
+    }, function (err, results) {
+      // results is now equals to: {one: 1, two: 2}
       if(err) {
         next(err);
-        return
+        return;
       }
-
-      next(null, items.map(function (d) {
-        d.locations = _.values(d.locations || {});
-        d.persons   = _.values(d.persons || {});
-        d.places    = _.values(d.places || {});
-        return d;
-      }));
+      next(null, results.items, {
+        total_items: results.totalItems
+      })
     });  
   },
   

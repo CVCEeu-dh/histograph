@@ -32,7 +32,11 @@ describe('model:entity ', function() {
   
   
   it('should return some related resources', function (done) {
-    entity.getRelatedResources(26706, {}, function (err, res){
+    entity.getRelatedResources({
+      id: 26706,
+      limit: 12,
+      offset: 0
+    }, function (err, res){
       should.not.exist(err, err);
       should.exist(res.length)
       done();
@@ -47,7 +51,11 @@ describe('model:entity ', function() {
   });
   
   it('should return some related persons', function (done) {
-    entity.getRelatedResources(26706, {}, function (err, res){
+    entity.getRelatedResources({
+      id: 26706,
+      limit: 12,
+      offset: 0
+    }, function (err, res){
       should.not.exist(err, err);
       should.exist(res.length)
       done();

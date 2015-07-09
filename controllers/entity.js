@@ -8,6 +8,8 @@ var settings   = require('../settings'),
     queries    = require('decypher')('./queries/resource.cyp'),
     parser     = require('../parser'),
     helpers    = require('../helpers'),
+    validator  = require('../validator'),
+     
     YAML       = require('yamljs'),
 
     _          = require('lodash'),
@@ -90,15 +92,18 @@ module.exports = function(io){
     },
     
     getRelatedResources: function (req, res) {
-      entity.getRelatedResources(req.params.id, {
-        limit: 10,
-        offset: 0
-      }, function (err, items) {
+       var form = validator.request(req, {
+            limit: 50,
+            offset: 0
+          });
+      
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      // get the total available
+      entity.getRelatedResources(form.params, function (err, items, info) {
         if(err)
           return helpers.cypherQueryError(err, res);
-        return res.ok({
-          items: items
-        });
+        return res.ok({items: items}, info);
       });
     }, // get graph of resources and other stugff, a graph object of nodes and edges
     
