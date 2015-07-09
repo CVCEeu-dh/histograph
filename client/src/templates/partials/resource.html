@@ -13,7 +13,8 @@
         <div class="collections">
           <div class="collection" ng-repeat="collection in item.collections"><a ng-href="#/c/{{collection.id}}">{{collection.name|humanize}}</a></div>
         </div>
-        <span gasp-type="date" gasp-parent="{{item.type}}-{{item.id}}">{{item.props|guessInterval}}</span>
+        <span gasp-type="date" class="empty" gasp-parent="{{item.type}}-{{item.id}}" ng-if="!tem.props.start_time">no date found</span>
+        <span gasp-type="date" gasp-parent="{{item.type}}-{{item.id}}" ng-if="item.props.start_time">{{item.props|guessInterval}}</span>
         
         <span ng-repeat="location in item.places">
           <a class="tag location" ng-click="toggleMenu($event, item, location, 'place')">{{location.name}}</a><!-- 
@@ -24,7 +25,7 @@
           
         
         <span ng-if="item.persons.length" class="tags"> — <i>in the document</i>:
-          <span ng-repeat="per in item.persons" data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.name}} - {{per.description}} ({{per.birth_date | date:"yyyy"}} - {{per.death_date | date:"yyyy"}})' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class='tag person'>{{per.name}}</span>
+          <span ng-repeat="per in item.persons"><span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.name}} - {{per.description}} ({{per.birth_date | date:"yyyy"}} - {{per.death_date | date:"yyyy"}})' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class='tag person'>{{per.name}}{{$last? '':  ', '}}</span></span>
         </span>
         <span ng-if="item.props.languages.length">  —  <i>available in</i>:
           <span ng-repeat="lang in item.props.languages" ng-click='setLanguage(lang)'>{{lang}} </span>

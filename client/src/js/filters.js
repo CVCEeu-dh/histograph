@@ -16,12 +16,13 @@ angular.module('histograph')
           end_date   = moment.utc(input.end_date),
           days = end_date.diff(start_date, 'day'),
           result;
-      
-      if(days < 1)
-        result = start_date.format('LL')
-      else
-        result = start_date.format('LL') +  ' — ' + end_date.format('LL')
-      return result;
+      if(start_date.isValid()) {
+        if(days < 1)
+          result = start_date.format('LL')
+        else
+          result = start_date.format('LL') +  ' — ' + end_date.format('LL')
+        return result;
+      } else return 'no date found'
     }
   })
   /*

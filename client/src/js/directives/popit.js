@@ -66,12 +66,11 @@ angular.module('histograph')
           Listener: body.click
         */
         $('body').on('click', function(e) {
-          console.log(arguments)
           var el    = $(e.target);
           
           type  = el.attr('gasp-type'); // should be something of date, location, person, etc ...
           id    = el.attr('data-id');
-          
+          $log.log(':: gasper @click', type, id);
           if(!type) {
             hide()
           } else {

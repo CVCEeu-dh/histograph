@@ -25,7 +25,8 @@
         </div>
         
         <div class="tags" ng-if="relatedPersons.length > 0">Appearing with:  
-        <span class="tag" ng-click="toggleMenu($event, item, person, 'person')" ng-repeat="person in relatedPersons">{{person.props.name}} ({{person.coappear}})</span>
+        <span ng-repeat="person in relatedPersons"><span class="person tag" data-id='{{person.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{person.name}} - {{person.description}} ({{person.birth_date | date:"yyyy"}} - {{person.death_date | date:"yyyy"}})' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' >
+          {{person.props.name}} ({{person.coappear}})</span>{{$last?'':', '}}</span>
         </div><span ng-if="item.props.languages.length">  —  <i>available in</i>:
           <span ng-repeat="lang in item.props.languages" ng-click='setLanguage(lang)'>{{lang}} </span>
         </span>

@@ -134,6 +134,9 @@ a:focus, a:hover{
   margin: 0px 0px 10px 0px;
 }
 
+.empty {
+  background: #FFE660;
+}
 .tag {
   margin: 0 8px 0 0;
   text-decoration: none;
