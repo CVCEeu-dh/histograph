@@ -367,11 +367,15 @@ apiRouter.route('/entity/:id/graph')
   
 */
 apiRouter.route('/collection')
-  .get(ctrl.collection.getItems);
+  .get(ctrl.collection.getItems)
+  .post(ctrl.collection.create);
 apiRouter.route('/collection/:id')
   .get(ctrl.collection.getItem);
 apiRouter.route('/collection/:id/graph')
   .get(ctrl.collection.getGraph);
+// apiRouter.route('/collection/:id/related/item') // generic items related to a collection
+  // .get(ctrl.collection.getRelatedItems)
+  // .post(ctrl.collection.addRelatedItems);
 apiRouter.route('/collection/:id/related/resources')
   .get(ctrl.collection.getRelatedResources);
 

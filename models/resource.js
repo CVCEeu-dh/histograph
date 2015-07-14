@@ -242,10 +242,9 @@ module.exports = {
           next(err);
           return;
         }
-        
         var hItems = _.indexBy(items, 'id');
         next(null, _.map(results.ids, function (d) {
-          hItems[d].persons = _.values(hItems[d].persons);
+          hItems[''+d].persons = _.values(hItems[''+d].persons);
           return hItems[d]
         }),{
           total_items: results.totalItems

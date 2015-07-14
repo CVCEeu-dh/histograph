@@ -114,6 +114,14 @@ module.exports = {
             error: 'id not valid'
           },
           {
+            field: 'ids',
+            check: 'matches',
+            args: [
+              /[\d,]+/
+            ],
+            error: 'ids should contain only numbers and commas'
+          },
+          {
             field: 'limit',
             check: 'isInt',
             args: [
@@ -176,6 +184,10 @@ module.exports = {
     safeParams = params;
     if(safeParams.id)
       safeParams.id = +safeParams.id;
+    if(safeParams.ids)
+      safeParams.ids = _.compact(safeParams.ids.split(',')).map(function(d) {
+        return +d;
+      });
     if(safeParams.limit)
       safeParams.limit = +safeParams.limit;
     if(safeParams.offset)

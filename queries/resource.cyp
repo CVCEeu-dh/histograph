@@ -119,11 +119,11 @@ RETURN count(candidate) as total_items
 
 // name: get_similar_resource_ids_by_entities
 // get top 100 similar resources sharing the same persons, orderd by time proximity if this info is available
-MATCH (res)
+MATCH (res:resource)
 WHERE id(res) = {id}
 WITH res
-OPTIONAL MATCH (res)--(per:person)--(r)
-OPTIONAL MATCH (res)--(loc:location)--(r)
+OPTIONAL MATCH (res)--(per:person)--(r:resource)
+OPTIONAL MATCH (res)--(loc:location)--(r:resource)
 WHERE id(r) <> id(res)
 WITH DISTINCT r,
 {
