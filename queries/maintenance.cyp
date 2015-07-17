@@ -1,4 +1,4 @@
-// name: get_entity_duplicates_by_wiky
+// name: DEPRECATED_get_entity_duplicates_by_wiky
 // find all node that have duplicates
 MATCH (n:entity)
 WHERE has(n.links_wiki) AND length(n.links_wiki) > 0
@@ -20,11 +20,12 @@ WITH
   n.links_wiki as w,
   collect(n.name) as names,
   collect(DISTINCT n.name) as unique_names,
-  collect(n) as ent
-WITH ent, length(unique_names) as un, length(ent) as c
+  collect(n) as entities
+WITH entities, unique_names, length(unique_names) as un, length(entities) as c
 WHERE un > 1 AND c > 1
-RETURN ent, un
+RETURN entities, c, unique_names
 ORDER BY c DESC
+
 
 // name: get_entity_relationships
 // find all in/out relationship for a given node
@@ -57,3 +58,15 @@ RETURN {
   links_viaf: n.links_viaf,
   abstract: COALESCE(n.abstract_en, n.abstract_fr, n.abstract_de)
 } as per
+
+
+
+// name: get_entity_duplicates_candidates_by_name
+// find all node that have duplicates by name
+MATCH (n:person)
+WHERE has(n.name) AND length(n.name) > 0
+WITH n.name as named, collect(n) as entities
+WITH named, entities, length(entities) as c
+WHERE c > 1
+RETURN named, entities, c
+ORDER BY c DESC

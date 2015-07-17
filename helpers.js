@@ -240,7 +240,9 @@ module.exports = {
             birth_place: 'http://dbpedia.org/property/placeOfBirth',
             death_place: 'http://dbpedia.org/property/placeOfDeath',
             description: 'http://dbpedia.org/property/shortDescription',
-            abstracts:   'http://dbpedia.org/ontology/abstract'
+            abstracts:   'http://dbpedia.org/ontology/abstract',
+            first_name:  'http://xmlns.com/foaf/0.1/givenName',
+            last_name:   'http://xmlns.com/foaf/0.1/surname'
           };
       // find fields and complete the properties dict
       _.forIn(props, function (v, k, o) {
