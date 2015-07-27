@@ -60,12 +60,14 @@ WITH ent, res, pla, per
     props: res,
     places: extract(n IN collect(DISTINCT pla)| {
       id: id(n),
-      name: n.name
+      name: n.name,
+      score: n.score
     }),
     persons: extract(n IN collect(DISTINCT per)| {
       id: id(n),
       name: n.name,
-      description: n.description
+      description: n.description,
+      score: n.score
     })
   } as result
 ORDER BY res.start_date DESC

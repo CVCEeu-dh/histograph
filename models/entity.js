@@ -336,17 +336,14 @@ module.exports = {
    @param id - numeric internal Neo4J node identifier
    */
   discover: function(id, next) {
-    // quetly does textrazor entity extraction.
     neo4j.read(id, function (err, node) {
       if(err) {
         next(err);
         return;
       }
-      
+      console.log('discover', _.keys(node))
       var q = async.waterfall([
-        
-        // check if the entity has a proper wiki link
-        function (nextTask) {
+        function lookupDBpediaLink (nextTask) { // check if the entity has a proper wiki link
           if((node.links_wiki && node.links_wiki.length > 0) || node.name.split(' ').length < 2) {
             nextTask(null, node);
             return
@@ -379,8 +376,10 @@ module.exports = {
         },
         // download wiki data
         function (node, nextTask) {
+          console.log(clc.blackBright('check wikipedia link'))
+          
           if(!node.links_wiki || node.links_wiki.length == 0) {
-            console.log('entity does not have a wiki link, skipping')
+            console.log(clc.blackBright('entity does not have a wiki link'),'skipping');
             nextTask(null, node)
             return
           };
@@ -396,14 +395,19 @@ module.exports = {
               nextTask(null, node)
               return;
             }
+            
             // in order to avoid the neo4jerror on empty array.
             if(res.languages.length > 0) {
               node = _.merge(node, res);
-              //console.log('merging nodes', node)
             }
+            if(res.first_name && res.last_name && res.first_name.trim().length && res.last_name.trim().length) {
+              node.slug = node.slug || helpers.text.slugify(res.first_name + ' ' + res.last_name);
+              console.log(clc.blackBright('slug', clc.yellowBright(node.slug)));
+            }
+            // console.log(node)
             // cleaning services
-            if(node.services && node.services.length)
-              node.services = _.unique(node.services);
+            // if(node.services && node.services.length)
+            //   node.services = _.unique(node.services);
             neo4j.save(node, function(err, res) {
               if(err) {
                 console.log(clc.red('error'), err.neo4jError.message)

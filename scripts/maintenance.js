@@ -268,6 +268,7 @@ if(options.entities) {
       console.log(clc.blackBright('waterfall for'),clc.yellowBright('maintenance.entities'), clc.cyanBright('completed'))
     }
   });
+  return;
 }
 
 if(options.homonyms) {
@@ -285,4 +286,5 @@ if(options.homonyms) {
       console.log(clc.blackBright('waterfall for'),clc.yellowBright('maintenance.entities'), clc.cyanBright('completed'))
     }
   });
+  return
 }

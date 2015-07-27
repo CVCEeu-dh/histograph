@@ -50,9 +50,14 @@ angular.module('histograph')
     // $scope.query =  $routeParams.query || '';
     
     // set query and redirect to search controller
-    $scope.setQuery = function() {
-       $log.log('CoreCtrl > setQuery',  $scope.query);
-      $location.path('search/' + $scope.query);
+    $scope.setQuery = function(item) {
+      $log.log('CoreCtrl > setQuery',  arguments);
+      if(item.type == 'resource')
+        $location.path('r/' + item.id);
+      else if(item.type == 'person')
+        $location.path('e/' + item.id);
+      else
+        $location.path('search/' + $scope.query);
     }
     
     /*
@@ -110,15 +115,15 @@ angular.module('histograph')
     };
     
     $scope.suggest = function(query) {
-      $log.info('CoreCtrl -> suggest', query);
-
+      // $log.info('CoreCtrl -> suggest', query);
+      $scope.query = ''+ query
       return $http.get('/api/suggest', {
         params: {
           query: query
         }
       }).then(function(response){
-        console.log(response)
-        return response.data.result.items
+        //console.log(response)
+        return [{type:'default'}].concat(response.data.result.items)
       });
     };
     

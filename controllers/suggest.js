@@ -216,10 +216,7 @@ module.exports =  function(io){
   
       neo4j.query(queries.lucene_query, {
         resource_query: [
-          'type_search: resource AND (',
-          'title_search:', q,
-          ' OR caption_search:', q,
-          ')'
+          'full_search:', q
         ].join(''),
         person_query: 'name_search:' + q,
         limit: req.query.limit || 4
@@ -246,10 +243,7 @@ module.exports =  function(io){
           limit  = +req.query.limit || 20,
           q      = toLucene(req.query.query),
           query  = [
-              'type_search: resource AND (',
-              'title_search:', q,
-              ' OR caption_search:', q,
-              ')'
+              'full_search:', q
             ].join('');
       // get countabilly
       async.parallel({
@@ -282,6 +276,8 @@ module.exports =  function(io){
         return res.ok({
           items: results.get_matching_resources.map(function (d) {
             d.props.languages = _.values(d.props.languages)
+            d.persons = _.values(d.persons);
+            d.places = _.values(d.places);
             return d;
           }),
         }, {
@@ -351,8 +347,7 @@ module.exports =  function(io){
           limit  = +req.query.limit || 20,
           q      = toLucene(req.query.query),
           query  = [
-              'title_search:', q,
-              ' OR caption_search:', q,
+              'full_search:', q,
               ' OR name_search:', q,
             ].join('');
             

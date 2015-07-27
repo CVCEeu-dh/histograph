@@ -492,6 +492,15 @@ module.exports = {
       return languages.length? _.first(_.first(languages)) : (defaultLanguage || 'en');
     },
     
+    translit: function (text) {
+      var from = 'àáäâèéëêìíïîòóöôùúüûñç',
+          to   = 'aaaaeeeeiiiioooouuuunc';
+      for (var i=0, l=from.length ; i<l ; i++) {
+        text = text.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i));
+      }   
+      return text; 
+    },
+    
     slugify:function(text) {
       var from = 'àáäâèéëêìíïîòóöôùúüûñç',
           to   = 'aaaaeeeeiiiioooouuuunc',

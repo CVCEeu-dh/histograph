@@ -1,18 +1,23 @@
 // name: lucene_query
 //
 start n=node:node_auto_index({resource_query})
+WITH n
+LIMIT {limit}
 RETURN {
   id: id(n),
-  props: n
+  props: n,
+  type: 'resource'
 } AS result
-LIMIT {limit}
 UNION
 start n=node:node_auto_index({person_query})
+WITH n
+LIMIT {limit}
 RETURN {
   id: id(n),
-  props: n
+  props: n,
+  type: last(labels(n))
 } AS result
-LIMIT {limit}
+
 
 
 // name: all_in_between
@@ -96,20 +101,25 @@ RETURN {
 // name: get_matching_resources_count
 // get resources by query
 start n=node:node_auto_index({query})
-WHERE 'resource' in labels(n)
 RETURN count(n) as total_count
 
 // name: get_matching_resources
 // get resources by query
 start n=node:node_auto_index({query})
-WHERE 'resource' in labels(n)
+WITH n
+SKIP {offset}
+LIMIT {limit}
+WITH n
+OPTIONAL MATCH (n)-[:appears_in]-(pla:`place`)
+OPTIONAL MATCH (n)-[:appears_in]-(per:`person`)
 RETURN {
   id: id(n),
   props: n,
-  type: 'resource'
+  type: 'resource',
+  places: collect(DISTINCT pla),
+  persons: collect(DISTINCT per)
 } AS result
-SKIP {offset}
-LIMIT {limit}
+
 
 // name: get_matching_entities_count
 // get resources by query

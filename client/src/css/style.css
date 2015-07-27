@@ -787,6 +787,10 @@ li.CodeMirror-hint-active {
   display: block
 }
 
+.dropdown-menu li.active{
+  background-color: #E8E8E7;
+}
+
 .dropdown-menu li a{
   font-size:13px;
   line-height: 20px;
@@ -4363,7 +4367,7 @@ Copyright (c) 2015 Daniel Eden
 
 #messenger{
   position: fixed;
-  top: 50%;
+  bottom: 200px;
   left: 50%;
   width: 240px;
   

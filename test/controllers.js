@@ -564,6 +564,7 @@ describe('controllers: suggest queries', function() {
       .end(function (err, res) {
         if(err)
           console.log(err);
+        // console.log(res.body)
         should.not.exist(err);
         should.exist(res.body.result.items.length);
         done()
@@ -761,7 +762,7 @@ describe('controllers: play with entities', function() {
         if(err)
           console.log(err);
         should.not.exist(err);
-        console.log(res.body.result.item)
+        // console.log(res.body.result.item)
         should.exist(res.body.result.item);
         should.equal(res.body.result.item.id, 26648);
         done()
