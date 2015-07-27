@@ -15,6 +15,19 @@ RETURN {
 LIMIT {limit}
 
 
+// name: all_in_between
+// 
+MATCH p=(n)-[r:appears_in*..2]-(t) WHERE id(n) in {ids} AND id(t) in {ids}
+RETURN extract(n IN nodes(p)| {
+  id: id(n),
+  type: last(labels(n)),
+  label: coalesce(n.name, n.title_en, n.title_fr)
+}) AS paths, relationships(p) as rels, length(p) as count
+ORDER BY count
+SKIP {offset}
+LIMIT {limit}
+
+
 // name: all_shortest_paths
 // get all shortestpath between nodes.
 MATCH p = allShortestPaths((a)-[*..4]-(b))

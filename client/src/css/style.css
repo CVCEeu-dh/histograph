@@ -93,8 +93,8 @@ a:focus, a:hover{
 }
 
 .view.active{
-  /*bottom: 80px;*/
-  padding-bottom: 80px;
+  bottom: 80px;
+  /*padding-bottom: 80px;*/
 }
 
 .item{
@@ -247,8 +247,8 @@ a:focus, a:hover{
 }
 
 #perspective.active{
-  /*bottom: 80px;*/
-  padding-bottom: 80px;
+  bottom: 80px;
+  /*padding-bottom: 80px;*/
 }
 
 #perspective-actions{
@@ -956,12 +956,13 @@ li.CodeMirror-hint-active {
 
 #playlist-actions{
   position: absolute;
-  right: 0px;
+  left: 70px;
   bottom: 0;
-  border-left: 1px solid #353535;
+  /*border-left: 1px solid #353535;*/
   top: 0;
-  width: 140px;
-  padding: 15px 15px;
+  width: 60px;
+  /*background: #353535;*/
+  padding: 15px 5px;
 }
 
 #playlist-actions .btn{
@@ -972,10 +973,11 @@ li.CodeMirror-hint-active {
 
 #playlist-queue{
   position:absolute;
-  right: 140px;
+  right: 20px;
   bottom: 0px;
   top: 15px;
-  left: 85px;
+  left: 140px;
+  /*background: #151515;*/
   /*border-top: 1px solid rgba(255,255,255,0.03);*/
   color: #f5f5f5;
 }

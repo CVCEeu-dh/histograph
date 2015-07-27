@@ -142,7 +142,11 @@ angular.module('histograph')
             // if(authority.max > 0)
             //   n.size = 1 + (stats[n.id].authority/(authority.max-authority.min))*6
             // else
-            n.color = colors[n.type] || "#353535"
+            n.color = colors[n.type] || "#353535";
+            n.x = n.x || Math.random()*50
+            n.y = n.y || Math.random()*50
+            
+            console.log(n.color)
             n.size = n.type == 'res'? 1 : si.graph.degree(n.id) + 1.5;
           });
           

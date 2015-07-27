@@ -52,10 +52,12 @@ angular.module('histograph')
             id: edgeId,
             source: ''+d.path[i].id,
             target: ''+d.path[i + 1].id,
-            color: "#a3a3a3"
+            color: "#a3a3a3",
+            weight: 1
           };
           graph.edges.push(index.edges[edgeId])
         }
+        
         
       }
     })

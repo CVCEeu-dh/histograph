@@ -599,7 +599,7 @@ describe('controllers: suggest queries', function() {
       });
   });
   
-  it('should get the path between four nodes', function (done) {
+  it('should get the SHORTEST path connecting all four nodes', function (done) {
     session
       .get('/api/suggest/all-shortest-paths/26441,27631,11173?limit=33')
       .expect('Content-Type', /json/)
@@ -613,18 +613,17 @@ describe('controllers: suggest queries', function() {
       });
   });
   
-  it('should return warning because of malformed ids', function (done) {
+   
+  it('should get the full path between four nodes', function (done) {
     session
-      .get('/api/suggest/all-shortest-paths/26441,27631,111734aa?limit=37')
+      .get('/api/suggest/all-in-between/26441,27631,11173?limit=33')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
         if(err)
           console.log(err);
         should.not.exist(err);
-        should.exist(res.body.result.items.length);
-        should.equal(res.body.info.limit, 37);
-        // should.equal(res.body.result.items.length, 37); // limit has been respected?
+        should.exist(res.body.result.graph);
         done()
       });
   });

@@ -162,12 +162,23 @@ angular
           }
         }
       })
+      // .when('/DEPRECATED-neighbors/:ids', {
+      //   templateUrl: 'templates/neighbors.html',
+      //   controller: 'NeighborsCtrl',
+      //   resolve: {
+      //     neighbors: function(SuggestFactory, $route) {
+      //       return SuggestFactory.neighbors({
+      //         ids: $route.current.params.ids
+      //       });
+      //     }
+      //   }
+      // })
       .when('/neighbors/:ids', {
         templateUrl: 'templates/neighbors.html',
         controller: 'NeighborsCtrl',
         resolve: {
-          neighbors: function(SuggestFactory, $route) {
-            return SuggestFactory.neighbors({
+          allInBetween: function(SuggestFactory, $route) {
+            return SuggestFactory.allInBetween({
               ids: $route.current.params.ids
             });
           }

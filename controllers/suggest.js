@@ -7,7 +7,8 @@ var settings  = require('../settings'),
     helpers   = require('../helpers.js'),
     parser    = require('../parser.js'),
     neo4j     = require('seraph')(settings.neo4j.host),
-    
+    validator  = require('../validator'),
+        
     queries  = require('decypher')('./queries/suggest.cyp'),
     
     async     = require('async'),
@@ -48,6 +49,70 @@ function toIds(ids) {
 
 module.exports =  function(io){
   return {
+    /*
+      Return a list of possible paths connecting at least two nodes of the given set.
+      api/suggest/allinbetween
+    */
+    allInBetween: function(req, res) {
+      var ids = toIds(req.params.ids);
+      if(!ids.length)
+        return res.error(400, {ids: 'not valid list of id'})
+      
+      var form = validator.request(req, {
+            limit: 20,
+            offset: 0
+          });
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      neo4j.query(queries.all_in_between, {
+        ids: ids,
+        offset: form.params.offset,
+        limit: form.params.limit
+      }, function (err, items) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        // console.log(items);
+        var graph = {
+          nodes: {},
+          edges: {}
+        };
+        
+        for(var i = 0; i < items.length; i++) {
+          for(var j = 0; j < items[i].paths.length; j++) {
+            if(!graph.nodes[items[i].paths[j].id]) {
+              graph.nodes[items[i].paths[j].id] = items[i].paths[j];
+            }
+          }
+          for(var j = 0; j < items[i].rels.length; j++) {
+            var edgeId = _.sortBy([items[i].rels[j].start, items[i].rels[j].end]).join('.');
+            
+            if(!graph.edges[edgeId]) {
+              graph.edges[edgeId] = {
+                id: edgeId,
+                source: items[i].rels[j].start,
+                target: items[i].rels[j].end,
+                weight: 0
+              };
+            }
+            graph.edges[edgeId].weight++;
+          }
+        }
+        
+        return res.ok({
+          graph: {
+            nodes: _.values(graph.nodes),
+            edges: _.values(graph.edges)
+          }
+        }, {
+          params: {
+            offset: form.params.offset,
+            limit: form.params.limit,
+            ids: ids
+          }
+        });
+      })
+    },
     /*
       Return a list of possible path connecting all of the comma separated nodes given
       api/suggest/
