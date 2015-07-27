@@ -62,33 +62,76 @@ module.exports = function(io){
     /*
       Create a comment specific for the entity ?
     */
-    createComment: function(req, res) {
-      // console.log('ici', req.body.content, req.user);
-      var now = helpers.now();
+    // createComment: function(req, res) {
+    //   // console.log('ici', req.body.content, req.user);
+    //   var now = helpers.now();
 
-      // add dummy comments on it.
-      neo4j.query(queries.add_comment_to_resource, {
-        id: +req.params.id,
-        content: req.body.content,
-        tags: req.body.tags,
-        username: req.user.username,
-        creation_date: now.date,
-        creation_time: now.time
-      }, function (err, items) {
-        console.log(err, items);
+    //   // add dummy comments on it.
+    //   neo4j.query(queries.add_comment_to_resource, {
+    //     id: +req.params.id,
+    //     content: req.body.content,
+    //     tags: req.body.tags,
+    //     username: req.user.username,
+    //     creation_date: now.date,
+    //     creation_time: now.time
+    //   }, function (err, items) {
+    //     console.log(err, items);
+    //     if(err)
+    //       return helpers.cypherQueryError(err, res);
+    //     // emit the event for those connected on resource. to be refactored.
+    //     io.emit('done:commenting', {
+    //       user: req.user.username,
+    //       resource_id: +req.params.id, 
+    //       data: items[0].comments[0]
+    //     });
+
+    //     return res.ok({
+    //       items: _.values(items[0].comments)
+    //     });
+    //   })
+    // },
+    
+    upvote: function(req, res) {
+      var form = validator.request(req);
+      
+      if(!form.isValid)
+        return helpers.formError(err, res);
+      entity.update(form.params.id, {
+        upvoted_by: req.user.username
+      }, function (err, ent) {
         if(err)
           return helpers.cypherQueryError(err, res);
-        // emit the event for those connected on resource. to be refactored.
-        io.emit('done:commenting', {
+        io.emit('done:upvote_entity', {
           user: req.user.username,
-          resource_id: +req.params.id, 
-          data: items[0].comments[0]
+          doi: +req.params.id, 
+          data: ent
         });
-
         return res.ok({
-          items: _.values(items[0].comments)
+          item: ent
         });
       })
+      
+    },
+    downvote: function(req, res) {
+      var form = validator.request(req);
+      
+      if(!form.isValid)
+        return helpers.formError(err, res);
+      entity.update(form.params.id, {
+        downvoted_by: req.user.username
+      }, function (err, ent) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        io.emit('done:downvote_entity', {
+          user: req.user.username,
+          doi: +req.params.id, 
+          data: ent
+        });
+        return res.ok({
+          item: ent
+        });
+      })
+      
     },
     
     getRelatedResources: function (req, res) {

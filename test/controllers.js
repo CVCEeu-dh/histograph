@@ -752,6 +752,21 @@ describe('controllers: play with entities', function() {
         done()
       });
   });
+  it('should downvote a single entity item', function (done) {
+    session
+      .post('/api/entity/26648/downvote')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err);
+        should.not.exist(err);
+        console.log(res.body.result.item)
+        should.exist(res.body.result.item);
+        should.equal(res.body.result.item.id, 26648);
+        done()
+      });
+  });
   it('should get some entities by id', function (done) {
     session
       .get('/api/entity/20381,26560,26248')

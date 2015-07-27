@@ -355,7 +355,10 @@ apiRouter.route('/entity/:id/related/persons')
   .get(ctrl.entity.getRelatedPersons);
 apiRouter.route('/entity/:id/graph')
   .get(ctrl.entity.getGraph);
-
+apiRouter.route('/entity/:id(\\d+)/upvote')
+  .post(ctrl.entity.upvote)
+apiRouter.route('/entity/:id(\\d+)/downvote')
+  .post(ctrl.entity.downvote)
   
 /*
 

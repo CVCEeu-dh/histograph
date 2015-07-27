@@ -101,6 +101,66 @@ module.exports = {
     });  
   },
   
+  /*
+    Change the relationship status from resource to the entity.
+    status: DISCARD
+    
+    
+    Alternative:
+    Downvote the link from the resource to the entity.
+    If two users downvoted it, the relationship disappear?
+  */
+  signaleRelatedResource: function(entity, resource, next) {
+    
+  },
+  
+  /*
+    Useful api for downvoting/upvoting
+    Note that You can modify the original one only if you're the owner of the comment.
+  */
+  update: function(id, params, next) {
+    var now = helpers.now();
+        // query = parser.agentBrown(queries.update_comment, properties);
+    
+    neo4j.query(queries.get_entity, {
+      id: id
+    }, function (err, ent) {
+      if(err) {
+        next(err);
+        return;
+      }
+      if(!ent.length) {
+        next(helpers.IS_EMPTY);
+        return;
+      }
+      ent = ent[0];
+       // -> { make: 'Citroen', model: 'DS4', id: 1 }
+      if(params.upvoted_by) {
+        ent.props.upvote = _.unique((ent.props.upvote || []).concat(params.upvoted_by));
+      }
+      if(params.downvoted_by) {
+        ent.props.downvote = _.unique((ent.props.downvote || []).concat(params.downvoted_by));
+      }
+      ent.props.celebrity =  _.unique((ent.props.upvote || []).concat(ent.props.downvote|| [])).length;
+      ent.props.score = (ent.props.upvote || []).length - (ent.props.downvote|| []).length;
+      ent.props.last_modification_date = now.date;
+      ent.props.last_modification_time = now.time;
+      // user will follow the inquiry
+      // upvote downvote with user username. (more readable)
+      // score is changed relatively
+      neo4j.save(ent.props, function (err, props) {
+        if(err) {
+          next(err);
+          return;
+        }
+        ent.props = props;
+        next(null, ent);
+      })
+    })
+  },
+
+  
+  
   getRelatedPersons: function(id, properties, next) {
     var options = _.merge({
       id: +id,

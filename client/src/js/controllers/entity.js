@@ -5,7 +5,7 @@
  * # IndexCtrl
  */
 angular.module('histograph')
-  .controller('EntityCtrl', function ($scope, $log, $routeParams, socket, $filter, entity, resources, persons, EntityVizFactory) {
+  .controller('EntityCtrl', function ($scope, $log, $routeParams, socket, $filter, entity, resources, persons, EntityExtraFactory) {
     $log.debug('EntityCtrl ready', +$routeParams.id, entity.result.item.name);
     
     $scope.item = entity.result.item;
@@ -25,9 +25,9 @@ angular.module('histograph')
     $scope.graphType = 'monopartite-entity'
     // sync graph
     $scope.drawGraph = function() {
-      EntityVizFactory.get({
+      EntityExtraFactory.get({
         id: $routeParams.id,
-        viz: 'graph',
+        extra: 'graph',
         type: $scope.graphType,
         limit: 2000
       }, function(res) {
@@ -49,4 +49,16 @@ angular.module('histograph')
     
     $scope.$watch('graphType', $scope.drawGraph)
     
+    $scope.downvote = function() {
+      // downvote current entity
+      $log.debug('EntityCtrl -> downvote()', $routeParams.id);
+      EntityExtraFactory.save({
+        id: $routeParams.id,
+        extra: 'downvote',
+      }, {}, function (res) {
+        $log.debug('EntityCtrl -> downvoted', res);
+        $scope.setMessage('thank you for signaling the mistake');
+        $scope.item = res.result.item;
+      })
+    };
   });

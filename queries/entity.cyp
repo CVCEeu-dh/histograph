@@ -8,6 +8,7 @@ RETURN {
   props: ent
 }
 
+
 // name: get_entities_by_ids
 //
 MATCH (ent:entity)
@@ -69,6 +70,14 @@ WITH ent, res, pla, per
   } as result
 ORDER BY res.start_date DESC
 SKIP {offset} LIMIT {limit}
+
+
+// name: signale_related_resource
+// change the relationship status in order to clean it later.
+MATCH (ent)-[r:appears_in]->(res:resource)
+WHERE id(ent) = {entity_id} AND id(res) = {resource_id}
+
+
 
 
 // name:count_related_resources
