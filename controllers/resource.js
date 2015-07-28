@@ -131,11 +131,13 @@ module.exports = function(io){
         if(err)
           return helpers.formError(err, res);
         var query = parser.agentBrown(queries.get_cooccurrences, params);
-        
+        console.log('query', query)
         
         helpers.cypherGraph(query, {
           offset: 0,
-          limit: 500
+          limit: 500,
+          start_time: params.start_time,
+          end_time: params.end_time
         }, function (err, graph) {
           if(err) {
             return helpers.cypherQueryError(err, res);
@@ -198,6 +200,59 @@ module.exports = function(io){
           items: items
         }, {
           params: form.params
+        });
+      })
+    },
+    /*
+      return the list of related issues
+    */
+    getRelatedIssue: function(req, res) {
+      var Issue   = require('../models/issue'), 
+          form = validator.request(req, {
+            limit: 20,
+            offset: 0
+          });
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      Issue.getMany({
+        resource_id: form.params.id,
+        type:        form.params.type,
+        limit:       form.params.limit,
+        offset:      form.params.offset
+      }, function (err, items, info) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({
+          items: items
+        }, info);
+      })
+    },
+    /*
+      create a new issue for this resource
+    */
+    createIssue: function (req, res) {
+      var Issue   = require('../models/issue'), 
+          form = validator.request(req);
+      
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      Issue.create({
+        type:        form.params.type,
+        solution:    form.params.solution,
+        description: form.params.description,
+        doi:         form.params.id,
+        user:        req.user
+      }, function (err, issue) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        io.emit('resource:issue:created', {
+          user: req.user.username,
+          doi: +req.params.id, 
+          data: issue
+        });
+        return res.ok({
+          item: issue
         });
       })
     },

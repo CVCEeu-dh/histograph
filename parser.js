@@ -63,7 +63,7 @@ module.exports = {
               segments = [
                 node + '.' + property,
                 methods[method],
-                filters[property]
+                '{' + property + '}'//filters[property]
               ];
           
           if(!methods[method])

@@ -1,0 +1,17 @@
+<div class="actions">
+  <div class="btn-group-vertical">
+    <button class="btn btn-link" ng-click="upvote(relatedItem)" tooltip-append-to-body="true" tooltip="vote up solution"><i class="fa fa-angle-up"></i></button>
+    <div>{{relatedItem.props.score || 0}}</div>
+    <button class="btn btn-link" ng-click="downvote(relatedItem)" tooltip-append-to-body="true" tooltip="vote down solution"><i class="fa fa-angle-down"></i></button>
+  </div>
+</div>
+<div class="inner">
+  
+  
+  <blockquote>{{relatedItem.props.solution}}
+    
+    <span>— {{relatedItem.props.description|| ""}}</span>
+  </blockquote>
+  <!-- score {{relatedItem.props.score || 0}} ({{relatedItem.props.celebrity || 0}})  -->
+  {{relatedItem.proposed_by.username}} — {{relatedItem.props.creation_date | date : 'longDate'}}
+</div>

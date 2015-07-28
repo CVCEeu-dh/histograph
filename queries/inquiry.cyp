@@ -35,7 +35,7 @@ MATCH (inq)-[:proposes]-(u:user)
 WITH DISTINCT inq, res, u
 RETURN {
   id: id(inq),
-  type: 'inquiry',
+  type: last(labels(inq)),
   props: inq,
   proposed_by: u,
   questioning: id(res)

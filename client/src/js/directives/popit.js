@@ -22,7 +22,7 @@ angular.module('histograph')
         redirect: '&',
         queue : '&'
       },
-      template: '<div ng-if="!issue" class="action-group">'+
+      template: '<div class="action-group">'+
                   '<a class="action" href="{{href}}" title="visit" data-action="link" tooltip="{{linkto}}">'+
                     '<span class="fa fa-link"></span></a>'+
                   '<a class="action queue" tooltip="add to your current playlist" data-action="queue">'+

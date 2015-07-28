@@ -515,7 +515,7 @@ a:focus, a:hover{
   padding-left: 35px;
 }
 .comment > .actions{
-  left: 5px;
+ left: 5px;
   top: 10px;
 }
 .comment > .actions button{
@@ -536,6 +536,17 @@ a:focus, a:hover{
   font-size: 20px;
   line-height: 20px;
 }
+
+.issue blockquote{
+  margin-bottom: 10px;
+}
+
+.issue  .actions{
+  position: absolute;
+  left: 5px;
+  top: 5px;
+}
+
 
 .username{
   

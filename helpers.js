@@ -148,6 +148,13 @@ module.exports = {
           message:  err.neo4jCause.message,
           exception: err.neo4jException
         });
+        break;
+      case 'ParameterNotFoundException':
+        return res.error(404, {
+          message:  err.neo4jError.message,
+          exception: err.neo4jException
+        });
+        break;
       default:
         return res.error(err.statusCode, err);
     };

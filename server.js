@@ -298,6 +298,26 @@ apiRouter.route('/inquiry/:id(\\d+)/related/comment') // POST
 
 /*
 
+  Controller: issue
+  -------------------
+  
+  Cfr. controllers/issue.js
+  Cfr Neo4j queries: queries/issue.cyp
+  
+*/
+apiRouter.route('/issue')
+  .get(ctrl.issue.getItems)
+apiRouter.route('/issue/:id(\\d+)')
+  .get(ctrl.issue.getItem)
+apiRouter.route('/issue/:id(\\d+)/upvote')
+  .post(ctrl.issue.upvote)
+apiRouter.route('/issue/:id(\\d+)/downvote')
+  .post(ctrl.issue.downvote)
+
+
+
+/*
+
   Controller: inquiry
   -------------------
   
@@ -332,6 +352,9 @@ apiRouter.route('/resource/:id(\\d+)/related/comment') // POST
 apiRouter.route('/resource/:id(\\d+)/related/inquiry')
   .post(ctrl.resource.createInquiry)
   .get(ctrl.resource.getRelatedInquiry)
+apiRouter.route('/resource/:id(\\d+)/related/issue')
+  .post(ctrl.resource.createIssue)
+  .get(ctrl.resource.getRelatedIssue)
 apiRouter.route('/resource/:id(\\d+)/graph')
   .get(ctrl.resource.getGraph);
 apiRouter.route('/cooccurrences') // @todo move to entity controller.

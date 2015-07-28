@@ -498,7 +498,7 @@ angular.module('histograph')
       $scope.freeze = 'sigma';
       $log.log('CoreCtrl -> openIssueModal', type, 'target_id', target.id)
       var modalInstance = $modal.open({
-        animation: true,
+        animation: false,
         templateUrl: 'templates/partials/comment-modal.html',
         controller: 'IssueModalCtrl',
         size: 'sm',
@@ -513,7 +513,10 @@ angular.module('histograph')
             return target;
           },
           items: function() {
-            return [{content: 'hei'}];
+            return ResourceRelatedFactory.get({
+              id: target.id,
+              model:'issue'
+            }).$promise
           }
         }
       });
@@ -523,16 +526,29 @@ angular.module('histograph')
   /*
     This controller handle the modal bootstrap that allow users to propose a new content for something.
   */
-  .controller('IssueModalCtrl', function ($scope, $modalInstance, $log, user, type, target, items) {
-    $log.log('IssueModalCtrl ready', type, items)
+  .controller('IssueModalCtrl', function ($scope, $modalInstance, $log, user, type, target, items, ResourceRelatedFactory) {
+    $log.log('IssueModalCtrl ready', type, items.result.items)
     $scope.type = type;
     $scope.target = target;
     $scope.user = user;
+    $scope.items = items.result.items; // :D
+    
     $scope.ok = function () {
-      $modalInstance.close();
+      if(type == 'date')
+        ResourceRelatedFactory.save({
+          model: 'issue',
+          id: target.id
+        }, {
+          type: 'date',
+          solution: [$scope.start_date, $scope.end_date],
+          description: $scope.description || ''
+        }, function(res) {
+          console.log(res)
+          //$modalInstance.close();
+        });
     };
 
     $scope.cancel = function () {
-      $modalInstance.dismiss('cancel');
+      $modalInstance.dismiss('close');
     };
   })
