@@ -90,9 +90,9 @@ passport.use(new GoogleStrategy({
   function(accessToken, refreshToken, profile, done) {
     neo4j.query(queries.merge_user, {
       email: 'g@' + profile.id,
-      username: profile.displayName,
+      username: profile.displayName + profile.id,
       firstname: profile.displayName,
-      gender: profile.gender,
+      gender: profile.gender || '',
       salt: '',
       password:'',
       status: 'enabled',
@@ -103,7 +103,7 @@ passport.use(new GoogleStrategy({
       console.log(err, res);
       if(err)
         return done(err);
-      console.log(res)
+      console.log(profile, res)
       var user = res[0];
       return done(null, user);
     });
