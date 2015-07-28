@@ -24,6 +24,7 @@ angular.module('histograph')
       scope:{
         graph: '=',
         tips: '=',
+        freeze: '=',
         controller: '=',
         redirect: '&',
         toggleMenu: '&togglemenu'
@@ -90,6 +91,11 @@ angular.module('histograph')
           }, 320);
         });
         
+        scope.$watch('freeze', function (v) {
+          if(v=='sigma')
+            stop();
+        });
+        
         /*
           Watch: current graph
           Redraw the current graph, calculate the force layout min duration
@@ -100,22 +106,22 @@ angular.module('histograph')
             return;
           stop();
           // calculate differences in x,y for the previous graph, if any
-          if(previousGraph) {
-            $log.log('::sigma --> reposition previous nodes', graph, previousGraph)
+          // if(previousGraph) {
+          //   $log.log('::sigma --> reposition previous nodes', graph, previousGraph)
             
-            var nodesMap = {};
-            // map current graph
-            graph.nodes.filter(function (d, i) {
-              nodesMap[d.id] = i;
-            });
+          //   var nodesMap = {};
+          //   // map current graph
+          //   graph.nodes.filter(function (d, i) {
+          //     nodesMap[d.id] = i;
+          //   });
                 
-            previousGraph.nodes.filter(function (d) {
-              if(nodesMap[d.id]) { // was already present
-                graph.nodes[nodesMap[d.id]].x = d.x;
-                graph.nodes[nodesMap[d.id]].y = d.y;
-              }
-            }); 
-          }
+          //   previousGraph.nodes.filter(function (d) {
+          //     if(nodesMap[d.id]) { // was already present
+          //       graph.nodes[nodesMap[d.id]].x = d.x;
+          //       graph.nodes[nodesMap[d.id]].y = d.y;
+          //     }
+          //   }); 
+          // }
           
           // $log.log('::sigma --> brand new nodes', graph.nodes.map(function(d) {
           //   return d.id

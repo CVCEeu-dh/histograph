@@ -153,6 +153,11 @@ angular.module('histograph')
           params: options
         });
       },
+      getEntities: function(options) {
+        return $http.get('/api/suggest/entities', {
+          params: options
+        });
+      },
       getGraph: function(options) {
         return $http.get('/api/suggest/graph', {
           params: options

@@ -278,6 +278,10 @@ a:focus, a:hover{
 #perspective .related{
   margin: 20px 20px;
 }
+
+.view.SearchCtrl #perspective{
+  width: 25%;
+}
 /*
 
   related items
@@ -325,7 +329,8 @@ a:focus, a:hover{
   width: 50%;
 }
 #see-also.SearchCtrl {
-  margin-left:0;
+  margin-left:25%;
+  width: 25%;
 }
 /*#see-also.IndexCtrl {
   margin-left:0%;

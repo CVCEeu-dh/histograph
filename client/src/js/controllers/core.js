@@ -51,8 +51,11 @@ angular.module('histograph')
     
     // set query and redirect to search controller
     $scope.setQuery = function(item) {
+      $scope.freeze = 'sigma';
       $log.log('CoreCtrl > setQuery',  arguments);
-      if(item.type == 'resource')
+      if(typeof item == 'string')
+        location ='/#/search/' + $scope.query;
+      else if(item.type == 'resource')
         $location.path('r/' + item.id);
       else if(item.type == 'person')
         $location.path('e/' + item.id);
@@ -117,6 +120,7 @@ angular.module('histograph')
     $scope.suggest = function(query) {
       // $log.info('CoreCtrl -> suggest', query);
       $scope.query = ''+ query
+      $scope.freeze = 'sigma'
       return $http.get('/api/suggest', {
         params: {
           query: query
@@ -270,7 +274,7 @@ angular.module('histograph')
       
       $scope.unsetMessage();
       // $scope.setMessage(MESSAGES.LOADED, 1500);
-      
+      $scope.freeze = false;
       // set initial params here
       $scope.params = cleanService.params(r.params)
       
@@ -329,7 +333,7 @@ angular.module('histograph')
       $log.log('CoreCtrl @locationChangeSuccess', path);
       
       var now = (new Date()).getTime();
-      
+      $scope.freeze = 'sigma';
       
       if(!$scope.trails.length) { // hey this is your first trail
         $scope.trails.push(new Trail(path, now));

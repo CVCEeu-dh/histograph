@@ -194,6 +194,13 @@ angular
               query: $route.current.params.query,
               limit: 30
             });
+          },
+          entities: function(SuggestFactory, $route) {
+            // clean limit here
+            return SuggestFactory.getEntities({
+              query: $route.current.params.query,
+              limit: 30
+            });
           }
         }
       })

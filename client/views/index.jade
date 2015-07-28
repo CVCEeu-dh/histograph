@@ -64,9 +64,10 @@ html
             div(class='col-sm-4')
               div(id='search-field')
                 //- form (ng-submit='setQuery(query)')
-                form
+                form(ng-submit='setQuery(query)')
                   div(class='input-group')
-                    input(type='text', name='test', ng-model='__query', typeahead-on-select='setQuery($item, $model, $label)', class='form-control', typeahead-editable='true', placeholder='Search for...', typeahead='item for items in suggest($viewValue)', typeahead-wait-ms='100', typeahead-template-url='suggest.html')
+                    //- input(type='text', ng-model='query', class='form-control')
+                    input(type='text', name='test', ng-model='__query', typeahead-on-select='setQuery($item, $model, $label)', class='form-control', typeahead-editable='false', placeholder='Search for...', typeahead='item for items in suggest($viewValue)', typeahead-wait-ms='100', typeahead-template-url='suggest.html')
                     //- input(type='text', ng-model='query', class='form-control', placeholder='Search for...', bs-typeahead, bs-options='item for items in suggest($viewValue)', data-container='body',data-delay='{ show: 500, hide: 1000000 }')
                     span(class='input-group-btn')
                       a(class='btn btn-default', type='button', ng-href='/#/search/{{query}}') search
@@ -142,7 +143,7 @@ html
           //-           button(class='btn btn-primary', ng-click='createObservation()') answer
               
         
-        div(id='milkyway', sigma, graph='graph', tips='headers.graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentCtrl}} {{queueStatus}}', controller='currentCtrl' redirect='redirect(path)')
+        div(id='milkyway', sigma, graph='graph', freeze='freeze' tips='headers.graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentCtrl}} {{queueStatus}}', controller='currentCtrl' redirect='redirect(path)')
           
         div(id='timeline', timeline, t='timeline', cxt='contextualTimeline')
           

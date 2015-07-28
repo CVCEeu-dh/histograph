@@ -1,8 +1,26 @@
-<div id='see-also' class='{{currentCtrl}}' ng-cloak>
-  <div ng-include src="'templates/partials/resource-toolbar.html'"></div>
-  <div class="empty-list" ng-if="relatedItems.length == 0">
-    Your path did not match any <i>documents</i>. <span ng-if="relatedEntities && relatedEntities.length > 0">
-    There are {{relatedEntities.length}} <i>entities</i> in your path, but at the moment we do not support this feature!
+<div id="perspective" class="secondary {{queueStatus}}">
+  
+  <div class="toolbar tk-proxima-nova">
+  <h2>{{matchingEntities.totalItems}} entities matching <b>{{matchingQuery}}</b></h2> 
+    <div class="wrapper">
+      <pagination boundary-links="true" total-items="matchingEntities.totalItems" items-per-page="matchingResources.limit" ng-model="currentPage" class="pagination-sm" max-size="4" previous-text="&lsaquo;" rotate="true" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></pagination>
+    </div> 
   </div>
-  <div ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/resource-lite.html"'></div>
+  <div class="empty-list" ng-if="matchingEntities.items.length == 0">
+    Your path did not match any <i>entity</i>.
+  </div>
+  <div ng-repeat='relatedItem in matchingEntities.items' ng-include='"templates/partials/entity-lite.html"'></div>
+</div>
+<div id='see-also' class='{{currentCtrl}}' ng-cloak>
+  <div class="toolbar tk-proxima-nova">
+    <h2>{{matchingEntities.totalItems}} documents matching <b>{{matchingQuery}}</b></h2> 
+    <div class="wrapper">
+    <pagination boundary-links="true" total-items="matchingResources.totalItems" items-per-page="matchingResources.limit" ng-model="currentPage" class="pagination-sm" max-size="4" previous-text="&lsaquo;" rotate="true" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></pagination>
+    </div>
+    
+  </div>
+  <div class="empty-list" ng-if="matchingResources.items.length == 0">
+    Your path did not match any <i>documents</i>.
+  </div>
+  <div ng-repeat='relatedItem in matchingResources.items' ng-include='"templates/partials/resource-lite.html"'></div>
 </div>
