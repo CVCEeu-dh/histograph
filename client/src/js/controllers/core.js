@@ -4,10 +4,11 @@
  * @description
  * # CoreCtrl
  * Main controller, handle socket/io bridging for notification
- * It is the parent of the other controllers.
+ * It is the parent of the other controllers. Note: It contains also partial controllers for modals.
  */
 angular.module('histograph')
-  .controller('CoreCtrl', function ($scope, $location, $timeout, $route, $log, $timeout, $http, $routeParams, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, EVENTS, VIZ, MESSAGES) {
+  
+  .controller('CoreCtrl', function ($scope, $location, $timeout, $route, $log, $timeout, $http, $routeParams, $modal, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, EVENTS, VIZ, MESSAGES) {
     $log.debug('CoreCtrl ready');
     $scope.locationPath = $location.path(); 
     
@@ -490,4 +491,48 @@ angular.module('histograph')
     };
     
     
+    /*
+      Open an issue modal
+    */
+    $scope.openIssueModal = function (type, target) {
+      $scope.freeze = 'sigma';
+      $log.log('CoreCtrl -> openIssueModal', type, 'target_id', target.id)
+      var modalInstance = $modal.open({
+        animation: true,
+        templateUrl: 'templates/partials/comment-modal.html',
+        controller: 'IssueModalCtrl',
+        size: 'sm',
+        resolve: {
+          user: function(){
+            return $scope.user;
+          },
+          type: function(){
+            return type
+          },
+          target: function(){
+            return target;
+          },
+          items: function() {
+            return [{content: 'hei'}];
+          }
+        }
+      });
+    };
+    
+  })
+  /*
+    This controller handle the modal bootstrap that allow users to propose a new content for something.
+  */
+  .controller('IssueModalCtrl', function ($scope, $modalInstance, $log, user, type, target, items) {
+    $log.log('IssueModalCtrl ready', type, items)
+    $scope.type = type;
+    $scope.target = target;
+    $scope.user = user;
+    $scope.ok = function () {
+      $modalInstance.close();
+    };
+
+    $scope.cancel = function () {
+      $modalInstance.dismiss('cancel');
+    };
   })

@@ -21,6 +21,7 @@ body{
   color: #1d1d1d;
   height: 100%;
   overflow: hidden;
+  background-color: #f0f0f0;
 }
 
 h1,h2,h3,h4{
@@ -90,6 +91,9 @@ a:focus, a:hover{
      -moz-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1);
        -o-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1);
           transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+}
+.view.IndexCtrl{
+  top: 100px;
 }
 
 .view.active{
@@ -231,7 +235,7 @@ a:focus, a:hover{
 #perspective{
   position: fixed;
   width: 36%;
-  top:  100px;
+  top:  50px;
   bottom: 0px;
   /*overflow: hidden;*/
   overflow: auto;
@@ -270,6 +274,9 @@ a:focus, a:hover{
   padding: 10px 20px;
   text-align: center;
 }
+.view.IndexCtrl #perspective{
+  top: 100px;
+}
 
 .view.InquiriesCtrl #perspective, .view.InquiryCtrl #perspective, .view.InquiryCreateCtrl #perspective{
   width: 50%;
@@ -281,6 +288,7 @@ a:focus, a:hover{
 
 .view.SearchCtrl #perspective{
   width: 25%;
+  top: 100px;
 }
 /*
 
@@ -4411,14 +4419,25 @@ Copyright (c) 2015 Daniel Eden
 #timeline {
   position: fixed;
   top: 50px;
-  left: 0;
+  left: 36%;
   right: 0;
-  background-color: #E8E8E7;
+  background-color: #f0f0f0;
   z-index: 4;
   height: 50px;
-  border-bottom: 1px solid #d4d4d4;
+  /*border-bottom: 1px solid #d4d4d4;*/
+  border-bottom: 1px solid #E5E5E5;
   /*box-shadow:0 1px 6px rgba(0,0,0,.16)*/
+   -webkit-transition: top .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
+     -moz-transition: top .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+       -o-transition: top .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+          transition: top .3s cubic-bezier(0.65, 0.05, 0.36, 1);
 }
+
+#timeline.searchCtrl{
+  left: 0%;
+}
+
+
 #timeline svg{
   background-color: #d8d8d8;
 }
@@ -4492,4 +4511,37 @@ Copyright (c) 2015 Daniel Eden
 .pagination>.disabled>a, .pagination>.disabled>a:focus, .pagination>.disabled>a:hover, .pagination>.disabled>span, .pagination>.disabled>span:focus, .pagination>.disabled>span:hover{
   background-color: transparent;
   border: 0px transparent;
+}
+
+/*
+  bootstrap: modal;
+*/
+.modal-backdrop{
+  background-color: #f0f0f0;
+}
+
+.modal-content{
+  background-color: white;
+  border: 1px solid #E8E8E7;
+  background-clip: padding-box;
+  border-radius: 2px;
+  box-shadow: none;
+}
+
+.modal-content form {
+  margin-left: 40px;
+}
+.modal-content .profile-pic{
+  border: 1px solid #d4d4d4;
+  width: 32;
+  border-radius: 32px;
+  overflow: hidden;
+  height: 32;
+  background: #d4d4d4;
+  margin: 0px 10px 0px 0px;
+  float: left;
+}
+
+.modal-content .profile-pic img{
+  height: 100%;
 }

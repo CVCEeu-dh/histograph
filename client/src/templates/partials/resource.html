@@ -4,7 +4,19 @@
           <a ng-href='#/r/{{item.id}}/inquiries'>comments <label>{{item.comments}}</label></a> -->
           
         <!-- /div -->
-        <div class="type">document
+        <div class="type">document</div>
+        
+        <div>
+          <span ng-click="openIssueModal('date', item)" class="empty" ng-if="!item.props.start_time" tooltip='click to add a date'>no date found</span>
+          <span ng-click="openIssueModal('date', item)" tooltip='click to propose a different date' ng-if="item.props.start_time">{{item.props|guessInterval}}</span>
+          
+          <span ng-repeat="location in item.places">
+            <a class="tag location" ng-click="toggleMenu($event, item, location, 'place')">{{location.name}}</a><!-- 
+            <a ng-if="location.geocode_id" ng-click="toggleInquirer(location)" class="tag location" >{{location.geocode_formatted_address}}</a>
+            <a ng-if="location.geonames_id" class="tag location" >{{location.geonames_toponymName}}, {{location.geonames_countryName}}</a>
+             --><span ng-if="!$last">-</span>
+          </span>
+        
           <span  ng-if="item.inquiries">—
           <a ng-href='#/r/{{item.id}}/inquiries' tooltip="view the related {{item.inquiries}} inquiries"><label>{{item.inquiries}}</label> <i class="fa fa-comment"></i></a>
           </span>
@@ -13,19 +25,11 @@
         <div class="collections">
           <div class="collection" ng-repeat="collection in item.collections"><a ng-href="#/c/{{collection.id}}">{{collection.name|humanize}}</a></div>
         </div>
-        <span gasp-type="date" class="empty" gasp-parent="{{item.type}}-{{item.id}}" ng-if="!item.props.start_time">no date found</span>
-        <span gasp-type="date" gasp-parent="{{item.type}}-{{item.id}}" ng-if="item.props.start_time">{{item.props|guessInterval}}</span>
         
-        <span ng-repeat="location in item.places">
-          <a class="tag location" ng-click="toggleMenu($event, item, location, 'place')">{{location.name}}</a><!-- 
-          <a ng-if="location.geocode_id" ng-click="toggleInquirer(location)" class="tag location" >{{location.geocode_formatted_address}}</a>
-          <a ng-if="location.geonames_id" class="tag location" >{{location.geonames_toponymName}}, {{location.geonames_countryName}}</a>
-           --><span ng-if="!$last">-</span>
-        </span>
           
         
-        <span ng-if="item.persons.length" class="tags"> — <i>persons in the document</i>:
-          <span ng-repeat="per in item.persons"><span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.props.name}} - {{per.props.description}} ({{per.props.birth_date | date:"yyyy"}} - {{per.props.death_date | date:"yyyy"}}) {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.name}}{{$last? '':  ', '}}</span></span>
+        <span ng-if="item.persons.length" class="tags"><i>persons in the document</i>:
+          <span ng-repeat="per in item.persons"><span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip-append-to-body="true" tooltip='{{per.props.name}} - {{per.props.description}} ({{per.props.birth_date | date:"yyyy"}} - {{per.props.death_date | date:"yyyy"}}) {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.name}}{{$last? '':  ', '}}</span></span>
         </span>
         <span ng-if="item.props.languages.length">  —  <i>available in</i>:
           <span ng-repeat="lang in item.props.languages" ng-click='setLanguage(lang)'>{{lang}} </span>

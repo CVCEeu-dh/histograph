@@ -22,7 +22,12 @@ angular.module('histograph')
         redirect: '&',
         queue : '&'
       },
-      template: '<div class="action-group"><a class="action" href="{{href}}" title="visit" data-action="link" tooltip="{{linkto}}"><span class="fa fa-link"></span></a><a class="action queue" tooltip="add to your current playlist" data-action="queue"><span class="fa fa-play-circle-o"></span></a>',
+      template: '<div ng-if="!issue" class="action-group">'+
+                  '<a class="action" href="{{href}}" title="visit" data-action="link" tooltip="{{linkto}}">'+
+                    '<span class="fa fa-link"></span></a>'+
+                  '<a class="action queue" tooltip="add to your current playlist" data-action="queue">'+
+                    '<span class="fa fa-play-circle-o"></span></a>' +
+                '</div>',
       link : function(scope, element, attrs) {
         var _gasp = $(element[0]), // gasp instance;
             type,            // element type
@@ -42,22 +47,28 @@ angular.module('histograph')
         */
         function show() {
           // build link acording to type.
-          console.log(type, id, parent.type, parent.id);
+          $log.log(':: gasp show', type, id, parent.type, parent.id);
           switch(type) {
+            case 'date':
+              scope.issue  = 'date';
+              break;
             case 'person':
             case 'place':
             case 'location':
             case 'personKnown':
-              scope.href = '/#/e/' + id;
+              scope.issue  = false;
+              scope.href   = '/#/e/' + id;
               scope.linkto = 'go to ' + type + ' page';
               break;
             case 'resource':
             case 'resourceKnown':
-              scope.href = '/#/r/'+id;
+              scope.issue  = false;
+              scope.href   = '/#/r/'+id;
               scope.linkto = 'go to document page';
               break;
             default:
-              scope.href = '';
+              scope.issue  = false;
+              scope.href   = '';
               scope.linkto = "";
               break;
           }
@@ -86,7 +97,7 @@ angular.module('histograph')
           
           type  = el.attr('gasp-type'); // should be something of date, location, person, etc ...
           id    = el.attr('data-id');
-          $log.log(':: gasper @click', type, id);
+          // $log.log(':: gasper @click', type, id);
           if(!type) {
             hide()
           } else {
