@@ -14,9 +14,10 @@ angular.module('histograph')
       restrict : 'A',
       scope:{
         timeline: '=t',
-        contextualTimeline: '=cxt'
+        contextualTimeline: '=cxt',
+        filters : '='
       },
-      template: '<div class="date left"></div><div class="date right"></div><div class="mouse tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div><div class="viewer"></div>',
+      template: '<div class="brush left">left</div><div class="brush right">right</div><div class="date left"></div><div class="date right"></div><div class="mouse tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div><div class="viewer"></div>',
       link : function(scope, element, attrs) {
         
         var δ = { css:{}, ƒ:{}};
@@ -45,6 +46,8 @@ angular.module('histograph')
           δ.tooltipText = d3.select('#timeline .tooltip-inner');
           δ.dateLeft    = d3.select('#timeline .date.left');
           δ.dateRight   = d3.select('#timeline .date.right');
+          δ.brushDateLeft    = d3.select('#timeline .brush.left');
+          δ.brushDateRight   = d3.select('#timeline .brush.right');
               
           δ.brush       = d3.svg.brush().x(δ.ƒ.x);
           
@@ -69,16 +72,18 @@ angular.module('histograph')
             
           δ.context = δ.svg.append("g")
               .attr("class", "context")
-              .attr("transform", "translate(" + δ.padding.v + "," + δ.padding.h/2 + ")"),                
+              .attr("transform", "translate(" + δ.padding.v + "," + δ.padding.h/2 + ")");                
           
-          δ.context.append("g")
+          δ.gBrush = δ.context.append("g")
               .attr("class", "x brush")
-              .call(δ.brush)
-                .selectAll("rect")
+              .call(δ.brush);
+              
+          δ.gBrush.selectAll("rect")
                   .attr({
                     y: 0,
                     height: δ.dimensions.h - δ.padding.h
                   });
+          
           
           δ.area = d3.svg.area()
               //.interpolate("monotone")
@@ -93,13 +98,24 @@ angular.module('histograph')
           δ.brush.on("brush", function() {
             var extent = δ.brush.extent()
             clearTimeout(δ.brushTimer);
+            
+            // δ.brushDateLeft.style({
+            //   'left': pos[0] + 150,
+            //   'opacity': pos[0] < δ.padding.v || pos[0] > δ.availableWidth - δ.padding.v? 0:1
+            // })
+            
+            
             δ.brushTimer = setTimeout(function(){
               //console.log(d3.time.format("%Y-%m-%d")(extent[0]))
-              $location.search({
-                from: d3.time.format("%Y-%m-%d")(extent[0]),
-                to: d3.time.format("%Y-%m-%d")(extent[1])
-              });
-              scope.$apply();
+               // console.log('extent',extent[0], typeof extent[0], isNaN(extent[0]))
+              if(typeof extent[0] == 'object') {
+             
+                $location.search({
+                  from: d3.time.format("%Y-%m-%d")(extent[0]),
+                  to: d3.time.format("%Y-%m-%d")(extent[1])
+                });
+                scope.$apply();
+              }
             }, 1000)
             
             //console.log("brushing babe", δ.brush.extent())
@@ -142,6 +158,8 @@ angular.module('histograph')
         
         δ.draw = function() {
           clearTimeout(δ.resizeTimer);
+          if(!δ.viewer)
+            return;
           δ.availableWidth = δ.viewer[0][0].clientWidth;
           
           var dataset = angular.copy(scope.timeline).map(function (d) {
@@ -160,7 +178,7 @@ angular.module('histograph')
               .text(δ.timeFormat(new Date(timeExtent[1])));
           
           
-          $log.log('::timeline -> draw() w:', δ.availableWidth, ' r:', ratio);
+          $log.log('::timeline -> draw() w:', δ.availableWidth, ' r:', ratio, scope.filters);
           
           //
           δ.svg.attr("width", δ.availableWidth)
@@ -169,13 +187,17 @@ angular.module('histograph')
           
           δ.ƒ.x.domain(timeExtent);
           δ.ƒ.y.domain(d3.extent(dataset, function(d) {return d.weight}));
+          $log.log('::', timeExtent);
+          δ.brush.x(δ.ƒ.x).extent(timeExtent);
+          δ.gBrush.call(δ.brush.event);
           
-          δ.brush.x(δ.ƒ.x);
           δ.stream
             .attr("d", δ.area(dataset));
         };
         
-        
+        /*
+          Listeners, watchers
+        */
         // on graph change, change the timeline as well
         scope.$watch('timeline', function (timeline) {
           if(!timeline)
@@ -186,6 +208,11 @@ angular.module('histograph')
           δ.draw();
           // computate min and max
         });
+        
+        scope.$watch('filters', function (filters) {
+          if(filters)
+            $log.log('::timeline filters:',filters);
+        })
         
         angular.element($window).bind('resize', function() {
           clearTimeout(δ.resizeTimer);

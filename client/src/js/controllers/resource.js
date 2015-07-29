@@ -148,13 +148,15 @@ angular.module('histograph')
     /*
       Reload related items, with filters.
     */
-    $scope.sync = function() {
+    $scope.sync = function(params) {
+      $scope.loading = true;
       ResourceRelatedFactory.get({
         id: $routeParams.id,
         model: 'resource',
         limit: 10,
         offset: ($scope.page-1) * 10
       }, function (res) {
+        $scope.loading = false;
         $scope.setRelatedItems(res.result.items);
       })
        
@@ -187,7 +189,7 @@ angular.module('histograph')
     });
     $scope.$on(EVENTS.PAGE_CHANGED, function(e, params) {
       $log.debug('ResourceCtrl @PAGE_CHANGED', params);
-      $scope.page = params.page;
-      $scope.sync();
+      $scope.page = params.page
+      $scope.sync(params);
     });
   })

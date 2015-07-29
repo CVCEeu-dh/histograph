@@ -4493,6 +4493,24 @@ Copyright (c) 2015 Daniel Eden
   text-align: left;
 }
 
+#timeline .brush{
+  display: none;
+  position: absolute;
+  width: 110px;
+  top: 15px;
+  background: white;
+}
+
+#timeline .brush.left{
+  left: 30px;
+  text-align: right;
+}
+
+#timeline .brush.right{
+  right: 30px;
+  text-align: left;
+}
+
 #timeline path{
   fill: none;
   stroke: #555;

@@ -5,7 +5,8 @@
   <div class="empty-list" ng-if="relatedItems.length == 0">
     There are no related <i>documents</i>.
   </div>
-  <div ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/resource-lite.html"'></div>
+  <div class="{{loading? 'animated fadeOut': 'animated fadeIn'}}" style="-webkit-animation-delay: {{$index * 100}}ms;
+    animation-delay: {{$index * 100}}ms"  ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/resource-lite.html"'></div>
 </div>
 
   
