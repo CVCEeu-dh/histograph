@@ -15,7 +15,7 @@
     <div class="filters" ng-if="params">
       <span ng-if="key != 'page'" class="filter" ng-repeat='(key, value) in params'>
         {{key}} {{value}}
-        <a ng-click="removeFromQueue(item)" tooltip-append-to-body="true" tooltip="remove from this set" class="action"><i class="fa fa-times-circle"></i></a>
+        <a ng-click="removeFilter(key, value)" tooltip-append-to-body="true" tooltip="remove from this set" class="action"><i class="fa fa-times-circle"></i></a>
       </span>
     </div>
     <div class="wrapper">

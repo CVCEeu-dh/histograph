@@ -500,6 +500,13 @@ angular.module('histograph')
       $log.debug('NeighborsCtrl redirect ', $scope.currentCtrl);
     };
     
+    /*
+      Filters
+    */
+    $scope.removeFilter = function(key, value) {
+      $log.debug('CoreCtrl -> removeFilter','key:', key, '- value:', value)
+      $location.search(key, null);
+    }
     
     /*
       Open an issue modal
