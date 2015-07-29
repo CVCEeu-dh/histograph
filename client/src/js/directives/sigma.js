@@ -86,9 +86,10 @@ angular.module('histograph')
         scope.$watch('controller', function (ctrl) {
           $log.log('::sigma @controller changed');
           setTimeout(function() {
+            $log.log('::sigma @controller changed -> rescale()');
             rescale();
             si.refresh();
-          }, 320);
+          }, 300);
         });
         
         scope.$watch('freeze', function (v) {
@@ -152,7 +153,6 @@ angular.module('histograph')
             n.x = n.x || Math.random()*50
             n.y = n.y || Math.random()*50
             
-            console.log(n.color)
             n.size = n.type == 'res'? 1 : si.graph.degree(n.id) + 1.5;
           });
           

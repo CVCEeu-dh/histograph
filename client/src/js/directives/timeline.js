@@ -185,7 +185,6 @@ angular.module('histograph')
           δ.init();
           δ.draw();
           // computate min and max
-          
         });
         
         angular.element($window).bind('resize', function() {

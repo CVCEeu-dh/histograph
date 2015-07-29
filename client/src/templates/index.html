@@ -13,7 +13,7 @@
   <div class="toolbar tk-proxima-nova">
     <h2>A list of <b>{{totalItems}}</b> resources</h2>
     <div class="filters">
-      <span class="filter" ng-repeat='(key, value) in params'>
+      <span ng-if="params" class="filter" ng-repeat='(key, value) in params'>
         {{key}} {{value}}
         <a ng-click="removeFromQueue(item)" tooltip-append-to-body="true" tooltip="remove from this set" class="action"><i class="fa fa-times-circle"></i></a>
       </span>

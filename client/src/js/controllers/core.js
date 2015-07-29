@@ -257,18 +257,14 @@ angular.module('histograph')
       }
     }
     
-    /*
-    
-      The authorizer
-      --------------
-    */
-    
+  
     /*
     
       Events listeners
       ----
     
     */
+    var _resizeTimer;
     $scope.$on('$routeChangeSuccess', function(e, r) {
       $log.log('CoreCtrl @routeChangeSuccess', r.params, r.$$route.controller);
       $scope.currentCtrl = r.$$route.controller;
@@ -278,6 +274,12 @@ angular.module('histograph')
       $scope.freeze = false;
       // set initial params here
       $scope.params = cleanService.params(r.params)
+      
+      // resize window
+      clearTimeout(_resizeTimer);
+      _resizeTimer = setTimeout(function() {
+        $(window).trigger('resize');
+      }, 300)
       
       switch($scope.currentCtrl) { // move to translation engine
         case 'SearchCtrl':
