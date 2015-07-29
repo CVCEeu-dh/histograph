@@ -17,16 +17,18 @@ angular.module('histograph')
       $scope.setGraph({nodes:[], edges:[]});
       
       ResourcesFactory.get($scope.params, function (res) {
-        $log.info('ResourceFactory', $scope.params, 'returned', res.result.items.length);
+        $log.info('ResourceFactory', $scope.params, 'returned', res.result.items.length, 'items');
         $scope.setRelatedItems(res.result.items);
+        $scope.totalItems = res.info.total_items;
+        $scope.limit = res.info.params.limit;
         
         $scope.syncGraph();
       });
       
-      InquiryFactory.get({limit: 20}, function(res) {
-        console.log(res);
-        $scope.inquiries = res.result.items
-      })
+      // InquiryFactory.get({limit: 20}, function(res) {
+      //   console.log(res);
+      //   $scope.inquiries = res.result.items
+      // })
     };
     
     $scope.syncGraph = function() {

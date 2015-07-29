@@ -328,6 +328,20 @@ a:focus, a:hover{
   padding-bottom: 10px;
   border-bottom: 1px solid #e8e8e8;
 }
+
+.toolbar .filters{
+  background-color: #e8e8e8;
+  padding: 10px;
+}
+.toolbar .filters .filter{
+  background-color: #151515;
+  display: inline-block;
+  color: white;
+  padding: 3px 6px;
+  margin-right: 10px;
+}
+  
+
 #see-also.AllShortestPathsCtrl , #see-also.NeighborsCtrl {
   margin-left: 25%;
   width: 25%;

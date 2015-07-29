@@ -10,7 +10,19 @@
   <div ng-repeat='relatedItem in inquiries' ng-include='"templates/partials/inquiry-lite.html"'></div>
 </div -->
 <div id='see-also' class='{{currentCtrl}}' ng-cloak>
-  <div ng-include src="'templates/partials/resource-toolbar.html'"></div>
+  <div class="toolbar tk-proxima-nova">
+    <h2>A list of <b>{{totalItems}}</b> resources</h2>
+    <div class="filters">
+      <span class="filter" ng-repeat='(key, value) in params'>
+        {{key}} {{value}}
+        <a ng-click="removeFromQueue(item)" tooltip-append-to-body="true" tooltip="remove from this set" class="action"><i class="fa fa-times-circle"></i></a>
+      </span>
+    </div>
+    <div class="wrapper">
+    <pagination boundary-links="true" total-items="totalItems" items-per-page="limit" ng-model="currentPage" class="pagination-sm" max-size="4" previous-text="&lsaquo;" rotate="true" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></pagination>
+    </div>
+    
+  </div>
   <div ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/resource-lite.html"'></div>
 </div>
 
