@@ -14,8 +14,6 @@ angular.module('histograph')
     // get entities ids to load
     $scope.relatedEntities = allInBetween.data.result.graph.nodes.filter(function (d) {
       return d.type == 'location' || d.type == 'place' || d.type == 'person';
-    }).map(function (d) {
-      return d.id;
     });
     // get some resource ids to load
     var resourcesToLoad = allInBetween.data.result.graph.nodes.filter(function (d) {

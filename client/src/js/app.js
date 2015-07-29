@@ -131,7 +131,8 @@ angular
           resources: function(EntityRelatedFactory, $route) {
             return EntityRelatedFactory.get({
               id: $route.current.params.id,
-              model: 'resources'
+              model: 'resources',
+              limit: 10
             }, {}).$promise;
           }
         }

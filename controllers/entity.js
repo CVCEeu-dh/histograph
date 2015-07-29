@@ -136,7 +136,7 @@ module.exports = function(io){
     
     getRelatedResources: function (req, res) {
        var form = validator.request(req, {
-            limit: 50,
+            limit: 10,
             offset: 0
           });
       

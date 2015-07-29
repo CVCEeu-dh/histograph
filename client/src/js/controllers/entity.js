@@ -5,8 +5,8 @@
  * # IndexCtrl
  */
 angular.module('histograph')
-  .controller('EntityCtrl', function ($scope, $log, $routeParams, socket, $filter, entity, resources, persons, EntityExtraFactory) {
-    $log.debug('EntityCtrl ready', +$routeParams.id, entity.result.item.name);
+  .controller('EntityCtrl', function ($scope, $log, $routeParams, socket, $filter, entity, resources, persons, EntityExtraFactory,EntityRelatedFactory, EVENTS) {
+    $log.debug('EntityCtrl ready', +$routeParams.id, entity.result.item.name, resources);
     
     $scope.item = entity.result.item;
     $scope.setRelatedItems(resources.result.items);
@@ -14,6 +14,7 @@ angular.module('histograph')
     
     $scope.pagetitle = 'related documents';
     $scope.totalItems = resources.info.total_items;
+    $scope.limit = 10//resources.info.params.limit
     
      /*
       Set graph title
@@ -61,4 +62,26 @@ angular.module('histograph')
         $scope.item = res.result.item;
       })
     };
+    
+    /*
+      Reload related items, with filters.
+    */
+    $scope.sync = function(params) {
+      $scope.loading = true;
+      EntityRelatedFactory.get({
+        id: $routeParams.id,
+        model: 'resources',
+        limit: 10,
+        offset: (params.page-1) * 10
+      }, function (res) {
+        $scope.loading = false;
+        $scope.setRelatedItems(res.result.items);
+      })
+    }
+    
+    $scope.$on(EVENTS.PAGE_CHANGED, function(e, params) {
+      $log.debug('ResourceCtrl @PAGE_CHANGED', params);
+      $scope.page = params.page
+      $scope.sync(params);
+    });
   });

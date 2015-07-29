@@ -44,7 +44,7 @@ if(options.resource) {
     function getTotalAmoutOfResources (callback) {   
       neo4j.query(''+
         'MATCH (res:resource) '+
-        '  WHERE not(has(res.full_search)) AND (has(res.title_en) OR has(res.title_fr) OR has(res.name)) '+
+        '  WHERE (has(res.title_en) OR has(res.title_fr) OR has(res.name)) '+
         '  RETURN count(*) as total_count', function (err, result) {
           if(err)
             return callback(err);
@@ -59,7 +59,7 @@ if(options.resource) {
         console.log(n);
         neo4j.query(''+
           ' MATCH (res:resource) '+
-          '  WHERE not(has(res.full_search)) AND (has(res.title_en) OR has(res.title_fr) OR has(res.name)) '+
+          '  WHERE (has(res.title_en) OR has(res.title_fr) OR has(res.name)) '+
           '  RETURN {id: id(res), name:res.name, doi: res.doi, archive: [res.name, res.source, res.caption], translations: [res.name, res.title_en, res.title_fr, res.caption_fr, res.caption_en]}'+
           ' SKIP {offset} LIMIT {limit}', {
             limit: 100,
@@ -69,7 +69,7 @@ if(options.resource) {
               return next(err);
             
             var q = async.queue(function (triplet, nextTriplet) {
-              console.log(clc.blackBright("processing id =", clc.whiteBright(triplet.id), triplet.doi, "remaining", clc.magentaBright(q.length(), loops-n)));
+              console.log(clc.blackBright("processing id =", clc.whiteBright(triplet.id), triplet.doi, "remaining", clc.magentaBright(q.length(), loops-n, total_count)));
               var contentToIndex = _.compact(_.unique(_.values(triplet.translations))).join(' ').toLowerCase();
               if(!contentToIndex.length) {
                 contentToIndex = _.compact(_.values(triplet.archive)).join(' ').toLowerCase();
@@ -79,18 +79,19 @@ if(options.resource) {
                 console.log(triplet.translations)
                 throw 'not enough content'
               }
-              contentToIndex = _.compact([ triplet.doi, contentToIndex]).join(' ');// + ' ' + helpers.text.translit(contentToIndex);
+              contentToIndex = _.compact([ triplet.doi, contentToIndex, helpers.text.translit(contentToIndex)]).join(' ');// + ' ' + helpers.text.translit(contentToIndex);
               neo4j.query(''+
                 ' MATCH (res:resource) '+
-                '  WHERE id(res) = {id} SET res.full_search = {full_search}', {
+                '  WHERE id(res) = {id} SET res.full_search = {full_search} RETURN res', {
                   id: triplet.id,
                   full_search: S(contentToIndex).stripTags().s
-              }, function (err) {
+              }, function (err, n) {
                 if(err)
                   throw err;
+                console.log('...',clc.greenBright('V'), n[0].full_search.length )
                 nextTriplet();
               })
-            }, 10);
+            }, 1);
             q.push(triplets);
             q.drain = next;
             // var contentToIndex = _.compact(triplets.translations).join(' ');
