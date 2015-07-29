@@ -76,6 +76,13 @@ OPTIONAL MATCH (res)-[r3:appears_in]-(per:`person`)
     } as r
   ORDER BY res.last_modification_time DESC
 
+// name: count_resources
+// count resources having a version, with current filters
+MATCH (res:resource)
+{?res:start_time__gt} {AND?res:end_time__lt}
+RETURN count(res) as total_items
+
+
 
 // name: get_resources_by_ids
 // get resources with number of comments, if any
@@ -171,11 +178,6 @@ WHERE res <> res2
   LIMIT 25
 
 
-// name: count_resources
-// count resources having a version, with current filters
-MATCH (r:resource)--(v:version)
-  WITH r
-  RETURN count(r)
 
 
 // name: add_comment_to_resource

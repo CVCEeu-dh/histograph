@@ -96,6 +96,47 @@ module.exports = {
     });  
   },
   /*
+    Available params are limit, offset, order by.
+  */
+  getMany: function(params, next) {
+    async.parallel({
+      totalItems: function(callback) {
+        var query = parser.agentBrown(rQueries.count_resources, params);
+        neo4j.query(query, params, function (err, result) {
+          if(err)
+            console.log(err)
+          if(err)
+            callback(err);
+          else
+            callback(null, result.total_items);
+        });
+      },
+      items: function(callback) {
+        var query = parser.agentBrown(rQueries.get_resources, params);
+        neo4j.query(query, params, function (err, items) {
+          if(err)
+            callback(err)
+          else
+            callback(null, items.map(function (d) {
+              d.locations = _.values(d.locations || {});
+              d.persons   = _.values(d.persons || {});
+              d.places    = _.values(d.places || {});
+              return d;
+            }));
+        })
+      }
+    }, function (err, results) {
+      // results is now equals to: {one: 1, two: 2}
+      if(err) {
+        next(err);
+        return;
+      }
+      next(null, results.items, {
+        total_items: results.totalItems
+      })
+    });
+  },
+  /*
     Provide here a list of valid ids
   */
   getByIds: function(ids, next) {

@@ -245,6 +245,7 @@ describe('controllers: get resource items available to the user', function() {
       .expect(200)
       .end(function (err, res) {
         should.not.exists(err);
+        console.log(res.body)
         should.equal(res.body.info.params.start_date, '1988-01-01T00:00:00.000Z');
         should.equal(res.body.info.params.end_date, '1988-01-02T00:00:00.000Z');
         should.equal(res.body.info.params.start_time, 567993600);
@@ -556,7 +557,7 @@ describe('controllers: issues', function() {
       .end(function (err, res) {
         if(err)
           console.log(err);
-        console.log(res.body.result.item);
+        should.exist(res.body.result.item);
         done()
       });
   });

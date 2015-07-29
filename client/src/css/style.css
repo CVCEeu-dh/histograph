@@ -340,10 +340,10 @@ a:focus, a:hover{
   margin-left:25%;
   width: 25%;
 }
-/*#see-also.IndexCtrl {
+#see-also.IndexCtrl {
   margin-left:0%;
-  width: 30%;
-}*/
+  width: 36%;
+}
 
 #inquiry-name{
   width: 100%;
@@ -604,9 +604,9 @@ a:focus, a:hover{
   left: 50%;
 }
 
-/*#milkyway.IndexCtrl{
-  left: 30%;
-}*/
+#milkyway.IndexCtrl{
+  left: 36%;
+}
 
 #milkyway.InquiriesCtrl, #milkyway.InquiryCtrl, #milkyway.InquiryCreateCtrl{
   display: none;
@@ -4444,7 +4444,7 @@ Copyright (c) 2015 Daniel Eden
           transition: top .3s cubic-bezier(0.65, 0.05, 0.36, 1);
 }
 
-#timeline.searchCtrl{
+#timeline.searchCtrl, #timeline.indexCtrl{
   left: 0%;
 }
 

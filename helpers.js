@@ -42,15 +42,12 @@ module.exports = {
         item: item
       }, info || {});
     },
-    getMany: function (err, res, items, params, warnings) {
+    getMany: function (err, res, items, info) {
       if(err && err != IS_EMPTY)
         return module.exports.cypherQueryError(err, res);
       return res.ok({
         items: items || []
-      }, {
-        params: params,
-        warnings: warnings
-      });
+      }, info);
     }
   }, 
   /**

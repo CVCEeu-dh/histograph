@@ -83,23 +83,20 @@ module.exports = function(io){
       get some, based on the limit/offset settings
     */
     getItems: function (req, res) {
-      validator.queryParams(req.query, function (err, params, warnings) {
-        if(err)
-          return helpers.formError(err, res);
-        var query = parser.agentBrown(queries.get_resources, params);
-        // console.log(query)
-        neo4j.query(query, params,function(err, items) {
-          if(err)
-            return helpers.cypherQueryError(err, res);
-          
-          return res.ok({
-            items: items
-          }, {
-            params: params,
-            warnings: warnings
+      var form = validator.request(req, {
+            limit: 50,
+            offset: 0
           });
+      
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+
+      resource.getMany(form.params, function (err, items, info) {
+        return helpers.models.getMany(err, res, items, {
+          params: form.params,
+          total_items: info.total_items
         });
-      })
+      });
     },
 
     /*
@@ -131,7 +128,7 @@ module.exports = function(io){
         if(err)
           return helpers.formError(err, res);
         var query = parser.agentBrown(queries.get_cooccurrences, params);
-        console.log('query', query)
+        // console.log('query', query)
         
         helpers.cypherGraph(query, {
           offset: 0,

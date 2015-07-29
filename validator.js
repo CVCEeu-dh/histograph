@@ -101,6 +101,7 @@ module.exports = {
   */
   request: function(req, params, next) {
     var errors     = {},
+        warnings   = {},
         safeParams = {},
         params     = _.merge(params || {}, req.query || {}, req.body || {}, req.params || {}),
         
@@ -165,11 +166,33 @@ module.exports = {
               32
             ],
             error: 'password have to ...'
+          },
+          {
+            field: 'from',
+            check: 'matches',
+            args: [
+              /^\d{4}-\d{2}-\d{2}$/
+            ],
+            error: 'should be in the format YYYY-MM-DD'
+          },
+          {
+            field: 'to',
+            check: 'matches',
+            args: [
+              /^\d{4}-\d{2}-\d{2}$/
+            ],
+            error: 'should be in the format YYYY-MM-DD'
           }
         ],
         result;
     
     result = verify(params, fields);
+    
+    
+    // if(safeParams.start_time != undefined && safeParams.end_time != undefined && safeParams.start_time > safeParams.end_time) {
+    //   warnings.end_date = 'check that params.to';
+    // }
+    
     // errors?
     if(result !== true) {
       if(next)
@@ -192,6 +215,25 @@ module.exports = {
       safeParams.limit = +safeParams.limit;
     if(safeParams.offset)
       safeParams.offset = +safeParams.offset;
+    
+    if(params.from) {
+      safeParams.start_date = moment.utc(params.from,'YYYY-MM-DD', true);
+      // if(!safeParams.start_date.isValid())
+      //   warnings.start_date = 'from does not contain a valid date';
+      // else
+      //   
+      safeParams.start_time = +safeParams.start_date.format('X');
+    };
+    if(params.to) {
+      safeParams.end_date = moment.utc(params.to,'YYYY-MM-DD', true);
+      // if(!safeParams.end_date.isValid())
+      //   errors.end_date = 'not a valid date'
+      // else
+      //   
+      safeParams.end_time = +safeParams.end_date.format('X');
+    };
+    
+    
     if(next)
       next(null, safeParams);
     else

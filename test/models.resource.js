@@ -10,14 +10,14 @@
 'use strict';
 
 var settings = require('../settings'),
-    resource = require('../models/resource'),
+    Resource = require('../models/resource'),
     should  = require('should');
     
 // todo: create a new resource, discover its content, then retrieve its representation
 describe('model:resource ', function() {
   
   it('should get a correct representation of a resource', function (done) {
-    resource.get(11160, function (err, res) {
+    Resource.get(11160, function (err, res) {
       if(err)
         throw err;
       should.equal(res.id, 11160)
@@ -27,8 +27,20 @@ describe('model:resource ', function() {
       done()
     })
   })
+  it('should get a list of available resources', function (done) {
+    Resource.getMany({
+      limit: 3,
+      offset: 0
+    }, function (err, items, info) {
+      if(err)
+        throw err;
+      should.exist(items.length)
+      should.exist(info.total_items)
+      done()
+    })
+  })
   it('should get a correct representation of a resource', function (done) {
-    resource.get(1, function (err, res) {
+    Resource.get(1, function (err, res) {
       if(err)
         throw err;
       should.equal(res.id, 1)
@@ -39,13 +51,13 @@ describe('model:resource ', function() {
     })
   })
   it('should return the timeline of resources', function (done) {
-    resource.getTimeline({}, function (err, res) {
+    Resource.getTimeline({}, function (err, res) {
       should.not.exist(err);
       done()
     })
   })
   it('should get a NOT found error', function (done) {
-    resource.get(111600000000, function (err, res) {
+    Resource.get(111600000000, function (err, res) {
       should.exist(err)
       done()
     })
