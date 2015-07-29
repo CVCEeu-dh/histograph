@@ -13,18 +13,27 @@ angular.module('histograph')
     /*
       Reload resources according to scope params
     */
-    $scope.sync = function() {
+    $scope.sync = function(options) {
       $scope.setGraph({nodes:[], edges:[]});
-      
-      ResourcesFactory.get($scope.params, function (res) {
-        $log.info('ResourceFactory', $scope.params, 'returned', res.result.items.length, 'items');
+      $scope.loading = true;
+      var params = angular.copy($scope.params);
+      if(options && options.page)
+        params.offset = (options.page - 1)*($scope.limit || 10)
+        
+      ResourcesFactory.get(params, function (res) {
+        $log.info('ResourceFactory', params, 'returned', res.result.items.length, 'items');
         $scope.setRelatedItems(res.result.items);
         $scope.totalItems = res.info.total_items;
         $scope.limit = res.info.params.limit;
-        
-        $scope.syncGraph();
+        $scope.loading = false;
       });
       
+      if(!options) {
+        $scope.currentPage=1;
+        $scope.syncGraph();
+      }
+        
+       
       // InquiryFactory.get({limit: 20}, function(res) {
       //   console.log(res);
       //   $scope.inquiries = res.result.items
@@ -68,6 +77,10 @@ angular.module('histograph')
     $scope.$on(EVENTS.API_PARAMS_CHANGED, function() {
       $log.log('IndexCtrl @API_PARAMS_CHANGED', $scope.params);
       $scope.sync();
+    });
+    $scope.$on(EVENTS.PAGE_CHANGED, function(e, params) {
+      $log.log('IndexCtrl @PAGE_CHANGED', params);
+      $scope.sync(params);
     });
     $scope.sync();
     
