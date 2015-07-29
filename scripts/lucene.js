@@ -60,7 +60,7 @@ if(options.resource) {
         neo4j.query(''+
           ' MATCH (res:resource) '+
           '  WHERE not(has(res.full_search)) AND (has(res.title_en) OR has(res.title_fr) OR has(res.name)) '+
-          '  RETURN {id: id(res), name:res.name, doi: res.doi, archive: [res.name, res.source, res.caption], translations: [res.title_en, res.title_fr, res.caption_fr, res.caption_en]}'+
+          '  RETURN {id: id(res), name:res.name, doi: res.doi, archive: [res.name, res.source, res.caption], translations: [res.name, res.title_en, res.title_fr, res.caption_fr, res.caption_en]}'+
           ' SKIP {offset} LIMIT {limit}', {
             limit: 100,
             offset: n*100
@@ -69,8 +69,8 @@ if(options.resource) {
               return next(err);
             
             var q = async.queue(function (triplet, nextTriplet) {
-              console.log(clc.blackBright("processing id =", clc.whiteBright(triplet.id), triplet.doi, "remaining", clc.magentaBright(q.length())));
-              var contentToIndex = _.compact(_.values(triplet.translations)).join(' ').toLowerCase();
+              console.log(clc.blackBright("processing id =", clc.whiteBright(triplet.id), triplet.doi, "remaining", clc.magentaBright(q.length(), loops-n)));
+              var contentToIndex = _.compact(_.unique(_.values(triplet.translations))).join(' ').toLowerCase();
               if(!contentToIndex.length) {
                 contentToIndex = _.compact(_.values(triplet.archive)).join(' ').toLowerCase();
               }
