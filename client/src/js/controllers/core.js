@@ -85,6 +85,14 @@ angular.module('histograph')
       $scope.relatedCount = options.total_count;
     }
     
+    $scope.setPage = function(page, prefix) {
+      $log.log('CoreCtrl > setPage', page, '- prefix:', prefix || 'without prefix');
+      $scope.$broadcast(EVENTS.PAGE_CHANGED, {
+        page: page,
+        prefix: prefix
+      });
+    }
+    
     /*
       language handlers
       Please cehck that each controller clean or replace this list

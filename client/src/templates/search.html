@@ -3,24 +3,25 @@
   <div class="toolbar tk-proxima-nova">
   <h2>{{matchingEntities.totalItems}} entities matching <b>{{matchingQuery}}</b></h2> 
     <div class="wrapper">
-      <pagination boundary-links="true" total-items="matchingEntities.totalItems" items-per-page="matchingResources.limit" ng-model="currentPage" class="pagination-sm" max-size="4" previous-text="&lsaquo;" rotate="true" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></pagination>
+      <pagination boundary-links="true" total-items="matchingEntities.totalItems" items-per-page="matchingEntities.limit" ng-model="matchingEntities.page" class="pagination-sm" max-size="4" previous-text="&lsaquo;" rotate="true" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;" ng-change="setPage(matchingEntities.page, 'entities')"></pagination>
     </div> 
   </div>
   <div class="empty-list" ng-if="matchingEntities.items.length == 0">
     Your path did not match any <i>entity</i>.
   </div>
-  <div ng-repeat='relatedItem in matchingEntities.items' ng-include='"templates/partials/entity-lite.html"'></div>
+  <div class='{{matchingEntities.loading? "animated fadeOut": "animated fadeIn"}}' ng-repeat='relatedItem in matchingEntities.items' ng-include='"templates/partials/entity-lite.html"'></div>
 </div>
 <div id='see-also' class='{{currentCtrl}}' ng-cloak>
   <div class="toolbar tk-proxima-nova">
-    <h2>{{matchingEntities.totalItems}} documents matching <b>{{matchingQuery}}</b></h2> 
+    <h2>{{matchingResources.totalItems}} documents matching <b>{{matchingQuery}}</b></h2> 
     <div class="wrapper">
-    <pagination boundary-links="true" total-items="matchingResources.totalItems" items-per-page="matchingResources.limit" ng-model="currentPage" class="pagination-sm" max-size="4" previous-text="&lsaquo;" rotate="true" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></pagination>
+    <pagination boundary-links="true" total-items="matchingResources.totalItems" items-per-page="matchingResources.limit" ng-model="matchingResources.page" class="pagination-sm" max-size="4" ng-change="setPage(matchingResources.page, 'resources')" previous-text="&lsaquo;" rotate="true" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></pagination>
     </div>
     
   </div>
   <div class="empty-list" ng-if="matchingResources.items.length == 0">
     Your path did not match any <i>documents</i>.
   </div>
-  <div ng-repeat='relatedItem in matchingResources.items' ng-include='"templates/partials/resource-lite.html"'></div>
+  <div class='{{matchingResources.loading? "animated fadeOut": "animated fadeIn"}}' ng-repeat='relatedItem in matchingResources.items' style="-webkit-animation-delay: {{$index * 100}}ms;
+    animation-delay: {{$index * 100}}ms" ng-include='"templates/partials/resource-lite.html"'></div>
 </div>

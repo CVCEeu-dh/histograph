@@ -331,14 +331,14 @@ a:focus, a:hover{
 
 .toolbar .filters{
   background-color: #e8e8e8;
-  padding: 10px;
+  padding: 0px 10px;
 }
 .toolbar .filters .filter{
   background-color: #151515;
   display: inline-block;
   color: white;
   padding: 3px 6px;
-  margin-right: 10px;
+  margin: 10px 5px 10px 5px;
 }
   
 
@@ -1139,8 +1139,8 @@ Copyright (c) 2015 Daniel Eden
 */
 
 .animated {
-  -webkit-animation-duration: 1s;
-  animation-duration: 1s;
+  -webkit-animation-duration: .35s;
+  animation-duration: .35s;
   -webkit-animation-fill-mode: both;
   animation-fill-mode: both;
 }

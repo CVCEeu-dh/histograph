@@ -5,7 +5,7 @@
  * # IndexCtrl
  */
 angular.module('histograph')
-  .controller('ResourceCtrl', function ($scope, $log, $routeParams, $filter, resource, resources, ResourceVizFactory, ResourceCommentsFactory, socket) {
+  .controller('ResourceCtrl', function ($scope, $log, $routeParams, $filter, resource, resources, ResourceVizFactory, ResourceCommentsFactory, ResourceRelatedFactory, socket, EVENTS) {
     $log.debug('ResourceCtrl ready');
     
     /*
@@ -15,8 +15,9 @@ angular.module('histograph')
     /*
       set pagination
     */
-    $scope.totalItems = resources.info.total_items;
-    $scope.currentPage = 1
+    $scope.totalItems  = resources.info.total_items;
+    $scope.limit       = 10;
+    $scope.page        = 1;
     /*
       Set graph title
     */
@@ -132,16 +133,32 @@ angular.module('histograph')
       limit: 2000
     }, function(res) {
       $log.log('res', res)
-      res.result.graph.nodes.map(function (d) {
-        d.x = Math.random()*50;
-        d.y = Math.random()*50;
-        return d;
-      });
+      // res.result.graph.nodes.map(function (d) {
+      //   // d.x = Math.random()*50;
+      //   // d.y = Math.random()*50;
+      //   return d;
+      // });
+    
       $log.debug('EntityCtrl set graph',res.result.graph.nodes);
       
       // once done, load the other viz
       $scope.setGraph(res.result.graph)
     });
+    
+    /*
+      Reload related items, with filters.
+    */
+    $scope.sync = function() {
+      ResourceRelatedFactory.get({
+        id: $routeParams.id,
+        model: 'resource',
+        limit: 10,
+        offset: ($scope.page-1) * 10
+      }, function (res) {
+        $scope.setRelatedItems(res.result.items);
+      })
+       
+    }
     
     /**
       Annotations
@@ -158,5 +175,19 @@ angular.module('histograph')
         }
         
       }
+    });
+    
+    /*
+      listener: EVENTS.API_PARAMS_CHANGED
+      some query parameter has changed, reload the list accordingly.
+    */
+    $scope.$on(EVENTS.API_PARAMS_CHANGED, function() {
+      $log.debug('ResourceCtrl @API_PARAMS_CHANGED', $scope.params);
+      $scope.sync();
+    });
+    $scope.$on(EVENTS.PAGE_CHANGED, function(e, params) {
+      $log.debug('ResourceCtrl @PAGE_CHANGED', params);
+      $scope.page = params.page;
+      $scope.sync();
     });
   })

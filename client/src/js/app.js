@@ -36,7 +36,8 @@ angular
   .constant("EVENTS", {
     USE_USER: 'use_user',
     USER_NOT_AUTHENTIFIED: 'user_not_authentified',
-    API_PARAMS_CHANGED: 'api_params_changed'
+    API_PARAMS_CHANGED: 'api_params_changed',
+    PAGE_CHANGED: 'page_changed'
   })
   .constant("VIZ", {
     TIMELINE: 'timeline'
@@ -56,6 +57,7 @@ angular
       .when('/r/:id', {
         templateUrl: 'templates/resource.html',
         controller: 'ResourceCtrl',
+        reloadOnSearch: false,
         resolve: {
           resource: function(ResourceFactory, $route) {
             return ResourceFactory.get({
@@ -192,14 +194,14 @@ angular
             // clean limit here
             return SuggestFactory.getResources({
               query: $route.current.params.query,
-              limit: 30
+              limit: 10
             });
           },
           entities: function(SuggestFactory, $route) {
             // clean limit here
             return SuggestFactory.getEntities({
               query: $route.current.params.query,
-              limit: 30
+              limit: 10
             });
           }
         }

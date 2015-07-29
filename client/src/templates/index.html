@@ -12,14 +12,14 @@
 <div id='see-also' class='{{currentCtrl}}' ng-cloak>
   <div class="toolbar tk-proxima-nova">
     <h2>A list of <b>{{totalItems}}</b> resources</h2>
-    <div class="filters">
-      <span ng-if="params" class="filter" ng-repeat='(key, value) in params'>
+    <div class="filters" ng-if="params">
+      <span ng-if="key != 'page'" class="filter" ng-repeat='(key, value) in params'>
         {{key}} {{value}}
         <a ng-click="removeFromQueue(item)" tooltip-append-to-body="true" tooltip="remove from this set" class="action"><i class="fa fa-times-circle"></i></a>
       </span>
     </div>
     <div class="wrapper">
-    <pagination boundary-links="true" total-items="totalItems" items-per-page="limit" ng-model="currentPage" class="pagination-sm" max-size="4" previous-text="&lsaquo;" rotate="true" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></pagination>
+    <pagination boundary-links="true" total-items="totalItems" items-per-page="limit" ng-model="currentPage" class="pagination-sm" max-size="4" previous-text="&lsaquo;" rotate="true" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;" ng-change="setPage(currentPage)"></pagination>
     </div>
     
   </div>
