@@ -386,13 +386,13 @@ angular.module('histograph')
       // load item by id ...
       
       var itemId = typeof item == 'object'? item.id: item,
-          indexOfItemId = $scope.playlistIds.indexOf(itemId),
+          indexOfItemId = $scope.playlistIds.indexOf(+itemId),
           isAlreadyInQueue = indexOfItemId != -1;
            // if the itemId is in the $scope.playlistIds, which is its index?
           // this will contain the list of ids in case the controller needs redirection
           
-      $log.info('CoreCtrl -> queue', itemId, inprog? 'do not force update scope': 'force scope update')
-      $log.log('   ', itemId, isAlreadyInQueue?'is already presend in readlist, skipping ...': 'should be added')
+      $log.info('CoreCtrl -> queue', itemId, inprog? 'do not force update scope': 'force scope update', $scope.playlistIds,itemId )
+      $log.log('   ', itemId, isAlreadyInQueue?'is already presend in readlist, skipping ...': 'adding', $scope.playlistIds.indexOf(itemId))
       
       if(isAlreadyInQueue) {
         $scope.queueStatus = 'active';
@@ -469,17 +469,21 @@ angular.module('histograph')
     // remove from playlist, then redirect.
     $scope.removeFromQueue = function(item) {
       $log.debug('NeighborsCtrl -> removeFromQueue()', item.id);
-      var ids = [];
+      var indexToRemove = -1,
+          ids = [];
       
       for(var i = 0; i < $scope.playlist.length; i++) {
         if($scope.playlist[i].id == item.id) {
-          $log.log('    remove', $scope.playlist[i].id);
-          $scope.playlist.splice(i, 1);
-          i = i-1;
+          indexToRemove = i;
         } else { // only for redirection purposes
           ids.push($scope.playlist[i].id);
         }
       }
+      if(indexToRemove !== -1)
+        $scope.playlist.splice(indexToRemove, 1);
+      
+      $scope.playlistIds = ids;
+      //$scope.$apply();
       if($scope.playlist.length == 0) {
         $scope.queueStatus = '';
       }
