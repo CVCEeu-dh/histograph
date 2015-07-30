@@ -17,7 +17,7 @@ angular.module('histograph')
         contextualTimeline: '=cxt',
         filters : '='
       },
-      template: '<div class="brush left">left</div><div class="brush right">right</div><div class="date left"></div><div class="date right"></div><div class="mouse tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div><div class="viewer"></div>',
+      template: '<div class="brushdate left">left</div><div class="brushdate right">right</div><div class="date left"></div><div class="date right"></div><div class="mouse tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div><div class="viewer"></div>',
       link : function(scope, element, attrs) {
         
         var δ = { css:{}, ƒ:{}};
@@ -98,7 +98,7 @@ angular.module('histograph')
           δ.brush.on("brush", function() {
             var extent = δ.brush.extent()
             clearTimeout(δ.brushTimer);
-            
+            console.log(extent)
             // δ.brushDateLeft.style({
             //   'left': pos[0] + 150,
             //   'opacity': pos[0] < δ.padding.v || pos[0] > δ.availableWidth - δ.padding.v? 0:1
@@ -171,7 +171,7 @@ angular.module('histograph')
               ratio = dataset.length /  δ.availableWidth,
               timeExtent = d3.extent(dataset, function(d) {return d.t});
           // set date from extent
-          console.log(timeExtent)
+          // console.log(timeExtent)
           δ.dateLeft
               .text(δ.timeFormat(new Date(timeExtent[0])));
           δ.dateRight
@@ -189,7 +189,7 @@ angular.module('histograph')
           δ.ƒ.y.domain(d3.extent(dataset, function(d) {return d.weight}));
           $log.log('::', timeExtent);
           δ.brush.x(δ.ƒ.x).extent(timeExtent);
-          δ.gBrush.call(δ.brush.event);
+          // δ.gBrush.call(δ.brush.event);
           
           δ.stream
             .attr("d", δ.area(dataset));

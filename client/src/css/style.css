@@ -645,6 +645,10 @@ a:focus, a:hover{
   z-index: 2;
 }
 
+#milkyway #commands.lookup{
+height: 150px;
+}
+
 #milkyway #commands .action{
   width: 30px;
   height: 30px;
@@ -4493,7 +4497,7 @@ Copyright (c) 2015 Daniel Eden
   text-align: left;
 }
 
-#timeline .brush{
+#timeline .brushdate{
   display: none;
   position: absolute;
   width: 110px;
@@ -4501,12 +4505,12 @@ Copyright (c) 2015 Daniel Eden
   background: white;
 }
 
-#timeline .brush.left{
+#timeline .brushdate.left{
   left: 30px;
   text-align: right;
 }
 
-#timeline .brush.right{
+#timeline .brushdate.right{
   right: 30px;
   text-align: left;
 }

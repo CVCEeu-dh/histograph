@@ -15,7 +15,8 @@ angular.module('histograph')
       template: ''+
         '<div id="playground"></div>' +
         '<div id="tips" ng-if="tips.length > 0"><div>{{tips}}</div></div>' +
-        '<div id="commands">' +
+        '<div id="commands" class="{{lookup?\'lookup\':\'\'}}">' +
+          '<div tooltip="view all nodes" tooltip-append-to-body="true" class="action {{lookup? \'bounceIn animated\': \'hidden\'}}" ng-click="toggleLookup()"><i class="fa fa-eye"></i></div>' +
           '<div class="action {{status==\'RUNNING\'? \'bounceIn animated\': \'\'}}" ng-click="togglePlay()"><i class="fa fa-{{status==\'RUNNING\' ? \'stop\': \'play\'}}"></i></div>' +
           '<div class="action" ng-click="rescale()"><i class="fa fa-dot-circle-o"></i></div>' +
           '<div class="action" ng-click="zoomin()"><i class="fa fa-plus"></i></div>' +
@@ -30,6 +31,22 @@ angular.module('histograph')
         toggleMenu: '&togglemenu'
       },
       link : function(scope, element, attrs) {
+        /*
+          Sigma addons
+          ---
+          thanks to @jacomyal (it need to be added before creating any new instance)
+        */
+        sigma.classes.graph.addMethod('neighbors', function (nodeId) {
+          var k,
+              neighbors = {},
+              index     = this.allNeighborsIndex[nodeId] || {};
+
+          for (k in index)
+            neighbors[k] = this.nodesIndex[k];
+          neighbors[nodeId] = this.nodesIndex[nodeId];
+          return neighbors;
+        });
+        
         // Creating sigma instance
         var timeout,
             
@@ -40,29 +57,44 @@ angular.module('histograph')
             minlayoutDuration = 4500,
             maxlayoutDuration = 25000, 
             
+            labels = {
+              nodes: {},
+              sorting: [], 
+            }, // the collection of labels to be visualized one after the other (according to node position, from top to left)
             si = new sigma({
-              settings: {
-                singleHover: true,
-                labelThreshold: 0,
-                labelSizeRatio: 3.5,
-                // labelSize: 'fixed',
-                defaultLabelSize: '12',
-                labelHoverShadowColor: '#a5a5a5',
-                labelHoverShadowBlur: 16,
-                labelSize: ''
-              }
-            }),
+                settings: {
+                  singleHover: true,
+                  labelThreshold: 0,
+                  labelSizeRatio: 3.5,
+                  // labelSize: 'fixed',
+                  defaultLabelSize: '12',
+                  labelHoverShadowColor: '#a5a5a5',
+                  labelHoverShadowBlur: 16,
+                  labelSize: ''
+                }
+              }),
             camera = si.addCamera('main'),
             
             colors = {
-              'person': '#333',
-              'collection': '#16cc00',
-              'resource': '#cc1600',
-              'resourceKnown': '#cc1600'
-            };
+                'person': "rgba(33, 33, 33, 0.7)",
+                'collection': '#16cc00',
+                'resource': '#cc1600',
+                'resourceKnown': '#cc1600'
+              },
+            
+            timers = {
+                play: 0
+              },
+            
+            scale = d3.scale.linear()
+              .domain([0,100])
+              .range(['#d4d4d4', '#000000']);
+        
+        
         
         // set theinitial status
         scope.status = IS_STOPPED;
+        scope.lookup = false;
         
         // create the main camera and specify 'canvas'
         si.addRenderer({
@@ -70,6 +102,7 @@ angular.module('histograph')
           camera: 'main',
           container: element.find('#playground')[0]
         });
+        
         
         /*
           
@@ -106,27 +139,9 @@ angular.module('histograph')
           if(!graph || !graph.nodes)
             return;
           stop();
-          // calculate differences in x,y for the previous graph, if any
-          // if(previousGraph) {
-          //   $log.log('::sigma --> reposition previous nodes', graph, previousGraph)
-            
-          //   var nodesMap = {};
-          //   // map current graph
-          //   graph.nodes.filter(function (d, i) {
-          //     nodesMap[d.id] = i;
-          //   });
-                
-          //   previousGraph.nodes.filter(function (d) {
-          //     if(nodesMap[d.id]) { // was already present
-          //       graph.nodes[nodesMap[d.id]].x = d.x;
-          //       graph.nodes[nodesMap[d.id]].y = d.y;
-          //     }
-          //   }); 
-          // }
-          
-          // $log.log('::sigma --> brand new nodes', graph.nodes.map(function(d) {
-          //   return d.id
-          // }))
+          clearTimeout(timers.play);
+          // refresh the scale for edge color, calculated the extent weights of the edges
+          scale.domain(d3.extent(graph.edges, function(d) {return d.weight || 1}));
           
           // Reading new graph
           si.graph.clear().read(graph);
@@ -138,24 +153,13 @@ angular.module('histograph')
           layoutDuration = Math.max(Math.min(4* si.graph.nodes().length * si.graph.edges().length, maxlayoutDuration),minlayoutDuration)
           $log.log('::sigma n. nodes', si.graph.nodes().length, ' n. edges', si.graph.edges().length, 'runninn layout atlas for', layoutDuration/1000, 'seconds')
           
-          
-          // computating other values for nodes (not only degree), min and max values
-          // var stats = si.graph.HITS(true),
-          //     authority = {min: -Infinity, max: Infinity};
-          
-          // $log.log('::sigma authority', authority)
-          // local Degree for size
           si.graph.nodes().forEach(function(n) {
-            // if(authority.max > 0)
-            //   n.size = 1 + (stats[n.id].authority/(authority.max-authority.min))*6
-            // else
+            
             n.color = colors[n.type] || "#353535";
             n.x = n.x || Math.random()*50
             n.y = n.y || Math.random()*50
-            
-            n.size = n.type == 'res'? 1 : si.graph.degree(n.id) + 1.5;
+            n.size = Math.sqrt(si.graph.degree(n.id));
           });
-          
           if(graph.nodes.length > 50) {
             si.settings('labelThreshold', 3.5);
             si.settings('labelSize', 'fixed');
@@ -167,11 +171,13 @@ angular.module('histograph')
           }
           
           //if(!previousGraph)
+            
+          $log.log('::sigma force atlas starting in .35s')
+          timers.play = setTimeout(function(){
             rescale();
-          si.refresh();
-          $log.log('::sigma force atlas started')
-          play()
-          
+            si.refresh();
+            play(); 
+          }, 350)
           
         });
         
@@ -209,38 +215,42 @@ angular.module('histograph')
           sigma clickNode
           @todo
         */
+        // si.bind('')
         si.bind('clickNode', function(e){
           stop();
+          $log.log('::sigma @clickNode', e.data.node.id,e.data.captor, e.data.node.type || 'entity', e.data.node.label);
           
-          $log.log('::sigma @clickNode', e.data.node.id, e.data.node.type || 'entity', e.data.node.label);
-          
+          // trigger to jquery (better via angular, @todo)
           $('body').trigger('sigma.clickNode', {
             type: e.data.node.type,
             id: e.data.node.id,
             captor: e.data.captor
           })
           
-          return;
-          if(e.data.node.type == 'resource') {
-            $log.log('::sigma redirect to', '/r/' + e.data.node.id);
-            scope.redirect({path: '/r/' + e.data.node.id})
-          }
-          
-          
-          switch(e.data.node.type) {
-            case 'person':
-            case 'place':
-            case 'location':
-            case 'personKnown':
-              scope.toggleMenu({e: e.data.captor, item:null, tag:e.data.node, hashtag:'person' })
-              $log.log('::sigma entity', e.data.captor);
-              break;
-            case 'resource':
-            case 'resourceKnown':
-              $log.log('::sigma resource');
-              break;  
-          }
+          // calculate the node do keep
+          var toKeep = si.graph.neighbors(e.data.node.id);
+           
+          // enlighten the egonetwork
+          si.graph.nodes().forEach(function (n) {
+            n.discard = !toKeep[n.id];
+          });
+          si.graph.edges().forEach(function (e) {
+            e.discard = !(toKeep[e.source] && toKeep[e.target])
+          });
+          scope.lookup = true;
           scope.$apply();
+          // refresh the view
+          si.refresh();
+          //zoomout();
+          // recenter
+          // sigma.misc.animation.camera(
+          //     si.cameras.main,
+          //     {
+          //       x: e.data.node['read_cammain:x'],
+          //       y: e.data.node['read_cammain:y'],
+          //     },
+          //     {duration: 250}
+          //   );
         });
         
         si.bind('clickEdge', function(e) {
@@ -296,6 +306,24 @@ angular.module('histograph')
             {duration: 150}
           );
         };
+        
+        /*
+          sigma reset neighbors
+          from egonetwork to other stories
+        */
+        function toggleLookup() {
+          $log.debug('::sigma -> toggleLookup()')
+          si.graph.nodes().forEach(function (n) {
+            n.discard = false;
+          });
+          si.graph.edges().forEach(function (e) {
+            e.discard = false
+          });
+          scope.lookup = false;
+          // refresh the view
+          rescale()
+          si.refresh();
+        }
         /*
           sigma play
           start the force atlas layout
@@ -343,9 +371,10 @@ angular.module('histograph')
             {duration: 150}
           );
         };
-        scope.rescale  = rescale; 
-        scope.zoomin  = zoomin; 
-        scope.zoomout = zoomout;
+        scope.rescale      = rescale; 
+        scope.zoomin       = zoomin; 
+        scope.zoomout      = zoomout;
+        scope.toggleLookup = toggleLookup;
         /*
           sigma canvas drawNode
           given a canvas ctx, a node and sigma settings, draw the basic shape for a node.
@@ -353,22 +382,8 @@ angular.module('histograph')
         function drawNode(node, context, settings, options) {
           var prefix = settings('prefix') || '';
           
-          context.fillStyle = '#e8e8e8';
-          context.beginPath();
-          context.arc(
-            node[prefix + 'x'],
-            node[prefix + 'y'],
-            node[prefix + 'size'] + 5,
-            0,
-            Math.PI * 2,
-            true
-          );
-          
-          context.fill();
-          context.closePath();
-          
-          // adding the small point
-          context.fillStyle = node.color;
+          context.fillStyle = node.discard? "rgba(0,0,0, .11)": node.color;
+        
           context.beginPath();
           context.arc(
             node[prefix + 'x'],
@@ -378,8 +393,23 @@ angular.module('histograph')
             Math.PI * 2,
             true
           );
+          
           context.fill();
           context.closePath();
+          
+          // adding the small point
+          // context.fillStyle = node.color;
+          // context.beginPath();
+          // context.arc(
+          //   node[prefix + 'x'],
+          //   node[prefix + 'y'],
+          //   node[prefix + 'size'] - 1,
+          //   0,
+          //   Math.PI * 2,
+          //   true
+          // );
+          // context.fill();
+          // context.closePath();
           if( node[prefix + 'size'] > 3) {
             context.fillStyle = "#fff";
             context.beginPath();
@@ -395,6 +425,7 @@ angular.module('histograph')
             context.closePath();
           }
         };
+        
         
         /*
         
@@ -440,9 +471,9 @@ angular.module('histograph')
         sigma.canvas.edges.def = function(edge, source, target, context, settings) {
           var color = "#d4d4d4",
               prefix = settings('prefix') || '';
-      
-          context.strokeStyle = color;
-          context.lineWidth = edge[prefix + 'size'] || 1;
+
+          context.strokeStyle = edge.discard? '#d4d4d4' : scale(edge.weight||1)//color;
+          context.lineWidth = edge.discard? 1: 2;//edge[prefix + 'weight'] || edge.weight || 1;
           context.beginPath();
           context.moveTo(
             source[prefix + 'x'],
@@ -452,7 +483,6 @@ angular.module('histograph')
             target[prefix + 'x'],
             target[prefix + 'y']
           );
-          
           context.stroke();
         };
         /*
@@ -463,13 +493,20 @@ angular.module('histograph')
           var fontSize,
               prefix = settings('prefix') || '',
               size = node[prefix + 'size'];
-
+          
+          if(node.discard)
+            return;
+          
           if (size < settings('labelThreshold'))
             return;
 
           if (!node.label || typeof node.label !== 'string')
             return;
           
+          if(node['renderer1:x'] < 0 || node['renderer1:y'] < 0)
+            return;
+          
+          // if(node.label == 'Jacques Delors')console.log('visiblelag', node['renderer1:x'], node['renderer1:y'])
           fontSize = (settings('labelSize') === 'fixed') ?
             settings('defaultLabelSize') :
             settings('labelSizeRatio') * size;
