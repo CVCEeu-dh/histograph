@@ -17,7 +17,7 @@ angular.module('histograph')
         contextualTimeline: '=cxt',
         filters : '='
       },
-      template: '<div class="brushdate left tk-proxima-nova"></div><div class="brushdate right tk-proxima-nova"></div><div class="date left"></div><div class="date right"></div><div class="mouse tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div><div class="viewer"></div>',
+      template: '<div class="brushdate left tk-proxima-nova"></div><div class="brushdate right tk-proxima-nova"></div><div class="date left tk-proxima-nova"></div><div class="date right tk-proxima-nova"></div><div class="mouse tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div><div class="viewer"></div>',
       link : function(scope, element, attrs) {
         
         var δ = { css:{}, ƒ:{}};
@@ -96,13 +96,15 @@ angular.module('histograph')
               .y1(30);
           
           δ.brush.on("brush", function() {
-            var extent = δ.brush.extent()
-            δ.brushDateLeft.style({
-              left: δ.ƒ.x(extent[0]) + 50
-            }).text(d3.time.format("%B %d, %Y")(extent[0]));
-            δ.brushDateRight.style({
-              left: δ.ƒ.x(extent[1]) + 110 + 50
-            }).text(d3.time.format("%B %d, %Y")(extent[1]));
+            var extent = δ.brush.extent();
+            if(typeof extent[0] == 'object') {
+              δ.brushDateLeft.style({
+                left: δ.ƒ.x(extent[0]) + 50
+              }).text(d3.time.format("%B %d, %Y")(extent[0]));
+              δ.brushDateRight.style({
+                left: δ.ƒ.x(extent[1]) + 110 + 50
+              }).text(d3.time.format("%B %d, %Y")(extent[1]));
+            }
             // δ.brushDateLeft.style({
             //   'left': pos[0] + 150,
             //   'opacity': pos[0] < δ.padding.v || pos[0] > δ.availableWidth - δ.padding.v? 0:1
@@ -159,8 +161,13 @@ angular.module('histograph')
           $log.log('::timeline -> init() ');
         };
         
+        δ.extent = function(extension) {
+          δ.gBrush.call(δ.brush.extent(extension));
+          δ.gBrush.call(δ.brush.event);
+        }
         
         δ.draw = function() {
+          
           clearTimeout(δ.resizeTimer);
           if(!δ.viewer)
             return;
@@ -182,7 +189,13 @@ angular.module('histograph')
               .text(δ.timeFormat(new Date(timeExtent[1])));
           
           
-          $log.log('::timeline -> draw() w:', δ.availableWidth, ' r:', ratio, scope.filters);
+          $log.log('::timeline -> draw() w:', δ.availableWidth, ' r:', ratio, scope.filters, d3.time.format("%Y-%m-%d").parse(scope.filters.from));
+          
+          // transform filters in other filters.
+          var extension = [
+            scope.filters.from? d3.time.format("%Y-%m-%d").parse(scope.filters.from): timeExtent[0],
+            scope.filters.to? d3.time.format("%Y-%m-%d").parse(scope.filters.to): timeExtent[1]
+          ]
           
           //
           δ.svg.attr("width", δ.availableWidth)
@@ -190,10 +203,14 @@ angular.module('histograph')
             .range([0, δ.availableWidth - δ.padding.h * 2]);
           
           δ.ƒ.x.domain(timeExtent);
-          δ.ƒ.y.domain(d3.extent(dataset, function(d) {return d.weight}));
+          δ.ƒ.y.domain(d3.extent(dataset, function(d) {
+            return d.weight
+          }));
           $log.log('::', timeExtent);
           δ.brush.x(δ.ƒ.x).extent(timeExtent);
-          // δ.gBrush.call(δ.brush.event);
+          
+          δ.extent(extension)
+            
           
           δ.stream
             .attr("d", δ.area(dataset));
@@ -214,8 +231,10 @@ angular.module('histograph')
         });
         
         scope.$watch('filters', function (filters) {
-          if(filters)
+          if(filters) {
             $log.log('::timeline filters:',filters);
+            δ.draw();
+          }
         })
         
         angular.element($window).bind('resize', function() {
