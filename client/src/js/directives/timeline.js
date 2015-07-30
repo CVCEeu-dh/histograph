@@ -189,7 +189,7 @@ angular.module('histograph')
               .text(δ.timeFormat(new Date(timeExtent[1])));
           
           
-          $log.log('::timeline -> draw() w:', δ.availableWidth, ' r:', ratio, scope.filters, d3.time.format("%Y-%m-%d").parse(scope.filters.from));
+          $log.log('::timeline -> draw() w:', δ.availableWidth, ' r:', ratio, scope.filters)//, d3.time.format("%Y-%m-%d").parse(scope.filters.from));
           
           // transform filters in other filters.
           var extension = [

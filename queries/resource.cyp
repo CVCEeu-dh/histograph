@@ -354,3 +354,22 @@ MATCH (res:resource)
 WITH res.start_time as t, length(COLLECT(res)) as weight
 WHERE t IS NOT NULL
 RETURN t, weight
+
+
+// name: get_timeline_similar_resource_ids_by_entities
+//
+MATCH (res)
+WHERE id(res) = 19389
+WITH res
+OPTIONAL MATCH (res)--(per:person)--(r)
+OPTIONAL MATCH (res)--(loc:location)--(r)
+WHERE id(r) <> id(res)
+WITH 
+{
+  id: id(r),
+  shared_persons: count(DISTINCT per),
+  shared_locations: count(DISTINCT loc),
+  start_time: r.start_time
+} as candidate
+WHERE candidate.start_time IS NOT NULL AND candidate.shared_persons > 0 OR candidate.shared_locations > 0
+RETURN candidate.start_time as t, count(*) as weight
