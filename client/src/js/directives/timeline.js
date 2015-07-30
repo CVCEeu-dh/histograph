@@ -17,7 +17,7 @@ angular.module('histograph')
         contextualTimeline: '=cxt',
         filters : '='
       },
-      template: '<div class="brushdate left">left</div><div class="brushdate right">right</div><div class="date left"></div><div class="date right"></div><div class="mouse tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div><div class="viewer"></div>',
+      template: '<div class="brushdate left tk-proxima-nova"></div><div class="brushdate right tk-proxima-nova"></div><div class="date left"></div><div class="date right"></div><div class="mouse tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div><div class="viewer"></div>',
       link : function(scope, element, attrs) {
         
         var δ = { css:{}, ƒ:{}};
@@ -46,8 +46,8 @@ angular.module('histograph')
           δ.tooltipText = d3.select('#timeline .tooltip-inner');
           δ.dateLeft    = d3.select('#timeline .date.left');
           δ.dateRight   = d3.select('#timeline .date.right');
-          δ.brushDateLeft    = d3.select('#timeline .brush.left');
-          δ.brushDateRight   = d3.select('#timeline .brush.right');
+          δ.brushDateLeft    = d3.select('#timeline .brushdate.left');
+          δ.brushDateRight   = d3.select('#timeline .brushdate.right');
               
           δ.brush       = d3.svg.brush().x(δ.ƒ.x);
           
@@ -97,14 +97,18 @@ angular.module('histograph')
           
           δ.brush.on("brush", function() {
             var extent = δ.brush.extent()
-            clearTimeout(δ.brushTimer);
-            console.log(extent)
+            δ.brushDateLeft.style({
+              left: δ.ƒ.x(extent[0]) + 50
+            }).text(d3.time.format("%B %d, %Y")(extent[0]));
+            δ.brushDateRight.style({
+              left: δ.ƒ.x(extent[1]) + 110 + 50
+            }).text(d3.time.format("%B %d, %Y")(extent[1]));
             // δ.brushDateLeft.style({
             //   'left': pos[0] + 150,
             //   'opacity': pos[0] < δ.padding.v || pos[0] > δ.availableWidth - δ.padding.v? 0:1
             // })
             
-            
+            clearTimeout(δ.brushTimer);
             δ.brushTimer = setTimeout(function(){
               //console.log(d3.time.format("%Y-%m-%d")(extent[0]))
                // console.log('extent',extent[0], typeof extent[0], isNaN(extent[0]))

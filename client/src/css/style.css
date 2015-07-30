@@ -4498,11 +4498,11 @@ Copyright (c) 2015 Daniel Eden
 }
 
 #timeline .brushdate{
-  display: none;
+  /*display: none;*/
   position: absolute;
   width: 110px;
-  top: 15px;
-  background: white;
+  top: 50px;
+  /*background: rgba(216,216,216, 1);*/
 }
 
 #timeline .brushdate.left{
