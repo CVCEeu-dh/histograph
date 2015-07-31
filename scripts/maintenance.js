@@ -23,10 +23,11 @@ var fs = require('fs'),
  
 
     
-//   // 
-//   // Start the prompt 
-//   // 
-//   prompt.start();
+// 
+// Start the prompt 
+// 
+prompt.start();
+
 // /*
 //   usage node maintenance.js --links_wiki
   
@@ -269,6 +270,43 @@ if(options.entities) {
     }
   });
   return;
+}
+
+/**
+  Perform a merge. The entity to takes it all.
+*/
+if(options.reconcile) {
+  var maintenance = require('../scripts/maintenance.entities');
+  if(options.help) {
+    console.log(clc.blackBright('this function will reconcile all links from the entity specified by the',clc.yellowBright('from'),'arg to the one specified by the',clc.yellowBright('to'),'arg '));
+    console.log('example: ', clc.whiteBright('--reconcile --from=1123456 --to=123456789'))
+    return;
+  }
+    
+  if(isNaN(options.from))
+    throw 'check your --entityid value. Should be an integer id!'
+  if(isNaN(options.to))
+    throw 'check your --entityid value. Should be an integer id!'
+  console.log(clc.blackBright('waterfall for'),clc.yellowBright('maintenance.reconcile'))
+  
+  prompt.get(['this would merge entity ' + options.from + ' in '+options.to], function (err, result) {
+    console.log(clc.blackBright('waterfall for'),clc.yellowBright('maintenance.reconcile'));
+    // waterfall to merge entities relationships.
+    async.waterfall([
+      function startup (next) {
+        next(null, options.from, options.to);
+      },
+      maintenance.reconcile_entities  
+    ], function (err) {
+      if(err){
+        console.log(err)
+        console.log(clc.blackBright('waterfall for'),clc.yellowBright('maintenance.entities'), clc.redBright('failed'))
+      } else {
+        console.log(clc.blackBright('waterfall for'),clc.yellowBright('maintenance.entities'), clc.cyanBright('completed'))
+      }
+    });
+  });
+  return
 }
 
 if(options.homonyms) {

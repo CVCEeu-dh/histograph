@@ -13,12 +13,29 @@ var settings = require('../settings'),
     queries  = require('decypher')('queries/maintenance.cyp'),
     neo4j    = require('seraph')(settings.neo4j.host),
     
+    Entity   = require('../models/entity'),
+    
     async    = require('async'),
     clc      = require('cli-color'),
     _        = require('lodash');
     
     
 module.exports = {
+  /*
+    Return a list of relationships that have to be merged
+  */
+  reconcile_entities: function(from, to, next) {
+    if(isNaN(from) || isNaN(to))
+      return next('from or to should be numeric neo4J identifier')
+    console.log(from, to);
+    Entity.reconcile({id: from}, {id: to}, function (err, res) {
+      if(err)
+        next(err)
+      else
+        next(null, res);
+    })
+    next()
+  },
   /*
     Return a list of probable duplicates by wiki, probably wrongly disambiguated (like Papandreu)
   */

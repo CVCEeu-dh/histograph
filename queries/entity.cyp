@@ -173,3 +173,22 @@ MATCH (ent)-[:appears_in]->(res:resource)
 WHERE id(ent) = {id} AND has(res.start_time)
 RETURN {id:id(res), start_time: res.start_time }
 ORDER BY res.start_time
+
+
+// name: get_relationships
+// get the list of all relationships
+MATCH (ent)-[r]->()
+WHERE id(ent) = {id}
+RETURN r
+
+
+// name: merge_relationships
+// create or merge a relationship.
+MATCH (n),(t)
+WHERE id(n) = {id_start} AND id(t) = {id_end}
+MERGE (n)-[r:{:%(type)}]->(t)
+ON CREATE SET
+  r.reconciled_by = {reconciled_by}
+ON MATCH SET
+  r.reconciled_by = {reconciled_by}
+RETURN r

@@ -10,6 +10,7 @@ var settings  = require('../settings'),
     
     neo4j     = require('seraph')(settings.neo4j.host),
     queries   = require('decypher')('./queries/entity.cyp'),
+    parser    = require('../parser.js'),
     
     crowdsourcing = require('../crowdsourcing/entity.js'),
     clc       = require('cli-color'),
@@ -440,10 +441,46 @@ module.exports = {
   },
   /*
     Do different entities poinjt to the same data? This function allow to merge them along with their links !! @todo
+    links will contain hidden field about this transaction.
   */
-  disambiguate: function(id, next) {
-    
+  reconcile: function (from, to, next) {
+    neo4j.query(queries.get_relationships, {
+      id: from.id
+    }, function (err, relationships) {
+      if(err)
+        return next(err);
+      
+      var q = async.queue(function (relationship, nextRelationship) {
+        console.log(clc.blackBright('copy:',clc.yellowBright(relationship.start),'-[:', relationship.type,']->',clc.yellowBright(relationship.end)))
+        var query = parser.agentBrown(queries.merge_relationships, {
+          type: relationship.type
+        });
+        // console.log(query)
+        neo4j.query(query, {
+          id_start: to.id,
+          id_end: relationship.end,
+          reconciled_by: _.unique((relationship.reconciled_by||[]).concat(from.id))
+        }, function (err, newRelationship) {
+          if(err)
+            throw err;
+          newRelationship = newRelationship[0]
+          console.log(clc.blackBright('  to:',clc.magentaBright(newRelationship.start),'-[:', newRelationship.type,']->',clc.yellowBright(newRelationship.end)))
+          // delete relationship by id....(beware!!!)
+          
+          nextRelationship(); 
+        })
+      }, 1);
+      q.push(relationships);
+      q.drain = function(err) {
+        if(err)
+          next(err)
+        else
+          next()
+      }
+      // merge relationship, one by one!!
+    })
   },
+  
   model: function(item, options) {
     var d = {},
         keys = [
