@@ -14,12 +14,13 @@ angular.module('histograph')
       Reload resources according to scope params
     */
     $scope.sync = function(options) {
-      $scope.setGraph({nodes:[], edges:[]});
+      
       $scope.loading = true;
       var params = angular.copy($scope.params);
       if(options && options.page)
         params.offset = (options.page - 1)*($scope.limit || 10)
-        
+      else
+        $scope.setGraph({nodes:[], edges:[]});
       ResourcesFactory.get(params, function (res) {
         $log.info('ResourceFactory', params, 'returned', res.result.items.length, 'items');
         $scope.setRelatedItems(res.result.items);
@@ -41,6 +42,7 @@ angular.module('histograph')
     };
     
     $scope.syncGraph = function() {
+      console.log($scope.params)
       CooccurrencesFactory.get($scope.params, function (res){
           res.result.graph.nodes.map(function (d) {
             d.color  = d.type == 'person'? "#D44A33": "#6891A2";

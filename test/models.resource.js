@@ -39,6 +39,19 @@ describe('model:resource ', function() {
       done()
     })
   })
+  it('should get a list of available resources matching a specific entity', function (done) {
+    Resource.getMany({
+      limit: 3,
+      offset: 0,
+      entity_id: 17618
+    }, function (err, items, info) {
+      if(err)
+        throw err;
+      should.exist(items.length)
+      should.exist(info.total_items)
+      done()
+    })
+  })
   it('should get a correct representation of a resource', function (done) {
     Resource.get(1, function (err, res) {
       if(err)

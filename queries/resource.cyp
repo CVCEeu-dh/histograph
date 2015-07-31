@@ -60,6 +60,7 @@ START res=node({id})
 MATCH (res:resource)
 {?res:start_time__gt} {AND?res:end_time__lt}
 WITH res
+{if:entity_id}MATCH (res)--(ent:entity) WHERE res.entity_id={entity_id} WITH res{/if}
   ORDER BY res.last_modification_time DESC, res.start_time DESC, res.creation_date DESC
   SKIP {offset} 
   LIMIT {limit}
