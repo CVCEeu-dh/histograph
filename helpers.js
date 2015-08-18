@@ -193,7 +193,7 @@ module.exports = {
   },
 
   /**
-    Call dbpedia service and translate its xml to a more human json content
+    Call dbpedia service and translate its xml to a more human json content.
     @to be tested, ideed
   */
   dbpedia: function(fullname, next) {
@@ -220,9 +220,9 @@ module.exports = {
       }
     );
   },
+  
   /*
     Transform a wiki object to a valid entity:person data
-    
   */
   dbpediaPerson: function(link, next) {
     services.dbpedia({
@@ -351,7 +351,42 @@ module.exports = {
     If there are no entities, res will contain an empty array but no error will be thrown.
     @return err, res
    */
-  textrazor: function (text, next) {
+  textrazor: function (options, next) {
+    services.textrazor(options, function (err, entities) {
+      if(err)
+        return next(err)
+      var entitiesPrefixesToKeep = {
+            PopulatedPlace: 'location',
+            Person: 'person',
+            Organisation: 'organization',
+          };
+          
+      // clean entities
+      entities = entities.map(function (d) {
+        var _d = {
+          name: d.entityEnglishId || d.entityId,
+          links_wiki: module.exports.text.wikify(d.wikiLink),
+          service: 'textrazor'
+        };
+        
+        _d.context = {
+          left: d.startingPos,
+          right: d.endingPos,
+          matched_text: d.matchedText
+        };
+        
+        if(d.type && d.type.length)
+          _d.type = _.unique(_.compact(d.type.map(function (type) {
+            return entitiesPrefixesToKeep[type]
+          })));
+        else
+          _d.type = [];
+        return _d;
+      });
+      next(null, entities)
+    });
+    
+    return;
     request
       .post({
         url: settings.textrazor.endpoint,
@@ -574,108 +609,133 @@ module.exports = {
     If there are no entities, res will contain an empty array but no error will be thrown.
     @return err, res
    */
-  yagoaida: function (text, next) {
-    console.log(text);
+  yagoaida: function (options, next) {
+    console.log('yagoaida', options)
     services.yagoaida({
-      text: text
+      text: options.text
     }, function (err, candidates) {
+      console.log('yagoaida', err)
+      var entities   = [],
+          entitiesPrefixesToKeep = {
+            YAGO_wordnet_district: 'location',
+            YAGO_wordnet_administrative_district: 'location',
+            YAGO_wordnet_person: 'person',
+            YAGO_wordnet_social_group: 'social_group',
+            YAGO_wordnet_institution: 'institution',
+            YAGO_wordnet_organization: 'organization',
+          };
       
-      var entities = [],
-          persons = candidates.filter(function(d) {
-            return d.type.map( function(t){
-              return t.replace(/\d/g, '');
-            }).indexOf('YAGO_wordnet_person_') !== -1
-          }),
-          locations = candidates.filter(function(d) {
-            return d.type.map( function(t){
-              return t.replace(/\d/g, '');
-            }).indexOf('YAGO_wordnet_administrative_district_') !== -1
-          });
-      // console.log(persons)
-      async.waterfall([
-        // 1. person
-        //
-        function (nextReconciliation) {
-          var q = async.queue(function (person, nextPerson) {
-            if(person.wikiLink) {
-              neo4j.query(reconcile.merge_person_entity_by_links_wiki, {
-                name: person.entityId.replace(/_/g, ' '),
-                links_wiki: module.exports.text.wikify(person.wikiLink) ,
-                links_yago: '',
-                service: 'yagoaida'
-              }, function (err, nodes) {
-                if(err)
-                  throw err;
-                // enrich with context
-                nodes = nodes.map(function(d) {
-                  d.context = {
-                    left: person.startingPos,
-                    right: person.endingPos
-                  };
-                  return d;
-                });
-                entities = entities.concat(nodes);
-                nextPerson();
-              })
-            } else { // find by name ??
-              nextPerson();
-            }
-          }, 1);
-          q.push(persons);
-          q.drain = nextReconciliation;
-        },
-        // 2. geonames/geocode reconciliation via 
-        // places entity (locations and cities) by using geonames services
-        function (nextReconciliation) {
-          var q = async.queue(function (location, nextLocation) {
-            module.exports.geonames(location.matchedText, function (err, nodes){
-              if(err == IS_EMPTY) {
-                nextLocation();
-                return;
-              } else if(err)
-                throw err;
-              nodes = nodes.map(function(d) {
-                d.context = {
-                  left: location.startingPos,
-                  right: location.endingPos
-                };
-                return d;
-              });
-                 // adding LOCAL lazy context here, provided by textrazor
-              entities = entities.concat(nodes);
-              nextLocation();
-            })
-          }, 1);
-          q.push(locations);
-          q.drain = nextReconciliation;
-        },
-        // 3. geocidign
-        // places entities (countries and cities) by using geocoding services
-        function (nextReconciliation) {
-          var q = async.queue(function (location, nextLocation) {
-            module.exports.geocoding(location.matchedText, function (err, nodes){
-              if(err == IS_EMPTY) {
-                nextLocation();
-                return;
-              } else if(err)
-                throw err
-              nodes = nodes.map(function(d) {
-                d.context = {
-                  left: location.startingPos,
-                  right: location.endingPos
-                };
-                return d;
-              });
-              entities = entities.concat(nodes);
-              nextLocation();
-            })
-          }, 1);
-          q.push(locations);
-          q.drain = nextReconciliation;
-        }
-      ], function() {
-        next(null, entities);
+      // adding context dict and oversimplify type
+      candidates = candidates.map(function (d) {
+        var _d = {
+          name: d.readableRepr,
+          links_wiki: module.exports.text.wikify(d.wikiLink),
+          service: 'yagoaida'
+        };
+        
+        _d.context = {
+          left: d.startingPos,
+          right: d.endingPos,
+          matched_text: d.matchedText
+        };
+        
+        _d.type = _.unique(_.compact(d.type.map(function (type) {
+          var abstractType =  _.dropRight(type.split('_')).join('_');
+          return entitiesPrefixesToKeep[abstractType]
+        })));
+        
+        return _d;
       });
+      
+      next(null, candidates);
+      // .filter(function (d) {
+      //   return d.type.length > 0
+      // }));
+      // console.log(persons)
+      // async.waterfall([
+      //   // 1. person
+      //   //
+      //   function (nextReconciliation) {
+      //     var q = async.queue(function (person, nextPerson) {
+      //       if(person.wikiLink) {
+      //         neo4j.query(reconcile.merge_person_entity_by_links_wiki, {
+      //           name: person.entityId.replace(/_/g, ' '),
+      //           links_wiki: module.exports.text.wikify(person.wikiLink) ,
+      //           links_yago: '',
+      //           service: 'yagoaida'
+      //         }, function (err, nodes) {
+      //           if(err)
+      //             throw err;
+      //           // enrich with context
+      //           nodes = nodes.map(function(d) {
+      //             d.context = {
+      //               left: person.startingPos,
+      //               right: person.endingPos
+      //             };
+      //             return d;
+      //           });
+      //           entities = entities.concat(nodes);
+      //           nextPerson();
+      //         })
+      //       } else { // find by name ??
+      //         nextPerson();
+      //       }
+      //     }, 1);
+      //     q.push(persons);
+      //     q.drain = nextReconciliation;
+      //   },
+      //   // 2. geonames/geocode reconciliation via 
+      //   // places entity (locations and cities) by using geonames services
+      //   function (nextReconciliation) {
+      //     var q = async.queue(function (location, nextLocation) {
+      //       module.exports.geonames(location.matchedText, function (err, nodes){
+      //         if(err == IS_EMPTY) {
+      //           nextLocation();
+      //           return;
+      //         } else if(err)
+      //           throw err;
+      //         nodes = nodes.map(function(d) {
+      //           d.context = {
+      //             left: location.startingPos,
+      //             right: location.endingPos
+      //           };
+      //           return d;
+      //         });
+      //            // adding LOCAL lazy context here, provided by textrazor
+      //         entities = entities.concat(nodes);
+      //         nextLocation();
+      //       })
+      //     }, 1);
+      //     q.push(locations);
+      //     q.drain = nextReconciliation;
+      //   },
+      //   // 3. geocidign
+      //   // places entities (countries and cities) by using geocoding services
+      //   function (nextReconciliation) {
+      //     var q = async.queue(function (location, nextLocation) {
+      //       module.exports.geocoding(location.matchedText, function (err, nodes){
+      //         if(err == IS_EMPTY) {
+      //           nextLocation();
+      //           return;
+      //         } else if(err)
+      //           throw err
+      //         nodes = nodes.map(function(d) {
+      //           d.context = {
+      //             left: location.startingPos,
+      //             right: location.endingPos
+      //           };
+      //           return d;
+      //         });
+      //         entities = entities.concat(nodes);
+      //         nextLocation();
+      //       })
+      //     }, 1);
+      //     q.push(locations);
+      //     q.drain = nextReconciliation;
+      //   }
+      // ], function() {
+      //   next(null, entities);
+      // });
     })
   },
   /**
@@ -1291,6 +1351,107 @@ module.exports = {
       });
     //console.log(req)
   },
+  /*
+    Get the resource redirection url for a wikipedialink.
+    link can be an array, too (but then you have to wait :-).
+  */
+  dbpediaRedirect: function(link, next) {
+    var links     = typeof link == 'object'? link: [link],
+        redirects = [];
+    var q = async.queue(function (_link, nextLink) {
+      console.log('link', _link, q.length())
+      services.dbpedia({
+        link: _link,
+        followRedirection: false
+      }, function (err, wiki) {
+        if(err) {
+          redirects.push({
+            redirectOf: undefined
+          });
+        } else if(_.size(wiki) == 0) {
+          redirects.push({
+            redirectOf: undefined
+          });
+        } else if(!wiki["http://dbpedia.org/resource/" + _link]["http://dbpedia.org/ontology/wikiPageRedirects"]) {
+          redirects.push({
+            redirectOf: _link
+          });
+        } else {
+          redirects.push({
+            redirectOf: path.basename(_.first(wiki["http://dbpedia.org/resource/" + _link]["http://dbpedia.org/ontology/wikiPageRedirects"]).value)
+          });
+        }
+        setTimeout(nextLink, 5);
+      });
+    }, 1);
+    q.push(links)
+    q.drain = function() {
+      console.log('ended');
+      next(null, redirects);
+    }
+  },
+  /*
+    EXPERIMENTAL.
+    Given a list of objects having a context and optionally a wikilink, group them and evaluate differences between the different langauges / sercices.
+    group the context. It is useful when dealing with multilingual alignement. 
+  */
+  align: function(entities, next) {
+    var aligned     = [],
+        withWiki    = [],
+        withoutWiki = [];
+    // entities having a wiki link
+    withWiki = _.filter(entities, function (d) {
+      return d.type && d.type.length && d.links_wiki.length > 0
+    });
+    // ... and not
+    withoutWiki = _.filter(entities, function (d) {
+      return  !d.links_wiki || !d.links_wiki.length
+    });
+    
+    // reconcile with dbpedia redirection link due to multilingual dbpedia resource.
+    module.exports.dbpediaRedirect(_.map(withWiki, 'links_wiki'), function (err, redirects) {
+      if(err) {
+        next(err);
+        return
+      }
+      // add the redirectOf field to the withWiki
+      withWiki = _.merge(withWiki, redirects);
+      // assemble the entities found either by link or by name
+      aligned = _.values(_.groupBy(entities, function (d) {
+        if(d.redirects && d.redirects.length)
+          return d.redirects
+        return d.name
+      })).map(function (aliases) {
+        // ... then remap the extracted entities in order to have group of same entity.
+        var _d = {
+          name: _.first(_.unique(_.map(aliases, 'name'))),
+          type: _.unique(_.flatten(_.map(aliases, 'type'))),
+          services: _.unique(_.flatten(_.map(aliases, 'service'))),
+          languages: _.unique(_.map(aliases, function (d) { 
+            return d.context.language
+          }))
+        };
+        
+        _d.context = _.map(aliases, function (d) {
+          d.context.language = d.language;
+          d.context.matched_text = d.matched_text;
+          return d
+        });
+        // this index is the product of number of services and languages
+        // where the entity has been found.
+        _d.trustworthiness  = Math.round(10 * (_d.services.length + _d.languages.length) / settings.referenceValues.trustworthiness);
+        // get the unique wikilink for this group, if any. 
+        var redirects = _.unique(_.flatten(_.map(aliases, 'redirectOf')));
+        // ... and assign it
+        _d.links_wiki = _.first(_.compact(_.unique(_.map(aliases, redirects.length? 'redirectOf': 'links_wiki')))) || ''
+        return _d
+      });
+      
+      console.log(_.sortBy(aligned, 'trustworthiness'))
+      next(null, aligned);
+    })
+
+  }
   
 }
       

@@ -20,6 +20,32 @@ var settings  = require('../settings'),
     
 
 module.exports = {
+  /*
+    Create a new entity or merge it if an entity with the same wikilink exists.
+    Note that an entity must be linked to a document.
+  */
+  create: function(properties, next) {
+    var now   = helpers.now(),
+        props = {
+          name: properties.name,
+          links_wiki: _.isEmpty(properties.links_wiki)? undefined: properties.links_wiki,
+          type: properties.type,
+          creation_date: now.date,
+          creation_time: now.time,
+          trustworthiness: properties.trustworthiness || 0,
+          resource_id: properties.resource.id
+        },
+        query = parser.agentBrown(queries.merge_entity, props);
+        
+    neo4j.query(query, props, function (err, nodes) {
+      if(err) {
+        next(err);
+        return;
+      }
+      next(null, nodes[0]);
+    })
+  },
+  
   get: function(id, next) {
     neo4j.query(queries.get_entity, {
       id: +id

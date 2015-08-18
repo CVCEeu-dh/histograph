@@ -25,6 +25,39 @@ RETURN {
 SKIP {offset}
 LIMIT {limit}
 
+// name: merge_entity
+// create or merge entity, by name or links_wiki.
+{if:links_wiki}
+  MERGE (ent:entity:{:type} {links_wiki: {links_wiki}})
+{/if}
+{unless:links_wiki}
+  MERGE (ent:entity:{} {name:{name}})
+{/unless}
+ON CREATE SET
+  ent.name          = {name},
+  ent.creation_date = {creation_date},
+  ent.creation_time = {creation_time}
+WITH ent
+MATCH (res:resource)
+  WHERE id(res) = {resource_id}
+WITH ent, res
+  MERGE (ent)-[r:appears_in]->(res)
+  ON CREATE SET
+    r.trustworthiness        = {trustworthiness},
+    r.last_modification_date = {creation_date},
+    r.last_modification_time = {creation_time}
+  ON MATCH SET
+    r.trustworthiness        = {trustworthiness},
+    r.last_modification_date = {creation_date},
+    r.last_modification_time = {creation_time}
+RETURN {
+  id: id(ent),
+  props: ent,
+  type: last(labels(ent)),
+  rel: r
+} as result
+
+
 // name: get_person_cooccurrences
 //
 MATCH (p1:person)-[r1:appears_in]-(res:resource)-[r2:appears_in]-(p2:person)
