@@ -9,6 +9,18 @@ var should   = require('should');
 
 module.exports = function(options) {
   return {
+    
+    entity: {
+      social_group: function() {
+        return {
+          links_wiki: 'Yalta_Conference',
+          type: 'social_group',
+          name: 'Yalta_Conference',
+          trustworthiness: 0.8
+        }
+      }  
+    },
+    
     resource: {
       multilanguage: function(properties) {
         return {

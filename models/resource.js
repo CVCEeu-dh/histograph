@@ -11,6 +11,7 @@ var settings  = require('../settings'),
     rQueries  = require('decypher')('./queries/resource.cyp'),
     vQueries  = require('decypher')('./queries/version.cyp'),
     
+    fs        = require('fs'),
     async     = require('async'),
     YAML      = require('yamljs'),
     _         = require('lodash');
@@ -179,7 +180,7 @@ module.exports = {
           languages: properties.languages
         });
     
-    neo4j.query(query, _.assign(properties,{
+    neo4j.query(query, _.assign(properties, {
       creation_date: now.date,
       creation_time: now.time,
       username: properties.user.username
@@ -195,6 +196,23 @@ module.exports = {
       next(null, node[0]);
     })
   },
+  
+  /*
+    Create a relationships with an entity. If the entity dioes not exist, it will create it.
+    Entity object MUST contain at least: name and type.
+  */
+  createRelatedEntity: function(resource, entity, next) {
+    var Entity = require('../models/entity');
+    Entity.create(_.assign(entity, {
+      resource: resource
+    }), function (err, entity) {
+      if(err) {
+        next(err);
+        return;
+      }
+      next(null, entity);
+    });
+  },  
   
   update: function(id, properties, next) {
 
@@ -300,15 +318,22 @@ module.exports = {
     Perform TEXTRAZOR on some field of our darling resource and 
     GEOCODE/GEONAMES for the found PLACES entities
   */
-  discover: function(id, next) {
-    // quetly does textrazor entity extraction.
-    neo4j.read(id, function (err, res) {
+  discover: function(resource, next) {
+    var entities = [],
+        ISO3     = {
+          'en': 'eng',
+          'fr': 'fra'
+        };
+    
+    neo4j.read(resource.id, function (err, res) {
       if(err) {
         next(err);
         return;
       }
+      /*
+        1. discover language if no one has been specified, from name and (generic) caption
+      */
       if(!res.languages && _.compact([res.name, res.source, res.caption]).length) {
-        // guess language
         var Langdetect = require('languagedetect'),
             langdetect = new Langdetect('iso2'),
             languages = langdetect.detect(_.compact([res.name, res.source, res.caption]).join('. ')),
@@ -317,8 +342,107 @@ module.exports = {
         res['title_'+language] =  res.name;
         res['caption_'+language] =  res.source;
       }
-      // should specify the different languages.
-      if(res.languages && res.languages.length) {
+      /*
+        If there is no language at all, clean up.        
+      */
+      if(!res.languages || !res.languages.length) {
+        console.log('models.discover: no language found...', res);
+        next(helpers.IS_EMPTY);
+        return;
+      }
+      /*
+        2. queue: for each language, get the results from yago (EN) and textrazor (EN / FR)
+      */
+      var q = async.queue(function (language, nextLanguage) {
+        var filename = 'contents/resource_' + res.doi + '_discover__'+ language + '.json',
+            content = [
+              res['title_'+ language] || '',
+              res['caption_'+ language] || ''
+            ].join('. '); // content string, by language is the concatenation of tuitles and captions
+          
+        // console.log('  language: ', language, content, filename);
+        // check if it has already been discovered
+        if(fs.existsSync(filename)) {
+          var contents = require('../'+filename);
+          entities = entities.concat(contents.yago, contents.textrazor)
+          nextLanguage();
+          return;
+        }
+          
+        async.parallel({
+          /*
+            1. textrazor (support other languages than english)
+          */
+          textrazor: function(callback) {
+            // if textrazor is abilitated
+            if(!settings.textrazor)
+              return callback(null, []);
+
+            console.log('calling textrazor...', language)
+            helpers.textrazor({
+              text: content,
+              cleanup_use_metadata: true,
+              // languageOverride: ISO3[language]
+            }, function (err, _entities) {
+              console.log(' textrazor answered')
+              if(err)
+                return callback(err);
+              entities = entities.concat(_entities.map(function (d) {
+                d.context.language = language;
+              }));
+              callback(null, _entities);
+            });
+          },
+          /*
+            2. yago (with disambiguation engine, english only)
+          */
+          yago: function(callback) {
+            if(language != 'en')
+              return callback(null, []);
+            console.log('calling yago...')
+            helpers.yagoaida({
+              text: content
+            }, function (err, _entities) {
+              console.log(' yago answered')
+              if(err)
+                return callback(err);
+              entities = entities.concat(_entities.map(function (d) {
+                d.context.language = language;
+              }));
+              callback(null, _entities);
+            })
+          }  
+        }, function (err, results) {
+          if(err)
+            console.log(err);
+          else
+            console.log('response: ',results)
+          // write to cache, dev only
+          fs.writeFileSync(filename, JSON.stringify(results, null, 2))
+          
+          nextLanguage();
+          //console;log(results)
+        });
+        
+      }, 1);
+      q.push(res.languages);
+      q.drain = function() {
+        console.log('entities', entities.length);
+        // calculate thrustwortness (for the links)
+        helpers.align(entities, function (err, entities) {
+          // then save entity and relationships, per language
+          
+          next(null, entities);
+        });
+        // next(null, entities);
+      };
+      
+      
+      
+      
+      
+      return;
+      
         var q = async.queue(function (language, nextLanguage) {
           var content = [
             res['title_'+ language] || '',
@@ -454,11 +578,7 @@ module.exports = {
         q.drain = function() {
           next(null, res);
         }
-      } else {
-        console.log('no language found...', res);
-        
-        next(helpers.IS_EMPTY)
-      }
+      
     });
     //helpers.
   }

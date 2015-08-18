@@ -44,12 +44,32 @@ WITH ent, res
   MERGE (ent)-[r:appears_in]->(res)
   ON CREATE SET
     r.trustworthiness        = {trustworthiness},
-    r.last_modification_date = {creation_date},
-    r.last_modification_time = {creation_time}
+    r.creation_date = {creation_date},
+    r.creation_time = {creation_time}
   ON MATCH SET
     r.trustworthiness        = {trustworthiness},
     r.last_modification_date = {creation_date},
     r.last_modification_time = {creation_time}
+RETURN {
+  id: id(ent),
+  props: ent,
+  type: last(labels(ent)),
+  rel: r
+} as result
+
+
+// name: merge_user_entity_relationship
+// create or merge the cureted by relationship on a specific entity
+MATCH (ent:entity), (u:user {username:{username}})
+WHERE id(ent) = {id}
+WITH ent, u
+MERGE (u)-[r:curates]->(ent)
+ON CREATE SET
+  r.creation_date = {creation_date},
+  r.creation_time = {creation_time}
+ON MATCH SET
+  r.last_modification_date = {creation_date},
+  r.last_modification_time = {creation_time}
 RETURN {
   id: id(ent),
   props: ent,

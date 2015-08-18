@@ -25,6 +25,7 @@ var __user,
     __entity;
 
 describe('model:entity init', function() {
+  
   it('should delete the user', function (done) {
     User.remove(generator.user.guest(), function (err) {
       if(err)
@@ -32,6 +33,8 @@ describe('model:entity init', function() {
       done();
     });
   });
+  
+  
   it('should create the dummy test user', function (done){
     User.create(generator.user.guest(), function (err, user) {
       if(err)
@@ -41,6 +44,7 @@ describe('model:entity init', function() {
       done();
     });
   });
+  
   
   it('should create a new resource A', function (done){
     Resource.create(generator.resource.multilanguage({
@@ -53,9 +57,12 @@ describe('model:entity init', function() {
     });
   });
 });
-// todo: create a new resource, discover its content, then retrieve its representation
+
+
+
 describe('model:entity ', function() {
-  it('should create a brand new entity, by wikilink', function (done) {
+  
+  it('should create a brand new entity, by using links_wiki', function (done) {
     Entity.create({
       links_wiki: 'Yalta_Conference',
       type: 'social_group',
@@ -70,6 +77,21 @@ describe('model:entity ', function() {
       done();
     })
   });
+  
+  
+  it('should create a relationship with the user (curator)', function (done) {
+    Entity.createRelatedUser(__entity, __user, function (err, entity) {
+      if(err)
+        console.log(err.neo4jError.message)
+      should.not.exist(err);
+      should.equal(entity.rel.end, __entity.id);
+      should.equal(entity.rel.start, __user.id);
+      should.equal(entity.rel.type, 'curates');
+      should.exist(entity.props.name);
+      done()
+    })
+  })
+  
   it('should create a brand new entity for a specific document', function (done) {
     Entity.get(__entity.id, function (err, res){
       should.not.exist(err, err);
@@ -77,6 +99,8 @@ describe('model:entity ', function() {
       done();
     })
   });
+  
+  
   it('should return a signle entity', function (done) {
     Entity.get(__entity.id, function (err, res){
       should.not.exist(err, err);
@@ -84,6 +108,8 @@ describe('model:entity ', function() {
       done();
     })
   });
+  
+  
   it('should return 404', function (done) {
     Entity.get(1715100000000000, function (err, res) {
       should.equal(err, 'is_empty');
@@ -125,9 +151,19 @@ describe('model:entity ', function() {
   });
 });
 
+
+
 describe('model:entity cleaning', function() {
   it('should delete the user', function (done) {
     User.remove(generator.user.guest(), function (err) {
+      if(err)
+        throw err;
+      done();
+    });
+  });
+  
+  it('should delete the resource', function (done) {
+    Resource.remove(generator.resource.multilanguage({}), function (err) {
       if(err)
         throw err;
       done();
@@ -140,11 +176,4 @@ describe('model:entity cleaning', function() {
   //     done();
   //   });
   // });
-  it('should delete the resource', function (done) {
-    Resource.remove(generator.resource.multilanguage({}), function (err) {
-      if(err)
-        throw err;
-      done();
-    });
-  });
 });
