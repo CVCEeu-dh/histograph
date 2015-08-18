@@ -28,6 +28,7 @@ module.exports = {
     };
     
     var url   = settings.dbpedia.endpoint + options.link + '.json',
+        followRedirection = options.followRedirection != undefined? options.followRedirection: true,
         level = options.level || 0;// recursion level, see below
     console.log(clc.blackBright('dbpedia service:'), url);
     request
@@ -45,7 +46,7 @@ module.exports = {
         
         var redirect = _.first(_.flattenDeep(_.compact(_.pluck(body, 'http://dbpedia.org/ontology/wikiPageRedirects'))));
         
-        if(redirect && redirect.value && level < 1) {
+        if(followRedirection && redirect && redirect.value && level < 1) {
           var link = redirect.value.split('/').pop();
           if(options.link == link) {
             // no need to scrape again...
@@ -132,32 +133,22 @@ module.exports = {
       next('textrazor text suould be a long text')
       return;
     };
-    
+    var form = _.merge({
+          apiKey: settings.textrazor.key,
+          extractors: 'entities'
+        }, options);
     request
       .post({
         url: settings.textrazor.endpoint,
         json: true,
-        form: {
-          text: options.text,
-          apiKey: settings.textrazor.key,
-          extractors: 'entities'
-        }
+        form: form
       }, function (err, res, body) {
         if(err) {
           next(err);
           return;
         }
-        console.log(body.response)
-        next(null, body.response.entities.map(function (d) {
-          return {
-            entityId: d.entityId,
-            startingPos: d.startingPos,
-            endingPos: d.endingPos,
-            matchedText: d.matchedText,
-            type: d.type,
-            wikiLink: path.basename(d.wikiLink)
-          };
-        }));
+        // console.log(form, 'body', body.response)
+        next(null, body.response.entities || []);
       })
   },
   /*
