@@ -18,6 +18,32 @@ module.exports = {
     host: 'http://localhost:7474'
   },
   
+  /*
+
+    list of suppported languages
+
+  */
+  languages: [
+    'en',
+    'fr',
+    'de',
+  ],
+  
+  /*
+
+    Reference values for some variable
+    
+    1. trustworthiness: number of language * number of distinct services  
+
+  */
+  referenceValues: {
+    trustworthiness: 3
+  },
+  
+  yagoaida: {
+    endpoint: 'https://gate.d5.mpi-inf.mpg.de/aida/service/disambiguate' 
+  },
+  
   dbpedia: {
     endpoint: 'http://dbpedia.org/data/',
     lookup: {
@@ -30,19 +56,30 @@ module.exports = {
     format: 'viaf.xml'
   },
   
-  yagoaida: {
-    endpoint: 'https://gate.d5.mpi-inf.mpg.de/aida/service/disambiguate' 
+  /*
+    Textrazor service 
+    uncomment to abilitate textrazor with your textrazor account
+  */
+  // textrazor: {
+  //   key: 'xyzxxxxxxxxxxxxxxxxx',
+  //   endpoint: 'https://api.textrazor.com'
+  // },
+  
+  /*
+    Twitter Authentication method (with node passport)
+    if you wish to authenticate people with their twitter account
+  */ 
+  twitter: {
+    consumer_key: 'XWY',
+    consumer_secret: 'XxYyZz'
   },
   
-  resourcespath: '', // abs location of the media (img) folder
-  
-  // if you wish to authenticate people with their twitter account
-  TWITTER_CONSUMER_KEY: 'XXXXX',
-  TWITTER_CONSUMER_SECRET: 'XXXXX',
-
-  ALCHEMYAPI_KEY: 'your alchemy api key', // cfr alchemyapi.com
-  REKOGNITIONAPI_KEY : 'your rekognition qapi key', // cfr rekognition.com
-  REKOGNITIONAPI_SECRET : 'your rekognition api secret',
-  SKYBIOMETRYAPI_KEY : 'your skybiometry api', // cfr skybiometry https://www.skybiometry.com/Account
-  SKYBIOMETRYAPI_SECRET : 'your skybiometry api secret' 
+  /*
+    Google+ Authentication method (with node passport)
+    if you wish to authenticate people with their google account
+  */ 
+  google: { 
+    clientId: "xzy.apps.googleusercontent.com",
+    clientSecret: "xxx000"
+  },
 };
