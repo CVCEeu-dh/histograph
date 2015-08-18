@@ -34,6 +34,14 @@ module.exports = {
           else 
             return '';
         })
+        .replace(/\{unless:([a-zA-Z_]+)\}((?:(?!\{\/unless).)*)\{\/unless\}/g, function (m, item, contents) {
+          // replace unless template.
+          // console.log(arguments)
+          if(!filters[item])
+            return module.exports.agentBrown(contents, filters);
+          else 
+            return '';
+        })
         .replace(/\{each:([a-zA-Z_]+)\sin\s([a-zA-Z_]+)\}((?:(?!\{\/each).)*)\{\/each\}/g, function (m, item, collection, contents) {
           // replace loop {each:language in languages} {:title_%(language)} = {{:title_%(language)}} {/each} with join.
           // produce something like
@@ -48,10 +56,15 @@ module.exports = {
           }
           return template.join(', ');
         })
+        .replace(/\{:([a-z_A-Z]+)\}/g, function (m, placeholder) {
+          // replace dynamic variables (used for label)
+          // e.g. `MATCH (ent:{:type})` becomes `MATCH (ent:person)` if type = 'person'
+          return filters[placeholder]
+        })
         .replace(/\{:([a-z_A-Z%\(\)\s]+)\}/g, function (m, placeholder) {
           // replace dynamic variables, e.g to write ent.title_en WHERE 'en' is dynaically assigned,
           // write as query
-          // ent.{sub:title_%(language) % language}
+          // ent.{:title_%(language) % language}
           // and provide the filters with language
           return placeholder.replace(/%\(([a-z_A-Z]+)\)/g, function (m, property) {
             return filters[property]

@@ -39,7 +39,7 @@ describe('parsers: split a string, add annotations.', function() {
       end_time: 556908879
     });
     
-    should.equal(q1, 'MATCH (nod) WHERE nod.start_time >= 56908878 AND nod.end_time <= 556908879 RETURN N')
+    should.equal(q1, 'MATCH (nod) WHERE nod.start_time >= {start_time} AND nod.end_time <= {end_time} RETURN N')
     
     var q2 = parser.agentBrown(
       'MATCH (inq:inquiry)--(res:resource) '+
@@ -60,6 +60,29 @@ describe('parsers: split a string, add annotations.', function() {
     done()
   });
   
+  it('should rebuild the CYPHER query based on UNLESS template', function (done) {
+    var query = '{if:links_wiki} '+
+          '  MERGE (ent:entity:{:type} {links_wiki: {links_wiki}}) '+
+          '{/if} ' +
+          '{unless:links_wiki} ' +
+          '  MERGE (ent:entity:{:type} {name:{name}}) ' +
+          '{/unless} ON CREATE SET';
+          
+    var q1 = parser.agentBrown(query, {
+      type: 'person',
+      name: 'ciccio'
+    });
+    should.equal(q1.trim().replace(/\s+/g, ' '), 'MERGE (ent:entity:person {name:{name}}) ON CREATE SET')
+    
+    var q2 = parser.agentBrown(query, {
+      type: 'person',
+      links_wiki: 'ciccio_wiki'
+    });
+    should.equal(q2.trim().replace(/\s+/g, ' '), 'MERGE (ent:entity:person {links_wiki: {links_wiki}}) ON CREATE SET')
+    
+    done()
+  });
+  
   it('should correctly rebuild the CYPHER query based on template', function (done) {
     var filteredQuery = parser.agentBrown('MATCH (nod) SET {each:language in languages} {:title_%(language)} = {{:title_%(language)}} {/each} RETURN N', {
       languages: ['en', 'fr', 'de', 'it']
@@ -73,6 +96,14 @@ describe('parsers: split a string, add annotations.', function() {
       languages: ['en', 'fr', 'de', 'it']
     });
     should.equal(q1.trim(),   'res.title_en = {title_en}, res.caption_en = {caption_en},  res.title_fr = {title_fr}, res.caption_fr = {caption_fr},  res.title_de = {title_de}, res.caption_de = {caption_de},  res.title_it = {title_it}, res.caption_it = {caption_it}');
+    done()
+  });
+  
+  it('should correctly rebuild the CYPHER query based on template', function (done) {
+    var q1 = parser.agentBrown('\nMATCH (ent:{:type}) WHERE', {
+      type: 'person'
+    });
+    should.equal(q1.trim(), 'MATCH (ent:person) WHERE');
     done()
   });
 });
