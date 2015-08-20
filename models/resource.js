@@ -483,11 +483,11 @@ module.exports = {
       */
       function geodisambiguate(resource, candidates, callback) {
         var locations = candidates.filter(function (d) {
-              return ent.type.indexOf('location') != -1
+              return d.type.indexOf('location') != -1
             }),
             
             remaining = candidates.filter(function (d) {
-              return ent.type.indexOf('location') == -1
+              return d.type.indexOf('location') == -1
             }),
             
             geodisambiguated = [];
@@ -495,20 +495,22 @@ module.exports = {
         
         var q = async.queue(function (candidate, nextCandidate) {
           if(_cached[candidate.name + candidate.context.language]) {
-            disambiguated.push(_cached[candidate.name + candidate.context.language]);
+            console.log('found', candidate.name + candidate.context.language)
+            geodisambiguated.push(_cached[candidate.name + candidate.context.language]);
             nextCandidate();
             return;
-          }
+          }console.log('sodqposidpqoidpqodiqp', q.length(), locations.length)
           // disambiguate with geonames (only, sic!)
-          module.exports.geonames({
-            address: candidate.name,
-            lang: candidate.context.language
-          }, function (err, location) {
-            if(err == IS_EMPTY) {
+          helpers.geonames({
+            text: candidate.name,
+            language: candidate.context.language
+          }, function (err, results) {
+            if(!results.length) {
               nextCandidate();
               return;
             } else if(err)
               throw err;
+            var location = results[0];
             
             _cached[candidate.name + candidate.context.language] = _.assign(candidate, {
               geoname_fcl: location.fcl,
@@ -516,9 +518,9 @@ module.exports = {
               geoname_lng: location.lng,
               geoname_id: location.geonameId,
               name: location.name, // yep, change name
-              q: location.q
+              q: location.query
             });
-            
+            console.log(_cached[candidate.name + candidate.context.language])
             geodisambiguated.push(_cached[candidate.name + candidate.context.language]);
             nextCandidate();
           })
@@ -526,6 +528,7 @@ module.exports = {
         
         q.push(locations);
         q.drain = function() {
+          console.log(geodisambiguated)
           callback(null, resource, geodisambiguated.concat(remaining))
         };
       },

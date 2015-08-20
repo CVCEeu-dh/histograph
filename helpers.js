@@ -903,51 +903,17 @@ module.exports = {
     @next your callback with(err, res)
   */
   geonames: function(options, next) {
-    // var geonamesURL = 'http://api.geonames.org/searchJSON?q='
-    //     + encodeURIComponent(address)
-    //     + '&style=long&maxRows=10&username=' + settings.geonames.username;
-
-    request.get({
-      url: "http://api.geonames.org/searchJSON",
-      json: true,
-      qs: _.assign({
-        maxRows: 1,
-        style: 'long',
-        username: settings.geonames.username
-      }, options, {
-        q: encodeURIComponent(options.address)
-      })
-    }, function (err, res, body) {
-      if(err) {
-        next(err);
-        return;
-      }
-
-      if(!body.geonames || !body.geonames.length) {
-        next(IS_EMPTY);
-        return;
-      };
-      var name = [body.geonames[0].toponymName, body.geonames[0].countryName].join(', ');
-      console.log(name, 'OR', body.geonames[0].toponymName, body.geonames[0].countryName, 'for', options.address);
-      
-      next(null, _.assign(body.geonames[0], {
-        name: name,
-        q: options.address
-      }))
-      // neo4j.query(reconcile.merge_geonames_entity, _.assign({
-      //     geonames_id: body.geonames[0].geonameId,
-      //     q: options.address,
-      //     countryId: '',
-      //     countryCode: ''
-      //   }, body.geonames[0]),
-      //   function(err, nodes) {
-      //     if(err) {
-      //       next(err);
-      //       return;
-      //     }
-      //     next(null, nodes);
-      //   }
-      // );
+    var params = {
+      address: options.text
+    };
+    if(options.language)
+      params.lang = options.language
+    
+    services.geonames(params, function (err, results) {
+      if(err == IS_EMPTY)
+        next(null, [])
+      else
+        next(null, results);
     });
   },
 

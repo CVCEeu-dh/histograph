@@ -217,6 +217,36 @@ module.exports = {
         });
         next(null, entities);
       });
-  }
+  },
   
+  geonames: function(options, next) {
+    request.get({
+      url: "http://api.geonames.org/searchJSON",
+      json: true,
+      qs: _.assign({
+        maxRows: 1,
+        style: 'long',
+        username: settings.geonames.username
+      }, options, {
+        q: encodeURIComponent(options.address)
+      })
+    }, function (err, res, body) {
+      if(err) {
+        next(err);
+        return;
+      }
+
+      if(!body.geonames || !body.geonames.length) {
+        next(IS_EMPTY);
+        return;
+      };
+      var name = _.unique([body.geonames[0].toponymName, body.geonames[0].countryName]).join(', ');
+      console.log(name, '----->', options.address);
+      
+      next(null, [_.assign(body.geonames[0], {
+        name: name,
+        query: options.address
+      })])
+    })
+  }
 };
