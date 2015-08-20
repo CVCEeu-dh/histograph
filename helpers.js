@@ -352,9 +352,12 @@ module.exports = {
     @return err, res
    */
   textrazor: function (options, next) {
-    services.textrazor(options, function (err, entities) {
+    services.textrazor(_.assign({
+      cleanup_use_metadata: true
+    }, options), function (err, entities) {
       if(err)
-        return next(err)
+        return next(err);
+      
       var entitiesPrefixesToKeep = {
             PopulatedPlace: 'location',
             Person: 'person',
@@ -899,14 +902,21 @@ module.exports = {
     Handle err response; it creates nodes frm the very first address found.
     @next your callback with(err, res)
   */
-  geonames: function(address, next) {
-    var geonamesURL = 'http://api.geonames.org/searchJSON?q='
-        + encodeURIComponent(address)
-        + '&style=long&maxRows=10&username=' + settings.geonames.username;
+  geonames: function(options, next) {
+    // var geonamesURL = 'http://api.geonames.org/searchJSON?q='
+    //     + encodeURIComponent(address)
+    //     + '&style=long&maxRows=10&username=' + settings.geonames.username;
 
     request.get({
-      url: geonamesURL,
-      json:true
+      url: "http://api.geonames.org/searchJSON",
+      json: true,
+      qs: _.assign({
+        maxRows: 1,
+        style: 'long',
+        username: settings.geonames.username
+      }, options, {
+        q: encodeURIComponent(options.address)
+      })
     }, function (err, res, body) {
       if(err) {
         next(err);
@@ -918,21 +928,26 @@ module.exports = {
         return;
       };
       var name = [body.geonames[0].toponymName, body.geonames[0].countryName].join(', ');
-      console.log(name, 'OR', body.geonames[0].toponymName, body.geonames[0].countryName, 'for', address);
-      neo4j.query(reconcile.merge_geonames_entity, _.assign({
-          geonames_id: body.geonames[0].geonameId,
-          q: geonamesURL,
-          countryId: '',
-          countryCode: ''
-        }, body.geonames[0]),
-        function(err, nodes) {
-          if(err) {
-            next(err);
-            return;
-          }
-          next(null, nodes);
-        }
-      );
+      console.log(name, 'OR', body.geonames[0].toponymName, body.geonames[0].countryName, 'for', options.address);
+      
+      next(null, _.assign(body.geonames[0], {
+        name: name,
+        q: options.address
+      }))
+      // neo4j.query(reconcile.merge_geonames_entity, _.assign({
+      //     geonames_id: body.geonames[0].geonameId,
+      //     q: options.address,
+      //     countryId: '',
+      //     countryCode: ''
+      //   }, body.geonames[0]),
+      //   function(err, nodes) {
+      //     if(err) {
+      //       next(err);
+      //       return;
+      //     }
+      //     next(null, nodes);
+      //   }
+      // );
     });
   },
 
@@ -1359,7 +1374,7 @@ module.exports = {
     var links     = typeof link == 'object'? link: [link],
         redirects = [];
     var q = async.queue(function (_link, nextLink) {
-      console.log('link', _link, q.length())
+      // console.log('link', _link, q.length())
       services.dbpedia({
         link: _link,
         followRedirection: false
@@ -1372,7 +1387,7 @@ module.exports = {
           redirects.push({
             redirectOf: undefined
           });
-        } else if(!wiki["http://dbpedia.org/resource/" + _link]["http://dbpedia.org/ontology/wikiPageRedirects"]) {
+        } else if(!wiki["http://dbpedia.org/resource/" + _link] || !wiki["http://dbpedia.org/resource/" + _link]["http://dbpedia.org/ontology/wikiPageRedirects"]) {
           redirects.push({
             redirectOf: _link
           });
@@ -1386,7 +1401,6 @@ module.exports = {
     }, 1);
     q.push(links)
     q.drain = function() {
-      console.log('ended');
       next(null, redirects);
     }
   },
@@ -1399,58 +1413,111 @@ module.exports = {
     var aligned     = [],
         withWiki    = [],
         withoutWiki = [];
-    // entities having a wiki link
-    withWiki = _.filter(entities, function (d) {
-      return d.type && d.type.length && d.links_wiki.length > 0
-    });
-    // ... and not
-    withoutWiki = _.filter(entities, function (d) {
-      return  !d.links_wiki || !d.links_wiki.length
-    });
     
-    // reconcile with dbpedia redirection link due to multilingual dbpedia resource.
-    module.exports.dbpediaRedirect(_.map(withWiki, 'links_wiki'), function (err, redirects) {
-      if(err) {
-        next(err);
-        return
-      }
-      // add the redirectOf field to the withWiki
-      withWiki = _.merge(withWiki, redirects);
-      // assemble the entities found either by link or by name
-      aligned = _.values(_.groupBy(entities, function (d) {
-        if(d.redirects && d.redirects.length)
-          return d.redirects
-        return d.name
-      })).map(function (aliases) {
-        // ... then remap the extracted entities in order to have group of same entity.
-        var _d = {
-          name: _.first(_.unique(_.map(aliases, 'name'))),
-          type: _.unique(_.flatten(_.map(aliases, 'type'))),
-          services: _.unique(_.flatten(_.map(aliases, 'service'))),
-          languages: _.unique(_.map(aliases, function (d) { 
-            return d.context.language
-          }))
-        };
+    
+    // step 1
+    async.waterfall([
+      function disambiguateLocations (callback) {
+        var _entities = [],
+            _cached   = {};
+            
+        var q = async.queue(function (candidate, nextCandidate) {
+          _entities.push(candidate);
+          nextCandidate();
+          return;
+          
+          if(_cached[candidate.name + candidate.context.language]) {
+            _entities.push(_cached[candidate.name + candidate.context.language]);
+            nextCandidate();
+            return;
+          }
+            
+          module.exports.geonames({
+            address: candidate.name,
+            lang: candidate.context.language
+          }, function (err, location){
+            if(err == IS_EMPTY) {
+              nextCandidate();
+              return;
+            } else if(err)
+              throw err;
+            
+            _cached[candidate.name + candidate.context.language] = _.assign(candidate, {
+              geoname_fcl: location.fcl,
+              geoname_lat: location.lat,
+              geoname_lng: location.lng,
+              geoname_id: location.geonameId,
+              name: location.name, // yep, change name
+              q: location.q
+            });
+            
+            _entities.push();
+            // _entities.push(_.merge(candidate, nodes));
+            nextCandidate();
+          })
+        }, 1);
         
-        _d.context = _.map(aliases, function (d) {
-          d.context.language = d.language;
-          d.context.matched_text = d.matched_text;
-          return d
+        q.push(entities);
+        q.drain = function() {
+          callback(null, _entities)
+        };
+      },
+      function disambiguateDbpediaRedirect (entities, callback) {
+            // entities having a wiki link
+        withWiki = _.filter(entities, function (d) {
+          return d.type != 'location' && d.links_wiki && d.links_wiki.length > 0
         });
-        // this index is the product of number of services and languages
-        // where the entity has been found.
-        _d.trustworthiness  = Math.round(10 * (_d.services.length + _d.languages.length) / settings.referenceValues.trustworthiness);
-        // get the unique wikilink for this group, if any. 
-        var redirects = _.unique(_.flatten(_.map(aliases, 'redirectOf')));
-        // ... and assign it
-        _d.links_wiki = _.first(_.compact(_.unique(_.map(aliases, redirects.length? 'redirectOf': 'links_wiki')))) || ''
-        return _d
-      });
-      
-      console.log(_.sortBy(aligned, 'trustworthiness'))
-      next(null, aligned);
-    })
-
+        // ... and not
+        withoutWiki = _.filter(entities, function (d) {
+          return d.type == 'location' || !d.links_wiki || !d.links_wiki.length
+        });
+    
+        module.exports.dbpediaRedirect(_.map(withWiki, 'links_wiki'), function (err, redirects) {
+          if(err) {
+            callback(err);
+            return
+          }
+          callback(null, redirects);
+        })
+      },
+      function calculateTrustworthiness (redirects, callback) {   
+        // assemble the entities found either by link or by name
+        var aligned = _.values(_.groupBy(_.merge(withWiki, redirects).concat(withoutWiki), function (d) {
+          if(d.redirects && d.redirects.length)
+            return d.redirects
+          return d.name
+        })).map(function (aliases) {
+          // ... then remap the extracted entities in order to have group of same entity.
+          var _d = {
+            name: _.first(_.unique(_.map(aliases, 'name'))),
+            type: _.unique(_.flatten(_.map(aliases, 'type'))),
+            services: _.unique(_.flatten(_.map(aliases, 'service'))),
+            languages: _.unique(_.map(aliases, function (d) { 
+              return d.context.language
+            }))
+          };
+          
+          _d.context = _.map(aliases, function (d) {
+            return d.context
+          });
+          // this index is the product of number of services and languages
+          // where the entity has been found.
+          _d.trustworthiness  = Math.round(100 * (_d.services.length + _d.languages.length) / settings.referenceValues.trustworthiness)/100;
+          // get the unique wikilink for this group, if any. 
+          var redirects = _.unique(_.flatten(_.map(aliases, 'redirectOf')));
+          // ... and assign it
+          _d.links_wiki = _.first(_.compact(_.unique(_.map(aliases, redirects.length? 'redirectOf': 'links_wiki')))) || ''
+          return _d
+        });
+console.log('found', aligned.length)
+        callback(null, aligned);
+      }
+    ], function (err, aligned) {
+      if(err)
+        next(err);
+      else
+        next(null, aligned);
+    });
   }
   
 }

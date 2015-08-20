@@ -115,7 +115,7 @@ clientRouter.route('/login')
   .post(function (req, res, next) {
     auth.passport.authenticate('local', function(err, user, info) {
       if(err) {
-        console.log('login error', err)
+        //console.log('login error', err)
         return res.error(403, {message: 'not valid credentials'});
       }
       req.logIn(user, function(err) {

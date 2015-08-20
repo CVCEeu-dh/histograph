@@ -33,6 +33,9 @@ module.exports = {
           creation_date: now.date,
           creation_time: now.time,
           trustworthiness: properties.trustworthiness || 0,
+          geoname_lat: properties.geoname_lat,
+          geoname_lng: properties.geoname_lng,
+          geoname_id:  properties.geoname_id,
           resource_id: properties.resource.id
         },
         query = parser.agentBrown(queries.merge_entity, props);
@@ -44,6 +47,28 @@ module.exports = {
       }
       next(null, nodes[0]);
     })
+  },
+  
+  /*
+    Create a relationship with the user who is in charge of it.
+  */
+  createRelatedUser: function(entity, user, next) {
+    var now   = helpers.now(),
+        props = { 
+          id: entity.id,
+          username: user.username,
+          creation_date: now.date,
+          creation_time: now.time
+        },
+        query = parser.agentBrown(queries.merge_user_entity_relationship, props);
+        
+    neo4j.query(query, props, function (err, nodes) {
+      if(err) {
+        next(err);
+        return;
+      }
+      next(null, nodes[0]);
+    });
   },
   
   get: function(id, next) {

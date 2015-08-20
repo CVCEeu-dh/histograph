@@ -31,8 +31,10 @@ console.log(options);
 if(options.resourceid) {
   if(isNaN(options.resourceid))
     throw 'check your --resourceid value. Should be an integer id!'
-  console.log(clc.blackBright('discovering resource ..',options.resourceid))
-  resource.discover(options.resourceid, function (err, res) {
+  console.log(clc.blackBright('\ndiscovering resource '), options.resourceid)
+  resource.discover({
+    id: options.resourceid
+  }, function (err, res) {
     // console.log(res)
     if(err)
       throw err;
@@ -103,7 +105,7 @@ if(options.resource) {
     function (nodes, next) {
       var q = async.queue(function (node, nextNode) {
         console.log(clc.blackBright('resource remaining'), clc.white.bgMagenta(q.length()))
-        resource.discover(node.id, function(err, res) {
+        resource.discover({id: node.id}, function(err, res) {
           if(err)
             throw err;
           

@@ -203,6 +203,7 @@ module.exports = {
   */
   createRelatedEntity: function(resource, entity, next) {
     var Entity = require('../models/entity');
+    
     Entity.create(_.assign(entity, {
       resource: resource
     }), function (err, entity) {
@@ -213,6 +214,31 @@ module.exports = {
       next(null, entity);
     });
   },  
+  
+  /*
+    Create a relationship with a version. Note that this will override the previous version if a link already exist.
+  */
+  createRelatedVersion: function(resource, version, next) {
+    var now   = helpers.now(),
+        props = { 
+          resource_id: resource.id,
+          yaml: version.yaml,
+          service: version.service,
+          language: version.language,
+          creation_date: now.date,
+          creation_time: now.time
+        },
+        query = parser.agentBrown(vQueries.merge_relationship_resource_version, props);
+        
+    neo4j.query(query, props, function (err, nodes) {
+      if(err) {
+        console.log(err)
+        next(err);
+        return;
+      }
+      next(null, nodes[0]);
+    });
+  },
   
   update: function(id, properties, next) {
 
@@ -324,262 +350,277 @@ module.exports = {
           'en': 'eng',
           'fr': 'fra'
         };
-    
-    neo4j.read(resource.id, function (err, res) {
-      if(err) {
-        next(err);
-        return;
-      }
+    /*
+      WATERFALL of discovery.
+      Ath the end of this waterfall we should have a list
+      of well written entities.
+    */
+    async.waterfall([
       /*
-        1. discover language if no one has been specified, from name and (generic) caption
+      
+        1. load the resource from neo4j db ... :D
       */
-      if(!res.languages && _.compact([res.name, res.source, res.caption]).length) {
-        var Langdetect = require('languagedetect'),
-            langdetect = new Langdetect('iso2'),
-            languages = langdetect.detect(_.compact([res.name, res.source, res.caption]).join('. ')),
-            language = languages.length? _.first(_.first(languages)) : 'en';
-        res.languages = [language];
-        res['title_'+language] =  res.name;
-        res['caption_'+language] =  res.source;
-      }
+      function loadResourceFromNeo4j (callback) {
+        neo4j.read(resource.id, function (err, node) {
+          if(err)
+            callback(err);
+          else
+            callback(null, node);
+        });
+      },
       /*
-        If there is no language at all, clean up.        
+      
+        2. verify that the languages have been assigned to the resource.
+      
       */
-      if(!res.languages || !res.languages.length) {
-        console.log('models.discover: no language found...', res);
-        next(helpers.IS_EMPTY);
-        return;
-      }
-      /*
-        2. queue: for each language, get the results from yago (EN) and textrazor (EN / FR)
-      */
-      var q = async.queue(function (language, nextLanguage) {
-        var filename = 'contents/resource_' + res.doi + '_discover__'+ language + '.json',
-            content = [
-              res['title_'+ language] || '',
-              res['caption_'+ language] || ''
-            ].join('. '); // content string, by language is the concatenation of tuitles and captions
-          
-        // console.log('  language: ', language, content, filename);
-        // check if it has already been discovered
-        if(fs.existsSync(filename)) {
-          var contents = require('../'+filename);
-          entities = entities.concat(contents.yago, contents.textrazor)
-          nextLanguage();
+      function checkLanguages(resource, callback) {
+        if(resource.languages) {
+          callback(null, resource);
           return;
         }
-          
-        async.parallel({
-          /*
-            1. textrazor (support other languages than english)
-          */
-          textrazor: function(callback) {
-            // if textrazor is abilitated
-            if(!settings.textrazor)
-              return callback(null, []);
-
-            console.log('calling textrazor...', language)
-            helpers.textrazor({
-              text: content,
-              cleanup_use_metadata: true,
-              // languageOverride: ISO3[language]
-            }, function (err, _entities) {
-              console.log(' textrazor answered')
-              if(err)
-                return callback(err);
-              entities = entities.concat(_entities.map(function (d) {
-                d.context.language = language;
-              }));
-              callback(null, _entities);
-            });
-          },
-          /*
-            2. yago (with disambiguation engine, english only)
-          */
-          yago: function(callback) {
-            if(language != 'en')
-              return callback(null, []);
-            console.log('calling yago...')
-            helpers.yagoaida({
-              text: content
-            }, function (err, _entities) {
-              console.log(' yago answered')
-              if(err)
-                return callback(err);
-              entities = entities.concat(_entities.map(function (d) {
-                d.context.language = language;
-              }));
-              callback(null, _entities);
-            })
-          }  
-        }, function (err, results) {
-          if(err)
-            console.log(err);
-          else
-            console.log('response: ',results)
-          // write to cache, dev only
-          fs.writeFileSync(filename, JSON.stringify(results, null, 2))
-          
-          nextLanguage();
-          //console;log(results)
+        // get the content from the required properties for the analysis.
+        var content = _.compact(settings.disambiguation.fields.map(function (field) {
+          return result.item[field];
+        }));
+        
+        if(!content.length)
+          return callback('no language has been specified for the resource');
+        
+        // automatic language detection
+        var Langdetect = require('languagedetect'),
+            langdetect = new Langdetect('iso2'),
+            languages  = langdetect.detect(content.join('. ')),
+            language   = languages.length? _.first(_.first(languages)) : 'en';
+        
+        result.item.languages = [language];
+        // create corresponding field to enable extraction
+        settings.disambiguation.fields.forEach(function (field) {
+          resource[ field + '_' + language]  = resource[field];
         });
         
-      }, 1);
-      q.push(res.languages);
-      q.drain = function() {
-        console.log('entities', entities.length);
-        // calculate thrustwortness (for the links)
-        helpers.align(entities, function (err, entities) {
-          // then save entity and relationships, per language
-          
-          next(null, entities);
-        });
-        // next(null, entities);
-      };
+        // save resource, then go to next task.
+        neo4j.save(resource, function (err, node) {
+          if(err)
+            callback(err);
+          else
+            callback(null, node);
+        })
+      },
+      /*
       
-      
-      
-      
-      
-      return;
-      
+        3. EXTRACT!
+        extract from yago and / or other services, according to resource language.
+        Note that according to various service terms of use, we cannot proceed async
+        (due to the limitation of parallel request for free service, for instance)
+      */
+      function extract(resource, callback) {
+        var candidates = []; // candidate entities extracted by various mechanisms
+              
         var q = async.queue(function (language, nextLanguage) {
-          var content = [
-            res['title_'+ language] || '',
-            res['caption_'+ language] || ''
-          ].join('. ');
-          
-          if(content.length < 10) { // not enough content
-            console.log('not enough content, skipping', res)
+          var filename = 'contents/resource_' + resource.doi + '_discover__'+ language + '.json',
+              content; // the text content to be disambiguated. if it's too long, helpers method should chunk it.
+              
+          // check if the content for this language has already been discovered
+          if(fs.existsSync(filename)) {
+            console.log('  using cached file', filename, q.length())
+            var cached_candidates = require('../'+filename);
+            candidates = candidates.concat(cached_candidates);
+            console.log(candidates.length, 'found')
             nextLanguage();
             return;
-          };
+          }
+          // concatenate fields as defined in settings.js
+          content = settings.disambiguation.fields.map(function (d) {
+            return resource[d + '_' + language] || ''   
+          }).join('. ');
           
-          // waterfall
-          
-          
-          helpers.yagoaida(content, function (err, entities) {
-            if(err)
-              throw err;
-            console.log('helpers.yagoaid entities ', entities.length);
-            var yaml = [];
-            // save the resource-entities relationship and prepare the annotation
-            var _q = async.queue(function (entity, nextEntity) {
-              yaml.push({
-                id: entity.id, // local entity id, or uri?
-                context: entity.context
-              });
-              helpers.enrichResource(res, entity, function (err, next) {
+          // launch the extraction chain, cfr settings.disambiguation.services
+          async.parallel(_.map(settings.disambiguation.services, function (supportedLanguages, service) {
+            return function (_callback) {
+              if(supportedLanguages.indexOf(language) == -1) {
+                _callback(null, []);
+                return;
+              };
+              console.log(service,'calling for', language);
+              helpers[service]({
+                text: content
+              }, function (err, _entities) {
+                console.log(service,'success for language', language);
                 if(err)
-                  throw err;
-                nextEntity();
+                  _callback(err);
+                else
+                  _callback(null, _entities.map(function (d) {
+                    d.context.language = language;
+                    d.service = service;
+                    return d;
+                  }));
               });
-            }, 2);
-            
-            _q.push(entities);
-            _q.drain = function() {
-              var now = helpers.now(),
-                  persons = entities.filter(function (d) {
-                    return (!d.geocode_id && !d.geonames_id)
-                  });
-              // add the proper version according to the language
-              neo4j.query(vQueries.merge_version_from_service, {
-                resource_id: res.id,
-                service: 'yagoaida',
-                unknowns: persons.length,
-                persons: persons.length,
-                creation_date: now.date,
-                creation_time: now.time,
-                language: language,
-                yaml: YAML.stringify(yaml, 2)
-              }, function (err, nodes) {
-                // console.log(err, vQueries.merge_version_from_service)
-                if(err)
-                  throw err;
-                // merge the version and the res
-                neo4j.query(vQueries.merge_relationship_version_resource, {
-                  version_id: nodes[0].id,
-                  resource_id: res.id
-                }, function (err, nodes) {
-                  if(err)
-                    throw err;
-                  console.log('  res #id',res.id,' saved, #ver_id', nodes[0].ver.id, 'res_url:', nodes[0].res.url);
-                  // out
-                  nextLanguage();
-                });
-              }); // eof vQueries.merge_version_from_service
-            }; // eof drain async
-          });
-          // console.log('textrazor')
-          /*
-          helpers.textrazor(content, function(err, entities) {
-            if(err == helpers.IS_LIMIT_REACHED) {
-              console.log('daily limit reached')
-              // daily limit has been reached
-              q.kill();
-              next()
-              return;
             }
+          }), function (err, results) { // interrupt queue
+            if(err) {
+              q.kill();
+              return callback(err);
+            }
+            candidates = candidates.concat(_.flatten(results));
+            fs.writeFileSync(filename, JSON.stringify(candidates, null, 2));
+            nextLanguage();
+          });
+
+        }, 1);
+        
+        q.push(resource.languages);
+        
+        q.drain = function() {
+          callback(null, resource, candidates.filter(function (d) {
+            return d.type.length > 0
+          }));
+        }
+      },
+      /*
+      
+        4. Disambiguate locations
+        and add LAT and LNG to 'location' entities candidate
+      */
+      function geodisambiguate(resource, candidates, callback) {
+        var locations = candidates.filter(function (d) {
+              return ent.type.indexOf('location') != -1
+            }),
             
-            if(err)
+            remaining = candidates.filter(function (d) {
+              return ent.type.indexOf('location') == -1
+            }),
+            
+            geodisambiguated = [];
+            _cached       = [];
+        
+        var q = async.queue(function (candidate, nextCandidate) {
+          if(_cached[candidate.name + candidate.context.language]) {
+            disambiguated.push(_cached[candidate.name + candidate.context.language]);
+            nextCandidate();
+            return;
+          }
+          // disambiguate with geonames (only, sic!)
+          module.exports.geonames({
+            address: candidate.name,
+            lang: candidate.context.language
+          }, function (err, location) {
+            if(err == IS_EMPTY) {
+              nextCandidate();
+              return;
+            } else if(err)
               throw err;
             
-            var yaml = [];
-            // save the resource-entities relationship and prepare the annotation
-            var _q = async.queue(function (entity, nextEntity) {
-              yaml.push({
-                id: entity.id, // local entity id, or uri?
-                context: entity.context
-              });
-              helpers.enrichResource(res, entity, function(err, next) {
-                if(err)
-                  throw err;
-                nextEntity();
-              });
-            }, 2);
+            _cached[candidate.name + candidate.context.language] = _.assign(candidate, {
+              geoname_fcl: location.fcl,
+              geoname_lat: location.lat,
+              geoname_lng: location.lng,
+              geoname_id: location.geonameId,
+              name: location.name, // yep, change name
+              q: location.q
+            });
             
-            _q.push(entities);
-            _q.drain = function() {
-              var now = helpers.now(),
-                  persons = entities.filter(function (d) {
-                    return (!d.geocode_id && !d.geonames_id)
-                  });
-              // add the proper version according to the language
-              neo4j.query(vQueries.merge_version_from_service, {
-                resource_id: res.id,
-                service: 'textrazor',
-                unknowns: persons.length,
-                persons: persons.length,
-                creation_date: now.date,
-                creation_time: now.time,
-                language: language,
-                yaml: YAML.stringify(yaml, 2)
-              }, function (err, nodes) {
-                console.log(err, vQueries.merge_version_from_service)
-                if(err)
-                  throw err;
-                // merge the version and the res
-                neo4j.query(vQueries.merge_relationship_version_resource, {
-                  version_id: nodes[0].id,
-                  resource_id: res.id
-                }, function (err, nodes) {
-                  if(err)
-                    throw err;
-                  console.log('  res #id',res.id,' saved, #ver_id', nodes[0].ver.id, 'res_url:', nodes[0].res.url);
-                  // out
-                  nextLanguage();
-                });
-              }); // eof vQueries.merge_version_from_service
-            }; // eof drain async
-          });
-          */
-        },1);
-        q.push(res.languages);
+            geodisambiguated.push(_cached[candidate.name + candidate.context.language]);
+            nextCandidate();
+          })
+        }, 1);
+        
+        q.push(locations);
         q.drain = function() {
-          next(null, res);
-        }
+          callback(null, resource, geodisambiguated.concat(remaining))
+        };
+      },
+      /*
       
-    });
+        5. cluster entities
+        based on their name or wikipedia identifier, if provided.
+        and evaluate thrustworthiness
+      */
+      function clusterEntities(resource, locations, candidates, callback) {
+        helpers.align(candidates, function (err, entities) {
+          if(err)
+            callback(err)
+          else
+            callback(null, resource, entities.concat(locations));
+        })
+      },
+      /*
+      
+        6. SAVE
+       
+       */
+      function saveEntities(resource, entities, callback) {
+        var yaml = {}; // the yaml version of entity id and splitpoints.
+        
+        var q = async.queue(function (ent, nextEntity) {
+          // for ech entity
+          if(ent.type[0] == 'location') {
+            console.log('skipping', ent.name, 'query:', ent.q)
+            nextEntity()
+            return
+          }
+          console.log(ent.name,'(',ent.type[0],'), remaining', q.length())
+          
+          module.exports.createRelatedEntity(resource, {
+            name: ent.name,
+            type: _.first(ent.type),
+            trustworthiness: ent.trustworthiness,
+            links_wiki: ent.links_wiki
+          }, function (err, entity) {
+            if(err) {
+              q.kill();
+              return callback(err);
+            }
+            // complete the yaml of this specific language
+            _.forEach(ent.context, function (d) {
+              yaml[d.language] = (yaml[d.language] || []).concat({
+                id: entity.id,
+                context: {
+                  left: d.left,
+                  right: d.right
+                }
+              });
+            });
+            nextEntity();
+          })
+        }, 1);
+        // just save typized links ...
+        q.push(entities);
+        q.drain = function() {
+          callback(null, resource, yaml);
+        };
+      },
+      /*
+      
+        7. SAVE annotation, per language
+           save the yaml in a (ver:version) for the current language
+      */
+      function saveAnnotation(resource, yaml, callback) {
+        var q = async.queue(function (version, nextVersion) {
+          module.exports.createRelatedVersion(resource, version, function (err, ver) {
+            if(err)
+              throw err;
+            nextVersion()
+          })
+        }, 1);
+        // remap yaml to match version data model
+        q.push(_.map(yaml, function (d, language) {
+          return {
+            language: language,
+            service: 'ner',
+            yaml: YAML.stringify(d, 2)
+          }
+        }));
+        
+        q.drain = function() {
+          callback(null, resource);
+        }
+      }
+    ], function (err, resource) {
+      if(err)
+        next(err)
+      else
+        next(null, resource)
+    })
     //helpers.
   }
 }

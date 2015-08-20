@@ -31,10 +31,15 @@ LIMIT {limit}
   MERGE (ent:entity:{:type} {links_wiki: {links_wiki}})
 {/if}
 {unless:links_wiki}
-  MERGE (ent:entity:{} {name:{name}})
+  MERGE (ent:entity:{:type} {name:{name}})
 {/unless}
 ON CREATE SET
   ent.name          = {name},
+  {if:geoname_id}
+    ent.geoname_id = {geoname_id},
+    ent.geoname_lat = {geoname_lat},
+    ent.geoname_lng = {geoname_lng},
+  {/if}
   ent.creation_date = {creation_date},
   ent.creation_time = {creation_time}
 WITH ent
