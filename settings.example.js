@@ -4,6 +4,8 @@
   ===
 */
 module.exports = {
+  baseurl: '',
+  
   secret: {
     cookie: 'cookie secret', // cookie salt
     salt: 'salt secret for password', // password salt

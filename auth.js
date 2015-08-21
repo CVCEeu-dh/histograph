@@ -53,8 +53,8 @@ passport.use(new LocalStrategy(function (username, password, done) {
   Auth mechanism for twitter
 */
 passport.use(new TwitterStrategy({
-    consumerKey: settings.TWITTER_CONSUMER_KEY,
-    consumerSecret: settings.TWITTER_CONSUMER_SECRET,
+    consumerKey: settings.twitter.consumer_key,
+    consumerSecret: settings.twitter.consumer_secret,
     callbackURL: settings.baseurl + "/auth/twitter/callback"
   },
   function(token, tokenSecret, profile, done) {
