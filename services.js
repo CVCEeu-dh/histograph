@@ -30,7 +30,7 @@ module.exports = {
     var url   = settings.dbpedia.endpoint + options.link + '.json',
         followRedirection = options.followRedirection != undefined? options.followRedirection: true,
         level = options.level || 0;// recursion level, see below
-    console.log(clc.blackBright('dbpedia service:'), url);
+    console.log(clc.blackBright('  dbpedia service:'), url);
     request
       .get({
         url: url,//url,
@@ -220,11 +220,15 @@ module.exports = {
   },
   
   geonames: function(options, next) {
+    if(!settings.geonames ||_.isEmpty(settings.geonames.username)) {
+      next(null, []);
+      return;
+    }
     request.get({
-      url: "http://api.geonames.org/searchJSON",
+      url: settings.geonames.endpoint,
       json: true,
       qs: _.assign({
-        maxRows: 1,
+        maxRows: 5,
         style: 'long',
         username: settings.geonames.username
       }, options, {
@@ -237,16 +241,122 @@ module.exports = {
       }
 
       if(!body.geonames || !body.geonames.length) {
-        next(IS_EMPTY);
+        next(null, []);
         return;
       };
-      var name = _.unique([body.geonames[0].toponymName, body.geonames[0].countryName]).join(', ');
-      console.log(name, '----->', options.address);
       
-      next(null, [_.assign(body.geonames[0], {
-        name: name,
-        query: options.address
-      })])
+      var name = _.unique([body.geonames[0].toponymName, body.geonames[0].countryName]).join(', ');
+      // console.log(name, '----->', body.geonames[0]);
+      
+      next(null, _.take(body.geonames.map(function (result) {
+        var name;
+        
+        if(result.fcl == 'A')
+          name = result.countryName;
+        else
+          name = result.toponymName;
+        
+        return _.assign(result, {
+          _id:      result.geonameId,
+          _name:    name,
+          _country: result.countryCode,
+          _query:   options.address
+        })
+      }), 2));
+    })
+  },
+  /*
+    Call the google geocoding api according to your current settings.
+    Please make sure you use the proper `settings.geocoding.key`.
+    A successful request should return an array of entity candidates.
+    
+    @param options  - dict of options, options.address should exist;
+    @param next     - your callback(err, res). 
+  */
+  geocoding: function(options, next) {
+    if(!settings.geocoding ||_.isEmpty(settings.geocoding.key)) {
+      next(null, []);
+      return;
+    }
+    request.get({
+      url: settings.geocoding.endpoint,
+      qs: _.assign({
+        key: settings.geocoding.key
+      }, options, {
+        q: encodeURIComponent(options.address)
+      }),
+      json: true
+    }, function (err, res, body) {
+      if(err) {
+        next(err);
+        return;
+      }
+      
+      // console.log(url)
+      if(!body.results.length) {
+        if(body.error_message) {
+          next(body.error_message)
+          return;
+        } 
+        next(null, []);
+        return;
+      };
+      // adding name, fcl and country code as well: it depends on the level.
+      next(null, _.take(body.results.map(function (result) {
+        var name = result.formatted_address,
+            fcl, 
+            country;
+        
+        if(result.types.indexOf('continent') != -1) { 
+          fcl = 'L';
+        } else if(result.types.indexOf('country') != -1) {
+          fcl = 'A';
+        } else if(result.types.indexOf('locality') != -1) {
+          fcl = 'P';
+        } else {
+          //console.log(result, options.address)
+          //throw 'stop'
+        }
+        country = _.find(result.address_components, function (d){
+          return d.types.indexOf('country') != -1
+        });   
+        
+        if(!country){
+          country = result.address_components[0]
+        }
+        if(!country){
+          console.log(result)
+          throw 'stop'
+        }
+        
+        return _.assign(result, {
+          _id:      result.place_id,
+          _name:    name,
+          _fcl:     fcl,
+          _country: country.short_name,
+          _query:   options.address,
+        });
+      }), 2));
+      
+      // if()
+      
+      // console.log(body.results[0].formatted_address, 'for', options.address);
+      // console.log(body.results[0].address_components)
+
+      // var country = _.find(body.results[0].address_components, function (d){
+      //     return d.types[0] == 'country';
+      //   }),
+      //   locality =  _.find(body.results[0].address_components, function (d){
+      //     return d.types[0] == 'locality';
+      //   });
+      // // the entity name
+      // var name_partials = [];
+      // if(locality && locality.long_name)
+      //   name_partials.push(locality.long_name);
+      // if(country && country.long_name)
+      //   name_partials.push(country.long_name);
+      // var name = name_partials.length? name_partials.join(', '): body.results[0].formatted_address;
+      // console.log(body.results[0], name)
     })
   }
 };

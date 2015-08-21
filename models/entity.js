@@ -26,18 +26,14 @@ module.exports = {
   */
   create: function(properties, next) {
     var now   = helpers.now(),
-        props = {
-          name: properties.name,
+        props = _.assign(properties, {
           links_wiki: _.isEmpty(properties.links_wiki)? undefined: properties.links_wiki,
-          type: properties.type,
           creation_date: now.date,
           creation_time: now.time,
           trustworthiness: properties.trustworthiness || 0,
-          geoname_lat: properties.geoname_lat,
-          geoname_lng: properties.geoname_lng,
-          geoname_id:  properties.geoname_id,
-          resource_id: properties.resource.id
-        },
+          resource_id: properties.resource.id,
+          name_search: properties.name_search || properties.name.toLowerCase()
+        }),
         query = parser.agentBrown(queries.merge_entity, props);
         
     neo4j.query(query, props, function (err, nodes) {

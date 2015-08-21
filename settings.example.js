@@ -20,6 +20,27 @@ module.exports = {
     host: 'http://localhost:7474'
   },
   
+  // list of resource fields to analyse.
+  // note that the language will be appended.
+  disambiguation: {
+    fields: [
+      'title',
+      'caption',
+    ],
+    services: {
+      'yagoaida': ['en']
+    },
+    geoservices: {
+      'geonames': ['en', 'fr', 'de', 'nl'],
+      'geocoding': ['en', 'fr', 'de', 'nl']
+    },
+    trustworthiness: [
+      'services',
+      'languages'
+    ]
+  },
+  
+  
   /*
 
     list of suppported languages
@@ -58,6 +79,20 @@ module.exports = {
     format: 'viaf.xml'
   },
   
+  geonames : {
+    endpoint: 'http://api.geonames.org/searchJSON',
+    username: '...'
+  },
+  /*
+    google geocoding api, cfr https://developers.google.com/maps/documentation/geocoding/intro
+    Users of the free API:
+      2500 requests per 24 hour period.
+      5 requests per second.
+  */
+  geocoding: { // google geocoding api
+    endpoint: 'https://maps.googleapis.com/maps/api/geocode/json',
+    key: ''
+  },
   /*
     Textrazor service 
     uncomment to abilitate textrazor with your textrazor account

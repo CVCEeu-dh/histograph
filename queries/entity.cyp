@@ -35,14 +35,46 @@ LIMIT {limit}
 {/unless}
 ON CREATE SET
   ent.name          = {name},
+  ent.name_search   = {name_search},
+  {if:lat}
+    ent.lat         = {lat},
+  {/if}
+  {if:lng}
+    ent.lng         = {lng},
+  {/if}
   {if:geoname_id}
-    ent.geoname_id = {geoname_id},
-    ent.geoname_lat = {geoname_lat},
-    ent.geoname_lng = {geoname_lng},
+    ent.geoname_id   = {geoname_id},
+    ent.geoname_fcl  = {geoname_fcl},
+    ent.geoname_country  = {geoname_country},
+  {/if}
+  {if:geocoding_id}
+    ent.geocoding_id  = {geocoding_id},
+    ent.geocoding_fcl = {geoname_fcl},
+    ent.geocoding_country = {geocoding_country},
   {/if}
   ent.creation_date = {creation_date},
   ent.creation_time = {creation_time}
+ON MATCH SET
+  {if:lat}
+    ent.lat         = {lat},
+  {/if}
+  {if:lng}
+    ent.lng         = {lng},
+  {/if}
+  {if:geoname_id}
+    ent.geoname_id   = {geoname_id},
+    ent.geoname_fcl  = {geoname_fcl},
+    ent.geoname_country  = {geoname_country},
+  {/if}
+  {if:geocoding_id}
+    ent.geocoding_id  = {geocoding_id},
+    ent.geocoding_fcl = {geoname_fcl},
+    ent.geocoding_country = {geocoding_country},
+  {/if}
+  ent.last_modification_date = {creation_date},
+  ent.last_modification_time = {creation_time}
 WITH ent
+LIMIT 1
 MATCH (res:resource)
   WHERE id(res) = {resource_id}
 WITH ent, res

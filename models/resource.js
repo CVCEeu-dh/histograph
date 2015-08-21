@@ -345,7 +345,9 @@ module.exports = {
     GEOCODE/GEONAMES for the found PLACES entities
   */
   discover: function(resource, next) {
-    var entities = [],
+    var clc = require('cli-color'),
+        entities = [],
+        
         ISO3     = {
           'en': 'eng',
           'fr': 'fra'
@@ -380,7 +382,7 @@ module.exports = {
         }
         // get the content from the required properties for the analysis.
         var content = _.compact(settings.disambiguation.fields.map(function (field) {
-          return result.item[field];
+          return resource[field];
         }));
         
         if(!content.length)
@@ -392,18 +394,19 @@ module.exports = {
             languages  = langdetect.detect(content.join('. ')),
             language   = languages.length? _.first(_.first(languages)) : 'en';
         
-        result.item.languages = [language];
+        resource.languages = [language];
         // create corresponding field to enable extraction
         settings.disambiguation.fields.forEach(function (field) {
-          resource[ field + '_' + language]  = resource[field];
+          if(resource[field])
+            resource[ field + '_' + language]  = resource[field];
         });
         
         // save resource, then go to next task.
         neo4j.save(resource, function (err, node) {
           if(err)
-            callback(err);
-          else
-            callback(null, node);
+            return callback(err);
+          console.log('resource saved')
+          callback(null, node);
         })
       },
       /*
@@ -413,19 +416,19 @@ module.exports = {
         Note that according to various service terms of use, we cannot proceed async
         (due to the limitation of parallel request for free service, for instance)
       */
-      function extract(resource, callback) {
+      function extract(resource, callback) {console.log(clc.yellowBright('extract'));
         var candidates = []; // candidate entities extracted by various mechanisms
-              
+        
         var q = async.queue(function (language, nextLanguage) {
           var filename = 'contents/resource_' + resource.doi + '_discover__'+ language + '.json',
               content; // the text content to be disambiguated. if it's too long, helpers method should chunk it.
               
           // check if the content for this language has already been discovered
           if(fs.existsSync(filename)) {
-            console.log('  using cached file', filename, q.length())
+            // console.log(clc.blackBright('  using cached file', clc.whiteBright(filename), q.length()));
             var cached_candidates = require('../'+filename);
             candidates = candidates.concat(cached_candidates);
-            console.log(candidates.length, 'found')
+            console.log(clc.blackBright('  found', clc.whiteBright(candidates.length), 'candidates (cache)'))
             nextLanguage();
             return;
           }
@@ -462,6 +465,7 @@ module.exports = {
               return callback(err);
             }
             candidates = candidates.concat(_.flatten(results));
+            
             fs.writeFileSync(filename, JSON.stringify(candidates, null, 2));
             nextLanguage();
           });
@@ -471,17 +475,22 @@ module.exports = {
         q.push(resource.languages);
         
         q.drain = function() {
-          callback(null, resource, candidates.filter(function (d) {
+          var valid_candidates = candidates.filter(function (d) {
             return d.type.length > 0
-          }));
+          });
+          console.log(clc.blackBright('  cleaning entities: keeping',clc.whiteBright(valid_candidates.length), 'out of', clc.whiteBright(candidates.length)))
+          callback(null, resource,valid_candidates );
         }
       },
       /*
       
-        4. Disambiguate locations
-        and add LAT and LNG to 'location' entities candidate
+        4. enrich entities with lat, lng.
+        and add LAT and LNG to 'location' entities candidate.
+        Note that this method can significatively increase the number of entities candidate.
       */
-      function geodisambiguate(resource, candidates, callback) {
+      function geoextract(resource, candidates, callback) { console.log(clc.yellowBright('geoestract'))
+        
+            
         var locations = candidates.filter(function (d) {
               return d.type.indexOf('location') != -1
             }),
@@ -489,61 +498,91 @@ module.exports = {
             remaining = candidates.filter(function (d) {
               return d.type.indexOf('location') == -1
             }),
-            
-            geodisambiguated = [];
-            _cached       = [];
-        
+            _cached  = {},
+            _locations = [];
+        console.log(clc.blackBright('  considering', clc.whiteBright(candidates.length), 'candidates; among them,', clc.magentaBright(locations.length), 'of type', clc.whiteBright('location')))
+
+        //console.log('geodis', settings.disambiguation.geoservices)
         var q = async.queue(function (candidate, nextCandidate) {
-          if(_cached[candidate.name + candidate.context.language]) {
-            console.log('found', candidate.name + candidate.context.language)
-            geodisambiguated.push(_cached[candidate.name + candidate.context.language]);
-            nextCandidate();
-            return;
-          }console.log('sodqposidpqoidpqodiqp', q.length(), locations.length)
-          // disambiguate with geonames (only, sic!)
-          helpers.geonames({
-            text: candidate.name,
-            language: candidate.context.language
-          }, function (err, results) {
-            if(!results.length) {
-              nextCandidate();
-              return;
-            } else if(err)
-              throw err;
-            var location = results[0];
+          // for each candidate entity, try to democratic disambiguate...
+          async.parallel(_.map(settings.disambiguation.geoservices, function (supportedLanguages, service) {
+            return function (_callback) {
+              // if(supportedLanguages.indexOf(candidate.context.language) == -1) {
+              //   _callback(null, []);
+              //   return;
+              // };
+              var _key = ([
+                    service,
+                    candidate.name,
+                    candidate.context.language 
+                  ].join('_')).toLowerCase();
+           
+              // check if we already call this service
+              if(_cached[_key]) {
+                _callback(null, _cached[_key]);
+                return;
+              }
+              console.log(clc.blackBright(' ',service,'for query', candidate.name));
+              // call the service, in parallel.
+              helpers[service]({
+                text: candidate.name,
+                // language: candidate.context.language // since geonames and geocoding do not care about language
+              }, function (err, _entities) {
+                console.log(clc.blackBright(' ',service,clc.cyanBright('success'),'for query', candidate.name));
+                if(err)
+                  return _callback(err);
+                console.log('  ...', _entities.length,'results', _.map(_entities, 'fcl'));
+                if(!_entities.length) {
+                  // this is not a PLACE :(
+                  remaining.push(_.assign(candidate, {
+                    type: [ 'topic' ]
+                  }));
+                }
+                _cached[_key] = _entities.filter(function (d) {
+                  console.log(service, d.fcl && d.fcl != 'L')
+                  return d.fcl && d.fcl != 'L' // too big, discard...
+                }).map(function (d) {
+                  return _.assign(candidate, d, {
+                    geoservice : service,
+                    geoquery   : candidate.name
+                  });
+                });
+                _callback(null, _cached[_key]);
+              });
+            }
+          }), function (err, results) { // interrupt queue
+            if(err) {
+              q.kill();
+              return callback(err);
+            }
             
-            _cached[candidate.name + candidate.context.language] = _.assign(candidate, {
-              geoname_fcl: location.fcl,
-              geoname_lat: location.lat,
-              geoname_lng: location.lng,
-              geoname_id: location.geonameId,
-              name: location.name, // yep, change name
-              q: location.query
-            });
-            console.log(_cached[candidate.name + candidate.context.language])
-            geodisambiguated.push(_cached[candidate.name + candidate.context.language]);
+            // filter useless (too generic) locations here.
+            _locations = _locations.concat(_.flatten(results));
+            // console.log(_.map(_locations, 'geoservice'))
             nextCandidate();
-          })
+          });
+
         }, 1);
-        
+
         q.push(locations);
         q.drain = function() {
-          console.log(geodisambiguated)
-          callback(null, resource, geodisambiguated.concat(remaining))
+          console.log(clc.blackBright('  found',clc.magentaBright(_locations.length),'locations while looping over', clc.whiteBright(locations.length),'locations'));
+          callback(null, resource, _locations.concat(remaining));
         };
       },
       /*
       
         5. cluster entities
         based on their name or wikipedia identifier, if provided.
-        and evaluate thrustworthiness
+        and evaluate trustworthiness
       */
-      function clusterEntities(resource, locations, candidates, callback) {
-        helpers.align(candidates, function (err, entities) {
+      function clusterEntities(resource, candidates, callback) { console.log(clc.yellowBright('cluster entities'))
+      console.log(clc.blackBright('  considering',clc.magentaBright(candidates.length),'candidates for clustering...'));
+        helpers.cluster(candidates, function (err, entities) {
           if(err)
             callback(err)
           else
-            callback(null, resource, entities.concat(locations));
+            callback(null, resource, entities);
         })
       },
       /*
@@ -551,17 +590,17 @@ module.exports = {
         6. SAVE
        
        */
-      function saveEntities(resource, entities, callback) {
+      function saveEntities(resource, entities, callback) { console.log(clc.yellowBright('saving entities'))
         var yaml = {}; // the yaml version of entity id and splitpoints.
         
         var q = async.queue(function (ent, nextEntity) {
           // for ech entity
-          if(ent.type[0] == 'location') {
-            console.log('skipping', ent.name, 'query:', ent.q)
-            nextEntity()
-            return
-          }
-          console.log(ent.name,'(',ent.type[0],'), remaining', q.length())
+          // if(ent.type[0] == 'location') {
+          //   console.log('skipping', ent.name, 'query:', ent.geoname_q, ent.geoname_fcl)
+          //   nextEntity()
+          //   return
+          // }
+          console.log(clc.blackBright('  saving', clc.yellowBright(ent.name),'as', clc.whiteBright(ent.type[0]), ent.trustworthiness,'remaining', q.length()));
           
           module.exports.createRelatedEntity(resource, {
             name: ent.name,
