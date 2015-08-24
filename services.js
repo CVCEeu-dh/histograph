@@ -224,22 +224,26 @@ module.exports = {
       next(null, []);
       return;
     }
-    request.get({
-      url: settings.geonames.endpoint,
-      json: true,
-      qs: _.assign({
+    var qs = _.assign({
+        lang: 'en',
+        isNameRequired: true,
         maxRows: 5,
         style: 'long',
         username: settings.geonames.username
       }, options, {
-        q: encodeURIComponent(options.address)
-      })
+        q: options.address
+      });
+    
+    request.get({
+      url: settings.geonames.endpoint,
+      json: true,
+      qs: qs
     }, function (err, res, body) {
       if(err) {
         next(err);
         return;
       }
-
+      
       if(!body.geonames || !body.geonames.length) {
         next(null, []);
         return;
@@ -306,6 +310,7 @@ module.exports = {
         var name = result.formatted_address,
             fcl, 
             country;
+        
         
         if(result.types.indexOf('continent') != -1) { 
           fcl = 'L';
