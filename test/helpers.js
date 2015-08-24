@@ -104,6 +104,86 @@ describe('helpers: geonames api', function() {
       done();
     });
   });
+  it('should calls GEONAMES service with current settings', function (done) {
+    helpers.geonames({
+      text: 'France'
+    }, function (err, results) {
+      console.log(results)
+      should.not.exist(err, err);
+      should.exist(results.length)
+      done();
+    });
+  });
+});
+
+
+describe('helpers: geocluster!', function() {
+  this.timeout(5000);
+  var entitiesToCluster = [];
+  
+  it('should calls GEONAMES service with current settings for FRANCE', function (done) {
+    helpers.geonames({
+      text: 'France'
+    }, function (err, results) {
+      should.not.exist(err, err);
+      should.exist(results.length);
+      entitiesToCluster = entitiesToCluster.concat(results)
+      done();
+      
+    });
+  });
+  it('should calls GEOCODING service with current settings for FRANCE', function (done) {
+    helpers.geocoding({
+      text: 'France'
+    }, function (err, results) {
+      should.not.exist(err, err);
+      should.exist(results.length)
+      entitiesToCluster = entitiesToCluster.concat(results)
+      done();
+    });
+  });
+  it('should ccluster France from two different services.', function (done) {
+    helpers.geocluster(entitiesToCluster, function (err, result) {
+      should.not.exist(err, err);
+      should.equal(result.name, 'Republic of France, France')
+      should.equal(result.country, 'FR')
+      done();
+    });
+  });
+});
+
+describe('helpers: geocluster for common mistakes!', function() {
+  this.timeout(5000);
+  var entitiesToCluster = [];
+  
+  it('should calls GEONAMES service with current settings for EU', function (done) {
+    helpers.geonames({
+      text: 'European Union'
+    }, function (err, results) {
+      should.not.exist(err, err);
+      should.exist(results.length);
+      entitiesToCluster = entitiesToCluster.concat(results)
+      done();
+      
+    });
+  });
+  it('should calls GEOCODING service with current settings for EU', function (done) {
+    helpers.geocoding({
+      text: 'European Union'
+    }, function (err, results) {
+      should.not.exist(err, err);
+      should.exist(results.length)
+      entitiesToCluster = entitiesToCluster.concat(results)
+      done();
+    });
+  });
+  it('should cluster European Union from two different services.', function (done) {
+    helpers.geocluster(entitiesToCluster, function (err, result) {
+      should.exist(err);
+      should.not.exist(result)
+      done();
+    });
+  });
 });
 
 
