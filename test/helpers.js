@@ -70,38 +70,37 @@ describe('helpers: text & geo filters', function() {
 // });
 
 
-describe('helpers: geocoding api', function() {
-  this.timeout(5000);
-  it('should call geocodingapi service and build a new location entity', function (done) {
-    helpers.geocoding('ruel Lepic, Paris', function (err, res) {
-      should.not.exist(err, err);
-      // console.log(res)
-      should.exist(res[0].geocode_id, res);
-      done();
-    });
-  });
-  it('should call geocodingapi service and build a new location entity starting from a COuntry', function (done) {
-    helpers.geocoding('Italia', function (err, res) {
-      should.not.exist(err, err);
-      // console.log(res)
-      should.exist(res[0].geocode_id, res);
-      should.equal(res[0].name, 'Italy');
-      should.equal(res[0].name_search, 'italy');
-      done();
-    });
-  });
-});
+// describe('helpers: geocoding api', function() {
+//   this.timeout(5000);
+//   it('should call geocodingapi service and build a new location entity', function (done) {
+//     helpers.geocoding('ruel Lepic, Paris', function (err, res) {
+//       should.not.exist(err, err);
+//       // console.log(res)
+//       should.exist(res[0].geocode_id, res);
+//       done();
+//     });
+//   });
+//   it('should call geocodingapi service and build a new location entity starting from a COuntry', function (done) {
+//     helpers.geocoding('Italia', function (err, res) {
+//       should.not.exist(err, err);
+//       // console.log(res)
+//       should.exist(res[0].geocode_id, res);
+//       should.equal(res[0].name, 'Italy');
+//       should.equal(res[0].name_search, 'italy');
+//       done();
+//     });
+//   });
+// });
 
 
 describe('helpers: geonames api', function() {
   this.timeout(5000);
-  it('should calls geocodingapi service and build a new location entity', function (done) {
-    helpers.geonames('Paris', function (err, res) {
-      console.log(res)
+  it('should calls GEONAMES service with current settings', function (done) {
+    helpers.geonames({
+      text: 'United Kingdom'
+    }, function (err, results) {
       should.not.exist(err, err);
-      should.exist(res[0].geonames_id, res);
-      should.exist(res[0].name_search);
-      should.exist(res[0].name);
+      should.exist(results.length)
       done();
     });
   });
