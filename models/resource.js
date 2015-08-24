@@ -482,97 +482,10 @@ module.exports = {
           callback(null, resource,valid_candidates );
         }
       },
+      
       /*
       
-        4. enrich entities with lat, lng.
-        and add LAT and LNG to 'location' entities candidate.
-        Note that this method can significatively increase the number of entities candidate.
-      */
-      function geoextract(resource, candidates, callback) { console.log(clc.yellowBright('geoestract'))
-        
-            
-        var locations = candidates.filter(function (d) {
-              return d.type.indexOf('location') != -1
-            }),
-            
-            remaining = candidates.filter(function (d) {
-              return d.type.indexOf('location') == -1
-            }),
-            _cached  = {},
-            _locations = [];
-        console.log(clc.blackBright('  considering', clc.whiteBright(candidates.length), 'candidates; among them,', clc.magentaBright(locations.length), 'of type', clc.whiteBright('location')))
-
-        //console.log('geodis', settings.disambiguation.geoservices)
-        var q = async.queue(function (candidate, nextCandidate) {
-          // for each candidate entity, try to democratic disambiguate...
-          async.parallel(_.map(settings.disambiguation.geoservices, function (supportedLanguages, service) {
-            return function (_callback) {
-              // if(supportedLanguages.indexOf(candidate.context.language) == -1) {
-              //   _callback(null, []);
-              //   return;
-              // };
-              var _key = ([
-                    service,
-                    candidate.name,
-                    candidate.context.language 
-                  ].join('_')).toLowerCase();
-           
-              // check if we already call this service
-              if(_cached[_key]) {
-                _callback(null, _cached[_key]);
-                return;
-              }
-              console.log(clc.blackBright(' ',service,'for query', candidate.name));
-              // call the service, in parallel.
-              helpers[service]({
-                text: candidate.name,
-                // language: candidate.context.language // since geonames and geocoding do not care about language
-              }, function (err, _entities) {
-                console.log(clc.blackBright(' ',service,clc.cyanBright('success'),'for query', candidate.name));
-                if(err)
-                  return _callback(err);
-                console.log('  ...', _entities.length,'results', _.map(_entities, 'fcl'));
-                if(!_entities.length) {
-                  // this is not a PLACE :(
-                  remaining.push(_.assign(candidate, {
-                    type: [ 'topic' ]
-                  }));
-                }
-                _cached[_key] = _entities.filter(function (d) {
-                  console.log(service, d.fcl && d.fcl != 'L')
-                  return d.fcl && d.fcl != 'L' // too big, discard...
-                }).map(function (d) {
-                  return _.assign(candidate, d, {
-                    geoservice : service,
-                    geoquery   : candidate.name
-                  });
-                });
-                _callback(null, _cached[_key]);
-              });
-            }
-          }), function (err, results) { // interrupt queue
-            if(err) {
-              q.kill();
-              return callback(err);
-            }
-            
-            // filter useless (too generic) locations here.
-            _locations = _locations.concat(_.flatten(results));
-            // console.log(_.map(_locations, 'geoservice'))
-            nextCandidate();
-          });
-
-        }, 1);
-
-        q.push(locations);
-        q.drain = function() {
-          console.log(clc.blackBright('  found',clc.magentaBright(_locations.length),'locations while looping over', clc.whiteBright(locations.length),'locations'));
-          callback(null, resource, _locations.concat(remaining));
-        };
-      },
-      /*
-      
-        5. cluster entities
+        4. cluster entities
         based on their name or wikipedia identifier, if provided.
         and evaluate trustworthiness
       */
@@ -585,6 +498,113 @@ module.exports = {
             callback(null, resource, entities);
         })
       },
+      
+      /*
+      
+        5. enrich entities with lat, lng.
+        and add LAT and LNG to 'location' entities candidate.
+        
+      */
+      function geoextract(resource, candidates, callback) { console.log(clc.yellowBright('geoestract'))
+        
+            
+        var withGeo = candidates.filter(function (d) {
+              return d.type.indexOf('location') != -1
+            }),
+            
+            withoutGeo = candidates.filter(function (d) {
+              return d.type.indexOf('location') == -1
+            }),
+            
+            _cached  = {},
+            _locations = [];
+            
+        console.log(clc.blackBright('  considering', clc.whiteBright(candidates.length), 'candidates; among them,', clc.magentaBright(withGeo.length), 'of type', clc.whiteBright('location')))
+
+        //console.log('geodis', settings.disambiguation.geoservices)
+        var q = async.queue(function (candidate, nextCandidate) {
+          // for each candidate entity, try to democratic disambiguate...
+          async.parallel(_.map(settings.disambiguation.geoservices, function (supportedLanguages, service) {
+            return function (_callback) {
+              // key for ram cached object
+              var _key = ([service, candidate.name].join('_')).toLowerCase();
+           
+              // check if we already call this service
+              if(_cached[_key]) {
+                _callback(null, _cached[_key]);
+                return;
+              }
+              console.log(clc.blackBright(' ',service,'for query', candidate.name));
+              
+              // call the DESIRED service, in parallel.
+              helpers[service]({
+                text: candidate.name,
+                language: 'en' //, language: candidate.context.language // since geonames and geocoding do not care about language
+              }, function (err, _entities) {
+                console.log(clc.blackBright(' ',service,clc.cyanBright('success'),'for query', candidate.name));
+                if(err)
+                  return _callback(err);
+                console.log('  ...', _entities.length,'results', _.map(_entities, 'fcl'));
+                
+                // write lo local cache the results objects
+                _cached[_key] = _entities.filter(function (d) {
+                  return d.fcl && d.fcl != 'L' // too generic locations (e.g Africa or Europe), discard...
+                }).map(function (d) {
+                  d.service = service
+                  return d;
+                });
+                
+                _callback(null, _cached[_key]);
+              });
+            }
+          }), function (err, results) { // interrupt queue
+            if(err) {
+              q.kill();
+              return callback(err); // stop top level waterfall
+            }
+            
+            // merge the results coming from the different services.
+            var locations = _.flatten(results);
+            
+            if(!locations.length) {
+              candidate.type = [ 'topic' ];
+              withoutGeo.push(candidate);
+              nextCandidate();
+              return;
+            }
+            
+            // align them geographically
+            helpers.geocluster(locations, function (err, location) {
+              if(err) {
+                nextCandidate();
+                return;
+              }
+              
+              var trustworthiness = .5*(candidate.trustworthiness||0) + .5*(location.trustworthiness||0);
+              if(trustworthiness >= settings.disambiguation.threshold.trustworthiness)
+                _locations.push(_.assign(candidate, location, {
+                  geotrustworthiness: location.trustworthiness,
+                  trustworthiness: trustworthiness,
+                  name: candidate.name
+                }));
+              
+              nextCandidate();
+              // 
+            })
+            
+          });
+
+        }, 1);
+
+        q.push(withGeo);
+        q.drain = function() {
+          console.log(clc.blackBright('  found',clc.magentaBright(_locations.length),'locations while looping over', clc.whiteBright(withGeo.length),'locations'));
+          // console.log(_locations)
+          
+          callback(null, resource, _locations.concat(withoutGeo));
+        };
+      },
+      
       /*
       
         6. SAVE
@@ -626,7 +646,9 @@ module.exports = {
           })
         }, 1);
         // just save typized links ...
-        q.push(entities);
+        q.push(entities.filter(function (d) {
+          return d.trustworthiness >= settings.disambiguation.threshold.trustworthiness
+        }));
         q.drain = function() {
           callback(null, resource, yaml);
         };
