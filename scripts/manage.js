@@ -23,7 +23,11 @@ var fs          = require('fs'),
                   }),
     
     availableTasks = {
+      'setup': [
+        tasks.setup
+      ],
       'import-resources': [
+        tasks.helpers.csv.parse,
         tasks.resource.importData
       ]
     };
@@ -40,10 +44,15 @@ if(!availableTasks[options.task]) {
 } 
 
 // the waterfall specified for the task
-async.waterfall(availableTasks[options.task], function (err) {
+async.waterfall([
+  // send initial options
+  function init(callback) {
+    callback(null, options);
+  }
+].concat(availableTasks[options.task]), function (err) {
   if(err) {
-    console.log(err);
-    console.log(clc.blackBright(' task'), clc.whiteBright(options.task), clc.redBright('error'));
+    console.warn(err);
+    console.log(clc.blackBright(' task'), clc.whiteBright(options.task), clc.redBright('exit with error'));
   } else
     console.log(clc.blackBright(' task'), clc.whiteBright(options.task), clc.cyanBright('completed'));
   

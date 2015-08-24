@@ -28,15 +28,6 @@ after(function () {
   session.destroy();
 });
 
-describe('controllers: create db constraints for user', function() {
-  it('should create a Constraint in Neo4j db', function (done) {
-    neo4j.query('CREATE CONSTRAINT ON (u:user) ASSERT u.email IS UNIQUE', function(err) {
-      should.not.exist(err, err);
-
-      done();
-    });
-  });
-});
 
 describe('controllers: create a new user', function() {
   it('should remove the user with email world@globetrotter.it', function (done) {

@@ -391,137 +391,6 @@ module.exports = {
       });
       next(null, entities)
     });
-    
-    return;
-    request
-      .post({
-        url: settings.textrazor.endpoint,
-        json: true,
-        form: {
-          text: text,
-          apiKey: settings.textrazor.key,
-          extractors: 'entities'
-        }
-      }, function (err, res, body) {
-        console.log('TEXTRAZOR', err)
-        // console.log(body.response.entities.length);
-
-        if(body.error) { // probably limit reached. 
-          next(LIMIT_REACHED);
-          return;
-        }
-
-        var entities = [];
-        var persons =  _.filter(body.response.entities, {type: ['Person']});
-        var locations =  _.filter(body.response.entities, {type: ['Place']});
-
-        console.log(_.map(persons, 'entityId'), _.map(locations, 'entityId'));
-
-
-        var queue = async.waterfall([
-          // person reconciliation (merge by)
-          function (nextReconciliation) {
-            var q = async.queue(function (person, nextPerson) {
-              if(person.wikiLink) {
-                neo4j.query(reconcile.merge_person_entity_by_links_wiki, {
-                  name: person.entityId,
-                  name_search: person.entityId.toLowerCase(),
-                  links_wiki: path.basename(person.wikiLink),
-                  links_yago: '',
-                  service: 'textrazor'
-                }, function (err, nodes) {
-                  if(err)
-                    throw err;
-                  // enrich with context
-                  nodes = nodes.map(function(d) {
-                    d.context = {
-                      left: person.startingPos,
-                      right: person.endingPos
-                    };
-                    return d;
-                  });
-
-                  entities = entities.concat(nodes);
-                  nextPerson();
-                })
-              } else {
-                neo4j.query(reconcile.merge_person_entity_by_name, {
-                  name: person.entityId,
-                  service: 'textrazor'
-                }, function (err, nodes) {
-                  if(err)
-                    throw err;
-                  
-                  nodes = nodes.map(function(d) {
-                    d.context = {
-                      left: person.startingPos,
-                      right: person.endingPos
-                    };
-                    return d;
-                  });
-
-                  entities = entities.concat(nodes);
-                  nextPerson();
-                })
-              };   
-            }, 1);
-
-            q.push(persons);
-            q.drain = nextReconciliation
-          },
-          // geonames/geocode reconciliation via 
-          // places entity (locations and cities) by using geonames services
-          function (nextReconciliation) {
-            var q = async.queue(function (location, nextLocation) {
-              module.exports.geonames(location.entityId, function (err, nodes){
-                if(err == IS_EMPTY) {
-                  nextLocation();
-                  return;
-                } else if(err)
-                  throw err;
-                nodes = nodes.map(function(d) {
-                  d.context = {
-                    left: location.startingPos,
-                    right: location.endingPos
-                  };
-                  return d;
-                });
-                   // adding LOCAL lazy context here, provided by textrazor
-                entities = entities.concat(nodes);
-                nextLocation();
-              })
-            }, 1);
-            q.push(locations);
-            q.drain = nextReconciliation;
-          },
-          // places entities (countries and cities) by using geocoding services
-          function (nextReconciliation) {
-            var q = async.queue(function (location, nextLocation) {
-              module.exports.geocoding(location.entityId, function (err, nodes){
-                if(err == IS_EMPTY) {
-                  nextLocation();
-                  return;
-                } else if(err)
-                  throw err
-                nodes = nodes.map(function(d) {
-                  d.context = {
-                    left: location.startingPos,
-                    right: location.endingPos
-                  };
-                  return d;
-                });
-                entities = entities.concat(nodes);
-                nextLocation();
-              })
-            }, 1);
-            q.push(locations);
-            q.drain = nextReconciliation;
-          }
-
-        ], function() {
-          next(null, entities);
-        });
-      });
   },
   /**
     A listo fo useful text filters
@@ -654,94 +523,6 @@ module.exports = {
       });
       
       next(null, candidates);
-      // .filter(function (d) {
-      //   return d.type.length > 0
-      // }));
-      // console.log(persons)
-      // async.waterfall([
-      //   // 1. person
-      //   //
-      //   function (nextReconciliation) {
-      //     var q = async.queue(function (person, nextPerson) {
-      //       if(person.wikiLink) {
-      //         neo4j.query(reconcile.merge_person_entity_by_links_wiki, {
-      //           name: person.entityId.replace(/_/g, ' '),
-      //           links_wiki: module.exports.text.wikify(person.wikiLink) ,
-      //           links_yago: '',
-      //           service: 'yagoaida'
-      //         }, function (err, nodes) {
-      //           if(err)
-      //             throw err;
-      //           // enrich with context
-      //           nodes = nodes.map(function(d) {
-      //             d.context = {
-      //               left: person.startingPos,
-      //               right: person.endingPos
-      //             };
-      //             return d;
-      //           });
-      //           entities = entities.concat(nodes);
-      //           nextPerson();
-      //         })
-      //       } else { // find by name ??
-      //         nextPerson();
-      //       }
-      //     }, 1);
-      //     q.push(persons);
-      //     q.drain = nextReconciliation;
-      //   },
-      //   // 2. geonames/geocode reconciliation via 
-      //   // places entity (locations and cities) by using geonames services
-      //   function (nextReconciliation) {
-      //     var q = async.queue(function (location, nextLocation) {
-      //       module.exports.geonames(location.matchedText, function (err, nodes){
-      //         if(err == IS_EMPTY) {
-      //           nextLocation();
-      //           return;
-      //         } else if(err)
-      //           throw err;
-      //         nodes = nodes.map(function(d) {
-      //           d.context = {
-      //             left: location.startingPos,
-      //             right: location.endingPos
-      //           };
-      //           return d;
-      //         });
-      //            // adding LOCAL lazy context here, provided by textrazor
-      //         entities = entities.concat(nodes);
-      //         nextLocation();
-      //       })
-      //     }, 1);
-      //     q.push(locations);
-      //     q.drain = nextReconciliation;
-      //   },
-      //   // 3. geocidign
-      //   // places entities (countries and cities) by using geocoding services
-      //   function (nextReconciliation) {
-      //     var q = async.queue(function (location, nextLocation) {
-      //       module.exports.geocoding(location.matchedText, function (err, nodes){
-      //         if(err == IS_EMPTY) {
-      //           nextLocation();
-      //           return;
-      //         } else if(err)
-      //           throw err
-      //         nodes = nodes.map(function(d) {
-      //           d.context = {
-      //             left: location.startingPos,
-      //             right: location.endingPos
-      //           };
-      //           return d;
-      //         });
-      //         entities = entities.concat(nodes);
-      //         nextLocation();
-      //       })
-      //     }, 1);
-      //     q.push(locations);
-      //     q.drain = nextReconciliation;
-      //   }
-      // ], function() {
-      //   next(null, entities);
-      // });
     })
   },
   /**
@@ -946,9 +727,12 @@ module.exports = {
     services.geocoding(params, function (err, results) {
       if(err == IS_EMPTY)
         next(null, [])
+      else if(err)
+        next(err)
       else
-        next(null, results.map(function (location) {
-          //console.log(location)
+        next(null, results.filter(function(location) {
+          return location._fcl;
+        }).map(function (location) {
           return {
             fcl:           location._fcl,
             geocoding_fcl:     location._fcl,
@@ -966,93 +750,6 @@ module.exports = {
         }));
     });
   },
-
-
-  // /**
-  //   Create a Geocoded entity:location Neo4j node for you. The Neo4J MERGE result will be
-  //   returned as arg for the next function next(null, result)
-    
-  //   Call the geocode api according to your current settings: make sure you use the proper
-    
-  //     settings.geocoding.key
-
-  //   Handle err response; it creates nodes frm the very first address found.
-  //   @next your callback with(err, res)
-  // */
-  // geocoding: function(address, next) {
-  //   var url = 'https://maps.googleapis.com/maps/api/geocode/json?key='
-  //         + settings.geocoding.key
-  //         + '&address=' + encodeURIComponent(address);
-  //   request.get({
-  //     url: url,
-  //     json: true
-  //   }, function (err, res, body) {
-  //     if(err) {
-  //       next(err);
-  //       return;
-  //     }
-      
-  //     // console.log(url)
-  //     if(!body.results.length) {
-  //       if(body.error_message) {
-  //         next(body.error_message)
-  //         return;
-  //       } 
-  //       next(IS_EMPTY);
-  //       return;
-  //     };
-  //     //console.log(body.results[0].formatted_address, 'for', address);
-  //     //console.log(body.results[0].address_components)
-
-  //     var country = _.find(body.results[0].address_components, function (d){
-  //         return d.types[0] == 'country';
-  //       }),
-  //       locality =  _.find(body.results[0].address_components, function (d){
-  //         return d.types[0] == 'locality';
-  //       });
-  //     // the entity name
-  //     var name_partials = [];
-  //     if(locality && locality.long_name)
-  //       name_partials.push(locality.long_name);
-  //     if(country && country.long_name)
-  //       name_partials.push(country.long_name);
-  //     var name = name_partials.length? name_partials.join(', '): body.results[0].formatted_address;
-
-  //     // update the nodee
-  //     neo4j.query(reconcile.merge_geocoding_entity, {
-  //       geocode_id: body.results[0].place_id,
-  //       name: name,
-  //       name_search: name.toLowerCase(),
-  //       q: 'https://maps.googleapis.com/maps/api/geocode/json?address=' + encodeURIComponent(address),
-        
-  //       countryName: country? country.long_name: '',
-
-  //       countryId: country? country.short_name: '',
-
-  //       toponymName: locality? locality.long_name: '',
-
-  //       formatted_address : body.results[0].formatted_address,
-
-  //       lat: body.results[0].geometry.location.lat,
-  //       lng: body.results[0].geometry.location.lng,
-
-  //       ne_lat: body.results[0].geometry.viewport.northeast.lat,
-  //       ne_lng: body.results[0].geometry.viewport.northeast.lng,
-  //       sw_lat: body.results[0].geometry.viewport.southwest.lat,
-  //       sw_lng: body.results[0].geometry.viewport.southwest.lng,
-  //     }, function(err, nodes) {
-  //       if(err) {
-  //         next(err);
-  //         return;
-  //       };
-  //       //console.log('COCOCOC', nodes)
-  //       next(null, nodes);
-  //       //batch.relate(n, 'helds_in', nodes[0], {upvote: 1, downvote:0});
-  //       //nextReconciliation(null, n, v);
-  //     });
-  //   }); // end of get geocode
-  // },
-
   /**
     Create a relationship @relationship from two nodes resource and entity.
     The Neo4J MERGE result will be returned as arg for the next function next(null, result)
@@ -1447,74 +1144,7 @@ module.exports = {
     
     // step 1
     async.waterfall([
-      // calculate and simplify entity:location
-      function geodisambiguate(callback) {
-        var locations = [],
-            groups = [];
-        
-        locations = entities.filter(function (d) {
-          return d.type.indexOf('location') != -1
-        });
-        groups = _.groupBy(locations, function (d) {
-          return d.geoquery.toLowerCase() + '_' + d.context.language
-        });
-        
-        
-        for(var i in groups) {
-          var _results = _.flatten(groups[i]),
-              _services = _.unique(_.map(_results, 'geoservice')),
-              combinations = [],
-              best;
-          console.log(i, _services)
-        }
-        throw 'ouch'
-        // group by query.
-            var _results = _.flatten(results),
-                combinations = [],
-                best;
-            
-            // do not disambiguate if there is just one service or one result
-            if(results.length == 1 || _results.length == 1) {
-              geodisambiguated.push(_.assign(candidate, _results[0], {
-                lat: +d.__lat,
-                lng: +d__lng
-              })); // unable to computate trustworthiness on distance: only on languages.
-              nextCandidate();
-              return;
-            }
-            
-            for(var i=0; i < _results.length; i++) {
-              for(var j= i + 1; j < _results.length; j++) {
-                var distance = helpers.geo.distance({
-                  lat: _results[i].__lat,
-                  lng: _results[i].__lng
-                }, {
-                  lat: _results[j].__lat,
-                  lng: _results[j].__lng
-                });
-                combinations.push({
-                  left: _results[i],
-                  right: _results[j],
-                  distance: distance
-                });
-              }
-            }
-            // best combination
-            best = _.first(_.sortBy(combinations, 'distance'));
-            // combinte the different interpratation into one. 
-            // WARN should be moved inside align direcly for coherence.
-            var c = _.assign(candidate, {
-              name: _.first(_.unique(_.compact([best.left.__name, best.right.__name]))),
-              lat: +_.first(_.unique([best.left.__lat, best.right.__lat])),
-              lng: +_.first(_.unique([best.left.__lng, best.right.__lng]))
-            }, best.left, best.right, {
-              geodistance: best.distance,
-              geotrustworthiness:
-                (best.left.__name == best.right.__name? .6: 0) +
-                (best.left.__country == best.right.__country? .35: 0)
-            });
-            geodisambiguated.push(c);
-      },
+      //
       function disambiguateDbpediaRedirect (callback) {
             // entities having a wiki link
         withWiki = _.filter(entities, function (d) {
@@ -1530,14 +1160,14 @@ module.exports = {
             callback(err);
             return
           }
-          callback(null, redirects);
+          callback(null, _.merge(withWiki, redirects).concat(withoutWiki));
         })
       },
       
       
-      function calculateTrustworthiness (redirects, callback) {   
+      function calculateTrustworthiness (candidates, callback) {   
         // assemble the entities found either by link or by name
-        var aligned = _.values(_.groupBy(_.merge(withWiki, redirects).concat(withoutWiki), function (d) {
+        var aligned = _.values(_.groupBy(candidates, function (d) {
           if(d.redirects && d.redirects.length)
             return d.type + '_' + d.redirectOf
           return d.type + '_' + d.name
@@ -1551,12 +1181,10 @@ module.exports = {
               return d.context.language
             }))
           };
-          // if type == location
-          
-          
-          _d.context = _.map(aliases, function (d) {
+          // assemble various context related to the entity
+          _d.context = _.flatten(_.map(aliases, function (d) {
             return d.context
-          });
+          }));
           // this index is the product of number of services and languages
           // where the entity has been found.
           _d.trustworthiness  = Math.round(100 * (_d.services.length + _d.languages.length) / settings.referenceValues.trustworthiness)/100;
@@ -1575,7 +1203,96 @@ module.exports = {
       else
         next(null, aligned);
     });
+  },
+  /*
+    Experimental: 
+    Given a list of objects having lat and long
+    {
+      lat: 33,
+      lng: 1,
+      service : 'geonames',
+      fcl : 'A',
+      country: 'FR'
+    }
+  */
+  geocluster: function(entities, next) {
+    var amountOfServices = _.unique(_.map(entities, 'service')).length;
+    
+    // if there are more than one service, we disambiguate just the first entity for each service
+    // services are meant for "suggestions": they provide the user with the amplest spectrum of possibilities.
+    // e.g try the query France in geonames, the second result is 'Fort-de-France'
+    if(amountOfServices > 1) {
+      // entities = _.values(_.groupBy(entities, 'service')).map(function (d) {
+      //   return _.first(d);
+      // });
+    }
+    
+    if(entities.length == 1) {
+      next(null, entities.map(function (d) {
+        d.trustworthiness = .5;
+        return d
+      }));
+      return;
+    }
+    
+    // calculate trustworthinsess
+    var amountOfNames,
+        amountOfCountries,
+        amountOfFcls,
+        
+        combinations = [],
+        best;
+    
+    for(var i=0; i < entities.length; i++) {
+      for(var j= i + 1; j < entities.length; j++) {
+        var distance = module.exports.geo.distance({
+          lat: +entities[i].lat,
+          lng: +entities[i].lng
+        }, {
+          lat: +entities[j].lat,
+          lng: +entities[j].lng
+        });
+        combinations.push({
+          left: entities[i],
+          right: entities[j],
+          distance: distance
+        });
+      }
+    }
+    
+    best = _.first(_.sortBy(combinations, 'distance'));
+    
+    amountOfNames = _.unique(_.compact(_.map([best.left.__name, best.right.__name], function (d) {
+      return d.trim().toLowerCase();
+    }))).length;
+    
+    amountOfCountries = _.unique(_.compact(_.map([best.left.country, best.right.country], function (d) {
+      return (d || '').trim().toLowerCase();
+    }))).length;
+    
+    amountOfFcls = _.unique(_.compact(_.map([best.left.fcl, best.right.fcl], function (d) {
+      return (d || '').trim().toLowerCase();
+    }))).length;
+    
+    
+    var merged = _.assign({
+      name: _.unique(_.compact([best.left.__name, best.right.__name])).join(', '),
+      lat: +_.first(_.unique([best.left.lat, best.right.lat])),
+      lng: +_.first(_.unique([best.left.lng, best.right.lng])),
+      fcl: _.unique([best.left.fcl, best.right.fcl]).join(', '),
+      country: _.unique([best.left.country, best.right.country]).join(', '),
+      trustworthiness:
+        .1 * amountOfServices / _.size(settings.disambiguation.geoservices) + 
+        .3 / amountOfNames + 
+        .3 / amountOfCountries + 
+        .1 / amountOfFcls + 
+        (best.distance > 10000? 0 : (10000 - best.distance) / 10000) *.2 
+    }, best.left, best.right);
+    
+    if(merged.trustworthiness < settings.disambiguation.threshold.geotrustworthiness)
+      next(IS_EMPTY);
+    else
+      next(null, merged);
   }
-  
 }
       
