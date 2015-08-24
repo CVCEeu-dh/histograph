@@ -14,20 +14,41 @@ module.exports = {
       records
       fields
   */
-  stringify: function(options, next) {
-    csv.stringify(options.records, {
-      delimiter: options.delimiter || '\t',
-      columns:   options.fields,
-      header:    true
-    }, function (err, data) {
-      fs.writeFile(options.filepath,
-         data, function (err) {
+  csv: {
+    stringify: function(options, callback) {
+      csv.stringify(options.records, {
+        delimiter: options.delimiter || '\t',
+        columns:   options.fields,
+        header:    true
+      }, function (err, data) {
+        fs.writeFile(options.filepath,
+           data, function (err) {
+          if(err) {
+            callback(err);
+            return
+          }
+          callback(null, options.filepath);
+        })
+      });
+    },
+    /*
+      REQUIRE an absolute or relative to this file task
+    */
+    parse: function(options, callback) {
+      if(!options.source) {
+        return callback(' Please specify the file path with --source=path/to/source.tsv');
+      }
+      csv.parse(''+fs.readFileSync(options.source), {
+        columns : true,
+        delimiter: options.delimiter || '\t'
+      }, function (err, data) {
         if(err) {
-          next(err);
-          return
+          callback(err);
+          return;
         }
-        next(null, options.filepath);
-      })
-    });
-  }
+        options.data = data;
+        callback(null, options);
+      });
+    }
+  },
 };
