@@ -287,7 +287,7 @@ module.exports = {
       qs: _.assign({
         key: settings.geocoding.key
       }, options, {
-        q: encodeURIComponent(options.address)
+        q: options.address
       }),
       json: true
     }, function (err, res, body) {
