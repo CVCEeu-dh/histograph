@@ -147,7 +147,7 @@ module.exports = {
           next(err);
           return;
         }
-        // console.log(form, 'body', body.response)
+        console.log(form, 'body', body.response)
         next(null, body.response.entities || []);
       })
   },
@@ -255,8 +255,8 @@ module.exports = {
       next(null, _.take(body.geonames.map(function (result) {
         var name;
         
-        if(result.fcl == 'A')
-          name = result.countryName;
+        if(result.fcl == 'A') // that is, the country
+          name = result.toponymName;
         else
           name = result.toponymName;
         
@@ -311,7 +311,6 @@ module.exports = {
             fcl, 
             country;
         
-        
         if(result.types.indexOf('continent') != -1) { 
           fcl = 'L';
         } else if(result.types.indexOf('country') != -1) {
@@ -319,8 +318,8 @@ module.exports = {
         } else if(result.types.indexOf('locality') != -1) {
           fcl = 'P';
         } else {
-          //console.log(result, options.address)
-          //throw 'stop'
+          // console.log(result, options.address)
+          // throw 'stop'
         }
         country = _.find(result.address_components, function (d){
           return d.types.indexOf('country') != -1
