@@ -220,54 +220,6 @@ MERGE (col:collection {name:{name}})
 RETURN col
 
 
-// name: merge_resource_by_doi
-// add a titre to an altrady existing resource nodes; FOR MIGRATION ONLY
-{if:slug}
-  MERGE (res:resource {slug:{slug}})
-{/if}
-{unless:slug}
-  MERGE (res:resource {doi:{doi}})
-{/unless}
-  ON CREATE set
-    res.name = {name},
-    res.mimetype = {mimetype},
-    res.creation_date = {creation_date},
-    res.creation_time = {creation_time},
-    res.languages = {languages},
-    {if:start_time}
-      res.start_time = {start_time},
-      res.end_time   = {end_time},
-      res.start_date = {start_date},
-      res.end_date   = {end_date},
-      res.date       = {text_date},
-    {/if}
-    {each:language in languages} 
-      res.{:title_%(language)} = {{:title_%(language)}},
-      res.{:caption_%(language)} = {{:caption_%(language)}}
-    {/each}
-  ON MATCH set
-    res.name = {name},
-    res.mimetype = {mimetype},
-    res.creation_date = {creation_date},
-    res.creation_time = {creation_time},
-    res.languages = {languages},
-    {if:start_time}
-      res.start_time = {start_time},
-      res.end_time   = {end_time},
-      res.start_date = {start_date},
-      res.end_date   = {end_date},
-      res.date       = {text_date},
-    {/if}
-    {each:language in languages} 
-      res.{:title_%(language)} = {{:title_%(language)}},
-      res.{:caption_%(language)} = {{:caption_%(language)}}
-    {/each}
-RETURN {
-  id: id(res),
-  props: res
-}
-
-
 // name: merge_resource
 // also assign a default curator for the resource
 {if:slug}
