@@ -61,11 +61,10 @@ describe('controllers: create a new user', function() {
         about      : '' // further info about the user, in markdown
       })
       .expect('Content-Type', /json/)
-      .expect(201)
+      .expect(200)
       .end(function (err, res) {
         if(err)
-          console.log(err)
-        console.log(res.body)
+          console.log('create user', err)
         should.equal(res.body.status, 'ok', res.body)
         done();
       })
@@ -551,7 +550,7 @@ describe('controllers: inquiries', function() {
   
   it('should get a list of inquiries related to a resource', function (done) {
     session
-      .get('/api/resource/11160/related/inquiry?limit=10')
+      .get('/api/resource/'+__resourceA.id +'/related/inquiry?limit=10')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {

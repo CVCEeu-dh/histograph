@@ -73,6 +73,18 @@ module.exports = function(options) {
         return _.assign(module.exports.user.guest, {
           role : 'staff'
         });
+      },
+      // that is, the paranoic robot..
+      marvin: function() {
+        return {
+          username   : 'MARVIN',
+          password   : 'marvin',
+          email      : 'marvin',
+          firstname  : 'MARVIN',
+          lastame    : 'marvin',
+          strategy   : 'local', // the strategy passport who creates his account, like local or google or twitter
+          about      : ''
+        }
       }
     },
     

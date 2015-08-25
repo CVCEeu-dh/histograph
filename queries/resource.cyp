@@ -97,18 +97,16 @@ WITH res
     OPTIONAL MATCH (res)-[:belongs_to]->(col)
     OPTIONAL MATCH (com)-[:mentions]->(res)
     OPTIONAL MATCH (inq)-[:questions]->(res)
-  WITH ver, res, ent, col, com, inq
-    RETURN {
-      resource: {
-        id: id(res),
-        props: res,
-        versions: EXTRACT(p in COLLECT(DISTINCT ver)|{name: p.name, id:id(p), yaml:p.yaml, language:p.language, type: last(labels(p))}),
-        entities: EXTRACT(p in COLLECT(DISTINCT ent)|{name: p.name, id:id(p), type: last(labels(p)), props: p}),
-        collections: EXTRACT(p in COLLECT(DISTINCT col)|{name: p.name, id:id(p), type: 'collection'}),
-        comments: count(distinct com),
-        inquiries: count(distinct inq)
-      }
+  WITH ver, res, ent, col, com, inq, {
+      id: id(res),
+      props: res,
+      versions: EXTRACT(p in COLLECT(DISTINCT ver)|{name: p.name, id:id(p), yaml:p.yaml, language:p.language, type: last(labels(p))}),
+      entities: EXTRACT(p in COLLECT(DISTINCT ent)|{name: p.name, id:id(p), type: last(labels(p)), props: p}),
+      collections: EXTRACT(p in COLLECT(DISTINCT col)|{name: p.name, id:id(p), type: 'collection'}),
+      comments: count(distinct com),
+      inquiries: count(distinct inq)
     } AS result
+  RETURN result
 
 
 // name: count_similar_resource_ids_by_entities
@@ -224,7 +222,12 @@ RETURN col
 
 // name: merge_resource_by_doi
 // add a titre to an altrady existing resource nodes; FOR MIGRATION ONLY
-MERGE (res:resource {doi:{doi}})
+{if:slug}
+  MERGE (res:resource {slug:{slug}})
+{/if}
+{unless:slug}
+  MERGE (res:resource {doi:{doi}})
+{/unless}
   ON CREATE set
     res.name = {name},
     res.mimetype = {mimetype},
@@ -267,17 +270,37 @@ RETURN {
 
 // name: merge_resource
 // also assign a default curator for the resource
-MERGE (res:resource {doi:{doi}})
+{if:slug}
+  MERGE (res:resource {slug:{slug}})
+{/if}
+{unless:slug}
+  MERGE (res:resource {doi:{doi}})
+{/unless}
   ON CREATE set
     res.name = {name},
     res.mimetype = {mimetype},
     res.creation_date = {creation_date},
     res.creation_time = {creation_time},
     res.languages = {languages},
-    {each:language in languages} 
+    {if:start_time}
+      res.start_time = {start_time},
+      res.end_time   = {end_time},
+      res.start_date = {start_date},
+      res.end_date   = {end_date},
+    {/if}
+    {each:language in languages}
       res.{:title_%(language)} = {{:title_%(language)}},
       res.{:caption_%(language)} = {{:caption_%(language)}}
     {/each}
+  ON MATCH SET
+    {if:start_time}
+      res.start_time = {start_time},
+      res.end_time   = {end_time},
+      res.start_date = {start_date},
+      res.end_date   = {end_date},
+    {/if}
+    res.last_modification_date = {creation_date},
+    res.last_modification_time = {creation_time}
 WITH res
 MATCH (u:user {username: {username}})
   MERGE (u)-[r:curates]->(res)

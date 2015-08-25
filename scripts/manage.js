@@ -28,8 +28,10 @@ var fs          = require('fs'),
       ],
       'import-resources': [
         tasks.helpers.csv.parse,
-        tasks.resource.importData
-      ]
+        tasks.helpers.marvin.create,
+        tasks.resource.importData,
+        tasks.helpers.marvin.remove
+      ],
     };
 
 console.log(clc.whiteBright( "\n\n +-+-+ "));
@@ -52,9 +54,9 @@ async.waterfall([
 ].concat(availableTasks[options.task]), function (err) {
   if(err) {
     console.warn(err);
-    console.log(clc.blackBright(' task'), clc.whiteBright(options.task), clc.redBright('exit with error'));
+    console.log(clc.blackBright('\n task'), clc.whiteBright(options.task), clc.redBright('exit with error'));
   } else
-    console.log(clc.blackBright(' task'), clc.whiteBright(options.task), clc.cyanBright('completed'));
+    console.log(clc.blackBright('\n task'), clc.whiteBright(options.task), clc.cyanBright('completed'));
   
   console.log("\n\n")
 });

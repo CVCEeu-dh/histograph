@@ -93,112 +93,142 @@ describe('helpers: text & geo filters', function() {
 // });
 
 
-describe('helpers: geonames api', function() {
-  this.timeout(5000);
-  it('should calls GEONAMES service with current settings', function (done) {
-    helpers.geonames({
-      text: 'United Kingdom'
-    }, function (err, results) {
-      should.not.exist(err, err);
-      should.exist(results.length)
-      done();
-    });
-  });
-  it('should calls GEONAMES service with current settings', function (done) {
-    helpers.geonames({
-      text: 'France'
-    }, function (err, results) {
-      console.log(results)
-      should.not.exist(err, err);
-      should.exist(results.length)
-      done();
-    });
-  });
-});
+// describe('helpers: geonames api', function() {
+//   this.timeout(5000);
+//   it('should calls GEONAMES service with current settings', function (done) {
+//     helpers.geonames({
+//       text: 'United Kingdom'
+//     }, function (err, results) {
+//       should.not.exist(err, err);
+//       should.exist(results.length)
+//       done();
+//     });
+//   });
+//   it('should calls GEONAMES service with current settings', function (done) {
+//     helpers.geonames({
+//       text: 'France'
+//     }, function (err, results) {
+//       console.log(results)
+//       should.not.exist(err, err);
+//       should.exist(results.length)
+//       done();
+//     });
+//   });
+// });
 
 
-describe('helpers: geocluster!', function() {
-  this.timeout(5000);
-  var entitiesToCluster = [];
+// describe('helpers: geocluster!', function() {
+//   this.timeout(5000);
+//   var entitiesToCluster = [];
   
-  it('should calls GEONAMES service with current settings for FRANCE', function (done) {
-    helpers.geonames({
-      text: 'France'
-    }, function (err, results) {
-      should.not.exist(err, err);
-      should.exist(results.length);
-      entitiesToCluster = entitiesToCluster.concat(results)
-      done();
+//   it('should calls GEONAMES service with current settings for FRANCE', function (done) {
+//     helpers.geonames({
+//       text: 'France'
+//     }, function (err, results) {
+//       should.not.exist(err, err);
+//       should.exist(results.length);
+//       entitiesToCluster = entitiesToCluster.concat(results)
+//       done();
       
-    });
-  });
-  it('should calls GEOCODING service with current settings for FRANCE', function (done) {
-    helpers.geocoding({
-      text: 'France'
-    }, function (err, results) {
-      should.not.exist(err, err);
-      should.exist(results.length)
-      entitiesToCluster = entitiesToCluster.concat(results)
-      done();
-    });
-  });
-  it('should ccluster France from two different services.', function (done) {
-    helpers.geocluster(entitiesToCluster, function (err, result) {
-      should.not.exist(err, err);
-      should.equal(result.name, 'Republic of France, France')
-      should.equal(result.country, 'FR')
-      done();
-    });
-  });
-});
+//     });
+//   });
+//   it('should calls GEOCODING service with current settings for FRANCE', function (done) {
+//     helpers.geocoding({
+//       text: 'France'
+//     }, function (err, results) {
+//       should.not.exist(err, err);
+//       should.exist(results.length)
+//       entitiesToCluster = entitiesToCluster.concat(results)
+//       done();
+//     });
+//   });
+//   it('should ccluster France from two different services.', function (done) {
+//     helpers.geocluster(entitiesToCluster, function (err, result) {
+//       should.not.exist(err, err);
+//       should.equal(result.name, 'Republic of France, France')
+//       should.equal(result.country, 'FR')
+//       done();
+//     });
+//   });
+// });
 
-describe('helpers: geocluster for common mistakes!', function() {
-  this.timeout(5000);
-  var entitiesToCluster = [];
+// describe('helpers: geocluster for common mistakes!', function() {
+//   this.timeout(5000);
+//   var entitiesToCluster = [];
   
-  it('should calls GEONAMES service with current settings for EU', function (done) {
-    helpers.geonames({
-      text: 'European Union'
-    }, function (err, results) {
-      should.not.exist(err, err);
-      should.exist(results.length);
-      entitiesToCluster = entitiesToCluster.concat(results)
-      done();
+//   it('should calls GEONAMES service with current settings for EU', function (done) {
+//     helpers.geonames({
+//       text: 'European Union'
+//     }, function (err, results) {
+//       should.not.exist(err, err);
+//       should.exist(results.length);
+//       entitiesToCluster = entitiesToCluster.concat(results)
+//       done();
       
-    });
-  });
-  it('should calls GEOCODING service with current settings for EU', function (done) {
-    helpers.geocoding({
-      text: 'European Union'
-    }, function (err, results) {
-      should.not.exist(err, err);
-      should.exist(results.length)
-      entitiesToCluster = entitiesToCluster.concat(results)
-      done();
-    });
-  });
-  it('should cluster European Union from two different services.', function (done) {
-    helpers.geocluster(entitiesToCluster, function (err, result) {
-      should.exist(err);
-      should.not.exist(result)
-      done();
-    });
-  });
-});
+//     });
+//   });
+//   it('should calls GEOCODING service with current settings for EU', function (done) {
+//     helpers.geocoding({
+//       text: 'European Union'
+//     }, function (err, results) {
+//       should.not.exist(err, err);
+//       should.exist(results.length)
+//       entitiesToCluster = entitiesToCluster.concat(results)
+//       done();
+//     });
+//   });
+//   it('should cluster European Union from two different services.', function (done) {
+//     helpers.geocluster(entitiesToCluster, function (err, result) {
+//       should.exist(err);
+//       should.not.exist(result)
+//       done();
+//     });
+//   });
+// });
 
 
-describe('viaf api', function() {
-  this.timeout(5000);
-  it('should calls viafapi service and build a new person entity', function (done) {
-    helpers.viaf('Hans von der Groeben', function (err, res) {
-      //should.not.exist(err, err);
-      done();
-    });
-  });
-});
-
+// describe('viaf api', function() {
+//   this.timeout(5000);
+//   it('should calls viafapi service and build a new person entity', function (done) {
+//     helpers.viaf('Hans von der Groeben', function (err, res) {
+//       //should.not.exist(err, err);
+//       done();
+//     });
+//   });
+// });
 
 describe('human date service', function() {
+  it('should test reconcileInterval', function (done) {
+    var d = helpers.reconcileIntervals({
+      start_date: '2015-06-07',
+      format: 'YYYY-MM-DD'
+    });
+    
+    should.equal(d.start_date, '2015-06-07T00:00:00+00:00')
+    should.equal(d.end_date, '2015-06-07T23:59:00+00:00')
+    
+    var d_END = helpers.reconcileIntervals({
+      start_date: '2015-06-07',
+      end_date: '2015-06-10',
+      format: 'YYYY-MM-DD'
+    });
+    
+    should.equal(d_END.start_date, '2015-06-07T00:00:00+00:00')
+    should.equal(d_END.end_date, '2015-06-10T23:59:00+00:00')
+    
+    var d_STRICT = helpers.reconcileIntervals({
+      start_date: '2015-06-07',
+      end_date: '2015-06-10',
+      format: 'YYYY-MM-DD',
+      strict: true
+    });
+    
+    should.equal(d_STRICT.start_date, '2015-06-07T00:00:00+00:00')
+    should.equal(d_STRICT.end_date, '2015-06-10T00:00:00+00:00')
+    
+    done()
+  });
+  
   this.timeout(5000);
   it('should transform 90-92 in two years span', function (done) {
     helpers.reconcileHumanDate('90-92', 'fr', function (err, res) {

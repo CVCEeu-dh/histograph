@@ -31,6 +31,7 @@ module.exports = {
           creation_date: now.date,
           creation_time: now.time,
           trustworthiness: properties.trustworthiness || 0,
+          frequency: properties.frequency,
           resource_id: properties.resource.id,
           name_search: properties.name_search || properties.name.toLowerCase()
         }),

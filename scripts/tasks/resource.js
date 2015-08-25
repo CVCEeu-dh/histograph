@@ -3,20 +3,18 @@
   Resource task collection
 */
 var settings = require('../../settings'),
-    helpers = require('./helpers'),
     async    = require('async'),
     Resource = require('../../models/resource');
 
 module.exports = {
   
   importData: function(options, callback) {
-    console.log(' load data');
-    console.log(options.data);
-    
+    console.log(clc.yellowBright('\n   tasks.resource.importData'));
     // check that data model is correct enough. 
     var COLUMNS    = [ // columns that HAVE TO BE PRESENT IN THE SOURCE TSV FILE!!!!
         'slug',
         'languages',
+        'title_en',
         'start_date',
         'end_date',
         'viaf_id'
@@ -51,21 +49,31 @@ module.exports = {
       return;
     }
     
-    // create or merge admin username
+    // check start_date and end_date
     
-    
+    console.log(clc.blackBright('   everything looks good, saving', clc.magentaBright(options.data.length), 'resources'));
+        
     var q = async.queue(function (resource, next) {
-      Resource.create(resource, function(err) {
+      resource.user = options.marvin;
+      resource.languages = _.compact(_.map(resource.languages.split(','),_.trim)).sort()
+      resource.name = resource.name || resource.title_en;
+      console.log(clc.blackBright('   saving ...', clc.whiteBright(resource.slug)))
+      Resource.create(resource, function (err, res) {
         if(err) {
           q.kill();
           callback(err)
         } else {
+          console.log(clc.blackBright('   resource: ', clc.whiteBright(resource.slug), 'saved', q.length(), 'resources remaining'));
+      
           next();
+          
         }
       })
     }, 3);
     q.push(options.data);
-    q.drain = callback;
+    q.drain = function() {
+      callback(null, options);
+    }
   },
   exportData: function(options, callback) {
     console.log('export data')

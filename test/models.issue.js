@@ -103,7 +103,7 @@ describe('model:issue init', function() {
 });
 
 describe('model:issue', function() {
-  console.log('Issue.DATE', Issue.DATE)
+  
   it('should create a new issue on date field (field validation should be done at controller level)', function (done) {
     Issue.create({
       type: Issue.DATE,

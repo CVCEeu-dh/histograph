@@ -801,6 +801,35 @@ module.exports = {
     else
       return result;
   },
+  /*
+    options.start_date and options.start_time according to options.format.
+    Cfr moment documentation.
+    If options.strict is not present, the start date and the end_date will be rounded to the
+    first available second and the last second respectively
+  */
+  reconcileIntervals: function(options, next) {
+    var start  = moment.utc(options.start_date, options.format, options.strict),
+        end    = options.end_date? moment.utc(options.end_date, options.format, options.strict): start.clone();
+    
+    if(!options.strict) {
+      //if(!options.end_date) {
+        end.add(24, 'hours').subtract(1, 'minutes');
+        start.set('hour', 0);
+      //}
+    }
+    
+    result = {
+      start_date: start.format(), // ISO format
+      start_time: start.format('X'),
+      end_date: end.format(),
+      end_time: end.format('X')
+    };
+    
+    if(next)
+      next(null, result);
+    else
+      return result;
+  },
   
   /**
     Dummy Time transformation with moment.

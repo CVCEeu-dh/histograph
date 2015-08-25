@@ -90,8 +90,9 @@ if(options.resource) {
   var queue = async.waterfall([
     // get pictures and documents having a caption
     function (next) {
-      neo4j.query('MATCH (a:resource) WHERE NOT (a)<-[:appears_in]-() RETURN a LIMIT {limit}', {
-        limit: +options.resource || 10
+      neo4j.query('MATCH (a:resource) WHERE NOT (a)<-[:appears_in]-() RETURN a skip {offset} LIMIT {limit}', {
+        limit: +options.resource || 10,
+        offset: +options.offset || 0
       }, function (err, nodes) {
         if(err)
           throw err;

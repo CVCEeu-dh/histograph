@@ -119,7 +119,6 @@ module.exports = {
         });
       },
       items: function(callback) {
-        console.log('items', params)
         var query = parser.agentBrown(rQueries.get_resources, params);
         neo4j.query(query, params, function (err, items) {
           if(err)
@@ -183,15 +182,26 @@ module.exports = {
   */
   create: function(properties, next) {
     var now = helpers.now(),
-        query = parser.agentBrown(rQueries.merge_resource, {
-          languages: properties.languages
-        });
-    
-    neo4j.query(query, _.assign(properties, {
+        query;
+    // create start_time if its not present
+    if(!properties.start_time && properties.start_date) {
+      properties = _.assign(properties, helpers.reconcileIntervals({
+        start_date: properties.start_date,
+        end_date: properties.end_date,
+        format: properties.dateformat || 'YYYY-MM-DD',
+        strict: properties.datestrict
+      }));
+    }
+    properties = _.assign(properties, {
       creation_date: now.date,
       creation_time: now.time,
       username: properties.user.username
-    }), function (err, node) {
+    });
+    
+    query = parser.agentBrown(rQueries.merge_resource, properties);
+    
+    
+    neo4j.query(query, properties, function (err, node) {
       if(err) {
         next(err);
         return;
@@ -342,8 +352,9 @@ module.exports = {
           return;
         }
         var hItems = _.indexBy(items, 'id');
+        
         next(null, _.map(results.ids, function (d) {
-          hItems[''+d].persons = _.values(hItems[''+d].persons);
+          hItems[''+d].persons = _.values(hItems[''+d].persons );
           return hItems[d]
         }),{
           total_items: results.totalItems
@@ -595,7 +606,7 @@ module.exports = {
               }
               
               var trustworthiness = .5*(candidate.trustworthiness||0) + .5*(location.trustworthiness||0);
-              if(trustworthiness >= settings.disambiguation.threshold.trustworthiness)
+              // if(trustworthiness >= settings.disambiguation.threshold.trustworthiness)
                 _locations.push(_.assign(candidate, location, {
                   geotrustworthiness: location.trustworthiness,
                   trustworthiness: trustworthiness,
@@ -640,6 +651,7 @@ module.exports = {
             name: ent.name,
             type: _.first(ent.type),
             trustworthiness: ent.trustworthiness,
+            frequency: ent.context.length,
             links_wiki: ent.links_wiki
           }, function (err, entity) {
             if(err) {
@@ -660,9 +672,7 @@ module.exports = {
           })
         }, 1);
         // just save typized links ...
-        q.push(entities.filter(function (d) {
-          return d.trustworthiness >= settings.disambiguation.threshold.trustworthiness
-        }));
+        q.push(entities);
         q.drain = function() {
           callback(null, resource, yaml);
         };
