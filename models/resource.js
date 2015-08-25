@@ -200,7 +200,6 @@ module.exports = {
     
     query = parser.agentBrown(rQueries.merge_resource, properties);
     
-    
     neo4j.query(query, properties, function (err, node) {
       if(err) {
         next(err);
@@ -211,7 +210,7 @@ module.exports = {
         return;
       }
       next(null, node[0]);
-    })
+    });
   },
   
   /*

@@ -231,8 +231,6 @@ RETURN col
   ON CREATE set
     res.name = {name},
     res.mimetype = {mimetype},
-    res.creation_date = {creation_date},
-    res.creation_time = {creation_time},
     res.languages = {languages},
     {if:start_time}
       res.start_time = {start_time},
@@ -240,16 +238,56 @@ RETURN col
       res.start_date = {start_date},
       res.end_date   = {end_date},
     {/if}
-    {each:language in languages}
-      res.{:title_%(language)} = {{:title_%(language)}},
-      res.{:caption_%(language)} = {{:caption_%(language)}}
-    {/each}
+    {if:url}
+      res.url = {url},
+    {/if}
+    {if:title_en}
+      res.title_en = {title_en},
+    {/if}
+    {if:title_fr}
+      res.title_fr = {title_fr},
+    {/if}
+    {if:title_de}
+      res.title_de = {title_de},
+    {/if}
+    {if:caption_en}
+      res.caption_en = {caption_en},
+    {/if}
+    {if:caption_fr}
+      res.caption_fr = {caption_fr},
+    {/if}
+    {if:caption_de}
+      res.caption_de = {caption_de},
+    {/if}
+    res.creation_date = {creation_date},
+    res.creation_time = {creation_time}
   ON MATCH SET
     {if:start_time}
       res.start_time = {start_time},
       res.end_time   = {end_time},
       res.start_date = {start_date},
       res.end_date   = {end_date},
+    {/if}
+    {if:url}
+      res.url = {url},
+    {/if}
+    {if:title_en}
+      res.title_en = {title_en},
+    {/if}
+    {if:title_fr}
+      res.title_fr = {title_fr},
+    {/if}
+    {if:title_de}
+      res.title_de = {title_de},
+    {/if}
+    {if:caption_en}
+      res.caption_en = {caption_en},
+    {/if}
+    {if:caption_fr}
+      res.caption_fr = {caption_fr},
+    {/if}
+    {if:caption_de}
+      res.caption_de = {caption_de},
     {/if}
     res.last_modification_date = {creation_date},
     res.last_modification_time = {creation_time}

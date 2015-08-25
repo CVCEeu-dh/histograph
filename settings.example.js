@@ -4,7 +4,8 @@
   ===
 */
 module.exports = {
-  baseurl: '',
+  baseurl: 'http://localhost:8000', // the remote address used to handle OAuth2 callbacks, without TRAILING slashes
+  port: 8000,
   
   secret: {
     cookie: 'cookie secret', // cookie salt
@@ -16,8 +17,12 @@ module.exports = {
     accesslog: './logs/access.log'
   },
 
-  neo4j : {
-    host: 'http://localhost:7474'
+  neo4j : { // > 2.2
+    host : {
+      server: 'http://localhost:7474',
+      user: 'neo4j',
+      pass: 'milliway'
+    }
   },
   
   // list of resource fields to analyse.
@@ -119,4 +124,6 @@ module.exports = {
     clientId: "xzy.apps.googleusercontent.com",
     clientSecret: "xxx000"
   },
+  
+  
 };

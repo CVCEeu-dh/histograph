@@ -11,10 +11,13 @@ module.exports = {
   importData: function(options, callback) {
     console.log(clc.yellowBright('\n   tasks.resource.importData'));
     // check that data model is correct enough. 
-    var COLUMNS    = [ // columns that HAVE TO BE PRESENT IN THE SOURCE TSV FILE!!!!
+    // Cfr. queries/resource.cyp --> merge_resource query
+    var COLUMNS    = [ // mandatory column names
         'slug',
         'languages',
         'title_en',
+        'caption_en',
+        'url',
         'start_date',
         'end_date',
         'viaf_id'
@@ -28,6 +31,7 @@ module.exports = {
     // get the fields from the very first line  
     fields = _.keys(_.first(options.data));
     
+    // get the total amount of languages from columns names starting with title_* 
     languages = _.compact(fields.map(function (d) {
       var field = d.match(/^title_([a-za-z]{2})$/);
       if(field)
@@ -35,13 +39,20 @@ module.exports = {
       return;
     }));
     
-    // expected fields according to language
-    expectedFields = _.unique(COLUMNS.concat(_.flatten(languages.map(function (language) {
-      return _.flatten(settings.disambiguation.fields.map(function (field) {
-        return field + '_' + language;
-      }));
-    }))));
+    // get the expected fields according to language
+    expectedFields = _.unique(
+      COLUMNS.concat(
+        _.flatten(
+          languages.map(function (language) {
+            return _.flatten(settings.disambiguation.fields.concat(['url']).map(function (field) {
+              return field + '_' + language;
+            }));
+          })
+        )
+      )
+    );
     
+    // get the difference between the mandatory column names and the current column names
     neededFields = _.difference(expectedFields, fields);
     if(neededFields.length > 0) {
       console.log('  missing: ',neededFields)
@@ -49,7 +60,6 @@ module.exports = {
       return;
     }
     
-    // check start_date and end_date
     
     console.log(clc.blackBright('   everything looks good, saving', clc.magentaBright(options.data.length), 'resources'));
         

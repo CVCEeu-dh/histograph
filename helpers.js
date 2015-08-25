@@ -820,9 +820,9 @@ module.exports = {
     
     result = {
       start_date: start.format(), // ISO format
-      start_time: start.format('X'),
+      start_time: +start.format('X'),
       end_date: end.format(),
-      end_time: end.format('X')
+      end_time: +end.format('X')
     };
     
     if(next)
