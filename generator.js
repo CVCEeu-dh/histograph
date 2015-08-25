@@ -36,8 +36,25 @@ module.exports = function(options) {
           languages: ['en', 'fr', 'de'],
           user: properties.user
         }
+      },
+      multilanguageB: function(properties) {
+        return {
+          name: 'another untitled B',
+          doi: 'automatic doi generation, B',
+          mimetype: 'text',
+          title_en: "'Yalta, from failure to myth' from Le Monde (5 February 1985)",
+          title_fr: "\"Yalta, de l'échec au mythe\" dans Le Monde (5 février 1985)",
+          title_de: "\"Jalta – vom Scheitern zum Mythos\" in Le Monde (5. Februar 1985)",
+          caption_en: "From 4 to 11 February 1945, the Yalta Conference was attended by Winston Churchill, Franklin D. Roosevelt and Joseph Stalin who were to determine the future of Europe. Forty years on, André Fontaine questions the real significance of the Conference in an article published in the French daily newspaper Le Monde on 5 February 1985.",
+          caption_fr: "Du 4 au 11 février 1945, la Conférence de Yalta réunit Winston Churchill, Franklin D. Roosevelt et Joseph Staline qui doivent décider du sort de l'Europe. Quarante ans plus tard, André Fontaine remet en question la portée effective de la conférence dans un article publié le 5 février 1985 dans le quotidien français Le Monde.",
+          caption_de: "Vom 4. bis 11. Februar 1945 trafen sich Winston Churchill, Franklin D. Roosevelt und Joseph Staline auf der Konferenz von Jalta, um über das Schicksal Europas zu entscheiden. Vierzig Jahre später stellt André Fontaine die eigentliche Tragweite dieser Konferenz in einem am 5. Februar 1985 in der französischen Tageszeitung Le Monde veröffentlichten Artikel in Frage.",
+          languages: ['en', 'fr', 'de'],
+          user: properties.user
+        }
       }
     },
+    
+    
     
     user: {
       guest: function() {

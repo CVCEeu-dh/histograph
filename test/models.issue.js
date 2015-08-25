@@ -273,7 +273,9 @@ describe('model:issue finish', function() {
   });
   
   it('should delete the resource', function (done) {
-    Resource.remove(__resource.props.doi, function (err) {
+    Resource.remove({
+      id: __resource.id
+    }, function (err) {
       should.not.exist(err);
       done();
     })

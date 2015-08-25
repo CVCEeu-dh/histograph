@@ -203,7 +203,9 @@ describe('model:collection ', function() {
   
   it('should delete the resources just created', function (done) {
     var q = async.queue(function (res, nextResource) {
-      resource.remove(res.props.doi, function (err) {
+      resource.remove({
+        id: res.id
+      }, function (err) {
         should.not.exist(err);
         nextResource();
       });

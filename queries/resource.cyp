@@ -68,6 +68,7 @@ WITH res
 OPTIONAL MATCH (res)-[r2:appears_in]-(loc:`location`)
 OPTIONAL MATCH (res)-[r3:appears_in]-(per:`person`)
   WITH res, loc, per
+  ORDER BY res.last_modification_time DESC
     RETURN {
       id: id(res),
       props: res,
@@ -75,7 +76,7 @@ OPTIONAL MATCH (res)-[r3:appears_in]-(per:`person`)
       locations: collect(DISTINCT loc),
       persons: collect(DISTINCT per)
     } as r
-  ORDER BY res.last_modification_time DESC
+  
 
 // name: count_resources
 // count resources having a version, with current filters
@@ -90,21 +91,23 @@ RETURN count(res) as total_items
 MATCH (res:resource)
 WHERE id(res) in {ids}
 WITH res
-  SKIP {offset}
-  LIMIT {limit}
-MATCH (ver:`version`)-[:describes]-(res)
-OPTIONAL MATCH (res)-[:appears_in]-(loc:`location`)
-OPTIONAL MATCH (res)-[:appears_in]-(pla:`place`)
-OPTIONAL MATCH (res)-[:appears_in]-(per:`person`)
-  WITH res, ver, loc, per, pla
+    OPTIONAL MATCH (ver)-[:describes]->(res)
+    OPTIONAL MATCH (ent)-[:appears_in]->(res)
+    OPTIONAL MATCH (res)-[:belongs_to]->(col)
+    OPTIONAL MATCH (com)-[:mentions]->(res)
+    OPTIONAL MATCH (inq)-[:questions]->(res)
+  WITH ver, res, ent, col, com, inq
     RETURN {
-      id: id(res),
-      props: res,
-      type: 'resource',
-      locations: collect(DISTINCT loc),
-      persons: collect(DISTINCT per),
-      places: collect(DISTINCT pla)
-    } as r
+      resource: {
+        id: id(res),
+        props: res,
+        versions: EXTRACT(p in COLLECT(DISTINCT ver)|{name: p.name, id:id(p), yaml:p.yaml, language:p.language, type: last(labels(p))}),
+        entities: EXTRACT(p in COLLECT(DISTINCT ent)|{name: p.name, id:id(p), type: last(labels(p)), props: p}),
+        collections: EXTRACT(p in COLLECT(DISTINCT col)|{name: p.name, id:id(p), type: 'collection'}),
+        comments: count(distinct com),
+        inquiries: count(distinct inq)
+      }
+    } AS result
 
 
 // name: count_similar_resource_ids_by_entities
@@ -285,7 +288,8 @@ RETURN {
 
 // name: remove_resource
 // WARNING!!!! destroy everything related to the resource, as if it never existed. Should not be used while comments are in place
-MATCH (n:resource {doi:{doi}})
+MATCH (n:resource)
+WHERE id(n) = {id}
 OPTIONAL MATCH (n)-[r]-()
 DELETE n, r
 

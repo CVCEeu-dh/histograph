@@ -145,6 +145,7 @@ WITH res, ent
   OPTIONAL MATCH (per:`person`)-[:appears_in]->(res)
 
 WITH ent, res, pla, per
+ORDER BY res.start_date DESC
   RETURN {
     id: id(res),
     props: res,
@@ -160,7 +161,7 @@ WITH ent, res, pla, per
       score: n.score
     })
   } as result
-ORDER BY res.start_date DESC
+
 SKIP {offset} LIMIT {limit}
 
 

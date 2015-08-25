@@ -45,9 +45,15 @@ module.exports = {
     get a complete resource object (with versions, comments etc...).
     @param id - numeric identifier only
    */
-  get: function(id, next) {
+  get: function(resource, next) {
+    if(typeof resource != 'object') {
+      resource = {
+        id: +resource
+      }
+    }
+      
     neo4j.query(rQueries.get_resource, {
-      id: +id
+      id: resource.id
     }, function(err, items) {
       
       if(err) {
@@ -198,6 +204,13 @@ module.exports = {
   },
   
   /*
+    Create a nice index
+  */
+  index: function(resource, next) {
+    
+  },
+  
+  /*
     Create a relationships with an entity. If the entity dioes not exist, it will create it.
     Entity object MUST contain at least: name and type.
   */
@@ -247,9 +260,9 @@ module.exports = {
     Change the resoruce label to :trash in order to manually
     @return (err, resource:Resource)
   */
-  remove: function(doi, next) {
+  remove: function(resource, next) {
     neo4j.query(rQueries.remove_resource, {
-      doi: doi
+      id: resource.id
     }, function(err) {
       if(err)
         next(err);

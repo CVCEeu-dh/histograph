@@ -28,6 +28,12 @@ after(function () {
   session.destroy();
 });
 
+var __user,
+    __resourceA,
+    __resourceB,
+    __entity,
+    __inquiry,
+    __comment;
 
 describe('controllers: create a new user', function() {
   it('should remove the user with email world@globetrotter.it', function (done) {
@@ -206,6 +212,7 @@ describe('controllers: authenticate the user, succeed', function() {
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function(err, res) { //
+        __user = res.body.user;
         should.equal(res.body.status, 'ok');
         should.equal(res.body.user.email, 'world@globetrotter.it');
         done();
@@ -216,7 +223,34 @@ describe('controllers: authenticate the user, succeed', function() {
 
 
 describe('controllers: get resource items available to the user', function() {
-
+  var generator = require('../generator')({
+                  suffix: 'controllers'
+                }),
+      Resource  = require('../models/resource');
+      
+  
+  it('should create a new resource A', function (done){
+    Resource.create(generator.resource.multilanguage({
+      user: __user
+    }), function (err, resource) {
+      if(err)
+        throw err;
+      __resourceA = resource;
+      done();
+    });
+  });
+  
+  it('should create a new resource B', function (done){
+    Resource.create(generator.resource.multilanguageB({
+      user: __user
+    }), function (err, resource) {
+      if(err)
+        throw err;
+      __resourceB = resource;
+      done();
+    });
+  });
+  
   it('should show a list of 50 resources', function (done) {
     session
       .get('/api/resource')
@@ -236,7 +270,6 @@ describe('controllers: get resource items available to the user', function() {
       .expect(200)
       .end(function (err, res) {
         should.not.exists(err);
-        console.log(res.body)
         should.equal(res.body.info.params.start_date, '1988-01-01T00:00:00.000Z');
         should.equal(res.body.info.params.end_date, '1988-01-02T00:00:00.000Z');
         should.equal(res.body.info.params.start_time, 567993600);
@@ -287,14 +320,15 @@ describe('controllers: get resource items available to the user', function() {
 
   it('should return the specified resource', function (done) {
     session
-      .get('/api/resource/11160')
+      .get('/api/resource/'+__resourceA.id)
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
-        //console.log(err, res.body.result.item)
+        // console.log(err, res.body.result.item)
         should.not.exists(err);
 
         should.exists(res.body.result.item);
+        should.equal(res.body.result.item.props.title_en,__resourceA.props.title_en);
         should.equal(res.body.status, 'ok', res.body);
         done();
       });
@@ -302,7 +336,7 @@ describe('controllers: get resource items available to the user', function() {
   
   it('should return the specified resources', function (done) {
     session
-      .get('/api/resource/18368,11160')
+      .get('/api/resource/'+[__resourceA.id, __resourceB.id].join(','))
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
@@ -316,7 +350,7 @@ describe('controllers: get resource items available to the user', function() {
   
   it('should show a list of 100 related resources', function (done) {
     session
-      .get('/api/resource/11167/related/resource?limit=100')
+      .get('/api/resource/'+__resourceA.id+'/related/resource?limit=100')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
@@ -330,7 +364,7 @@ describe('controllers: get resource items available to the user', function() {
   
   it('should create a comment and attach it to the required resource', function (done) {
     session
-      .post('/api/resource/11160/related/comment')
+      .post('/api/resource/'+__resourceA.id+'/related/comment')
       .send({
         content : 'A content with some #taa and #location tag',
         resource_id: 512,
@@ -377,7 +411,7 @@ describe('controllers: get resource items available to the user', function() {
   
   it('should get a single resource MONOPARTITE graph object', function (done) {
     session
-      .get('/api/resource/11160/graph?type=monopartite-entity')
+      .get('/api/resource/'+__resourceA.id+'/graph?type=monopartite-entity')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
@@ -393,8 +427,7 @@ describe('controllers: get resource items available to the user', function() {
 });
 
 describe('controllers: inquiries', function() {
-  var __inquiry = {},
-      __comment = {};
+
   
   it('should get some inquiries', function (done) {
     session
@@ -412,7 +445,7 @@ describe('controllers: inquiries', function() {
   
   it('should create a new inquiry', function (done) {
     session
-      .post('/api/resource/11160/related/inquiry')
+      .post('/api/resource/'+__resourceA.id+'/related/inquiry')
       .send({
         name: 'this is a test inquiry',
         description: 'please provide the resource with something important'
@@ -538,7 +571,7 @@ describe('controllers: issues', function() {
   
   it('should create an issue on date', function (done) {
     session
-      .post('/api/resource/11160/related/issue')
+      .post('/api/resource/'+__resourceA.id + '/related/issue')
       .send({
         type: 'date',
         solution: ['2000-12-31','2001-01-01'],
@@ -675,9 +708,9 @@ describe('controllers: issues', function() {
 
 describe('controllers: suggest queries', function() {
   
-  it('should get some suggestions for helmut kohl and mitterrand', function (done) {
+  it('should get some suggestions for Yalta', function (done) {
     session
-      .get('/api/suggest?query=helmut kohl mitterrand')
+      .get('/api/suggest?query=Yalta')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
@@ -764,7 +797,7 @@ describe('controllers: suggest queries', function() {
   
   it('should get an unknown node based on id', function (done) {
     session
-      .get('/api/suggest/unknown-node/26441')
+      .get('/api/suggest/unknown-node/'+__resourceA.id)
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
@@ -778,14 +811,14 @@ describe('controllers: suggest queries', function() {
   
   it('should get an unknown node based on ids', function (done) {
     session
-      .get('/api/suggest/unknown-nodes/26441,27631')
+      .get('/api/suggest/unknown-nodes/'+ __resourceA.id +','+ __resourceB.id)
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
         if(err)
           console.log(err);
         should.not.exist(err);
-        should.equal(_.map(res.body.result.items, 'id').join(), [26441, 27631].join());
+        should.equal(_.map(res.body.result.items, 'id').sort().join(), [__resourceA.id,  __resourceB.id].sort().join());
         done()
       });
   });
@@ -872,9 +905,27 @@ describe('controllers: collections', function() {
 });
 
 describe('controllers: play with entities', function() {
+  var Entity = require('../models/entity')
+  it('should create a brand new entity, by using links_wiki', function (done) {
+    Entity.create({
+      links_wiki: 'European_Parliament',
+      type: 'social_group',
+      name: 'European Parliament',
+      resource: __resourceA,
+      trustworthiness: 0.8
+    }, function (err, entity) {
+      should.not.exist(err, err);
+      should.equal(entity.rel.type, 'appears_in');
+      should.exist(entity.props.name)
+      __entity = entity;
+      done();
+    })
+  });
+  
+  
   it('should get a single entity item', function (done) {
     session
-      .get('/api/entity/20381')
+      .get('/api/entity/'+__entity.id)
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
@@ -882,13 +933,13 @@ describe('controllers: play with entities', function() {
           console.log(err);
         should.not.exist(err);
         should.exist(res.body.result.item);
-        should.equal(res.body.result.item.id, 20381);
+        should.equal(res.body.result.item.id, __entity.id);
         done()
       });
   });
   it('should downvote a single entity item', function (done) {
     session
-      .post('/api/entity/26648/downvote')
+      .post('/api/entity/'+__entity.id+'/downvote')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
@@ -897,13 +948,13 @@ describe('controllers: play with entities', function() {
         should.not.exist(err);
         // console.log(res.body.result.item)
         should.exist(res.body.result.item);
-        should.equal(res.body.result.item.id, 26648);
+        should.equal(res.body.result.item.id, __entity.id);
         done()
       });
   });
   it('should get some entities by id', function (done) {
     session
-      .get('/api/entity/20381,26560,26248')
+      .get('/api/entity/' + __entity.id + ','+__entity.id)
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
@@ -917,7 +968,7 @@ describe('controllers: play with entities', function() {
   });
   it('should get a single entity related resources', function (done) {
     session
-      .get('/api/entity/20381/related/resources')
+      .get('/api/entity/'+__entity.id+'/related/resources')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {

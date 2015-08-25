@@ -154,7 +154,9 @@ describe('model:inquiry ', function() {
   });
   
   it('should delete the resource', function (done) {
-    resource.remove(__resource.props.doi, function (err) {
+    resource.remove({
+      id: __resource.id
+    }, function (err) {
       should.not.exist(err);
       done();
     })

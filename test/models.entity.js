@@ -154,6 +154,13 @@ describe('model:entity ', function() {
 
 
 describe('model:entity cleaning', function() {
+  it('should delete the resource', function (done) {
+    Resource.remove(__resource, function (err) {
+      if(err)
+        throw err;
+      done();
+    });
+  });
   it('should delete the user', function (done) {
     User.remove(generator.user.guest(), function (err) {
       if(err)
@@ -162,13 +169,7 @@ describe('model:entity cleaning', function() {
     });
   });
   
-  it('should delete the resource', function (done) {
-    Resource.remove(generator.resource.multilanguage({}), function (err) {
-      if(err)
-        throw err;
-      done();
-    });
-  });
+  
   // it('should delete the entity', function (done) {
   //   User.remove(generator.user.guest(), function (err) {
   //     if(err)

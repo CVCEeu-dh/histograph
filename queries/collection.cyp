@@ -146,8 +146,7 @@ WITH col, r, item
   OPTIONAL MATCH (pla:place)-[:appears_in]->(item)
   OPTIONAL MATCH (per:person)-[:appears_in]->(item)
 
-WITH col, r, item, pla, per
-  RETURN {
+WITH col, r, item, pla, per, {
     id: id(item),
     type: last(labels(item)),
     props: item,
@@ -161,7 +160,8 @@ WITH col, r, item, pla, per
       name: n.name,
       description: n.description
     })
-  }
+  } as result
 ORDER BY r.sort_index ASC
+RETURN result
 SKIP {offset}
 LIMIT {limit}

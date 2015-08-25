@@ -1,8 +1,10 @@
 HG
 ===
+
 ! __wip__
 
-HG is the new Histograph, a node-express application.
+HG is the new Histograph, a node-express application aiming at providing digital humanities specialists with an online collaborative environment.
+Connections between people, documents and pictures are stored in a [Neo4j](http://neo4j.com/) graph database.
 
 ## installation
 Once cloned, 
@@ -13,11 +15,27 @@ Then copy paste the settings.example.js to settings.js
 	
 	cp settings.example.js setttings.js
 
-Run the setup script: it will add some constraint to the neo4j db.
+Install [Neo4j](http://neo4j.com/) version: 2.1.8 and set database properties to deal with auto_indexing in `conf/neo4j.properties` file.
+
+	# Autoindexing
+
+	# Enable auto-indexing for nodes, default is false
+	node_auto_indexing=true
+
+	# The node property keys to be auto-indexed, if enabled
+	node_keys_indexable=full_search,name_search
+
+Complete the installation by pointing to a location in your system that will store the neo4j data (`conf/neo4j-server.properties`)
+
+	
+	# location of the database directory
+	org.neo4j.server.database.location=data/graph.db
+
+Run then the setup script: it will add some constraint to neo4j db.
 
 	node scripts\manage.js --task=setup
 
-Modify fields accordingly, then test in order to check that everything has been installed.
+Modify neo4j related configuration in your histograph settings.js file, then run tests and check that everything runs properly.
 
 	npm test
 

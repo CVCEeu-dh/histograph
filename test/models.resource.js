@@ -71,15 +71,15 @@ describe('model:resource ', function() {
     })
   });
   
-  it('should discover institutions, places and persons', function (done) {
-    this.timeout(60000)
-    Resource.discover(__resourceA, function (err, resource) {
-      if(err)
-        throw err;
-      //console.log(resource)
-      done();
-    })
-  });
+  // it('should discover institutions, places and persons', function (done) {
+  //   this.timeout(60000)
+  //   Resource.discover(__resourceA, function (err, resource) {
+  //     if(err)
+  //       throw err;
+  //     //console.log(resource)
+  //     done();
+  //   })
+  // });
   
   it('should create a new resource B', function (done){
     Resource.create({
@@ -115,12 +115,12 @@ describe('model:resource ', function() {
   // });
   
   it('should get a correct representation of a resource', function (done) {
-    Resource.get(11160, function (err, res) {
+    Resource.get(__resourceB, function (err, res) {
       if(err)
         throw err;
-      should.equal(res.id, 11160)
-      
+      should.equal(res.id, __resourceB.id)
       should.exist(res.props)
+      should.equal(res.props.caption_en, __resourceB.props.caption_en)
       done()
     })
   })
@@ -149,17 +149,7 @@ describe('model:resource ', function() {
       done()
     })
   })
-  it('should get a correct representation of a resource', function (done) {
-    Resource.get(1, function (err, res) {
-      if(err)
-        throw err;
-      should.equal(res.id, 1)
-      
-      should.exist(res.persons.length)
-      should.exist(res.props)
-      done()
-    })
-  })
+  
   it('should return the timeline of resources', function (done) {
     Resource.getTimeline({}, function (err, res) {
       should.not.exist(err);
@@ -174,13 +164,17 @@ describe('model:resource ', function() {
   })
   
   it('should delete the resource A', function (done) {
-    Resource.remove(__resourceA.props.doi, function (err) {
+    Resource.remove({
+      id: __resourceA.id
+    }, function (err) {
       should.not.exist(err);
       done();
     })
   });
   it('should delete the resource B', function (done) {
-    Resource.remove(__resourceA.props.doi, function (err) {
+    Resource.remove({
+      id: __resourceA.id
+    }, function (err) {
       should.not.exist(err);
       done();
     })
