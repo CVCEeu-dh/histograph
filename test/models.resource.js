@@ -140,10 +140,10 @@ describe('model:resource ', function() {
     Resource.getMany({
       limit: 3,
       offset: 0,
-      entity_id: 17618
+      entity_id: __social_group.id
     }, function (err, items, info) {
       if(err)
-        throw err;
+        console.log(err);
       should.exist(items.length)
       should.exist(info.total_items)
       done()

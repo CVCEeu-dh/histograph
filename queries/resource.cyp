@@ -67,15 +67,16 @@ WITH res
 WITH res
 OPTIONAL MATCH (res)-[r2:appears_in]-(loc:`location`)
 OPTIONAL MATCH (res)-[r3:appears_in]-(per:`person`)
-  WITH res, loc, per
-  ORDER BY res.last_modification_time DESC
-    RETURN {
+  WITH res, loc, per, {
       id: id(res),
       props: res,
       type: 'resource',
       locations: collect(DISTINCT loc),
       persons: collect(DISTINCT per)
-    } as r
+    } as result
+  RETURN result 
+  ORDER BY res.last_modification_time DESC
+    
   
 
 // name: count_resources

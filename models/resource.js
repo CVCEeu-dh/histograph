@@ -119,6 +119,7 @@ module.exports = {
         });
       },
       items: function(callback) {
+        console.log('items', params)
         var query = parser.agentBrown(rQueries.get_resources, params);
         neo4j.query(query, params, function (err, items) {
           if(err)
