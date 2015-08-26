@@ -8,7 +8,7 @@
  */
 angular.module('histograph')
   
-  .controller('CoreCtrl', function ($scope, $location, $timeout, $route, $log, $timeout, $http, $routeParams, $modal, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, EVENTS, VIZ, MESSAGES) {
+  .controller('CoreCtrl', function ($scope, $location, $state, $timeout, $route, $log, $timeout, $http, $routeParams, $modal, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, EVENTS, VIZ, MESSAGES) {
     $log.debug('CoreCtrl ready');
     $scope.locationPath = $location.path(); 
     
@@ -341,40 +341,43 @@ angular.module('histograph')
     
     
     $scope.$on('$locationChangeSuccess', function(e, path) {
-      $log.log('CoreCtrl @locationChangeSuccess', path);
+      $log.log('CoreCtrl @locationChangeSuccess', path, $state);
       
       var now = (new Date()).getTime();
-      $scope.freeze = 'sigma';
       
-      if(!$scope.trails.length) { // hey this is your first trail
-        $scope.trails.push(new Trail(path, now));
-        return;
-      };
+      $scope.unsetMessage();
       
-      var trail;
-      // check if the paths already exists in past trail and it is not the last one.
-      for(var i = $scope.trails.length - 1; i > -1; i--) {
-        for(var j = $scope.trails[i].paths.length - 1; j > -1 ; j--) {
-          if($scope.trails[i].paths[j].path === path) { // create a new trail
-            trail = new Trail(path, now, j, i);
-            $scope.trails.push(trail);
-            break;
-          }
-        }
-        if(trail)
-          break;
-      };
       
-      // the path is totally new, append it to the last trail paths
-      if(!trail) 
-        $scope.trails[$scope.trails.length - 1].paths.push({
-          path: path,
-          start: now
-        });
+      // if(!$scope.trails.length) { // hey this is your first trail
+      //   $scope.trails.push(new Trail(path, now));
+      //   return;
+      // };
+      
+      // var trail;
+      // // check if the paths already exists in past trail and it is not the last one.
+      // for(var i = $scope.trails.length - 1; i > -1; i--) {
+      //   for(var j = $scope.trails[i].paths.length - 1; j > -1 ; j--) {
+      //     if($scope.trails[i].paths[j].path === path) { // create a new trail
+      //       trail = new Trail(path, now, j, i);
+      //       $scope.trails.push(trail);
+      //       break;
+      //     }
+      //   }
+      //   if(trail)
+      //     break;
+      // };
+      
+      // // the path is totally new, append it to the last trail paths
+      // if(!trail) 
+      //   $scope.trails[$scope.trails.length - 1].paths.push({
+      //     path: path,
+      //     start: now
+      //   });
     });
     
     $scope.$on('$locationChangeStart', function() {
       $log.log('CoreCtrl @locationChangeStart');
+      $scope.freeze = 'sigma';
       $scope.setMessage(MESSAGES.LOADING);
     });
      /*

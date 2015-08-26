@@ -42,10 +42,14 @@
         </blockquote> -->
       </div>
 </div>
-<div id='see-also' class='{{currentCtrl}}' ng-cloak>
+<div ui-view>
+  
+  <div id='see-also' class='{{currentCtrl}}'>
   <div ng-include src="'templates/partials/resource-toolbar.html'"></div>
   
   
   <div class="{{loading? 'animated fadeOut': 'animated fadeIn'}}" style="-webkit-animation-delay: {{$index * 100}}ms;
     animation-delay: {{$index * 100}}ms" ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/resource-lite.html"'></div>
+  </div>
+  <div ng-include src="'templates/partials/milkyway.html'"></div>
 </div>

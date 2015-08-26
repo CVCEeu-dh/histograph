@@ -6,7 +6,6 @@
  */
 angular.module('histograph')
   .controller('IndexCtrl', function ($scope, $log, $timeout, ResourcesFactory, CooccurrencesFactory, cleanService, InquiryFactory, EVENTS) {
-    
     $log.debug('IndexCtrl ready', $scope.params);
     
     $scope.pagetitle = 'A list of resources to start with'

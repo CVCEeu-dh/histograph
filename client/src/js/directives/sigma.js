@@ -98,7 +98,7 @@ angular.module('histograph')
         
         // create the main camera and specify 'canvas'
         si.addRenderer({
-          type: 'canvas',
+          type: 'canvas',//canvas',
           camera: 'main',
           container: element.find('#playground')[0]
         });
@@ -136,10 +136,18 @@ angular.module('histograph')
         */
         scope.$watch('graph', function (graph, previousGraph) {
           $log.log('::sigma @graph changed');
-          if(!graph || !graph.nodes)
-            return;
           stop();
           clearTimeout(timers.play);
+          
+          if(!graph || !graph.nodes || !graph.nodes.length) {
+            $log.log('::sigma @graph empty, clear...');
+            // clean graph, the exit
+             si.graph.clear();
+             si.refresh();
+            return;
+          }
+            
+          
           // refresh the scale for edge color, calculated the extent weights of the edges
           scale.domain(d3.extent(graph.edges, function(d) {return d.weight || 1}));
           

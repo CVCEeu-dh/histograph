@@ -1,0 +1,9 @@
+<div class="toolbar">
+  <div class="wrapper">
+    <pagination boundary-links="true" total-items="totalItems" ng-model="currentPage" class="pagination-sm" max-size="4" previous-text="&lsaquo;" rotate="true" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></pagination>
+  </div>
+</div>
+{{totalItems}}
+<div ui-view>
+<div ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/inquiry-lite.html"'></div>
+</div>

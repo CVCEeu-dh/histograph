@@ -5,8 +5,8 @@
  * # IndexCtrl
  */
 angular.module('histograph')
-  .controller('EntityCtrl', function ($scope, $log, $routeParams, socket, $filter, entity, resources, persons, EntityExtraFactory,EntityRelatedFactory, EVENTS) {
-    $log.debug('EntityCtrl ready', +$routeParams.id, entity.result.item.name, resources);
+  .controller('EntityCtrl', function ($scope, $log, $stateParams, socket, $filter, entity, resources, persons, EntityExtraFactory,EntityRelatedFactory, EVENTS) {
+    $log.debug('EntityCtrl ready', +$stateParams.id);
     
     $scope.item = entity.result.item;
     $scope.setRelatedItems(resources.result.items);
@@ -27,7 +27,7 @@ angular.module('histograph')
     // sync graph
     $scope.drawGraph = function() {
       EntityExtraFactory.get({
-        id: $routeParams.id,
+        id: $stateParams.id,
         extra: 'graph',
         type: $scope.graphType,
         limit: 2000
@@ -52,9 +52,9 @@ angular.module('histograph')
     
     $scope.downvote = function() {
       // downvote current entity
-      $log.debug('EntityCtrl -> downvote()', $routeParams.id);
+      $log.debug('EntityCtrl -> downvote()', $stateParams.id);
       EntityExtraFactory.save({
-        id: $routeParams.id,
+        id: $stateParams.id,
         extra: 'downvote',
       }, {}, function (res) {
         $log.debug('EntityCtrl -> downvoted', res);
@@ -69,7 +69,7 @@ angular.module('histograph')
     $scope.sync = function(params) {
       $scope.loading = true;
       EntityRelatedFactory.get({
-        id: $routeParams.id,
+        id: $stateParams.id,
         model: 'resources',
         limit: 10,
         offset: (params.page-1) * 10
@@ -84,4 +84,4 @@ angular.module('histograph')
       $scope.page = params.page
       $scope.sync(params);
     });
-  });
+  })

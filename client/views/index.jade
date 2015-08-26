@@ -92,7 +92,7 @@ html
                   i(class='fa fa-google-plus')
       else
         div(class='view {{currentCtrl}} {{queueStatus}}')
-          div(ng-view, autoscroll='true')
+          div(ui-view='', autoscroll='true')
         
         
           //- div(id='see-also', class='{{currentCtrl}}', ng-cloak)
@@ -145,7 +145,7 @@ html
         
         div(id='milkyway', sigma, graph='graph', freeze='freeze' tips='headers.graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentCtrl}} {{queueStatus}}', controller='currentCtrl' redirect='redirect(path)')
           
-        div(id='timeline', timeline, class='{{currentCtrl}}', t='timeline', cxt='contextualTimeline', filters="params")
+        //- div(id='timeline', timeline, class='{{currentCtrl}}', t='timeline', cxt='contextualTimeline', filters="params")
           
         div(id='pop', gasp, target="target", redirect='redirect(path)', comment="startCommenting(item, tag, hashtag)", queue="queue(item, inprog)")
           
@@ -222,6 +222,7 @@ html
     script(src='/js/lib/perfect-scrollbar.min.js')
     script(src='/js/lib/perfect-scrollbar.with-mousewheel.min.js')
     script(src='/js/lib/angular.min.js')
+    script(src='js/lib/angular-ui-router.min.js')  
     script(src='/js/lib/angular-route.min.js')
     script(src='/js/lib/angular-resource.min.js')
     script(src='/js/lib/angular-cookies.min.js')

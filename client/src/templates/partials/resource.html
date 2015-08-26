@@ -18,7 +18,7 @@
           </span>
         
           <span  ng-if="item.inquiries">—
-          <a ng-href='#/r/{{item.id}}/inquiries' tooltip="view the related {{item.inquiries}} inquiries"><label>{{item.inquiries}}</label> <i class="fa fa-comment"></i></a>
+          <a ng-href='#/r/{{item.id}}/inq' tooltip="view the related {{item.inquiries}} inquiries"><label>{{item.inquiries}}</label> <i class="fa fa-comment"></i></a>
           </span>
         </div>
         <h3 class="" data-id='{{item.id}}'><a ng-href="#/r/{{item.id}}" ng-bind-html="item.props | title:language"></a></h3>
@@ -40,7 +40,7 @@
             <a ng-if="item.inquiries > 0" class="btn btn-default" tooltip-append-to-body="true" tooltip="view inquiries" ng-href="#/r/{{item.id}}/inquiries">
               <i class="fa fa-comment-o"></i>
             </a>
-            <a ng-if="item.inquiries == 0" class="btn btn-default" tooltip-append-to-body="true" tooltip="create a new inquiry" ng-href="#/r/{{item.id}}/new/inquiry">
+            <a ng-if="item.inquiries == 0" class="btn btn-default" tooltip-append-to-body="true" tooltip="create a new inquiry" ng-href="#/r/{{item.id}}/inq/create">
               <i class="fa fa-comment-o"></i>
             </a>
             <button class="btn btn-default" tooltip-append-to-body="true" tooltip="add to bookmark list" ng-click="queue(item.id, true)">

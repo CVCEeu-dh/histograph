@@ -25,6 +25,7 @@
 
 angular
   .module('histograph', [
+    'ui.router',
     'ngRoute',
     'ngResource',
     'ngCookies',
@@ -47,170 +48,142 @@ angular
     LOADED: 'loaded',
     AUTH_REQUIRED: 'please connect with your credentials'
   })
-  .config(function ($routeProvider, $httpProvider) {
-    $routeProvider
-      .when('/', {
+  .config(function ($stateProvider, $urlRouterProvider) {
+    $urlRouterProvider.otherwise("/");
+    $stateProvider
+      .state('index', {
+        url: '/',
+       
         templateUrl: 'templates/index.html',
         controller: 'IndexCtrl',
-        reloadOnSearch: false
-      })
-      .when('/r/:id', {
-        templateUrl: 'templates/resource.html',
-        controller: 'ResourceCtrl',
         reloadOnSearch: false,
-        resolve: {
-          resource: function(ResourceFactory, $route) {
-            return ResourceFactory.get({
-              id: $route.current.params.id
-            }).$promise;
-          },
-          resources: function(ResourceRelatedFactory, $route) {
-            return ResourceRelatedFactory.get({
-              id: $route.current.params.id,
-              model: 'resource',
-              limit: 10
-            }).$promise;
-          },
-        }
       })
-      .when('/r/:id/inquiries', {
-        templateUrl: 'templates/inquiries.html',
-        controller: 'InquiriesCtrl',
-        resolve: {
-          resource: function(ResourceFactory, $route) {
-            return ResourceFactory.get({
-              id: $route.current.params.id
-            }).$promise;
-          },
-          inquiries: function(ResourceRelatedFactory, $route) {
-            return ResourceRelatedFactory.get({
-              id: $route.current.params.id,
-              model: 'inquiry',
-              limit: 10
-            }).$promise;
-          },
-        }
-      })
-      .when('/r/:id/new/inquiry', {
-        templateUrl: 'templates/inquiry.new.html',
-        controller: 'InquiryCreateCtrl',
-        resolve: {
-          resource: function(ResourceFactory, $route) {
-            return ResourceFactory.get({
-              id: $route.current.params.id
-            }).$promise;
-          }
-        }
-      })
-      .when('/i/:inquiry_id', {
-        templateUrl: 'templates/inquiry.html',
-        controller: 'InquiryCtrl',
-        resolve: {
-          inquiry: function(InquiryFactory, $route) {
-            return InquiryFactory.get({
-              id: $route.current.params.inquiry_id
-            }).$promise;
-          }
-        }
-      })
-      .when('/e/:id', {
+      
+      .state('entity', {
+        url: '/e/:id',
         templateUrl: 'templates/entity.html',
         controller: 'EntityCtrl',
+        reloadOnSearch: false,
         resolve: {
-          entity: function(EntityFactory, $route) {
+          entity: function(EntityFactory, $stateParams) {
             return EntityFactory.get({
-              id: $route.current.params.id
+              id: $stateParams.id
             }).$promise;
           },
-          persons: function(EntityRelatedFactory, $route) {
+          persons: function(EntityRelatedFactory, $stateParams) {
             return EntityRelatedFactory.get({
-              id: $route.current.params.id,
+              id: $stateParams.id,
               model: 'persons'
             }, {}).$promise;
           },
-          resources: function(EntityRelatedFactory, $route) {
+          resources: function(EntityRelatedFactory, $stateParams) {
             return EntityRelatedFactory.get({
-              id: $route.current.params.id,
+              id: $stateParams.id,
               model: 'resources',
               limit: 10
             }, {}).$promise;
           }
         }
       })
-      .when('/c/:id', {
-        templateUrl: 'templates/collection.html',
-        controller: 'CollectionCtrl',
+       /*
+        resources
+        @todo
+      */
+      .state('resource', {
+        url: '/r/:id',
+        templateUrl: 'templates/resource.html',
+        controller: 'ResourceCtrl',
+        reloadOnSearch: false,
         resolve: {
-          collection: function(CollectionFactory, $route) {
-            return CollectionFactory.get({
-              id: $route.current.params.id
+          resource: function(ResourceFactory, $stateParams) {
+            return ResourceFactory.get({
+              id: $stateParams.id
             }).$promise;
           },
-          resources: function(CollectionRelatedFactory, $route) {
-            return CollectionRelatedFactory.get({
-              id: $route.current.params.id,
-              model: 'resources'
-            }, {}).$promise;
-          }
+          resources: function(ResourceRelatedFactory, $stateParams) {
+            return ResourceRelatedFactory.get({
+              id: $stateParams.id,
+              model: 'resource',
+              limit: 10
+            }).$promise;
+          },
         }
       })
-      .when('/ap/:ids', {
-        templateUrl: 'templates/neighbors.html',
-        controller: 'AllShortestPathsCtrl',
-        resolve: {
-          allShortestPaths: function(SuggestFactory, $route) {
-            return SuggestFactory.allShortestPaths({
-              ids: $route.current.params.ids
-            });
+        .state('resource.inquiry', {
+          url: '/inq/:inquiry_id',
+          templateUrl: 'templates/partials/inquiry.html',
+          controller: 'InquiryCtrl',
+          resolve: {
+            inquiry: function(InquiryFactory, $stateParams) {
+              return InquiryFactory.get({
+                id: $stateParams.inquiry_id
+              }).$promise;
+            }
           }
-        }
-      })
-      // .when('/DEPRECATED-neighbors/:ids', {
-      //   templateUrl: 'templates/neighbors.html',
-      //   controller: 'NeighborsCtrl',
-      //   resolve: {
-      //     neighbors: function(SuggestFactory, $route) {
-      //       return SuggestFactory.neighbors({
-      //         ids: $route.current.params.ids
-      //       });
-      //     }
-      //   }
-      // })
-      .when('/neighbors/:ids', {
+        })
+        .state('resource.inquiries', {
+          url: '/inq',
+          templateUrl: 'templates/partials/inquiries.html',
+          controller: 'InquiriesCtrl',
+          resolve: {
+            inquiries: function(ResourceRelatedFactory, $stateParams) {
+              return ResourceRelatedFactory.get({
+                id: $stateParams.id,
+                model: 'inquiry',
+                limit: 10
+              }).$promise;
+            },
+          }
+        })
+          .state('resource.inquiries.create', {
+            url: '/create',
+            templateUrl: 'templates/partials/inquiries.create.html',
+            controller: 'InquiryCreateCtrl'
+          })
+      /*
+        collections
+        @todo
+      */    
+      //.state('collections', {})
+      //.state('collection', {})
+      
+      /*
+        MISC
+        @todo
+      */    
+      .state('neighbors', {
+        url: '/neighbors/{ids:[0-9,]+}',
         templateUrl: 'templates/neighbors.html',
         controller: 'NeighborsCtrl',
         resolve: {
-          allInBetween: function(SuggestFactory, $route) {
+          allInBetween: function(SuggestFactory, $stateParams) {
             return SuggestFactory.allInBetween({
-              ids: $route.current.params.ids
+              ids: $stateParams.ids
             });
           }
         }
       })
-      .when('/search/:query', {
+      .state('search', {
+        url: '/search/{query:[^/]{1,100}}',
         templateUrl: 'templates/search.html',
         controller: 'SearchCtrl',
         resolve: {
           resources: function(SuggestFactory, $route) {
             // clean limit here
             return SuggestFactory.getResources({
-              query: $route.current.params.query,
+              query: $stateParams.query,
               limit: 10
             });
           },
           entities: function(SuggestFactory, $route) {
             // clean limit here
             return SuggestFactory.getEntities({
-              query: $route.current.params.query,
+              query: $stateParams.query,
               limit: 10
             });
           }
         }
-      })
-      .otherwise({
-        redirectTo: '/'
-      })
-  
+      });
   })
   .config(function ($httpProvider) {
     $httpProvider.interceptors.push(function ($q, $log, $rootScope, EVENTS) {

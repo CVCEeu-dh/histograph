@@ -5,7 +5,7 @@
  * # IndexCtrl
  */
 angular.module('histograph')
-  .controller('ResourceCtrl', function ($scope, $log, $routeParams, $filter, resource, resources, ResourceVizFactory, ResourceCommentsFactory, ResourceRelatedFactory, socket, EVENTS) {
+  .controller('ResourceCtrl', function ($scope, $log, $stateParams, $filter, resource, resources, ResourceVizFactory, ResourceCommentsFactory, ResourceRelatedFactory, socket, EVENTS) {
     $log.debug('ResourceCtrl ready');
     
     /*
@@ -41,7 +41,7 @@ angular.module('histograph')
     socket.on('done:commenting', function (result) {
       
       // add the comment at the bottom
-      if(result.resource_id != $routeParams.id)
+      if(result.resource_id != $stateParams.id)
         return;
       if(result.data.comment) {
         $log.info('done:commenting', result);
@@ -57,7 +57,7 @@ angular.module('histograph')
     });
 
     socket.on('start:commenting', function (result) {
-      $log.info('start:commenting', result.data, $routeParams.id);
+      $log.info('start:commenting', result.data, $stateParams.id);
     });
 
     /*
@@ -77,7 +77,7 @@ angular.module('histograph')
     //   $log.debug('resource.postMention', item);
     //   if($scope.comment.text.trim().length > 0 && $scope.commenting) {
     //     $scope.commenting = false;
-    //     ResourceCommentsFactory.save({id: $routeParams.id}, {
+    //     ResourceCommentsFactory.save({id: $stateParams.id}, {
     //       content: $scope.comment.text,
     //       tags:  $scope.comment.tags
     //     }, function(res){
@@ -127,7 +127,7 @@ angular.module('histograph')
     
     // sync graph
     ResourceVizFactory.get({
-      id: $routeParams.id,
+      id: $stateParams.id,
       viz: 'graph',
       type: $scope.graphType,
       limit: 2000
@@ -151,7 +151,7 @@ angular.module('histograph')
     $scope.sync = function(params) {
       $scope.loading = true;
       ResourceRelatedFactory.get({
-        id: $routeParams.id,
+        id: $stateParams.id,
         model: 'resource',
         limit: 10,
         offset: ($scope.page-1) * 10

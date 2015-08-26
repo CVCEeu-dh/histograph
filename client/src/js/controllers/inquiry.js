@@ -5,8 +5,8 @@
  * # IndexCtrl
  */
 angular.module('histograph')
-  .controller('InquiryCtrl', function ($scope, $log, $routeParams, inquiry, ResourceFactory, CommentFactory, InquiryRelatedFactory, socket) {
-    $log.debug('InquiryCtrl reource id:', $routeParams.id, 'inquiry loaded', inquiry);
+  .controller('InquiryCtrl', function ($scope, $log, $stateParams, inquiry, ResourceFactory, CommentFactory, InquiryRelatedFactory, socket) {
+    $log.debug('InquiryCtrl ready, resource id:', $stateParams.id, '- inquiry id:', $stateParams.inquiry_id);
     
     $scope.comment = {};
     /*
@@ -49,22 +49,17 @@ angular.module('histograph')
       on load
     */
     $scope.inquiry = inquiry.result.item;
-    // get the related resource
-    ResourceFactory.get({
-      id: +$scope.inquiry.questioning
-    }, function(data){
-      $scope.item = data.result.item;
-    });
+
     
     // list of ids, without any scope
     var relatedItemsIds = [];
     
     // load related items
     InquiryRelatedFactory.get({
-      id: +$scope.inquiry.id,
+      id: +$stateParams.inquiry_id,
       model: 'comment'
     }, function(data) {
-      $scope.relatedItems = data.result.items;
+      // $scope.relatedItems = data.result.items;
       relatedItemsIds = data.result.items.map(function (d) {return d.id});
     })
     
@@ -74,14 +69,14 @@ angular.module('histograph')
     socket.on('done:create_comment', function (result) {
       // a comment has been added.
       $log.log('socket@done:create_comment / InquiryCtrl', result);
-      if(result.doi == $scope.inquiry.id) {
-        InquiryRelatedFactory.get({
-          id: +$scope.inquiry.id,
-          model: 'comment'
-        }, function(data) {
-          $scope.relatedItems = data.result.items;
-        })
-      }
+      // if(result.doi == $scope.inquiry.id) {
+      //   InquiryRelatedFactory.get({
+      //     id: +$stateParams.inquiry_id,
+      //     model: 'comment'
+      //   }, function(data) {
+      //     $scope.relatedItems = data.result.items;
+      //   })
+      // }
       // create and sort?
       // if(relatedItemsIds.indexOf(result.data.id) == -1
       // for(var i in $scope.relatedItems) {
@@ -101,20 +96,16 @@ angular.module('histograph')
         }
       }
     });
-    
-     // new inquiry
-    /*
-      Set graph title
-    */
-    // $scope.setHeader('graph', 'neighborhood for the document "' + $filter('title')(resource.result.item.props, $scope.language, 24) + '"');
-    $scope.setGraph({
-      nodes: [],
-      edges: []
-    })
+
   })
-  .controller('InquiryCreateCtrl', function ($scope, $log, $routeParams, $location, resource, ResourceRelatedFactory, socket) {
-    $log.debug('InquiryCreateCtrl ready', $routeParams.id, 'loaded');
+  .controller('InquiryCreateCtrl', function ($scope, $log, $stateParams, $location, ResourceRelatedFactory, socket) {
+    $log.debug('InquiryCreateCtrl ready, resource id:', $stateParams.id, 'loaded');
     
+    // the current, empty inquiry
+    $scope.inquiry = {
+      name: '',
+      description: 'Basic Multiline description\nWith more text than expected'
+    };
     /*
     
       Create a new inquiry
@@ -125,53 +116,20 @@ angular.module('histograph')
       $log.debug('InquiryCreateCtrl -> createInquiry()', $scope.inquiry);
       if($scope.inquiry.name.trim().length > 3) {
         ResourceRelatedFactory.save({
-          id: $routeParams.id,
+          id: $stateParams.id,
           model: 'inquiry'
         }, angular.copy($scope.inquiry), function (data) {
           $log.debug('InquiryCreateCtrl -> createInquiry() success', data.result.item.id);
           // redirect...
-          $location.path('/i/' + data.result.item.id)
+          // $location.path('/i/' + data.result.item.id)
         })
       };
     }
-    
-    /**
-      on load
-    */
-    $scope.item = resource.result.item;
-    
-    /*
-      the current inquiry
-    */
-    $scope.inquiry = {
-      name: '',
-      description: 'Basic Multiline description\nWith more text than expected'
-    }
-    
-    /*
-      Set graph title
-    */
-    // $scope.setHeader('graph', 'neighborhood for the document "' + $filter('title')(resource.result.item.props, $scope.language, 24) + '"');
-    $scope.setGraph({
-      nodes: [],
-      edges: []
-    });
+   
   })
-  .controller('InquiriesCtrl', function ($scope, $log, $routeParams, resource, inquiries, socket) {
-    $log.debug('InquiriesCtrl ready', $routeParams.id, 'loaded', inquiries);
-     /**
-      on load
-    */
-    $scope.item = resource.result.item;
-    //$scope.setRelatedItems(inquiries.result.items);
+  .controller('InquiriesCtrl', function ($scope, $log, $stateParams, inquiries, socket) {
+    $log.debug('InquiriesCtrl ready', $stateParams.id, 'loaded', inquiries);
     $scope.relatedItems = inquiries.result.items
-     // new inquiry
-    /*
-      Set graph title
-    */
-    // $scope.setHeader('graph', 'neighborhood for the document "' + $filter('title')(resource.result.item.props, $scope.language, 24) + '"');
-    $scope.setGraph({
-      nodes: [],
-      edges: []
-    })
+    $scope.totalItems = inquiries.info.total_count || 0
+    
   })
