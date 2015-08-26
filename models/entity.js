@@ -30,7 +30,8 @@ module.exports = {
           links_wiki: _.isEmpty(properties.links_wiki)? undefined: properties.links_wiki,
           creation_date: now.date,
           creation_time: now.time,
-          trustworthiness: properties.trustworthiness || 0,
+          services: properties.services,
+          languages: properties.languages,
           frequency: properties.frequency,
           resource_id: properties.resource.id,
           name_search: properties.name_search || properties.name.toLowerCase()

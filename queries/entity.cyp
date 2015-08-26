@@ -80,16 +80,26 @@ MATCH (res:resource)
 WITH ent, res
   MERGE (ent)-[r:appears_in]->(res)
   ON CREATE SET
-    r.trustworthiness  = {trustworthiness},
     {if:frequency}
       r.frequency   = {frequency},
+    {/if}
+    {if:languages}
+      r.languages   = {languages},
+    {/if}
+    {if:services}
+      r.services   = {services},
     {/if}
     r.creation_date = {creation_date},
     r.creation_time = {creation_time}
   ON MATCH SET
-    r.trustworthiness  = {trustworthiness},
     {if:frequency}
       r.frequency   = {frequency},
+    {/if}
+    {if:languages}
+      r.languages   = {languages},
+    {/if}
+    {if:services}
+      r.services   = {services},
     {/if}
     r.last_modification_date = {creation_date},
     r.last_modification_time = {creation_time}

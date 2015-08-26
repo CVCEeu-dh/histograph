@@ -649,7 +649,8 @@ module.exports = {
           module.exports.createRelatedEntity(resource, {
             name: ent.name,
             type: _.first(ent.type),
-            trustworthiness: ent.trustworthiness,
+            services: ent.services,
+            languages: ent.languages,
             frequency: ent.context.length,
             links_wiki: ent.links_wiki
           }, function (err, entity) {

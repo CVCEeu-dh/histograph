@@ -1214,9 +1214,7 @@ module.exports = {
           _d.context = _.flatten(_.map(aliases, function (d) {
             return d.context
           }));
-          // this index is the product of number of services and languages
-          // where the entity has been found.
-          _d.trustworthiness  = Math.round(100 * (_d.services.length + _d.languages.length) / settings.referenceValues.trustworthiness)/100;
+          
           // get the unique wikilink for this group, if any. 
           var redirects = _.unique(_.flatten(_.map(aliases, 'redirectOf')));
           // ... and assign it
