@@ -67,7 +67,9 @@ module.exports = function(io){
           });
         })
       else
-        resource.getByIds(ids, function (err, items) {
+        resource.getByIds({
+          ids: ids
+        }, function (err, items) {
           if(err == helpers.IS_EMPTY)
             return res.error(404);
           if(err)
@@ -113,6 +115,7 @@ module.exports = function(io){
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       // get the total available
+      console.log(form.params)
       resource.getRelatedResources(form.params, function (err, items, info) {
         if(err)
           return helpers.cypherQueryError(err, res);

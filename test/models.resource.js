@@ -131,6 +131,33 @@ describe('model:resource ', function() {
     }, function (err, items, info) {
       if(err)
         throw err;
+      // console.log(items[0])
+      should.exist(items.length)
+      should.exist(info.total_items)
+      done()
+    })
+  })
+  it('should get a list of available resources by ids', function (done) {
+    Resource.getByIds({
+      ids: [__resourceB.id, __resourceA.id]
+    }, function (err, items, info) {
+      if(err)
+        throw err;
+      // console.log(items[0])
+      should.exist(items.length)
+      should.exist(info.total_items)
+      done()
+    })
+  })
+  it('should get a list of similarresources resources by ids', function (done) {
+    Resource.getRelatedResources({
+      id: __resourceA.id,
+      limit: 10,
+      offset: 0,
+    }, function (err, items, info) {
+      if(err)
+        throw err;
+      // console.log(items[0])
       should.exist(items.length)
       should.exist(info.total_items)
       done()
@@ -144,6 +171,8 @@ describe('model:resource ', function() {
     }, function (err, items, info) {
       if(err)
         console.log(err);
+      // console.log(__social_group.id, items[1],info.total_items)
+      should.exist(items[0]) // at least one item have to be here
       should.exist(items.length)
       should.exist(info.total_items)
       done()

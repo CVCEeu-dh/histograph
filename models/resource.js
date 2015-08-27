@@ -4,12 +4,14 @@
  *
  */
 var settings  = require('../settings'),
-    helpers   = require('../helpers.js'),
-    parser    = require('../parser.js'),
+    helpers   = require('../helpers'),
+    parser    = require('../parser'),
     neo4j     = require('seraph')(settings.neo4j.host),
     
     rQueries  = require('decypher')('./queries/resource.cyp'),
     vQueries  = require('decypher')('./queries/version.cyp'),
+    
+    models    = require('../helpers/models'),
     
     fs        = require('fs'),
     async     = require('async'),
@@ -51,7 +53,7 @@ module.exports = {
         id: +resource
       }
     }
-      
+    var query = parser.agentBrown(rQueries.get_resource)
     neo4j.query(rQueries.get_resource, {
       id: resource.id
     }, function(err, items) {
@@ -102,71 +104,66 @@ module.exports = {
       next(null, item);
     });  
   },
+  
   /*
     Available params are limit, offset, order by.
   */
   getMany: function(params, next) {
-    async.parallel({
-      totalItems: function(callback) {
-        var query = parser.agentBrown(rQueries.count_resources, params);
-        neo4j.query(query, params, function (err, result) {
-          if(err)
-            console.log(err)
-          if(err)
-            callback(err);
-          else
-            callback(null, result.total_items);
-        });
+    models.getMany({
+      queries: {
+        count_items: rQueries.count_resources,
+        items: rQueries.get_resources
       },
-      items: function(callback) {
-        var query = parser.agentBrown(rQueries.get_resources, params);
-        neo4j.query(query, params, function (err, items) {
-          if(err)
-            callback(err)
-          else
-            callback(null, items.map(function (d) {
-              d.locations = _.values(d.locations || {});
-              d.persons   = _.values(d.persons || {});
-              d.places    = _.values(d.places || {});
-              return d;
-            }));
-        })
-      }
+      params: params
     }, function (err, results) {
-      // results is now equals to: {one: 1, two: 2}
-      if(err) {
-        next(err);
-        return;
-      }
-      next(null, results.items, {
-        total_items: results.totalItems
-      })
+      if(err)
+        next(err)
+      else
+        next(null, results.items.map(module.exports.normalize), {
+          total_items : results.count_items
+        });
     });
+  },
+  normalize: function(node) {
+    node.persons = _.values(node.persons).filter(function (n) {
+      return n.id
+    });
+    node.locations = _.values(node.locations).filter(function (n) {
+      return n.id
+    });
+    node.organizations = _.values(node.organizations).filter(function (n) {
+      return n.id
+    });
+     node.social_groups = _.values(node.social_groups).filter(function (n) {
+      return n.id
+    });
+    return node;
   },
   /*
     Provide here a list of valid ids
   */
-  getByIds: function(ids, next) {
-    neo4j.query(rQueries.get_resources_by_ids, {
-        ids: ids,
-        limit: ids.length,
-        offset: 0
+  getByIds: function(params, next) {
+    
+    var query = parser.agentBrown(rQueries.get_resources, params);
+    
+    neo4j.query(query, {
+      ids: params.ids,
+      limit: params.ids.length,
+      offset: 0
     }, function (err, items) {
+
       if(err) {
-        console.log(err.neo4jError)
         next(err);
         return;
       }
-      if(items.length == 0) {
-        next(helpers.IS_EMPTY);
-        return;
-      }
-      next(null, _.map(items, function (item) {
-        item.places = _.values(item.places); 
-        item.locations = _.values(item.locations); 
-        item.persons = _.values(item.persons); 
-        return item;
-      }));
+      
+      var itemsAsDict = _.indexBy(items.map(module.exports.normalize), 'id');
+      
+      next(null, params.ids.map(function (id) {
+        return itemsAsDict[''+id]
+      }), {
+        total_items : items.length
+      });
     });
   },
   
@@ -310,55 +307,31 @@ module.exports = {
     });
   },
   
-  getRelatedResources: function (properties, next) {
-    async.parallel({
-      totalItems: function(callback){
-        neo4j.query(rQueries.count_similar_resource_ids_by_entities,  {
-          id: +properties.id
-        }, function (err, result) {
-          if(err)
-            callback(err);
-          else
-            callback(null, result.total_items);
-        });
+  getRelatedResources: function (params, next) {
+    models.getMany({
+      queries: {
+        count_items: rQueries.count_similar_resource_ids_by_entities,
+        items: rQueries.get_similar_resource_ids_by_entities
       },
-      ids: function(callback){
-        neo4j.query(rQueries.get_similar_resource_ids_by_entities, {
-          id: +properties.id,
-          limit: +properties.limit,
-          offset: +properties.offset
-        }, function (err, ids) {
-          if(err)
-            callback(err)
-          else
-            callback(null, _.compact(_.map(ids, 'id')));
-        })
+      params: {
+        id: +params.id,
+        limit: +params.limit || 10,
+        offset: +params.offset || 0
       }
     }, function (err, results) {
-      // results is now equals to: {one: 1, two: 2}
       if(err) {
+        console.log(err)
         next(err);
         return;
       }
-      
-      neo4j.query(rQueries.get_resources_by_ids, {
-        ids: results.ids,
-        limit: results.ids.length,
-        offset: 0
-      }, function (err, items) {
-        if(err) {
-          next(err);
-          return;
-        }
-        var hItems = _.indexBy(items, 'id');
-        
-        next(null, _.map(results.ids, function (d) {
-          hItems[''+d].persons = _.values(hItems[''+d].persons );
-          return hItems[d]
-        }),{
-          total_items: results.totalItems
+      module.exports.getByIds({
+        ids: _.map(results.items, 'target')
+      }, function (err, items){
+        next(null, items, {
+          total_items : results.count_items
         });
       });
+      
     }); 
     
   },
@@ -399,7 +372,7 @@ module.exports = {
         2. verify that the languages have been assigned to the resource.
       
       */
-      function checkLanguages(resource, callback) {
+      function checkLanguages(resource, callback) { console.log(clc.whiteBright('   checking languages'));
         if(resource.languages) {
           callback(null, resource);
           return;
@@ -425,6 +398,9 @@ module.exports = {
             resource[ field + '_' + language]  = resource[field];
         });
         
+        
+        // check that there is no slug as such
+        
         // save resource, then go to next task.
         neo4j.save(resource, function (err, node) {
           if(err)
@@ -434,13 +410,44 @@ module.exports = {
         })
       },
       /*
+        2.B check slug and name according to avaialbe fields
+      */
+      function checkSlug(resource, callback) { console.log(clc.whiteBright('   checking slug'));
+        if(!_.isEmpty(resource.slug) && !_.isEmpty(resource.name)) {
+          callback(null, resource);
+          return;
+        }
+        // give it a name (english version)
+        if(_.isEmpty(resource.name))
+          resource.name = _.first(_.compact([resource.title_en].concat(resource.languages.map(function (language) {
+            return resource['title_' + language];
+          }))));
+        
+        if(_.isEmpty(resource.name)) {
+          console.log(resource);
+          return callback('resource', resource.id, 'must have at least one valid title field');
+        }
+          
+        if(_.isEmpty(resource.slug)) {
+          resource.slug = helpers.text.slugify(resource.name);
+        }
+        
+        neo4j.save(resource, function (err, node) {
+          if(err)
+            return callback(err);
+          console.log('resource saved')
+          callback(null, node);
+        })
+        
+      },
+      /*
       
         3. EXTRACT!
         extract from yago and / or other services, according to resource language.
         Note that according to various service terms of use, we cannot proceed async
         (due to the limitation of parallel request for free service, for instance)
       */
-      function extract(resource, callback) {console.log(clc.yellowBright('extract'));
+      function extract(resource, callback) {console.log(clc.whiteBright('   extract'));
         var candidates = []; // candidate entities extracted by various mechanisms
         
         var q = async.queue(function (language, nextLanguage) {
@@ -513,7 +520,7 @@ module.exports = {
         based on their name or wikipedia identifier, if provided.
         and evaluate trustworthiness
       */
-      function clusterEntities(resource, candidates, callback) { console.log(clc.yellowBright('cluster entities'))
+      function clusterEntities(resource, candidates, callback) { console.log(clc.whiteBright('   cluster entities'))
       console.log(clc.blackBright('  considering',clc.magentaBright(candidates.length),'candidates for clustering...'));
         helpers.cluster(candidates, function (err, entities) {
           if(err)
@@ -529,7 +536,7 @@ module.exports = {
         and add LAT and LNG to 'location' entities candidate.
         
       */
-      function geoextract(resource, candidates, callback) { console.log(clc.yellowBright('geoestract'))
+      function geoextract(resource, candidates, callback) { console.log(clc.whiteBright('   geoestract'))
         
             
         var withGeo = candidates.filter(function (d) {
@@ -634,7 +641,7 @@ module.exports = {
         6. SAVE
        
        */
-      function saveEntities(resource, entities, callback) { console.log(clc.yellowBright('saving entities'))
+      function saveEntities(resource, entities, callback) { console.log(clc.whiteBright('   saving entities'))
         var yaml = {}; // the yaml version of entity id and splitpoints.
         
         var q = async.queue(function (ent, nextEntity) {

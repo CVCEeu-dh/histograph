@@ -333,7 +333,7 @@ describe('controllers: get resource items available to the user', function() {
       });
   });
   
-  it('should return the specified resources', function (done) {
+  it('should return the specified resources by ids', function (done) {
     session
       .get('/api/resource/'+[__resourceA.id, __resourceB.id].join(','))
       .expect('Content-Type', /json/)

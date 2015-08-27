@@ -239,6 +239,7 @@ module.exports =  function(io){
       @todo: use the solr endpoint wherever available.
     */
     resources: function (req, res) {
+      var Resource = require('../models/resource');
       var offset = +req.query.offset || 0,
           limit  = +req.query.limit || 20,
           q      = toLucene(req.query.query),
@@ -272,14 +273,9 @@ module.exports =  function(io){
       }, function (err, results) {
         if(err)
           return helpers.cypherQueryError(err, res);
-        
+        console.log(results)
         return res.ok({
-          items: results.get_matching_resources.map(function (d) {
-            d.props.languages = _.values(d.props.languages)
-            d.persons = _.values(d.persons);
-            d.places = _.values(d.places);
-            return d;
-          }),
+          items: results.get_matching_resources.map(Resource.normalize),
         }, {
           total_count: results.get_matching_resources_count.total_count,
           offset: offset,

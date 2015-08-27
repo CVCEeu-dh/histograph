@@ -110,14 +110,43 @@ WITH n
 SKIP {offset}
 LIMIT {limit}
 WITH n
-OPTIONAL MATCH (n)-[:appears_in]-(pla:`place`)
-OPTIONAL MATCH (n)-[:appears_in]-(per:`person`)
+OPTIONAL MATCH (res)-[r_loc:appears_in]-(loc:`location`)
+OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
+OPTIONAL MATCH (res)-[r_org:appears_in]-(org:`organization`)
+OPTIONAL MATCH (res)-[r_soc:appears_in]-(soc:`social_group`)
+WITH res,
+    {  
+      id: id(loc),
+      type: 'location',
+      props: loc,
+      rel: r_loc
+    } as location,
+    {  
+      id: id(per),
+      type: 'person',
+      props: per,
+      rel: r_per
+    } as person,
+    {  
+      id: id(org),
+      type: 'organization',
+      props: org,
+      rel: r_org
+    } as organization,
+    {  
+      id: id(soc),
+      type: 'social_group',
+      props: soc,
+      rel: r_soc
+    } as social_group
 RETURN {
   id: id(n),
   props: n,
   type: 'resource',
-  places: collect(DISTINCT pla),
-  persons: collect(DISTINCT per)
+   persons:      collect(DISTINCT person),
+   organizations: collect(DISTINCT organization),
+   locations:    collect(DISTINCT location),
+    social_groups:    collect(DISTINCT social_group)
 } AS result
 
 

@@ -1,56 +1,53 @@
 // name: get_resource
 // get resource with its version and comments
 MATCH (res) WHERE id(res) = {id}
-WITH res
+  WITH res
+    OPTIONAL MATCH (loc:`location`)-[r_loc:appears_in]->(res)
+    OPTIONAL MATCH (per:`person`)-[r_per:appears_in]->(per)
+    OPTIONAL MATCH (org:`organization`)-[r_org:appears_in]->(res)
+    OPTIONAL MATCH (soc:`social_group`)-[r_soc:appears_in]-(res)
     OPTIONAL MATCH (ver)-[:describes]->(res)
-    OPTIONAL MATCH (ent)-[:appears_in]->(res)
     OPTIONAL MATCH (res)-[:belongs_to]->(col)
     OPTIONAL MATCH (com)-[:mentions]->(res)
     OPTIONAL MATCH (inq)-[:questions]->(res)
-  WITH ver, res, ent, col, com, inq
+  WITH res,
+    {  
+      id: id(loc),
+      type: 'location',
+      props: loc,
+      rel: r_loc
+    } as location,
+    {  
+      id: id(per),
+      type: 'person',
+      props: per,
+      rel: r_per
+    } as person,
+    {  
+      id: id(org),
+      type: 'organization',
+      props: org,
+      rel: r_org
+    } as organization,
+    {  
+      id: id(soc),
+      type: 'social_group',
+      props: soc,
+      rel: r_soc
+    } as social_group, 
+  ver, col, com, inq
     RETURN {
       resource: {
         id: id(res),
         props: res,
         versions: EXTRACT(p in COLLECT(DISTINCT ver)|{name: p.name, id:id(p), yaml:p.yaml, language:p.language, type: last(labels(p))}),
-        entities: EXTRACT(p in COLLECT(DISTINCT ent)|{name: p.name, id:id(p), type: last(labels(p)), props: p}),
+        locations: collect(DISTINCT location),
+        persons:   collect(DISTINCT person),
+        organizations: collect(DISTINCT organization),
+        social_groups:    collect(DISTINCT social_group),
         collections: EXTRACT(p in COLLECT(DISTINCT col)|{name: p.name, id:id(p), type: 'collection'}),
         comments: count(distinct com),
         inquiries: count(distinct inq)
-      }
-    } AS result
-    
-    
-// name: get_resource_by_language
-// get resource with its version and comments
-START res=node({id})
-  WITH res
-    OPTIONAL MATCH (ann:`annotation` {language:{language}})-[:describes]-(res)
-    OPTIONAL MATCH (ver:`positioning`)-[:describes]-(res)
-    OPTIONAL MATCH (res)-[:appears_in{is_event_place:true}]-(pla:`location`)
-    OPTIONAL MATCH (res)-[:appears_in]-(loc:`location`)
-    OPTIONAL MATCH (res)-[:appears_in]-(per:`person`)
-    OPTIONAL MATCH (res)-[:belongs_to]-(col:collection)
-    OPTIONAL MATCH (u:user)-[:says]-(com)-[:mentions]-(res)
-  
-  WITH ann, ver, res, pla, loc, per, u, col, {
-      id: id(com),
-      props: com,
-      user: u
-    } AS coms
-
-  WITH ann, ver, res, pla, loc, per, col, coms
-    RETURN {
-      resource: {
-        id: id(res),
-        props: res,
-        positionings: collect(DISTINCT ver),
-        annotations: collect(DISTINCT ann),
-        places: collect(DISTINCT pla),
-        locations: collect(DISTINCT loc),
-        persons: collect(DISTINCT per),
-        comments: collect(DISTINCT coms),
-        collections: collect(DISTINCT col)
       }
     } AS result
 
@@ -58,32 +55,67 @@ START res=node({id})
 // name: get_resources
 // get resources with number of comments, if any
 MATCH (res:resource)
+{if:ids}
+  WHERE id(res) IN {ids}
+{/if}
 {?res:start_time__gt} {AND?res:end_time__lt}
+  WITH res
+{if:entity_id}
+  MATCH (res)--(ent:entity) WHERE id(ent)={entity_id} 
+  WITH res
+{/if}
+ORDER BY res.last_modification_time DESC, res.start_time DESC, res.creation_date DESC
+SKIP {offset} 
+LIMIT {limit}
 WITH res
-{if:entity_id}MATCH (res)--(ent:entity) WHERE res.entity_id={entity_id} WITH res{/if}
-  ORDER BY res.last_modification_time DESC, res.start_time DESC, res.creation_date DESC
-  SKIP {offset} 
-  LIMIT {limit}
-WITH res
-OPTIONAL MATCH (res)-[r2:appears_in]-(loc:`location`)
-OPTIONAL MATCH (res)-[r3:appears_in]-(per:`person`)
-  WITH res, loc, per, {
-      id: id(res),
-      props: res,
-      type: 'resource',
-      locations: collect(DISTINCT loc),
-      persons: collect(DISTINCT per)
-    } as result
-  RETURN result 
-  ORDER BY res.last_modification_time DESC
-    
+OPTIONAL MATCH (res)-[r_loc:appears_in]-(loc:`location`)
+OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
+OPTIONAL MATCH (res)-[r_org:appears_in]-(org:`organization`)
+OPTIONAL MATCH (res)-[r_soc:appears_in]-(soc:`social_group`)
+WITH res,
+    {  
+      id: id(loc),
+      type: 'location',
+      props: loc,
+      rel: r_loc
+    } as location,
+    {  
+      id: id(per),
+      type: 'person',
+      props: per,
+      rel: r_per
+    } as person,
+    {  
+      id: id(org),
+      type: 'organization',
+      props: org,
+      rel: r_org
+    } as organization,
+    {  
+      id: id(soc),
+      type: 'social_group',
+      props: soc,
+      rel: r_soc
+    } as social_group
+RETURN {
+   id:id(res),
+   type: 'resource',
+   props: res,
+   persons:      collect(DISTINCT person),
+   organizations: collect(DISTINCT organization),
+   locations:    collect(DISTINCT location),
+    social_groups:    collect(DISTINCT social_group)
+} as resource
   
 
 // name: count_resources
 // count resources having a version, with current filters
-MATCH (res:resource)
+MATCH (res:resource){if:entity_id}--(ent:entity)
+  WHERE id(ent)={entity_id} 
+WITH res
+{/if}
 {?res:start_time__gt} {AND?res:end_time__lt}
-RETURN count(res) as total_items
+RETURN count(res) as count_items
 
 
 
@@ -111,41 +143,25 @@ WITH res
 
 // name: count_similar_resource_ids_by_entities
 // get top 100 similar resources sharing the same persons, orderd by time proximity if this info is available
-MATCH (res)
+MATCH (res:resource)-[:appears_in*2]-(e)
 WHERE id(res) = {id}
-WITH res
-OPTIONAL MATCH (res)--(per:person)--(r)
-OPTIONAL MATCH (res)--(loc:location)--(r)
-WHERE id(r) <> id(res)
-WITH DISTINCT r,
-{
-  id: id(r),
-  shared_persons: length(collect(DISTINCT per)),
-  shared_locations: length(collect(DISTINCT loc))
-} as candidate
-WHERE candidate.shared_persons > 0 OR candidate.shared_locations > 0
-RETURN count(candidate) as total_items
+RETURN count(DISTINCT(e)) as count_items
 
 
 // name: get_similar_resource_ids_by_entities
 // get top 100 similar resources sharing the same persons, orderd by time proximity if this info is available
-MATCH (res:resource)
+MATCH p=(res)<-[:appears_in]-(ent:entity)-[:appears_in]->(res2:resource) 
 WHERE id(res) = {id}
-WITH res
-OPTIONAL MATCH (res)--(per:person)--(r:resource)
-OPTIONAL MATCH (res)--(loc:location)--(r:resource)
-WHERE id(r) <> id(res)
-WITH DISTINCT r,
-{
-  id: id(r),
-  dt: abs(coalesce(res.start_time, 1000000000) - coalesce(r.start_time, 0)),
-  shared_persons: length(collect(DISTINCT per)),
-  shared_locations: length(collect(DISTINCT loc))
+RETURN{
+  target: id(res2),
+  dst : abs(coalesce(res.start_time, 1000000000) - coalesce(res2.start_time, 0)),
+  det : abs(coalesce(res.end_time, 1000000000) - coalesce(res2.end_time, 0)),
+  labels: count(DISTINCT(last(labels(ent))))
 } as candidate
-ORDER BY candidate.dt ASC, candidate.shared_persons DESC, candidate.shared_locations DESC
+ORDER BY 
+candidate.labels DESC, candidate.dst ASC, candidate.det ASC
 SKIP {offset}
 LIMIT {limit}
-RETURN candidate
 
 
 // name: get_similar_resources
