@@ -26,6 +26,9 @@ var fs          = require('fs'),
       'setup': [
         tasks.setup
       ],
+      'discover-resources': [
+        tasks.resource.discoverMany
+      ],
       'import-resources': [
         tasks.helpers.csv.parse,
         tasks.helpers.marvin.create,
