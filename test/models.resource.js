@@ -70,7 +70,17 @@ describe('model:resource ', function() {
       done();
     })
   });
-  
+  it('should get resource A plus social_group entity', function (done) {
+    Resource.get(__resourceA, function (err, res) {
+      if(err)
+        throw err;
+      should.equal(res.id, __resourceA.id)
+      should.exist(res.props)
+      should.exist(res.social_groups.length)
+      should.equal(res.props.caption_en, __resourceA.props.caption_en)
+      done()
+    })
+  })
   // it('should discover institutions, places and persons', function (done) {
   //   this.timeout(60000)
   //   Resource.discover(__resourceA, function (err, resource) {
