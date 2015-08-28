@@ -8,7 +8,7 @@
  */
 angular.module('histograph')
   
-  .controller('CoreCtrl', function ($scope, $location, $state, $timeout, $route, $log, $timeout, $http, $routeParams, $modal, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, EVENTS, VIZ, MESSAGES) {
+  .controller('CoreCtrl', function ($scope, $rootScope, $location, $state, $timeout, $route, $log, $timeout, $http, $routeParams, $modal, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, EVENTS, VIZ, MESSAGES) {
     $log.debug('CoreCtrl ready');
     $scope.locationPath = $location.path(); 
     
@@ -273,15 +273,15 @@ angular.module('histograph')
     
     */
     var _resizeTimer;
-    $scope.$on('$routeChangeSuccess', function(e, r) {
-      $log.log('CoreCtrl @routeChangeSuccess', r.params, r.$$route.controller);
-      $scope.currentCtrl = r.$$route.controller;
+    $rootScope.$on('$stateChangeSuccess', function (e, state) {
+      $log.log('CoreCtrl @stateChangeSuccess', state.name);
+      $scope.currentState = state.name ;// r.$$route.controller;
       
       $scope.unsetMessage();
       // $scope.setMessage(MESSAGES.LOADED, 1500);
       $scope.freeze = false;
       // set initial params here
-      $scope.params = cleanService.params(r.params)
+      $scope.params = cleanService.params($location.search())
       
       // resize window
       clearTimeout(_resizeTimer);
@@ -341,8 +341,7 @@ angular.module('histograph')
     
     
     $scope.$on('$locationChangeSuccess', function(e, path) {
-      $log.log('CoreCtrl @locationChangeSuccess', path, $state);
-      
+      $log.log('CoreCtrl @locationChangeSuccess', path);
       var now = (new Date()).getTime();
       
       $scope.unsetMessage();

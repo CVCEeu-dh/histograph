@@ -1,4 +1,33 @@
+<div id='perspective-menu' class="tk-proxima-nova header-menu">
+  <ul>
+    <li>
+      <a ui-sref="index">explore</a> / <a>resource#{{item.id}}</a>
+    </li>
+  </ul>
+</div>
+
 <div id="perspective" class="{{queueStatus}}" ng-include src="'templates/partials/resource.html'"></div>
+
+<div id='see-also-menu' class="tk-proxima-nova header-menu">
+  <ul>
+    <li>
+      <a ui-sref-active-eq="active" ui-sref="resource({ id: item.id })">
+        see {{totalItems}} related  resources
+      </a>
+    </li>
+    <li>
+      <a ui-sref-active-eq="active" ui-sref="resource.inquiries({ id: item.id })">
+        collections
+      </a>
+    </li>
+    <li>
+      <a ui-sref-active-eq="active" ui-sref="resource.inquiries({ id: item.id })">
+        inquiries / issues
+      </a>
+    </li>
+  </ul>
+</div>
+
 <div ui-view id='see-also'>
   <div  class='{{currentCtrl}}' ng-cloak>
     <div ng-include src="'templates/partials/resource-toolbar.html'"></div>

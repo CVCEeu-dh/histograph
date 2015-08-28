@@ -37,7 +37,7 @@ header{
   right:0;
   top: 0;
   background: white;
-  border-bottom: 1px solid #d4d4d4;
+  border-bottom: 1px solid #f0f0f0;
   z-index: 5;
   line-height: 50px;
   font-size:13px;
@@ -82,7 +82,7 @@ a:focus, a:hover{
 .view{
   position: absolute;
   top: 100px;
-  bottom: 0px;
+  bottom: 50px;
   left:0;
   width: 100%;
   background: #f0f0f0;
@@ -97,7 +97,7 @@ a:focus, a:hover{
 }
 
 .view.active{
-  bottom: 80px;
+  bottom: 130px;
   /*padding-bottom: 80px;*/
 }
 
@@ -177,8 +177,8 @@ a:focus, a:hover{
 
 .item.resource, .item.collection, .item.entity{
   /*border: 1px solid #eee;*/
-  margin: 40px auto 0px auto;
-  padding: 0 20px 10px 30px;
+  margin: 40px auto 0px 50px;
+  padding: 0 20px 10px 0px;
 }
 
 .item .collections{
@@ -196,6 +196,9 @@ a:focus, a:hover{
   margin: 20px 0;  
 }
 
+.item .language.active {
+  border-bottom: 1px solid
+}
 .item .full-text{
       background-color: #f5f5f5;
   padding: 15px 15px;
@@ -232,11 +235,69 @@ a:focus, a:hover{
   margin: 0px auto;
 }
 
+/*
+
+  Headers menu (perspective and see-also)
+  ~~~~~~~~~~~~~~~~~~~~~~~
+  
+*/
+  
+.header-menu{
+  position: fixed;
+  top: 50px;
+  height: 50px;
+  background: white
+}
+
+
+.header-menu ul{
+  padding: 0 20px 0 40px;
+  margin: 0;
+  display: block;
+  border-bottom: 1px solid #d8d8d8;
+}
+
+.header-menu ul li{
+  list-style-type: none;
+  display: inline-block;
+}
+.header-menu ul li a{
+  display: block;
+  padding: 15px 0px 13px 0;
+  line-height: 20px;
+  border-bottom: 1px solid transparent;
+  margin: 0 20px -1px 0;
+  color: #777777 ;
+  -webkit-transition: border-bottom .3s, color .3s; 
+   -moz-transition: border-bottom .3s, color .3s;
+     -o-transition: border-bottom .3s, color .3s;
+        transition: border-bottom .3s, color .3s;
+}
+
+.header-menu ul li a:hover{
+  color: #151515;
+  border-bottom: 1px solid #151515;
+}
+
+
+.header-menu ul li a.active{
+  list-style-type: none;
+  display: inline-block;
+  color: #FF5742;
+  border-bottom: 1px solid #FF5742;
+}
+
+/*
+
+  The focus: #perspective
+  ~~~~~~~~~~~~~~~~~~~~~~~
+  
+*/
 #perspective{
   position: fixed;
   width: 36%;
-  top:  50px;
-  bottom: 0px;
+  top:  100px;
+  bottom: 50px;
   /*overflow: hidden;*/
   overflow: auto;
   overflow-y: auto;
@@ -247,6 +308,25 @@ a:focus, a:hover{
      -moz-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1), width .3s cubic-bezier(0.65, 0.05, 0.36, 1);
        -o-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1), width .3s cubic-bezier(0.65, 0.05, 0.36, 1);
           transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1), width .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+}
+
+#perspective-menu{
+  width: 36%;
+}
+#perspective-menu ul{
+  padding-left: 50px;
+}
+#perspective-menu a{
+  display: inline;
+  padding: 0;
+  margin:0;
+  
+}
+
+
+#perspective-menu li{
+  padding: 15px 20px 13px 0px;
+  line-height: 20px
 }
 
 #perspective.secondary{
@@ -260,7 +340,7 @@ a:focus, a:hover{
 }
 
 #perspective.active{
-  bottom: 80px;
+  bottom: 130px;
   /*padding-bottom: 80px;*/
 }
 
@@ -302,7 +382,7 @@ a:focus, a:hover{
   overflow: auto;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 0px 10px 0 25px;
+  padding: 50px 10px 0 25px;
   /*border-left: 1px solid #d4d4d4;*/
   /*-webkit-transition: margin-left .3s cubic-bezier(0.65, 0.05, 0.36, 1); 
    -moz-transition: margin-left .3s cubic-bezier(0.65, 0.05, 0.36, 1);
@@ -310,14 +390,38 @@ a:focus, a:hover{
         transition: margin-left .3s cubic-bezier(0.65, 0.05, 0.36, 1);*/
 }
 
+
+#see-also-menu {
+  left: 36%;
+  width: 64%;
+}
+
+.search #see-also{
+  margin-left: 20%;
+}
+
+.search #see-also-menu{
+ width: 80%;
+  left: 20%;
+}
+
 .toolbar{
   color: white;
-  margin: 20px 0 10px 0;
-  padding: 10px;
+  margin: 0;
+  padding: 0;
+  position: fixed;
+  top:100px;
+  background: #f0f0f0;
+  z-index: 4;
+  width: 32%;
+  left: 36%;
 }
 
 .toolbar .wrapper{
   text-align: center;
+  padding: 20px 0 0 0;
+  border-bottom: 1px solid #e8e8e8;
+  margin: 0 20px
 }
 
 .toolbar h2{
@@ -341,6 +445,10 @@ a:focus, a:hover{
   margin: 10px 5px 10px 5px;
 }
   
+.search #see-also .toolbar{
+  width: 36%;
+  left: 20%;
+}
 
 #see-also.AllShortestPathsCtrl , #see-also.NeighborsCtrl {
   margin-left: 25%;
@@ -606,29 +714,35 @@ a:focus, a:hover{
   top: 120px;
   left: 68%;
   right: 20px;
-  bottom: 20px;
+  bottom: 70px;
   background: #e8e8e8;
-  -webkit-transition: left .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
+  /*-webkit-transition: left .3s cubic-bezier(0.65, 0.05, 0.36, 1);
      -moz-transition: left .3s cubic-bezier(0.65, 0.05, 0.36, 1);
        -o-transition: left .3s cubic-bezier(0.65, 0.05, 0.36, 1);
-          transition: left .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+          transition: left .3s cubic-bezier(0.65, 0.05, 0.36, 1);*/
+}
+
+#milkyway.active{
+  bottom: 150px;
 }
 
 #milkyway.AllShortestPathsCtrl, #milkyway.NeighborsCtrl, #milkyway.SearchCtrl{
   left: 50%;
 }
 
-#milkyway.IndexCtrl{
-  left: 36%;
+#milkyway.index{
+  left: 50%;
+}
+
+#milkyway.search{
+  left: 52%;
 }
 
 #milkyway.InquiriesCtrl, #milkyway.InquiryCtrl, #milkyway.InquiryCreateCtrl{
   display: none;
 }
 
-#milkyway.active{
-  bottom: 80px;
-}
+
 
 #milkyway #playground{
   width: 100%;
@@ -823,7 +937,7 @@ li.CodeMirror-hint-active {
     
 }
 .dropdown-menu li{
-  padding: 5px;
+  padding: 10px 30px 5px 15px;
   line-height: 20px;
   position:relative;
   display: block
@@ -834,15 +948,17 @@ li.CodeMirror-hint-active {
 }
 
 .dropdown-menu li a{
-  font-size:13px;
+  font-size:12px;
   line-height: 20px;
   white-space: normal;
+  color: #777777;
 }
 
 .dropdown-menu li span{
   position: absolute;
-  right: 5px;
-  top: 5px;
+  right: 10px;
+  top: 50%;
+  margin-top: -10px;
 }
 
 .dropdown-menu>li>a:hover{
@@ -4447,26 +4563,32 @@ Copyright (c) 2015 Daniel Eden
 */
 #timeline {
   position: fixed;
-  top: 50px;
-  left: 36%;
+  bottom: 0px;
+  left: 0;
   right: 0;
   background-color: #f0f0f0;
   z-index: 4;
   height: 50px;
   /*border-bottom: 1px solid #d4d4d4;*/
-  border-bottom: 1px solid #E5E5E5;
+  border-top: 1px solid #E5E5E5;
   /*box-shadow:0 1px 6px rgba(0,0,0,.16)*/
-   -webkit-transition: top .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
-     -moz-transition: top .3s cubic-bezier(0.65, 0.05, 0.36, 1);
-       -o-transition: top .3s cubic-bezier(0.65, 0.05, 0.36, 1);
-          transition: top .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+  -webkit-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
+     -moz-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+       -o-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+          transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+  
 }
 
-#timeline.searchCtrl, #timeline.indexCtrl{
+/*#timeline.search, #timeline.index{
   left: 0%;
+}*/
+
+#timeline.active{
+  -webkit-transform: translateY(-80px); /* Safari */
+      -ms-transform: translateY(-80px); /* IE 9 */
+          transform: translateY(-80px);
+    
 }
-
-
 #timeline svg{
   background-color: #d8d8d8;
 }
@@ -4502,6 +4624,7 @@ Copyright (c) 2015 Daniel Eden
   position: absolute;
   width: 110px;
   top: 50px;
+  font-weight: bold;
   /*background: rgba(216,216,216, 1);*/
 }
 
@@ -4525,7 +4648,8 @@ Copyright (c) 2015 Daniel Eden
 
 #timeline .brush .extent {
   stroke: #fff;
-  fill-opacity: .125;
+  fill: #ff5742;
+  fill-opacity: .165;
   shape-rendering: crispEdges;
 }
 

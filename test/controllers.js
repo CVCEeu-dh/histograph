@@ -706,7 +706,7 @@ describe('controllers: issues', function() {
 
 
 describe('controllers: suggest queries', function() {
-  
+  this.timeout(5000)
   it('should get some suggestions for Yalta', function (done) {
     session
       .get('/api/suggest?query=Yalta')

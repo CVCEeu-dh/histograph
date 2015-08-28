@@ -3,7 +3,7 @@
 MATCH (res) WHERE id(res) = {id}
   WITH res
     OPTIONAL MATCH (loc:`location`)-[r_loc:appears_in]->(res)
-    OPTIONAL MATCH (per:`person`)-[r_per:appears_in]->(per)
+    OPTIONAL MATCH (per:`person`)-[r_per:appears_in]->(res)
     OPTIONAL MATCH (org:`organization`)-[r_org:appears_in]->(res)
     OPTIONAL MATCH (soc:`social_group`)-[r_soc:appears_in]-(res)
     OPTIONAL MATCH (ver)-[:describes]->(res)

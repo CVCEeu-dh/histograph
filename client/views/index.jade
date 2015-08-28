@@ -1,7 +1,7 @@
 html
   head
     title!= title
-    
+    meta(name='pinterest', content='nopin', description = "contents subject to copyright")
     link(href='/css/bootstrap.min.css', rel='stylesheet')
     link(href='/css/font-awesome.min.css', rel='stylesheet')
     link(href='/css/perfect-scrollbar.min.css', rel='stylesheet')
@@ -43,12 +43,12 @@ html
            
           
           div(class='row', ng-cloak)
-            div(class='col-sm-4')
+            div(class='col-sm-8')
               a(href='#/') hg v.0.1
               a(href='#/profile')
                 img(src=user.picture)
                 span {{user.username}} 
-                
+              
              
               div(class='inline', dropdown, dropdown-append-to-body='true', is-open='status.isopen')
                 span(dropdown-toggle, ng-disabled='disabled')
@@ -57,7 +57,9 @@ html
       
                 ul(class='dropdown-menu', role='menu', )
                   li(ng-repeat='lang in availableLanguages', ng-click='setLanguage(lang)') {{lang}}
-                
+              
+              a(href='/logout')
+                span  logout
                 
                 
                 
@@ -71,12 +73,7 @@ html
                     //- input(type='text', ng-model='query', class='form-control', placeholder='Search for...', bs-typeahead, bs-options='item for items in suggest($viewValue)', data-container='body',data-delay='{ show: 500, hide: 1000000 }')
                     span(class='input-group-btn')
                       a(class='btn btn-default', type='button', ng-href='/#/search/{{query}}') search
-            div(class='col-sm-2')
-              a(href='#')
-                span settings 
-            div(class='col-sm-2')
-              a(href='/logout')
-                span logout
+            
           div(id='history')
             div(history='', trails='trails')
           
@@ -91,7 +88,8 @@ html
                 a(ng-href='/auth/google?next={{locationPath}}', class='btn btn-default expanded') login with google 
                   i(class='fa fa-google-plus')
       else
-        div(class='view {{currentCtrl}} {{queueStatus}}')
+        div(class='view {{currentCtrl}} {{currentState}} {{queueStatus}}')
+          
           div(ui-view='', autoscroll='true')
         
         
@@ -143,9 +141,9 @@ html
           //-           button(class='btn btn-primary', ng-click='createObservation()') answer
               
         
-        div(id='milkyway', sigma, graph='graph', freeze='freeze' tips='headers.graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentCtrl}} {{queueStatus}}', controller='currentCtrl' redirect='redirect(path)')
+        div(id='milkyway', sigma, graph='graph', freeze='freeze' tips='headers.graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentState}} {{queueStatus}}', controller='currentCtrl' redirect='redirect(path)')
           
-        //- div(id='timeline', timeline, class='{{currentCtrl}}', t='timeline', cxt='contextualTimeline', filters="params")
+        div(id='timeline', timeline, class='{{currentState}} {{queueStatus}}', t='timeline', cxt='contextualTimeline', filters="params")
           
         div(id='pop', gasp, target="target", redirect='redirect(path)', comment="startCommenting(item, tag, hashtag)", queue="queue(item, inprog)")
           
@@ -206,7 +204,9 @@ html
         div.inner {{ message }}
        
     script(src='/js/lib/jquery-2.1.3.min.js') 
-    script(src='/js/lib/d3.min.js')  
+    script(src='/js/lib/d3.min.js')
+    script(src='/js/lib/lodash.min.js') 
+      
     script(src='/js/lib/codemirror.js')
     script(src='/js/lib/codemirror-addon-simple.js')
     script(src='/js/lib/codemirror-addon-show-hint.js')

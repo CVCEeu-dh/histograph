@@ -164,18 +164,32 @@ angular
         }
       })
       .state('search', {
-        url: '/search/{query:[^/]{1,100}}',
+        url: '/search/{query:[^/]*}',
         templateUrl: 'templates/search.html',
         controller: 'SearchCtrl',
         resolve: {
-          resources: function(SuggestFactory, $route) {
+          resources: function(SuggestFactory, $stateParams) {
             // clean limit here
             return SuggestFactory.getResources({
               query: $stateParams.query,
               limit: 10
             });
           },
-          entities: function(SuggestFactory, $route) {
+          entities: function(SuggestFactory, $stateParams) {
+            // clean limit here
+            return SuggestFactory.getEntities({
+              query: $stateParams.query,
+              limit: 10
+            });
+          }
+        }
+      })
+      .state('searchentity', {
+        url: '/search/{query}/entity',
+        templateUrl: 'templates/search.html',
+        controller: 'SearchCtrl',
+        resolve: {
+          entities: function(SuggestFactory, $stateParams) {
             // clean limit here
             return SuggestFactory.getEntities({
               query: $stateParams.query,

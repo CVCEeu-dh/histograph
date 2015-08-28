@@ -110,11 +110,11 @@ WITH n
 SKIP {offset}
 LIMIT {limit}
 WITH n
-OPTIONAL MATCH (res)-[r_loc:appears_in]-(loc:`location`)
-OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
-OPTIONAL MATCH (res)-[r_org:appears_in]-(org:`organization`)
-OPTIONAL MATCH (res)-[r_soc:appears_in]-(soc:`social_group`)
-WITH res,
+OPTIONAL MATCH (n)-[r_loc:appears_in]-(loc:`location`)
+OPTIONAL MATCH (n)-[r_per:appears_in]-(per:`person`)
+OPTIONAL MATCH (n)-[r_org:appears_in]-(org:`organization`)
+OPTIONAL MATCH (n)-[r_soc:appears_in]-(soc:`social_group`)
+WITH n,
     {  
       id: id(loc),
       type: 'location',

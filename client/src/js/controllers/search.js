@@ -5,8 +5,8 @@
  * # SearchCtrl
  */
 angular.module('histograph')
-  .controller('SearchCtrl', function ($scope, $log, $routeParams, socket, resources, entities, SuggestFactory, EVENTS) {
-    $log.debug('SearchCtrl ready, query "', $routeParams.query, '" matches', resources.data.info.total_count, 'documents', entities.data.info.total_count, 'entities');
+  .controller('SearchCtrl', function ($scope, $log, $stateParams, socket, resources, entities, SuggestFactory, EVENTS) {
+    $log.debug('SearchCtrl ready, query "', $stateParams.query, '" matches', resources.data.info.total_count, 'documents', entities.data.info.total_count, 'entities');
     
     $scope.pagetitle = 'documents found';
     
@@ -22,15 +22,16 @@ angular.module('histograph')
       limit:  entities.data.info.limit
     };
     
-    $scope.matchingQuery = $routeParams.query;
+    $scope.matchingQuery = $stateParams.query;
+    
     
     /*
       Graph
     */
-    $scope.setHeader('graph', 'network of search results for "'+ $routeParams.query+'"');
+    $scope.setHeader('graph', 'network of search results for "'+ $stateParams.query+'"');
     
     SuggestFactory.getGraph({
-      query: $routeParams.query,
+      query: $stateParams.query,
       limit: 2000
     }).then(function(res) {
       $log.log('res', res)
@@ -56,7 +57,7 @@ angular.module('histograph')
       if(typeof params.prefix == undefined || params.prefix == 'resources'){
         $scope.matchingResources.loading = true;
         SuggestFactory.getResources({
-          query: $routeParams.query,
+          query: $stateParams.query,
           limit: 10,
           offset: (params.page-1)*10
         }).then(function (res) {
@@ -72,7 +73,7 @@ angular.module('histograph')
       if(typeof params.prefix == undefined || params.prefix == 'entities'){
         $scope.matchingEntities.loading = true;
         SuggestFactory.getEntities({
-          query: $routeParams.query,
+          query: $stateParams.query,
           limit: 10,
           offset: (params.page-1)*10
         }).then(function (res) {

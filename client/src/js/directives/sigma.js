@@ -152,16 +152,23 @@ angular.module('histograph')
           scale.domain(d3.extent(graph.edges, function(d) {return d.weight || 1}));
           
           // Reading new graph
-          si.graph.clear().read(graph);
+          si.graph.clear();
           
           // exit
-          if(si.graph.nodes().length == 0)
+          if(graph.nodes.length == 0)
             return;
           // calculate a default duration 
           layoutDuration = Math.max(Math.min(4* si.graph.nodes().length * si.graph.edges().length, maxlayoutDuration),minlayoutDuration)
           $log.log('::sigma n. nodes', si.graph.nodes().length, ' n. edges', si.graph.edges().length, 'runninn layout atlas for', layoutDuration/1000, 'seconds')
           
-          si.graph.nodes().forEach(function(n) {
+          
+          
+          //if(!previousGraph)
+            
+          $log.log('::sigma force atlas starting in .35s')
+          timers.play = setTimeout(function(){
+            si.graph.clear().read(graph);
+            si.graph.nodes().forEach(function(n) {
             
             n.color = colors[n.type] || "#353535";
             n.x = n.x || Math.random()*50
@@ -177,11 +184,6 @@ angular.module('histograph')
             si.settings('labelThreshold', 0);
             si.settings('labelSize', 'fixed');
           }
-          
-          //if(!previousGraph)
-            
-          $log.log('::sigma force atlas starting in .35s')
-          timers.play = setTimeout(function(){
             rescale();
             si.refresh();
             play(); 

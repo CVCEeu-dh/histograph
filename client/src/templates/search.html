@@ -1,4 +1,11 @@
-<div id="perspective" class="secondary {{queueStatus}}">
+<div id='perspective-menu' class="tk-proxima-nova header-menu">
+  <ul>
+    <li>
+      <a ui-sref="index">search</a> / <b>{{matchingQuery}}</b>
+    </li>
+  </ul>
+</div>
+<!-- <div id="perspective" class="secondary {{queueStatus}}">
   
   <div class="toolbar tk-proxima-nova">
   <h2>{{matchingEntities.totalItems}} entities matching <b>{{matchingQuery}}</b></h2> 
@@ -10,18 +17,36 @@
     Your path did not match any <i>entity</i>.
   </div>
   <div class='{{matchingEntities.loading? "animated fadeOut": "animated fadeIn"}}' ng-repeat='relatedItem in matchingEntities.items' ng-include='"templates/partials/entity-lite.html"'></div>
+</div> -->
+
+<div id='see-also-menu' class="tk-proxima-nova header-menu">
+  <ul>
+    <li>
+      <a ui-sref-active-eq="active" ui-sref="search({ query: matchingQuery })">
+         {{matchingResources.totalItems}} resources
+      </a>
+    </li>
+    <li>
+      <a ui-sref-active-eq="active" ui-sref="searchentity({ query: matchingQuery })">
+         {{matchingEntities.totalItems}} entities
+      </a>
+    </li>
+   
+  </ul>
 </div>
-<div id='see-also' class='{{currentCtrl}}' ng-cloak>
-  <div class="toolbar tk-proxima-nova">
-    <h2>{{matchingResources.totalItems}} documents matching <b>{{matchingQuery}}</b></h2> 
-    <div class="wrapper">
-    <pagination boundary-links="true" total-items="matchingResources.totalItems" items-per-page="matchingResources.limit" ng-model="matchingResources.page" class="pagination-sm" max-size="4" ng-change="setPage(matchingResources.page, 'resources')" previous-text="&lsaquo;" rotate="true" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></pagination>
+
+<div ui-view id='see-also'>
+  <div class='{{currentCtrl}}' ng-cloak>
+    <div class="toolbar tk-proxima-nova">
+      <div class="wrapper">
+      <pagination boundary-links="true" total-items="matchingResources.totalItems" items-per-page="matchingResources.limit" ng-model="matchingResources.page" class="pagination-sm" max-size="4" ng-change="setPage(matchingResources.page, 'resources')" previous-text="&lsaquo;" rotate="true" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></pagination>
+      </div>
+      
     </div>
-    
+    <div class="empty-list" ng-if="matchingResources.items.length == 0">
+      Your path did not match any <i>documents</i>.
+    </div>
+    <div class='{{matchingResources.loading? "animated fadeOut": "animated fadeIn"}}' ng-repeat='relatedItem in matchingResources.items' style="-webkit-animation-delay: {{$index * 100}}ms;
+      animation-delay: {{$index * 100}}ms" ng-include='"templates/partials/resource-lite.html"'></div>
   </div>
-  <div class="empty-list" ng-if="matchingResources.items.length == 0">
-    Your path did not match any <i>documents</i>.
-  </div>
-  <div class='{{matchingResources.loading? "animated fadeOut": "animated fadeIn"}}' ng-repeat='relatedItem in matchingResources.items' style="-webkit-animation-delay: {{$index * 100}}ms;
-    animation-delay: {{$index * 100}}ms" ng-include='"templates/partials/resource-lite.html"'></div>
 </div>

@@ -95,13 +95,9 @@ module.exports = {
         };
         return d;
       });
-      var entitites = _.values(item.entities);
-      item.places = _.filter(entitites, {type: 'place'});  
-      item.locations = _.filter(entitites, {type: 'location'});
-      item.persons = _.filter(entitites, {type: 'person'});
       item.collections = _.values(item.collections);
-
-      next(null, item);
+      
+      next(null, module.exports.normalize(item));
     });  
   },
   
@@ -134,7 +130,7 @@ module.exports = {
     node.organizations = _.values(node.organizations).filter(function (n) {
       return n.id
     });
-     node.social_groups = _.values(node.social_groups).filter(function (n) {
+    node.social_groups = _.values(node.social_groups).filter(function (n) {
       return n.id
     });
     return node;

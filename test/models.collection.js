@@ -10,32 +10,39 @@
 'use strict';
 
 var settings   = require('../settings'),
-    user       = require('../models/user'),
+    User       = require('../models/user'),
     resource   = require('../models/resource'),
     collection = require('../models/collection'),
     async      = require('async'),
     _          = require('lodash'),
-    should     = require('should');
     
-// todo: create a new resource, discover its content, then retrieve its representation
-describe('model:collection ', function() {
-  this.timeout(5000);
-  var __collection, // the local collection object created for fun
+    generator = require('../generator')({
+      suffix: 'collection'
+    }),
+    
+    should     = require('should');
+
+ var __collection, // the local collection object created for fun
       __resourceX, // the local resource object that can be inquiried
       __resourceY,
       __resourceZ,
       __user;
-
+      
+// todo: create a new resource, discover its content, then retrieve its representation
+describe('model:collection init', function() {
+  this.timeout(5000);
+ 
+  
+  it('should delete the user', function (done) {
+    User.remove(generator.user.guest(), function (err) {
+      if(err)
+        throw err;
+      done();
+    });
+  });
+  
   it('should create the dummy test user', function (done){
-    user.create({
-      username   : 'hello-world-for-collection',
-      password   : 'WorldHello',
-      email      : 'test-model-collection@globetrotter.it',
-      firstname  : 'Milky',
-      lastame    : 'Way',
-      strategy   : 'local', // the strategy passport who creates his account, like local or google or twitter
-      about      : ''
-    }, function (err, user) {
+    User.create(generator.user.guest(), function (err, user) {
       if(err)
         throw err;
       should.exist(user.username);
@@ -104,7 +111,10 @@ describe('model:collection ', function() {
       done()
     });
   });
-  
+
+});
+
+describe('model:collection', function() {
   it('should create a brand new collection', function (done) {
     collection.create({
       name: 'test collection',
@@ -176,7 +186,7 @@ describe('model:collection ', function() {
     });
   })
   it('should return a list of resource items', function (done) {
-    collection.getRelatedResources(12275, {}, function(err, res){
+    collection.getRelatedResources(__collection.id, {}, function(err, res){
       // console.log(err)
       done()
     });
@@ -213,8 +223,9 @@ describe('model:collection ', function() {
     q.push([__resourceX, __resourceY, __resourceZ]);
     q.drain = done;
   });
+  
   it('should delete the user', function (done) {
-    user.remove({email: __user.email}, function (err) {
+    User.remove(generator.user.guest(), function (err) {
       if(err)
         throw err;
       done();

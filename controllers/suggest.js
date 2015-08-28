@@ -246,6 +246,7 @@ module.exports =  function(io){
           query  = [
               'full_search:', q
             ].join('');
+      
       // get countabilly
       async.parallel({
         get_matching_resources_count: function (callback) {
@@ -264,6 +265,7 @@ module.exports =  function(io){
             offset: offset,
             limit: limit
           }, function (err, items) {
+            console.log(err)
             if(err)
               callback(err);
             else
@@ -273,7 +275,7 @@ module.exports =  function(io){
       }, function (err, results) {
         if(err)
           return helpers.cypherQueryError(err, res);
-        console.log(results)
+        
         return res.ok({
           items: results.get_matching_resources.map(Resource.normalize),
         }, {

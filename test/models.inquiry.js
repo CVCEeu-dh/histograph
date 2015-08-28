@@ -59,11 +59,12 @@ describe('model:inquiry ', function() {
       if(err)
         throw err;
       __resource = resource;
+      console.log(resource)
       done();
     });
   })
   
-  it('should create a new inquiry (field validation should be done at controller level)', function (done) {
+  it('should create a new inquiry (field validation should be done at ctrl level)', function (done) {
     inquiry.create({
       name: 'This is a test',
       description: 'This is a description',

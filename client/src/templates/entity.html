@@ -1,3 +1,11 @@
+<div id='perspective-menu' class="tk-proxima-nova header-menu">
+  <ul>
+    <li>
+      <a ui-sref="index">explore</a> / <a><b>{{item.type}}</b>#{{item.id}}</a>
+    </li>
+  </ul>
+</div>
+
 <div id="perspective" class="{{queueStatus}}">
   
       <div ng-if="item" class="entity item">
@@ -42,10 +50,28 @@
         </blockquote> -->
       </div>
 </div>
+
+
+<div id='see-also-menu' class="tk-proxima-nova header-menu">
+  <ul>
+    <li>
+      <a ui-sref-active-eq="active" ui-sref="entity({ id: item.id })">
+        <b>{{totalItems}}</b> related  resources
+      </a>
+    </li>
+    
+    <li>
+      <a ui-sref-active-eq="active" ui-sref="resource.inquiries({ id: item.id })">
+        inquiries / issues
+      </a>
+    </li>
+  </ul>
+</div>
+
 <div ui-view>
   
   <div id='see-also' class='{{currentCtrl}}'>
-  <div ng-include src="'templates/partials/resource-toolbar.html'"></div>
+  <div class='fixed-toolbar' ng-include src="'templates/partials/resource-toolbar.html'"></div>
   
   
   <div class="{{loading? 'animated fadeOut': 'animated fadeIn'}}" style="-webkit-animation-delay: {{$index * 100}}ms;

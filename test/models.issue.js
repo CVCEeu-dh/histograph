@@ -104,7 +104,7 @@ describe('model:issue init', function() {
 
 describe('model:issue', function() {
   
-  it('should create a new issue on date field (field validation should be done at controller level)', function (done) {
+  it('should create a new issue on date field (field validation should be done at ctrl level)', function (done) {
     Issue.create({
       type: Issue.DATE,
       solution: ['2011-06-04','2011-06-04'],
