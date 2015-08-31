@@ -55,10 +55,10 @@ header ul li{
   padding: 0 0px 0 40px;
 }
 
-header img{
+header img {
   display: inline-block;
   height: 25px;
-  padding: 0 10px 0 20px;
+  padding: 0px 10px 0 0;
 }
 
 blockquote{
@@ -77,6 +77,17 @@ a:focus, a:hover{
   color: #151515;
   border-bottom: 1px solid #151515;
   text-decoration: none;
+}
+
+a#header-logo {
+   color: #151515 ;
+   margin-right: 50px;
+}
+
+a#header-logo img{
+  display: inline-block;
+  height: 25px;
+  padding: 0px 5px 0 0;
 }
 
 .view{
@@ -99,6 +110,26 @@ a:focus, a:hover{
 .view.active{
   bottom: 130px;
   /*padding-bottom: 80px;*/
+}
+
+/*
+  
+  ITEM
+  wrap: bigger container for item, suited for grid / lsit view;
+*/
+.wrap {
+  
+}
+
+.index .wrap{
+  float: left;
+  width: 50%;
+  
+  
+}
+
+.index .wrap .related{
+  margin-right: 20px;
 }
 
 .item{
@@ -446,9 +477,21 @@ a:focus, a:hover{
 }
   
 .search #see-also .toolbar{
-  width: 36%;
+  width: 32%;
   left: 20%;
 }
+
+
+.index #see-also {
+  margin-left:0%;
+  width: 50%;
+}
+
+.index #see-also .toolbar{
+  width: 50%;
+  left: 00%;
+}
+
 
 #see-also.AllShortestPathsCtrl , #see-also.NeighborsCtrl {
   margin-left: 25%;
@@ -461,10 +504,6 @@ a:focus, a:hover{
 #see-also.SearchCtrl {
   margin-left:25%;
   width: 25%;
-}
-#see-also.IndexCtrl {
-  margin-left:0%;
-  width: 36%;
 }
 
 #inquiry-name{

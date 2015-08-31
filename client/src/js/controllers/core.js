@@ -323,62 +323,37 @@ angular.module('histograph')
     
     $scope.$on(EVENTS.USER_NOT_AUTHENTIFIED, function (e) {
       $scope.unsetMessage(MESSAGES.LOADING);
-    })
+    });
+    
+    
+    
     /*
-      listener $routeUpdate
+      listener $location
       ---
        handle reoute update, e.g on search
     */
-    $scope.$on('$routeUpdate', function(next, current) { 
-      $log.debug('CoreCtrl', '@routeUpdate', next, current);
-      
-      $scope.params = angular.copy(current.params);
-      // verify @todo filtering here
-      $scope.$broadcast(EVENTS.API_PARAMS_CHANGED);
-    });
-    
-    
-    
-    
-    $scope.$on('$locationChangeSuccess', function(e, path) {
-      $log.log('CoreCtrl @locationChangeSuccess', path);
-      var now = (new Date()).getTime();
-      
-      $scope.unsetMessage();
-      
-      
-      // if(!$scope.trails.length) { // hey this is your first trail
-      //   $scope.trails.push(new Trail(path, now));
-      //   return;
-      // };
-      
-      // var trail;
-      // // check if the paths already exists in past trail and it is not the last one.
-      // for(var i = $scope.trails.length - 1; i > -1; i--) {
-      //   for(var j = $scope.trails[i].paths.length - 1; j > -1 ; j--) {
-      //     if($scope.trails[i].paths[j].path === path) { // create a new trail
-      //       trail = new Trail(path, now, j, i);
-      //       $scope.trails.push(trail);
-      //       break;
-      //     }
-      //   }
-      //   if(trail)
-      //     break;
-      // };
-      
-      // // the path is totally new, append it to the last trail paths
-      // if(!trail) 
-      //   $scope.trails[$scope.trails.length - 1].paths.push({
-      //     path: path,
-      //     start: now
-      //   });
-    });
-    
-    $scope.$on('$locationChangeStart', function() {
+    $scope.$on('$locationChangeStart', function (e, path) {
       $log.log('CoreCtrl @locationChangeStart');
       $scope.freeze = 'sigma';
       $scope.setMessage(MESSAGES.LOADING);
     });
+    
+    $scope.currentPath;
+    
+    $scope.$on('$locationChangeSuccess', function (e, path) {
+      $log.log('CoreCtrl @locationChangeSuccess', path, $location);
+      
+      // same state as before???
+      if($scope.currentPath == $location.path()) {
+        $scope.params = $location.search();
+        $scope.$broadcast(EVENTS.API_PARAMS_CHANGED);
+      
+      }
+      $scope.currentPath = $location.path();
+      
+      $scope.unsetMessage();
+    });
+    
      /*
     
       Playlist

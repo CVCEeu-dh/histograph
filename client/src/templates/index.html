@@ -1,0 +1,41 @@
+<div id='perspective-menu' class="tk-proxima-nova header-menu">
+  <ul>
+    <li>
+      <a ui-sref="index">explore</a> / <b>resources</b>
+    </li>
+  </ul>
+</div>
+
+
+<div id='see-also-menu' class="tk-proxima-nova header-menu">
+  <ul>
+    <li>
+      <a ui-sref-active-eq="active" ui-sref="index">
+        see {{totalItems}}  resources
+      </a>
+    </li>
+    <li>
+      <a ui-sref-active-eq="active" ui-sref="resource.inquiries({ id: item.id })">
+        {{collections}} collections
+      </a>
+    </li>
+    <li>
+      <a ui-sref-active-eq="active" ui-sref="resource.inquiries({ id: item.id })">
+        {{inquiries}} inquiries / issues
+      </a>
+    </li>
+  </ul>
+</div>
+
+<div ui-view id='see-also'>
+  <div  class='{{currentCtrl}}' ng-cloak>
+    <div ng-include src="'templates/partials/resource-toolbar.html'"></div>
+    
+    <div class="empty-list" ng-if="relatedItems.length == 0">
+      There are no related <i>documents</i>.
+    </div>
+    <div class="wrap {{loading? 'animated fadeOut': 'animated fadeIn'}}" style="-webkit-animation-delay: {{$index * 100}}ms;
+      animation-delay: {{$index * 100}}ms"  ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/resource-lite.html"'></div>
+  </div>
+  
+</div>

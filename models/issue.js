@@ -58,22 +58,25 @@ module.exports = {
     })
   },
   /*
-    Create a new inquiry and assign it to the properties.user provided. Verify at controller level that a user has been assigned.
+    Create a new issue and assign it to the properties.user provided (Ctrl: req.user).
+    Create the first "solution" as well.
     properties: {
-      name: '',
-      description: '',
-      user: { ... }
+      title:    'This date is not correct or is missing',
+      description: 'Consider that ...',
+      solution: ['2011-06-04','2011-06-04'], // day range
+      
+      user:     { ... }
     }
   */
   create: function(properties, next) {
     var now = helpers.now();
     
-    neo4j.query(queries.merge_issue, {
+    neo4j.query(parser.agentBrown(queries.create_issue, properties), {
       type: properties.type,
-      solution: properties.solution,
-      slug: helpers.text.slugify(properties.user.username + ' ' + properties.type + ' ' + properties.doi),
+      title: properties.title,
+      slug: helpers.text.slugify(properties.type + ' ' + properties.doi),
       description: properties.description,
-      language: properties.description.length? helpers.text.language(properties.description): 'en',
+      language: properties.language,
       creation_date: now.date,
       creation_time: now.time,
       username: properties.user.username,
@@ -87,27 +90,46 @@ module.exports = {
         next(helpers.IS_EMPTY);
         return;
       }
-      next(null, node[0]);
+      // create a first comment
+      module.exports.createRelatedComment(node[0], {
+        user: properties.user,
+        first: true,
+        language: node.language,
+        content: properties.solution
+      }, function (err, comment) {
+        if(err) {
+          next(err);
+          return;
+        }
+        // add the first comment as first comment
+        next(null, _.assign(node[0], {
+          first: {
+            id: comment.id,
+            props: comment.props
+          }
+        }))
+      });
     })
   },
   /*
-    Create and attach a comment on the inquiry
+    Create and attach a comment on the issue, i.e a solution or an observation
     name: name of the inquiry
     content: 
     username
   */
-  createComment: function(id, properties, next) {
-    var now = helpers.now();
-    neo4j.query(queries.merge_inquiry_comment, {
-      id: id,
+  createRelatedComment: function(issue, properties, next) {
+    var now = helpers.now(),
+        query = parser.agentBrown(queries.merge_issue_comment, properties);
+    neo4j.query(query, {
+      id: issue.id,
+      first: properties.first, 
       content: properties.content,
-      language: helpers.text.language(properties.content, 'en'),
+      language: properties.language,
       username: properties.user.username,
-      slug: helpers.text.slugify(properties.user.username + ' ' + properties.content.substr(0, 32)),
+      slug: helpers.text.slugify(properties.user.username + ' ' + JSON.stringify(properties.content)),
       creation_date: now.date,
       creation_time: now.time,
     }, function (err, node) {
-      // console.log(err, node)
       if(err) {
         next(err);
         return;

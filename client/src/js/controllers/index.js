@@ -17,11 +17,13 @@ angular.module('histograph')
       $scope.loading = true;
       var params = angular.copy($scope.params);
       if(options && options.page)
-        params.offset = (options.page - 1)*($scope.limit || 10)
+        params.offset = (options.page - 1)*($scope.limit || 20)
       else
         $scope.setGraph({nodes:[], edges:[]});
+      // load resources
+      $log.log('IndexCtrl -> sync() - params:', params);
       ResourcesFactory.get(params, function (res) {
-        $log.info('ResourceFactory', params, 'returned', res.result.items.length, 'items');
+        $log.info('IndexCtrl -> sync() returned', res.result.items.length, 'items');
         $scope.setRelatedItems(res.result.items);
         $scope.totalItems = res.info.total_items;
         $scope.limit = res.info.params.limit;
@@ -67,7 +69,6 @@ angular.module('histograph')
     /*
       clean previous graph
     */
-    $scope.setGraph({nodes:[], edges:[]})
      
     
     

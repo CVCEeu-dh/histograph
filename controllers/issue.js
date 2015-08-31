@@ -1,6 +1,6 @@
 /**
 
-  API Controller for hg:Issue
+  API Controller for hg:Inquiry:Issue
   ===
   
 */

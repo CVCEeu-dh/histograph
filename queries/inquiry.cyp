@@ -8,7 +8,7 @@ WITH u, inq, res
 OPTIONAL MATCH (inq)-[:answers]-(com)
 RETURN {
   id: id(inq),
-  type: 'inquiry',
+  type: last(labels(inq)),
   props: inq,
   proposed_by: u,
   questioning: id(res),

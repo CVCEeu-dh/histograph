@@ -110,7 +110,7 @@ angular
         }
       })
         .state('resource.inquiry', {
-          url: '/inq/:inquiry_id',
+          url: '/inq/{inquiry_id:[0-9,]+}',
           templateUrl: 'templates/partials/inquiry.html',
           controller: 'InquiryCtrl',
           resolve: {
@@ -140,6 +140,7 @@ angular
             templateUrl: 'templates/partials/inquiries.create.html',
             controller: 'InquiryCreateCtrl'
           })
+          
       /*
         collections
         @todo

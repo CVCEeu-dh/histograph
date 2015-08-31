@@ -120,7 +120,8 @@ angular.module('histograph')
     
     
       // get theaccepted version
-    
+    //
+    $log.log('ResourceCtrl -> setRelatedItems - items', resources.result.items);
     $scope.setRelatedItems(resources.result.items);
     
     $scope.graphType = 'monopartite-entity'

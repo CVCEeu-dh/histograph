@@ -238,14 +238,16 @@ module.exports = function(io){
         return helpers.formError(form.errors, res);
       
       Issue.create({
-        type:        form.params.type,
-        solution:    form.params.solution,
-        description: form.params.description,
-        doi:         form.params.id,
-        user:        req.user
+        type:         form.params.type,
+        title:        form.params.title,
+        description:  form.params.description,
+        solution:     form.params.solution, 
+        doi:          form.params.id,
+        user:         req.user
       }, function (err, issue) {
         if(err)
           return helpers.cypherQueryError(err, res);
+
         io.emit('resource:issue:created', {
           user: req.user.username,
           doi: +req.params.id, 
@@ -254,7 +256,7 @@ module.exports = function(io){
         return res.ok({
           item: issue
         });
-      })
+      });
     },
     /*
       create a comment on this resource

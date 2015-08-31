@@ -1,10 +1,11 @@
 // name: get_issue
 // get issue by id or slug title
-MATCH (iss:inquiry:issue)
+MATCH (iss:inquiry:issue)-[:answers {first: true}]-(first:comment)
 WHERE id(iss) = {id}
-WITH iss
+WITH iss, first
 MATCH (u)-[:proposes]->(iss)-[:questions]-(res)
-WITH u, iss, res
+WITH u, iss, res, first
+OPTIONAL MATCH (iss)-[:answers {accepted: true}]-(accepted)
 OPTIONAL MATCH (iss)-[:answers]-(com)
 RETURN {
   id: id(iss),
@@ -12,13 +13,21 @@ RETURN {
   props: iss,
   proposed_by: u,
   questioning: id(res),
+  first : {
+    id: id(first),
+    props: first
+  },
+  accepted : {
+    id: id(accepted),
+    props: accepted
+  },
   answers: count(com)
 }
 
 
 // name: count_issues
 //
-MATCH (inq:issue)--(res:resource)
+MATCH (inq:inquiry:issue)--(res:resource)
 {?res:resource_id__ID}
 RETURN count(*) as total_Count
 
@@ -42,17 +51,19 @@ RETURN {
   questioning: id(res)
 }
 
-// name: merge_issue
+// name: create_issue
 // create a new issue (safely merge if the issue already exists by slug title.
 MERGE (iss:inquiry:issue {slug: {slug}, questioning: {doi}})
 ON CREATE SET
-  iss.type          = {type}, // that is, date or location or place or person
-  iss.solution      = {solution},
-  iss.description   = {description},
-  iss.language      = {language},
-  iss.creation_date = {creation_date},
-  iss.creation_time = {creation_time},
-  iss.proposed_by   = {username}
+  iss.type           = {type}, // that is, date or location or place or person
+  iss.title          = {title}, // the title
+  iss.description    = {description},
+  {if:language}
+  iss.language       = {language},
+  {/if}
+  iss.creation_date  = {creation_date},
+  iss.creation_time  = {creation_time},
+  iss.proposed_by    = {username}
 WITH iss
 MATCH (u:user {username: {username}})
   MERGE (u)-[r:proposes]->(iss)
@@ -71,7 +82,41 @@ RETURN {
   id: id(iss),
   props: iss,
   proposed_by: u,
-  questioning: res
+  questioning: id(res)
+} as result
+
+
+// name: merge_issue_comment
+// create a new issue comment - slug param contain the id of the resource as well.
+MATCH (iss:issue)--(res:resource), (u:user {username: {username}})
+WHERE id(iss) = {id}
+  MERGE (u)-[r:follows]->(iss)
+WITH iss, u, res
+  MERGE (com:comment:solution {slug: {slug}})
+    ON CREATE SET
+      com.content       = {content},
+      {if:language}
+      com.language      = {language},
+      {/if}
+      com.creation_date = {creation_date},
+      com.creation_time = {creation_time},
+      com.answered_by   = {username},
+      com.score         = 0,
+      com.celebrity     = 0
+WITH iss, com, u, res
+  MERGE (com)-[r:answers]->(iss)
+    {if:first}
+    ON CREATE SET
+      r.first = true
+    {/if}
+WITH iss, com, u, res
+  MERGE (u)-[r:writes]->(com)
+RETURN {
+  id: id(com),
+  props: com,
+  written_by: u,
+  answering: iss,
+  questioning: id(res)
 } as result
 
 
