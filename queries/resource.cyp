@@ -257,6 +257,15 @@ RETURN col
     {if:url}
       res.url = {url},
     {/if}
+    {if:url_en}
+      res.url_en = {url_en},
+    {/if}
+    {if:url_fr}
+      res.url_fr = {url_fr},
+    {/if}
+    {if:url_de}
+      res.url_de = {url_de},
+    {/if}
     {if:title_en}
       res.title_en = {title_en},
     {/if}
@@ -286,6 +295,15 @@ RETURN col
     {/if}
     {if:url}
       res.url = {url},
+    {/if}
+    {if:url_en}
+      res.url_en = {url_en},
+    {/if}
+    {if:url_fr}
+      res.url_fr = {url_fr},
+    {/if}
+    {if:url_de}
+      res.url_de = {url_de},
     {/if}
     {if:title_en}
       res.title_en = {title_en},
