@@ -229,8 +229,9 @@ MATCH (n)-[r]-(t:resource)
  WHERE id(n) = {id}
 WITH t
  MATCH (p1:person)-[:appears_in]-(t)-[:appears_in]-(p2:person)
+ WHERE p1.score > -1 AND p2.score > -1
 WITH p1, p2, length(collect(DISTINCT t)) as w
-
+  
 RETURN {
     source: {
       id: id(p1),

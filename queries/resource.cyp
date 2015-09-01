@@ -382,6 +382,7 @@ WITH per
   MATCH (per)--(res:resource)
 WITH res
   MATCH (p1:person)-[:appears_in]-(res)-[:appears_in]-(p2:person)
+  WHERE p1.score > -1 AND p2.score > -1
 WITH p1, p2, length(collect(DISTINCT res)) as w
 RETURN {
   source: {
