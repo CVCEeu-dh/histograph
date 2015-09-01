@@ -78,11 +78,19 @@ WITH iss, u, res
   ON MATCH SET
     res.last_modification_date = {creation_date},
     res.last_modification_time = {creation_time}
+WITH iss, u, res
+  OPTIONAL MATCH (iss)-[:answers {accepted: true}]-(accepted)
+  OPTIONAL MATCH (iss)-[:answers]-(com)
 RETURN {
   id: id(iss),
   props: iss,
   proposed_by: u,
-  questioning: id(res)
+  questioning: id(res),
+  accepted : {
+    id: id(accepted),
+    props: accepted
+  },
+  answers: count(com)
 } as result
 
 

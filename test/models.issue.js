@@ -121,7 +121,7 @@ describe('model:issue', function() {
       
       should.equal(iss.questioning,__resource.id);
       should.exist(iss.first.id)
-      //console.log(iss)
+      
       __issue = iss;
       done()
     })
@@ -135,6 +135,7 @@ describe('model:issue', function() {
       should.equal(iss.proposed_by.username, __userA.username);
       should.equal(iss.questioning, __resource.id);
       should.exist(iss.first.id)
+      should.exist(iss.answers)
        done()
     })
   });

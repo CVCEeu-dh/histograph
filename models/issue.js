@@ -102,6 +102,10 @@ module.exports = {
           return;
         }
         // add the first comment as first comment
+        if(!node[0].accepted.id)
+          delete node[0].accepted
+        
+        node[0].answers = 1;
         next(null, _.assign(node[0], {
           first: {
             id: comment.id,
