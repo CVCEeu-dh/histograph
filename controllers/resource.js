@@ -233,13 +233,15 @@ module.exports = function(io){
     createIssue: function (req, res) {
       var Issue   = require('../models/issue'), 
           form = validator.request(req);
-      
+      // console.log(form.params)
       if(!form.isValid)
         return helpers.formError(form.errors, res);
-      
+      // if form.params.type == Issue.DATE
+      // check that the solution is an array of valid dates.
       Issue.create({
         type:         form.params.type,
         title:        form.params.title,
+        language:     form.params.language || 'en',
         description:  form.params.description,
         solution:     form.params.solution, 
         doi:          form.params.id,
@@ -247,7 +249,7 @@ module.exports = function(io){
       }, function (err, issue) {
         if(err)
           return helpers.cypherQueryError(err, res);
-
+        
         io.emit('resource:issue:created', {
           user: req.user.username,
           doi: +req.params.id, 

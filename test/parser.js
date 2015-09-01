@@ -11,7 +11,22 @@ var parser  = require('../parser.js'),
     helpers = require('../helpers.js'),
     should  = require('should');
 
-describe('parsers: split a string, add annotations.', function() {
+
+
+describe('parser:paragraphs', function() {
+  it('should split a long document in paragraphs', function (done) {
+    // body...
+    var fs = require('fs');
+    var paragraphs = parser.paragraphs({
+      text: ''+ fs.readFileSync('./contents/parser.paragraphs.example') 
+    });
+    should.exist(paragraphs.length)
+    done()
+  });
+});
+
+
+describe('parser:annotate', function() {
   var points;
 
   it('should correctly parse the yaml', function (done) {

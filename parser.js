@@ -151,5 +151,11 @@ module.exports = {
 
   yaml: function(yaml) {
     return YAML.parse(yaml)
+  },
+  
+  // divide a long text in paragraphs (really simple one)
+  // according to multiple linebreaks
+  paragraphs: function (options) {
+    return _.compact(_.map(options.text.split(/[;\.\n\r]+[\n\r]{2,}/g), _.trim));
   }
 };

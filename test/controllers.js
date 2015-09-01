@@ -573,6 +573,7 @@ describe('controllers: issues', function() {
       .post('/api/resource/'+__resourceA.id + '/related/issue')
       .send({
         type: 'date',
+        title: 'Date not found, or is not correct',
         solution: ['2000-12-31','2001-01-01'],
         description: 'the date cannot be read properly'
       })

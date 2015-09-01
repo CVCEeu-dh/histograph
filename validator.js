@@ -150,6 +150,16 @@ module.exports = {
             optional: true
           },
           {
+            field: 'title',
+            check: 'isLength',
+            args: [
+              3,
+              500
+            ],
+            error: 'should be 3 to 500 chars',
+            optional: true
+          },
+          {
             field: 'description',
             check: 'isLength',
             args: [
