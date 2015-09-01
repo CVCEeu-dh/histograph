@@ -387,11 +387,13 @@ RETURN {
   source: {
     id: id(p1),
     type: LAST(labels(p1)),
+    score: p1.score,
     label: p1.name
   },
   target: {
     id: id(p2),
     type: LAST(labels(p2)),
+    score: p2.score,
     label: p2.name
   },
   weight: w 

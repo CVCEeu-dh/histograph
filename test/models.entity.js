@@ -67,8 +67,7 @@ describe('model:entity ', function() {
       links_wiki: 'Yalta_Conference',
       type: 'social_group',
       name: 'Yalta_Conference',
-      resource: __resource,
-      trustworthiness: 0.8
+      resource: __resource
     }, function (err, entity) {
       should.not.exist(err, err);
       should.equal(entity.rel.type, 'appears_in');

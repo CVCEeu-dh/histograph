@@ -36,6 +36,8 @@ LIMIT {limit}
 ON CREATE SET
   ent.name          = {name},
   ent.name_search   = {name_search},
+  ent.celebrity     = 0,
+  ent.score         = 0,
   {if:lat}
     ent.lat         = {lat},
   {/if}
