@@ -138,5 +138,51 @@ module.exports = {
       else
         callback(null, options);
     });
+  },
+  /*
+    Start the discover chain for one signle dicoument, useful for test purposes.
+  */
+  discoverOne: function(options, callback) {
+    console.log(clc.yellowBright('\n   tasks.resource.discoverOne'));
+    if(!options.id || isNaN(options.id)) {
+      callback('option --id required')
+      return;
+    }
+    var neo4j    = require('seraph')(settings.neo4j.host);
+    var queue = async.waterfall([
+      // get pictures and documents having a caption
+      function (next) {
+        neo4j.read(options.id, function (err, node) {
+          if(err) {
+            next(err);
+            return;
+          }
+          next(null, node);
+        });
+      },
+      /**
+        Nicely add YAGO/TEXTRAZOR api service to extract persons from resources having caption (an/or source field)
+      */
+      function (node, next) {
+        Resource.discover({
+          id: node.id
+        }, function (err, res) {
+          if(err)
+            next(err);
+            
+          neo4j.save(res, function (err, n) {
+            if(err)
+              throw err;
+            console.log('node', n.id, clc.cyanBright('saved'))
+            next();
+          });
+        })
+      }
+    ], function (err) {
+      if(err)
+        callback(err);
+      else
+        callback(null, options);
+    });
   }
 }

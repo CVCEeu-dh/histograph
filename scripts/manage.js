@@ -26,6 +26,9 @@ var fs          = require('fs'),
       'setup': [
         tasks.setup
       ],
+      'discover-resource': [
+        tasks.resource.discoverOne
+      ],
       'discover-resources': [
         tasks.resource.discoverMany
       ],
