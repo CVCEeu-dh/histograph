@@ -333,6 +333,29 @@ module.exports = {
   },
   
   /*
+    Return the 
+  */
+  getText: function(resource, options) {
+    return _.compact(options.fields.map(function (d) {
+      if(d == 'url') {
+        if(!_.isEmpty(resource[d + '_' + options.language])) {
+          try{
+            return fs.readFileSync(settings.txtPath + '/' + resource[d + '_' + options.language], {
+              encoding: 'utf8'
+            }) || '';
+          } catch(e) {
+            console.log('dounf', e)
+            return '';
+          }
+        }
+        return '';
+      }
+      // console.log(options, d, d + '_' + options.language)
+      return resource[d + '_' + options.language] || '';
+    })).join('. ');
+  },   
+  
+  /*
     The long chain of the discovery.
     Perform TEXTRAZOR on some field of our darling resource and 
     GEOCODE/GEONAMES for the found PLACES entities
@@ -447,23 +470,24 @@ module.exports = {
         var candidates = []; // candidate entities extracted by various mechanisms
         
         var q = async.queue(function (language, nextLanguage) {
-          var filename = 'contents/resource_' + resource.doi + '_discover__'+ language + '.json',
+          var filename = 'cached/resource_' + resource.doi + '_discover__'+ language + '.json',
               content; // the text content to be disambiguated. if it's too long, helpers method should chunk it.
               
           // check if the content for this language has already been discovered
-          if(fs.existsSync(filename)) {
-            // console.log(clc.blackBright('  using cached file', clc.whiteBright(filename), q.length()));
-            var cached_candidates = require('../'+filename);
-            candidates = candidates.concat(cached_candidates);
-            console.log(clc.blackBright('  found', clc.whiteBright(candidates.length), 'candidates (cache)'))
-            nextLanguage();
-            return;
-          }
+          // if(fs.existsSync(filename)) {
+          //   // console.log(clc.blackBright('  using cached file', clc.whiteBright(filename), q.length()));
+          //   var cached_candidates = require('../'+filename);
+          //   candidates = candidates.concat(cached_candidates);
+          //   console.log(clc.blackBright('  found', clc.whiteBright(candidates.length), 'candidates (cache)'))
+          //   nextLanguage();
+          //   return;
+          // }
           // concatenate fields as defined in settings.js
-          content = settings.disambiguation.fields.map(function (d) {
-            return resource[d + '_' + language] || ''   
-          }).join('. ');
-          
+          content = module.exports.getText(resource, {
+            language: language,
+            fields: settings.disambiguation.fields
+          });
+          console.log(settings.disambiguation.fields)
           // launch the extraction chain, cfr settings.disambiguation.services
           async.parallel(_.map(settings.disambiguation.services, function (supportedLanguages, service) {
             return function (_callback) {
@@ -493,7 +517,7 @@ module.exports = {
             }
             candidates = candidates.concat(_.flatten(results));
             
-            fs.writeFileSync(filename, JSON.stringify(candidates, null, 2));
+            // fs.writeFileSync(filename, JSON.stringify(candidates, null, 2));
             nextLanguage();
           });
 
