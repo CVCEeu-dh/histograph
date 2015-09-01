@@ -1,4 +1,4 @@
-<div class="related inquiry">
+<div ng-if='relatedItem.type == "inquiry"' class="related inquiry">
 <!-- <div ng-if="relatedItem.proposed_by.picture" class="profile-pic">
   <div class="profile-pic-wrapper">
     
@@ -14,4 +14,12 @@
   </div>
   <div class="content" ng-bind-html="relatedItem.props.description | marked"></div>
   <div class="more"><a ng-href="#/inq/{{relatedItem.id}}">read more, or propose an answer</a></div>
+</div>
+
+
+<div ng-if='relatedItem.type == "issue"' class="related inquiry">
+  <h4>{{relatedItem.props.title}}</h4>
+  <div class="author"> by <a ng-href="/#/u/{{inquiry.proposed_by.username}}">{{relatedItem.proposed_by.username}}</a> — {{relatedItem.props.creation_date | date : 'longDate'}}, <b>{{relatedItem.answers}} </b> answers
+  
+  </div>
 </div>

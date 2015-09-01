@@ -8,7 +8,7 @@
 
 <div id="perspective" class="{{queueStatus}}" ng-include src="'templates/partials/resource.html'"></div>
 
-<div id='see-also-menu' class="tk-proxima-nova header-menu">
+<div id='see-also-menu' class="tk-proxima-nova header-menu {{state}}">
   <ul>
     <li>
       <a ui-sref-active-eq="active" ui-sref="resource({ id: item.id })">

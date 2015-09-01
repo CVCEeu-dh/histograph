@@ -8,7 +8,7 @@
         
         <div>
           <span ng-click="openIssueModal('date', item)" class="empty" ng-if="!item.props.start_time" tooltip='click to add a date'>no date found</span>
-          <span ng-click="openIssueModal('date', item)" tooltip='click to propose a different date' ng-if="item.props.start_time">{{item.props|guessInterval}}</span>
+          <a ng-href="#/r/{{item.id}}/inq/create/date" tooltip='click to propose a different date' ng-if="item.props.start_time">{{item.props|guessInterval}}</a>
           
           <span ng-repeat="location in item.places">
             <a class="tag location" ng-click="toggleMenu($event, item, location, 'place')">{{location.name}}</a><!-- 

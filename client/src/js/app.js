@@ -140,6 +140,11 @@ angular
             templateUrl: 'templates/partials/inquiries.create.html',
             controller: 'InquiryCreateCtrl'
           })
+          .state('resource.inquiries.createIssue', {
+            url: '/create/{type:date|title}',
+            templateUrl: 'templates/partials/issues.create.html',
+            controller: 'IssueCreateCtrl'
+          })
           
       /*
         collections

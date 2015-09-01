@@ -1,0 +1,28 @@
+<div class="related inquiry">
+    <div class="type">{{issue.title}}</div>
+    <form>
+      <label>title</label>
+      <div ng-model='issue.title' ui-codemirror='{lineNumbers: false, lineWrapping : true, mode: "xml"}'></div>
+     
+      
+      <form novalidate name="form">
+        <label>your solution: <b>start</b></label>
+        <input class='form-control' ng-model='start_date' placeholder='YYYY-mm-dd'>
+        <label>your solution: <b>end</b></label>
+        <input class='form-control' ng-model='end_date' placeholder='YYYY-mm-dd'>
+        
+      </form>
+      
+      <!--  <label>a short description of the issue</label>
+      <div ng-model='issue.description' ui-codemirror='{lineNumbers: false, lineWrapping : true, mode: "xml"}'></div> -->
+      
+      
+      <div style='text-align:center; margin-top: 10px'>
+        <div class='btn-group' role='group' aria-label='...'>
+          <button class='btn btn-primary' ng-click='createIssue()'>
+           create inquiry
+          </button>
+        </div>  
+      </div>  
+    </form>
+  </div>
