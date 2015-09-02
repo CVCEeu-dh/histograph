@@ -19,10 +19,18 @@ RETURN {
 } AS result
 
 
+// name: count_all_in_between
+// 
+MATCH p=(n)-[r:appears_in*..3]-(t) WHERE id(n) in {ids} AND id(t) in {ids}
+RETURN extract(n in filter(x IN nodes(p) WHERE NOT id(x) IN {ids})|{
+    type: last(labels(n)),
+    id: id(n)
+  }) as count_items
+
 
 // name: all_in_between
 // 
-MATCH p=(n)-[r:appears_in*..2]-(t) WHERE id(n) in {ids} AND id(t) in {ids}
+MATCH p=(n)-[r:appears_in*..3]-(t) WHERE id(n) in {ids} AND id(t) in {ids}
 RETURN extract(n IN nodes(p)| {
   id: id(n),
   type: last(labels(n)),

@@ -783,7 +783,7 @@ describe('controllers: suggest queries', function() {
    
   it('should get the full path between four nodes', function (done) {
     session
-      .get('/api/suggest/all-in-between/26441,27631,11173?limit=33')
+      .get('/api/suggest/all-in-between/26859,26858,17366,39404,26400?limit=33')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {

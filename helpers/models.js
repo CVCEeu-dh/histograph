@@ -40,6 +40,7 @@ module.exports = {
       count_items: function (callback) {
         var query = parsers.agentBrown(options.queries.count_items, options.params);
         neo4j.query(query, options.params, function (err, result) {
+          console.log(err,result)
           if(err)
             return callback(err);
           callback(null, result.count_items)

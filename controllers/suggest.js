@@ -4,7 +4,9 @@
  *
  */
 var settings  = require('../settings'),
-    helpers   = require('../helpers.js'),
+    helpers   = require('../helpers'),
+    models    = require('../helpers/models'),
+    
     parser    = require('../parser.js'),
     neo4j     = require('seraph')(settings.neo4j.host),
     validator  = require('../validator'),
@@ -65,33 +67,42 @@ module.exports =  function(io){
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       
-      neo4j.query(queries.all_in_between, {
-        ids: ids,
-        offset: form.params.offset,
-        limit: form.params.limit
-      }, function (err, items) {
+      models.getMany({
+        queries: {
+          count_items: queries.count_all_in_between,
+          items: queries.all_in_between,
+        },
+        params: {
+          ids: ids,
+          limit: form.params.limit,
+          offset: form.params.offset
+        }
+      }, function (err, results) {
+        console.log(results.count_items.length)
+        
+        console.log(_.flatten(results.count_items, true));
         if(err)
           return helpers.cypherQueryError(err, res);
-        // console.log(items);
+        
         var graph = {
           nodes: {},
           edges: {}
         };
         
-        for(var i = 0; i < items.length; i++) {
-          for(var j = 0; j < items[i].paths.length; j++) {
-            if(!graph.nodes[items[i].paths[j].id]) {
-              graph.nodes[items[i].paths[j].id] = items[i].paths[j];
+        for(var i = 0; i < results.items.length; i++) {
+          for(var j = 0; j < results.items[i].paths.length; j++) {
+            if(!graph.nodes[results.items[i].paths[j].id]) {
+              graph.nodes[results.items[i].paths[j].id] = results.items[i].paths[j];
             }
           }
-          for(var j = 0; j < items[i].rels.length; j++) {
-            var edgeId = _.sortBy([items[i].rels[j].start, items[i].rels[j].end]).join('.');
+          for(var j = 0; j < results.items[i].rels.length; j++) {
+            var edgeId = _.sortBy([results.items[i].rels[j].start, results.items[i].rels[j].end]).join('.');
             
             if(!graph.edges[edgeId]) {
               graph.edges[edgeId] = {
                 id: edgeId,
-                source: items[i].rels[j].start,
-                target: items[i].rels[j].end,
+                source: results.items[i].rels[j].start,
+                target: results.items[i].rels[j].end,
                 weight: 0
               };
             }
@@ -105,13 +116,70 @@ module.exports =  function(io){
             edges: _.values(graph.edges)
           }
         }, {
+          total_items: _.unique(
+            _.map(
+              _.compact(
+                _.flatten(results.count_items)
+              ), 'id'
+            )
+          ).length,
           params: {
             offset: form.params.offset,
             limit: form.params.limit,
             ids: ids
           }
         });
+        
       })
+      
+      
+      // neo4j.query(queries.all_in_between, {
+      //   ids: ids,
+      //   offset: form.params.offset,
+      //   limit: form.params.limit
+      // }, function (err, items) {
+      //   if(err)
+      //     return helpers.cypherQueryError(err, res);
+      //   // console.log(items);
+      //   var graph = {
+      //     nodes: {},
+      //     edges: {}
+      //   };
+        
+      //   for(var i = 0; i < items.length; i++) {
+      //     for(var j = 0; j < items[i].paths.length; j++) {
+      //       if(!graph.nodes[items[i].paths[j].id]) {
+      //         graph.nodes[items[i].paths[j].id] = items[i].paths[j];
+      //       }
+      //     }
+      //     for(var j = 0; j < items[i].rels.length; j++) {
+      //       var edgeId = _.sortBy([items[i].rels[j].start, items[i].rels[j].end]).join('.');
+            
+      //       if(!graph.edges[edgeId]) {
+      //         graph.edges[edgeId] = {
+      //           id: edgeId,
+      //           source: items[i].rels[j].start,
+      //           target: items[i].rels[j].end,
+      //           weight: 0
+      //         };
+      //       }
+      //       graph.edges[edgeId].weight++;
+      //     }
+      //   }
+        
+      //   return res.ok({
+      //     graph: {
+      //       nodes: _.values(graph.nodes),
+      //       edges: _.values(graph.edges)
+      //     }
+      //   }, {
+      //     params: {
+      //       offset: form.params.offset,
+      //       limit: form.params.limit,
+      //       ids: ids
+      //     }
+      //   });
+      // })
     },
     /*
       Return a list of possible path connecting all of the comma separated nodes given
