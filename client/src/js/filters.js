@@ -95,6 +95,14 @@ angular.module('histograph')
       return input.replace('_', ' ').replace(/\.\w+$/, '');
     }
   })
+  // humanize filenames if needed, strip bogus .
+  .filter('humanizeState', function() {
+    return function(input) {
+      if(!input)
+        return '';
+      return input.replace('.', ' ');
+    }
+  })
   .filter('datesOfAPerson', function() {
     return function(birth_time,death_time) {
       

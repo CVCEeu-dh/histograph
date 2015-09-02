@@ -421,10 +421,18 @@ a#header-logo img{
         transition: margin-left .3s cubic-bezier(0.65, 0.05, 0.36, 1);*/
 }
 
-
 #see-also-menu {
   left: 36%;
   width: 64%;
+}
+
+.index #see-also {
+  margin-left:0%;
+  width: 50%;
+}
+
+.neighbors.resources #see-also{
+  margin-left: 25%;
 }
 
 .search #see-also{
@@ -435,6 +443,13 @@ a#header-logo img{
  width: 80%;
   left: 20%;
 }
+
+
+.neighbors.resources #see-also-menu{
+ width: 75%;
+  left: 25%;
+}
+
 
 .toolbar{
   color: white;
@@ -481,11 +496,12 @@ a#header-logo img{
   left: 20%;
 }
 
-
-.index #see-also {
-  margin-left:0%;
-  width: 50%;
+.neighbors.resources  #see-also .toolbar{
+ width: 32%;
+  left: 25%;
 }
+
+
 
 .index #see-also .toolbar{
   width: 50%;
@@ -776,6 +792,11 @@ a#header-logo img{
 #milkyway.search{
   left: 52%;
 }
+
+#milkyway.neighbors{
+  left: 57%;
+}
+
 
 #milkyway.InquiriesCtrl, #milkyway.InquiryCtrl, #milkyway.InquiryCreateCtrl{
   display: none;
@@ -4675,18 +4696,18 @@ Copyright (c) 2015 Daniel Eden
   /*display: none;*/
   position: absolute;
   width: 110px;
-  top: 50px;
-  font-weight: bold;
-  /*background: rgba(216,216,216, 1);*/
+  bottom: 30px;
+  font-weight: normal;
+  background: rgba(255,255,255, .4);
 }
 
 #timeline .brushdate.left{
-  left: 30px;
+  left: 40px;
   text-align: right;
 }
 
 #timeline .brushdate.right{
-  right: 30px;
+  right: 40px;
   text-align: left;
 }
 
@@ -4700,7 +4721,7 @@ Copyright (c) 2015 Daniel Eden
 
 #timeline .brush .extent {
   stroke: #fff;
-  fill: #ff5742;
+  fill: #ffffff;
   fill-opacity: .165;
   shape-rendering: crispEdges;
 }

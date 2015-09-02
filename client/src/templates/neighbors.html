@@ -1,10 +1,12 @@
+<div id='perspective-menu' class="tk-proxima-nova header-menu">
+  <ul>
+    <li>
+      <a ui-sref="index">explore</a> / <b>discover neighbors</b> (from {{playlist.length}} elements)</a>
+    </li>
+  </ul>
+</div>
+
 <div id="perspective" class="{{queueStatus}} reduced">
-  <div class="toolbar tk-proxima-nova">
-    <h2>starting from {{playlist.length}} elements</h2> 
-    <!-- <div class="wrapper">
-      <pagination boundary-links="true" total-items="totalItems" ng-model="currentPage" class="pagination-sm" max-size="4" previous-text="&lsaquo;" rotate="true" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></pagination>
-    </div>  -->
-  </div>
   
   <div class="related" ng-repeat="relatedItem in playlist" ng-if="relatedItem.type == 'resource'" data-id='{{relatedItem.id}}'>
        
@@ -57,18 +59,28 @@
     <a data-id='{{relatedItem.id}}'>view on graph</a>
   </div>
 </div>
-<div id='see-also' class='{{currentCtrl}}' ng-cloak>
-  <!-- <div ng-include src="'templates/partials/resource-toolbar.html'"></div> -->
-  <div class="toolbar tk-proxima-nova">
-    <h2><b>{{relatedEntities.length}}</b> entities and <b>{{relatedItems.length}}</b> documents</h2>
-  </div>
-  <div class="tags" ng-if="relatedEntities.length > 0">Entities:  
-    <span ng-repeat="entity in relatedEntities"><span class="entity tag" data-id='{{entity.id}}' tooltip='{{entity.label}}' gasp-type='{{entity.type}}' gasp-parent='{{item.type}}-{{item.id}}' >
-      {{entity.label}}</span>{{$last?'':', '}}</span>
-  </div>
-        
-  <div class="empty-list" ng-if="relatedItems.length == 0">
-    Your path did not match any <i>documents</i>.
-  </div>
-  <div ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/resource-lite.html"'></div>
+
+<div id='see-also-menu' class="tk-proxima-nova header-menu">
+  <ul>
+    <li>
+      <a ui-sref-active-eq="active" ui-sref="neighbors.resources">
+        <b>{{related.resource || 0}}</b> resources
+      </a>
+    </li>
+    <li ng-if='related.person'>
+      <a>
+        <b>{{related.person}}</b> persons
+      </a>
+    </li>
+    <li ng-if='related.location'>
+      <a>
+        <b>{{related.location}}</b> location
+      </a>
+    </li>
+  </ul>
+</div>
+
+
+<div ui-view id='see-also' ng-cloak>
+  
 </div>

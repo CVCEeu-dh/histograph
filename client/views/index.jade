@@ -91,7 +91,7 @@ html
                 a(ng-href='/auth/google?next={{locationPath}}', class='btn btn-default expanded') login with google 
                   i(class='fa fa-google-plus')
       else
-        div(class='view {{currentCtrl}} {{currentState}} {{queueStatus}}')
+        div(class='view {{currentCtrl}} {{currentState|humanizeState}} {{queueStatus}}')
           
           div(ui-view='', autoscroll='true')
         
@@ -144,7 +144,7 @@ html
           //-           button(class='btn btn-primary', ng-click='createObservation()') answer
               
         
-        div(id='milkyway', sigma, graph='graph', freeze='freeze' tips='headers.graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentState}} {{queueStatus}}', controller='currentCtrl' redirect='redirect(path)')
+        div(id='milkyway', sigma, graph='graph', freeze='freeze' tips='headers.graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentState|humanizeState}} {{queueStatus}}', controller='currentCtrl' redirect='redirect(path)')
 
         
         div(id='timeline', timeline, class='{{currentState}} {{queueStatus}}', t='timeline', cxt='contextualTimeline', filters="params")
@@ -197,7 +197,7 @@ html
                     i(class='fa fa-times-circle')
                 
           div(id='playlist-actions', class='btn-group')
-            a(ng-href='/#/neighbors/{{playlist | map:"id"}}', tooltip-append-to-body='true', tooltip='explore connections between your readlist', class='btn btn-primary')
+            a(ng-href='/#/neighbors/{{playlist | map:"id"}}/r', tooltip-append-to-body='true', tooltip='explore connections between your readlist', class='btn btn-primary')
               i(class='fa fa-diamond')
             //- a(ng-href='/#/neighbors/{{playlist | map:"id"}}', tooltip-append-to-body='true', tooltip='explore neighborhood of your readlist', class='btn btn-primary')
             //-   i(class='fa fa-rocket')

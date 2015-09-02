@@ -158,6 +158,7 @@ angular
         @todo
       */    
       .state('neighbors', {
+        abstract: true,
         url: '/neighbors/{ids:[0-9,]+}',
         templateUrl: 'templates/neighbors.html',
         controller: 'NeighborsCtrl',
@@ -169,6 +170,13 @@ angular
           }
         }
       })
+        
+        .state('neighbors.resources', {
+          url: '/r',
+          templateUrl: 'templates/partials/neighbors.html',
+          controller: 'NeighborsResourcesCtrl',
+        })
+      
       .state('search', {
         url: '/search/{query:[^/]*}',
         templateUrl: 'templates/search.html',
