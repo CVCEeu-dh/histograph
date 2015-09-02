@@ -21,7 +21,9 @@ angular.module('histograph')
           '<div class="action" ng-click="rescale()"><i class="fa fa-dot-circle-o"></i></div>' +
           '<div class="action" ng-click="zoomin()"><i class="fa fa-plus"></i></div>' +
           '<div class="action" ng-click="zoomout()"><i class="fa fa-minus"></i></div>' +
-        '</div>',
+        '</div>' + 
+        '<div id="tooltip-sigma" class="mouse tooltip"><div class="tooltip-inner"></div>',
+        
       scope:{
         graph: '=',
         tips: '=',
@@ -34,7 +36,7 @@ angular.module('histograph')
         /*
           Sigma addons
           ---
-          thanks to @jacomyal (it need to be added before creating any new instance)
+          thanks to @jacomyal (it need to be added before creating any new instance of sigmajs)
         */
         sigma.classes.graph.addMethod('neighbors', function (nodeId) {
           var k,
@@ -46,6 +48,14 @@ angular.module('histograph')
           neighbors[nodeId] = this.nodesIndex[nodeId];
           return neighbors;
         });
+        
+        // configure a default tooltip
+        var tooltip = {};
+        
+        tooltip.tip         = $("#tooltip-sigma");
+        tooltip.el          = tooltip.tip.find('.tooltip-inner');
+        tooltip.isVisible   = false;
+        tooltip.text        = '';
         
         // Creating sigma instance
         var timeout,
@@ -70,7 +80,9 @@ angular.module('histograph')
                   defaultLabelSize: '12',
                   labelHoverShadowColor: '#a5a5a5',
                   labelHoverShadowBlur: 16,
-                  labelSize: ''
+                  labelSize: '',
+                  minNodeSize: 3,
+                  maxNodeSize: 10
                 }
               }),
             camera = si.addCamera('main'),
@@ -139,15 +151,15 @@ angular.module('histograph')
           stop();
           clearTimeout(timers.play);
           
+          // clean graph if there is no nodes
           if(!graph || !graph.nodes || !graph.nodes.length) {
             $log.log('::sigma @graph empty, clear...');
             // clean graph, the exit
-             si.graph.clear();
-             si.refresh();
+            si.graph.clear();
+            si.refresh();
             return;
           }
             
-          
           // refresh the scale for edge color, calculated the extent weights of the edges
           scale.domain(d3.extent(graph.edges, function(d) {return d.weight || 1}));
           
@@ -157,15 +169,12 @@ angular.module('histograph')
           // exit
           if(graph.nodes.length == 0)
             return;
-          // calculate a default duration 
+          
+          // calculate initital layout duration 
           layoutDuration = Math.max(Math.min(4* si.graph.nodes().length * si.graph.edges().length, maxlayoutDuration),minlayoutDuration)
           $log.log('::sigma n. nodes', si.graph.nodes().length, ' n. edges', si.graph.edges().length, 'runninn layout atlas for', layoutDuration/1000, 'seconds')
           
-          
-          
-          //if(!previousGraph)
-            
-          $log.log('::sigma force atlas starting in .35s')
+          // timout the layout
           timers.play = setTimeout(function(){
             si.graph.clear().read(graph);
             si.graph.nodes().forEach(function(n) {
@@ -176,7 +185,7 @@ angular.module('histograph')
             n.size = Math.sqrt(si.graph.degree(n.id));
           });
           if(graph.nodes.length > 50) {
-            si.settings('labelThreshold', 3.5);
+            si.settings('labelThreshold', 5.5);
             si.settings('labelSize', 'fixed');
             $log.log('::sigma change settings, a lot of nodes')
           } else {
@@ -187,7 +196,7 @@ angular.module('histograph')
             rescale();
             si.refresh();
             play(); 
-          }, 350)
+          }, 50)
           
         });
         
@@ -262,6 +271,50 @@ angular.module('histograph')
           //     {duration: 250}
           //   );
         });
+        
+        /*
+          listener overNode
+          on mouseover, draw the related tooltip in the correct position.
+          We use the renderer since the tooltip is relqtive to sigma parent element.
+        */
+        si.bind('overNode', function(e) {
+          // console.log(e.data.node, tooltip.el)
+          if(tooltip.timer)
+            clearTimeout(tooltip.timer);
+          
+          var _css = {
+            top: e.data.node['renderer1:y'],
+            left: e.data.node['renderer1:x']
+          };
+          
+          if(!tooltip.isVisible)
+            _css.opacity = 1.0;
+          
+          if(tooltip.text != e.data.node.label)
+            tooltip.el.text(e.data.node.label);
+          
+          tooltip.isVisible = true;
+          tooltip.text = e.data.node.label
+          // apply css transf
+          tooltip.tip.css(_css);
+        });
+
+        /*
+          listener outNode
+        */
+        si.bind('outNode', function(e) {
+          if(!tooltip.isVisible)
+            return;
+          if(tooltip.timer)
+            clearTimeout(tooltip.timer);
+          tooltip.timer = setTimeout(function() {
+            tooltip.tip.css({
+              opacity: 0
+            });
+          }, 210);
+          
+          tooltip.isVisible = false;
+        })
         
         si.bind('clickEdge', function(e) {
           console.log('overEdge', e.data, e)
@@ -398,7 +451,7 @@ angular.module('histograph')
           context.arc(
             node[prefix + 'x'],
             node[prefix + 'y'],
-            node[prefix + 'size'] + 2,
+            node[prefix + 'size'],
             0,
             Math.PI * 2,
             true
@@ -539,92 +592,36 @@ angular.module('histograph')
           
         */
         sigma.canvas.hovers.def = function(node, context, settings) {
-          var x,
-              y,
-              w,
-              h,
-              e,
-              fontStyle = settings('hoverFontStyle') || settings('fontStyle'),
-              prefix = settings('prefix') || '',
-              size = node[prefix + 'size'],
-              fontSize = (settings('labelSize') === 'fixed') ?
-                settings('defaultLabelSize') :
-                settings('labelSizeRatio') * size;
+          var prefix = settings('prefix') || '';
           
-          // Label background:
-          context.font = (fontStyle ? fontStyle + ' ' : '') +
-            fontSize + 'px ' + (settings('hoverFont') || settings('font'));
-          
+          context.fillStyle = node.discard? "rgba(0,0,0, .21)": "rgba(255,255,255, .81)";
+        
           context.beginPath();
-          context.fillStyle = settings('labelHoverBGColor') === 'node' ?
-            (node.color || settings('defaultNodeColor')) :
-            settings('defaultHoverLabelBGColor');
-
-          if (node.label && settings('labelHoverShadow')) {
-            context.shadowOffsetX = 0;
-            context.shadowOffsetY = 2;
-            context.shadowBlur = settings('labelHoverShadowBlur') || 8;
-            context.shadowColor = settings('labelHoverShadowColor');
-          }
-
-          if (node.label && typeof node.label === 'string') {
-            x = Math.round(node[prefix + 'x'] - fontSize / 2 - 2);
-            y = Math.round(node[prefix + 'y'] - fontSize / 2 - 2);
-            w = Math.round(
-              context.measureText(node.label).width + fontSize / 2 + size + 7
-            );
-            h = Math.round(+fontSize + 4);
-            e = Math.round(fontSize / 2 + 2);
-
-            context.moveTo(x, y + e);
-            context.arcTo(x, y, x + e, y, e);
-            context.lineTo(x + w, y);
-            context.lineTo(x + w, y + h);
-            context.lineTo(x + e, y + h);
-            context.arcTo(x, y + h, x, y + h - e, e);
-            context.lineTo(x, y + e);
-
-            context.closePath();
-            context.fill();
-
-            context.shadowOffsetX = 0;
-            context.shadowOffsetY = 0;
-            context.shadowBlur = 0;
-          }
-
-          // Node border:
-          if (settings('borderSize') > 0) {
+          context.arc(
+            node[prefix + 'x'],
+            node[prefix + 'y'],
+            node[prefix + 'size']+3,
+            0,
+            Math.PI * 2,
+            true
+          );
+          
+          context.fill();
+          context.closePath();
+          
+          if( node[prefix + 'size']) {
+            context.fillStyle = "#151515";
             context.beginPath();
-            context.fillStyle = settings('nodeBorderColor') === 'node' ?
-              (node.color || settings('defaultNodeColor')) :
-              settings('defaultNodeBorderColor');
             context.arc(
               node[prefix + 'x'],
               node[prefix + 'y'],
-              size + settings('borderSize'),
+              3,
               0,
               Math.PI * 2,
               true
             );
-            context.closePath();
             context.fill();
-          }
-
-          // Node:
-          var nodeRenderer = sigma.canvas.nodes[node.type] || sigma.canvas.nodes.def;
-          nodeRenderer(node, context, settings);
-
-          // Display the label:
-          if (node.label && typeof node.label === 'string') {
-            context.fillStyle = (settings('labelHoverColor') === 'node') ?
-              (node.color || settings('defaultNodeColor')) :
-              settings('defaultLabelHoverColor');
-
-            context.fillText(
-              node.label,
-              Math.round(node[prefix + 'x'] + size + 3),
-              Math.round(node[prefix + 'y'] + fontSize / 3)
-            );
+            context.closePath();
           }
         };
       }

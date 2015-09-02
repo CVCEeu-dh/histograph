@@ -1281,6 +1281,19 @@ li.CodeMirror-hint-active {
   font-family: 'proxima-nova';
 }
 
+#tooltip-sigma {
+  width: 200px;
+  margin-left: -100px;
+  margin-top: -50px;
+  background: transparent;
+  text-align: center;
+}
+
+#tooltip-sigma .tooltip-inner{
+  position: relative;
+  background: #383838;
+  display: inline-block;
+}
 /*
   
   Animate.css animations
