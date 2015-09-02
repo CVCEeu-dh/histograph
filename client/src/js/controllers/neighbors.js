@@ -33,20 +33,20 @@ angular.module('histograph')
     });
     
     var resourcesToLoad = allInBetween.data.result.graph.nodes.filter(function (d) {
-      console.log(d, playlistIds.indexOf(d.id))
       return d.type == 'resource' && playlistIds.indexOf(d.id)== -1;
     }).map(function (d) {
       return d.id;
     });
     
-    $log.log('NeighborsCtrl load related items ',resourcesToLoad.length , playlistIds);
+    $log.log('NeighborsCtrl load related items ',resourcesToLoad.length);
     
     
     if(resourcesToLoad.length)
       ResourceFactory.get({
         id: resourcesToLoad.join(',')
       }, function(res) {
-        $scope.setRelatedItems(res.result.items);
+        console.log(resourcesToLoad.join(','))
+        $scope.setRelatedItems(res.result.items || [res.result.item]);
       })
     else
       $scope.setRelatedItems([])
