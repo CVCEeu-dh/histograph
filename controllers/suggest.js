@@ -78,9 +78,9 @@ module.exports =  function(io){
           offset: form.params.offset
         }
       }, function (err, results) {
-        console.log(results.count_items.length)
-        
-        console.log(_.flatten(results.count_items, true));
+        // ids of all the discovered.
+        var discovered = _.unique(_.flatten(results.count_items, true), 'id');
+      
         if(err)
           return helpers.cypherQueryError(err, res);
         
@@ -116,13 +116,8 @@ module.exports =  function(io){
             edges: _.values(graph.edges)
           }
         }, {
-          total_items: _.unique(
-            _.map(
-              _.compact(
-                _.flatten(results.count_items)
-              ), 'id'
-            )
-          ).length,
+          total_items: discovered.length,
+          clusters: _.mapValues(_.groupBy(discovered, 'type'),_.size),
           params: {
             offset: form.params.offset,
             limit: form.params.limit,
