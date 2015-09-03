@@ -52,14 +52,15 @@ html
                 span {{user.username}} 
               
              
-              div(class='inline', dropdown, dropdown-append-to-body='true', is-open='status.isopen')
-                span(dropdown-toggle, ng-disabled='disabled')
-                  {{ language }}
-                  i(class='fa fa-down')
-      
-                ul(class='dropdown-menu', role='menu', )
-                  li(ng-repeat='lang in availableLanguages', ng-click='setLanguage(lang)') {{lang}}
-              
+              div(class='inline', style='position:relative')
+                div(dropdown, dropdown-append-to-body='true', is-open='status.isopen')
+                  span(dropdown-toggle, ng-disabled='disabled')
+                    {{ language }}
+                    i(class='fa fa-down')
+        
+                  ul(class='dropdown-menu', role='menu', )
+                    li(ng-repeat='lang in availableLanguages', ng-click='setLanguage(lang)') {{lang}}
+                
               a(href='/logout')
                 span  logout
                 

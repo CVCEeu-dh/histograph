@@ -226,14 +226,14 @@ angular.module('histograph')
         return 'media/' + props.url;
       
       if(!props.languages || !props.languages.length)
-        return ''; // noty found...
+        return; // noty found...
       
-      var primary = props[language + '_url'];
-        
+      var primary = props['url_' + language ] || props[language + '_url'];
+        console.log('URL', props, primary)
       if(primary)
         return primary;
       
-      return props[props.languages[0] + '_url']
+      return props['url_' + props.languages[0]] || props[props.languages[0] + '_url']
     }
   })
   /*

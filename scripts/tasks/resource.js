@@ -2,9 +2,11 @@
   
   Resource task collection
 */
-var settings = require('../../settings'),
-    async    = require('async'),
-    Resource = require('../../models/resource');
+var settings  = require('../../settings'),
+    async     = require('async'),
+    path      = require('path'),
+    fs        = require('fs'),
+    Resource  = require('../../models/resource');
 
 module.exports = {
   
@@ -17,7 +19,7 @@ module.exports = {
         'languages',
         'title_en',
         'caption_en',
-        'url',
+        'url_en',
         'start_date',
         'end_date',
         'viaf_id'
@@ -60,6 +62,20 @@ module.exports = {
       return;
     }
     
+    // check that url are in place, for each resource
+    options.data.forEach(function(resource) {
+      languages.forEach(function (language) {
+        if(!_.isEmpty(resource['url_' + language])) {
+          var filename =  path.join(settings.paths.txt, resource['url_' + language]);
+          console.log(clc.blackBright('   checking url: '), filename);
+          // throw an error if the specified file cannot be found
+          // console.log(fs.accessSync(filename))
+          if(!fs.existsSync(filename)) {
+            throw 'file not found.'
+          }
+        }
+      })
+    });
     
     console.log(clc.blackBright('   everything looks good, saving', clc.magentaBright(options.data.length), 'resources'));
         
@@ -67,13 +83,19 @@ module.exports = {
       resource.user = options.marvin;
       resource.languages = _.compact(_.map(resource.languages.split(','),_.trim)).sort()
       resource.name = resource.name || resource.title_en;
-      console.log(clc.blackBright('   saving ...', clc.whiteBright(resource.slug)))
+      // check that every urls exist
+      
+      
+      
+      console.log(clc.blackBright('   creating ...', clc.whiteBright(resource.slug)))
+      
+      
       Resource.create(resource, function (err, res) {
         if(err) {
           q.kill();
           callback(err)
         } else {
-          console.log(clc.blackBright('   resource: ', clc.whiteBright(resource.slug), 'saved', q.length(), 'resources remaining'));
+          console.log(clc.blackBright('   resource: ', clc.whiteBright(res.id), 'saved,', q.length(), 'resources remaining'));
       
           next();
           

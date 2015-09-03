@@ -21,6 +21,7 @@ var express       = require('express'),        // call express
     cookieParser  = require('cookie-parser'),
     
     fs            = require('fs'),
+    path          = require('path'),
     morgan        = require('morgan'),    // logging puropse
 
     ctrl          = require('require-all')({
@@ -189,22 +190,33 @@ clientRouter.route('/auth/google/callback')
 
 clientRouter.route('/media/:file')
   .get(function (req, res, next) {
-    var file = req.params.file|| '';
-    file = req.params.file
-            .split('/')
-            .join('');
-    return res.sendFile(settings.mediaPath + '/' + file, { root: __dirname });
+    var filename = path.join(settings.paths.media, req.params.file);
+    res.sendFile(filename, {root: __dirname}, function (err) {
+      if(err) {
+        res.status(err.status).end();
+      }
+    });
   })
 
 clientRouter.route('/txt/:file')
   .get(function (req, res, next) {
-    var file = req.params.file|| '';
-    // clean parameter
-    file = req.params.file
-            .split('/')
-            .join('');
-    return res.sendFile(settings.paths.txt + '/' + file, { root: __dirname });
+    var filename = path.join(settings.paths.txt, req.params.file);
+    res.sendFile(filename, {root: __dirname}, function (err) {
+      if(err) {
+        res.status(err.status).end();
+      }
+    });
   })
+
+clientRouter.route('/txt/:path/:file')
+  .get(function (req, res, next) {
+    var filename = path.join(settings.paths.txt, req.params.path, req.params.file);
+    res.sendFile(filename, {root: __dirname}, function (err) {
+      if(err) {
+        res.status(err.status).end();
+      }
+    });
+  });
 
 
 /*
@@ -214,19 +226,10 @@ clientRouter.route('/txt/:file')
 
 */
 apiRouter.use(function (req, res, next) { // middleware to use for all requests
-  if (req.isAuthenticated()) {
-    // understand some basic query parameters and output metadata about the request
-    var params = {};
-    
-    if(req.query.limit) {
-      // check every items here, otherwise block the flow
-      
-    }
-    
+  if(req.isAuthenticated())
     return next();
-  }
-  
-  return res.error(403);
+  else
+    return res.error(403);
 });
 
 // api index

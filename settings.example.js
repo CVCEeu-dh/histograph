@@ -14,6 +14,8 @@ module.exports = {
   },
   
   paths: {
+    media: '',
+    txt: './contents/dataset/txt',
     accesslog: './logs/access.log'
   },
 
@@ -31,6 +33,7 @@ module.exports = {
     fields: [
       'title',
       'caption',
+      'url'
     ],
     services: {
       'yagoaida': ['en']
@@ -38,11 +41,7 @@ module.exports = {
     geoservices: {
       'geonames': ['en', 'fr', 'de', 'nl'],
       'geocoding': ['en', 'fr', 'de', 'nl']
-    },
-    trustworthiness: [
-      'services',
-      'languages'
-    ]
+    }
   },
   
   

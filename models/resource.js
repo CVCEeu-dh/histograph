@@ -340,7 +340,7 @@ module.exports = {
       if(d == 'url') {
         if(!_.isEmpty(resource[d + '_' + options.language])) {
           try{
-            return fs.readFileSync(settings.txtPath + '/' + resource[d + '_' + options.language], {
+            return fs.readFileSync(settings.paths.txt + '/' + resource[d + '_' + options.language], {
               encoding: 'utf8'
             }) || '';
           } catch(e) {
