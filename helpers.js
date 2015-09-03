@@ -1316,10 +1316,7 @@ module.exports = {
         (best.distance > 10000? 0 : (10000 - best.distance) / 10000) *.2 
     }, best.left, best.right);
     
-    if(merged.trustworthiness < settings.disambiguation.threshold.geotrustworthiness)
-      next(IS_EMPTY);
-    else
-      next(null, merged);
+    next(null, merged);
   }
 }
       

@@ -82,6 +82,7 @@ module.exports = {
     var q = async.queue(function (resource, next) {
       resource.user = options.marvin;
       resource.languages = _.compact(_.map(resource.languages.split(','),_.trim)).sort()
+      
       resource.name = resource.name || resource.title_en;
       // check that every urls exist
       
@@ -101,7 +102,7 @@ module.exports = {
           
         }
       })
-    }, 3);
+    }, 1);
     q.push(options.data);
     q.drain = function() {
       callback(null, options);
