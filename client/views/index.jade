@@ -93,60 +93,9 @@ html
                   i(class='fa fa-google-plus')
       else
         div(class='view {{currentCtrl}} {{currentState|humanizeState}} {{queueStatus}}')
-          
           div(ui-view='', autoscroll='true')
         
-        
-          //- div(id='see-also', class='{{currentCtrl}}', ng-cloak)
-          //-   h3 {{headers.seealso}}
-          //-   //- pagination(boundary-links='true', total-items='relatedCount || 0' ng-model='relatedPage' class='pagination-sm' previous-text='<' next-text='>' first-text='<<' last-text='>>')
-          //-   //- change header of the see-also section.
-          //-   div(ng-if="currentCtrl == 'InquiryCreateCtrl'")
-          //-     p new inquiry
-          //-     form
-          //-       div title
-          //-       input(type='text', ng-model='inquiry.name', id='inquiry-name', class='tk-proxima-nova')
-          //-       div content
-          //-       div(ng-model='inquiry.description', ui-codemirror='{lineNumbers: false, lineWrapping : true, mode: "xml"}')
-          //-       div(style='text-align:center')
-          //-         div(class='btn-group', role='group', aria-label='...')
-          //-           button(class='btn btn-primary', ng-click='createInquiry()') create inquiry
-          //-   //- change header of the see-also section.
-          //-   div(ng-if="currentCtrl == 'InquiryCtrl'")
-          //-     p Main inquiry.
-            
-          //-   div(ng-repeat='relatedItem in relatedItems', class='related')
-          //-     div(ng-if='relatedItem.type == "resource"')
-          //-       h4
-          //-         a(ng-href='#/r/{{relatedItem.id}}', ng-bind-html='relatedItem.props | title : language')
-                  
-          //-       div(class='actions')
-          //-         button(class='btn btn-default action', tooltip='add to playlist', tooltip-append-to-body="true", ng-click='queue(relatedItem.id, true)')
-          //-           i(class='fa fa-play-circle-o')
-              
-          //-       div
-          //-         span(class='date') {{relatedItem.props|guessInterval}}
-          //-         span(ng-if='relatedItem.persons', class='tags') — 
-          //-           i in the document:
-          //-           span(ng-repeat='per in relatedItem.persons', data-id='{{per.id}}', ng-click='toggleMenu($event, relatedItem, per)', class='tag person') {{per.name}}
-                
-          //-       img(ng-if='relatedItem.props.mimetype=="image"', ng-src="{{relatedItem.props | url : language}}")
-          //-       blockquote {{relatedItem.props | abstract : language}}
-                
-          //-     div(ng-if='relatedItem.type == "inquiry"', ng-include='"templates/partials/inquiry-lite.html"')
-            
-          //-   div(ng-if="currentCtrl == 'InquiryCtrl'")
-          //-     p new comment
-          //-     form
-          //-       div your answer
-          //-       div(ng-model='comment.content', ui-codemirror='{lineNumbers: false, lineWrapping : true, mode: "xml"}')
-          //-       div(style='text-align:center')
-          //-         div(class='btn-group', role='group', aria-label='...')
-          //-           button(class='btn btn-primary', ng-click='createObservation()') answer
-              
-        
         div(id='milkyway', sigma, graph='graph', freeze='freeze' tips='headers.graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentState|humanizeState}} {{queueStatus}}', controller='currentCtrl' redirect='redirect(path)')
-
         
         div(id='timeline', timeline, class='{{currentState}} {{queueStatus}}', t='timeline', cxt='contextualTimeline', filters="params")
           
@@ -163,17 +112,9 @@ html
             a(class=' action', title='comment', data-action='comment')
               span(class='fa fa-comment-o')
                 
-        div(id='inquirer', class="{{commenting? 'commenting': ''}}")
-          div
-            img(class='user-picture', ng-src='{{user.picture}}')
-            p {{user.username}} {{comment.tags}}
-          div(ng-model='comment.text', ui-codemirror="{lineNumbers: false,theme:'twilight',lineWrapping : true,mode: 'Smalltalk'}")
-          div(style='text-align:center')
-            div(class='btn-group', role='group', aria-label='...')
-              button(class='btn btn-primary', ng-click='postComment()') comment
-              button(ng-if='comment.tags.length' class='btn btn-default') signale
-              button(class='btn btn-default', ng-click='stopCommenting()') close
-        
+        div(id='the-annotator-wrapper')
+          div(id='the-annotator')
+          
         div(id='playlist-resume', ng-class='queueStatus' tooltip-append-to-body='true', tooltip='toggle read queue' ng-click='toggleQueue()')
           span(class="fa fa-angle-up")
               
@@ -231,6 +172,7 @@ html
     script(src='/js/lib/angular-route.min.js')
     script(src='/js/lib/angular-resource.min.js')
     script(src='/js/lib/angular-cookies.min.js')
+    script(src='/js/lib/angular-local-storage.min.js')
     
     script(src='/js/lib/ui-codemirror.min.js')
     

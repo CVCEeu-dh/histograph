@@ -417,14 +417,21 @@ angular.module('histograph')
     $scope.getPlaylistFromLocalStorage();
     
     $scope.queueRedirect = function() {
+      $log.log('CoreCtrl -> queueRedirect()', $state.current); 
       // store in the localstorage just the id
       localStorageService.set('playlist', angular.copy($scope.playlist));
-      if($scope.currentCtrl == 'NeighborsCtrl') {
+      
+      // if there isn't any item, just skip...
+      if($scope.playlist.length == 0) {
+        $scope.queueStatus = '';
+        return;
+      }
+      
+      // Otherwise check the current state
+      
+      if($state.current.controller == 'NeighborsResourcesCtrl') {
         $log.log('    redirect to: /#/neighbors/'+$scope.playlistIds.join(',')); 
-        $location.path('/neighbors/'+$scope.playlistIds.join(','));
-      } else if($scope.currentCtrl == 'AllShortestPathsCtrl') {
-        $log.log('    redirect to: /#/ap/'+$scope.playlistIds.join(','));
-        $location.path('/ap/'+$scope.playlistIds.join(','));
+        $location.path('/neighbors/'+$scope.playlistIds.join(',')+'/r');
       }
     };
     
@@ -454,15 +461,15 @@ angular.module('histograph')
     };
      
     $scope.toggleQueue = function(item) {
-    if($scope.queueStatus == 'sleep')
-      $scope.queueStatus = 'active';
-    else
-      $scope.queueStatus = 'sleep';
+      if($scope.queueStatus == 'sleep')
+        $scope.queueStatus = 'active';
+      else
+        $scope.queueStatus = 'sleep';
     }
     
     // remove from playlist, then redirect.
     $scope.removeFromQueue = function(item) {
-      $log.debug('NeighborsCtrl -> removeFromQueue()', item.id);
+      $log.log('CoreCtrl -> removeFromQueue()', item.id);
       var indexToRemove = -1,
           ids = [];
       
@@ -477,32 +484,14 @@ angular.module('histograph')
         $scope.playlist.splice(indexToRemove, 1);
       
       $scope.playlistIds = ids;
-      //$scope.$apply();
-      if($scope.playlist.length == 0) {
-        $scope.queueStatus = '';
-      }
-      if($scope.currentCtrl == 'NeighborsCtrl') {
-        $log.log('    redirect to: /#/neighbors/'+ids.join(',')); 
-        $location.path('/neighbors/'+ids.join(','));
-      } else if($scope.currentCtrl == 'AllShortestPathsCtrl') {
-        $log.log('    redirect to: /#/ap/'+ids.join(','));
-        $location.path('/ap/'+ids.join(','));
-      }
-      // $scope.playlist.forEach(function (d) {
-      //   if(d.id == item.id) {
-          
-      //   }
-      //     delete d;
-      // });
-      
-      $log.debug('NeighborsCtrl redirect ', $scope.currentCtrl);
+      $scope.queueRedirect();
     };
     
     /*
       Filters
     */
     $scope.removeFilter = function(key, value) {
-      $log.debug('CoreCtrl -> removeFilter','key:', key, '- value:', value)
+      $log.log('CoreCtrl -> removeFilter() - key:', key, '- value:', value)
       $location.search(key, null);
     }
     
@@ -511,7 +500,7 @@ angular.module('histograph')
     */
     $scope.openIssueModal = function (type, target) {
       $scope.freeze = 'sigma';
-      $log.log('CoreCtrl -> openIssueModal', type, 'target_id', target.id)
+      $log.log('CoreCtrl -> openIssueModal - type:', type, 'target_id', target.id)
       var modalInstance = $modal.open({
         animation: false,
         templateUrl: 'templates/partials/comment-modal.html',
