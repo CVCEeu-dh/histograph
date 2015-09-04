@@ -150,8 +150,8 @@ RETURN count(DISTINCT(e)) as count_items
 
 // name: get_similar_resource_ids_by_entities
 // get top 100 similar resources sharing the same persons, orderd by time proximity if this info is available
-MATCH p=(res)<-[:appears_in]-(ent:entity)-[:appears_in]->(res2:resource) 
-WHERE id(res) = {id}
+MATCH p=(res)<-[:appears_in]-(ent:entity)-[:appears_in]->(res2:resource)
+WHERE id(res) = {id} AND ent.score > -1 
 RETURN{
   target: id(res2),
   dst : abs(coalesce(res.start_time, 1000000000) - coalesce(res2.start_time, 0)),

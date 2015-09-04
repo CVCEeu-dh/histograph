@@ -284,11 +284,13 @@ angular.module('histograph')
           tim.fn.x.domain(timeExtent);
           tim.fn.y.domain(weigthExtent);
           $log.log('::timeline', timeExtent);
-          tim.brush.x(tim.fn.x).extent(timeExtent);
           
-          tim.gBrush.call(tim.brush.extent(extension));
-          tim.gBrush.call(tim.brush.event);
           
+          if(extension[0] || extension[1]) {
+            tim.brush.x(tim.fn.x).extent(timeExtent);
+            tim.gBrush.call(tim.brush.extent(extension));
+            tim.gBrush.call(tim.brush.event);
+          }
           // let's draw !!!
           var histogram = tim.histograms.selectAll('.t')
             .data(dataset, function (d){
