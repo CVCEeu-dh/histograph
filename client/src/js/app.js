@@ -32,13 +32,16 @@ angular
     'ui.bootstrap',
     'ui.codemirror',
     // 'mgcrea.ngStrap'
-    'perfect_scrollbar'
+    'perfect_scrollbar',
+    'LocalStorageModule'
   ])
   .constant("EVENTS", {
     USE_USER: 'use_user',
     USER_NOT_AUTHENTIFIED: 'user_not_authentified',
     API_PARAMS_CHANGED: 'api_params_changed',
-    PAGE_CHANGED: 'page_changed'
+    PAGE_CHANGED: 'page_changed',
+    ANNOTATOR_SHOWN: 'annotationEditorShown',
+    ANNOTATOR_HIDDEN: 'annotationEditorHidden'
   })
   .constant("VIZ", {
     TIMELINE: 'timeline'
@@ -47,6 +50,15 @@ angular
     LOADING: 'loading, please wait',
     LOADED: 'loaded',
     AUTH_REQUIRED: 'please connect with your credentials'
+  })
+  /*
+    Local-storage module config. cfr
+    https://github.com/grevory/angular-local-storage
+  */
+  .config(function (localStorageServiceProvider) {
+    localStorageServiceProvider
+      .setPrefix('histograph')
+      .setNotify(true, true);
   })
   .config(function ($stateProvider, $urlRouterProvider) {
     $urlRouterProvider.otherwise("/");

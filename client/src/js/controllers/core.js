@@ -8,7 +8,7 @@
  */
 angular.module('histograph')
   
-  .controller('CoreCtrl', function ($scope, $rootScope, $location, $state, $timeout, $route, $log, $timeout, $http, $routeParams, $modal, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, EVENTS, VIZ, MESSAGES) {
+  .controller('CoreCtrl', function ($scope, $rootScope, $location, $state, $timeout, $route, $log, $timeout, $http, $routeParams, $modal, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, localStorageService, EVENTS, VIZ, MESSAGES) {
     $log.debug('CoreCtrl ready');
     $scope.locationPath = $location.path(); 
     
@@ -30,7 +30,6 @@ angular.module('histograph')
     
     // the current user
     $scope.user = {};
-    
     
     
     // current headers for a given column. Cfr setHeader
@@ -301,6 +300,8 @@ angular.module('histograph')
       // set header andccording to the controllers
       
     });
+    
+    
     /*
       change the given user, programmatically. Cfr httpProvider config in app.js
     */
@@ -378,6 +379,8 @@ angular.module('histograph')
         return;
       }
       
+      
+      
       // otherwise add item to queue...
       if(typeof item == 'object') {
         $scope.playlist.push(item);
@@ -400,8 +403,22 @@ angular.module('histograph')
         })
       }
     };
-     
+    
+    $scope.getPlaylistFromLocalStorage = function () {
+      var storedItems = localStorageService.get('playlist');
+      console.log('CoreCtrl -> getPlaylistFromLocalStorage() - n.items:', storedItems.length)
+      if(storedItems.length) {
+        $scope.playlist    = storedItems;
+        $scope.playlistIds = _.map(storedItems, 'id');
+        $scope.queueStatus = 'active';
+      }
+    }
+    
+    $scope.getPlaylistFromLocalStorage();
+    
     $scope.queueRedirect = function() {
+      // store in the localstorage just the id
+      localStorageService.set('playlist', angular.copy($scope.playlist));
       if($scope.currentCtrl == 'NeighborsCtrl') {
         $log.log('    redirect to: /#/neighbors/'+$scope.playlistIds.join(',')); 
         $location.path('/neighbors/'+$scope.playlistIds.join(','));
@@ -520,6 +537,21 @@ angular.module('histograph')
       });
     };
     
+     $scope.cancel = function () {
+      $modalInstance.dismiss('close');
+    };
+    
+    $scope.isAnnotating = false;
+    
+    $scope.$on(EVENTS.ANNOTATOR_SHOWN, function() {
+      $log.info('CoreCtrl @EVENTS.ANNOTATOR_SHOWN')
+      
+    })
+    
+    $scope.$on(EVENTS.ANNOTATOR_HIDDEN, function() {
+      $scope.isAnnotating = false;
+    })
+    
   })
   /*
     This controller handle the modal bootstrap that allow users to propose a new content for something.
@@ -546,7 +578,6 @@ angular.module('histograph')
         });
     };
 
-    $scope.cancel = function () {
-      $modalInstance.dismiss('close');
-    };
+   
   })
+  

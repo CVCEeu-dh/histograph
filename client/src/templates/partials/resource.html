@@ -57,10 +57,11 @@
         </div>
         
         <!-- <a data-id='{{item.id}}'> view on graph</a> or <a ng-click='queue(item.id, true)'> add to playlist</a> -->
-        <blockquote ng-if="currentAnnotation" class="caption" annotator context="item" marked="currentAnnotation.annotated.source" ></blockquote>
-        <blockquote ng-if="!currentAnnotation" class="caption" annotator ng-bind-html="item.props | caption : language">
-        </blockquote>
-
+        <div annotator>
+          <blockquote ng-if="currentAnnotation" class="caption"  context="item" marked="currentAnnotation.annotated.source" ></blockquote>
+          <blockquote ng-if="!currentAnnotation" class="caption"  ng-bind-html="item.props | caption : language">
+          </blockquote>
+        </div>
         <!-- Single button -->
         <div ng-if='item.props.mimetype=="image"'>
           <div ng-if="versions.length > 1" class="btn-group" dropdown is-open="status.isopen" tooltip="view a different version">
@@ -80,8 +81,9 @@
           </div>
         </div>
         
+        <div annotator>
         <div class="full-text" ng-if='item.props.mimetype!="image"' lazytext url='item.props|url:language'></div>
-        
+        </div>
         <blockquote ng-if="item.props.stakeholders||item.props.caption">
          {{item.props.stakeholders||item.props.caption}}
         </blockquote>

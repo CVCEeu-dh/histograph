@@ -229,7 +229,7 @@ angular.module('histograph')
         return; // noty found...
       
       var primary = props['url_' + language ] || props[language + '_url'];
-        console.log('URL', props, primary)
+        // console.log('URL', props, primary)
       if(primary)
         return primary;
       

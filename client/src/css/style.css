@@ -1315,6 +1315,21 @@ li.CodeMirror-hint-active {
   background: #383838;
   display: inline-block;
 }
+
+
+#the-annotator-wrapper {
+  position: fixed;
+  top:0;
+  left:0;
+}
+#the-annotator {
+  position: absolute;
+}
+
+
+#the-annotator.enabled {
+  display: block;
+}
 /*
   
   Animate.css animations

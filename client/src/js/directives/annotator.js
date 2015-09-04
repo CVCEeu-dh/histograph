@@ -88,30 +88,15 @@ angular.module('histograph')
       }
     }
   })
-  .directive('annotator', function ($compile, $log) {
-    return {
+
+  .directive('marked', function ($compile, $log) {
+   return {
       restrict : 'A',
       scope:{
         marked: '=',
         context: '='
       },
       link : function(scope, element, attrs) {
-        
-        Annotator.Plugin.HelloWorld = (function() {
-
-          function HelloWorld(element, options) {
-            this.element = element;
-            this.options = options;
-            console.log("Hello World!");
-          }
-
-          HelloWorld.prototype.pluginInit = function() {
-            console.log("Initialized with annotator: ", this.annotator);
-          };
-
-          return HelloWorld;
-        })();
-        
         var entities = [],
             renderer = new marked.Renderer();
         // chenge how marked interpred link for this special directive only
@@ -133,27 +118,53 @@ angular.module('histograph')
               return d.type
             }).join(',') +'" data-id="' +href +'" tooltip="' +
             localEntities.map(function (d) {
-              return d.name
+              return d.name || d.props.name
             }).join(' - ') + '">' + text + '</a>';
         };
-
-
+        
+        
         scope.$watch('marked', function(val) {
           if(!val)
             return;
           // organise(merge) entitites
-          $log.log('::annotator @marked changed');
+          $log.log('::marked @marked changed');
           
           entities = scope.context.locations.concat(scope.context.persons)
           
           element.html(marked(scope.marked, {
             renderer: renderer
           }));
-
+          
+          // apply tooltip
           $compile(element.contents())(scope);
-          element.annotator()
         })
-        
       }
     }
   })
+
+  .directive('annotator', function ($log) {
+    return {
+      restrict : 'A',
+      scope:{
+        onSelection: '&'
+      },
+      link : function(scope, element, attrs) {
+        element.bind('mouseup', function(e){
+          var selection;
+
+          if (window.getSelection) {
+              selection = window.getSelection();
+          } else if (document.selection) {
+              selection = document.selection.createRange();
+          }
+
+          if (selection.toString() !== '') {
+            var s = selection.toString();
+            $log.log('::annotator -> ',selection)  
+            
+          }
+        });
+      }
+    }
+  });
+  
