@@ -11,11 +11,11 @@ Once cloned,
 	
 	npm install
 
-Then copy paste the settings.example.js to settings.js
+Then copy the `settings.example.js` file to `settings.js`
 	
-	cp settings.example.js setttings.js
+	cp settings.example.js settings.js
 
-Install [Neo4j](http://neo4j.com/) version: 2.1.8 and set database properties to deal with auto_indexing in `conf/neo4j.properties` file.
+Install [Neo4j](http://neo4j.com/) (v 2.2) and configure the database indexing features with auto_indexing in `conf/neo4j.properties` file.
 
 	# Autoindexing
 
@@ -25,35 +25,31 @@ Install [Neo4j](http://neo4j.com/) version: 2.1.8 and set database properties to
 	# The node property keys to be auto-indexed, if enabled
 	node_keys_indexable=full_search,name_search
 
-Complete the installation by pointing to a location in your system that will store the neo4j data (`conf/neo4j-server.properties`)
+Complete the neo4j installation by pointing to a location in your system that will store the neo4j data (`conf/neo4j-server.properties`)
 
 	
 	# location of the database directory
 	org.neo4j.server.database.location=data/graph.db
 
-Run then the setup script: it will add some constraint to neo4j db.
+Run then the setup script: it will add the required constraints to neo4j db.
 
-	node scripts\manage.js --task=setup
+	> node scripts\manage.js --task=setup
 
-Modify neo4j related configuration in your histograph settings.js file, then run tests and check that everything runs properly.
+Modify neo4j related configuration in your histograph `settings.js` file, then run the unit tests in order to check that everything runs properly.
 
-	npm test
+	> npm test
 
 
 ## import data: manage.js script
-Data can be loaded directly as Neo4j node, but the best so far in order to deal with data **import** and **export** in histograph is running
+Once histograph has been installed, documents can be loaded from a csv file via the **import** script by running:
 	
-	node scripts\manage.js
+	> node scripts\manage.js --task=import-resources --source=contents\resources.tsv.example
 
-e.g to import data in histograph:
-
-
-	node scripts\manage.js --task=import-resources --source=contents\resources.tsv.example
-
+For detailed instructions about import and annotation process, see the [related wiki page](https://github.com/CVCEeu-dh/histograph/wiki/importing-text-documents-and-configure-the-annotation-script)
 	
 ## Named Entity Recognition
-Histograph enable the enrichment of resources with different webservices. The most reliable is yagoaida, developed by the team at Max Plank Institute.
-Yago entity extracton is enabled by default, but the disambiguation engine works only for english texts.
+Histograph enable the enrichment of resources with different webservices that extract and disambiguate the name entities found. Among them, we use  (AIDA)[https://github.com/yago-naga/aida] web service, developed by Max Plank Institute.
+AIDA entity extracton is enabled by default, but the disambiguation engine works only for english texts.
 
 First of all, set the correct endpoint to yago aida in settings.js:
 
@@ -62,7 +58,7 @@ First of all, set the correct endpoint to yago aida in settings.js:
     	endpoint: 'https://gate.d5.mpi-inf.mpg.de/aida/service/disambiguate' 
   	},
 
-Then make sure that the disambiguation services include yagoaida:
+Then make sure that the disambiguation services include AIDA:
 
   	disambiguation: {
     	fields: [
@@ -74,18 +70,6 @@ Then make sure that the disambiguation services include yagoaida:
         }
 	}
  
-
-
-## dealing with migration
-Migration folder contains some scripts useful to migrate from the previous dataset composed of many json and xml files to the neo4j database.
-These scripts deal with *reconciliation* as well: reconciliation for human date, locally written; for geographical data, disambiguated by using two geolocation services api (geonames and google geocoding); and for person. Basically the `migrate` script solve the first problem:
-	
-	npm run-script migrate
-
-and the `resolve` script allows you to resolve disambiguation
-
-  npm run-script resolve
-
 
 ## troubleshooting
 ### geocoding api setup
