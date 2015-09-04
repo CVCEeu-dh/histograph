@@ -15,7 +15,7 @@ var settings   = require('../settings'),
     _          = require('lodash'),
 
     neo4j      = require('seraph')(settings.neo4j.host),
-    resource   = require('../models/resource');
+    Resource   = require('../models/resource');
     
 
 module.exports = function(io){
@@ -57,7 +57,7 @@ module.exports = function(io){
       if(ids.length == 0)
         return res.error(404);
       if(ids.length == 1)
-        resource.get(req.params.id, function (err, item) {
+        Resource.get(req.params.id, function (err, item) {
           if(err == helpers.IS_EMPTY)
             return res.error(404);
           if(err)
@@ -67,7 +67,7 @@ module.exports = function(io){
           });
         })
       else
-        resource.getByIds({
+        Resource.getByIds({
           ids: ids
         }, function (err, items) {
           if(err == helpers.IS_EMPTY)
@@ -93,7 +93,7 @@ module.exports = function(io){
       if(!form.isValid)
         return helpers.formError(form.errors, res);
 
-      resource.getMany(form.params, function (err, items, info) {
+      Resource.getMany(form.params, function (err, items, info) {
         return helpers.models.getMany(err, res, items, {
           params: form.params,
           total_items: info.total_items
@@ -116,7 +116,7 @@ module.exports = function(io){
         return helpers.formError(form.errors, res);
       // get the total available
       console.log(form.params)
-      resource.getRelatedResources(form.params, function (err, items, info) {
+      Resource.getRelatedResources(form.params, function (err, items, info) {
         if(err)
           return helpers.cypherQueryError(err, res);
         return res.ok({items: items}, info);
@@ -250,9 +250,9 @@ module.exports = function(io){
         if(err)
           return helpers.cypherQueryError(err, res);
         
-        io.emit('resource:issue:created', {
+        io.emit('resource:create-related-issue:done', {
           user: req.user.username,
-          doi: +req.params.id, 
+          id:  +form.params.id, 
           data: issue
         });
         return res.ok({
@@ -280,9 +280,9 @@ module.exports = function(io){
         if(err)
           return helpers.cypherQueryError(err, res);
         // emit the event for those connected on resource. to be refactored.
-        io.emit('done:commenting', {
+        io.emit('resource:create-related-comment:done', {
           user: req.user.username,
-          resource_id: +req.params.id, 
+          id: +req.params.id, 
           data: items[0].comments[0]
         });
 
@@ -291,7 +291,7 @@ module.exports = function(io){
         });
       })
     },
-     getGraph: function (req, res) {
+    getGraph: function (req, res) {
       
       var type = 'bipartite';
       
@@ -304,7 +304,7 @@ module.exports = function(io){
       }
       
       if(type == 'bipartite') {
-        resource.getGraphPersons(req.params.id, {}, function (err, graph) {
+        Resource.getGraphPersons(req.params.id, {}, function (err, graph) {
            if(err)
             return helpers.cypherQueryError(err, res);
           return res.ok({
@@ -314,7 +314,7 @@ module.exports = function(io){
           });
         });
       } else if(type == 'monopartite-entity') {
-        resource.getGraphPersons(req.params.id, {}, function (err, graph) {
+        Resource.getGraphPersons(req.params.id, {}, function (err, graph) {
            if(err)
             return helpers.cypherQueryError(err, res);
           return res.ok({
@@ -331,7 +331,7 @@ module.exports = function(io){
         if(err)
           return helpers.formError(err, res);
         
-        resource.getTimeline(params, function (err, timeline) {
+        Resource.getTimeline(params, function (err, timeline) {
           if(err)
             return helpers.cypherQueryError(err, res);
           return res.ok({
@@ -343,6 +343,53 @@ module.exports = function(io){
         });
       });
     },
+    
+    
+    /*
+      Create a relationship bzetween the current user and the resoruce
+    */
+    createRelatedUser: function (req, res) {
+      var form = validator.request(req);
+      
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      Resource.createRelatedUser({
+        id: form.params.id
+      }, req.user, function (err, resource) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        io.emit('resource:create-related-user:done', {
+          user: req.user.username,
+          id:   form.params.id, 
+          data: resource
+        });
+        return res.ok({
+          item: resource
+        });
+      })
+    },
+    
+    /*
+      Get the users related to the resource (relationship: [:curates])
+    */
+    getRelatedUsers: function (req, res) {
+      var form = validator.request(req);
+      
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      Resource.getRelatedUsers({
+        id: form.params.id
+      }, form.params, function (err, items, info) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({
+          items: items
+        }, info);
+      })
+    },
+    
     /*
       remap neo4j items to nice resource objects
       @return list of resource objects

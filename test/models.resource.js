@@ -20,6 +20,7 @@ var settings  = require('../settings'),
     
 
 var __user,
+    __userB,
     __social_group,
     __resourceA,
     __resourceB;
@@ -39,6 +40,23 @@ describe('model:resource init', function() {
         throw err;
       should.exist(user.username);
       __user = user;
+      done();
+    });
+  });
+  
+  it('should delete the user B', function (done) {
+    User.remove(generator.user.researcher(), function (err) {
+      if(err)
+        throw err;
+      done();
+    });
+  });
+  it('should create the dummy test user B', function (done){
+    User.create(generator.user.researcher(), function (err, user) {
+      if(err)
+        throw err;
+      should.exist(user.username);
+      __userB = user;
       done();
     });
   });
@@ -70,6 +88,16 @@ describe('model:resource ', function() {
       done();
     })
   });
+  
+  it('should create a relationship with a second user', function (done) {
+    Resource.createRelatedUser(__resourceA, __userB, function (err, resource) {
+      should.equal(resource.rel.start, __userB.id)
+      should.equal(resource.rel.end, __resourceA.id)
+      done();
+    })
+  });
+  
+  
   it('should get resource A plus social_group entity', function (done) {
     Resource.get(__resourceA, function (err, res) {
       if(err)
@@ -253,6 +281,13 @@ describe('model:resource ', function() {
 describe('model:resource cleaning', function() {
   it('should delete the user', function (done) {
     User.remove({email: __user.email}, function (err) {
+      if(err)
+        throw err;
+      done();
+    });
+  });
+  it('should delete the userB', function (done) {
+    User.remove({email: __userB.email}, function (err) {
       if(err)
         throw err;
       done();

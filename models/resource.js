@@ -256,6 +256,53 @@ module.exports = {
     });
   },
   
+  /*
+    Create a special relationship [:♥] between the resource and the user
+    
+  */
+  createRelatedUser: function(resource, user, next) {
+    var now   = helpers.now();
+        
+    neo4j.query(rQueries.merge_user_resource_relationship, { 
+      id: resource.id,
+      username: user.username,
+      creation_date: now.date,
+      creation_time: now.time
+    }, function (err, nodes) {
+      if(err) {
+        next(err);
+        return;
+      }
+      next(null, nodes[0]);
+    });
+  },
+  /*
+    Get the list of users related to the resource
+  */
+  getRelatedUsers: function(resource, params, next) {
+    models.getMany({
+      queries: {
+        count_items: rQueries.count_related_users,
+        items: rQueries.get_related_users
+      },
+      params: {
+        id:     +resource.id,
+        limit:  +params.limit || 10,
+        offset: +params.offset || 0
+      }
+    }, function (err, results) {
+      if(err) {
+        console.log(err)
+        next(err);
+        return;
+      }
+      next(null, results.items, {
+        total_items : results.count_items
+      });
+    }); 
+  },
+  
+  
   update: function(id, properties, next) {
 
   },
@@ -344,7 +391,7 @@ module.exports = {
               encoding: 'utf8'
             }) || '';
           } catch(e) {
-            console.log('dounf', e)
+            console.log('!warning, resource.getText(), file not found or not valid...', e)
             return '';
           }
         }

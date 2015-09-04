@@ -429,3 +429,44 @@ WITH
 } as candidate
 WHERE candidate.start_time IS NOT NULL AND candidate.shared_persons > 0 OR candidate.shared_locations > 0
 RETURN candidate.start_time as t, count(*) as weight
+
+
+// name: merge_user_resource_relationship
+// create or merge the cureted by relationship on a specific entity
+MATCH (res:resource), (u:user {username:{username}})
+WHERE id(res) = {id}
+WITH res, u
+MERGE (u)-[r:curates]->(res)
+ON CREATE SET
+  r.creation_date = {creation_date},
+  r.creation_time = {creation_time}
+ON MATCH SET
+  r.last_modification_date = {creation_date},
+  r.last_modification_time = {creation_time}
+RETURN {
+  id: id(res),
+  props: res,
+  type: last(labels(res)),
+  rel: r
+} as result
+
+
+// name:count_related_users
+// get related users that 'curates'sthe resource
+MATCH (u:user)-[r:curates]->(res)
+RETURN count(u)
+
+// name:get_related_users
+// get related users that 'curates'sthe resource
+MATCH (u:user)-[r:curates]->(res)
+WHERE id(res) = {id}
+RETURN {
+  id: id(u),
+  username: u.username,
+  props: u,
+  type: last(labels(u)),
+  rel: r
+} as users
+ORDER BY r.creation_time DESC
+SKIP {offset}
+LIMIT {limit}

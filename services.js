@@ -201,6 +201,10 @@ module.exports = {
         if(err)
           next(err);
         // FLATTEN YAGO entities by providing only entitites having "best entity"
+        if(!body.mentions) {
+          console.log(body)  
+        }
+        
         var entities = body.mentions.filter(function (d) {
           return d.bestEntity && d.bestEntity.kbIdentifier;
         }).map(function (d) {

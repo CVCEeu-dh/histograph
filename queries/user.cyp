@@ -15,7 +15,8 @@ MERGE (k:user { email:{email} })
     k.picture={picture},
     k.gender={gender}
   RETURN k
-  
+
+
 // name: remove_user
 // WARNING!!!! destroy everything related to the user, as if it never existed.
 MATCH (n:user {email:{email}})

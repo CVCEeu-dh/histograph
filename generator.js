@@ -66,7 +66,8 @@ module.exports = function(options) {
           firstname   : 'Milky',
           lastame     : 'Way',
           strategy    : 'local', // the strategy passport who creates his account, like local or google or twitter
-          about       : ''
+          about       : '',
+          status      : 'enabled'
         }
       },
       

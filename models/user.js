@@ -55,6 +55,7 @@ module.exports = {
         next(null, node);
     });
   },
+  
   /*
     This method MUST NOT HAVE an API access.
     user can contain just the email field.
