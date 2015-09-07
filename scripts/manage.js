@@ -38,6 +38,11 @@ var fs          = require('fs'),
         tasks.resource.importData,
         tasks.helpers.marvin.remove
       ],
+      'query': [
+        tasks.helpers.tick.start,
+        tasks.helpers.cypher.raw,
+        tasks.helpers.tick.end
+      ],
     };
 
 console.log(clc.whiteBright( "\n\n +-+-+ "));
