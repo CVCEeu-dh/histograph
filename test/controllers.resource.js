@@ -132,6 +132,25 @@ describe('controller:resource (related users)', function() {
 
 
 
+// describe('controller:resource (related resources)', function() {
+//   it('should show a list of 10 related resources', function (done) {
+//     session
+//       .get('/api/resource/3553/related/resource?limit=10')
+//       .expect('Content-Type', /json/)
+//       .expect(200)
+//       .end(function (err, res) {
+//         if(err)
+//           console.log(err)
+//         should.not.exists(err);
+//         console.log(res.body.result)
+//         should.exist(res.body.result.items);
+//         done();
+//       });
+//   });
+// })
+
+
+
 describe('controller:resource after', function() {
   it('should delete the resource A', function (done) {
     Resource.remove({
