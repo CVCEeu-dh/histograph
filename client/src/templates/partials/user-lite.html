@@ -1,0 +1,20 @@
+
+<div class="related user">
+  <div  ng-if="relatedItem.props.picture" class="profile-pic">
+    <div class="profile-pic-wrapper">
+      
+      <img ng-src="{{relatedItem.props.picture}}">
+    </div>
+  </div>
+    
+   <div class="author"><a ng-href="/#/u/{{relatedItem.username}}">{{relatedItem.username}}</a>
+   <div><span ng-if='relatedItem.favourites.length'><i class='fa fa-heart-o'></i> favourited — </span> {{relatedItem.proposes.length}} inquiries proposed</div>
+  </div>
+  <div>
+    <div ng-repeat='inquiry in relatedItem.proposes'>
+      <b>
+        <a ng-href="#/r/{{item.id}}/inq/{{inquiry.id}}">{{inquiry.props.name}}</a> — {{inquiry.props.creation_date | date : 'longDate'}}
+      </b>
+    </div>
+  </div>
+</div>

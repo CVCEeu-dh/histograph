@@ -12,19 +12,25 @@
   <ul>
     <li>
       <a ui-sref-active-eq="active" ui-sref="resource({ id: item.id })">
-        see {{totalItems}} related  resources
+        see also
       </a>
     </li>
     <li>
+      <a ui-sref-active-eq="active" tooltip='list this resource related users' ui-sref="resource.users({ id: item.id })">
+        users
+      </a>
+    </li>
+   <!--  <li>
       <a ui-sref-active-eq="active" ui-sref="resource.inquiries({ id: item.id })">
         collections
       </a>
-    </li>
+    </li> -->
     <li>
-      <a ui-sref-active-eq="active" ui-sref="resource.inquiries({ id: item.id })">
-        inquiries / issues
+      <a ui-sref-active-eq="active" tooltip='list this resource related inquiries' ui-sref="resource.inquiries({ id: item.id })">
+        inquiries
       </a>
     </li>
+    
   </ul>
 </div>
 

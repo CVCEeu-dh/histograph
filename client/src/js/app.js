@@ -121,6 +121,20 @@ angular
           },
         }
       })
+        .state('resource.users', {
+          url: '/u',
+          templateUrl: 'templates/partials/users.html',
+          controller: 'UsersCtrl',
+          resolve: {
+            users: function(ResourceRelatedFactory, $stateParams) {
+              return ResourceRelatedFactory.get({
+                id: $stateParams.id,
+                model: 'user'
+              }).$promise;
+            }
+          }
+        })
+        
         .state('resource.inquiry', {
           url: '/inq/{inquiry_id:[0-9,]+}',
           templateUrl: 'templates/partials/inquiry.html',

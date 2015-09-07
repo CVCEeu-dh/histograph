@@ -562,10 +562,15 @@ a#header-logo img{
   background-color: white;
   padding: 20px 15px 1px 15px;
   border: 1px solid #E8E8E7;
+  border-bottom-width: 3px;
   background-clip: padding-box;
   border-radius: 2px;
 }
 
+
+.related.user {
+  padding-bottom: 20px;
+}
 .related .type{
   color: #a5a5a5;
   margin: 0px 0px 10px 0px;

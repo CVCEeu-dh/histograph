@@ -8,6 +8,7 @@ angular.module('histograph')
   .controller('ResourceCtrl', function ($scope, $log, $stateParams, $filter, resource, resources, ResourceVizFactory, ResourceCommentsFactory, ResourceRelatedFactory, socket, EVENTS) {
     $log.debug('ResourceCtrl ready');
     
+    
     /*
       set see also title
     */
@@ -33,7 +34,30 @@ angular.module('histograph')
       $scope.focusId = id;
       $scope.$broadcast('focuson', {id:id});
     }
-
+    
+    /*
+      Favourite the current resource :D  
+    */
+    $scope.favourite = function() {
+      ResourceRelatedFactory.save({
+        id: $stateParams.id,
+        model: 'user',  
+      }, {}, function (res) {
+        console.log('ResourceCtrl -> favourite() - result:', res.status);
+      });
+    }
+    
+    /*
+    
+      Sockets
+      ---
+    */
+    socket.on('resource:create-related-user:done', function (result) {
+      console.log(result)
+      if(result.id == $stateParams.id)
+        // update user notificaation
+        $log.info('ResourceCtrl socket@resource:create-related-user:done - by:', result.user);
+    })
     /**
       commenting, with socket
     
@@ -133,14 +157,14 @@ angular.module('histograph')
       type: $scope.graphType,
       limit: 2000
     }, function(res) {
-      $log.log('res', res)
+      // $log.log('res', res)
       // res.result.graph.nodes.map(function (d) {
       //   // d.x = Math.random()*50;
       //   // d.y = Math.random()*50;
       //   return d;
       // });
     
-      $log.debug('EntityCtrl set graph',res.result.graph.nodes);
+      // $log.debug('EntityCtrl set graph',res.result.graph.nodes);
       
       // once done, load the other viz
       $scope.setGraph(res.result.graph)

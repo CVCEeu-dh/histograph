@@ -50,7 +50,7 @@
             <a ng-if="item.inquiries == 0" class="btn btn-default" tooltip-append-to-body="true" tooltip="create a new inquiry" ng-href="#/r/{{item.id}}/inq/create">
               <i class="fa fa-comment-o"></i>
             </a>
-            <button class="btn btn-default" tooltip-append-to-body="true" tooltip="add to my favourite">
+            <button class="btn btn-default" tooltip-append-to-body="true" ng-click='favourite()' tooltip="add to my favourite">
               <i class="fa fa-heart-o"></i>
             </button>
             <button class="btn btn-default" tooltip-append-to-body="true" tooltip="add to bookmark list" ng-click="queue(item.id, true)">

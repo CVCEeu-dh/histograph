@@ -485,11 +485,11 @@ module.exports = {
     @return err, res
    */
   yagoaida: function (options, next) {
-    console.log('yagoaida', options)
     services.yagoaida({
       text: options.text
     }, function (err, candidates) {
-      console.log('yagoaida', err)
+      if(err)
+        console.log('yagoaida', err)
       var entities   = [],
           entitiesPrefixesToKeep = {
             YAGO_wordnet_district: 'location',
