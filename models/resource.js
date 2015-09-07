@@ -14,6 +14,7 @@ var settings  = require('../settings'),
     models    = require('../helpers/models'),
     
     fs        = require('fs'),
+    path      = require('path'),
     async     = require('async'),
     YAML      = require('yamljs'),
     _         = require('lodash');
@@ -517,9 +518,30 @@ module.exports = {
         var candidates = []; // candidate entities extracted by various mechanisms
         
         var q = async.queue(function (language, nextLanguage) {
-          var filename = 'cached/resource_' + resource.doi + '_discover__'+ language + '.json',
-              content; // the text content to be disambiguated. if it's too long, helpers method should chunk it.
+          var filename = [
+                'resource',
+                resource.id,
+                _.keys(settings.disambiguation.services).join('_'),
+                language
+              ].join('_') + '.json',
               
+              content; // the text content to be disambiguated. if it's too long, helpers method should chunk it.
+          
+          if(settings.paths.cache && settings.paths.cache.disambiguation) {
+            try{
+              var contents = fs.readFileSync(path.join(settings.paths.cache.disambiguation, filename), {
+                    encoding: 'utf8'
+                  }),
+                  cached_candidates = JSON.parse(contents);
+                  
+              candidates = candidates.concat(cached_candidates);
+              console.log(clc.blackBright('  found', clc.whiteBright(candidates.length), 'candidates (cache)'))
+              nextLanguage();
+              return;
+            } catch (e) {
+              console.log(e)
+            }
+          }
           // check if the content for this language has already been discovered
           // if(fs.existsSync(filename)) {
           //   // console.log(clc.blackBright('  using cached file', clc.whiteBright(filename), q.length()));
@@ -564,7 +586,10 @@ module.exports = {
             }
             candidates = candidates.concat(_.flatten(results));
             
-            // fs.writeFileSync(filename, JSON.stringify(candidates, null, 2));
+            // write to cache
+            if(settings.paths.cache && settings.paths.cache.disambiguation) {
+              fs.writeFileSync(path.join(settings.paths.cache.disambiguation, filename), JSON.stringify(candidates, null, 2));
+            }
             nextLanguage();
           });
 
