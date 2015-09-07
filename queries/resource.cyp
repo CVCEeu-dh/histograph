@@ -67,44 +67,53 @@ MATCH (res:resource)
 ORDER BY res.last_modification_time DESC, res.start_time DESC, res.creation_date DESC
 SKIP {offset} 
 LIMIT {limit}
+
 WITH res
 OPTIONAL MATCH (res)-[r_loc:appears_in]-(loc:`location`)
-OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
-OPTIONAL MATCH (res)-[r_org:appears_in]-(org:`organization`)
-OPTIONAL MATCH (res)-[r_soc:appears_in]-(soc:`social_group`)
-WITH res,
-    {  
+ORDER BY r_loc.frequency DESC
+
+WITH res, collect({  
       id: id(loc),
       type: 'location',
       props: loc,
       rel: r_loc
-    } as location,
-    {  
+    })[0..5] as locations   
+OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
+ORDER BY r_per.frequency DESC
+
+WITH res, locations, collect({
       id: id(per),
       type: 'person',
       props: per,
       rel: r_per
-    } as person,
-    {  
+    })[0..5] as persons
+OPTIONAL MATCH (res)-[r_org:appears_in]-(org:`organization`)
+ORDER BY r_org.frequency DESC
+
+WITH res, locations, persons, collect({  
       id: id(org),
       type: 'organization',
       props: org,
       rel: r_org
-    } as organization,
-    {  
+    })[0..5] as organizations
+OPTIONAL MATCH (res)-[r_soc:appears_in]-(soc:`social_group`)
+ORDER BY r_soc.frequency DESC
+
+WITH res, locations, persons, organizations, collect({
       id: id(soc),
       type: 'social_group',
       props: soc,
       rel: r_soc
-    } as social_group
+    })[0..5] as social_groups
+
 RETURN {
    id:id(res),
    type: 'resource',
    props: res,
-   persons:      collect(DISTINCT person)[0..10],
-   organizations: collect(DISTINCT organization),
-   locations:    collect(DISTINCT location),
-    social_groups:    collect(DISTINCT social_group)
+   persons:     persons,
+   organizations: organizations,
+   locations:    locations,
+    social_groups:   social_groups
 } as resource
   
 
