@@ -101,7 +101,7 @@ RETURN {
    id:id(res),
    type: 'resource',
    props: res,
-   persons:      collect(DISTINCT person),
+   persons:      collect(DISTINCT person)[0..10],
    organizations: collect(DISTINCT organization),
    locations:    collect(DISTINCT location),
     social_groups:    collect(DISTINCT social_group)
@@ -439,10 +439,12 @@ WITH res, u
 MERGE (u)-[r:curates]->(res)
 ON CREATE SET
   r.creation_date = {creation_date},
-  r.creation_time = {creation_time}
+  r.creation_time = {creation_time},
+  r.favourited = true
 ON MATCH SET
   r.last_modification_date = {creation_date},
-  r.last_modification_time = {creation_time}
+  r.last_modification_time = {creation_time},
+  r.favourited = true
 RETURN {
   id: id(res),
   props: res,
@@ -452,21 +454,29 @@ RETURN {
 
 
 // name:count_related_users
-// get related users that 'curates'sthe resource
-MATCH (u:user)-[r:curates]->(res)
-RETURN count(u)
+// get related users that 'curates's OR liked the resource
+MATCH (u:user)-[*0..2]-(res)
+WHERE id(res) = {id}
+RETURN count(DISTINCT u) as count_items
 
 // name:get_related_users
 // get related users that 'curates'sthe resource
-MATCH (u:user)-[r:curates]->(res)
+MATCH (res:resource)-[*0..2]-(u)
 WHERE id(res) = {id}
-RETURN {
+WITH res
+OPTIONAL MATCH (u)-[r:curates]->(res)
+OPTIONAL MATCH (u)-[r2:proposes]->(inq)-[:questions]->(res)
+WITH u, r, {
+    id: id(inq),
+    type: last(labels(inq)),
+    rel: r2,
+    props: inq
+  } as proposed_inquiries
+RETURN  {
   id: id(u),
   username: u.username,
   props: u,
   type: last(labels(u)),
-  rel: r
+  favourites: COLLECT(DISTINCT r),
+  proposes: COLLECT(DISTINCT proposed_inquiries)
 } as users
-ORDER BY r.creation_time DESC
-SKIP {offset}
-LIMIT {limit}
