@@ -70,7 +70,7 @@ LIMIT {limit}
 
 WITH res
 OPTIONAL MATCH (res)-[r_loc:appears_in]-(loc:`location`)
-ORDER BY r_loc.frequency DESC
+
 
 WITH res, collect({  
       id: id(loc),
@@ -79,7 +79,6 @@ WITH res, collect({
       rel: r_loc
     })[0..5] as locations   
 OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
-ORDER BY r_per.frequency DESC
 
 WITH res, locations, collect({
       id: id(per),
@@ -88,7 +87,6 @@ WITH res, locations, collect({
       rel: r_per
     })[0..5] as persons
 OPTIONAL MATCH (res)-[r_org:appears_in]-(org:`organization`)
-ORDER BY r_org.frequency DESC
 
 WITH res, locations, persons, collect({  
       id: id(org),
@@ -97,7 +95,6 @@ WITH res, locations, persons, collect({
       rel: r_org
     })[0..5] as organizations
 OPTIONAL MATCH (res)-[r_soc:appears_in]-(soc:`social_group`)
-ORDER BY r_soc.frequency DESC
 
 WITH res, locations, persons, organizations, collect({
       id: id(soc),
