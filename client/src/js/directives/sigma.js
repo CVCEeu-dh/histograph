@@ -24,11 +24,13 @@ sigma.classes.graph.addMethod('neighbors', function (nodeId) {
  * directive to show a grapgh of nodes and edges thanks to @Yomguithereal!!! 
  */
 angular.module('histograph')
+  
   .directive('sigma', function($log, $location) {
     return {
       restrict : 'A',
       template: ''+
         '<div id="playground"></div>' +
+        '<div gmasp target="target"></div>' +
         '<div id="tips" ng-if="tips.length > 0"><div>{{tips}}</div></div>' +
         '<div id="commands" class="{{lookup?\'lookup\':\'\'}}">' +
           '<div tooltip="view all nodes" tooltip-append-to-body="true" class="action {{lookup? \'bounceIn animated\': \'hidden\'}}" ng-click="toggleLookup()"><i class="fa fa-eye"></i></div>' +
@@ -48,7 +50,7 @@ angular.module('histograph')
       },
       link : function(scope, element, attrs) {
         
-        
+        scope.target = 'ciccio'
         // configure a default tooltip
         var tooltip = {};
         
@@ -87,7 +89,6 @@ angular.module('histograph')
                   minEdgeSize: 1,
                   maxEdgeSize: 2,
                   enableEdgeHovering: true,
-                  edgeHoverColor: 'edge',
                   defaultEdgeHoverColor: '#000',
                   edgeHoverSizeRatio: 1,
                   edgeHoverExtremities: true
@@ -97,11 +98,11 @@ angular.module('histograph')
             camera = si.addCamera('main'),
             
             colors = {
-                'person': "rgba(33, 33, 33, 0.7)",
+              person: "#4dc3ba", //rgba(33, 33, 33, 0.7)",
                 'collection': '#16cc00',
                 'resource': '#cc1600',
                 'resourceKnown': '#cc1600'
-              },
+            },
             
             timers = {
                 play: 0
@@ -160,10 +161,11 @@ angular.module('histograph')
           stop();
           clearTimeout(timers.play);
           
+          scope.target = false
           // clean graph if there is no nodes
           if(!graph || !graph.nodes || !graph.nodes.length) {
             $log.log('::sigma @graph empty, clear...');
-            // clean graph, the exit
+            // clean graph, then exit
             si.graph.clear();
             si.refresh();
             return;
@@ -174,10 +176,6 @@ angular.module('histograph')
           
           // Reading new graph
           si.graph.clear();
-          
-          // exit
-          if(graph.nodes.length == 0)
-            return;
           
           // calculate initital layout duration 
           layoutDuration = Math.max(Math.min(4* si.graph.nodes().length * si.graph.edges().length, maxlayoutDuration),minlayoutDuration)
@@ -251,14 +249,16 @@ angular.module('histograph')
         // si.bind('')
         si.bind('clickNode', function(e){
           stop();
-          $log.log('::sigma @clickNode', e.data.node.id,e.data.captor, e.data.node.type || 'entity', e.data.node.label);
+          if(e.data.captor.isDragging)
+            return;
+          $log.log('::sigma @clickNode', e.data);
           
           // trigger to jquery (better via angular, @todo)
-          $('body').trigger('sigma.clickNode', {
-            type: e.data.node.type,
-            id: e.data.node.id,
-            captor: e.data.captor
-          })
+          // $('body').trigger('sigma.clickNode', {
+          //   type: e.data.node.type,
+          //   id: e.data.node.id,
+          //   captor: e.data.captor
+          // })
           
           // calculate the node do keep
           var toKeep = si.graph.neighbors(e.data.node.id);
@@ -271,6 +271,10 @@ angular.module('histograph')
             e.discard = !(toKeep[e.source] && toKeep[e.target])
           });
           scope.lookup = true;
+          scope.target = {
+            type: 'node',
+            data: e.data
+          };
           scope.$apply();
           // refresh the view
           si.refresh();
@@ -300,8 +304,7 @@ angular.module('histograph')
             clearTimeout(tooltip.timer);
           
           var _css = {
-                top: e.data.captor['clientY'],
-                left: e.data.captor['clientX']
+                transform: 'translate('+ e.data.captor['clientX'] +'px,'+ e.data.captor['clientY'] +'px)'
               },
               label = [
                 si.graph.nodes(''+e.data.edge.source).label,
@@ -332,8 +335,7 @@ angular.module('histograph')
             clearTimeout(tooltip.timer);
           
           var _css = {
-            top: e.data.captor['clientY'],
-            left: e.data.captor['clientX']
+            transform: 'translate('+ e.data.captor['clientX'] +'px,'+ e.data.captor['clientY'] +'px)'
           };
           
           if(!tooltip.isVisible)
@@ -353,9 +355,11 @@ angular.module('histograph')
           listener outNode
         */
         si.bind('outEdge outNode', function(e) {
+          
           if(e.data.edge && (tooltip.node == e.data.edge.source || tooltip.node == e.data.edge.target )) {
             return; // i.e, the overnode is thrown before the corresponding outEdge event.
           }
+          console.log('outEdge outNode')
           if(!tooltip.isVisible)
             return;
           if(tooltip.timer)
@@ -373,9 +377,23 @@ angular.module('histograph')
         
         si.bind('clickEdge', function(e) {
           
+          e.data.edge.nodes = {
+            source: si.graph.nodes(''+e.data.edge.source),
+            target: si.graph.nodes(''+e.data.edge.target)
+          };
+          scope.target = {
+            type: 'edge',
+            data: e.data
+          };
+          scope.$apply();
         })
         
         si.bind('clickStage', function(e) {
+          console.log(e.data)
+          if(e.data.captor.isDragging == false)
+            toggleLookup({
+              update: true
+            });
           $('body').trigger('sigma.clickStage');
         })
         
@@ -429,7 +447,7 @@ angular.module('histograph')
           sigma reset neighbors
           from egonetwork to other stories
         */
-        function toggleLookup() {
+        function toggleLookup(options) {
           $log.debug('::sigma -> toggleLookup()')
           si.graph.nodes().forEach(function (n) {
             n.discard = false;
@@ -438,9 +456,12 @@ angular.module('histograph')
             e.discard = false
           });
           scope.lookup = false;
+          scope.target = false;
           // refresh the view
-          rescale()
+          // rescale()
           si.refresh();
+          if(options && options.update)
+            scope.$apply();
         }
         /*
           sigma play
@@ -603,6 +624,9 @@ angular.module('histograph')
           );
           context.stroke();
         };
+        
+         // sigma.canvas.edgeshover.def = function() {}
+        
         /*
           sigma canvas labels renderer
           

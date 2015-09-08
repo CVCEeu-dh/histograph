@@ -10,6 +10,56 @@
  * Quietly used by CoreCtrl.
  */
 angular.module('histograph')
+  .directive('gmasp', function ($log, $location) {
+    return {
+      restrict : 'A',
+      template: ''+ 
+        '<div class="gasp tk-proxima-nova {{enabled?\'enabled animated fadeIn\':\'disabled animated fadeOut\'}}"><div class="inner {{target.type||\'\'}}">'+ 
+          '<div class="text" ng-if="target.type == \'node\'">{{type}} {{label}}</div>' + 
+          '<div class="text" ng-if="target.type == \'edge\'">'+
+            '<i class="fa fa-circle {{left.type}}"></i> {{left.label}} - ' +
+            '{{right.label}} <i class="fa fa-circle {{right.type}}"></i></div>' + 
+          '<div class="action-group">'+
+            '<a class="action" href="{{href}}" title="visit" data-action="link" tooltip="{{linkto}}">'+
+              '<span class="fa fa-link"></span></a>'+
+            '<a class="action queue" tooltip="add to your current playlist" data-action="queue">'+
+              '<span class="fa fa-play-circle-o"></span></a>' +
+            
+          '</div>' +
+        '</div></div>',
+      scope:{
+        target : '='
+      },
+      link : function(scope, element, attrs) {
+        var _gasp = $(element[0]); // gasp instance;
+        scope.enabled = false;
+        $log.log('::gmasp ready');
+        
+        // enable / disable gasp instance
+        scope.$watch('target', function(v) {
+          $log.log('::gmasp @target - value:', v);
+          if(!v || !v.type) {
+            // make it NOT visible
+            scope.enabled = false;
+            return;
+          }
+          // handle label according to target type (node or edge)
+          if(v.type=='node') {
+            scope.href  = '#/e/' + v.data.node.id;
+            scope.label = v.data.node.label;
+            scope.type = v.data.node.type;
+          } else if(v.type == 'edge') {
+            scope.href  = false;
+            scope.left  = v.data.edge.nodes.source;
+            scope.right = v.data.edge.nodes.target;
+          }
+          // make it visible
+          scope.enabled = true;
+          
+        })
+      }
+    }
+  })
   /*
     Jquery Popup.
   */
@@ -126,8 +176,8 @@ angular.module('histograph')
           $log.info(':: gasper @sigma.clickNode', data);
           
           pos = { 
-            top: data.captor.clientY ,
-            left: data.captor.clientX - 40
+            top: data.captor.clientY + 65,
+            left: data.captor.clientX - 100
           };
           type = data.type;
           id   = data.id;

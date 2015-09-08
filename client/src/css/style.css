@@ -856,6 +856,63 @@ height: 150px;
   display: inline-block;
 }
 
+#milkyway .gasp{
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  z-index: 11;
+}
+
+#milkyway .gasp .inner{
+  background-color: #383838;
+    color: white;
+    display: inline-block;
+    height: 40px;
+    margin-top: 10px;
+    padding: 0px 5px 0 15px;
+    border-radius: 2px;
+    line-height: 40px;
+}
+
+#milkyway .gasp .text{
+  display: inline-block;
+}
+
+#milkyway .gasp .action-group{
+  display: inline-block;
+  padding-left: 10px;
+}
+
+#milkyway .gasp a.action{
+    display: inline-block;
+    line-height: 40px;
+    padding: 0 10px 0 10px;
+    width: 40px;
+    color: white;
+    overflow: hidden;
+}
+
+#milkyway .person {
+  color: #4dc3ba;  
+}
+#milkyway .resource {
+  color: #f6941c;  
+}
+
+.disabled{
+  pointer-events: none;  
+}
+
+#milkyway .gasp a.action:hover, #milkyway .gasp a.action:focus{
+  border-bottom: 0px solid transparent;
+  background: #989898
+}
+
+
+
 .fa{
   font-size: 15px;
   line-height: inherit
@@ -1300,11 +1357,16 @@ li.CodeMirror-hint-active {
 */
 .tooltip {
   pointer-events: none;
-      -webkit-transition: opacity .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
-     -moz-transition: opacity .3s cubic-bezier(0.65, 0.05, 0.36, 1);
-       -o-transition: opacity .3s cubic-bezier(0.65, 0.05, 0.36, 1);
-          transition: opacity .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+      -webkit-transition: opacity .2s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
+     -moz-transition: opacity .2s cubic-bezier(0.65, 0.05, 0.36, 1);
+       -o-transition: opacity .2s cubic-bezier(0.65, 0.05, 0.36, 1);
+          transition: opacity .2s cubic-bezier(0.65, 0.05, 0.36, 1);
   
+}
+.tooltip .tooltip-wrapper {
+  position: absolute;
+  bottom: 0px;
+  width:100%;
 }
 .tooltip .tooltip-inner {
   line-height: 18px;
