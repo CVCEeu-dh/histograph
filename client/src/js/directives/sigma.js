@@ -1,5 +1,20 @@
 'use strict';
+/*
+  Sigma addons
+  ---
+  thanks to @jacomyal (it need to be added before creating any new instance of sigmajs)
+*/
+sigma.classes.graph.addMethod('neighbors', function (nodeId) {
+  var k,
+      neighbors = {},
+      index     = this.allNeighborsIndex[nodeId] || {};
 
+  for (k in index)
+    neighbors[k] = this.nodesIndex[k];
+  neighbors[nodeId] = this.nodesIndex[nodeId];
+  return neighbors;
+});
+        
 /**
  * @ngdoc overview
  * @name histograph
@@ -21,8 +36,7 @@ angular.module('histograph')
           '<div class="action" ng-click="rescale()"><i class="fa fa-dot-circle-o"></i></div>' +
           '<div class="action" ng-click="zoomin()"><i class="fa fa-plus"></i></div>' +
           '<div class="action" ng-click="zoomout()"><i class="fa fa-minus"></i></div>' +
-        '</div>' + 
-        '<div id="tooltip-sigma" class="mouse tooltip"><div class="tooltip-inner"></div>',
+        '</div>',
         
       scope:{
         graph: '=',
@@ -33,21 +47,7 @@ angular.module('histograph')
         toggleMenu: '&togglemenu'
       },
       link : function(scope, element, attrs) {
-        /*
-          Sigma addons
-          ---
-          thanks to @jacomyal (it need to be added before creating any new instance of sigmajs)
-        */
-        sigma.classes.graph.addMethod('neighbors', function (nodeId) {
-          var k,
-              neighbors = {},
-              index     = this.allNeighborsIndex[nodeId] || {};
-
-          for (k in index)
-            neighbors[k] = this.nodesIndex[k];
-          neighbors[nodeId] = this.nodesIndex[nodeId];
-          return neighbors;
-        });
+        
         
         // configure a default tooltip
         var tooltip = {};
@@ -82,7 +82,16 @@ angular.module('histograph')
                   labelHoverShadowBlur: 16,
                   labelSize: '',
                   minNodeSize: 3,
-                  maxNodeSize: 10
+                  maxNodeSize: 10,
+                  enableEdgeHovering : true,
+                  minEdgeSize: 1,
+                  maxEdgeSize: 2,
+                  enableEdgeHovering: true,
+                  edgeHoverColor: 'edge',
+                  defaultEdgeHoverColor: '#000',
+                  edgeHoverSizeRatio: 1,
+                  edgeHoverExtremities: true
+    
                 }
               }),
             camera = si.addCamera('main'),
@@ -110,7 +119,7 @@ angular.module('histograph')
         
         // create the main camera and specify 'canvas'
         si.addRenderer({
-          type: 'canvas',//canvas',
+          type: 'canvas',
           camera: 'main',
           container: element.find('#playground')[0]
         });
@@ -175,28 +184,33 @@ angular.module('histograph')
           $log.log('::sigma n. nodes', si.graph.nodes().length, ' n. edges', si.graph.edges().length, 'runninn layout atlas for', layoutDuration/1000, 'seconds')
           
           // timout the layout
-          timers.play = setTimeout(function(){
+          timers.play = setTimeout(function() {
             si.graph.clear().read(graph);
-            si.graph.nodes().forEach(function(n) {
+            si.graph.nodes().forEach(function (n) {
+              
+              n.color = colors[n.type] || "#353535";
+              n.x = n.x || Math.random()*50
+              n.y = n.y || Math.random()*50
+              n.size = Math.sqrt(si.graph.degree(n.id));
+            });
+            si.graph.edges().forEach(function (n) {
+              
+              n.size = n.weight;
+            });
             
-            n.color = colors[n.type] || "#353535";
-            n.x = n.x || Math.random()*50
-            n.y = n.y || Math.random()*50
-            n.size = Math.sqrt(si.graph.degree(n.id));
-          });
-          if(graph.nodes.length > 50) {
-            si.settings('labelThreshold', 5.5);
-            si.settings('labelSize', 'fixed');
-            $log.log('::sigma change settings, a lot of nodes')
-          } else {
-            
-            si.settings('labelThreshold', 0);
-            si.settings('labelSize', 'fixed');
-          }
+            if(graph.nodes.length > 50) {
+              si.settings('labelThreshold', 5.5);
+              si.settings('labelSize', 'fixed');
+              $log.log('::sigma change settings, a lot of nodes')
+            } else {
+              
+              si.settings('labelThreshold', 0);
+              si.settings('labelSize', 'fixed');
+            }
             rescale();
             si.refresh();
             play(); 
-          }, 50)
+          }, 50);
           
         });
         
@@ -273,18 +287,53 @@ angular.module('histograph')
         });
         
         /*
+          listener overEdge
+          on mouseover an edge, make the relationship clear
+        */
+        
+        
+        
+        si.bind('overEdge', function(e) {
+          // debugger
+          // console.log(arguments)
+          if(tooltip.timer)
+            clearTimeout(tooltip.timer);
+          
+          var _css = {
+                top: e.data.captor['clientY'],
+                left: e.data.captor['clientX']
+              },
+              label = [
+                si.graph.nodes(''+e.data.edge.source).label,
+                si.graph.nodes(''+e.data.edge.target).label
+              ].join(' - ');
+          
+          if(!tooltip.isVisible)
+            _css.opacity = 1.0;
+          
+          if(tooltip.text != label)
+            tooltip.el.text(label);
+          
+          tooltip.isVisible = true;
+          tooltip.text = label
+          // apply css transf
+          tooltip.tip.css(_css);
+          
+        });
+        /*
           listener overNode
           on mouseover, draw the related tooltip in the correct position.
           We use the renderer since the tooltip is relqtive to sigma parent element.
         */
         si.bind('overNode', function(e) {
+          console.log('overnode');
           // console.log(e.data.node, tooltip.el)
           if(tooltip.timer)
             clearTimeout(tooltip.timer);
           
           var _css = {
-            top: e.data.node['renderer1:y'],
-            left: e.data.node['renderer1:x']
+            top: e.data.captor['clientY'],
+            left: e.data.captor['clientX']
           };
           
           if(!tooltip.isVisible)
@@ -295,6 +344,7 @@ angular.module('histograph')
           
           tooltip.isVisible = true;
           tooltip.text = e.data.node.label
+          tooltip.node = e.data.node.id;
           // apply css transf
           tooltip.tip.css(_css);
         });
@@ -302,7 +352,10 @@ angular.module('histograph')
         /*
           listener outNode
         */
-        si.bind('outNode', function(e) {
+        si.bind('outEdge outNode', function(e) {
+          if(e.data.edge && (tooltip.node == e.data.edge.source || tooltip.node == e.data.edge.target )) {
+            return; // i.e, the overnode is thrown before the corresponding outEdge event.
+          }
           if(!tooltip.isVisible)
             return;
           if(tooltip.timer)
@@ -316,8 +369,10 @@ angular.module('histograph')
           tooltip.isVisible = false;
         })
         
+        
+        
         si.bind('clickEdge', function(e) {
-          console.log('overEdge', e.data, e)
+          
         })
         
         si.bind('clickStage', function(e) {
@@ -624,6 +679,12 @@ angular.module('histograph')
             context.closePath();
           }
         };
+        
+        /*
+          sigma canvas svg
+          
+        */
+        // sigma.svg.hovers.def = function() {}
       }
     }
   });
