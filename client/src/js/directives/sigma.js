@@ -334,7 +334,7 @@ angular.module('histograph')
           We use the renderer since the tooltip is relqtive to sigma parent element.
         */
         si.bind('overNode', function(e) {
-          console.log('overnode');
+          // console.log('overnode');
           // console.log(e.data.node, tooltip.el)
           if(tooltip.timer)
             clearTimeout(tooltip.timer);
@@ -364,7 +364,7 @@ angular.module('histograph')
           // if(e.data.edge && (tooltip.node == e.data.edge.source || tooltip.node == e.data.edge.target )) {
           //   return; // i.e, the overnode is thrown before the corresponding outEdge event.
           // }
-          console.log('outEdge outNode')
+          // console.log('outEdge outNode')
           if(!tooltip.isVisible)
             return;
           if(tooltip.timer)
@@ -581,7 +581,7 @@ angular.module('histograph')
           var color = "#d4d4d4",
               prefix = settings('prefix') || '';
           
-          if(scope.target.type=='edge' && scope.target.data.edge.id == edge.id) {
+          if(scope.target && scope.target.type=='edge' && scope.target.data.edge.id == edge.id) {
             context.strokeStyle = '#383838';
             context.lineWidth = 6;
             context.beginPath();

@@ -57,17 +57,17 @@ ON CREATE SET
 WITH inq
 MATCH (u:user {username: {username}})
   MERGE (u)-[r:proposes]->(inq)
+  ON CREATE SET
+    r.creation_date = {creation_date},
+    r.creation_time = {creation_time}
 WITH inq, u
 MATCH (res)
   WHERE id(res) = {doi}
 WITH inq, u, res
   MERGE (inq)-[r:questions]->(res)
   ON CREATE SET
-    res.last_modification_date = {creation_date},
-    res.last_modification_time = {creation_time}
-  ON MATCH SET
-    res.last_modification_date = {creation_date},
-    res.last_modification_time = {creation_time}
+    r.creation_date = {creation_date},
+    r.creation_time = {creation_time}
 RETURN {
   id: id(inq),
   props: inq,
@@ -93,8 +93,14 @@ WITH inq, u, res
       com.celebrity     = 0
 WITH inq, com, u, res
   MERGE (com)-[r:answers]->(inq)
+  ON CREATE SET
+    r.creation_date = {creation_date},
+    r.creation_time = {creation_time}
 WITH inq, com, u, res
   MERGE (u)-[r:writes]->(com)
+  ON CREATE SET
+    r.creation_date = {creation_date},
+    r.creation_time = {creation_time}
 RETURN {
   id: id(com),
   props: com,

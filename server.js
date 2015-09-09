@@ -279,6 +279,8 @@ app.use('/api', apiRouter); // api endpoint. we should be auth to pass this poin
 */
 apiRouter.route('/user/session')// api session info
   .get(ctrl.user.session)
+apiRouter.route('/user/pulse') // api session info
+  .get(ctrl.user.pulse)
   
 
 /*

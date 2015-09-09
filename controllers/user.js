@@ -7,9 +7,12 @@
 var settings   = require('../settings'),
     helpers    = require('../helpers'),
     validator  = require('validator'),
+    _validator  = require('../validator'),
     multer     = require('multer'),
     _          = require('lodash'),
     neo4j      = require('seraph')(settings.neo4j.host),
+    
+    User       = require('../models/user'),
 
     fields     = [
       {
@@ -141,8 +144,16 @@ module.exports = function(io) {
     }],
 
 
-    /*
-      POST:/ add an inquiry on a resource, in crowdsourcing
-    */
+    pulse: function(req, res) {
+      var form = _validator.request(req, {
+            limit: 10,
+            offset: 0
+          });
+      User.pulse(req.user, form.params, function (err, items, info) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({items: items}, info);
+      });
+    }
   }
 };

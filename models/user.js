@@ -4,7 +4,8 @@
  *
  */
 var settings  = require('../settings'),
-    helpers   = require('../helpers.js'),
+    helpers   = require('../helpers'),
+    models    = require('../helpers/models'),
     queries   = require('decypher')('./queries/user.cyp'),
     neo4j     = require('seraph')(settings.neo4j.host),
     _         = require('lodash');
@@ -67,5 +68,30 @@ module.exports = {
       else
         next(null);
     }) 
+  },
+  
+  /*
+    This method return a list of live items
+  */
+  pulse: function(user, params, next) {
+    models.getMany({
+      queries: {
+        count_items: queries.count_pulse,
+        items: queries.get_pulse
+      },
+      params: {
+        limit:  params.limit || 10,
+        offset: params.offset || 0
+      }
+    }, function (err, results) {
+      if(err) {
+        console.log(err)
+        next(err);
+        return;
+      }
+      next(null, results.items, {
+        total_items : results.count_items
+      });
+    });
   }
 };
