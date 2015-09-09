@@ -7,8 +7,14 @@
 sigma.classes.graph.addMethod('neighbors', function (nodeId) {
   var k,
       neighbors = {},
-      index     = this.allNeighborsIndex[nodeId] || {};
-
+      index     = {};
+  
+  if(typeof nodeId == 'object')
+    for(var i in nodeId)
+      index = _.assign(index, this.allNeighborsIndex[nodeId[i]]);
+  else
+    index = this.allNeighborsIndex[nodeId] || {}
+  
   for (k in index)
     neighbors[k] = this.nodesIndex[k];
   neighbors[nodeId] = this.nodesIndex[nodeId];
@@ -241,27 +247,19 @@ angular.module('histograph')
           check for focus changes
         */
         $(document).on('click', '[data-id]', focus);
-        // $(document).on('mouseenter', '[data-id]', function(e) {
-          
-        // });
-        // deprecaded, we do not understand what happens $(document).on('mouseenter', '[data-id]', focus);
+        
         /*
           sigma clickNode
-          @todo
         */
-        // si.bind('')
-        si.bind('clickNode', function(e){
+        si.bind('clickNode', function (e){
+          // stop the layout runner
           stop();
-          if(e.data.captor.isDragging)
-            return;
-          $log.log('::sigma @clickNode', e.data);
+          // if(e.data.captor.isDragging) {
+          //   $log.info('::sigma @clickNode isDragging');
+          //   return;
+          // }
           
-          // trigger to jquery (better via angular, @todo)
-          // $('body').trigger('sigma.clickNode', {
-          //   type: e.data.node.type,
-          //   id: e.data.node.id,
-          //   captor: e.data.captor
-          // })
+          $log.log('::sigma @clickNode', e.data);
           
           // calculate the node do keep
           var toKeep = si.graph.neighbors(e.data.node.id);
@@ -273,31 +271,17 @@ angular.module('histograph')
           si.graph.edges().forEach(function (e) {
             e.discard = !(toKeep[e.source] && toKeep[e.target])
           });
+          
           scope.lookup = true;
           scope.target = {
             type: 'node',
             data: e.data
           };
-          
+          // apply the scope
           scope.$apply();
           // refresh the view
           si.refresh();
-          //zoomout();
-          // recenter
-          // sigma.misc.animation.camera(
-          //     si.cameras.main,
-          //     {
-          //       x: e.data.node['read_cammain:x'],
-          //       y: e.data.node['read_cammain:y'],
-          //     },
-          //     {duration: 250}
-          //   );
         });
-        
-        /*
-          listener overEdge
-          on mouseover an edge, make the relationship clear
-        */
         
         
         
@@ -381,21 +365,29 @@ angular.module('histograph')
         
         
         si.bind('clickEdge', function(e) {
-          
           e.data.edge.nodes = {
             source: si.graph.nodes(''+e.data.edge.source),
             target: si.graph.nodes(''+e.data.edge.target)
           };
+          var toKeep = si.graph.neighbors([''+e.data.edge.source, ''+e.data.edge.target]);
+           
+          // enlighten the egonetwork
+          si.graph.nodes().forEach(function (n) {
+            n.discard = !toKeep[n.id];
+          });
+          si.graph.edges().forEach(function (e) {
+            e.discard = !(toKeep[e.source] && toKeep[e.target])
+          });
+          
           scope.target = {
             type: 'edge',
             data: e.data
           };
-          si.refresh();
           scope.$apply();
+          si.refresh();
         })
         
         si.bind('clickStage', function(e) {
-          console.log(e.data)
           if(e.data.captor.isDragging == false)
             toggleLookup({
               update: true
