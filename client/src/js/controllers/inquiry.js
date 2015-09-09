@@ -59,7 +59,7 @@ angular.module('histograph')
       id: +$stateParams.inquiry_id,
       model: 'comment'
     }, function(data) {
-      // $scope.relatedItems = data.result.items;
+      $scope.inquiry.relatedItems = data.result.items;
       relatedItemsIds = data.result.items.map(function (d) {return d.id});
     })
     
@@ -121,7 +121,7 @@ angular.module('histograph')
         }, angular.copy($scope.inquiry), function (data) {
           $log.debug('InquiryCreateCtrl -> createInquiry() success', data.result.item.id);
           // redirect...
-          // $location.path('/i/' + data.result.item.id)
+          $location.path('/r/'+ $stateParams.id +'/inq/' + data.result.item.id)
         })
       };
     }

@@ -29,7 +29,7 @@ MATCH (u:user {username: '@danieleguido'})-[r]-(n)
 OPTIONAL MATCH (n)-[r2]-()
 WITH u, r, r2, n
 
-ORDER BY r2.creation_time DESC, r.creation_time DESC
+ORDER BY n.creation_time DESC, r2.creation_time DESC, r.creation_time DESC
 SKIP {offset}
 LIMIT {limit}
 WITH {

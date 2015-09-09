@@ -360,6 +360,13 @@ angular.module('histograph')
       Playlist
       --------
      */
+     /*
+      items - array of item ids to be loaded and added to queue
+     */
+     $scope.addQueue = function (items) {
+       
+     }
+     
      $scope.queue = function(item, inprog) {
       // load item by id ...
       

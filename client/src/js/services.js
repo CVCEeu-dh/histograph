@@ -124,6 +124,13 @@ angular.module('histograph')
     }
   })
   /*
+    Get a list of resource
+  */
+  .factory('UserFactory', function ($resource) {
+    return $resource('/api/user/:method');
+  })
+  
+  /*
     Get/Update/Delete one resource
   */
   .factory('SuggestFactory', function ($http) {

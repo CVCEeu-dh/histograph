@@ -97,6 +97,24 @@ angular
           }
         }
       })
+      
+      /*
+        user
+        /u          - the authenticated user profile
+        /u/username - the PUBLIC profile of another user
+      */
+      .state('user', {
+        url: '/u',
+        templateUrl: 'templates/user.html',
+        controller: 'UserCtrl',
+        resolve: {
+          pulse: function(UserFactory, $stateParams) {
+            return UserFactory.get({
+              method: 'pulse'
+            }).$promise;
+          }
+        }
+      })
        /*
         resources
         @todo

@@ -28,7 +28,7 @@ module.exports = function(io) {
       }, function (err, com) {
         if(err)
           return helpers.cypherQueryError(err, res);
-        io.emit('done:update_comment', {
+        io.emit('comment:upvote:done', {
           user: req.user.username,
           doi: +req.params.id, 
           data: com
@@ -49,7 +49,7 @@ module.exports = function(io) {
       }, function (err, com) {
         if(err)
           return helpers.cypherQueryError(err, res);
-        io.emit('done:update_comment', {
+        io.emit('comment:downvote:done', {
           user: req.user.username,
           doi: +req.params.id, 
           data: com

@@ -13,7 +13,7 @@
     
     <div class="content" ng-bind-html="inquiry.props.description | marked"></div>
     
-    <div ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/comment-lite.html"' class='comment'></div>
+    <div ng-repeat='relatedItem in inquiry.relatedItems' ng-include='"templates/partials/comment-lite.html"' class='comment'></div>
     
     <form>
       <h4>propose your answer</h4>

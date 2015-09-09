@@ -62,7 +62,7 @@ module.exports = {
     user can contain just the email field.
   */
   remove: function(user, next) {
-    neo4j.query(queries.remove_user, user, function(err, res) {
+    neo4j.query(queries.remove_user, user, function (err, res) {
       if(err)
         next(err);
       else

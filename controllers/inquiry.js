@@ -57,7 +57,7 @@ module.exports = function(io) {
       }, function (err, comment) {
         if(err)
           return helpers.cypherQueryError(err, res);
-        io.emit('done:create_comment', {
+        io.emit('inquiry:create_related_comment:done', {
           user: req.user.username,
           doi: +req.params.id, 
           data: comment

@@ -88,7 +88,7 @@ WITH inq, u, res
       com.language      = {language},
       com.creation_date = {creation_date},
       com.creation_time = {creation_time},
-      com.answered_by   = {username},
+      com.created_by   = {username},
       com.score         = 0,
       com.celebrity     = 0
 WITH inq, com, u, res
