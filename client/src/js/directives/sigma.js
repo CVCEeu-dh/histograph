@@ -580,7 +580,7 @@ angular.module('histograph')
         sigma.canvas.edges.def = function(edge, source, target, context, settings) {
           var color = "#d4d4d4",
               prefix = settings('prefix') || '';
-          
+         
           if(scope.target && scope.target.type=='edge' && scope.target.data.edge.id == edge.id) {
             context.strokeStyle = '#383838';
             context.lineWidth = 6;
@@ -596,7 +596,7 @@ angular.module('histograph')
             context.stroke();
           } else {
           
-          context.strokeStyle = edge.discard? '#d4d4d4' : scale(edge.weight||1)//color;
+          context.strokeStyle = edge.discard? '#e8E8E8' : scale(edge.weight||1)//color;
           context.lineWidth = edge.discard? 1: 2;//edge[prefix + 'weight'] || edge.weight || 1;
           context.beginPath();
           context.moveTo(
