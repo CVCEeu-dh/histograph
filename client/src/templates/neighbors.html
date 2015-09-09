@@ -32,7 +32,7 @@
   </div>
   
   <div class="related entity" ng-repeat="relatedItem in playlist" ng-if="relatedItem.type != 'resource'">
-    {{relatedItem.type}}    
+    <i class="fa type fa-circle {{relatedItem.type}}"></i>{{relatedItem.type}}    
     <div  ng-if="relatedItem.props.thumbnail" class="profile-pic">
       <div class="profile-pic-wrapper">
         

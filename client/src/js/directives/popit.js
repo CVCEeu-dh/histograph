@@ -14,13 +14,13 @@ angular.module('histograph')
     return {
       restrict : 'A',
       template: ''+ 
-        '<div class="gasp tk-proxima-nova {{enabled?\'enabled animated fadeIn\':\'disabled animated fadeOut\'}}"><div class="inner {{target.type||\'\'}}">'+ 
-          '<div class="text" ng-if="target.type == \'node\'">{{type}} {{label}}</div>' + 
-          '<div class="text" ng-if="target.type == \'edge\'">'+
-            '<i class="fa fa-circle {{left.type}}"></i> {{left.label}} - ' +
-            '{{right.label}} <i class="fa fa-circle {{right.type}}"></i></div>' + 
+        '<div class="gasp tk-proxima-nova {{enabled?\'enabled\':\'disabled\'}}"><div class="inner {{target.type||\'\'}}">'+ 
+          '<span class="text" ng-if="target.type == \'node\'" ><i tooltip="{{type}}" class="fa fa-circle type {{type}}"></i>{{label}}</span>' + 
+          '<span class="text" ng-if="target.type == \'edge\'">'+
+            '<i class="fa fa-circle {{left.type}}"></i> &#8594; <i class="fa fa-circle {{right.type}}"></i> {{left.label}} &#8594; ' +
+            '{{right.label}} </span>' + 
           '<div class="action-group">'+
-            '<a class="action" href="{{href}}" title="visit" data-action="link" tooltip="{{linkto}}">'+
+            '<a class="action slide {{target.type == \'node\'? \'enabled\': \'disabled\'}}" href="{{href}}" title="visit" data-action="link" tooltip="{{linkto}}">'+
               '<span class="fa fa-link"></span></a>'+
             '<a class="action queue" tooltip="add to your current playlist" data-action="queue">'+
               '<span class="fa fa-play-circle-o"></span></a>' +

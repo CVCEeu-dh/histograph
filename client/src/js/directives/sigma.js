@@ -99,9 +99,10 @@ angular.module('histograph')
             
             colors = {
               person: "#4dc3ba", //rgba(33, 33, 33, 0.7)",
-                'collection': '#16cc00',
-                'resource': '#cc1600',
-                'resourceKnown': '#cc1600'
+              collection: '#16cc00',
+              location: '#0093a6',
+              resource: '#f6941c',
+              resourceKnown: '#f6941c'
             },
             
             timers = {
@@ -176,7 +177,7 @@ angular.module('histograph')
           
           // Reading new graph
           si.graph.clear();
-          
+          si.refresh();
           // calculate initital layout duration 
           layoutDuration = Math.max(Math.min(4* si.graph.nodes().length * si.graph.edges().length, maxlayoutDuration),minlayoutDuration)
           $log.log('::sigma n. nodes', si.graph.nodes().length, ' n. edges', si.graph.edges().length, 'runninn layout atlas for', layoutDuration/1000, 'seconds')
@@ -186,7 +187,9 @@ angular.module('histograph')
             si.graph.clear().read(graph);
             si.graph.nodes().forEach(function (n) {
               
-              n.color = colors[n.type] || "#353535";
+              n.color = n.type?
+                (colors[n.type] || "#353535"):
+                "#353535";
               n.x = n.x || Math.random()*50
               n.y = n.y || Math.random()*50
               n.size = Math.sqrt(si.graph.degree(n.id));
@@ -208,7 +211,7 @@ angular.module('histograph')
             rescale();
             si.refresh();
             play(); 
-          }, 50);
+          }, 1000);
           
         });
         
@@ -275,6 +278,7 @@ angular.module('histograph')
             type: 'node',
             data: e.data
           };
+          
           scope.$apply();
           // refresh the view
           si.refresh();
@@ -311,6 +315,7 @@ angular.module('histograph')
                 si.graph.nodes(''+e.data.edge.target).label
               ].join(' - ');
           
+          tooltip.edge = e.data.edge.id;
           if(!tooltip.isVisible)
             _css.opacity = 1.0;
           
@@ -346,7 +351,7 @@ angular.module('histograph')
           
           tooltip.isVisible = true;
           tooltip.text = e.data.node.label
-          tooltip.node = e.data.node.id;
+          
           // apply css transf
           tooltip.tip.css(_css);
         });
@@ -356,9 +361,9 @@ angular.module('histograph')
         */
         si.bind('outEdge outNode', function(e) {
           
-          if(e.data.edge && (tooltip.node == e.data.edge.source || tooltip.node == e.data.edge.target )) {
-            return; // i.e, the overnode is thrown before the corresponding outEdge event.
-          }
+          // if(e.data.edge && (tooltip.node == e.data.edge.source || tooltip.node == e.data.edge.target )) {
+          //   return; // i.e, the overnode is thrown before the corresponding outEdge event.
+          // }
           console.log('outEdge outNode')
           if(!tooltip.isVisible)
             return;
@@ -385,6 +390,7 @@ angular.module('histograph')
             type: 'edge',
             data: e.data
           };
+          si.refresh();
           scope.$apply();
         })
         
@@ -457,6 +463,7 @@ angular.module('histograph')
           });
           scope.lookup = false;
           scope.target = false;
+          tooltip.node = false;
           // refresh the view
           // rescale()
           si.refresh();
@@ -521,8 +528,23 @@ angular.module('histograph')
         function drawNode(node, context, settings, options) {
           var prefix = settings('prefix') || '';
           
+          if(scope.target.type=='node' && scope.target.data.node.id == node.id) {
+            context.fillStyle = '#383838';
+            context.beginPath();
+            context.arc(
+              node[prefix + 'x'],
+              node[prefix + 'y'],
+              node[prefix + 'size'] + 4,
+              0,
+              Math.PI * 2,
+              true
+            );
+            
+            context.fill();
+            context.closePath(); 
+              
+          }
           context.fillStyle = node.discard? "rgba(0,0,0, .11)": node.color;
-        
           context.beginPath();
           context.arc(
             node[prefix + 'x'],
@@ -536,33 +558,6 @@ angular.module('histograph')
           context.fill();
           context.closePath();
           
-          // adding the small point
-          // context.fillStyle = node.color;
-          // context.beginPath();
-          // context.arc(
-          //   node[prefix + 'x'],
-          //   node[prefix + 'y'],
-          //   node[prefix + 'size'] - 1,
-          //   0,
-          //   Math.PI * 2,
-          //   true
-          // );
-          // context.fill();
-          // context.closePath();
-          if( node[prefix + 'size'] > 3) {
-            context.fillStyle = "#fff";
-            context.beginPath();
-            context.arc(
-              node[prefix + 'x'],
-              node[prefix + 'y'],
-              1,
-              0,
-              Math.PI * 2,
-              true
-            );
-            context.fill();
-            context.closePath();
-          }
         };
         
         
@@ -578,31 +573,6 @@ angular.module('histograph')
           drawNode(node, context, settings)
         };
         
-        // sigma.canvas.nodes.personKnown = 
-        // sigma.canvas.nodes.resourceKnown = function(node, context, settings) {
-        //   var prefix = settings('prefix') || '';
-        //   drawNode(node, context, settings);
-        //   // Adding a border
-          
-        //   context.beginPath();
-        //   context.setLineDash([3]);
-        //   context.arc(
-        //     node[prefix + 'x'],
-        //     node[prefix + 'y'],
-        //     node[prefix + 'size'] + 3,
-        //     0,
-        //     Math.PI * 2,
-        //     true
-        //   );
-
-        //   context.closePath();
-            
-        //   context.lineWidth = node.borderWidth || 1;
-        //   context.strokeStyle = node.borderColor || '#444';
-        //   context.stroke();
-          
-          
-        // };
         /*
           sigma canvas edge renderer
           
@@ -610,7 +580,22 @@ angular.module('histograph')
         sigma.canvas.edges.def = function(edge, source, target, context, settings) {
           var color = "#d4d4d4",
               prefix = settings('prefix') || '';
-
+          
+          if(scope.target.type=='edge' && scope.target.data.edge.id == edge.id) {
+            context.strokeStyle = '#383838';
+            context.lineWidth = 6;
+            context.beginPath();
+            context.moveTo(
+              source[prefix + 'x'],
+              source[prefix + 'y']
+            );
+            context.lineTo(
+              target[prefix + 'x'],
+              target[prefix + 'y']
+            );
+            context.stroke();
+          } else {
+          
           context.strokeStyle = edge.discard? '#d4d4d4' : scale(edge.weight||1)//color;
           context.lineWidth = edge.discard? 1: 2;//edge[prefix + 'weight'] || edge.weight || 1;
           context.beginPath();
@@ -623,6 +608,7 @@ angular.module('histograph')
             target[prefix + 'y']
           );
           context.stroke();
+          }
         };
         
          // sigma.canvas.edgeshover.def = function() {}
@@ -673,20 +659,20 @@ angular.module('histograph')
         sigma.canvas.hovers.def = function(node, context, settings) {
           var prefix = settings('prefix') || '';
           
-          context.fillStyle = node.discard? "rgba(0,0,0, .21)": "rgba(255,255,255, .81)";
+          // context.fillStyle = node.discard? "rgba(0,0,0, .21)": "rgba(255,255,255, .81)";
         
-          context.beginPath();
-          context.arc(
-            node[prefix + 'x'],
-            node[prefix + 'y'],
-            node[prefix + 'size']+3,
-            0,
-            Math.PI * 2,
-            true
-          );
+          // context.beginPath();
+          // context.arc(
+          //   node[prefix + 'x'],
+          //   node[prefix + 'y'],
+          //   node[prefix + 'size']+3,
+          //   0,
+          //   Math.PI * 2,
+          //   true
+          // );
           
-          context.fill();
-          context.closePath();
+          // context.fill();
+          // context.closePath();
           
           if( node[prefix + 'size']) {
             context.fillStyle = "#151515";

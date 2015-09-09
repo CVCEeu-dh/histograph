@@ -578,6 +578,7 @@ a#header-logo img{
 
 .related h4{
   margin-top: 0;
+  margin-bottom: 0;
   margin-right: 20px;
 }
 
@@ -866,6 +867,16 @@ height: 150px;
   z-index: 11;
 }
 
+#milkyway .gasp.enabled{
+  opacity: 1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  text-align: center;
+  z-index: 11;
+}
+
 #milkyway .gasp .inner{
   background-color: #383838;
     color: white;
@@ -878,7 +889,8 @@ height: 150px;
 }
 
 #milkyway .gasp .text{
-  display: inline-block;
+  display: inline;
+  float:left;
 }
 
 #milkyway .gasp .action-group{
@@ -886,19 +898,37 @@ height: 150px;
   padding-left: 10px;
 }
 
-#milkyway .gasp a.action{
-    display: inline-block;
-    line-height: 40px;
-    padding: 0 10px 0 10px;
-    width: 40px;
-    color: white;
-    overflow: hidden;
+#milkyway .gasp .action{
+  display: inline-block;
+  line-height: 40px;
+  width: 40px;
+  color: white;
+  overflow: hidden;
+    -webkit-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
+     -moz-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+       -o-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+          transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+}
+#milkyway .gasp .action.disabled {
+  opacity: .1; 
 }
 
-#milkyway .person {
+.fa.type{
+  padding: 0;
+  margin: 0;
+  margin-right: 7px;  
+  font-size: inherit;
+}
+
+.fa.person {
   color: #4dc3ba;  
 }
-#milkyway .resource {
+
+.fa.location{
+  color: #0093a6;
+}
+
+.fa.resource {
   color: #f6941c;  
 }
 
