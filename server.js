@@ -10,7 +10,7 @@ var express       = require('express'),        // call express
     settings      = require('./settings'),
 
     app           = exports.app = express(),                 // define our app using express
-    port          = process.env.PORT || 8000,
+    port          = settings.port || process.env.PORT || 8000,
     server        = app.listen(port),
     io            = require('socket.io')
                       .listen(server),

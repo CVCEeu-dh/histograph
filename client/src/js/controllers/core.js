@@ -363,10 +363,25 @@ angular.module('histograph')
      /*
       items - array of item ids to be loaded and added to queue
      */
-     $scope.addQueue = function (items) {
-       
-     }
      
+     $scope.addToQueue = function (items) {
+        var toBeAdded = [];
+        toBeAdded = items.filter(function (d) {
+          return $scope.playlistIds.indexOf(+d) == -1;
+        });
+        
+        $log.log('CoreCtrl -> addToQueue() - n. items:', items.length,'- n. to be added:', toBeAdded.length)
+        if(toBeAdded.length)
+          SuggestFactory.getUnknownNodes({
+            ids: toBeAdded
+          }).then(function (res) {
+            $log.log('CoreCtrl -> addToQueue() SuggestFactory', res);
+            $scope.playlist = $scope.playlist.concat(res.data.result.items);
+            $scope.playlistIds = _.map( $scope.playlist, 'id');
+            $scope.queueStatus = 'active';
+          })
+     }
+
      $scope.queue = function(item, inprog) {
       // load item by id ...
       

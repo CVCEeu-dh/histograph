@@ -95,7 +95,7 @@ html
         div(class='view {{currentCtrl}} {{currentState|humanizeState}} {{queueStatus}}')
           div(ui-view='', autoscroll='true')
         
-        div(id='milkyway', sigma, graph='graph', freeze='freeze' tips='headers.graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentState|humanizeState}} {{queueStatus}}', controller='currentCtrl' redirect='redirect(path)', queue="addToQueue(item)")
+        div(id='milkyway', sigma, graph='graph', freeze='freeze' tips='headers.graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentState|humanizeState}} {{queueStatus}}', controller='currentCtrl' redirect='redirect(path)', queue="addToQueue(items)")
         
         div(id='timeline', timeline, class='{{currentState}} {{queueStatus}}', t='timeline', cxt='contextualTimeline', filters="params")
           

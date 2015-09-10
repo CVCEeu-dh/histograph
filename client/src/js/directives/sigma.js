@@ -52,11 +52,14 @@ angular.module('histograph')
         freeze: '=',
         controller: '=',
         redirect: '&',
+        addToQueue: '&queue',
         toggleMenu: '&togglemenu'
       },
       link : function(scope, element, attrs) {
+        // set the initial target
+        scope.target = false;
         
-        scope.target = 'ciccio'
+        
         // configure a default tooltip
         var tooltip = {};
         

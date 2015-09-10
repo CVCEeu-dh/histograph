@@ -22,7 +22,7 @@ angular.module('histograph')
           '<div class="action-group">'+
             '<a class="action slide {{target.type == \'node\'? \'enabled\': \'disabled\'}}" href="{{href}}" title="visit" data-action="link" tooltip="{{linkto}}">'+
               '<span class="fa fa-link"></span></a>'+
-            '<a class="action queue" tooltip="add to your current playlist" data-action="queue">'+
+            '<a class="action queue" ng-click="addTargetToQueue()" tooltip="add to your current playlist" data-action="queue">'+
               '<span class="fa fa-play-circle-o"></span></a>' +
             
           '</div>' +
@@ -34,6 +34,21 @@ angular.module('histograph')
         var _gasp = $(element[0]); // gasp instance;
         scope.enabled = false;
         $log.log('::gmasp ready');
+        
+        scope.addTargetToQueue = function() {
+          $log.log('::gmasp -> addTargetToQueue()')
+          if(scope.target.type == 'node')
+            scope.$parent.addToQueue({
+              items: [ scope.target.data.node.id ]
+            });
+          else if(scope.target.type == 'edge')
+            scope.$parent.addToQueue({
+              items: [
+                scope.target.data.edge.nodes.source.id,
+                scope.target.data.edge.nodes.target.id
+              ]
+            })
+        }
         
         // enable / disable gasp instance
         scope.$watch('target', function(v) {
