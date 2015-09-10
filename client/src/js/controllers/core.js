@@ -379,6 +379,7 @@ angular.module('histograph')
             $scope.playlist = $scope.playlist.concat(res.data.result.items);
             $scope.playlistIds = _.map( $scope.playlist, 'id');
             $scope.queueStatus = 'active';
+            $scope.queueRedirect();
           })
      }
 
@@ -428,8 +429,10 @@ angular.module('histograph')
     
     $scope.getPlaylistFromLocalStorage = function () {
       var storedItems = localStorageService.get('playlist');
-      if(!storedItems)
+      if(!storedItems) {
         localStorageService.set('playlist', []);
+        storedItems = localStorageService.get('playlist');
+      }
       console.log('CoreCtrl -> getPlaylistFromLocalStorage() - n.items:', storedItems.length)
       if(storedItems.length) {
         $scope.playlist    = storedItems;
