@@ -428,6 +428,8 @@ angular.module('histograph')
     
     $scope.getPlaylistFromLocalStorage = function () {
       var storedItems = localStorageService.get('playlist');
+      if(!storedItems)
+        localStorageService.set('playlist', []);
       console.log('CoreCtrl -> getPlaylistFromLocalStorage() - n.items:', storedItems.length)
       if(storedItems.length) {
         $scope.playlist    = storedItems;
