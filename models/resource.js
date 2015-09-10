@@ -142,13 +142,12 @@ module.exports = {
   getByIds: function(params, next) {
     
     var query = parser.agentBrown(rQueries.get_resources, params);
-    console.log(params.ids)
+    // console.log(params.ids)
     neo4j.query(query, {
       ids: params.ids,
       limit: params.ids.length,
       offset: 0
     }, function (err, items) {
-      console.log(err)
       if(err) {
         next(err);
         return;
@@ -331,6 +330,21 @@ module.exports = {
     }, properties);
     
     helpers.cypherGraph(rQueries.get_graph_persons, options, function (err, graph) {
+      if(err) {
+        next(err);
+        return
+      };
+      next(null, graph);
+    });
+  },
+  
+  /**
+    Monopartite graph of related resources
+  */
+  getRelatedResourcesGraph: function(resource, params, next) {
+    helpers.cypherGraph(rQueries.get_related_resources_graph, _.assign({
+      id: resource.id
+    }, params), function (err, graph) {
       if(err) {
         next(err);
         return

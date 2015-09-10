@@ -115,7 +115,7 @@ module.exports = function(io){
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       // get the total available
-      console.log(form.params)
+      // console.log(form.params)
       Resource.getRelatedResources(form.params, function (err, items, info) {
         if(err)
           return helpers.cypherQueryError(err, res);
@@ -324,6 +324,28 @@ module.exports = function(io){
           });
         });
       }
+    },
+    /*
+      Get monopartite graph of related resource network
+    */
+    getRelatedResourcesGraph: function (req, res) {
+      var form = validator.request(req, {
+            limit: 100,
+            offset: 0
+          });
+      Resource.getRelatedResourcesGraph({
+        id: form.params.id
+      },
+      {
+        limit: form.params.limit,
+        offset: form.params.offset
+      }, function (err, graph) {
+        return res.ok({
+          graph: graph
+        }, {
+          type: 'monopartite'
+        });
+      });
     },
     
     getTimeline: function (req, res) {

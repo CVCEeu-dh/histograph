@@ -365,6 +365,8 @@ apiRouter.route('/resource/:id(\\d+)/related/issue')
   .get(ctrl.resource.getRelatedIssue)
 apiRouter.route('/resource/:id(\\d+)/graph')
   .get(ctrl.resource.getGraph);
+apiRouter.route('/resource/:id(\\d+)/related/resource/graph')
+  .get(ctrl.resource.getRelatedResourcesGraph);
 apiRouter.route('/cooccurrences') // @todo move to entity controller.
   .get(ctrl.resource.getCooccurrences)
 

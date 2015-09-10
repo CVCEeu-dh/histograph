@@ -389,7 +389,7 @@ WITH per
 WITH res
   MATCH (p1:person)-[:appears_in]-(res)-[:appears_in]-(p2:person)
   WHERE p1.score > -1 AND p2.score > -1
-WITH p1, p2, length(collect(DISTINCT res)) as w
+WITH p1, p2, count(DISTINCT res) as w
 RETURN {
   source: {
     id: id(p1),
@@ -405,8 +405,34 @@ RETURN {
   },
   weight: w 
 } as result
-ORDER BY w DESC
+ORDER BY result.weight DESC
 LIMIT {limit}
+
+
+// name: get_related_resources_graph
+//
+MATCH (res:resource)--(ent:person)--(res2:resource)
+WHERE id(res) = {id}
+WITH res2
+MATCH (res2:resource)<--(ent_int:person)-->(res3:resource)
+WHERE res2 <> res3
+WITH res2, res3, count(distinct ent_int) as intersection
+RETURN {
+  source: {
+    id: id(res2),
+    type: LAST(labels(res2)),
+    label: COALESCE(res2.name, res2.title_en, res2.title_fr)
+  },
+  target: {
+    id: id(res3),
+    type: LAST(labels(res3)),
+    label: COALESCE(res3.name, res3.title_en, res3.title_fr)
+  },
+  weight: intersection
+} as result
+ORDER BY intersection DESC
+LIMIT {limit}
+
 
 
 // name: get_timeline
