@@ -1,50 +1,60 @@
 // name: get_resource
 // get resource with its version and comments
 MATCH (res) WHERE id(res) = {id}
-  WITH res
-    OPTIONAL MATCH (loc:`location`)-[r_loc:appears_in]->(res)
-    OPTIONAL MATCH (per:`person`)-[r_per:appears_in]->(res)
-    OPTIONAL MATCH (org:`organization`)-[r_org:appears_in]->(res)
-    OPTIONAL MATCH (soc:`social_group`)-[r_soc:appears_in]-(res)
-    OPTIONAL MATCH (ver)-[:describes]->(res)
-    OPTIONAL MATCH (res)-[:belongs_to]->(col)
-    OPTIONAL MATCH (com)-[:mentions]->(res)
-    OPTIONAL MATCH (inq)-[:questions]->(res)
-  WITH res,
-    {  
+WITH res
+OPTIONAL MATCH (res)-[r_loc:appears_in]-(loc:`location`)
+WITH res, r_loc, loc
+ORDER BY r_loc.frequency DESC
+WITH res, collect({  
       id: id(loc),
       type: 'location',
       props: loc,
       rel: r_loc
-    } as location,
-    {  
+    })[0..5] as locations
+
+OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
+WITH res, locations, r_per, per
+ORDER BY r_per.frequency DESC
+WITH res, locations, collect({
       id: id(per),
       type: 'person',
       props: per,
       rel: r_per
-    } as person,
-    {  
+    })[0..5] as persons
+OPTIONAL MATCH (res)-[r_org:appears_in]-(org:`organization`)
+
+WITH res, locations, persons, collect({  
       id: id(org),
       type: 'organization',
       props: org,
       rel: r_org
-    } as organization,
-    {  
+    })[0..5] as organizations
+OPTIONAL MATCH (res)-[r_soc:appears_in]-(soc:`social_group`)
+
+WITH res, locations, persons, organizations, collect({
       id: id(soc),
       type: 'social_group',
       props: soc,
       rel: r_soc
-    } as social_group, 
-  ver, col, com, inq
+    })[0..5] as social_groups
+
+
+
+    OPTIONAL MATCH (ver)-[:describes]->(res)
+    OPTIONAL MATCH (res)-[:belongs_to]->(col)
+    OPTIONAL MATCH (com)-[:mentions]->(res)
+    OPTIONAL MATCH (inq)-[:questions]->(res)
+
+ 
     RETURN {
       resource: {
         id: id(res),
         props: res,
         versions: EXTRACT(p in COLLECT(DISTINCT ver)|{name: p.name, id:id(p), yaml:p.yaml, language:p.language, type: last(labels(p))}),
-        locations: collect(DISTINCT location),
-        persons:   collect(DISTINCT person),
-        organizations: collect(DISTINCT organization),
-        social_groups:    collect(DISTINCT social_group),
+        locations: locations,
+        persons:   persons,
+        organizations: organizations,
+        social_groups:  social_groups,
         collections: EXTRACT(p in COLLECT(DISTINCT col)|{name: p.name, id:id(p), type: 'collection'}),
         comments: count(distinct com),
         inquiries: count(distinct inq)
@@ -158,14 +168,15 @@ RETURN count(DISTINCT(e)) as count_items
 // get top 100 similar resources sharing the same persons, orderd by time proximity if this info is available
 MATCH p=(res)<-[:appears_in]-(ent:entity)-[:appears_in]->(res2:resource)
 WHERE id(res) = {id} AND ent.score > -1 
-RETURN{
+RETURN {
   target: id(res2),
   dst : abs(coalesce(res.start_time, 1000000000) - coalesce(res2.start_time, 0)),
   det : abs(coalesce(res.end_time, 1000000000) - coalesce(res2.end_time, 0)),
-  labels: count(DISTINCT(last(labels(ent))))
+  labels: count(DISTINCT(last(labels(ent)))),
+  int : count(DISTINCT ent)
 } as candidate
 ORDER BY 
-candidate.labels DESC, candidate.dst ASC, candidate.det ASC
+candidate.int DESC, candidate.labels DESC, candidate.dst ASC, candidate.det ASC
 SKIP {offset}
 LIMIT {limit}
 
@@ -411,12 +422,12 @@ LIMIT {limit}
 
 // name: get_related_resources_graph
 //
-MATCH (res:resource)--(ent:person)--(res2:resource)
-WHERE id(res) = {id}
-WITH res2
-MATCH (res2:resource)<--(ent_int:person)-->(res3:resource)
+MATCH (res:resource)-[:appears_in]-(ent:person)
+WHERE id(res) = {id} AND ent.score > -1
+WITH ent
+MATCH (res3:resource)<--(ent)-->(res2:resource)
 WHERE res2 <> res3
-WITH res2, res3, count(distinct ent_int) as intersection
+WITH res2, res3, count(distinct ent) as intersection
 RETURN {
   source: {
     id: id(res2),
@@ -432,6 +443,8 @@ RETURN {
 } as result
 ORDER BY intersection DESC
 LIMIT {limit}
+
+
 
 
 
@@ -512,3 +525,24 @@ RETURN  {
   favourites: COLLECT(DISTINCT r),
   proposes: COLLECT(DISTINCT proposed_inquiries)
 } as users
+
+
+// name:get_related_entities
+// get related nodes that are connected with the entity. test with
+// > node .\scripts\manage.js --task=query --cypher=resource/get_related_entities --id=<ID> --limit=10 --type=person --offset=0
+MATCH (res)<-[:appears_in]-(per:{:entity})
+WHERE id(res) = {id}
+RETURN {
+  id: id(per),
+  type: 'person',
+  props: per
+}
+SKIP {offset}
+LIMIT {limit}
+
+// name:count_related_entities
+// get related nodes that are connected with the entity. test with
+// > node .\scripts\manage.js --task=query --cypher=resource/get_related_entities --id=<ID> --limit=10 --type=person --offset=0
+MATCH (res)<-[:appears_in]-(per:{:entity})
+WHERE id(res) = {id}
+RETURN COUNT(per) as count_items

@@ -59,7 +59,14 @@ angular.module('histograph')
         // set the initial target
         scope.target = false;
         
-        
+        // cutat function for long labels
+        var cutat = function (text, cutAt) {
+          var t = text.substr(0, cutAt);
+          //re-trim if we are in the middle of a word
+          if(t.length > cutAt)
+            t = t.substr(0, Math.min(t.length, t.lastIndexOf(' '))) + ' ...'
+          return t
+        }  
         // configure a default tooltip
         var tooltip = {};
         
@@ -93,7 +100,7 @@ angular.module('histograph')
                   labelHoverShadowBlur: 16,
                   labelSize: '',
                   minNodeSize: 3,
-                  maxNodeSize: 10,
+                  maxNodeSize: 6,
                   enableEdgeHovering : true,
                   minEdgeSize: 1,
                   maxEdgeSize: 2,
@@ -167,15 +174,16 @@ angular.module('histograph')
           Redraw the current graph, calculate the force layout min duration
         */
         scope.$watch('graph', function (graph, previousGraph) {
-          $log.log('::sigma @graph changed');
-          stop();
           clearTimeout(timers.play);
+          $log.log('::sigma @graph changed');
           
-          scope.target = false
-          // clean graph if there is no nodes
+          stop();
+          
+          scope.target = false;
+          
+          // clean graph if there are no nodes, then exit
           if(!graph || !graph.nodes || !graph.nodes.length) {
             $log.log('::sigma @graph empty, clear...');
-            // clean graph, then exit
             si.graph.clear();
             si.refresh();
             return;
@@ -195,7 +203,6 @@ angular.module('histograph')
           timers.play = setTimeout(function() {
             si.graph.clear().read(graph);
             si.graph.nodes().forEach(function (n) {
-              
               n.color = n.type?
                 (colors[n.type] || "#353535"):
                 "#353535";
@@ -606,6 +613,48 @@ angular.module('histograph')
           }
         };
         
+        sigma.canvas.edgehovers.def = function(edge, source, target, context, settings) {
+          if(!edge || !source || !target)
+            return;
+          var color = colors[source.type],
+            prefix = settings('prefix') || '',
+            size = edge[prefix + 'size'] || 1;
+            
+          size *= settings('edgeHoverSizeRatio');
+
+          context.strokeStyle = color;
+          context.lineWidth = size;
+          context.beginPath();
+          context.moveTo(
+            source[prefix + 'x'],
+            source[prefix + 'y']
+          );
+          context.lineTo(
+            target[prefix + 'x'],
+            target[prefix + 'y']
+          );
+          context.stroke();
+        };
+        
+        sigma.canvas.extremities.def = function(edge, source, target, context, settings) {
+          if(!edge || !source || !target)
+            return;
+          // Source Node:
+          (
+            sigma.canvas.hovers[source.type] ||
+            sigma.canvas.hovers.def
+          ) (
+            source, context, settings
+          );
+
+          // Target Node:
+          (
+            sigma.canvas.hovers[target.type] ||
+            sigma.canvas.hovers.def
+          ) (
+            target, context, settings
+          );
+        };
          // sigma.canvas.edgeshover.def = function() {}
         
         /*

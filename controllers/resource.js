@@ -123,6 +123,26 @@ module.exports = function(io){
       });
     },
     
+    /*
+      Get top related persons
+      get the most important entities per type
+    */
+    getRelatedEntities: function (req, res) {
+      var form = validator.request(req, {
+            limit: 50,
+            offset: 0
+          });
+      
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+     
+      Resource.getRelatedEntities(form.params, function (err, items, info) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({items: items}, info);
+      });
+    },
+    
     /**
       We should move this to entities instead.
     */

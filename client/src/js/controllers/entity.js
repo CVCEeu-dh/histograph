@@ -85,3 +85,6 @@ angular.module('histograph')
       $scope.sync(params);
     });
   })
+.controller('EntitiesCtrl', function ($scope, $log, entities){
+
+})

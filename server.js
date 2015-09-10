@@ -357,6 +357,8 @@ apiRouter.route('/resource/:id(\\d+)/related/comment') // POST
 apiRouter.route('/resource/:id(\\d+)/related/inquiry')
   .post(ctrl.resource.createInquiry)
   .get(ctrl.resource.getRelatedInquiry)
+apiRouter.route('/resource/:id(\\d+)/related/:entity(person|location)')
+  .get(ctrl.resource.getRelatedEntities)
 apiRouter.route('/resource/:id(\\d+)/related/user')
   .get(ctrl.resource.getRelatedUsers)  
   .post(ctrl.resource.createRelatedUser)  

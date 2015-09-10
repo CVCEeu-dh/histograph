@@ -139,6 +139,21 @@ angular
           },
         }
       })
+        .state('resource.persons', {
+          url: '/p',
+          templateUrl: 'templates/partials/users.html',
+          controller: 'EntitiesCtrl',
+          resolve: {
+            entities: function(ResourceRelatedFactory, $stateParams) {
+              return ResourceRelatedFactory.get({
+                id: $stateParams.id,
+                model: 'person'
+                
+              }).$promise;
+            }
+          }
+        })
+        
         .state('resource.users', {
           url: '/u',
           templateUrl: 'templates/partials/users.html',

@@ -141,12 +141,12 @@ WITH p1, p2, length(collect(DISTINCT res)) as w
 RETURN {
     source: {
       id: id(p1),
-      type: HEAD(labels(p1)),
+      type: LAST(labels(p1)),
       name: p1.name
     },
     target: {
       id: id(p2),
-      type: HEAD(labels(p2)),
+      type: LAST(labels(p2)),
       name: p2.name
     },
     weight: w 

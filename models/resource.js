@@ -393,6 +393,39 @@ module.exports = {
     }); 
     
   },
+  /*
+    Return the related entities according to type.
+    @param params - a dict containing at least the entity label (type: 'person|location') and the resource id
+  */
+  getRelatedEntities: function (params, next) {
+    models.getMany({
+      queries: {
+        count_items: rQueries.count_related_entities,
+        items: rQueries.get_related_entities
+      },
+      params: {
+        entity: params.entity,
+        id: +params.id,
+        limit: +params.limit || 10,
+        offset: +params.offset || 0
+      }
+    }, function (err, results) {
+      if(err) {
+        console.log(err)
+        next(err);
+        return;
+      }
+      module.exports.getByIds({
+        ids: _.map(results.items, 'target')
+      }, function (err, items){
+        next(null, items, {
+          total_items : results.count_items
+        });
+      });
+      
+    }); 
+    
+  },
   
   /*
     Return the 

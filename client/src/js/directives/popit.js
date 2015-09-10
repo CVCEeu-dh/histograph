@@ -60,7 +60,7 @@ angular.module('histograph')
           }
           // handle label according to target type (node or edge)
           if(v.type=='node') {
-            scope.href  = '#/e/' + v.data.node.id;
+            scope.href  = '#/' + (v.data.node.type=='resource'? 'r': 'e') + '/' + v.data.node.id;
             scope.label = v.data.node.label;
             scope.type = v.data.node.type;
           } else if(v.type == 'edge') {

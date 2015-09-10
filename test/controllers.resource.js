@@ -130,12 +130,27 @@ describe('controller:resource (related users)', function() {
   })
 })
 
+describe('controller:resource (related entities)', function() {
+  
+  it('should get the list of curators by date, 2 in this case (the owner and the curator)', function (done) {
+    session
+      .get('/api/resource/3526/related/person')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exists(err);
+        console.log(res)
+        done();
+      });
+  })
+})
+
 
 
 describe('controller:resource (related resources)', function() {
   it('should show a list of 10 related resources', function (done) {
     session
-      .get('/api/resource/3553/related/resource?limit=10')
+      .get('/api/resource/'+ __resourceA.id +'/related/resource?limit=10')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
@@ -150,7 +165,7 @@ describe('controller:resource (related resources)', function() {
   
   it('should show the graph of 10 related resources', function (done) {
     session
-      .get('/api/resource/1589/related/resource/graph')
+      .get('/api/resource/'+ __resourceA.id +'/related/resource/graph')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {

@@ -5,7 +5,7 @@
  * # IndexCtrl
  */
 angular.module('histograph')
-  .controller('ResourceCtrl', function ($scope, $log, $stateParams, $filter, resource, resources, ResourceVizFactory, ResourceCommentsFactory, ResourceRelatedFactory, socket, EVENTS) {
+  .controller('ResourceCtrl', function ($scope, $log, $stateParams, $filter, resource, resources, ResourceRelatedVizFactory, ResourceRelatedFactory, socket, EVENTS) {
     $log.debug('ResourceCtrl ready');
     
     
@@ -54,62 +54,9 @@ angular.module('histograph')
     */
     socket.on('resource:create-related-user:done', function (result) {
       console.log(result)
-      if(result.id == $stateParams.id)
-        // update user notificaation
+      if(result.id == $stateParams.id) // update user notificaation
         $log.info('ResourceCtrl socket@resource:create-related-user:done - by:', result.user);
     })
-    /**
-      commenting, with socket
-    
-    */
-    socket.on('done:commenting', function (result) {
-      
-      // add the comment at the bottom
-      if(result.resource_id != $stateParams.id)
-        return;
-      if(result.data.comment) {
-        $log.info('done:commenting', result);
-        result.data.props = result.data.comment;
-        $scope.item.comments.push(result.data);
-      } else {
-        $log.error('done:commenting', 'comment invalid, please check');
-      }
-    });
-
-    socket.on('continue:commenting', function (result) {
-      $log.info('continue:commenting', result);
-    });
-
-    socket.on('start:commenting', function (result) {
-      $log.info('start:commenting', result.data, $stateParams.id);
-    });
-
-    /*
-      Create a comment, twetterlike wherever you are.
-      (of course you have to comment a resource)
-    */
-    $scope.startMention = function (item) {
-      $log.debug('resource.startMention', item);
-      $scope.commenting = true;
-      socket.emit('start:commenting', item.props, function (result) {
-        $log.info('start:commenting', result);
-      });
-
-    };
-    
-    // $scope.postMention = function (item) {
-    //   $log.debug('resource.postMention', item);
-    //   if($scope.comment.text.trim().length > 0 && $scope.commenting) {
-    //     $scope.commenting = false;
-    //     ResourceCommentsFactory.save({id: $stateParams.id}, {
-    //       content: $scope.comment.text,
-    //       tags:  $scope.comment.tags
-    //     }, function(res){
-          
-    //       console.log('postMention', res);
-    //     })
-    //   }
-    // };
 
 
     $scope.switchVersion = function(version) {
@@ -151,22 +98,12 @@ angular.module('histograph')
     $scope.graphType = 'monopartite-entity'
     
     // sync graph
-    ResourceVizFactory.get({
+    ResourceRelatedVizFactory.get({
       id: $stateParams.id,
-      viz: 'graph',
-      type: $scope.graphType,
-      limit: 2000
+      model: 'resource',
+      type: 'graph',
+      limit: 100
     }, function(res) {
-      // $log.log('res', res)
-      // res.result.graph.nodes.map(function (d) {
-      //   // d.x = Math.random()*50;
-      //   // d.y = Math.random()*50;
-      //   return d;
-      // });
-    
-      // $log.debug('EntityCtrl set graph',res.result.graph.nodes);
-      
-      // once done, load the other viz
       $scope.setGraph(res.result.graph)
     });
     

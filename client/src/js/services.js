@@ -32,6 +32,9 @@ angular.module('histograph')
         query: {method: 'GET' },
     });
   })
+  /*
+    DEPRECATED
+  */
   .factory('ResourceVizFactory', function ($resource) {
     return $resource('/api/resource/:id/:viz', {}, {
         query: {method: 'GET' },
@@ -39,6 +42,7 @@ angular.module('histograph')
   })
   /*
     Should contain all viz methods available (GET only vis)
+    DEPRECATED
   */
   .factory('VisualizationFactory', function ($http) {
     return {
@@ -51,6 +55,7 @@ angular.module('histograph')
   })
   /*
     Add a comment to a resource
+    DEPRECATED
   */
   .factory('ResourceCommentsFactory', function ($resource) {
     return $resource('/api/resource/:id/related/comment', {}, {
@@ -62,6 +67,12 @@ angular.module('histograph')
   */
   .factory('ResourceRelatedFactory', function ($resource) {
     return $resource('/api/resource/:id/related/:model');
+  })
+  /*
+    Add / get :model related to resource
+  */
+  .factory('ResourceRelatedVizFactory', function ($resource) {
+    return $resource('/api/resource/:id/related/:model/:type');
   })
   /*
     POST Save a new inquiry (modify it) or GET list of inquiries
