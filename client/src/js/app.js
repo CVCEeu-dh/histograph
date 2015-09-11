@@ -174,6 +174,12 @@ angular
           templateUrl: 'templates/partials/resources.html',
           controller: 'ResourcesCtrl',
           resolve: {
+            relatedVizFactory: function(EntityRelatedVizFactory) {
+              return EntityRelatedVizFactory
+            },
+            relatedFactory: function(EntityRelatedFactory) {
+              return EntityRelatedFactory
+            },
             resources: function(EntityRelatedFactory, $stateParams) {
               return EntityRelatedFactory.get({
                 id: $stateParams.id,
@@ -221,10 +227,16 @@ angular
         }
       })
         .state('resource.resources', {
-          url: '/r',
+          url: '',
           templateUrl: 'templates/partials/resources.html',
           controller: 'ResourcesCtrl',
           resolve: {
+            relatedVizFactory: function(ResourceRelatedVizFactory) {
+              return ResourceRelatedVizFactory
+            },
+            relatedFactory: function(ResourceRelatedFactory) {
+              return ResourceRelatedFactory
+            },
             resources: function(ResourceRelatedFactory, $stateParams) {
               return ResourceRelatedFactory.get({
                 id: $stateParams.id,

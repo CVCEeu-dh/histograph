@@ -112,7 +112,7 @@ angular.module('histograph')
     
     
   })
-  .controller('ResourcesCtrl', function ($scope, $log, $stateParams, $filter, resources, ResourceRelatedVizFactory, ResourceRelatedFactory, socket, EVENTS) {
+  .controller('ResourcesCtrl', function ($scope, $log, $stateParams, $filter, resources, relatedVizFactory, ResourceRelatedFactory, socket, EVENTS) {
      /*
       set pagination
     */
@@ -121,8 +121,11 @@ angular.module('histograph')
     $scope.page        = 1;
     
     $log.debug('ResourcesCtrl ready');
-    // sync graph
-    ResourceRelatedVizFactory.get({
+    /*
+      Load graph data
+    */
+    relatedVizFactory
+    .get({
       id: $stateParams.id,
       model: 'resource',
       type: 'graph',
