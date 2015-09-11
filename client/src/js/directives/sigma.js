@@ -417,12 +417,11 @@ angular.module('histograph')
           node
         */
         function focus(nodeId) {
-          $log.info('::sigma --> focus()', nodeId)
+         
           if(typeof nodeId == 'object') { // it is an event ideed
-            
             nodeId = $(this).attr('data-id');
           }
-          
+           $log.info('::sigma --> focus()', nodeId, _.map(si.graph.nodes(), 'id'))
           var node = si.graph.nodes(nodeId);
           try{
             sigma.misc.animation.camera(
@@ -435,7 +434,7 @@ angular.module('histograph')
               {duration: 250}
             );
           } catch(e) {
-            
+            $log.error(e)
           }
         }
         /*

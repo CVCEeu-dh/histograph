@@ -121,6 +121,7 @@ angular
       */
       .state('resource', {
         url: '/r/:id',
+        abstract: true,
         templateUrl: 'templates/resource.html',
         controller: 'ResourceCtrl',
         reloadOnSearch: false,
@@ -130,25 +131,65 @@ angular
               id: $stateParams.id
             }).$promise;
           },
-          resources: function(ResourceRelatedFactory, $stateParams) {
-            return ResourceRelatedFactory.get({
-              id: $stateParams.id,
-              model: 'resource',
-              limit: 10
-            }).$promise;
-          },
+          
         }
       })
+        .state('resource.resources', {
+          url: '/r',
+          templateUrl: 'templates/partials/resources.html',
+          controller: 'ResourcesCtrl',
+          resolve: {
+            resources: function(ResourceRelatedFactory, $stateParams) {
+              return ResourceRelatedFactory.get({
+                id: $stateParams.id,
+                model: 'resource',
+                limit: 10
+              }).$promise;
+            },
+          }
+        })
         .state('resource.persons', {
-          url: '/p',
-          templateUrl: 'templates/partials/users.html',
+          url: '/per',
+          templateUrl: 'templates/partials/entities.html',
           controller: 'EntitiesCtrl',
           resolve: {
+            model: function(){
+              return 'person'
+            },
+            relatedVizFactory: function(ResourceRelatedVizFactory) {
+              return ResourceRelatedVizFactory
+            },
+            relatedFactory: function(ResourceRelatedFactory) {
+              return ResourceRelatedFactory
+            },
             entities: function(ResourceRelatedFactory, $stateParams) {
               return ResourceRelatedFactory.get({
                 id: $stateParams.id,
-                model: 'person'
-                
+                model: 'person',
+                limit: 10
+              }).$promise;
+            }
+          }
+        })
+        .state('resource.organizations', {
+          url: '/org',
+          templateUrl: 'templates/partials/entities.html',
+          controller: 'EntitiesCtrl',
+          resolve: {
+            model: function(){
+              return 'organization'
+            },
+            relatedVizFactory: function(ResourceRelatedVizFactory) {
+              return ResourceRelatedVizFactory
+            },
+            relatedFactory: function(ResourceRelatedFactory) {
+              return ResourceRelatedFactory
+            },
+            entities: function(ResourceRelatedFactory, $stateParams) {
+              return ResourceRelatedFactory.get({
+                id: $stateParams.id,
+                model: 'organization',
+                limit: 10
               }).$promise;
             }
           }

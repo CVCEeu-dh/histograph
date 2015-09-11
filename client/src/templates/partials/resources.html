@@ -2,8 +2,8 @@
     <div ng-include src="'templates/partials/resource-toolbar.html'"></div>
     
     <div class="empty-list" ng-if="relatedItems.length == 0">
-      There are no related <i>inquiries</i>.
+      There are no related <i>resources</i>.
     </div>
     <div class="{{loading? 'animated fadeOut': 'animated fadeIn'}}" style="-webkit-animation-delay: {{$index * 100}}ms;
-      animation-delay: {{$index * 100}}ms"  ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/inquiry-lite.html"'></div>
+      animation-delay: {{$index * 100}}ms"  ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/resource-lite.html"'></div>
   </div>

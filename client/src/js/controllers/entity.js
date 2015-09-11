@@ -63,28 +63,47 @@ angular.module('histograph')
       })
     };
     
-    /*
-      Reload related items, with filters.
-    */
-    $scope.sync = function(params) {
-      $scope.loading = true;
-      EntityRelatedFactory.get({
-        id: $stateParams.id,
-        model: 'resources',
-        limit: 10,
-        offset: (params.page-1) * 10
-      }, function (res) {
-        $scope.loading = false;
-        $scope.setRelatedItems(res.result.items);
-      })
-    }
     
-    $scope.$on(EVENTS.PAGE_CHANGED, function(e, params) {
-      $log.debug('ResourceCtrl @PAGE_CHANGED', params);
-      $scope.page = params.page
-      $scope.sync(params);
-    });
   })
-.controller('EntitiesCtrl', function ($scope, $log, entities){
-
+.controller('EntitiesCtrl', function ($scope, $log, $stateParams, entities, model, relatedFactory, relatedVizFactory, EVENTS){
+  $log.log('EntitiesCtrl', entities.info.total_items);
+  $scope.model = model
+  /*
+    Load graph data
+  */
+  relatedVizFactory.get({
+    id: $stateParams.id,
+    model: model,
+    type: 'graph',
+    limit: 100
+  }, function(res) {
+    $scope.setGraph(res.result.graph)
+  });
+    
+  /*
+    Reload related items, with filters.
+  */
+  $scope.sync = function(params) {
+    $scope.loading = true;
+    relatedFactory.get({
+      id: $stateParams.id,
+      model: model,
+      limit: 10,
+      offset: (params.page-1) * 10
+    }, function (res) {
+      $scope.loading = false;
+      $scope.setRelatedItems(res.result.items);
+    })
+  }
+  
+  $scope.$on(EVENTS.PAGE_CHANGED, function(e, params) {
+    $log.debug('ResourceCtrl @PAGE_CHANGED', params);
+    $scope.page = params.page
+    $scope.sync(params);
+  });
+  
+  $scope.totalItems  = entities.info.total_items;
+  $scope.limit       = 10;
+  $scope.page        = 1;
+  $scope.setRelatedItems(entities.result.items);
 })

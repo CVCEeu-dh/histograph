@@ -11,8 +11,18 @@
 <div id='see-also-menu' class="tk-proxima-nova header-menu {{state}}">
   <ul>
     <li>
-      <a ui-sref-active-eq="active" ui-sref="resource({ id: item.id })">
-        see also
+      <a ui-sref-active-eq="active" ui-sref="resource.resources({ id: item.id })">
+        <i class="fa fa-circle type resource"></i>resources
+      </a>
+    </li>
+    <li>
+      <a ui-sref-active-eq="active" ui-sref="resource.persons({ id: item.id })">
+        <i class="fa fa-circle type person"></i>persons
+      </a>
+    </li>
+    <li>
+      <a ui-sref-active-eq="active" ui-sref="resource.organizations({ id: item.id })">
+        <i class="fa fa-circle type organization"></i>organizations
       </a>
     </li>
     <li>

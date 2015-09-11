@@ -5,7 +5,7 @@
  * # IndexCtrl
  */
 angular.module('histograph')
-  .controller('ResourceCtrl', function ($scope, $log, $stateParams, $filter, resource, resources, ResourceRelatedVizFactory, ResourceRelatedFactory, socket, EVENTS) {
+  .controller('ResourceCtrl', function ($scope, $log, $stateParams, $filter, resource, ResourceRelatedVizFactory, ResourceRelatedFactory, socket, EVENTS) {
     $log.debug('ResourceCtrl ready');
     
     
@@ -13,12 +13,7 @@ angular.module('histograph')
       set see also title
     */
     $scope.pagetitle = 'related documents';
-    /*
-      set pagination
-    */
-    $scope.totalItems  = resources.info.total_items;
-    $scope.limit       = 10;
-    $scope.page        = 1;
+   
     /*
       Set graph title
     */
@@ -92,37 +87,11 @@ angular.module('histograph')
     
       // get theaccepted version
     //
-    $log.log('ResourceCtrl -> setRelatedItems - items', resources.result.items);
-    $scope.setRelatedItems(resources.result.items);
     
     $scope.graphType = 'monopartite-entity'
     
-    // sync graph
-    ResourceRelatedVizFactory.get({
-      id: $stateParams.id,
-      model: 'resource',
-      type: 'graph',
-      limit: 100
-    }, function(res) {
-      $scope.setGraph(res.result.graph)
-    });
     
-    /*
-      Reload related items, with filters.
-    */
-    $scope.sync = function(params) {
-      $scope.loading = true;
-      ResourceRelatedFactory.get({
-        id: $stateParams.id,
-        model: 'resource',
-        limit: 10,
-        offset: ($scope.page-1) * 10
-      }, function (res) {
-        $scope.loading = false;
-        $scope.setRelatedItems(res.result.items);
-      })
-       
-    }
+  
     
     /**
       Annotations
@@ -141,16 +110,56 @@ angular.module('histograph')
       }
     });
     
+    
+  })
+  .controller('ResourcesCtrl', function ($scope, $log, $stateParams, $filter, resources, ResourceRelatedVizFactory, ResourceRelatedFactory, socket, EVENTS) {
+     /*
+      set pagination
+    */
+    $scope.totalItems  = resources.info.total_items;
+    $scope.limit       = 10;
+    $scope.page        = 1;
+    
+    $log.debug('ResourcesCtrl ready');
+    // sync graph
+    ResourceRelatedVizFactory.get({
+      id: $stateParams.id,
+      model: 'resource',
+      type: 'graph',
+      limit: 100
+    }, function(res) {
+      $scope.setGraph(res.result.graph)
+    });
+    
+    $log.log('ResourcesCtrl -> setRelatedItems - items', resources.result.items);
+    $scope.setRelatedItems(resources.result.items);
+    
+      
+    /*
+      Reload related items, with filters.
+    */
+    $scope.sync = function(params) {
+      $scope.loading = true;
+      ResourceRelatedFactory.get({
+        id: $stateParams.id,
+        model: 'resource',
+        limit: 10,
+        offset: ($scope.page-1) * 10
+      }, function (res) {
+        $scope.loading = false;
+        $scope.setRelatedItems(res.result.items);
+      }) 
+    };
     /*
       listener: EVENTS.API_PARAMS_CHANGED
       some query parameter has changed, reload the list accordingly.
     */
     $scope.$on(EVENTS.API_PARAMS_CHANGED, function() {
-      $log.debug('ResourceCtrl @API_PARAMS_CHANGED', $scope.params);
+      $log.debug('ResourcesCtrl @API_PARAMS_CHANGED', $scope.params);
       $scope.sync();
     });
     $scope.$on(EVENTS.PAGE_CHANGED, function(e, params) {
-      $log.debug('ResourceCtrl @PAGE_CHANGED', params);
+      $log.debug('ResourcesCtrl @PAGE_CHANGED', params);
       $scope.page = params.page
       $scope.sync(params);
     });
