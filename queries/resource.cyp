@@ -530,19 +530,35 @@ RETURN  {
 // name:get_related_entities
 // get related nodes that are connected with the entity. test with
 // > node .\scripts\manage.js --task=query --cypher=resource/get_related_entities --id=<ID> --limit=10 --type=person --offset=0
-MATCH (res)<-[:appears_in]-(per:{:entity})
-WHERE id(res) = {id}
+MATCH (n)-[r]-(ent:{:entity})
+  WHERE id(n) = {id}
+WITH ent
+  MATCH (ent)--(res:resource)
+  // order by relevance ...
+WITH res
+  MATCH (ent1:{:entity})-[r:appears_in]->(res)
+  WHERE ent1.score > -1
+WITH ent1, count(DISTINCT r) as w
 RETURN {
-  id: id(per),
-  type: 'person',
-  props: per
+  id: id(ent1),
+  type: last(labels(ent1)),
+  props: ent1,
+  weight: w
 }
+ORDER BY w DESC
 SKIP {offset}
 LIMIT {limit}
 
 // name:count_related_entities
 // get related nodes that are connected with the entity. test with
 // > node .\scripts\manage.js --task=query --cypher=resource/get_related_entities --id=<ID> --limit=10 --type=person --offset=0
-MATCH (res)<-[:appears_in]-(per:{:entity})
-WHERE id(res) = {id}
-RETURN COUNT(per) as count_items
+MATCH (n)-[r]-(ent:{:entity})
+  WHERE id(n) = {id}
+WITH ent
+  MATCH (ent)--(res:resource)
+  // order by relevance ...
+WITH res
+  MATCH (ent1:{:entity})-[:appears_in]->(res)
+  WHERE ent1.score > -1
+WITH ent1
+RETURN COUNT(DISTINCT ent1) as count_items
