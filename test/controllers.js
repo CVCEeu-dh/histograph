@@ -410,7 +410,7 @@ describe('controllers: get resource items available to the user', function() {
   
   it('should get a single resource MONOPARTITE graph object', function (done) {
     session
-      .get('/api/resource/'+__resourceA.id+'/graph?type=monopartite-entity')
+      .get('/api/resource/'+__resourceA.id+'/related/resource/graph?type=monopartite-entity')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
