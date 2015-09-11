@@ -134,12 +134,12 @@ describe('controller:resource (related entities)', function() {
   
   it('should get the list of curators by date, 2 in this case (the owner and the curator)', function (done) {
     session
-      .get('/api/resource/3526/related/person')
+      .get('/api/resource/'+ __resourceA.id +'/related/person')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
         should.not.exists(err);
-        console.log(res)
+        should.exist(res.body.result.items);
         done();
       });
   })
