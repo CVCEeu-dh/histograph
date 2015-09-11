@@ -31,6 +31,29 @@ angular.module('histograph')
     // the current user
     $scope.user = {};
     
+    // current viewpoint (view mode)
+    $scope.viewpoint = {
+      isopen: false,
+      available: [
+        { 
+          icon: 'tv',
+          name: 'tv',
+          label:'view everything'
+        },
+        {
+          icon: 'columns',
+          name: 'read', 
+          label:'facilitate reading'
+        },
+        { 
+          icon: 'map-o',
+          name: 'network',
+          label:'facilitate exploration'
+        }
+      ]
+    };
+    
+    $scope.viewpoint.selected = $scope.viewpoint.available[0]
     
     // current headers for a given column. Cfr setHeader
     $scope.headers = {
@@ -45,6 +68,11 @@ angular.module('histograph')
       } else
         $scope.headers[key] = value;
     }
+    
+    $scope.setViewpoint = function(value) {
+      $scope.viewpoint.selected = value;
+    }
+    
     
     // the current search query, if any
     // $scope.query =  $routeParams.query || '';

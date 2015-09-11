@@ -1,31 +1,26 @@
-<div id='perspective-menu' class="tk-proxima-nova header-menu">
-  <ul>
-    <li>
-      <a ui-sref="index">explore</a> / <a>resource#{{item.id}}</a>
-    </li>
-  </ul>
+<div id='perspective-menu' class="tk-proxima-nova header-menu" ng-include src="'templates/partials/helpers/menu.html'">
 </div>
 
 <div id="perspective" class="{{queueStatus}}" ng-include src="'templates/partials/resource.html'"></div>
 
 <div id='see-also-menu' class="tk-proxima-nova header-menu {{state}}">
   <ul>
-    <li>
+    <li role="menuitem">
       <a ui-sref-active-eq="active" ui-sref="resource.resources({ id: item.id })">
         <i class="fa fa-circle type resource"></i>resources
       </a>
     </li>
-    <li>
+    <li role="menuitem">
       <a ui-sref-active-eq="active" ui-sref="resource.persons({ id: item.id })">
         <i class="fa fa-circle type person"></i>persons
       </a>
     </li>
-    <li>
+    <li role="menuitem">
       <a ui-sref-active-eq="active" ui-sref="resource.organizations({ id: item.id })">
         <i class="fa fa-circle type organization"></i>organizations
       </a>
     </li>
-    <li>
+    <li role="menuitem">
       <a ui-sref-active-eq="active" tooltip='list this resource related users' ui-sref="resource.users({ id: item.id })">
         users
       </a>
@@ -35,7 +30,7 @@
         collections
       </a>
     </li> -->
-    <li>
+    <li role="menuitem">
       <a ui-sref-active-eq="active" tooltip='list this resource related inquiries' ui-sref="resource.inquiries({ id: item.id })">
         inquiries
       </a>

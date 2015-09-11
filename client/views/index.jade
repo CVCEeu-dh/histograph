@@ -1,6 +1,6 @@
 html
   head
-    title!= title
+    title histograph
     meta(name='pinterest', content='nopin', description = "contents subject to copyright")
     link(href='/css/bootstrap.min.css', rel='stylesheet')
     link(href='/css/font-awesome.min.css', rel='stylesheet')
@@ -61,7 +61,8 @@ html
         
                   ul(class='dropdown-menu', role='menu', )
                     li(ng-repeat='lang in availableLanguages', ng-click='setLanguage(lang)') {{lang}}
-                
+              
+                 
               a(href='/logout')
                 span  logout
                 
@@ -93,10 +94,10 @@ html
                 a(ng-href='/auth/google?next={{locationPath}}', class='btn btn-default expanded') login with google 
                   i(class='fa fa-google-plus')
       else
-        div(class='view {{currentCtrl}} {{currentState|humanizeState}} {{queueStatus}}')
+        div(class='view {{currentCtrl}} {{currentState|humanizeState}} {{queueStatus}} viewpoint-{{viewpoint.selected.name}}')
           div(ui-view='', autoscroll='true')
         
-        div(id='milkyway', sigma, graph='graph', freeze='freeze' tips='headers.graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentState|humanizeState}} {{queueStatus}}', controller='currentCtrl' redirect='redirect(path)', queue="addToQueue(items)")
+        div#milkyway(sigma, graph='graph', freeze='freeze' tips='headers.graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentState|humanizeState}} {{queueStatus}} viewpoint-{{viewpoint.selected.name}}', controller='currentCtrl' redirect='redirect(path)', queue="addToQueue(items)")
         
         div(id='timeline', timeline, class='{{currentState}} {{queueStatus}}', t='timeline', cxt='contextualTimeline', filters="params")
           
@@ -182,8 +183,8 @@ html
     
     script(src='/js/lib/ui-codemirror.min.js')
     
-    script(src='/js/lib/angular-strap.min.js')
-    script(src='/js/lib/angular-strap.tpl.min.js')
+    //- script(src='/js/lib/angular-strap.min.js')
+    //- script(src='/js/lib/angular-strap.tpl.min.js')
     script(src='/js/lib/ui-bootstrap-tpls.min.js')
     script(src='/js/lib/angular-perfect-scrollbar.js')
     

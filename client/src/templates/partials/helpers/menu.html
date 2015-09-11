@@ -1,0 +1,15 @@
+<ul>
+  <li class='path'>
+    <a  ui-sref="index">home</a>
+  </li>
+  <li class='path split'>/</li>
+  <li class='path'>
+    <a class="active" href="#">{{item.type || 'resource'}}#{{item.id}}</a>
+  </li>
+   <li class='path split'>&nbsp;</li>
+  <!-- viewpoint menu-->
+  <li tooltip="{{p.label}}" tooltip-append-to-body='true' ng-repeat="p in viewpoint.available" >
+    <a ng-click='setViewpoint(p)' class='{{ p.name == viewpoint.selected.name? "active": ""}}'><i class="fa fa-{{p.icon}}"></i>
+    </a>
+  </li>
+</ul>
