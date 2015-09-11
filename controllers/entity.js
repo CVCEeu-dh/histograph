@@ -201,6 +201,24 @@ module.exports = function(io){
         });
       });
     },
+    
+    getRelatedResourcesGraph: function (req, res) {
+      var form = validator.request(req, {
+            limit: 100,
+            offset: 0
+          });
+      entity.getRelatedResourcesGraph({
+        id: form.params.id,
+        limit: form.params.limit,
+        offset: form.params.offset
+      }, function (err, graph) {
+        return res.ok({
+          graph: graph
+        }, {
+          type: 'monopartite'
+        });
+      });
+    },
     /*
       DEPRECATED
     */

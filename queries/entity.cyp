@@ -249,6 +249,32 @@ ORDER BY w DESC
 LIMIT {limit}
 
 
+// name: get_related_resources_graph
+// monopartite graph of resources
+MATCH (n:entity)
+ WHERE id(n) = {id}
+WITH n
+MATCH (n)-[:appears_in]-(t1:resource), (n)-[:appears_in]-(t:resource)
+WITH t, t1
+MATCH (t)-[:appears_in]-(n:entity)-[:appears_in]-(t1)
+WHERE t <> t1
+WITH t, t1, length(collect(DISTINCT n)) as w
+RETURN {
+    source: {
+      id: id(t),
+      type: LAST(labels(t)),
+      label: COALESCE(t.name, t.title_en, t.title_fr,t.title, '')
+    },
+    target: {
+      id: id(t1),
+      type: LAST(labels(t1)),
+      label: COALESCE(t1.name, t1.title_en, t1.title_fr,t1.title, '')
+    },
+    weight: w 
+  } as result
+ORDER BY w DESC
+LIMIT {limit}
+
 // name:get_related_persons
 // DEPRECATED get related persons that are connected with the entity, sorted by frequence
 MATCH (ent)-[:appears_in]->(res:resource)

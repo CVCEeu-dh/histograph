@@ -272,7 +272,20 @@ module.exports = {
       next(null, graph);
     });
   },
-  
+  /**
+    Monopartite graph
+    params must contain an integer ID
+  */
+  getRelatedResourcesGraph: function(params, next) {
+    var query = parser.agentBrown(queries.get_related_resources_graph, params)
+    helpers.cypherGraph(query, params, function (err, graph) {
+      if(err) {
+        next(err);
+        return
+      };
+      next(null, graph);
+    });
+  },
   /**
     Bipartite graph of entity and resources
   */
