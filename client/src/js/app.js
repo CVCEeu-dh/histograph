@@ -61,7 +61,8 @@ angular
       .setNotify(true, true);
   })
   .config(function ($stateProvider, $urlRouterProvider) {
-    $urlRouterProvider.otherwise("/");
+    $urlRouterProvider
+      .otherwise("/");
     $stateProvider
       .state('index', {
         url: '/',
