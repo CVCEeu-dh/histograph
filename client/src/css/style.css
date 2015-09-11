@@ -306,16 +306,16 @@ a#header-logo img{
 }
 
 .header-menu ul li a:hover{
-  color: #151515;
-  border-bottom: 1px solid #151515;
+  color: #515151;
+  border-bottom: 1px solid #515151;
 }
 
 
 .header-menu ul li a.active{
   list-style-type: none;
   display: inline-block;
-  color: #FF5742;
-  border-bottom: 1px solid #FF5742;
+  color: #151515;
+  border-bottom: 1px solid #151515;
 }
 
 /*
