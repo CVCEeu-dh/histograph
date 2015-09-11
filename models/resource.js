@@ -415,13 +415,10 @@ module.exports = {
         next(err);
         return;
       }
-      module.exports.getByIds({
-        ids: _.map(results.items, 'target')
-      }, function (err, items){
-        next(null, items, {
+      next(null, results.items, {
           total_items : results.count_items
         });
-      });
+     
       
     }); 
     
