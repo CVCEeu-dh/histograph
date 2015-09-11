@@ -6,7 +6,8 @@
  *
  */
 var settings  = require('../settings'),
-    helpers   = require('../helpers.js'),
+    helpers   = require('../helpers'),
+    models    = require('../helpers/models'),
     
     neo4j     = require('seraph')(settings.neo4j.host),
     queries   = require('decypher')('./queries/entity.cyp'),
@@ -151,6 +152,33 @@ module.exports = {
     });  
   },
   
+  /*
+    Return the related entities according to type.
+    @param params - a dict containing at least the entity label (type: 'person|location') and the resource id
+  */
+  getRelatedEntities: function (params, next) {
+    models.getMany({
+      queries: {
+        count_items: queries.count_related_entities,
+        items: queries.get_related_entities
+      },
+      params: {
+        entity: params.entity,
+        id: +params.id,
+        limit: +params.limit || 10,
+        offset: +params.offset || 0
+      }
+    }, function (err, results) {
+      if(err) {
+        console.log(err)
+        next(err);
+        return;
+      }
+      next(null, results.items, {
+        total_items : results.count_items
+      });
+    });
+  },
   /*
     Change the relationship status from resource to the entity.
     status: DISCARD

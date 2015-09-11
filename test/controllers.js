@@ -982,7 +982,7 @@ describe('controllers: play with entities', function() {
   
   it('should get a single entity related persons', function (done) {
     session
-      .get('/api/entity/20381/related/persons')
+      .get('/api/entity/20381/related/person')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {

@@ -108,6 +108,17 @@ describe('model:entity ', function() {
     })
   });
   
+  it('should return the list of persons related to the entity', function (done) {
+    Entity.getRelatedEntities({
+      id: __entity.id,
+      entity: 'person'
+    }, function (err, items, info) {
+      should.not.exist(err, err);
+      should.exist(info.total_items);
+      should.exist(items.length);
+      done();
+    })
+  });
   
   it('should return 404', function (done) {
     Entity.get(1715100000000000, function (err, res) {

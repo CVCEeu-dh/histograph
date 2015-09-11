@@ -150,6 +150,22 @@ module.exports = function(io){
       });
     }, // get graph of resources and other stugff, a graph object of nodes and edges
     
+    getRelatedEntities: function (req, res) {
+      var form = validator.request(req, {
+            limit: 50,
+            offset: 0
+          });
+      
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+     
+      entity.getRelatedEntities(form.params, function (err, items, info) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({items: items}, info);
+      });
+    },
+    
     getRelatedPersons: function (req, res) {
       entity.getRelatedPersons(req.params.id, {
         limit: 10,

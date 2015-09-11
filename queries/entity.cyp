@@ -250,7 +250,7 @@ LIMIT {limit}
 
 
 // name:get_related_persons
-// get related persons that are connected with the entity, sorted by frequence
+// DEPRECATED get related persons that are connected with the entity, sorted by frequence
 MATCH (ent)-[:appears_in]->(res:resource)
 WHERE id(ent) = {id}
 WITH ent, res
@@ -263,8 +263,39 @@ RETURN {
   coappear: COUNT(DISTINCT res)
 } as results ORDER BY results.coappear DESC LIMIT 10
 
+
+// name:get_related_entities
+//
+MATCH (ent)-[r:appears_in]->(res:resource)
+  WHERE id(ent) = {id}
+WITH res
+  MATCH (ent1:{:entity})-[r:appears_in]->(res)
+  WHERE ent1.score > -1
+WITH ent1, count(DISTINCT r) as w
+RETURN {
+  id: id(ent1),
+  type: last(labels(ent1)),
+  props: ent1,
+  weight: w
+}
+ORDER BY w DESC
+SKIP {offset}
+LIMIT {limit}
+
+
+// name:count_related_entities
+//
+MATCH (ent)-[r:appears_in]->(res:resource)
+  WHERE id(ent) = {id}
+WITH res
+  MATCH (ent1:{:entity})-[r:appears_in]->(res)
+  WHERE ent1.score > -1
+WITH ent1
+RETURN COUNT(DISTINCT ent1) as count_items
+
+
 // name:get_related_places
-// get related persons that are connected with the entity, sorted by frequence
+// DEPRECATED get related persons that are connected with the entity, sorted by frequence
 MATCH (ent)-[:appears_in]->(res:resource)
 WHERE id(ent) = {id}
 WITH ent, res
