@@ -255,23 +255,24 @@ module.exports = {
       next(null, items);
     });  
   },
+  
+  
+  
   /**
     Monopartite graph
+    params must contain an integer ID
   */
-  getGraphPersons: function(id, properties, next) {
-    var options = _.merge({
-      id: +id, 
-      limit: 100
-    }, properties);
-    // build a nodes edges graph
-    helpers.cypherGraph(queries.get_graph_persons, options, function (err, graph) {
+  getRelatedEntitiesGraph: function(params, next) {
+    var query = parser.agentBrown(queries.get_related_entities_graph, params)
+    helpers.cypherGraph(query, params, function (err, graph) {
       if(err) {
         next(err);
         return
-      }
+      };
       next(null, graph);
-    })
+    });
   },
+  
   /**
     Bipartite graph of entity and resources
   */

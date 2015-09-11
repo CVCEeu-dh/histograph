@@ -120,6 +120,18 @@ describe('model:entity ', function() {
     })
   });
   
+  it('should return the network of persons related to the entity', function (done) {
+    Entity.getRelatedEntitiesGraph({
+      id: __entity.id,
+      entity: 'person',
+      limit: 100
+    }, function (err, graph) {
+      should.not.exist(err, err);
+      should.exist(graph);
+      done();
+    })
+  });
+  
   it('should return 404', function (done) {
     Entity.get(1715100000000000, function (err, res) {
       should.equal(err, 'is_empty');

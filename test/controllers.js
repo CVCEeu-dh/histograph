@@ -968,7 +968,7 @@ describe('controllers: play with entities', function() {
   });
   it('should get a single entity related resources', function (done) {
     session
-      .get('/api/entity/'+__entity.id+'/related/resources')
+      .get('/api/entity/'+__entity.id+'/related/resource')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
@@ -982,7 +982,7 @@ describe('controllers: play with entities', function() {
   
   it('should get a single entity related persons', function (done) {
     session
-      .get('/api/entity/20381/related/person')
+      .get('/api/entity/'+__entity.id+'/related/person')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
@@ -996,7 +996,7 @@ describe('controllers: play with entities', function() {
   
   it('should get a single entity graph object', function (done) {
     session
-      .get('/api/entity/20381/graph')
+      .get('/api/entity/'+__entity.id+'/related/person/graph')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
@@ -1009,7 +1009,7 @@ describe('controllers: play with entities', function() {
   });
   it('should get a single entity MONOPARTITE graph object', function (done) {
     session
-      .get('/api/entity/20381/graph?type=monopartite-entity')
+      .get('/api/entity/'+__entity.id+'/related/person/graph?type=monopartite-entity')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {

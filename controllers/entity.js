@@ -179,6 +179,31 @@ module.exports = function(io){
       });
     }, // get graph of resources and other stugff, a graph object of nodes and edges
     
+    
+    /*
+      Get monopartite graph of related resource network
+    */
+    getRelatedEntitiesGraph: function (req, res) {
+      var form = validator.request(req, {
+            limit: 100,
+            offset: 0
+          });
+      entity.getRelatedEntitiesGraph({
+        id: form.params.id,
+        entity: form.params.entity,
+        limit: form.params.limit,
+        offset: form.params.offset
+      }, function (err, graph) {
+        return res.ok({
+          graph: graph
+        }, {
+          type: 'monopartite'
+        });
+      });
+    },
+    /*
+      DEPRECATED
+    */
     getGraph: function (req, res) {
       
       var type = 'bipartite';

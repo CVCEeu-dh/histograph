@@ -48,29 +48,39 @@
 
 
 <div id='see-also-menu' class="tk-proxima-nova header-menu">
-  <ul>
-    <li>
-      <a ui-sref-active-eq="active" ui-sref="entity({ id: item.id })">
-        <b>{{totalItems}}</b> related  resources
+   <ul>
+    <li role="menuitem">
+      <a ui-sref-active-eq="active" ui-sref="entity.resources({ id: item.id })">
+        <i class="fa fa-circle type resource"></i>resources
       </a>
     </li>
-    
-    <li>
-      <a ui-sref-active-eq="active" ui-sref="resource.inquiries({ id: item.id })">
-        inquiries / issues
+    <li role="menuitem">
+      <a ui-sref-active-eq="active" ui-sref="entity.persons({ id: item.id })">
+        <i class="fa fa-circle type person"></i>persons
+      </a>
+    </li>
+    <li role="menuitem">
+      <a ui-sref-active-eq="active" ui-sref="entity.organizations({ id: item.id })">
+        <i class="fa fa-circle type organization"></i>organizations
+      </a>
+    </li>
+    <li role="menuitem">
+      <a ui-sref-active-eq="active" ui-sref="entity.locations({ id: item.id })">
+        <i class="fa fa-circle type location"></i>locations
       </a>
     </li>
   </ul>
 </div>
 
-<div ui-view>
+<div ui-view id='see-also'>
+  <div  class='{{currentCtrl}}'>
+    <div ng-include src="'templates/partials/resource-toolbar.html'"></div>
   
-  <div id='see-also' class='{{currentCtrl}}'>
-  <div class='fixed-toolbar' ng-include src="'templates/partials/resource-toolbar.html'"></div>
-  
-  
-  <div class="{{loading? 'animated fadeOut': 'animated fadeIn'}}" style="-webkit-animation-delay: {{$index * 100}}ms;
-    animation-delay: {{$index * 100}}ms" ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/resource-lite.html"'></div>
+    <div class="empty-list" ng-if="relatedItems.length == 0">
+      There are no related <i>{{model}}</i>.
+    </div>
+    
+    
   </div>
   
 </div>

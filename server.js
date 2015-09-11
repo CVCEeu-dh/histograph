@@ -385,14 +385,14 @@ apiRouter.route('/cooccurrences') // @todo move to entity controller.
 apiRouter.route('/entity/:id')
   .get(ctrl.entity.getItem)
   
-apiRouter.route('/entity/:id/related/resources')
+apiRouter.route('/entity/:id/related/resource')
   .get(ctrl.entity.getRelatedResources);
   
 apiRouter.route('/entity/:id(\\d+)/related/:entity(person|location|organization)')
   .get(ctrl.entity.getRelatedEntities)
   
-apiRouter.route('/entity/:id/graph')
-  .get(ctrl.entity.getGraph);
+apiRouter.route('/entity/:id/related/:entity(person|location|organization)/graph')
+  .get(ctrl.entity.getRelatedEntitiesGraph);
   
 apiRouter.route('/entity/:id(\\d+)/upvote')
   .post(ctrl.entity.upvote)

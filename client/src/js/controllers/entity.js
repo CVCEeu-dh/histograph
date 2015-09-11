@@ -5,16 +5,13 @@
  * # IndexCtrl
  */
 angular.module('histograph')
-  .controller('EntityCtrl', function ($scope, $log, $stateParams, socket, $filter, entity, resources, persons, EntityExtraFactory,EntityRelatedFactory, EVENTS) {
+  .controller('EntityCtrl', function ($scope, $log, $stateParams, socket, $filter, entity, persons, EntityExtraFactory,EntityRelatedFactory, EVENTS) {
     $log.debug('EntityCtrl ready', +$stateParams.id);
     
     $scope.item = entity.result.item;
-    $scope.setRelatedItems(resources.result.items);
+    
     $scope.relatedPersons    = persons.result.items;
     
-    $scope.pagetitle = 'related documents';
-    $scope.totalItems = resources.info.total_items;
-    $scope.limit = 10//resources.info.params.limit
     
      /*
       Set graph title
@@ -25,30 +22,30 @@ angular.module('histograph')
     // cooccurrences
     $scope.graphType = 'monopartite-entity'
     // sync graph
-    $scope.drawGraph = function() {
-      EntityExtraFactory.get({
-        id: $stateParams.id,
-        extra: 'graph',
-        type: $scope.graphType,
-        limit: 2000
-      }, function(res) {
-        $log.log('res', res)
-        res.result.graph.nodes.map(function (d) {
-          d.color  = d.type == 'person'? "#D44A33": "#6891A2";
-          d.type   = d.type || 'res';
-          d.x = Math.random()*50;
-          d.y = Math.random()*50;
-          //d.label = d.name;
-          return d;
-        })
-        $log.debug('EntityCtrl set graph',res.result.graph.nodes);
+    // $scope.drawGraph = function() {
+    //   EntityExtraFactory.get({
+    //     id: $stateParams.id,
+    //     extra: 'graph',
+    //     type: $scope.graphType,
+    //     limit: 2000
+    //   }, function(res) {
+    //     $log.log('res', res)
+    //     res.result.graph.nodes.map(function (d) {
+    //       d.color  = d.type == 'person'? "#D44A33": "#6891A2";
+    //       d.type   = d.type || 'res';
+    //       d.x = Math.random()*50;
+    //       d.y = Math.random()*50;
+    //       //d.label = d.name;
+    //       return d;
+    //     })
+    //     $log.debug('EntityCtrl set graph',res.result.graph.nodes);
         
-        // once done, load the other viz
-        $scope.setGraph(res.result.graph)
-      });
-    };
+    //     // once done, load the other viz
+    //     $scope.setGraph(res.result.graph)
+    //   });
+    // };
     
-    $scope.$watch('graphType', $scope.drawGraph)
+    // $scope.$watch('graphType', $scope.drawGraph)
     
     $scope.downvote = function() {
       // downvote current entity
@@ -66,7 +63,7 @@ angular.module('histograph')
     
   })
 .controller('EntitiesCtrl', function ($scope, $log, $stateParams, entities, model, relatedFactory, relatedVizFactory, EVENTS){
-  $log.log('EntitiesCtrl', entities.info.total_items);
+  $log.log('EntitiesCtrl ready - model:', model, entities.info.total_items);
   $scope.model = model
   /*
     Load graph data
@@ -75,7 +72,7 @@ angular.module('histograph')
     id: $stateParams.id,
     model: model,
     type: 'graph',
-    limit: 100
+    limit: 1000
   }, function(res) {
     $scope.setGraph(res.result.graph)
   });

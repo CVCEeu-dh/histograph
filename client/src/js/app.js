@@ -73,6 +73,7 @@ angular
       })
       
       .state('entity', {
+        abstract: true,
         url: '/e/:id',
         templateUrl: 'templates/entity.html',
         controller: 'EntityCtrl',
@@ -86,18 +87,102 @@ angular
           persons: function(EntityRelatedFactory, $stateParams) {
             return EntityRelatedFactory.get({
               id: $stateParams.id,
-              model: 'persons'
-            }, {}).$promise;
-          },
-          resources: function(EntityRelatedFactory, $stateParams) {
-            return EntityRelatedFactory.get({
-              id: $stateParams.id,
-              model: 'resources',
+              model: 'person',
               limit: 10
             }, {}).$promise;
-          }
+          },
+          // resources: function(EntityRelatedFactory, $stateParams) {
+          //   return EntityRelatedFactory.get({
+          //     id: $stateParams.id,
+          //     model: 'resources',
+          //     limit: 10
+          //   }, {}).$promise;
+          // }
         }
       })
+        .state('entity.persons', {
+          url: '',
+          templateUrl: 'templates/partials/entities.html',
+          controller: 'EntitiesCtrl',
+          resolve: {
+            model: function(){
+              return 'person'
+            },
+            relatedVizFactory: function(EntityRelatedVizFactory) {
+              return EntityRelatedVizFactory
+            },
+            relatedFactory: function(EntityRelatedFactory) {
+              return EntityRelatedFactory
+            },
+            entities: function(EntityRelatedFactory, $stateParams) {
+              return EntityRelatedFactory.get({
+                id: $stateParams.id,
+                model: 'person',
+                limit: 10
+              }).$promise;
+            }
+          }
+        })
+        .state('entity.organizations', {
+          url: '/org',
+          templateUrl: 'templates/partials/entities.html',
+          controller: 'EntitiesCtrl',
+          resolve: {
+            model: function(){
+              return 'organization'
+            },
+            relatedVizFactory: function(EntityRelatedVizFactory) {
+              return EntityRelatedVizFactory
+            },
+            relatedFactory: function(EntityRelatedFactory) {
+              return EntityRelatedFactory
+            },
+            entities: function(EntityRelatedFactory, $stateParams) {
+              return EntityRelatedFactory.get({
+                id: $stateParams.id,
+                model: 'organization',
+                limit: 10
+              }).$promise;
+            }
+          }
+        })
+        .state('entity.locations', {
+          url: '/loc',
+          templateUrl: 'templates/partials/entities.html',
+          controller: 'EntitiesCtrl',
+          resolve: {
+            model: function(){
+              return 'location'
+            },
+            relatedVizFactory: function(EntityRelatedVizFactory) {
+              return EntityRelatedVizFactory
+            },
+            relatedFactory: function(EntityRelatedFactory) {
+              return EntityRelatedFactory
+            },
+            entities: function(EntityRelatedFactory, $stateParams) {
+              return EntityRelatedFactory.get({
+                id: $stateParams.id,
+                model: 'location',
+                limit: 10
+              }).$promise;
+            }
+          }
+        })
+        .state('entity.resources', {
+          url: '/r',
+          templateUrl: 'templates/partials/resources.html',
+          controller: 'ResourcesCtrl',
+          resolve: {
+            resources: function(EntityRelatedFactory, $stateParams) {
+              return EntityRelatedFactory.get({
+                id: $stateParams.id,
+                model: 'resource',
+                limit: 10
+              }).$promise;
+            },
+          }
+        })
       
       /*
         user

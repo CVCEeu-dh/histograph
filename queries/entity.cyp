@@ -223,12 +223,12 @@ RETURN result
 LIMIT {limit}
 
 
-// name: get_graph_persons
-// monopartite graph of people
+// name: get_related_entities_graph
+// monopartite graph of entities
 MATCH (n)-[r]-(t:resource)
  WHERE id(n) = {id}
 WITH t
- MATCH (p1:person)-[:appears_in]-(t)-[:appears_in]-(p2:person)
+ MATCH (p1:{:entity})-[:appears_in]-(t)-[:appears_in]-(p2:{:entity})
  WHERE p1.score > -1 AND p2.score > -1
 WITH p1, p2, length(collect(DISTINCT t)) as w
   

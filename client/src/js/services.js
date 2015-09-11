@@ -108,10 +108,17 @@ angular.module('histograph')
     return $resource('/api/entity/:id', {}, {});
   })
   .factory('EntityRelatedFactory', function ($resource) {
-    return $resource('/api/entity/:id/related/:model', {}, {});
+    return $resource('/api/entity/:id/related/:model');
   })
   .factory('EntityExtraFactory', function ($resource) {
     return $resource('/api/entity/:id/:extra', {}, {});
+  })
+  /*
+    model - the related model
+    type  - type of viz, eg graph or timeline
+  */
+  .factory('EntityRelatedVizFactory', function ($resource) {
+    return $resource('/api/entity/:id/related/:model/:type');
   })
   /*
     GET cooccurrences
