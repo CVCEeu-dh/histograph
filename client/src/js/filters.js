@@ -185,6 +185,26 @@ angular.module('histograph')
       return wrapper(props['caption_' + props.languages[0]])
     }
   })
+  
+  // thanks to igreulich/angular-truncate
+  .filter('truncate', function (){
+    return function (text, length, end){
+      if (text !== undefined){
+        if (isNaN(length)){
+          length = 10;
+        }
+
+        end = end || "...";
+
+        if (text.length <= length || text.length - end.length <= length){
+          return text;
+        }else{
+          return String(text).substring(0, length - end.length) + end;
+        }
+      }
+    };
+  })
+  
   .filter('abstract', function($sce) {
     return function(props, language, cutAt) {
       var primary = props['abstract_' + language],

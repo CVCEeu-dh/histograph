@@ -1,0 +1,18 @@
+<div class="gasp tk-proxima-nova {{enabled?'enabled':'disabled'}}"><div class="inner {{target.type||''}}">
+  <div class="text" ng-if="target.type == 'node'" ><i tooltip="{{type}}" class="fa fa-circle type {{type}}"></i>{{label|truncate:32}}</div> 
+  <div class="text" ng-if="target.type == 'edge'">
+    <i class="fa fa-circle {{left.type}}"></i>&nbsp;
+    <i class="fa fa-long-arrow-right"></i>&nbsp;
+    <i class="fa fa-circle {{right.type}}"></i>
+    <span><span tooltip="{{left.label}}" tooltip-append-to-body='true'>{{left.label|truncate:20}}</span> &#8594; 
+    <span tooltip="{{right.label}}" tooltip-append-to-body='true'>{{right.label|truncate:20}}
+    </span>
+  </div> 
+  <div class="action-group">
+    <a class="action slide {{target.type == 'node'? 'enabled': 'disabled'}}" href="{{href}}" title="visit" data-action="link" tooltip="{{linkto}}">
+      <span class="fa fa-link"></span></a>
+    <a class="action queue" ng-click="addTargetToQueue()" tooltip="add to your current playlist" data-action="queue">
+      <span class="fa fa-play-circle-o"></span></a>
+            
+  </div>
+</div></div>

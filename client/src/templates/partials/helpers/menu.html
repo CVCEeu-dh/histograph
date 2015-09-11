@@ -4,7 +4,7 @@
   </li>
   <li class='path split'>/</li>
   <li class='path'>
-    <a class="active" href="#">{{item.type || 'resource'}}#{{item.id}}</a>
+    <a ng-if='item' class="active" href="#">{{item.type || 'resource'}}#{{item.id}}</a>
   </li>
    <li class='path split'>&nbsp;</li>
   <!-- viewpoint menu-->
