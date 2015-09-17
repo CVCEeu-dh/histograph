@@ -125,6 +125,8 @@ describe('controller:resource (related users)', function() {
       .expect(200)
       .end(function (err, res) {
         should.not.exists(err);
+        should.exist(res.body.info.total_items);
+        should.exist(res.body.result.items);
         done();
       });
   })

@@ -296,7 +296,10 @@ module.exports = {
         next(err);
         return;
       }
-      next(null, results.items, results.count_items);
+
+      next(null, _.filter(results.items, 'id'), {
+        total_items: results.count_items
+      });
     }); 
   },
   

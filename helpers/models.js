@@ -42,7 +42,7 @@ module.exports = {
         neo4j.query(query, options.params, function (err, result) {
           if(err)
             return callback(err);
-          callback(null, result.count_items || result)
+          callback(null, isNaN(result.count_items)? result: result.count_items)
         })
       },
       items: function (callback) {

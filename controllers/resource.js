@@ -448,9 +448,7 @@ module.exports = function(io){
       }, form.params, function (err, items, info) {
         if(err)
           return helpers.cypherQueryError(err, res);
-        return res.ok({
-          items: items
-        }, info);
+        return res.ok({items: items}, info);
       })
     },
     
