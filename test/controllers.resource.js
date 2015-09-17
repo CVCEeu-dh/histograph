@@ -180,6 +180,23 @@ describe('controller:resource (related resources)', function() {
         done();
       });
   });
+  
+  it('should show the graph of 10 related people', function (done) {
+    session
+      .get('/api/resource/'+ __resourceA.id +'/related/person/graph')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err)
+        should.not.exists(err);
+        
+        should.exist(res.body.result.graph);
+        should.exist(res.body.result.graph.nodes.length);
+        should.exist(res.body.result.graph.edges.length);
+        done();
+      });
+  });
 })
 
 

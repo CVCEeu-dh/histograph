@@ -143,6 +143,28 @@ module.exports = function(io){
       });
     },
     
+    /*
+      Get monopartite graph of related resource network
+    */
+    getRelatedEntitiesGraph: function (req, res) {
+      var form = validator.request(req, {
+            limit: 100,
+            offset: 0
+          });
+      Resource.getRelatedEntitiesGraph({
+        id: form.params.id,
+        entity: form.params.entity,
+        limit: form.params.limit,
+        offset: form.params.offset
+      }, function (err, graph) {
+        return res.ok({
+          graph: graph
+        }, {
+          model:  form.params.entity
+        });
+      });
+    },
+    
     /**
       We should move this to entities instead.
     */

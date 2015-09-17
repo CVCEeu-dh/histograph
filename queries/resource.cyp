@@ -392,7 +392,7 @@ LIMIT {limit}
 
 
 // name: get_graph_persons
-//
+// DEPRECATED
 MATCH (n)-[r]-(per:person)
   WHERE id(n) = {id}
 WITH per
@@ -417,6 +417,32 @@ RETURN {
   weight: w 
 } as result
 ORDER BY result.weight DESC
+LIMIT {limit}
+
+
+// name: get_related_entities_graph
+// monopartite graph of entities
+MATCH (n:resource)
+ WHERE id(n) = {id}
+WITH n
+ MATCH (p1:{:entity})-[:appears_in]->(n)<-[:appears_in]-(p2:{:entity})
+ WHERE p1.score > -1 AND p2.score > -1
+WITH p1, p2, count(DISTINCT n) as w
+  
+RETURN {
+    source: {
+      id: id(p1),
+      type: LAST(labels(p1)),
+      label: COALESCE(p1.name, p1.title_en, p1.title_fr,p1.title, '')
+    },
+    target: {
+      id: id(p2),
+      type: LAST(labels(p2)),
+      label: COALESCE(p2.name, p2.title_en, p2.title_fr,p2.title, '')
+    },
+    weight: w 
+  } as result
+ORDER BY w DESC
 LIMIT {limit}
 
 

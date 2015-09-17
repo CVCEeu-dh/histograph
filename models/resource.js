@@ -296,9 +296,7 @@ module.exports = {
         next(err);
         return;
       }
-      next(null, results.items, {
-        total_items : results.count_items
-      });
+      next(null, results.items, results.count_items);
     }); 
   },
   
@@ -322,6 +320,7 @@ module.exports = {
   },
   /**
     Monopartite graph
+    DEPRECATED. cfr getRelatedEntitiesGraph
   */
   getGraphPersons: function(id, properties, next) {
     var options = _.merge({
@@ -339,7 +338,23 @@ module.exports = {
   },
   
   /**
+    Monopartite graph
+    params must contain an integer ID
+  */
+  getRelatedEntitiesGraph: function(params, next) {
+    var query = parser.agentBrown(rQueries.get_related_entities_graph, params)
+    helpers.cypherGraph(query, params, function (err, graph) {
+      if(err) {
+        next(err);
+        return
+      };
+      next(null, graph);
+    });
+  },
+  
+  /**
     Monopartite graph of related resources
+    DEPRECATED getRelatedEntitiesGraph
   */
   getRelatedResourcesGraph: function(resource, params, next) {
     helpers.cypherGraph(rQueries.get_related_resources_graph, _.assign({

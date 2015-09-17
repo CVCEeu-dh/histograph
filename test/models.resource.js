@@ -246,6 +246,23 @@ describe('model:resource ', function() {
     })
   })
   
+  it('should get the graph of entities attached', function (done) {
+    Resource.getRelatedEntitiesGraph({
+      id: __resourceA.id,
+      entity: 'person',
+      limit: 100,
+      offset: 0
+    }, function (err, graph) {
+      if(err)
+        console.log(err);
+      // console.log(__social_group.id, items[1],info.total_items)
+      should.exist(graph.nodes);
+      should.exist(graph.edges);
+      done()
+    })
+  })
+  
+  
   it('should return the timeline of resources', function (done) {
     Resource.getTimeline({}, function (err, res) {
       should.not.exist(err);
