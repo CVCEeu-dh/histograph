@@ -117,7 +117,7 @@ module.exports = {
     var queue = async.waterfall([
       // get pictures and documents having a caption
       function (next) {
-        neo4j.query('MATCH (a:resource) WHERE NOT (a)-[:appears_in]-() RETURN a skip {offset} LIMIT {limit}', {
+        neo4j.query('MATCH (a:resource) WHERE NOT (a)-[:appears_in]-() RETURN a ORDER BY a.mimetype DESC skip {offset} LIMIT {limit} ', {
           limit: +options.limit || 10,
           offset: +options.offset || 0
         }, function (err, nodes) {
