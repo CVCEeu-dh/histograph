@@ -198,8 +198,10 @@ module.exports = {
           text: options.text
         }
       }, function (err, res, body) {
-        if(err)
+        if(err) {
           next(err);
+          return;
+        }
         // FLATTEN YAGO entities by providing only entitites having "best entity"
         if(!body.mentions) {
           console.log(body)  

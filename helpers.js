@@ -488,8 +488,12 @@ module.exports = {
     services.yagoaida({
       text: options.text
     }, function (err, candidates) {
-      if(err)
+      if(err) {
         console.log('yagoaida', err)
+        next(err);
+        return;
+      }
+      
       var entities   = [],
           entitiesPrefixesToKeep = {
             YAGO_wordnet_district: 'location',

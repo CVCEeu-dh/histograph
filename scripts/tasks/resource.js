@@ -190,9 +190,10 @@ module.exports = {
         Resource.discover({
           id: node.id
         }, function (err, res) {
-          if(err)
+          if(err) {
             next(err);
-            
+            return
+          }
           neo4j.save(res, function (err, n) {
             if(err)
               throw err;
