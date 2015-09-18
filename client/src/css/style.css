@@ -4868,10 +4868,15 @@ Copyright (c) 2015 Daniel Eden
   margin: 0px 150px;
 }
 #timeline .tooltip {
-  top: 50px;
-  background: #555;
-  color: white;
-  text-align: center
+  top: -30px;
+    text-align: center;
+    margin-left: -100px;
+    width: 200px;
+}
+
+#timeline .tooltip .tooltip-inner{
+      display: inline-block;
+    background-color: #383838;
 }
 
 #timeline .date{
@@ -4900,12 +4905,12 @@ Copyright (c) 2015 Daniel Eden
 }
 
 #timeline .brushdate.left{
-  left: 40px;
+  /*left: 40px;*/
   text-align: right;
 }
 
 #timeline .brushdate.right{
-  right: 40px;
+  /*right: 40px;*/
   text-align: left;
 }
 
