@@ -376,6 +376,7 @@ angular
         })
       
       .state('search', {
+        abstract:true,
         url: '/search/{query:[^/]*}',
         templateUrl: 'templates/search.html',
         controller: 'SearchCtrl',
@@ -389,6 +390,7 @@ angular
           },
           entities: function(SuggestFactory, $stateParams) {
             // clean limit here
+            console.log($stateParams)
             return SuggestFactory.getEntities({
               query: $stateParams.query,
               limit: 10
@@ -396,20 +398,58 @@ angular
           }
         }
       })
-      .state('searchentity', {
-        url: '/search/{query}/entity',
-        templateUrl: 'templates/search.html',
-        controller: 'SearchCtrl',
-        resolve: {
-          entities: function(SuggestFactory, $stateParams) {
-            // clean limit here
-            return SuggestFactory.getEntities({
-              query: $stateParams.query,
-              limit: 10
-            });
-          }
-        }
-      });
+        .state('search.resources', {
+          url: '',
+          templateUrl: 'templates/partials/resources.html',
+          controller: 'SearchResourcesCtrl',
+        })
+        .state('search.persons', {
+          url: '/per',
+          templateUrl: 'templates/partials/entities.html',
+          controller: 'SearchEntitiesCtrl',
+        })
+        .state('search.locations', {
+          url: '/loc',
+          templateUrl: 'templates/partials/entities.html',
+          controller: 'SearchEntitiesCtrl',
+        })
+        .state('search.organization', {
+          url: '/org',
+          templateUrl: 'templates/partials/entities.html',
+          controller: 'SearchEntitiesCtrl',
+        })
+        .state('search.social_group', {
+          url: '/soc',
+          templateUrl: 'templates/partials/entities.html',
+          controller: 'SearchEntitiesCtrl',
+        })
+      //   .state('search.entities', {
+      //     url: '/{entity:person|location}/',
+      //     templateUrl: 'templates/partials/resources.html',
+      //     controller: 'SearchResourcesCtrl',
+      //   })
+      // .state('searchentity', {
+      //   url: '/search/{query}/{entity:person|location}',
+      //   templateUrl: 'templates/search.html',
+      //   controller: 'SearchCtrl',
+      //   resolve: {
+      //     resources: function(SuggestFactory, $stateParams) {
+      //       // clean limit here
+      //       return SuggestFactory.getResources({
+      //         query: $stateParams.query,
+      //         limit: 10
+      //       });
+      //     },
+      //     entities: function(SuggestFactory, $stateParams) {
+      //       // clean limit here
+      //       return SuggestFactory.getEntities({
+      //         query: $stateParams.query,
+      //         entity: $stateParams.entity,
+      //         limit: 10
+      //       });
+      //     }
+      //   }
+      // });
   })
   .config(function ($httpProvider) {
     $httpProvider.interceptors.push(function ($q, $log, $rootScope, EVENTS) {

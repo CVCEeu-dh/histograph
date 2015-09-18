@@ -109,6 +109,27 @@ module.exports = {
     }
   },
   
+  /*
+    Give a slug to poor resources not having one
+  */
+  // slugMany: function(options, callback) {
+  //   var neo4j = require('seraph')(settings.neo4j.host);
+    
+    
+    
+  //   neo4j.query('MATCH (res:resource) WHERE not(has(res.slug)) RETURN RES SKIP {offset} LIMIT {limit}', {
+  //     limit: +options.limit || 10,
+  //     offset: +options.offset || 0
+  //   }, function(err, nodes) {
+  //     if(err) {
+  //       callback(err);
+  //       return;
+  //     }
+  //     next(null, nodes);
+  //   });
+  //   //neo4j.query('MATCH (p:resource) WITH p.slug as slug, count(distinct p) AS nodes WITH slug, nodes WHERE nodes > 1 RETURN slug, nodes')
+    
+  // },
   
   discoverMany: function(options, callback) {
     console.log(clc.yellowBright('\n   tasks.resource.discover'));

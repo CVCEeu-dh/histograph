@@ -11,15 +11,11 @@ angular.module('histograph')
     $scope.pagetitle = 'documents found';
     
     $scope.matchingResources = {
-      items: resources.data.result.items,
       totalItems: resources.data.info.total_count,
-      limit:  resources.data.info.limit
     }
-     
+
     $scope.matchingEntities  = {
-      items: entities.data.result.items,
-      totalItems: entities.data.info.total_count,
-      limit:  entities.data.info.limit
+      types: _.indexBy(entities.data.info.total_items, 'type'),
     };
     
     $scope.matchingQuery = $stateParams.query;
@@ -49,52 +45,97 @@ angular.module('histograph')
       $scope.setGraph(res.data.result.graph)
     });
     
-    /*
-      sync
-      reload items according to page, prefix and active filters
-    */
-    $scope.sync = function(params){
-      if(typeof params.prefix == undefined || params.prefix == 'resources'){
-        $scope.matchingResources.loading = true;
-        SuggestFactory.getResources({
-          query: $stateParams.query,
-          limit: 10,
-          offset: (params.page-1)*10
-        }).then(function (res) {
-          $scope.matchingResources = {
-            items:      res.data.result.items,
-            totalItems: res.data.info.total_count,
-            limit:      res.data.info.limit,
-            page:       params.page,
-            loading:    false
-          }
-        });
-      }
-      if(typeof params.prefix == undefined || params.prefix == 'entities'){
-        $scope.matchingEntities.loading = true;
-        SuggestFactory.getEntities({
-          query: $stateParams.query,
-          limit: 10,
-          offset: (params.page-1)*10
-        }).then(function (res) {
-          $scope.matchingEntities = {
-            items:      res.data.result.items,
-            totalItems: res.data.info.total_count,
-            limit:      res.data.info.limit,
-            page:       params.page,
-            loading:    false
-          }
-        });
-      }
-    };
+    // /*
+    //   sync
+    //   reload items according to page, prefix and active filters
+    // */
+    // $scope.sync = function(params){
+    //   if(typeof params.prefix == undefined || params.prefix == 'resources'){
+    //     $scope.matchingResources.loading = true;
+    //     SuggestFactory.getResources({
+    //       query: $stateParams.query,
+    //       limit: 10,
+    //       offset: (params.page-1)*10
+    //     }).then(function (res) {
+    //       $scope.matchingResources = {
+    //         items:      res.data.result.items,
+    //         totalItems: res.data.info.total_count,
+    //         limit:      res.data.info.limit,
+    //         page:       params.page,
+    //         loading:    false
+    //       }
+    //     });
+    //   }
+    //   if(typeof params.prefix == undefined || params.prefix == 'entities'){
+    //     $scope.matchingEntities.loading = true;
+    //     SuggestFactory.getEntities({
+    //       query: $stateParams.query,
+    //       limit: 10,
+    //       offset: (params.page-1)*10
+    //     }).then(function (res) {
+    //       $scope.matchingEntities = {
+    //         items:      res.data.result.items,
+    //         totalItems: res.data.info.total_count,
+    //         limit:      res.data.info.limit,
+    //         page:       params.page,
+    //         loading:    false
+    //       }
+    //     });
+    //   }
+    // };
     /*
       event listeners
     */
+    
+  })
+  .controller('SearchResourcesCtrl', function ($scope, $log, $stateParams, resources, SuggestFactory, EVENTS) {
+    $log.debug('SearchResourcesCtrl ready - query:', $stateParams.query)
+    
+    $scope.setRelatedItems(resources.data.result.items);
+    $scope.totalItems = resources.data.info.total_count;
+    $scope.limit = 10;
     $scope.$on(EVENTS.PAGE_CHANGED, function(e, params) {
-      $log.debug('SearchCtrl @PAGE_CHANGED', params);
+      $log.debug('SearchResourcesCtrl @PAGE_CHANGED', params);
       $scope.page = params.page;
       $scope.sync(params);
     });
-  });
+    
+    $scope.sync = function(params){
+      SuggestFactory.getResources({
+        query: $stateParams.query,
+        limit: $scope.limit,
+        offset: (params.page-1)*$scope.limit
+      }).then(function (res) {
+        $scope.setRelatedItems(res.data.result.items);
+        $scope.totalItems = res.data.info.total_count;
+        $scope.limit = res.data.info.limit;
+      });
+    };
+  })
+  .controller('SearchEntitiesCtrl', function ($scope, $log, $stateParams, entities, SuggestFactory, EVENTS) {
+    $log.debug('SearchEntitiesCtrl ready - query:', $stateParams.query)
+    
+    $scope.setRelatedItems(entities.data.result.items);
+    $scope.totalItems = 80;
+    $scope.limit = 10;
+    $scope.$on(EVENTS.PAGE_CHANGED, function(e, params) {
+      $log.debug('SearchEntitiesCtrl @PAGE_CHANGED', params);
+      $scope.page = params.page;
+      $scope.sync(params);
+    });
+    
+    $scope.sync = function(params){
+      SuggestFactory.getEntities({
+        query: $stateParams.query,
+        limit: $scope.limit,
+        entity: $stateParams.entity,
+        offset: (params.page-1)*$scope.limit
+      }).then(function (res) {
+        $scope.setRelatedItems(res.data.result.items);
+        $scope.totalItems = res.data.info.total_count;
+        $scope.limit = res.data.info.limit;
+      });
+    };
+  })
     
     

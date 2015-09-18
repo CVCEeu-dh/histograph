@@ -328,10 +328,10 @@ module.exports =  function(io){
             offset: offset,
             limit: limit
           }, function (err, items) {
-            console.log(err)
-            if(err)
+            if(err) {
+              console.log(err)
               callback(err);
-            else
+            } else
               callback(null, items);
           })
         }
@@ -354,9 +354,18 @@ module.exports =  function(io){
       @todo: use the solr endpoint wherever available.
     */
     entities: function (req, res) {
+      
+      var form = validator.request(req, {
+            limit: 20,
+            offset: 0
+          });
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
       var offset = +req.query.offset || 0,
           limit  = +req.query.limit || 20,
           q      = toLucene(req.query.query),
+          entity = req.query.entity || 'person',    
           query  = [
               
               'name_search:', q,
@@ -378,6 +387,7 @@ module.exports =  function(io){
           neo4j.query(queries.get_matching_entities, {
             query: query,
             offset: offset,
+            entity: 'person',
             limit: limit
           }, function (err, items) {
             if(err)
@@ -389,14 +399,13 @@ module.exports =  function(io){
       }, function (err, results) {
         if(err)
           return helpers.cypherQueryError(err, res);
-        
         return res.ok({
           items: results.get_matching_entities.map(function (d) {
             d.props.languages = _.values(d.props.languages)
             return d;
           }),
         }, {
-          total_count: results.get_matching_entities_count.total_count,
+          total_items: results.get_matching_entities_count,
           offset: offset,
           limit: limit
         });

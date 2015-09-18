@@ -739,14 +739,16 @@ describe('controllers: suggest queries', function() {
   
   it('should get entities matching for helmut kohl', function (done) {
     session
-      .get('/api/suggest/entities?query=helmut kohl')
+      .get('/api/suggest/entities?query=paris')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
+        
         if(err)
           console.log(err);
         should.not.exist(err);
-        //console.log(res.body.result.items)
+        //citems)
+        should.exist(res.body.info.total_items);
         should.exist(res.body.result.items.length);
         done()
       });
