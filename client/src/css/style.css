@@ -392,6 +392,10 @@ a#header-logo img{
   margin:0;  
 }
 
+.neighbors #perspective-menu {
+    width: 25%;
+}
+
 .viewpoint-read #perspective-menu {
   width: 50%
 }
