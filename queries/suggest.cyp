@@ -113,48 +113,52 @@ RETURN count(n) as total_count
 
 // name: get_matching_resources
 // get resources by query
-start n=node:node_auto_index({query})
-WITH n
+start res=node:node_auto_index({query})
+WITH res
 SKIP {offset}
 LIMIT {limit}
-WITH n
-OPTIONAL MATCH (n)-[r_loc:appears_in]-(loc:`location`)
-OPTIONAL MATCH (n)-[r_per:appears_in]-(per:`person`)
-OPTIONAL MATCH (n)-[r_org:appears_in]-(org:`organization`)
-OPTIONAL MATCH (n)-[r_soc:appears_in]-(soc:`social_group`)
-WITH n,
-    {  
+WITH res
+
+OPTIONAL MATCH (res)-[r_loc:appears_in]-(loc:`location`)
+WITH res, collect({  
       id: id(loc),
       type: 'location',
       props: loc,
       rel: r_loc
-    } as location,
-    {  
+    })[0..5] as locations
+      
+OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
+WITH res, locations, collect({
       id: id(per),
       type: 'person',
       props: per,
       rel: r_per
-    } as person,
-    {  
+    })[0..5] as persons
+
+OPTIONAL MATCH (res)-[r_org:appears_in]-(org:`organization`)
+WITH res, locations, persons, collect({  
       id: id(org),
       type: 'organization',
       props: org,
       rel: r_org
-    } as organization,
-    {  
+    })[0..5] as organizations
+
+OPTIONAL MATCH (res)-[r_soc:appears_in]-(soc:`social_group`)
+WITH res, locations, persons, organizations, collect({
       id: id(soc),
       type: 'social_group',
       props: soc,
       rel: r_soc
-    } as social_group
+    })[0..5] as social_groups
+
 RETURN {
-  id: id(n),
-  props: n,
+  id: id(res),
+  props: res,
   type: 'resource',
-   persons:      collect(DISTINCT person),
-   organizations: collect(DISTINCT organization),
-   locations:    collect(DISTINCT location),
-    social_groups:    collect(DISTINCT social_group)
+  persons:        persons,
+  organizations:  organizations,
+  locations:      locations,
+  social_groups:  social_groups
 } AS result
 
 
@@ -162,12 +166,17 @@ RETURN {
 // get resources by query
 start n=node:node_auto_index({query})
 WHERE 'entity' in labels(n)
-RETURN count(n) as total_count
+WITH last(labels(n)) as type, count(n) as count_items
+RETURN {
+  type: type,
+  count: count_items
+} AS result
+
 
 // name: get_matching_entities
 // get resources by query
 start n=node:node_auto_index({query})
-WHERE 'entity' in labels(n)
+WHERE {entity} in labels(n)
 RETURN {
   id: id(n),
   props: n,
@@ -175,6 +184,7 @@ RETURN {
 } AS result
 SKIP {offset}
 LIMIT {limit}
+
 
 // name: get_graph_matching_entities
 //
