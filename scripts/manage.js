@@ -26,6 +26,12 @@ var fs          = require('fs'),
       'setup': [
         tasks.setup
       ],
+      'cartoDB': [
+        tasks.helpers.tick.start,
+        tasks.resource.cartoDB,
+        tasks.helpers.csv.stringify,
+        tasks.helpers.tick.end
+      ],
       'discover-resource': [
         tasks.resource.discoverOne
       ],

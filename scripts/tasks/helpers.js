@@ -84,7 +84,7 @@ module.exports = {
             callback(err);
             return
           }
-          callback(null, options.filepath);
+          callback(null, options);
         })
       });
     },

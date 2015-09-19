@@ -10,6 +10,40 @@ var settings  = require('../../settings'),
 
 module.exports = {
   
+  cartoDB: function(options, callback) {
+    console.log(clc.yellowBright('\n   tasks.resource.cartoDB'));
+    if(!options.target) {
+      return callback(' Please specify the file path to write in with --target=path/to/source.tsv');
+    }
+      
+    var neo4j    = require('seraph')(settings.neo4j.host);
+    
+    neo4j.query('Match (loc:location)-[:appears_in]->(r:resource) WHERE has(loc.geocode_lat) RETURN {name: loc.name, lat: loc.geocode_lat, lng: loc.geocode_lng,start_time: r.start_time, start_date: r.start_date, end_time: r.end_time, end_date:r.end_date, title:COALESCE(r.name, r.title_en, r.title_fr), id:id(r)} skip {offset} LIMIT {limit} ', {
+        limit: +options.limit || 1000,
+        offset: +options.offset || 0
+    }, function(err, rows) {
+      if(err) {
+        callback(err);
+        return
+      }
+      options.records = rows;
+      options.fields = [
+        'name',
+        'lat',
+        'lng',
+        'start_time',
+        'start_date',
+        'end_time',
+        'end_date',
+        'title',
+        'id'
+      ];
+      options.filepath=options.target;
+      
+      callback(null, options)
+    });
+  },    
+  
   importData: function(options, callback) {
     console.log(clc.yellowBright('\n   tasks.resource.importData'));
     // check that data model is correct enough. 
