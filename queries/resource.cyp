@@ -74,7 +74,7 @@ MATCH (res:resource)
   MATCH (res)--(ent:entity) WHERE id(ent)={entity_id} 
   WITH res
 {/if}
-ORDER BY res.last_modification_time DESC, res.start_time DESC, res.creation_date DESC
+ORDER BY res.start_time DESC
 SKIP {offset} 
 LIMIT {limit}
 
@@ -122,7 +122,7 @@ RETURN {
    locations:    locations,
     social_groups:   social_groups
 } as resource
-  
+ORDER BY res.start_time ASC
 
 // name: count_resources
 // count resources having a version, with current filters

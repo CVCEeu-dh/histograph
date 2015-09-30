@@ -32,8 +32,15 @@ var fs          = require('fs'),
         tasks.helpers.csv.stringify,
         tasks.helpers.tick.end
       ],
+      'discover-entities': [
+        tasks.helpers.tick.start,
+        tasks.entity.discoverMany,
+        tasks.helpers.tick.end
+      ],
       'discover-resource': [
-        tasks.resource.discoverOne
+        tasks.helpers.tick.start,
+        tasks.resource.discoverOne,
+        tasks.helpers.tick.end
       ],
       'discover-resources': [
         tasks.resource.discoverMany
