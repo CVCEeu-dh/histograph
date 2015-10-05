@@ -16,6 +16,10 @@ validator.extend('notMatches', function (str, pattern, modifiers) {
   return !pattern.test(str);
 });
 
+validator.extend('includedIn', function (str, choices) {
+  return _.difference(str.split(','), choices).length === 0;
+});
+
 /*
   Verify that for each field in form, everything looks good.
   @params form    - req.body and/or req.params
@@ -130,6 +134,18 @@ module.exports = {
         32
       ],
       error: 'password have to ...'
+    },
+    {
+      field: 'mimetype',
+      check: 'includedIn',
+      args: [
+        [
+          'image',
+          'text',
+          'video'
+        ]
+      ],
+      error: 'should be a number in range 1 to max 50'
     },
     {
       field: 'from',
@@ -278,7 +294,6 @@ module.exports = {
     
     if(next)
       next(null, safeParams);
-    else
       return {
         isValid: true,
         params: safeParams
