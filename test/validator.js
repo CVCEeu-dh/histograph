@@ -124,4 +124,15 @@ describe('validator: check mimetype field', function() {
     done();
   });
   
+  it('should work with multiple filters, plain text', function (done) {
+    var form = validator.request({}, {
+      mimetype: 'image,video'
+    })
+    should.not.exist(form.errors);
+    should.exist(form.params.mimetype);
+    should.equal(form.params.mimetype.length, 2);
+    should.equal(form.isValid, true);
+    done();
+  });
+  
 });

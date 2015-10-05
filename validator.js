@@ -145,7 +145,7 @@ module.exports = {
           'video'
         ]
       ],
-      error: 'should be a number in range 1 to max 50'
+      error: 'should be something like image, text or video'
     },
     {
       field: 'from',
@@ -281,6 +281,9 @@ module.exports = {
     
     if(safeParams.offset)
       safeParams.offset = +safeParams.offset;
+    
+    if(typeof safeParams.mimetype == 'string')
+      safeParams.mimetype = safeParams.mimetype.split(',');
     
     if(params.from) {
       safeParams.start_date = moment.utc(params.from,'YYYY-MM-DD', true);
