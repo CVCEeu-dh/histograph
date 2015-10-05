@@ -172,7 +172,7 @@ module.exports = {
     var queue = async.waterfall([
       // get pictures and documents having a caption
       function (next) {
-        neo4j.query('MATCH (a:resource) WHERE NOT (a)-[:appears_in]-() RETURN a ORDER BY a.mimetype DESC skip {offset} LIMIT {limit} ', {
+        neo4j.query('MATCH (a:resource) WHERE NOT(has(a.discovered)) AND NOT (a)-[:appears_in]-() RETURN a ORDER BY a.mimetype DESC skip {offset} LIMIT {limit} ', {
           limit: +options.limit || 10,
           offset: +options.offset || 0
         }, function (err, nodes) {
@@ -196,7 +196,7 @@ module.exports = {
             if(err)
               throw err;
             
-            res.yago_annotated = true;
+            res.discovered = true;
             neo4j.save(res, function (err, n) {
               if(err)
                 throw err;

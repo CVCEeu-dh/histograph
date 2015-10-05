@@ -9,6 +9,13 @@ var YAML = require('yamljs'),
     validator  = require('validator'),
     moment     = require('moment');
 
+validator.extend('notMatches', function (str, pattern, modifiers) {
+  if (Object.prototype.toString.call(pattern) !== '[object RegExp]') {
+      pattern = new RegExp(pattern, modifiers);
+  }
+  return !pattern.test(str);
+});
+
 /*
   Verify that for each field in form, everything looks good.
   @params form    - req.body and/or req.params
@@ -50,6 +57,114 @@ function verify(form, fields, options) {
 
 
 module.exports = {
+  /*
+    Common validation fields
+  */
+  FIELDS:[
+    {
+      field: 'id',
+      check: 'isInt',
+      args: [
+        0
+      ],
+      error: 'id not valid'
+    },
+    {
+      field: 'ids',
+      check: 'matches',
+      args: [
+        /[\d,]+/
+      ],
+      error: 'ids should contain only numbers and commas'
+    },
+    {
+      field: 'limit',
+      check: 'isInt',
+      args: [
+        {min: 1, max: 100}
+      ],
+      error: 'should be a number in range 1 to max 50'
+    },
+    {
+      field: 'offset',
+      check: 'isInt',
+      args: [
+        {min: 0}
+      ],
+      error: 'should be a number in range 1 to max 50'
+    },
+    {
+      field: 'name',
+      check: 'isLength',
+      args: [
+        3,
+        500
+      ],
+      error: 'should be at least 3 to 160 chars',
+      optional: true
+    },
+    {
+      field: 'title',
+      check: 'isLength',
+      args: [
+        3,
+        500
+      ],
+      error: 'should be 3 to 500 chars',
+      optional: true
+    },
+    {
+      field: 'description',
+      check: 'isLength',
+      args: [
+        3,
+        2500
+      ],
+      error: 'should be at least 3 to 250 chars'
+    },
+    {
+      field: 'password',
+      check: 'isLength',
+      args: [
+        8,
+        32
+      ],
+      error: 'password have to ...'
+    },
+    {
+      field: 'from',
+      check: 'matches',
+      args: [
+        /^\d{4}-\d{2}-\d{2}$/
+      ],
+      error: 'should be in the format YYYY-MM-DD'
+    },
+    {
+      field: 'to',
+      check: 'matches',
+      args: [
+        /^\d{4}-\d{2}-\d{2}$/
+      ],
+      error: 'should be in the format YYYY-MM-DD'
+    },
+    {
+      field: 'orderby',
+      check: 'notMatches',
+      args: [
+        /(with|match|create|remove|set|delete)\s/i,
+      ],
+      error: 'It cannot contain reserved keywords"'
+    },
+    {
+      field: 'orderby',
+      check: 'matches',
+      args: [
+        /^[,a-zA-Z_\s\.]+$/
+      ],
+      error: 'should be in the format "sortable ASC, sortable DESC"'
+    }
+  ],
+  
   /**
     usage: wrap the function with
     validator.queryParams(req.query, function (err, safeParams, warnings) {
@@ -99,110 +214,31 @@ module.exports = {
     @param params   - predefined params
     
   */
-  request: function(req, params, next) {
+  request: function(req, params, options, next) {
     var errors     = {},
         warnings   = {},
         safeParams = {},
         params     = _.merge(params || {}, req.query || {}, req.body || {}, req.params || {}),
         
-        fields     = [
-          {
-            field: 'id',
-            check: 'isInt',
-            args: [
-              0
-            ],
-            error: 'id not valid'
-          },
-          {
-            field: 'ids',
-            check: 'matches',
-            args: [
-              /[\d,]+/
-            ],
-            error: 'ids should contain only numbers and commas'
-          },
-          {
-            field: 'limit',
-            check: 'isInt',
-            args: [
-              1,
-              50
-            ],
-            error: 'should be a number in range 1 to max 50'
-          },
-          {
-            field: 'offset',
-            check: 'isInt',
-            args: [
-              0
-            ],
-            error: 'should be a number in range 1 to max 50'
-          },
-          {
-            field: 'name',
-            check: 'isLength',
-            args: [
-              3,
-              500
-            ],
-            error: 'should be at least 3 to 160 chars',
-            optional: true
-          },
-          {
-            field: 'title',
-            check: 'isLength',
-            args: [
-              3,
-              500
-            ],
-            error: 'should be 3 to 500 chars',
-            optional: true
-          },
-          {
-            field: 'description',
-            check: 'isLength',
-            args: [
-              3,
-              2500
-            ],
-            error: 'should be at least 3 to 250 chars'
-          },
-          {
-            field: 'password',
-            check: 'isLength',
-            args: [
-              8,
-              32
-            ],
-            error: 'password have to ...'
-          },
-          {
-            field: 'from',
-            check: 'matches',
-            args: [
-              /^\d{4}-\d{2}-\d{2}$/
-            ],
-            error: 'should be in the format YYYY-MM-DD'
-          },
-          {
-            field: 'to',
-            check: 'matches',
-            args: [
-              /^\d{4}-\d{2}-\d{2}$/
-            ],
-            error: 'should be in the format YYYY-MM-DD'
-          }
-        ],
+        fields     = module.exports.FIELDS,
         result;
     
+    if(typeof options == 'object') {
+      // override certain specific fields (format: cfr module.exports.FIELDS)
+      if(options.fields)
+        fields = _.unique((options.fields || []).concat(module.exports.FIELDS), 'field');
+      // specify which fields are required (when usually they're not) or viceversa. Cfr module.exports.FIELDS
+      if(options.required)
+        fields = fields.map(function (d) {
+          if(options.required[d.field])
+            d.optional = options.required[d.field];
+          return d;
+        });
+    }
+    
+    // verify  
     result = verify(params, fields);
-    
-    
-    // if(safeParams.start_time != undefined && safeParams.end_time != undefined && safeParams.start_time > safeParams.end_time) {
-    //   warnings.end_date = 'check that params.to';
-    // }
-    
+  
     // errors?
     if(result !== true) {
       if(next)
@@ -215,34 +251,30 @@ module.exports = {
     }
     // sanitize here the params if required (e.g, limit and offset if they're exagerated etc..)...
     safeParams = params;
+    
     if(safeParams.id)
       safeParams.id = +safeParams.id;
+    
     if(safeParams.ids)
       safeParams.ids = _.compact(safeParams.ids.split(',')).map(function(d) {
         return +d;
       });
+    
     if(safeParams.limit)
       safeParams.limit = +safeParams.limit;
+    
     if(safeParams.offset)
       safeParams.offset = +safeParams.offset;
     
     if(params.from) {
       safeParams.start_date = moment.utc(params.from,'YYYY-MM-DD', true);
-      // if(!safeParams.start_date.isValid())
-      //   warnings.start_date = 'from does not contain a valid date';
-      // else
-      //   
       safeParams.start_time = +safeParams.start_date.format('X');
     };
+    
     if(params.to) {
       safeParams.end_date = moment.utc(params.to,'YYYY-MM-DD', true);
-      // if(!safeParams.end_date.isValid())
-      //   errors.end_date = 'not a valid date'
-      // else
-      //   
       safeParams.end_time = +safeParams.end_date.format('X');
     };
-    
     
     if(next)
       next(null, safeParams);

@@ -4,7 +4,7 @@ MATCH (res) WHERE id(res) = {id}
 WITH res
 OPTIONAL MATCH (res)-[r_loc:appears_in]-(loc:`location`)
 WITH res, r_loc, loc
-ORDER BY r_loc.frequency DESC
+ORDER BY r_loc.tfidf DESC, r_loc.frequency DESC
 WITH res, collect({  
       id: id(loc),
       type: 'location',
@@ -14,7 +14,7 @@ WITH res, collect({
 
 OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
 WITH res, locations, r_per, per
-ORDER BY r_per.frequency DESC
+ORDER BY r_per.tfidf DESC, r_per.frequency DESC
 WITH res, locations, collect({
       id: id(per),
       type: 'person',
