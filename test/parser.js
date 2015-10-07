@@ -16,11 +16,28 @@ var parser  = require('../parser.js'),
 describe('parser:paragraphs', function() {
   it('should split a long document in paragraphs', function (done) {
     // body...
-    var fs = require('fs');
+    // var fs = require('fs');
     var paragraphs = parser.paragraphs({
-      text: ''+ fs.readFileSync('./contents/parser.paragraphs.example') 
+      text: " In olden times when wishing still helped one, there lived a king" + 
+            " whose daughters were all beautiful, but the youngest was so beautiful" +
+            " that the sun itself, which has seen so much, was astonished whenever" +
+            " it shone in her face.\n\n" +
+            "  Close by the king's castle lay a great dark" +
+            " forest, and under an old lime-tree in the forest was a well, and when" +
+            " the day was very warm, the king's child went out into the forest and" +
+            " sat down by the side of the cool fountain, and when she was bored she" +
+            " took a golden ball, and threw it up on high and caught it, and this" +
+            " ball was her favorite plaything.\n\n" +
+            " Now it so happened that on one occasion the princess's golden ball" +
+            " did not fall into the little hand which she was holding up for it," +
+            " but on to the ground beyond, and rolled straight into the water.  The" +
+            " king's daughter followed it with her eyes, but it vanished, and the" +
+            " well was deep, so deep that the bottom could not be seen.  At this" +
+            " she began to cry, and cried louder and louder, and could not be" +
+            " comforted.  And as she thus lamented someone said to her, \"What ails" +
+            " you, king's daughter?  You weep so that even a stone would show pity.\""
     });
-    should.exist(paragraphs.length)
+    should.equal(paragraphs.length, 3)
     done()
   });
 });

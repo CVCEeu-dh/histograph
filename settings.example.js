@@ -14,16 +14,21 @@ module.exports = {
   },
   
   paths: {
-    media: '',
-    txt: './contents/dataset/txt',
-    accesslog: './logs/access.log'
+    media: './contents/media',
+    txt: './contents/txt',
+    accesslog: './logs/access.log',
+    cache: {
+      disambiguation: './contents/cache/disambiguation',
+      dbpedia: './contents/cache/dbpedia',
+      queries: './contents/cache/queries'
+    }
   },
 
   neo4j : { // > 2.2
     host : {
       server: 'http://localhost:7474',
       user: 'neo4j',
-      pass: 'milliway'
+      pass: 'neo4j'
     }
   },
   
@@ -95,7 +100,7 @@ module.exports = {
   */
   geocoding: { // google geocoding api
     endpoint: 'https://maps.googleapis.com/maps/api/geocode/json',
-    key: ''
+    key: '...'
   },
   /*
     Textrazor service 
