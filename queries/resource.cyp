@@ -184,20 +184,25 @@ RETURN count(DISTINCT(e)) as count_items
 
 // name: get_similar_resource_ids_by_entities
 // get top 100 similar resources sharing the same persons, orderd by time proximity if this info is available
-MATCH p=(res)<-[:appears_in]-(ent:entity)-[:appears_in]->(res2:resource)
-WHERE id(res) = {id} AND ent.score > -1 
-RETURN {
+MATCH (res)<-[R1:appears_in]-(ent:entity)-[R2:appears_in]->(res2:resource)
+  WHERE id(res) = {id} AND ent.score > -1 
+WITH res, ent, res2, R1, R2, {
   target: id(res2),
   dst : abs(coalesce(res.start_time, 1000000000) - coalesce(res2.start_time, 0)),
   det : abs(coalesce(res.end_time, 1000000000) - coalesce(res2.end_time, 0)),
   labels: count(DISTINCT(last(labels(ent)))),
   int : count(DISTINCT ent)
 } as candidate
-ORDER BY 
-candidate.int DESC, candidate.labels DESC, candidate.dst ASC, candidate.det ASC
+RETURN candidate
+ORDER BY
+{unless:orderby}
+  R1.tfidf DESC, R2.tfidf DESC, candidate.dst ASC, candidate.det ASC
+{/unless}
+{if:orderby}
+  {:orderby}
+{/if}
 SKIP {offset}
 LIMIT {limit}
-
 
 // name: get_similar_resources
 // get resources that match well with a given one
