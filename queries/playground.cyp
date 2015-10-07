@@ -38,4 +38,53 @@ RETURN {
 ORDER BY r.tfidf DESC
 LIMIT 10
 
+
+// name: demo
 //
+MATCH (ent:person)-[:appears_in]->(res)<-[:appears_in]-(ent2:person)
+RETURN {
+  source: id(ent),
+  target: id(ent2),
+  int:  count(DISTINCT res)
+} as comparable
+ORDER BY comparable.int DESC
+SKIP {offset}
+LIMIT {limit}
+
+
+// name: jaccard
+MATCH (ent:person)-[:appears_in]->(res)<-[:appears_in]-(ent2:person)
+WITH {
+  source: id(ent),
+  target: id(ent2),
+  int:  count(DISTINCT res)
+} as comparable
+ORDER BY comparable.int DESC
+LIMIT 10
+
+MATCH (ent)-[r1:appears_in]->(res), (ent2)-[r2:appears_in]->(res)
+
+RETURN comparable
+
+
+// name: get_cooccurrences
+//
+MATCH (p1:person)-[r1:appears_in]-(res:resource)-[r2:appears_in]-(p2:person)
+{?res:start_time__gt} {AND?res:end_time__lt}
+WITH p1, p2, length(collect(DISTINCT res)) as w
+RETURN {
+    source: {
+      id: id(p1),
+      type: LAST(labels(p1)),
+      label: COALESCE(p1.name, p1.title_en, p1.title_fr)
+    },
+    target: {
+      id: id(p2),
+      type: LAST(labels(p2)),
+      label: COALESCE(p2.name, p2.title_en, p2.title_fr)
+    },
+    weight: w
+  } as result
+ORDER BY w DESC
+SKIP {offset}
+LIMIT {limit}
