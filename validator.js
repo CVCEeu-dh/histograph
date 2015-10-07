@@ -87,7 +87,7 @@ module.exports = {
       args: [
         {min: 1, max: 100}
       ],
-      error: 'should be a number in range 1 to max 50'
+      error: 'should be a number in range 1 to max 100'
     },
     {
       field: 'offset',
