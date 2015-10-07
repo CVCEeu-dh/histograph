@@ -68,19 +68,23 @@ MATCH (res:resource)
 {if:ids}
   WHERE id(res) IN {ids}
 {/if}
-{?res:start_time__gt} {AND?res:end_time__lt}
+{?res:start_time__gt} {AND?res:end_time__lt} {AND?res:mimetype__in}
   WITH res
 {if:entity_id}
   MATCH (res)--(ent:entity) WHERE id(ent)={entity_id} 
   WITH res
 {/if}
+{if:orderby}
+ORDER BY {:orderby}
+{/if}
+{unless:orderby}
 ORDER BY res.start_time DESC
+{/unless}
 SKIP {offset} 
 LIMIT {limit}
 
 WITH res
 OPTIONAL MATCH (res)-[r_loc:appears_in]-(loc:`location`)
-
 
 WITH res, collect({  
       id: id(loc),
@@ -113,16 +117,30 @@ WITH res, locations, persons, organizations, collect({
       rel: r_soc
     })[0..5] as social_groups
 
+{if:entity_id}
+  OPTIONAL MATCH (res)--(ann:annotation) 
+  WITH res, ann, locations, persons, organizations, social_groups
+{/if}
+
 RETURN {
-   id:id(res),
-   type: 'resource',
-   props: res,
-   persons:     persons,
-   organizations: organizations,
-   locations:    locations,
-    social_groups:   social_groups
+  id:id(res),
+  type: 'resource',
+  props: res,
+  {if:entity_id}
+    ann: ann,
+  {/if}
+  persons:     persons,
+  organizations: organizations,
+  locations:    locations,
+  social_groups:   social_groups
 } as resource
-ORDER BY res.start_time ASC
+{if:orderby}
+ORDER BY {:orderby}
+{/if}
+{unless:orderby}
+ORDER BY res.start_time DESC
+{/unless}
+
 
 // name: count_resources
 // count resources having a version, with current filters

@@ -101,6 +101,22 @@ describe('controller:resource before', function() {
 });
 
 
+describe('controller:resource', function() {
+  it('should sort the list of resource', function (done) {
+    session
+      .get('/api/resource/')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err)
+        should.not.exists(err);
+        
+        done();
+      });
+  });
+})
+
 describe('controller:resource (related users)', function() {
   it('should create a curates relationship between the resource and the user', function (done) {
     session
@@ -130,7 +146,8 @@ describe('controller:resource (related users)', function() {
         done();
       });
   })
-})
+});
+
 
 describe('controller:resource (related entities)', function() {
   

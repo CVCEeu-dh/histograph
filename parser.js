@@ -20,7 +20,7 @@ module.exports = {
           equals: '=',
           differs: '<>',
           pattern: '=~', // MUST be replaced by a neo4j valid regexp.
-          
+          in: 'IN',
           ID: 'id(node) ='
         };
     
