@@ -1472,10 +1472,10 @@ li.CodeMirror-hint-active {
 */
 .tooltip {
   pointer-events: none;
-      -webkit-transition: opacity .2s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
+  /*    -webkit-transition: opacity .2s cubic-bezier(0.65, 0.05, 0.36, 1);  
      -moz-transition: opacity .2s cubic-bezier(0.65, 0.05, 0.36, 1);
        -o-transition: opacity .2s cubic-bezier(0.65, 0.05, 0.36, 1);
-          transition: opacity .2s cubic-bezier(0.65, 0.05, 0.36, 1);
+          transition: opacity .2s cubic-bezier(0.65, 0.05, 0.36, 1);*/
   
 }
 .tooltip .tooltip-wrapper {

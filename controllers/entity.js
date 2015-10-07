@@ -187,7 +187,22 @@ module.exports = function(io){
       var form = validator.request(req, {
             limit: 100,
             offset: 0
+          }, {
+            // increment the min
+            fields: [
+              {
+                field: 'limit',
+                check: 'isInt',
+                args: [
+                  {min: 1, max: 1000}
+                ],
+                error: 'should be a number in range 1 to max 1000'
+              }
+            ],
           });
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
       entity.getRelatedEntitiesGraph({
         id: form.params.id,
         entity: form.params.entity,

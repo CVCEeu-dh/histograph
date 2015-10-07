@@ -156,31 +156,39 @@ LIMIT 10
 
 // name:get_related_resources
 // get related nodes that are connected with the entity
-MATCH (ent)-[:appears_in]->(res:resource)
+MATCH (ent)-[r:appears_in]->(res:resource)
 WHERE id(ent) = {id}
-WITH res, ent
-  OPTIONAL MATCH (pla:`place`)-[:appears_in]->(res)
-  OPTIONAL MATCH (per:`person`)-[:appears_in]->(res)
+WITH r, res, ent
+ORDER BY r.tfidf DESC, res.start_date DESC
+SKIP {offset}
+LIMIT {limit}
 
-WITH ent, res, pla, per
-ORDER BY res.start_date DESC
+OPTIONAL MATCH (res)-[r_loc:appears_in]-(loc:`location`)
+WITH r, ent, res, collect({  
+      id: id(loc),
+      type: 'location',
+      props: loc,
+      rel: r_loc
+    })[0..5] as locations   
+
+OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
+WITH r, ent, res, locations, collect({
+      id: id(per),
+      type: 'person',
+      props: per,
+      rel: r_per
+    })[0..5] as persons
+
+WITH r, ent, res, locations, persons
+
   RETURN {
     id: id(res),
     props: res,
-    places: extract(n IN collect(DISTINCT pla)| {
-      id: id(n),
-      name: n.name,
-      score: n.score
-    }),
-    persons: extract(n IN collect(DISTINCT per)| {
-      id: id(n),
-      name: n.name,
-      description: n.description,
-      score: n.score
-    })
+    rel: r,
+    locations: locations,
+    persons: persons
   } as result
-
-SKIP {offset} LIMIT {limit}
+ORDER BY r.tfidf DESC, res.start_date DESC
 
 
 // name: signale_related_resource
@@ -294,9 +302,9 @@ RETURN {
 //
 MATCH (ent)-[r:appears_in]->(res:resource)
   WHERE id(ent) = {id}
-WITH res
+WITH ent, res
   MATCH (ent1:{:entity})-[r:appears_in]->(res)
-  WHERE ent1.score > -1
+  WHERE ent1.score > -1 AND ent1 <>ent
 WITH ent1, count(DISTINCT r) as w
 RETURN {
   id: id(ent1),
@@ -313,9 +321,9 @@ LIMIT {limit}
 //
 MATCH (ent)-[r:appears_in]->(res:resource)
   WHERE id(ent) = {id}
-WITH res
+WITH ent, res
   MATCH (ent1:{:entity})-[r:appears_in]->(res)
-  WHERE ent1.score > -1
+  WHERE ent1.score > -1 AND ent1 <>ent
 WITH ent1
 RETURN COUNT(DISTINCT ent1) as count_items
 
