@@ -13,7 +13,7 @@ MATCH (e:entity)-[r2:appears_in]->(res)
 MATCH (e)-[r3:appears_in]->(res:resource)
   WHERE has(r3.frequency) AND r3.tf < 1
     SET r3.tfidf = r3.tf * log(num_of_docs/num_of_docs_per_ent),
-    r3.df = num_of_docs_per_ent
+    e.df = num_of_docs_per_ent
 RETURN e.name, r3.frequency, r3.tdf, r3.tf, r3.tfidf, res.name ORDER BY r3.tfidf DESC 
 SKIP {offset}
 LIMIT {limit}
