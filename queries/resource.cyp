@@ -190,7 +190,7 @@ WITH res, ent, res2, R1, R2, {
   target: id(res2),
   dst : abs(coalesce(res.start_time, 1000000000) - coalesce(res2.start_time, 0)),
   det : abs(coalesce(res.end_time, 1000000000) - coalesce(res2.end_time, 0)),
-  labels: count(DISTINCT(last(labels(ent)))),
+  //labels: count(DISTINCT(last(labels(ent)))),
   int : count(DISTINCT ent)
 } as candidate
 RETURN candidate
@@ -442,16 +442,14 @@ RETURN {
 ORDER BY result.weight DESC
 LIMIT {limit}
 
-
 // name: get_related_entities_graph
-// monopartite graph of entities
-MATCH (n:resource)
- WHERE id(n) = {id}
-WITH n
- MATCH (p1:{:entity})-[:appears_in]->(n)<-[:appears_in]-(p2:{:entity})
+//
+MATCH (n)<-[r1:appears_in]-(ent:{:entity})-[r2:appears_in]->(res:resource)
+  WHERE id(n) = {id}
+WITH res
+MATCH (p1:{:entity})-[:appears_in]->(res)<-[:appears_in]-(p2:{:entity})
  WHERE p1.score > -1 AND p2.score > -1
-WITH p1, p2, count(DISTINCT n) as w
-  
+WITH p1, p2, count(DISTINCT res) as w
 RETURN {
     source: {
       id: id(p1),
@@ -466,7 +464,9 @@ RETURN {
     weight: w 
   } as result
 ORDER BY w DESC
-LIMIT {limit}
+LIMIT 500
+
+
 
 
 // name: get_related_resources_graph

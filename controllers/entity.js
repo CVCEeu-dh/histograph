@@ -221,7 +221,22 @@ module.exports = function(io){
       var form = validator.request(req, {
             limit: 100,
             offset: 0
+          }, {
+            // increment the min
+            fields: [
+              {
+                field: 'limit',
+                check: 'isInt',
+                args: [
+                  {min: 1, max: 1000}
+                ],
+                error: 'should be a number in range 1 to max 1000'
+              }
+            ],
           });
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
       entity.getRelatedResourcesGraph({
         id: form.params.id,
         limit: form.params.limit,
@@ -234,43 +249,6 @@ module.exports = function(io){
         });
       });
     },
-    /*
-      DEPRECATED
-    */
-    getGraph: function (req, res) {
-      
-      var type = 'bipartite';
-      
-      // get the right graph
-      if(req.query.type) {
-        if(['monopartite-entity', 'monopartite-resource'].indexOf(req.query.type) == -1) {
-          return res.error({type: req.query.type + 'not found'});
-        }
-        type = req.query.type
-      }
-      
-      
-      if(type == 'bipartite') {
-        entity.getGraph(req.params.id, {}, function (err, graph) {
-           if(err)
-            return helpers.cypherQueryError(err, res);
-          return res.ok({
-            graph: graph
-          }, {
-            type: type
-          });
-        });
-      } else if(type == 'monopartite-entity') {
-        entity.getGraphPersons(req.params.id, {}, function (err, graph) {
-           if(err)
-            return helpers.cypherQueryError(err, res);
-          return res.ok({
-            graph: graph
-          }, {
-            type: type
-          });
-        });
-      }
-    }
+    
   }
 }
