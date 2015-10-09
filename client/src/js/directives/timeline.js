@@ -204,10 +204,11 @@ angular.module('histograph')
             if(left == right) {
               $log.log('::timeline @brushend, click on the timeline just clear the things');
               tim.fn.clear();
-              $location.search({
+              var previous = $location.search();
+              $location.search(angular.extend(previous,{
                   from: null,
                   to: null
-                });
+                }));
                 scope.$apply();
               
               return;
@@ -231,11 +232,12 @@ angular.module('histograph')
               //console.log(d3.time.format("%Y-%m-%d")(extent[0]))
                // console.log('extent',extent[0], typeof extent[0], isNaN(extent[0]))
               if(typeof extent[0] == 'object') {
-             
-                $location.search({
+                var previous = $location.search();
+                
+                $location.search(angular.extend(previous, {
                   from: d3.time.format("%Y-%m-%d")(extent[0]),
                   to: d3.time.format("%Y-%m-%d")(extent[1])
-                });
+                }));
                 scope.$apply();
               }
             }, 10)
