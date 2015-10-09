@@ -22,41 +22,20 @@ var fs          = require('fs'),
                     filter  :  /(.*).js$/
                   }),
     
-    availableTasks = {
+    availableTasks = _.assign({
       'setup': [
         tasks.setup
       ],
-      'cartoDB': [
-        tasks.helpers.tick.start,
-        tasks.resource.cartoDB,
-        tasks.helpers.csv.stringify,
-        tasks.helpers.tick.end
-      ],
-      'discover-entities': [
-        tasks.helpers.tick.start,
-        tasks.entity.discoverMany,
-        tasks.helpers.tick.end
-      ],
       'discover-resource': [
-        tasks.helpers.tick.start,
-        tasks.resource.discoverOne,
-        tasks.helpers.tick.end
+        tasks.resource.discoverOne
       ],
       'discover-resources': [
         tasks.resource.discoverMany
       ],
-      'import-resources': [
-        tasks.helpers.csv.parse,
-        tasks.helpers.marvin.create,
-        tasks.resource.importData,
-        tasks.helpers.marvin.remove
-      ],
       'query': [
-        tasks.helpers.tick.start,
-        tasks.helpers.cypher.raw,
-        tasks.helpers.tick.end
-      ],
-    };
+        tasks.helpers.cypher.raw
+      ]
+    }, settings.availableTasks || {});
 
 console.log(clc.whiteBright( "\n\n +-+-+ "));
 console.log(clc.whiteBright( " |H|G| "));
@@ -74,8 +53,9 @@ async.waterfall([
   // send initial options
   function init(callback) {
     callback(null, options);
-  }
-].concat(availableTasks[options.task]), function (err) {
+  },
+  tasks.helpers.tick.start
+].concat(availableTasks[options.task]).concat([tasks.helpers.tick.end]), function (err) {
   if(err) {
     console.warn(err);
     console.log(clc.blackBright('\n task'), clc.whiteBright(options.task), clc.redBright('exit with error'));
