@@ -16,7 +16,7 @@ module.exports = {
   getMany: function(options, callback) {
     console.log(clc.yellowBright('\n   tasks.resource.getMany'));
     neo4j.query(
-      ' MATCH (res:resource) \n'+
+      ' MATCH (res:resource)\n'+
       ' RETURN res SKIP {offset} LIMIT {limit}', {
       limit: +options.limit || 100000,
       offset: +options.offset || 0
@@ -32,6 +32,58 @@ module.exports = {
       
     })
   },
+  
+  /*
+    cluster date basd on month
+  */
+  dateToMonths: function(options, callback) {
+    console.log(clc.yellowBright('\n   tasks.resource.dateToMonths'));
+    var moment = require('moment');
+    
+    var q = async.queue(function (resource, next) {
+      console.log(clc.blackBright('\n   resource: '), resource.id, clc.cyanBright(resource.slug.substring(0, 24)));
+      
+      var isToUpdate  = false,
+          start_month = moment.utc(resource.start_time, 'X').format('YYYYMM'),
+          end_month   = moment.utc(resource.end_time, 'X').format('YYYYMM');
+          
+      console.log(clc.blackBright('   start_date: '), resource.start_date)
+      console.log(clc.blackBright('   start_month:'), start_month)
+      console.log(clc.blackBright('   end_date:   '),   resource.end_date)
+      console.log(clc.blackBright('   end_month:  '),   end_month)
+        
+      if(start_month != resource.start_month || end_month != resource.end_month )
+        isToUpdate = true;
+      
+      if(isToUpdate) {
+        console.log(clc.blackBright('   updating ...'));
+        
+        neo4j.query('MATCH (res) WHERE id(res) = {id} SET res.start_month = {start_month}, res.end_month = {end_month} RETURN res.name', {
+          id: +resource.id,
+          start_month: start_month,
+          end_month: end_month
+        }, function (err) {
+          if(err) {
+            q.kill()
+            callback(err);
+          } else {
+            console.log(clc.greenBright('    saved!'), clc.blackBright('Remaining:'), q.length())
+        
+            next();
+          }
+        });
+      } else {
+        console.log(clc.blackBright('    nothing to do, skipping. Remaining:'), q.length())
+        setTimeout(next, 2);
+      }
+      
+    }, 10)
+    q.push(_.filter(options.records, 'start_time'));
+    q.drain = function() {
+      callback(null, options);
+    }   
+  },
+  
   /* check resource nodes for slug and names and date */
   slugify: function(options, callback) {
     console.log(clc.yellowBright('\n   tasks.resource.slugify'));
