@@ -496,13 +496,39 @@ LIMIT {limit}
 
 
 
+// name: count_timeline
+//
+MATCH (res:resource)
+WHERE res.start_time IS NOT NULL
+{?res:start_time__gt} {AND?res:end_time__lt}
+return count(distinct res.start_time)
+
 
 // name: get_timeline
 //
 MATCH (res:resource)
-{?res:start_time__gt} {AND?res:end_time__lt}
-WITH res.start_time as t, length(COLLECT(res)) as weight
-WHERE t IS NOT NULL
+  WHERE has(res.start_month)
+{if:start_time}
+  AND res.start_time >= {start_time}
+{/if}
+{if:end_time}
+  AND res.end_time <= {end_time}
+{/if} 
+WITH  res.start_month as tm, min(res.start_time) as t, count(res) as weight
+RETURN t, weight
+
+
+// name: get_timeline_per_day
+//
+MATCH (res:resource)
+WHERE has(res.start_time)
+{if:start_time}
+  AND res.start_time >= {start_time}
+{/if}
+{if:end_time}
+  AND res.end_time <= {end_time}
+{/if} 
+WITH  res.start_time as t, count(res) as weight
 RETURN t, weight
 
 
