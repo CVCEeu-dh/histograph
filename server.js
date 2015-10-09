@@ -5,6 +5,7 @@
 
 */
 var express       = require('express'),        // call express
+    compress      = require('compression'),
     session       = require('express-session'),
     
     settings      = require('./settings'),
@@ -50,6 +51,9 @@ var sessionMiddleware = session({
 })
 
 console.log('logs',settings.paths.accesslog);
+
+app.use(compress());
+
 // configure logger
 app.use(morgan('combined', {
   stream: fs.createWriteStream(settings.paths.accesslog, {flags: 'a'})

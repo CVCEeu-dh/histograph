@@ -104,7 +104,6 @@ angular.module('histograph')
                   enableEdgeHovering : true,
                   minEdgeSize: 1,
                   maxEdgeSize: 2,
-                  enableEdgeHovering: true,
                   defaultEdgeHoverColor: '#000',
                   edgeHoverSizeRatio: 1,
                   edgeHoverExtremities: true
