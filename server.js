@@ -12,6 +12,7 @@ var express       = require('express'),        // call express
 
     app           = exports.app = express(),                 // define our app using express
     port          = settings.port || process.env.PORT || 8000,
+    env           = process.env.NODE_ENV || 'development'
     server        = app.listen(port),
     io            = require('socket.io')
                       .listen(server),
@@ -50,7 +51,8 @@ var sessionMiddleware = session({
   saveUninitialized: true
 })
 
-console.log('logs',settings.paths.accesslog);
+console.log('logs:', settings.paths.accesslog);
+console.log('env: ', env);
 
 app.use(compress());
 
@@ -59,8 +61,15 @@ app.use(morgan('combined', {
   stream: fs.createWriteStream(settings.paths.accesslog, {flags: 'a'})
 }));
 
+if ('production' == env) {
+  app.use(express.static('./client/dist'));
+} else {
+  app.use(express.static('./client/src'));
+}
+
+
 // configure static files and jade templates
-app.use(express.static('./client/src'));
+
 app.set('views', './client/views');
 app.set('view engine', 'jade');
 
@@ -108,13 +117,12 @@ express.response.error = function(statusCode, err) {
 */
 clientRouter.route('/').
   get(function(req, res) { // test route to make sure everything is working (accessed at GET http://localhost:8080/api)
-   
-      res.render('index', {
-        user: req.user || 'anonymous',
-        message: 'hooray! welcome to our api!'
-      });
-    
+    res.render('production' == env? 'index-lite':'index', {
+      user: req.user || 'anonymous',
+      message: 'hooray! welcome to our api!'
+    });
   });
+  
 
 clientRouter.route('/login')
   .post(function (req, res, next) {
