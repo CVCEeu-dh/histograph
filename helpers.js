@@ -425,7 +425,7 @@ module.exports = {
       }
       
       return text.toLowerCase()
-        .replace(/[^a-z]/g, '-')
+        .replace(/[^a-z0-9]/g, '-')
         .replace(/-{1,}/g,'-')
         .replace(/-$/,'')
         .replace(/^-/, '');
