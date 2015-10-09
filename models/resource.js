@@ -44,6 +44,30 @@ var Resource = function() {
 
 
 module.exports = {
+  FIELDS: [
+    'id',
+    'slug',
+    'name',
+    'title_en',
+    'caption_en',
+    'url',
+    'url_en', // the txt file in english
+    'start_date',
+    'end_date',
+    'viaf_id'
+  ],
+  
+  UPDATABLE: [
+    'slug',
+    'name',
+    'title_en',
+    'caption_en',
+    'url_en',
+    'start_date',
+    'end_date',
+    'viaf_id'
+  ],
+
   /**
     get a complete resource object (with versions, comments etc...).
     @param id - numeric identifier only
