@@ -10,10 +10,18 @@ CREATE CONSTRAINT ON (res:resource) ASSERT res.doi IS UNIQUE
 // create email constraint for user
 CREATE CONSTRAINT ON (u:user) ASSERT u.username IS UNIQUE
 
-// name: create_index_on_start_date
-// create index on start date to group / filter result by date
-CREATE INDEX ON :resource(start_date)
+// name: create_index_on_start_time
+// create index on start date to group / filter result by timestamp
+CREATE INDEX ON :resource(start_time)
 
-// name: create_index_on_end_date
+// name: create_index_on_start_month
 // create index on start date to group / filter result by date
-CREATE INDEX ON :resource(end_date)
+CREATE INDEX ON :resource(start_month)
+
+// name: create_index_on_end_time
+// create index on start date to group / filter result by date
+CREATE INDEX ON :resource(end_time)
+
+// name: create_index_on_end_month
+// create index on start date to group / filter result by date
+CREATE INDEX ON :resource(end_month)

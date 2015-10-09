@@ -312,27 +312,27 @@ angular.module('histograph')
             return d.t*1000
           });
           
-          if(scope.timeline.length < 1000)
+          // if(scope.timeline.length < 1000)
             dataset = angular.copy(scope.timeline).map(function (d) {
               d.t*=1000; // different level of aggregation
               return d;
             });
-          else {
-            dataset = angular.copy(scope.timeline).map(function (d) {
-              d.t*=1000; // different level of aggregation
-              d.m = tim.fn.asYear(new Date(d.t));
-              return d;
-            });
-            dataset = _.map(_.groupBy(dataset, 'm'), function (values, k) {
-              return {
-                weight: _.sum(values, 'weight'),
-                k: k,
-                t: _.min(values, 't').t,
-                t1: _.max(values, 't').t
-              };
-            });
-            console.log('::timeline -> draw() - sample:',_.take(dataset, 5))
-          }
+          // else {
+          //   dataset = angular.copy(scope.timeline).map(function (d) {
+          //     d.t*=1000; // different level of aggregation
+          //     d.m = tim.fn.asYear(new Date(d.t));
+          //     return d;
+          //   });
+          //   dataset = _.map(_.groupBy(dataset, 'm'), function (values, k) {
+          //     return {
+          //       weight: _.sum(values, 'weight'),
+          //       k: k,
+          //       t: _.min(values, 't').t,
+          //       t1: _.max(values, 't').t
+          //     };
+          //   });
+          //   console.log('::timeline -> draw() - sample:',_.take(dataset, 5))
+          // }
            
           weigthExtent = d3.extent(dataset, function (d) {
             return d.weight
@@ -397,7 +397,7 @@ angular.module('histograph')
               y: function(d) {
                 return tim.fn.y(d.weight)
               },
-              width: 4,
+              width: 3,
               height: function(d) {
                 return 30 - tim.fn.y(d.weight)
               }
