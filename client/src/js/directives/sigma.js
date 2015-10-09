@@ -1,10 +1,11 @@
-'use strict';
 /*
   Sigma addons
   ---
   thanks to @jacomyal (it need to be added before creating any new instance of sigmajs)
 */
 sigma.classes.graph.addMethod('neighbors', function (nodeId) {
+  'use strict';
+
   var k,
       neighbors = {},
       index     = {};
@@ -13,7 +14,7 @@ sigma.classes.graph.addMethod('neighbors', function (nodeId) {
     for(var i in nodeId)
       index = _.assign(index, this.allNeighborsIndex[nodeId[i]]);
   else
-    index = this.allNeighborsIndex[nodeId] || {}
+    index = this.allNeighborsIndex[nodeId] || {};
   
   for (k in index)
     neighbors[k] = this.nodesIndex[k];
@@ -30,8 +31,9 @@ sigma.classes.graph.addMethod('neighbors', function (nodeId) {
  * directive to show a grapgh of nodes and edges thanks to @Yomguithereal!!! 
  */
 angular.module('histograph')
-  
-  .directive('sigma', function($log, $location) {
+  .directive('sigma', function ($log, $location) {
+    'use strict';
+
     return {
       restrict : 'A',
       template: ''+
@@ -64,7 +66,7 @@ angular.module('histograph')
           var t = text.substr(0, cutAt);
           //re-trim if we are in the middle of a word
           if(t.length > cutAt)
-            t = t.substr(0, Math.min(t.length, t.lastIndexOf(' '))) + ' ...'
+            t = t.substr(0, Math.min(t.length, t.lastIndexOf(' '))) + ' ...';
           return t
         }  
         // configure a default tooltip
@@ -301,7 +303,7 @@ angular.module('histograph')
             clearTimeout(tooltip.timer);
           
           var _css = {
-                transform: 'translate('+ e.data.captor['clientX'] +'px,'+ e.data.captor['clientY'] +'px)'
+                transform: 'translate('+ e.data.captor.clientX +'px,'+ e.data.captor.clientY +'px)'
               },
               label = [
                 si.graph.nodes(''+e.data.edge.source).label,
@@ -333,7 +335,7 @@ angular.module('histograph')
             clearTimeout(tooltip.timer);
           
           var _css = {
-            transform: 'translate('+ e.data.captor['clientX'] +'px,'+ e.data.captor['clientY'] +'px)'
+            transform: 'translate('+ e.data.captor.clientX +'px,'+ e.data.captor.clientY +'px)'
           };
           
           if(!tooltip.isVisible)
@@ -397,7 +399,7 @@ angular.module('histograph')
         })
         
         si.bind('clickStage', function(e) {
-          if(e.data.captor.isDragging == false)
+          if(e.data.captor.isDragging === false)
             toggleLookup({
               update: true
             });

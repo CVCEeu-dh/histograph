@@ -51,7 +51,7 @@ angular.module('histograph')
           params: options
         });
       }
-    }
+    };
   })
   /*
     Add a comment to a resource
@@ -139,7 +139,7 @@ angular.module('histograph')
       downvote: function(options) {
         return $http.post('/api/comment/' + options.id + '/downvote');
       },
-    }
+    };
   })
   /*
     Get a list of resource
@@ -188,7 +188,7 @@ angular.module('histograph')
           params: options
         });
       } 
-    }
+    };
   })
   /*
     Socket.io service, thqnks to http://briantford.com/blog/angular-socket-io
@@ -212,7 +212,7 @@ angular.module('histograph')
               callback.apply(socket, args);
             }
           });
-        })
+        });
       }
     };
   });

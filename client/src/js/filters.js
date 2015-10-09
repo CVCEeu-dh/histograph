@@ -18,12 +18,12 @@ angular.module('histograph')
           result;
       if(start_date.isValid()) {
         if(days < 1)
-          result = start_date.format('LL')
+          result = start_date.format('LL');
         else
-          result = start_date.format('LL') +  ' — ' + end_date.format('LL')
+          result = start_date.format('LL') +  ' — ' + end_date.format('LL');
         return result;
-      } else return 'no date found'
-    }
+      } else return 'no date found';
+    };
   })
   /*
     given an object with start_date and end_date ISO object,
@@ -65,35 +65,34 @@ angular.module('histograph')
         
       }
       return delta.humanize(true);
-    }
+    };
   })
   // filter items array by returning ONLY items that are int the compare list
   .filter('only', function() {
     return function(items, compare) {
-      var filtered = []
-        ids = compare.map(function (d) {
-          return d.id;
-        });
+      var filtered = [],
+          ids = compare.map(function (d) {
+            return d.id;
+          });
       angular.forEach(items, function (d) {
         if(ids.indexOf(d.id) !== -1)
           filtered.push(d);
-      })
+      });
       return filtered;
-    }
+    };
   })
   // extract the first numeric path from a given string. Mostly used for ID in comment tags.
   .filter('idify', function() {
     return function(input) {
-      
       return +input.match(/\d+/);
-    }
+    };
   })
   // humanize filenames if needed, strip bogus .
   .filter('humanize', function() {
     return function(input) {
       
       return input.replace('_', ' ').replace(/\.\w+$/, '');
-    }
+    };
   })
   // humanize filenames if needed, strip bogus .
   .filter('humanizeState', function() {
@@ -101,7 +100,7 @@ angular.module('histograph')
       if(!input)
         return '';
       return input.replace('.', ' ');
-    }
+    };
   })
   .filter('datesOfAPerson', function() {
     return function(birth_time,death_time) {
@@ -117,15 +116,15 @@ angular.module('histograph')
           start_date_b.isValid()? start_date_b.format('ll'): ' ... ',
         ')'
       ].join(''); // count years
-    }
+    };
   })
   .filter('map', function() {
     return function(input, key) {
       if(!input) return '';
       return input.map(function (d) {
-        return d[key]
-      }).join(',')
-    }
+        return d[key];
+      }).join(',');
+    };
   })
   // according to language, give the title a real title
   .filter('title', function($sce) {
@@ -141,7 +140,7 @@ angular.module('histograph')
             var t = text.substr(0, cutAt);
             //re-trim if we are in the middle of a word
             if(t.length > cutAt)
-              t = t.substr(0, Math.min(t.length, t.lastIndexOf(' '))) + ' ...'
+              t = t.substr(0, Math.min(t.length, t.lastIndexOf(' '))) + ' ...';
             // if there is a cut at, we will strip the html
             return t;
           };
@@ -158,8 +157,8 @@ angular.module('histograph')
       if(!props.languages || !props.languages.length)
         return 'Untitled';
       
-      return wrapper(props['title_' + props.languages[0]])
-    }
+      return wrapper(props['title_' + props.languages[0]]);
+    };
   })
   // according to language, give the caption a real caption
   .filter('caption', function($sce) {
@@ -167,7 +166,7 @@ angular.module('histograph')
       var primary = props['caption_' + language];
       
       var wrapper = function(text) {
-        return $sce.trustAsHtml(text)
+        return $sce.trustAsHtml(text);
       };
       
       if(primary)
@@ -182,8 +181,8 @@ angular.module('histograph')
       if(!props.languages || !props.languages.length)
         return 'caption';
       
-      return wrapper(props['caption_' + props.languages[0]])
-    }
+      return wrapper(props['caption_' + props.languages[0]]);
+    };
   })
   
   // thanks to igreulich/angular-truncate
@@ -216,7 +215,7 @@ angular.module('histograph')
             var t = text.substr(0, cutAt);
             //re-trim if we are in the middle of a word
             if(text.length > cutAt)
-              t = t.substr(0, Math.min(t.length, t.lastIndexOf(' '))) + ' ...'
+              t = t.substr(0, Math.min(t.length, t.lastIndexOf(' '))) + ' ...';
             // if there is a cut at, we will strip the html
             return t;
           };
@@ -233,8 +232,8 @@ angular.module('histograph')
       if(!props.languages || !props.languages.length)
         return 'abstract';
       
-      return wrapper(props['abstract_' + props.languages[0]])
-    }
+      return wrapper(props['abstract_' + props.languages[0]]);
+    };
   })
   /**
     Return a valid url for the given mimetype and props.
@@ -253,8 +252,8 @@ angular.module('histograph')
       if(primary)
         return primary;
       
-      return props['url_' + props.languages[0]] || props[props.languages[0] + '_url']
-    }
+      return props['url_' + props.languages[0]] || props[props.languages[0] + '_url'];
+    };
   })
   /*
     Return the html marked version of the field.
@@ -263,8 +262,7 @@ angular.module('histograph')
     return function(text) {
       if(typeof text == 'string')
         return $sce.trustAsHtml(marked(text));
-      else '';
-    }
-  })
-
-
+      else 
+        return '';
+    };
+  });

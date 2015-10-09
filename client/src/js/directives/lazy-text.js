@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * @ngdoc overview
  * @name histograph
@@ -17,8 +15,8 @@ angular.module('histograph')
         url: '='
       },
       link : function(scope, element, attrs) {
+        'use strict';
         $log.log('::lazi-text ready', scope.url);
-        
         
         scope.$watch('url', function(url) {
           if(!url)
@@ -31,4 +29,4 @@ angular.module('histograph')
         })
       }
     }
-  })
+  });
