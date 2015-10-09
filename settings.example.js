@@ -134,18 +134,18 @@ module.exports = {
   */ 
    availableTasks: {
     'cartoDB': [
-      tasks.resource.cartoDB,
-      tasks.helpers.csv.stringify
+      'tasks.resource.cartoDB',
+      'tasks.helpers.csv.stringify'
     ],
     'discover-entities': [
-      tasks.entity.discoverMany
+      'tasks.entity.discoverMany'
     ],
     
     'import-resources': [
-      tasks.helpers.csv.parse,
-      tasks.helpers.marvin.create,
-      tasks.resource.importData,
-      tasks.helpers.marvin.remove
+      'tasks.helpers.csv.parse',
+      'tasks.helpers.marvin.create',
+      'tasks.resource.importData',
+      'tasks.helpers.marvin.remove'
     ]
   }
   

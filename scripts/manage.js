@@ -12,6 +12,7 @@
   task=
 */
 var fs          = require('fs'),
+    settings    = require('../settings'),
     options     = require('minimist')(process.argv.slice(2));
     async       = require('async'),
     _           = require('lodash'),
@@ -55,7 +56,12 @@ async.waterfall([
     callback(null, options);
   },
   tasks.helpers.tick.start
-].concat(availableTasks[options.task]).concat([tasks.helpers.tick.end]), function (err) {
+].concat(_.map(availableTasks[options.task],function (d){
+  
+  if(typeof d == 'function')
+    return d;
+  return _.get(tasks, d.replace('tasks.', ''))
+})).concat([tasks.helpers.tick.end]), function (err) {
   if(err) {
     console.warn(err);
     console.log(clc.blackBright('\n task'), clc.whiteBright(options.task), clc.redBright('exit with error'));
