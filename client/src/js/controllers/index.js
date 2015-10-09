@@ -45,14 +45,14 @@ angular.module('histograph')
     $scope.syncGraph = function() {
       console.log($scope.params)
       CooccurrencesFactory.get($scope.params, function (res){
-          res.result.graph.nodes.map(function (d) {
-            d.color  = d.type == 'person'? "#D44A33": "#6891A2";
-            d.type   = d.type || 'res';
-            d.x = Math.random()*50;
-            d.y = Math.random()*50;
-            //d.label = d.name;
-            return d;
-          });
+          // res.result.graph.nodes.map(function (d) {
+          //   d.color  = d.type == 'person'? "#D44A33": "#6891A2";
+          //   d.type   = d.type || 'res';
+          //   d.x = Math.random()*50;
+          //   d.y = Math.random()*50;
+          //   //d.label = d.name;
+          //   return d;
+          // });
           $log.log('IndexCtrl CooccurrencesFactory returned a graph of',res.result.graph.nodes.length, 'nodes');
           $scope.setGraph(res.result.graph)
         });

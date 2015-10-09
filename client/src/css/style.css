@@ -1242,7 +1242,7 @@ li.CodeMirror-hint-active {
   display: none;
   top: 0;
   left: 0;
-  background: #E8E8E7;
+  background: #585858;
   /*border: 1px solid #C5C5C6;*/
   border-radius: 3px;
   z-index: 10;
@@ -1264,6 +1264,7 @@ li.CodeMirror-hint-active {
   font-size: 15px;
   display: inline-block;
   text-align: center;
+  color: #f0f0f0;
 }
 
 #pop .action:hover{
