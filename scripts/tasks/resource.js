@@ -33,6 +33,25 @@ module.exports = {
     })
   },
   
+  getOne: function(options, callback) {
+    console.log(clc.yellowBright('\n   tasks.resource.getOne'),'id:', options.id);
+    neo4j.query(
+      ' MATCH (res:resource)\n'+
+      ' WHERE id(res)={id} RETURN res LIMIT 1', {
+      id: (+options.id || -1)
+    }, function (err, nodes) {
+      if(err) {
+        callback(err);
+        return;
+      }
+      console.log(clc.blackBright('   nodes:', clc.magentaBright(nodes.length)));
+      options.fields = Resource.FIELDS;
+      options.records = nodes;
+      callback(null, options)
+      
+    })
+  },
+  
   /*
     cluster date basd on month
   */
