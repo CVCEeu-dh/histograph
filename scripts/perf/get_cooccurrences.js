@@ -59,8 +59,8 @@ async.waterfall([
       }));
 
       console.log();
-      console.log("-  min: " + res.timer.min());
-      console.log("- mean: " + res.timer.mean());
-      console.log("-  max: " + res.timer.max());
+      console.log("-  min: " + res.timer.min()/1000000000);
+      console.log("- mean: " + res.timer.mean()/1000000000);
+      console.log("-  max: " + res.timer.max()/1000000000);
     }
 })
