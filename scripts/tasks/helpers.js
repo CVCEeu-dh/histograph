@@ -334,7 +334,30 @@ module.exports = {
       callback(null, options);
       })
       
+    },
+
+    perf: function(options, callback) {
+      if(!options.cypher) {
+        return callback(' Please specify the query path (decypher file without .cyp extension followed by / query name), e.g. --cypher=resource/count_related_users');
+      }
+
+      var path = options.cypher.split('/');
+
+      if(path.length != 2) {
+        return callback(' Please specify a valid query path, e.g. --cypher=resource/count_related_users, since you specified ' + options.cypher);
+      }
+
+      var neo4j     = require('seraph')(settings.neo4j.host),
+          queries   = require('decypher')('./queries/' + path[0] + '.cyp'),
+          parser    = require('../../parser.js'),
+          query;
+
+      if(!queries[path[1]]) {
+        console.log(clc.blackBright('  queries available:'), _.keys(queries));
+        return callback(' Please specify a valid query name with --name=<queryname>');
+      }
+      query = parser.agentBrown(queries[path[1]], options);
+      neo4j.query(query, options, callback);
     }
-    
   }
 };
