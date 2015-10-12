@@ -247,7 +247,11 @@ WHERE p1 <> p2
 WITH p1, p2, res
 ORDER BY r1.tfidf DESC, r2.tfidf DESC
 WITH p1, p2, count(DISTINCT res) as w
-CREATE (p1)-[r:appear_in_same_document { count: w }]->(p2)
+MERGE (p1)-[r:appear_in_same_document]-(p2)
+ON CREATE SET
+r.count = w
+ON MATCH SET
+r.count = w
 
 
 // name: bb_get_cooccurrences
