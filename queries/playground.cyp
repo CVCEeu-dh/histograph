@@ -273,6 +273,23 @@ RETURN {
   } as result
 ORDER BY w DESC
 
+// name: bb_get_cooccurrences_global
+MATCH (p1:person)-[r:appear_in_same_document]-(p2:person)
+RETURN {
+  source: {
+    id: id(p1),
+    type: 'resource',
+    label: COALESCE(p1.name, p1.title_en, p1.title_fr)
+  },
+  target: {
+    id: id(p2),
+    type: 'resource',
+    label: COALESCE(p2.name, p2.title_en, p2.title_fr)
+  },
+  weight: r.count
+}
+ORDER BY r.count DESC
+
 
 // name: bb_get_related_resources_graph
 //
