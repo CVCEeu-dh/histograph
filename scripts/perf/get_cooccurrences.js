@@ -24,22 +24,6 @@ var sampleSize = 5,
     sample = 1,
     sampleValues = [];
 
-// function takeSample(callback) {
-//   console.log(clc.yellowBright(" - Taking sample " + sample));
-//   tick.start(ticker, function() {});
-//   query(options, function(err, results) {
-//     if (err) {
-//       callback(err);
-//     } else {
-//       sample = sample + 1;
-      
-//       tick.end(ticker, function(duration) {
-        
-//       });
-//     }
-//   });
-// }
-
 _.range(sampleSize).forEach(function() {
   sampleConfig = sampleConfig.concat([
     tick.start,
