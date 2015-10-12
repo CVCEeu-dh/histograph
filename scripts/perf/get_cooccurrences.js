@@ -3,7 +3,8 @@ var fs          = require('fs'),
     options     = {
       cypher: "playground/bb_get_cooccurrences",
       limit: 500,
-      offset: 0
+      offset: 0,
+      verbose: false
     },
     async       = require('async'),
     clc         = require('cli-color'),
@@ -28,12 +29,11 @@ _.range(sampleSize).forEach(function() {
   sampleConfig = sampleConfig.concat([
     tick.start,
     function (options, callback) {
-      console.log('exec rep. ' + sample)
+      process.stdout.write("Taking sample " + sample + "/" + sampleSize + "\r");
       query(options, function(err, results) {
         if (err) {
           callback(err);
         } else {
-          console.log('rep. ' + sample)
           sample = sample + 1;
           callback(null, options)
         }
