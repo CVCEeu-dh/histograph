@@ -8,6 +8,7 @@ var settings   = require('../../settings'),
     csv        = require('csv'),
     generator  = require('../../generator')(),
     inquirer   = require('inquirer'),
+    clc         = require('cli-color'),
     exectimer  = require('exectimer');
     
 module.exports = {
@@ -201,9 +202,10 @@ module.exports = {
       options.__tick.stop();
       if (options.verbose) {
         console.log(clc.yellowBright('\n   tasks.helpers.tick.end'));
-        console.log(clc.yellowBright("   It took: "), exectimer.timers.TIMER.duration()/1000000000, clc.yellowBright("sec."));
+        console.log(clc.yellowBright("   elapsed: "), exectimer.timers.TIMER.duration()/1000000000, clc.yellowBright("sec."));
       }
-      callback(exectimer.timers.TIMER.duration() / 1000000000, options)
+      options.timer =  exectimer.timers.TIMER;
+      callback(null, options);
     }
   },
   
