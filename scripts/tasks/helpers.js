@@ -189,16 +189,21 @@ module.exports = {
   },
   tick: {
     start: function(options, callback) {
+      options.verbose = (options.verbose == undefined) ? true : options.verbose;
       options.__tick = new exectimer.Tick("TIMER");
-      console.log(clc.yellowBright('\n   tasks.helpers.tick.start'));
+      if (options.verbose) {
+        console.log(clc.yellowBright('\n   tasks.helpers.tick.start'));
+      }
       options.__tick.start()
       callback(null, options)
     },
     end: function(options, callback) {
-      console.log(clc.yellowBright('\n   tasks.helpers.tick.end'));
       options.__tick.stop();
-      console.log(clc.yellowBright("It took: "), exectimer.timers.TIMER.duration()/1000000000);
-      callback(null, options)
+      if (options.verbose) {
+        console.log(clc.yellowBright('\n   tasks.helpers.tick.end'));
+        console.log(clc.yellowBright("   It took: "), exectimer.timers.TIMER.duration()/1000000000, clc.yellowBright("sec."));
+      }
+      callback(exectimer.timers.TIMER.duration() / 1000000000, options)
     }
   },
   
