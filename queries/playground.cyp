@@ -238,6 +238,18 @@ LIMIT {limit}
 
 // Bertjan's playground
 
+// Queries to created cached results for cooccurrence relationships between
+// persons
+
+// name: bb_create_cooccurrence_cache
+MATCH (p1:person)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:person)
+WHERE p1 <> p2
+WITH p1, p2, res
+ORDER BY r1.tfidf DESC, r2.tfidf DESC
+WITH p1, p2, count(DISTINCT res) as w
+CREATE (p1)-[r:appear_in_same_document { count: w }]->(p2)
+
+
 // name: bb_get_cooccurrences
 //
 MATCH (p1:person)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:person)
