@@ -49,7 +49,18 @@ async.waterfall([
       callback(null, options);
     }
   ].concat(sampleConfig), function (err, res) {
-  console.log('min. time', res.timer.min()/1000000000, 's.')
-  console.log('max. time', res.timer.max()/1000000000, 's.')
-  // console.log(res)
+    if (err) {
+      console.log(err);
+    } else {
+      process.stdout.clearLine();
+      console.log("Done.");
+      console.log(res.timer.ticks.map(function(tick) {
+        return tick.getDiff()/1000000000;
+      }));
+
+      console.log();
+      console.log("-  min: " + res.timer.min());
+      console.log("- mean: " + res.timer.mean());
+      console.log("-  max: " + res.timer.max());
+    }
 })
