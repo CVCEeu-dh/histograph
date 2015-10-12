@@ -238,7 +238,7 @@ LIMIT {limit}
 
 // Bertjan's playground
 
-// name: get_cooccurrences
+// name: bb_get_cooccurrences
 //
 MATCH (p1:person)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:person)
 {?res:start_time__gt} {AND?res:end_time__lt}
@@ -262,48 +262,48 @@ RETURN {
 ORDER BY w DESC
 
 
-// name: get_related_resources_graph
+// name: bb_get_related_resources_graph
 //
-MATCH (res:resource)<-[:appears_in]-(ent:entity)
-  WHERE id(res) = 4416 AND ent.df > 1 AND ent.score > -1
-WITH ent
-MATCH (ent)-[:appears_in]->(res:resource)
-  WHERE ent.df > 1
-WITH count(distinct res) as total_docs
-MATCH (ent)-[rel:appears_in]->(res:resource)
-  WHERE ent.df > 1
-WITH distinct(ent), rel.tf * log(toFloat(total_docs)/toFloat(ent.df)) as tfidf
-  ORDER BY tfidf DESC
-  // Rough estimate, 50 entities is typically enough to get a graph of 500
-  // resources.
-  // TODO: This must become a sensitivity parameter, probably expressed as
-  //       percentage of available entities for subset
-  LIMIT 50
-WITH ent
-MATCH (res1:resource)<--(ent)-->(res2:resource)
-  WHERE res1 <> res2
-WITH res1, res2, count(distinct ent) as intersection
-RETURN {
-  source: {
-    id: id(res1),
-    type: LAST(labels(res1)),
-    label: COALESCE(res1.name, res1.title_en, res1.title_fr)
-  },
-  target: {
-    id: id(res2),
-    type: LAST(labels(res2)),
-    label: COALESCE(res2.name, res2.title_en, res2.title_fr)
-  },
-  weight: intersection
-} as result
-ORDER BY intersection DESC
-LIMIT 500
+//MATCH (res:resource)<-[:appears_in]-(ent:entity)
+//  WHERE id(res) = 4416 AND ent.df > 1 AND ent.score > -1
+//WITH ent
+//MATCH (ent)-[:appears_in]->(res:resource)
+//  WHERE ent.df > 1
+//WITH count(distinct res) as total_docs
+//MATCH (ent)-[rel:appears_in]->(res:resource)
+//  WHERE ent.df > 1
+//WITH distinct(ent), rel.tf * log(toFloat(total_docs)/toFloat(ent.df)) as tfidf
+//  ORDER BY tfidf DESC
+//  // Rough estimate, 50 entities is typically enough to get a graph of 500
+//  // resources.
+//  // TODO: This must become a sensitivity parameter, probably expressed as
+//  //       percentage of available entities for subset
+//  LIMIT 50
+//WITH ent
+//MATCH (res1:resource)<--(ent)-->(res2:resource)
+//  WHERE res1 <> res2
+//WITH res1, res2, count(distinct ent) as intersection
+//RETURN {
+//  source: {
+//    id: id(res1),
+//    type: LAST(labels(res1)),
+//    label: COALESCE(res1.name, res1.title_en, res1.title_fr)
+//  },
+//  target: {
+//    id: id(res2),
+//    type: LAST(labels(res2)),
+//    label: COALESCE(res2.name, res2.title_en, res2.title_fr)
+//  },
+//  weight: intersection
+//} as result
+//ORDER BY intersection DESC
+//LIMIT 500
 
 
 
 
 
-// name: get_similar_resource_ids_by_entities
+// name: bb_get_similar_resource_ids_by_entities
 // get top 100 similar resources sharing the same persons, orderd by time proximity if this info is available
 // First get all entities in our document of interest
 MATCH (res:resource)<-[:appears_in]-(ent:entity)
@@ -348,7 +348,7 @@ LIMIT {limit}
 
 
 
-// name: get_related_resources_graph
+// name: bb_get_related_resources_graph
 //
 MATCH (res:resource)<-[:appears_in]-(ent:entity)
   WHERE id(res) = {id} AND ent.df > 1 AND ent.score > -1
