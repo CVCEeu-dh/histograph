@@ -24,25 +24,48 @@ var sampleSize = 5,
     sample = 1,
     sampleValues = [];
 
-function takeSample(callback) {
-  console.log(clc.yellowBright(" - Taking sample " + sample));
-  tick.start(ticker, function() {});
-  query(options, function(err, results) {
-    if (err) {
-      callback(err);
-    } else {
-      sample = sample + 1;
-      tick.end(ticker, function(duration) {
-        callback(null, duration);
-      });
-    }
-  });
-}
+// function takeSample(callback) {
+//   console.log(clc.yellowBright(" - Taking sample " + sample));
+//   tick.start(ticker, function() {});
+//   query(options, function(err, results) {
+//     if (err) {
+//       callback(err);
+//     } else {
+//       sample = sample + 1;
+      
+//       tick.end(ticker, function(duration) {
+        
+//       });
+//     }
+//   });
+// }
 
 _.range(sampleSize).forEach(function() {
-  sampleConfig.push(takeSample);
+  sampleConfig = sampleConfig.concat([
+    tick.start,
+    function (options, callback) {
+      console.log('exec rep. ' + sample)
+      query(options, function(err, results) {
+        if (err) {
+          callback(err);
+        } else {
+          console.log('rep. ' + sample)
+          sample = sample + 1;
+          callback(null, options)
+        }
+      });
+    },
+    tick.end
+  ]);
 });
 
-async.series(sampleConfig, function(err, res) {
-  console.log(res)
+
+async.waterfall([
+    function init(callback) {
+      callback(null, options);
+    }
+  ].concat(sampleConfig), function (err, res) {
+  console.log('min. time', res.timer.min()/1000000000, 's.')
+  console.log('max. time', res.timer.max()/1000000000, 's.')
+  // console.log(res)
 })
