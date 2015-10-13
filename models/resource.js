@@ -208,6 +208,7 @@ module.exports = {
         format: properties.dateformat || 'YYYY-MM-DD',
         strict: properties.datestrict
       }));
+      
     }
     properties = _.assign(properties, {
       creation_date: now.date,

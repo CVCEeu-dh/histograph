@@ -303,6 +303,10 @@ RETURN col
       res.start_date = {start_date},
       res.end_date   = {end_date},
     {/if}
+    {if:start_month}
+      res.start_month = {start_month},
+      res.end_month   = {end_month},
+    {/if}
     {if:url}
       res.url = {url},
     {/if}
@@ -341,6 +345,10 @@ RETURN col
       res.end_time   = {end_time},
       res.start_date = {start_date},
       res.end_date   = {end_date},
+    {/if}
+    {if:start_month}
+      res.start_month = {start_month},
+      res.end_month   = {end_month},
     {/if}
     {if:url}
       res.url = {url},

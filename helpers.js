@@ -826,8 +826,12 @@ module.exports = {
       start_date: start.format(), // ISO format
       start_time: +start.format('X'),
       end_date: end.format(),
-      end_time: +end.format('X')
+      end_time: +end.format('X'),
     };
+    
+    // calculate month
+    result.start_month = moment.utc(result.start_time, 'X').format('YYYYMM');
+    result.end_month   = moment.utc(result.end_time, 'X').format('YYYYMM');
     
     if(next)
       next(null, result);

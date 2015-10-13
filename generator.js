@@ -34,6 +34,8 @@ module.exports = function(options) {
           caption_en: "On 17 June 1950, the English weekly magazine The New Statesman and Nation reports on the British position towards the French plan for the pooling of coal and steel production in Western Europe.",
           caption_fr: "Le 17 juin 1950, l'hebdomadaire anglais The New Statesman and Nation expose la position britannique face au projet français de mise en commun des productions de l'acier et du charbon en Europe occidentale.",
           caption_de: "Am 17. Juni 1950 legt die englische Wochenzeitschrift The New Statesman and Nation die britische Haltung gegenüber dem französischen Plan der Zusammenlegung der Kohle- und Stahlproduktion in Westeuropa dar.",
+          start_date: '1950-06-17',
+          end_date:   '1950-06-17',
           languages: ['en', 'fr', 'de'],
           user: properties.user
         }
@@ -50,6 +52,8 @@ module.exports = function(options) {
           caption_fr: "Du 4 au 11 février 1945, la Conférence de Yalta réunit Winston Churchill, Franklin D. Roosevelt et Joseph Staline qui doivent décider du sort de l'Europe. Quarante ans plus tard, André Fontaine remet en question la portée effective de la conférence dans un article publié le 5 février 1985 dans le quotidien français Le Monde.",
           caption_de: "Vom 4. bis 11. Februar 1945 trafen sich Winston Churchill, Franklin D. Roosevelt und Joseph Staline auf der Konferenz von Jalta, um über das Schicksal Europas zu entscheiden. Vierzig Jahre später stellt André Fontaine die eigentliche Tragweite dieser Konferenz in einem am 5. Februar 1985 in der französischen Tageszeitung Le Monde veröffentlichten Artikel in Frage.",
           languages: ['en', 'fr', 'de'],
+          start_date: '1945-02-04',
+          end_date:   '1945-02-11',
           user: properties.user
         }
       }
