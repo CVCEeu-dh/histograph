@@ -187,7 +187,7 @@ module.exports = function(io){
       validator.queryParams(req.query, function (err, params, warnings) {
         if(err)
           return helpers.formError(err, res);
-        var query = parser.agentBrown(queries.get_cooccurrences, params);
+        var query = parser.agentBrown(queries.get_filtered_cooccurrences, params);
         // console.log('query', query)
         
         helpers.cypherGraph(query, {
