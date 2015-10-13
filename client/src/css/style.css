@@ -373,7 +373,7 @@ a#header-logo img{
 */
 #perspective{
   position: fixed;
-  width: 36%;
+  width: 400px;
   top:  100px;
   bottom: 50px;
   /*overflow: hidden;*/
@@ -389,7 +389,7 @@ a#header-logo img{
 }
 
 #perspective-menu{
-  width: 36%;
+  width: 400px;
 }
 
 #perspective-menu > ul{
@@ -467,8 +467,8 @@ a#header-logo img{
 */
 
 #see-also{
-  width: 32%;
-  margin-left: 36%;
+  width: 360px;
+  margin-left: 390px;
   overflow: auto;
   overflow-y: auto;
   overflow-x: hidden;
@@ -481,8 +481,9 @@ a#header-logo img{
 }
 
 #see-also-menu {
-  left: 36%;
-  width: 64%;
+  left: 0px;
+  right: 0px;
+  padding-left: 400px;
   z-index: 10;
 }
 
@@ -535,15 +536,15 @@ a#header-logo img{
   top:100px;
   background: #f0f0f0;
   z-index: 4;
-  width: 32%;
-  left: 36%;
+  width: 350px;
+  left: 400px;
 }
 
 .toolbar .wrapper{
   text-align: center;
   padding: 20px 0 0 0;
   border-bottom: 1px solid #e8e8e8;
-  margin: 0 20px
+  margin: 0 10px
 }
 
 .toolbar h2{
@@ -860,7 +861,7 @@ a#header-logo img{
 #milkyway{
   position: fixed;
   top: 120px;
-  left: 68%;
+  left: 760px;
   right: 20px;
   bottom: 70px;
   background: #e8e8e8;
