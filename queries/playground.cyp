@@ -241,6 +241,10 @@ LIMIT {limit}
 // Queries to created cached results for cooccurrence relationships between
 // persons
 
+// name: bb_clear_cooccurrence_cache
+MATCH ()-[r:appear_in_same_document]-()
+DELETE r
+
 // name: bb_create_cooccurrence_cache
 MATCH (p1:person)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:person)
 WHERE p1 <> p2
