@@ -266,6 +266,7 @@ r.jaccard = JACCARD
 //
 MATCH (p1:person)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:person)
 {?res:start_time__gt} {AND?res:end_time__lt}
+WHERE id(p1) < id(p2)
 WITH p1, p2, res
 ORDER BY r1.tfidf DESC, r2.tfidf DESC
 
@@ -287,6 +288,7 @@ ORDER BY w DESC
 
 // name: bb_get_cooccurrences_global
 MATCH (p1:person)-[r:appear_in_same_document]-(p2:person)
+WHERE id(p1) < id(p2)
 RETURN {
   source: {
     id: id(p1),
