@@ -4,20 +4,40 @@
 */
 var settings  = require('../../settings'),
     parser    = require('../../parser'),
+    
+    neo4j     = require('seraph')(settings.neo4j.host),
     async     = require('async'),
     path      = require('path'),
     fs        = require('fs'),
-    Entity    = require('../../models/entity');
+    Entity    = require('../../models/entity'),
+    
+    queries   = require('decypher')('./queries/playground.cyp');
 
 module.exports = {
-  
+  cleanSimilarity: function(options, callback) {
+    console.log(clc.yellowBright('\n   tasks.entity.cleanSimilarity'));
+    neo4j.query(queries.bb_clear_cooccurrence_cache, function (err) {
+      if(err)
+        callback(err)
+      else {
+        console.log(clc.cyanBright('   cleaned'),'every similarity relationship');
+        callback(null, options);
+    
+      }
+    })
+  },
   jaccard: function(options, callback) {
     console.log(clc.yellowBright('\n   tasks.entity.jaccard'));
-    var queries = require('decypher')('./queries/playground.cyp'),
-        query = parser.agentBrown(queries.jaccard, options);
-    console.log(query);
+    var query = parser.agentBrown(queries.bb_create_cooccurrence_cache, options);
+    neo4j.query(queries.bb_clear_cooccurrence_cache, function (err) {
+      if(err)
+        callback(err)
+      else {
+        console.log(clc.cyanBright('   created'),'jaccard indexes');
+        callback(null, options);
     
-    callback(null, options);
+      }
+    })
   },
   
   getMany: function(options, callback) {

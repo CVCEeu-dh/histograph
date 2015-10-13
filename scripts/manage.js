@@ -38,6 +38,7 @@ var fs          = require('fs'),
         based on similarity
       */
       'calculate-similarity': [
+        tasks.entity.cleanSimilarity,   
         tasks.entity.jaccard   
       ],
       'query': [
