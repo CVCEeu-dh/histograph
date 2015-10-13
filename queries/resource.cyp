@@ -402,24 +402,63 @@ RETURN col, res
 
 // name: get_cooccurrences
 //
-MATCH (p1:person)-[r1:appears_in]-(res:resource)-[r2:appears_in]-(p2:person)
+MATCH (p1:person)-[r:appear_in_same_document]-(p2:person)
+WHERE id(p1) < id(p2) AND r.jaccard < 0.33
+RETURN {
+  source: {
+    id: id(p1),
+    type: 'person',
+    label: COALESCE(p1.name, p1.title_en, p1.title_fr)
+  },
+  target: {
+    id: id(p2),
+    type: 'person',
+    label: COALESCE(p2.name, p2.title_en, p2.title_fr)
+  },
+  weight: r.jaccard
+}
+ORDER BY r.weight DESC
+LIMIT {limit}
+
+
+// name: get_filtered_cooccurrences
+//
+MATCH (p1:person)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:person)
 {?res:start_time__gt} {AND?res:end_time__lt}
-WITH p1, p2, length(collect(DISTINCT res)) as w
+WHERE id(p1) < id(p2)
+  {if:start_time}
+    AND res.start_time >= {start_time}
+  {/if}
+  {if:end_time}
+    AND res.end_time <= {end_time}
+  {/if}
+  {if:mimetype}
+    AND res.mimetype in {mimetype}
+  {/if}
+  {if:entity_id}
+    AND id(p1) IN {entity_id}
+    AND id(p2) IN {entity_id}
+  {/if}
+  AND p1.score > -1
+  AND p2.score > -1
+WITH p1, p2, res
+ORDER BY r1.tfidf DESC, r2.tfidf DESC
+// limit here?
+WITH p1, p2, count(DISTINCT res) as w
 RETURN {
     source: {
       id: id(p1),
-      type: LAST(labels(p1)),
+      type: 'person',
       label: COALESCE(p1.name, p1.title_en, p1.title_fr)
     },
     target: {
       id: id(p2),
-      type: LAST(labels(p2)),
+      type: 'person',
       label: COALESCE(p2.name, p2.title_en, p2.title_fr)
     },
     weight: w
   } as result
 ORDER BY w DESC
-SKIP {offset}
 LIMIT {limit}
 
 
@@ -532,8 +571,10 @@ MATCH (res:resource)<-[:appears_in]-(ent:entity)
 WHERE id(res) = {id}
 WITH ent
 MATCH (res:resource)<-[:appears_in]-(ent)
+WHERE has(res.start_month)
 WITH  res.start_month as tm, min(res.start_time) as t, count(res) as weight
-RETURN t, weight
+RETURN tm, t, weight
+ORDER BY tm ASC
 
 
 
