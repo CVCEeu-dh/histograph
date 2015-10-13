@@ -241,23 +241,32 @@ LIMIT {limit}
 // Queries to created cached results for cooccurrence relationships between
 // persons
 
+// name: bb_clear_cooccurrence_cache
+MATCH ()-[r:appear_in_same_document]-()
+DELETE r
+
 // name: bb_create_cooccurrence_cache
-MATCH (p1:person)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:person)
-WHERE p1 <> p2
-WITH p1, p2, res
-ORDER BY r1.tfidf DESC, r2.tfidf DESC
-WITH p1, p2, count(DISTINCT res) as w
+// For the "WHERE id(p1) < id(p2)" part, see:
+// https://stackoverflow.com/questions/33083491/how-to-get-a-unique-set-of-node-pairs-for-undirected-relationships/33084035#33084035
+MATCH (p1: person)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2: person)
+WHERE id(p1) < id(p2)
+WITH p1, p2, count(*) as intersection
+MATCH (p1)-[rel:appears_in]->(r1:resource)
+WITH p1,p2, intersection, count(rel) as H1
+MATCH (p2)-[rel:appears_in]->(r1:resource)
+WITH p1,p2, intersection, H1, count(rel) as H2
+WITH p1, p2, intersection, H1+H2 as union
+WITH p1, p2, intersection, union, toFloat(intersection)/toFloat(union) as JACCARD
 MERGE (p1)-[r:appear_in_same_document]-(p2)
 ON CREATE SET
-r.count = w
-ON MATCH SET
-r.count = w
+r.jaccard = JACCARD
 
 
 // name: bb_get_cooccurrences
 //
 MATCH (p1:person)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:person)
 {?res:start_time__gt} {AND?res:end_time__lt}
+WHERE id(p1) < id(p2)
 WITH p1, p2, res
 ORDER BY r1.tfidf DESC, r2.tfidf DESC
 
@@ -279,6 +288,7 @@ ORDER BY w DESC
 
 // name: bb_get_cooccurrences_global
 MATCH (p1:person)-[r:appear_in_same_document]-(p2:person)
+WHERE id(p1) < id(p2)
 RETURN {
   source: {
     id: id(p1),
@@ -290,9 +300,9 @@ RETURN {
     type: 'resource',
     label: COALESCE(p2.name, p2.title_en, p2.title_fr)
   },
-  weight: r.count
+  jaccard: r.jaccard
 }
-ORDER BY r.count DESC
+ORDER BY r.jaccard DESC
 
 
 // name: bb_get_related_resources_graph
