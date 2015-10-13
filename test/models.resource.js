@@ -269,6 +269,16 @@ describe('model:resource ', function() {
       done()
     })
   })
+  
+  it('should return the timeline of related resources', function (done) {
+    Resource.getRelatedResourcesTimeline({
+       id: __resourceA.id
+    }, function (err, res) {
+      should.not.exist(err);
+      done()
+    })
+  })
+  
   it('should get a NOT found error', function (done) {
     Resource.get(111600000000, function (err, res) {
       should.exist(err)

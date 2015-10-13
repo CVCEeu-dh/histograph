@@ -423,6 +423,28 @@ module.exports = function(io){
       });
     },
     
+    getRelatedResourcesTimeline: function (req, res) {
+      var form = validator.request(req, {
+            limit: 100,
+            offset: 0
+          });
+      
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      Resource.getRelatedResourcesTimeline({
+        id: form.params.id
+      }, function (err, timeline) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({
+          timeline: timeline
+        }, {
+          params: params,
+          warnings: warnings
+        });
+      })
+    },
     
     /*
       Create a relationship bzetween the current user and the resoruce

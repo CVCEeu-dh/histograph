@@ -381,6 +381,8 @@ apiRouter.route('/resource/:id(\\d+)/related/:entity(person|location|organizatio
   .get(ctrl.resource.getRelatedEntitiesGraph);
 apiRouter.route('/resource/:id(\\d+)/related/resource/graph')
   .get(ctrl.resource.getRelatedResourcesGraph);
+apiRouter.route('/resource/:id(\\d+)/related/resource/timeline')
+  .get(ctrl.resource.getRelatedResourcesTimeline);
 apiRouter.route('/cooccurrences') // @todo move to entity controller.
   .get(ctrl.resource.getCooccurrences)
 

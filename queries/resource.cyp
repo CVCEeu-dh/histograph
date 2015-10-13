@@ -526,6 +526,17 @@ WITH  res.start_month as tm, min(res.start_time) as t, count(res) as weight
 RETURN t, weight
 
 
+// name: get_related_resources_timeline
+//
+MATCH (res:resource)<-[:appears_in]-(ent:entity)
+WHERE id(res) = {id}
+WITH ent
+MATCH (res:resource)<-[:appears_in]-(ent)
+WITH  res.start_month as tm, min(res.start_time) as t, count(res) as weight
+RETURN t, weight
+
+
+
 // name: get_timeline_per_day
 //
 MATCH (res:resource)
