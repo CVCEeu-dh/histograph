@@ -29,7 +29,7 @@ module.exports = {
   jaccard: function(options, callback) {
     console.log(clc.yellowBright('\n   tasks.entity.jaccard'));
     var query = parser.agentBrown(queries.bb_create_cooccurrence_cache, options);
-    neo4j.query(queries.bb_clear_cooccurrence_cache, function (err) {
+    neo4j.query(query, function (err) {
       if(err)
         callback(err)
       else {
