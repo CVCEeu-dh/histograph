@@ -137,11 +137,21 @@ a#header-logo img{
   margin: 0 auto 100px auto;
 }
 
-.item h3 a{
+.item h3>span{
   font-weight: bold;
   font-size: 18px;
   line-height: 24px;
   color: #151515;
+}
+.item h3 a{
+  color: #353535;
+}
+.item .caption a[gasp-type='person'], .item h3 a[gasp-type='person'] {
+  border-bottom: 2px solid #4dc3ba
+}
+
+.item .caption a[gasp-type='location'], .item h3 a[gasp-type='location'] {
+  border-bottom: 2px solid #0093a6
 }
 
 .item img{

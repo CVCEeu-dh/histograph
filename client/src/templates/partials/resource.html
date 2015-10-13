@@ -21,7 +21,10 @@
           <a ng-href='#/r/{{item.id}}/inq' tooltip="view the related {{item.inquiries}} inquiries"><label>{{item.inquiries}}</label> <i class="fa fa-comment"></i></a>
           </span>
         </div>
-        <h3 class="" data-id='{{item.id}}'><a ng-href="#/r/{{item.id}}" ng-bind-html="item.props | title:language"></a></h3>
+        <h3 class="" data-id='{{item.id}}'>
+          <span ng-if="currentAnnotation" ng-href="#/r/{{item.id}}" context="item" marked="currentAnnotation.annotated.title"></span>
+          <span ng-if="!currentAnnotation" ng-href="#/r/{{item.id}}" ng-bind-html="item.props | title:language"></span>
+        </h3>
         <!-- <div class="collections">
           <div class="collection" ng-repeat="collection in item.collections"><a ng-href="#/c/{{collection.id}}">{{collection.name|humanize}}</a></div>
         </div> -->
