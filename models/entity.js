@@ -21,6 +21,16 @@ var settings  = require('../settings'),
     
 
 module.exports = {
+  FIELDS: [
+    'id',
+    'slug',
+    'name',
+  ],
+  
+  UPDATABLE: [
+    'slug',
+    'name',
+  ],
   /*
     Create a new entity or merge it if an entity with the same wikilink exists.
     Note that an entity must be linked to a document.

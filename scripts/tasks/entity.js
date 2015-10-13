@@ -3,12 +3,62 @@
   Resource task collection
 */
 var settings  = require('../../settings'),
+    parser    = require('../../parser'),
     async     = require('async'),
     path      = require('path'),
     fs        = require('fs'),
-    Entity  = require('../../models/entity');
+    Entity    = require('../../models/entity');
 
 module.exports = {
+  
+  jaccard: function(options, callback) {
+    console.log(clc.yellowBright('\n   tasks.entity.jaccard'));
+    var queries = require('decypher')('./queries/playground.cyp'),
+        query = parser.agentBrown(queries.jaccard, options);
+    console.log(query);
+    
+    callback(null, options);
+  },
+  
+  getMany: function(options, callback) {
+    console.log(clc.yellowBright('\n   tasks.entity.getMany'));
+    var query = parser.agentBrown(
+      ' MATCH (ent:entity{if:entity}:{:entity}{/if})\n'+
+      ' RETURN ent SKIP {offset} LIMIT {limit}', options);
+    console.log(query);
+    neo4j.query(query, {
+      limit: +options.limit || 100000,
+      offset: +options.offset || 0
+    }, function (err, nodes) {
+      if(err) {
+        callback(err);
+        return;
+      }
+      console.log(clc.blackBright('   nodes:', clc.magentaBright(nodes.length)));
+      options.fields = entity.FIELDS;
+      options.records = nodes;
+      callback(null, options);
+    })
+  },
+  
+  getOne: function(options, callback) {
+    console.log(clc.yellowBright('\n   tasks.entity.getOne'),'id:', options.id);
+    neo4j.query(
+      ' MATCH (ent:entity)\n'+
+      ' WHERE id(ent)={id} RETURN ent LIMIT 1', {
+      id: (+options.id || -1)
+    }, function (err, nodes) {
+      if(err) {
+        callback(err);
+        return;
+      }
+      console.log(clc.blackBright('   nodes:', clc.magentaBright(nodes.length)));
+      options.fields = Resource.FIELDS;
+      options.records = nodes;
+      callback(null, options)
+      
+    })
+  },
   
   discoverMany: function(options, callback) {
     console.log(clc.yellowBright('\n   tasks.entity.discover'));

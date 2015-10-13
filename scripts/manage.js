@@ -33,6 +33,13 @@ var fs          = require('fs'),
       'discover-resources': [
         tasks.resource.discoverMany
       ],
+      /*
+        computate (ent:entity:person)--(ent:entity:person) links
+        based on similarity
+      */
+      'calculate-similarity': [
+        tasks.entity.jaccard   
+      ],
       'query': [
         tasks.helpers.cypher.raw
       ]
