@@ -182,7 +182,7 @@ WHERE id(res) = {id}
 RETURN count(DISTINCT(e)) as count_items
 
 
-// name: get_similar_resource_ids_by_entities
+// name: get_similar_resource_ids_by_entities_v1
 // get top 100 similar resources sharing the same persons, orderd by time proximity if this info is available
 MATCH (res)<-[R1:appears_in]-(ent:entity)-[R2:appears_in]->(res2:resource)
   WHERE id(res) = {id} AND ent.score > -1 
@@ -199,45 +199,54 @@ ORDER BY
   R1.tfidf DESC, R2.tfidf DESC, candidate.dst ASC, candidate.det ASC
 {/unless}
 {if:orderby}
-  {:orderby}
+   ORDER BY {:orderby}
 {/if}
 SKIP {offset}
 LIMIT {limit}
 
-// name: get_similar_resources
-// get resources that match well with a given one
-// recommendation system ,et oui
-START res = node({id})
-MATCH (res)-[*1..2]-(res2:resource)
-  OPTIONAL MATCH (per:person)--(res2)
-  OPTIONAL MATCH (loc:location)--(res2)
-WHERE res <> res2
-  WITH res, res2,
-    abs(res.start_time-res2.start_time) as proximity,
-  collect(DISTINCT per) as persons,
-    collect(DISTINCT loc) as locations
-  WITH res2, persons, locations, proximity,
-    length(persons) as person_similarity,
-    length(locations) * 0.01 as location_similarity
-  WITH res2, persons, locations, proximity, person_similarity, location_similarity, person_similarity + location_similarity as entity_similarity
-
-  RETURN {
-    id: id(res2),
-    props: res2,
-    persons: persons,
-    locations: locations,
-    ratings: {
-      location_similarity: location_similarity,
-      person_similarity: person_similarity,
-      entity_similarity: entity_similarity,
-      proximity: proximity
-    }
-  } AS result
-  ORDER BY entity_similarity DESC, proximity ASC, person_similarity DESC, location_similarity DESC
-  LIMIT 25
 
 
+// name: get_similar_resource_ids_by_entities
+//
+MATCH (res1:resource)<-[r1:appears_in]-(ent:entity)-[r2:appears_in]->(res2:resource)
+  WHERE id(res1) = {id}
+    AND ent.score > -1
+    {if:mimetype}
+    AND res2.mimetype = {mimetype}
+    {/if}
+    {if:start_time}
+    AND res2.start_time >= {start_time}
+    {/if}
+    {if:end_time}
+    AND res2.end_time >= {end_time}
+    {/if}
+    AND id(res1) <> id(res2)
+  
+WITH res1, res2, count(*) as intersection
 
+MATCH (res1)<-[rel:appears_in]-(r1:entity)
+WITH res1, res2, intersection, count(rel) as H1
+
+MATCH (res2)<-[rel:appears_in]-(r1:entity)
+WITH res1,res2, intersection, H1, count(rel) as H2
+WITH res1, res2, intersection, H1+H2 as union
+WITH res1, res2, intersection, union, toFloat(intersection)/toFloat(union) as JACCARD
+
+{unless:orderby}
+ORDER BY JACCARD DESC
+SKIP {offset}
+LIMIT {limit}
+{/unless}
+RETURN {
+  target: id(res2),
+  type: LAST(labels(res2)),
+  dst : abs(coalesce(res1.start_time, 1000000000) - coalesce(res2.start_time, 0)),
+  det : abs(coalesce(res1.end_time, 1000000000) - coalesce(res2.end_time, 0)),
+  weight: JACCARD
+} as result
+{if:orderby}
+  ORDER BY {:orderby}
+{/if}
 
 // name: add_comment_to_resource
 // add a comment to a resource, by user username. At least one #tag should be provided
@@ -492,7 +501,6 @@ RETURN {
 } as result
 ORDER BY intersection DESC
 LIMIT {limit}
-
 
 
 
