@@ -307,6 +307,12 @@ RETURN col
       res.start_month = {start_month},
       res.end_month   = {end_month},
     {/if}
+    {if:full_search}
+      res.full_search = {full_search},
+    {/if}
+    {if:title_search}
+      res.title_search = {title_search},
+    {/if}
     {if:url}
       res.url = {url},
     {/if}
@@ -349,6 +355,12 @@ RETURN col
     {if:start_month}
       res.start_month = {start_month},
       res.end_month   = {end_month},
+    {/if}
+    {if:full_search}
+      res.full_search = {full_search},
+    {/if}
+    {if:title_search}
+      res.title_search = {title_search},
     {/if}
     {if:url}
       res.url = {url},
@@ -425,7 +437,7 @@ RETURN {
   },
   weight: r.jaccard
 }
-ORDER BY r.weight DESC
+ORDER BY r.jaccard DESC
 LIMIT {limit}
 
 
