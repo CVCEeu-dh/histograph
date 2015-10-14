@@ -1,27 +1,33 @@
 /**
- * Suggest controller for autocompletion
+ * Suggest controller for autocompletion and search purposes
  * =====================================
  *
  */
-var settings  = require('../settings'),
-    helpers   = require('../helpers'),
-    models    = require('../helpers/models'),
+var settings   = require('../settings'),
+    helpers    = require('../helpers'),
+    models     = require('../helpers/models'),
     
-    parser    = require('../parser.js'),
-    neo4j     = require('seraph')(settings.neo4j.host),
+    parser     = require('../parser.js'),
+    
+    neo4j      = require('seraph')(settings.neo4j.host),
     validator  = require('../validator'),
         
-    queries  = require('decypher')('./queries/suggest.cyp'),
+    queries    = require('decypher')('./queries/suggest.cyp'),
     
-    async     = require('async'),
-    _         = require('lodash');
+    async      = require('async'),
+    _          = require('lodash');
 
 
 /*
-  Tiny helper to tranform words in a valid lucenequery
-  according to ccurrent lucene indexes
+  Very basic tiny method to tranform words in a valid lucenequery
+  according to ccurrent lucene indexes.
 */
 function toLucene(query) {
+  if(query.split(/\s/).length > 1)
+    return '"' +query.split(/\s/).join(' ')+ '"'
+  else
+    return query;
+  
   var q = '*' + query.split(/[^\w]/).map(function (d) {
     return d.trim().toLowerCase()
   }).join('*') + '*';
@@ -274,16 +280,36 @@ module.exports =  function(io){
       next(err=null, [])
      */
     suggest: function(req, res) {
-      var q = toLucene(req.query.query);
+      var resource_query,
+          entity_query;
+          
+      var form = validator.request(req, {
+            limit: 20,
+            offset: 0,
+            language: 'en'
+          });
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
       
-  
+      resource_query = 'full_search:' + toLucene(req.query.query) + ' OR title_search:' + toLucene(req.query.query);
+      entity_query = 'name_search:' + toLucene(req.query.query);
+      // lucene.setSearchTerm('full_search:(' + req.query.query + ') OR title_search:(' + req.query.query+')');
+      // resource_query = '' + lucene.getFormattedSearchTerm();
+      
+      // lucene.setSearchTerm('name_search:' + req.query.query);
+      // entity_query = '' + lucene.getFormattedSearchTerm();
+      console.log('resource_query', resource_query)
+          console.log('entity_query', entity_query)
+      
       neo4j.query(queries.lucene_query, {
-        resource_query: [
-          'full_search:', q
-        ].join(''),
-        person_query: 'name_search:' + q,
-        limit: req.query.limit || 4
+        resource_query: resource_query,
+        entity_query: entity_query,
+        limit: req.query.limit || 4,
+        language: form.params.language
       }, function (err, items) {
+        if (err) {
+          
+        }
         if(err)
           return helpers.cypherQueryError(err, res);
         
