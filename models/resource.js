@@ -232,10 +232,16 @@ module.exports = {
   },
   
   /*
-    Create a nice index
+    Create a nice index according to your legay index.
+    Not needed if using node_auto_index!
   */
   index: function(resource, next) {
-    
+    async.parallel(_.map(['full_search', 'title_search'], function(legacyindex) {
+      return function(n) {
+        console.log('indexing', legacyindex, resource.props[legacyindex])
+        neo4j.legacyindex.add(legacyindex, resource.id, (legacyindex, resource[legacyindex] || resource.props[legacyindex] || '').toLowerCase(), n);
+      }
+    }), next);
   },
   
   /*
