@@ -690,7 +690,7 @@ angular.module('histograph')
             settings('defaultLabelColor');
 
           context.fillText(
-            node.label,
+            cutat(node.label, 22),
             Math.round(node[prefix + 'x'] + size + 3),
             Math.round(node[prefix + 'y'] + fontSize / 3)
           );
