@@ -9,7 +9,7 @@ RETURN {
   type: 'resource'
 } AS result
 UNION
-start n=node:node_auto_index({person_query})
+start n=node:node_auto_index({entity_query})
 WITH n
 LIMIT {limit}
 RETURN {

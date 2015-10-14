@@ -200,6 +200,21 @@ describe('controller:resource (related resources)', function() {
       });
   });
   
+  it('should get the timeline of related resources', function (done) {
+    session
+      .get('/api/resource/'+ __resourceA.id +'/related/resource/timeline')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err)
+        should.not.exists(err);
+        console.log(res.body.result)
+        
+        done();
+      });
+  });
+  
   it('should show the graph of 10 related people', function (done) {
     session
       .get('/api/resource/'+ __resourceA.id +'/related/person/graph')
