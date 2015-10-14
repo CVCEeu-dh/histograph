@@ -36,6 +36,8 @@ module.exports = function(options) {
           caption_de: "Am 17. Juni 1950 legt die englische Wochenzeitschrift The New Statesman and Nation die britische Haltung gegenüber dem französischen Plan der Zusammenlegung der Kohle- und Stahlproduktion in Westeuropa dar.",
           start_date: '1950-06-17',
           end_date:   '1950-06-17',
+          full_search: "improbable query ever Britain s Answer to M Schuman from The New Statesman and Nation (17 June 1950)",
+          title_search: "improbable. 'This is the Title'",
           languages: ['en', 'fr', 'de'],
           user: properties.user
         }
