@@ -207,7 +207,7 @@ RETURN {
 LIMIT {limit}
 
 // name: get_suggestions
-//
+// CHECK
 MATCH (n:resource)
 WHERE n.title_search =~ {query} OR n.caption_search =~ {query}
 RETURN { id: id(n), props: n } LIMIT {limit}
@@ -215,3 +215,21 @@ UNION
 MATCH (n:entity)
 WHERE n.name =~ {query}
 RETURN { id: id(n), props: n } LIMIT {limit}
+
+
+// name: build_full_search_legacy_index
+// fill the full search index. Cfr scripts/tasks/lucene.js
+MATCH (res:resource) WHERE has(res.full_search)
+SET res.full_search = res.full_search
+
+
+// name: build_title_search_legacy_index
+// fill the full search index. Cfr scripts/tasks/lucene.js
+MATCH (res:resource) WHERE has(res.title_search)
+SET res.title_search = res.title_search
+
+
+// name: build_name_search_legacy_index
+// fill the full search index. Cfr scripts/tasks/lucene.js
+MATCH (ent:entity) WHERE has(ent.name_search)
+SET ent.name_search = ent.name_search

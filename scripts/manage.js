@@ -25,7 +25,12 @@ var fs          = require('fs'),
     
     availableTasks = _.assign({
       'setup': [
-        tasks.setup
+        tasks.setup.indexes,
+        tasks.lucene.drop,
+        tasks.lucene.init
+      ],
+      'index': [
+        tasks.lucene.update
       ],
       'discover-resource': [
         tasks.resource.discoverOne
