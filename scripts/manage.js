@@ -26,9 +26,10 @@ var fs          = require('fs'),
     availableTasks = _.assign({
       'setup': [
         tasks.setup.indexes,
-        tasks.lucene.drop,
-        tasks.lucene.init
+        // Not enabled, since we're only using auto_index // tasks.lucene.drop,
+        // Not enabled, since we're only using auto_index // tasks.lucene.init
       ],
+      
       'index': [
         tasks.lucene.update
       ],

@@ -15,16 +15,12 @@ var settings  = require('../../settings'),
 
 module.exports = {
   NODE_LEGACY_INDEXES : [
-    'full_search',
-    'title_search',
-    'name_search'
+    // 'full_search',
+    // 'title_search',
+    // 'name_search'
   ],
   /*
     init legacy indexes for lucene:
-  
-    create three legacy indexes:
-        title_search and full_search for (res:reource) nodes;
-        name_search for (ent:entity) nodes.
   
   */
   init: function(options, callback) {
@@ -57,10 +53,6 @@ module.exports = {
   },
   /*
     drop legacy indexes for lucene:
-  
-    delete three legacy indexes:
-        title_search and full_search for (res:resource) nodes;
-        name_search for (ent:entity) nodes.
   
   */
   drop: function(options, callback) {
@@ -95,10 +87,10 @@ module.exports = {
     
   */
   update: function(options, callback) {
-    async.series(_.map(module.exports.NODE_LEGACY_INDEXES, function (legacyIndex) {
+    async.series(_.map(['full_search', 'name_search', 'title_search'], function (property) {
       return function (next) {
-        console.log(clc.blackBright('   updating legacy index'), legacyIndex);
-        neo4j.query(queries['build_'+ legacyIndex +'_legacy_index'], function (err) {
+        console.log(clc.blackBright('   updating node_auto_index'), property);
+        neo4j.query(queries['build_'+ property +'_legacy_index'], function (err) {
           if(err) {
             next(err);
           } else {
