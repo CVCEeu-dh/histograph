@@ -388,6 +388,23 @@ module.exports = {
     });
   },
   /*
+    Simply test the get text function for a specific resource
+  */
+  getText: function(options, callback) {
+    console.log(clc.yellowBright('\n   tasks.resource.getText'));
+    
+    if(!options.language || options.language.length !=2 ) {
+      callback('option --language required, 2 chars lang')
+      return;
+    }
+    var text = Resource.getText(_.first(options.records), {
+      language: options.language,
+      fields: settings.disambiguation.fields
+    });
+    console.log(text);
+    callback(null, options);
+  },
+  /*
     Start the discover chain for one signle dicoument, useful for test purposes.
   */
   discoverOne: function(options, callback) {

@@ -493,6 +493,9 @@ module.exports = {
       if(d == 'url') {
         if(!_.isEmpty(resource[d + '_' + options.language])) {
           try{
+            var stats = fs.statSync(settings.paths.txt + '/' + resource[d + '_' + options.language]);
+            if(stats.size > (settings.disambiguation.maxSize || 100000))
+              return '';
             return fs.readFileSync(settings.paths.txt + '/' + resource[d + '_' + options.language], {
               encoding: 'utf8'
             }) || '';

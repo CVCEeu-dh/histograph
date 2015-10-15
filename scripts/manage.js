@@ -49,6 +49,10 @@ var fs          = require('fs'),
       ],
       'query': [
         tasks.helpers.cypher.raw
+      ],
+      'text-of-resource': [
+        tasks.resource.getOne,
+        tasks.resource.getText
       ]
     }, settings.availableTasks || {});
 
