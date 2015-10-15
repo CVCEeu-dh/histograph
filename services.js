@@ -204,7 +204,9 @@ module.exports = {
         }
         // FLATTEN YAGO entities by providing only entitites having "best entity"
         if(!body.mentions) {
-          console.log(body)  
+          console.log(body);
+          next(null, []);
+          return;
         }
         
         var entities = body.mentions.filter(function (d) {
