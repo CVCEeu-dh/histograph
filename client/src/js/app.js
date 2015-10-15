@@ -39,7 +39,8 @@ angular
     API_PARAMS_CHANGED: 'api_params_changed',
     PAGE_CHANGED: 'page_changed',
     ANNOTATOR_SHOWN: 'annotationEditorShown',
-    ANNOTATOR_HIDDEN: 'annotationEditorHidden'
+    ANNOTATOR_HIDDEN: 'annotationEditorHidden',
+    INFINITE_SCROLL: 'infinite_scroll'
   })
   .constant("VIZ", {
     TIMELINE: 'timeline'
@@ -235,12 +236,13 @@ angular
             relatedFactory: function(ResourceRelatedFactory) {
               return ResourceRelatedFactory
             },
-            resources: function(ResourceRelatedFactory, $stateParams) {
-              return ResourceRelatedFactory.get({
+            resources: function(ResourceRelatedFactory, $stateParams, $location) {
+              // console.log('state params', $stateParams, )
+              return ResourceRelatedFactory.get(angular.extend({
                 id: $stateParams.id,
                 model: 'resource',
                 limit: 10
-              }).$promise;
+              }, $location.search())).$promise;
             },
           }
         })

@@ -542,7 +542,7 @@ a#header-logo img{
 
 .toolbar .wrapper{
   text-align: center;
-  padding: 20px 0 0 0;
+  padding: 10px 0 10px 0;
   border-bottom: 1px solid #e8e8e8;
   margin: 0 10px
 }
@@ -1188,7 +1188,9 @@ li.CodeMirror-hint-active {
   padding: 10px 30px 5px 15px;
   line-height: 20px;
   position:relative;
-  display: block
+  display: block;
+  color: #151515;
+  font-size: 12px;
 }
 
 .dropdown-menu li.active{

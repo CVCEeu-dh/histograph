@@ -104,6 +104,10 @@ angular.module('histograph')
       $scope.relatedItems = relatedItems;
     };
     
+    $scope.addRelatedItems = function(relatedItems) {
+      $log.log('CoreCtrl > addRelatedItems', relatedItems.length);
+      $scope.relatedItems = ($scope.relatedItems || []).concat(relatedItems);
+    }
     
     $scope.relatedPage = 1;
     $scope.relatedCount = 0; // total number of items
@@ -120,9 +124,13 @@ angular.module('histograph')
       });
     }
     
+    $scope.addMoreItems = function() {
+      $log.log('CoreCtrl > addMoreItems');
+      $scope.$broadcast(EVENTS.INFINITE_SCROLL);
+    }
+    
     /*
       language handlers
-      Please cehck that each controller clean or replace this list
     */
     $scope.language = 'en';
     
@@ -132,6 +140,61 @@ angular.module('histograph')
     
     $scope.setLanguage = function(lang) {
       $scope.language = lang
+    }
+    
+    
+    /*
+      sorting order handlers.
+      In children controllers, use setAvailableSortings to update the list.
+    */
+    
+    
+    $scope.availableSortings = [
+      {
+        label: 'relevance',
+        value: 'relevance'
+      }, {
+        label: 'date (closest)',
+        value: '-date'
+      }
+    ];
+    
+    $scope.sorting = $scope.availableSortings[0];
+    
+    $scope.setAvailableSortings = function(availableSortings) {
+      $scope.availableSortings = availableSortings;
+    };
+    
+    $scope.setSorting = function(sorting) {
+      $scope.sorting = sorting;
+      if(sorting.value == 'relevance')
+        $location.search('orderby', null);
+      else
+        $location.search('orderby', sorting.value)
+    }
+    
+    /*
+      choose multiple mimetype handlers.
+      In children controllers, use setAvailableSortings to update the list.
+    */
+    $scope.mimetype = 'all documents';
+    $scope.availableMimetypes = [
+      {
+        label: 'images',
+        checked: false,
+      },
+      {
+        label: 'texts',
+        checked: false
+      }
+    ];
+    
+    $scope.setAvailableMimetypes = function(availableMimetypes) {
+      $scope.availableMimetypes = availableMimetypes;
+    };
+    
+    $scope.setMimetype = function(mimetype) {
+      $scope.mimetype = mimetype;
     }
     
     /**
