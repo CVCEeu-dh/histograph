@@ -147,6 +147,11 @@ module.exports = {
           next(err);
           return;
         }
+        if(!body.response) {
+          console.log(body)
+          next(null, []);
+          return
+        }
         // console.log(form, 'body', body.response)
         next(null, body.response.entities || []);
       })
