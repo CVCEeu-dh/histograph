@@ -167,16 +167,16 @@ describe('controller:resource (related entities)', function() {
 
 
 describe('controller:resource (related resources)', function() {
-  it('should show a list of 10 related resources', function (done) {
+  it('should show a list of 10 related letters, if any', function (done) {
     session
-      .get('/api/resource/'+ __resourceA.id +'/related/resource?limit=10')
+      .get('/api/resource/'+ __resourceA.id +'/related/resource?limit=10&ecmd=letter')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
         if(err)
           console.log(err)
         should.not.exists(err);
-        // console.log(res.body.result)
+        console.log(res.body.info)
         should.exist(res.body.result.items);
         done();
       });

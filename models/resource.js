@@ -432,11 +432,7 @@ module.exports = {
         count_items: rQueries.count_similar_resource_ids_by_entities,
         items: rQueries.get_similar_resource_ids_by_entities
       },
-      params: {
-        id: +params.id,
-        limit: +params.limit || 10,
-        offset: +params.offset || 0
-      }
+      params: params
     }, function (err, results) {
       if(err) {
         console.log(err)
@@ -477,10 +473,8 @@ module.exports = {
         return;
       }
       next(null, results.items, {
-          total_items : results.count_items
-        });
-     
-      
+        total_items : results.count_items,
+      });
     }); 
     
   },

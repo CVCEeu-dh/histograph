@@ -148,6 +148,32 @@ module.exports = {
       error: 'should be something like image, text or video'
     },
     {
+      field: 'ecmd',
+      check: 'includedIn',
+      args: [
+        [
+          'external_text',
+          'picture',
+          'press',
+          'video',
+          'cartoon',
+          'facts',
+          'letter',
+          'facsimile',
+          'treaty',
+          'sound',
+          'table',
+          'article',
+          'schema',
+          'map',
+          'graphical_table',
+          'scientific_contribution',
+          'passport'
+        ]
+      ],
+      error: 'should be something like picture, press or video'
+    },
+    {
       field: 'from',
       check: 'matches',
       args: [
@@ -294,6 +320,10 @@ module.exports = {
       safeParams.end_date = moment.utc(params.to,'YYYY-MM-DD', true);
       safeParams.end_time = +safeParams.end_date.format('X');
     };
+    
+    if(params.ecmd) {
+      safeParams.ecmd = 'ECMD_' + params.ecmd.toUpperCase()
+    }
     
     if(next)
       next(null, safeParams);

@@ -177,9 +177,22 @@ WITH res
 
 // name: count_similar_resource_ids_by_entities
 // get top 100 similar resources sharing the same persons, orderd by time proximity if this info is available
-MATCH (res:resource)-[:appears_in*2]-(e)
+MATCH (res:resource)-[:appears_in*2]-(res2:resource)
 WHERE id(res) = {id}
-RETURN count(DISTINCT(e)) as count_items
+  {if:mimetype}
+  AND res2.mimetype = {mimetype}
+  {/if}
+  {if:ecmd}
+  AND res2.ecmd = {ecmd}
+  {/if}
+  {if:start_time}
+  AND res2.start_time >= {start_time}
+  {/if}
+  {if:end_time}
+  AND res2.end_time >= {end_time}
+  {/if}
+  AND id(res) <> id(res2)
+RETURN count(DISTINCT(res2)) as count_items
 
 
 // name: get_similar_resource_ids_by_entities_v1
@@ -213,6 +226,9 @@ MATCH (res1:resource)<-[r1:appears_in]-(ent:entity)-[r2:appears_in]->(res2:resou
     AND ent.score > -1
     {if:mimetype}
     AND res2.mimetype = {mimetype}
+    {/if}
+    {if:ecmd}
+    AND res2.ecmd = {ecmd}
     {/if}
     {if:start_time}
     AND res2.start_time >= {start_time}
@@ -589,9 +605,24 @@ RETURN t, weight
 //
 MATCH (res:resource)<-[:appears_in]-(ent:entity)
 WHERE id(res) = {id}
+  
 WITH ent
 MATCH (res:resource)<-[:appears_in]-(ent)
 WHERE has(res.start_month)
+  {if:mimetype}
+  AND res.mimetype = {mimetype}
+  {/if}
+  {if:ecmd}
+  AND res.ecmd = {ecmd}
+  {/if}
+  {if:start_time}
+  AND res.start_time >= {start_time}
+  {/if}
+  {if:end_time}
+  AND res.end_time >= {end_time}
+  {/if}
+
+  
 WITH  res.start_month as tm, min(res.start_time) as t, count(res) as weight
 RETURN tm, t, weight
 ORDER BY tm ASC
