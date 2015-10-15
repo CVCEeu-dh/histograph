@@ -118,7 +118,8 @@ angular.module('histograph')
     */
     $scope.totalItems  = resources.info.total_items;
     $scope.limit       = 10;
-    $scope.page        = 1;
+    $scope.offset      = 0;
+    $scope.page        = 1; // always first page!!
     
     $log.debug('ResourcesCtrl ready');
     /*
@@ -141,16 +142,19 @@ angular.module('histograph')
     /*
       Reload related items, with filters.
     */
-    $scope.sync = function(params) {
+    $scope.sync = function() {
       $scope.loading = true;
-      relatedFactory.get({
+      relatedFactory.get(angular.extend({
         id: $stateParams.id,
         model: 'resource',
-        limit: 10,
-        offset: ($scope.page-1) * 10
-      }, function (res) {
+        limit: $scope.limit,
+        offset: $scope.offset
+      }, $scope.params), function (res) {
         $scope.loading = false;
-        $scope.setRelatedItems(res.result.items);
+        if($scope.offset > 0)
+          $scope.addRelatedItems(res.result.items);
+        else
+          $scope.setRelatedItems(res.result.items);
       }) 
     };
     /*
@@ -158,12 +162,21 @@ angular.module('histograph')
       some query parameter has changed, reload the list accordingly.
     */
     $scope.$on(EVENTS.API_PARAMS_CHANGED, function() {
+      // reset offset
+      $scope.offset = 0;
       $log.debug('ResourcesCtrl @API_PARAMS_CHANGED', $scope.params);
       $scope.sync();
     });
-    $scope.$on(EVENTS.PAGE_CHANGED, function(e, params) {
-      $log.debug('ResourcesCtrl @PAGE_CHANGED', params);
-      $scope.page = params.page
-      $scope.sync(params);
+    // $scope.$on(EVENTS.PAGE_CHANGED, function(e, params) {
+    //   $log.debug('ResourcesCtrl @PAGE_CHANGED', params);
+    //   $scope.page = params.page
+    //   $scope.sync();
+    // });
+    
+    $scope.$on(EVENTS.INFINITE_SCROLL, function (e) {
+      $scope.offset = $scope.offset + $scope.limit;
+      $log.debug('ResourcesCtrl @INFINITE_SCROLL', '- skip:',$scope.offset,'- limit:', $scope.limit);
+      
+      $scope.sync();
     });
   })
