@@ -21,9 +21,13 @@ gulp.task('jshint', function() {
 gulp.task('templates', function () {
   return gulp.src('./client/src/templates/**/*.html')
     .pipe($.templatecache({
-      module: 'histograph'
+      module: 'histograph',
+      transformUrl: function(url) {
+        return 'templates/' + url;
+      }
     }))
-    .pipe(gulp.dest('./client/src/js'));
+    .pipe(gulp.dest('./client/src/js'))
+    .pipe($.size({templates: 'js'}))
 });
 
 
