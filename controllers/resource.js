@@ -187,12 +187,13 @@ module.exports = function(io){
       validator.queryParams(req.query, function (err, params, warnings) {
         if(err)
           return helpers.formError(err, res);
-        var query = parser.agentBrown(queries.get_filtered_cooccurrences, params);
+        // var query = parser.agentBrown(queries.get_filtered_cooccurrences, params);
+        var query = parser.agentBrown(queries.get_cooccurrences, params);
         // console.log('query', query)
         
         helpers.cypherGraph(query, {
           offset: 0,
-          limit: 500,
+          limit: 100,
           start_time: params.start_time,
           end_time: params.end_time
         }, function (err, graph) {
@@ -440,8 +441,7 @@ module.exports = function(io){
         return res.ok({
           timeline: timeline
         }, {
-          params: params,
-          warnings: warnings
+          params: form.params
         });
       })
     },

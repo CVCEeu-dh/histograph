@@ -250,7 +250,9 @@ DELETE r
 // https://stackoverflow.com/questions/33083491/how-to-get-a-unique-set-of-node-pairs-for-undirected-relationships/33084035#33084035
 MATCH (p1: person)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2: person)
 WHERE id(p1) < id(p2)
+// WITH r1, r2, p1, p2, count(*) as intersection
 WITH p1, p2, count(*) as intersection
+
 MATCH (p1)-[rel:appears_in]->(r1:resource)
 WITH p1,p2, intersection, count(rel) as H1
 MATCH (p2)-[rel:appears_in]->(r1:resource)
