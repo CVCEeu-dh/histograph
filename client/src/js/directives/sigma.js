@@ -65,7 +65,7 @@ angular.module('histograph')
         var cutat = function (text, cutAt) {
           var t = text.substr(0, cutAt);
           //re-trim if we are in the middle of a word
-          if(t.length > cutAt)
+          if(text.length > cutAt)
             t = t.substr(0, Math.min(t.length, t.lastIndexOf(' '))) + ' ...';
           return t
         }  
@@ -228,7 +228,7 @@ angular.module('histograph')
             rescale();
             si.refresh();
             play(); 
-          }, 1000);
+          }, 100);
           
         });
         
@@ -354,7 +354,7 @@ angular.module('histograph')
         /*
           listener outNode
         */
-        si.bind('outEdge outNode', function(e) {
+        si.bind('outNode', function(e) {
           
           // if(e.data.edge && (tooltip.node == e.data.edge.source || tooltip.node == e.data.edge.target )) {
           //   return; // i.e, the overnode is thrown before the corresponding outEdge event.
@@ -446,7 +446,7 @@ angular.module('histograph')
         function rescale() {
           sigma.misc.animation.camera(
             si.cameras.main,
-            {x: 0, y: 0, angle: 0, ratio: 1.618},
+            {x: 0, y: 0, angle: 0, ratio: 1.0618},
             {duration: 150}
           );
         };
