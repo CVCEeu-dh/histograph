@@ -94,8 +94,8 @@ html
                 a(ng-href='/auth/google?next={{locationPath}}', class='btn btn-default expanded') login with google 
                   i(class='fa fa-google-plus')
       else
-        div(class='view {{currentCtrl}} {{currentState|humanizeState}} {{queueStatus}} viewpoint-{{viewpoint.selected.name}}')
-          div(ui-view='', autoscroll='true')
+        div(class='view {{currentCtrl}} {{currentState|humanizeState}} {{queueStatus}} viewpoint-{{viewpoint.selected.name}}', infinite-scroll='addMoreItems()', infinite-scroll-collection='relatedItems')
+          div(ui-view='')
         
         div#milkyway(sigma, graph='graph', freeze='freeze' tips='headers.graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentState|humanizeState}} {{queueStatus}} viewpoint-{{viewpoint.selected.name}}', controller='currentCtrl' redirect='redirect(path)', queue="addToQueue(items)")
         
