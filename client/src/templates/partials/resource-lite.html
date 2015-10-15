@@ -1,5 +1,5 @@
 <div class="related">
-  <div class="type"><i class="fa fa-circle type resource"></i> {{relatedItem.props.mimetype}}</div>
+  <div class="type"><i class="fa fa-circle type resource"></i> {{relatedItem.props.ecmd|ecmd}} - {{relatedItem.props.mimetype}} {{$index + 1}}/{{totalItems}}</div>
   <h4>
     <a href='#/r/{{relatedItem.id}}' ng-bind-html='relatedItem.props | title : language'></a>
   </h4>

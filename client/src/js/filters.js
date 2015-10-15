@@ -26,6 +26,20 @@ angular.module('histograph')
     };
   })
   /*
+    Transform ECMD categories into human readable ones (if any) _PRESS 
+  */
+  .filter('ecmd', function() {
+    return function (input) {
+      if(!input || !input.length) {
+        return '';
+      }
+      var categories = {
+        ECMD_PRESS : 'press'
+      }
+      return categories[input] || input.toLowerCase().replace('ecmd_', '').replace(/_/g, ' ');
+    };
+  })
+  /*
     given an object with start_date and end_date ISO object,
     return the humanified delta between a second start_date end_date object.
     Improved with momentjs.
