@@ -94,10 +94,7 @@ module.exports = function(io){
         return helpers.formError(form.errors, res);
 
       Resource.getMany(form.params, function (err, items, info) {
-        return helpers.models.getMany(err, res, items, {
-          params: form.params,
-          total_items: info.total_items
-        });
+        helpers.models.getMany(err, res, items, info, form.params);
       });
     },
 
@@ -108,18 +105,16 @@ module.exports = function(io){
     */
     getRelatedItems: function (req, res) {
       var form = validator.request(req, {
-            limit: 50,
+            limit: 10,
             offset: 0
           });
-      
+      // validate orderby
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       // get the total available
       // console.log(form.params)
       Resource.getRelatedResources(form.params, function (err, items, info) {
-        if(err)
-          return helpers.cypherQueryError(err, res);
-        return res.ok({items: items}, info);
+        helpers.models.getMany(err, res, items, info, form.params);
       });
     },
     
@@ -137,9 +132,7 @@ module.exports = function(io){
         return helpers.formError(form.errors, res);
      
       Resource.getRelatedEntities(form.params, function (err, items, info) {
-        if(err)
-          return helpers.cypherQueryError(err, res);
-        return res.ok({items: items}, info);
+        helpers.models.getMany(err, res, items, info, form.params);
       });
     },
     

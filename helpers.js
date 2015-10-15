@@ -42,14 +42,14 @@ module.exports = {
         item: item
       }, info || {});
     },
-    getMany: function (err, res, items, info) {
+    getMany: function (err, res, items, info, params) {
       if(err && err != IS_EMPTY)
         return module.exports.cypherQueryError(err, res);
-      return res.ok({
-        items: items || []
-      }, info);
+      res.ok({
+        items: items
+      }, _.assign(info || {}, params || {}));
     }
-  }, 
+  },
   /**
     Handle causes and stacktraces provided by seraph
     @err the err string provided by cypher
