@@ -39,7 +39,7 @@
   </ul>
 </div>
 
-<div ui-view id='see-also'>
+<div ui-view id='see-also' >
   <div  class='{{currentCtrl}}' ng-cloak>
     <div ng-include src="'templates/partials/resource-toolbar.html'"></div>
     
@@ -47,7 +47,7 @@
       There are no related <i>documents</i>.
     </div>
     <div class="{{loading? 'animated fadeOut': 'animated fadeIn'}}" style="-webkit-animation-delay: {{$index * 100}}ms;
-      animation-delay: {{$index * 100}}ms"  ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/resource-lite.html"'></div>
+    animation-delay: {{$index * 100}}ms"  ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/resource-lite.html"'></div>
   </div>
   
 </div>

@@ -2,7 +2,32 @@
   <!-- <h2>{{totalItems}} {{pagetitle}}</h2> -->
   <!-- {{params}} -->
   <div class="wrapper">
-  <pagination boundary-links="true" total-items="totalItems" items-per-page="limit" ng-model="currentPage" class="pagination-sm" max-size="4" previous-text="&lsaquo;" rotate="true" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;" ng-change='setPage(currentPage)'></pagination>
+  <!-- <pagination boundary-links="true" total-items="totalItems" items-per-page="limit" ng-model="currentPage" class="pagination-sm" max-size="4" previous-text="&lsaquo;" rotate="true" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;" ng-change='setPage(currentPage)'></pagination> -->
+    <div class="btn-group" uib-dropdown is-open="false">
+      <button id="single-button" type="button" class="btn btn-default" uib-dropdown-toggle>
+        {{mimetype}} <span class="caret"></span>
+      </button>
+      <ul class="uib-dropdown-menu dropdown-menu" role="menu" aria-labelledby="single-button">
+        <li ng-repeat="item in availableMimetypes">
+          <span class="checkbox">
+          <label>
+            <input type="checkbox"> {{item.label}}
+          </label>
+          </span>
+        </li>
+      </ul>
+    </div>
+    <!-- Single button -->
+    <div class="btn-group" uib-dropdown is-open="false">
+      <button id="single-button" type="button" class="btn btn-default" uib-dropdown-toggle>
+        by {{sorting.label}} <span class="caret"></span>
+      </button>
+      <ul class="uib-dropdown-menu dropdown-menu" role="menu" aria-labelledby="single-button">
+        <li class="{{sorting==item?'active':''}}" ng-repeat="item in availableSortings">
+          <a ng-click='setSorting(item)'>by {{item.label}}</a>
+        </li>
+      </ul>
+    </div>
   </div>
   
 </div>
