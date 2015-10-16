@@ -363,9 +363,11 @@ module.exports = {
           Resource.discover({
             id: node.id
           }, function (err, res) {
-            if(err)
-              throw err;
-            
+            if(err) {
+              q.kill();
+              next(err);
+              return; 
+            }
             res.discovered = true;
             neo4j.save(res, function (err, n) {
               if(err)
