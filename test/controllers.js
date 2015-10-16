@@ -370,7 +370,7 @@ describe('controllers: get resource items available to the user', function() {
   
   it('should get a single resource MONOPARTITE graph object', function (done) {
     session
-      .get('/api/resource/'+__resourceA.id+'/related/resource/graph?type=monopartite-entity')
+      .get('/api/resource/'+__resourceA.id+'/related/resource/graph?graphtype=monopartite-entity')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
@@ -539,8 +539,8 @@ describe('controllers: issues', function() {
       })
       .expect('Content-Type', /json/)
       .end(function (err, res) {
-        if(err)
-          console.log(err);
+        should.not.exist(err);
+        console.log(res.body)
         should.exist(res.body.result.item);
         done()
       });
@@ -971,13 +971,13 @@ describe('controllers: play with entities', function() {
   });
   it('should get a single entity MONOPARTITE graph object', function (done) {
     session
-      .get('/api/entity/'+__entity.id+'/related/person/graph?type=monopartite-entity')
+      .get('/api/entity/'+__entity.id+'/related/person/graph?graphtype=monopartite-entity')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
-        if(err)
-          console.log('ERROR', err);
         should.not.exist(err);
+        if(res.body.status=='error')
+          console.log('ERROR', res.body);
         
         should.exist(res.body.result.graph);
         done()
@@ -1039,7 +1039,8 @@ describe('controllers: test cypher error message: ', function() {
   });
   
   it('should not fail ...? undefined parameters ... expect to change on next version of seraph?', function (done) {
-    neo4j.query('MATCH (x:y) WHERE x.d = {d} RETURN x', {},function (err, node) {
+    neo4j.query('MATCH (x:y) WHERE id(x) = {d} RETURN x', {}, function (err, node) {
+      // Neo.ClientError.Statement.ParameterMissing
       done();
     });
   });

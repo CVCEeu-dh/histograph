@@ -217,6 +217,8 @@ describe('controller:resource (related resources)', function() {
       });
   });
   
+  
+  
   it('should show the graph of 10 related resources', function (done) {
     session
       .get('/api/resource/'+ __resourceA.id +'/related/resource/graph')
@@ -267,6 +269,7 @@ describe('controller:resource (related resources)', function() {
         done();
       });
   });
+  
 })
 
 
