@@ -44,9 +44,16 @@ ON CREATE SET
   {if:lng}
     ent.lng         = {lng},
   {/if}
+  {if:country}
+    ent.country         = {country},
+  {/if}
   {if:geoname_id}
     ent.geoname_id   = {geoname_id},
+  {/if}
+  {if:geoname_fcl}
     ent.geoname_fcl  = {geoname_fcl},
+  {/if}
+  {if:geoname_country}
     ent.geoname_country  = {geoname_country},
   {/if}
   {if:geocoding_id}
@@ -63,9 +70,16 @@ ON MATCH SET
   {if:lng}
     ent.lng         = {lng},
   {/if}
+  {if:country}
+    ent.country         = {country},
+  {/if}
   {if:geoname_id}
     ent.geoname_id   = {geoname_id},
+  {/if}
+  {if:geoname_fcl}
     ent.geoname_fcl  = {geoname_fcl},
+  {/if}
+  {if:geoname_country}
     ent.geoname_country  = {geoname_country},
   {/if}
   {if:geocoding_id}
