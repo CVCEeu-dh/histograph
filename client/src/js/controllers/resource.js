@@ -117,16 +117,27 @@ angular.module('histograph')
       set pagination
     */
     $scope.totalItems  = resources.info.total_items;
-    $scope.limit       = 10;
-    $scope.offset      = 0;
-    $scope.page        = 1; // always first page!!
+    $scope.limit       = resources.info.limit;
+    $scope.offset      = resources.info.offset;
+    // $scope.page        = 1; // always first page!!
+    
+    /*
+      set order by
+      according to the favourite orderby. Avoid default values.
+    */
+    if(resources.info.orderby != 'relevance')
+      $scope.setSorting(resources.info.orderby);
+    
+    /*
+      set facets
+    */
+    $scope.setAvailableGroups(resources.info.groups);
     
     $log.debug('ResourcesCtrl ready');
     /*
       Load graph data
     */
-    relatedVizFactory
-    .get({
+    relatedVizFactory.get({
       id: $stateParams.id,
       model: 'resource',
       type: 'graph',
@@ -151,10 +162,14 @@ angular.module('histograph')
         offset: $scope.offset
       }, $scope.params), function (res) {
         $scope.loading = false;
+        $scope.offset  = res.info.offset;
+        $scope.limit   = res.info.limit;
         if($scope.offset > 0)
           $scope.addRelatedItems(res.result.items);
         else
           $scope.setRelatedItems(res.result.items);
+        // reset if needed
+        $scope.setAvailableGroups(res.info.groups);
       }) 
     };
     /*

@@ -135,6 +135,8 @@ a#header-logo img{
 .item{
   max-width: 460px;
   margin: 0 auto 100px auto;
+  font-size: 13px;
+    line-height: 21px;
 }
 
 .item h3>span{
@@ -152,6 +154,12 @@ a#header-logo img{
 
 .item .caption a[gasp-type='location'], .item h3 a[gasp-type='location'] {
   border-bottom: 2px solid #0093a6
+}
+
+.item blockquote {
+  font-size: 13px;
+  line-height: 21px;
+  padding: 12px 15px;
 }
 
 .item img{
@@ -566,6 +574,19 @@ a#header-logo img{
   color: white;
   padding: 3px 6px;
   margin: 10px 5px 10px 5px;
+}
+
+.toolbar .dropdown-menu {
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.toolbar .dropdown-menu>li>a{
+  font-size:12px;
+  line-height: 18px
+}
+.toolbar .dropdown-menu>li>a:hover {
+  border-bottom: 0px transparent;
 }
 
 .viewpoint-read #see-also .toolbar{
@@ -1180,11 +1201,11 @@ li.CodeMirror-hint-active {
   ~~~~~~~~~~~~
 
 */
-.dropdown-menu{
+#search-field .dropdown-menu{
   max-width: 100%;
     
 }
-.dropdown-menu li{
+#search-field .dropdown-menu li{
   padding: 10px 30px 5px 15px;
   line-height: 20px;
   position:relative;
@@ -1193,25 +1214,25 @@ li.CodeMirror-hint-active {
   font-size: 12px;
 }
 
-.dropdown-menu li.active{
+#search-field .dropdown-menu li.active{
   background-color: #E8E8E7;
 }
 
-.dropdown-menu li a{
+#search-field .dropdown-menu li a{
   font-size:12px;
   line-height: 20px;
   white-space: normal;
   color: #777777;
 }
 
-.dropdown-menu li span{
+#search-field .dropdown-menu li span{
   position: absolute;
   right: 10px;
   top: 50%;
   margin-top: -10px;
 }
 
-.dropdown-menu>li>a:hover{
+#search-field .dropdown-menu>li>a:hover{
   border: 0px transparent;
 }
 

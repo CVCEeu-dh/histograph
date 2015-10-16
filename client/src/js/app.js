@@ -50,6 +50,18 @@ angular
     LOADED: 'loaded',
     AUTH_REQUIRED: 'please connect with your credentials'
   })
+  .constant("ORDER_BY", {
+    RELEVANCE: {
+      label: 'relevance',
+      value: 'relevance'
+    },
+    
+    CLOSEST_DATE: {
+      label: 'date (closest)',
+      value: '-date'
+    }
+    
+  })
   /*
     Local-storage module config. cfr
     https://github.com/grevory/angular-local-storage

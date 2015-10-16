@@ -8,7 +8,7 @@
  */
 angular.module('histograph')
   
-  .controller('CoreCtrl', function ($scope, $rootScope, $location, $state, $timeout, $route, $log, $timeout, $http, $routeParams, $modal, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, localStorageService, EVENTS, VIZ, MESSAGES) {
+  .controller('CoreCtrl', function ($scope, $rootScope, $location, $state, $timeout, $route, $log, $timeout, $http, $routeParams, $modal, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, localStorageService, EVENTS, VIZ, MESSAGES, ORDER_BY) {
     $log.debug('CoreCtrl ready');
     $scope.locationPath = $location.path(); 
     
@@ -150,27 +150,53 @@ angular.module('histograph')
     
     
     $scope.availableSortings = [
-      {
-        label: 'relevance',
-        value: 'relevance'
-      }, {
-        label: 'date (closest)',
-        value: '-date'
-      }
+      ORDER_BY.RELEVANCE,
+      ORDER_BY.CLOSEST_DATE
     ];
     
-    $scope.sorting = $scope.availableSortings[0];
+    $scope.sorting = ORDER_BY.RELEVANCE;
     
     $scope.setAvailableSortings = function(availableSortings) {
       $scope.availableSortings = availableSortings;
     };
     
     $scope.setSorting = function(sorting) {
+      if(typeof sorting == 'string') {
+        var sorting = _.first(_.filter(ORDER_BY, {value: sorting}));
+        if(sorting) {
+          $scope.sorting = sorting;
+          $location.search('orderby', sorting.value)
+        }
+        return;
+      }
       $scope.sorting = sorting;
       if(sorting.value == 'relevance')
         $location.search('orderby', null);
       else
         $location.search('orderby', sorting.value)
+    }
+    
+    /*
+      choose multiple ecmd
+      aka category.
+      Gruop MUST be shipped with label, value and count_items
+    */
+    $scope.groups = []; // chose groups...
+    $scope.availableGroups = []
+    $scope.setAvailableGroups = function(availableGroups) {
+      $scope.availableGroups = availableGroups;
+    };
+    // array of groups
+    $scope.setGroups = function(groups) {
+      $scope.groups = groups;
+    }
+    // add a single 
+    $scope.addGroup = function(group) {
+      $scope.groups.push(group);
+    }
+    $scope.removeGroup = function(group) {
+      // remove a specific group from the set
+      $scope.groups = [];
     }
     
     /*
