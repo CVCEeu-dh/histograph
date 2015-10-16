@@ -180,10 +180,10 @@ WITH res
 MATCH (res:resource)-[:appears_in*2]-(res2:resource)
 WHERE id(res) = {id}
   {if:mimetype}
-  AND res2.mimetype = {mimetype}
+  AND res2.mimetype IN {mimetype}
   {/if}
-  {if:ecmd}
-  AND res2.ecmd = {ecmd}
+  {if:type}
+  AND res2.type IN {type}
   {/if}
   {if:start_time}
   AND res2.start_time >= {start_time}
@@ -192,7 +192,10 @@ WHERE id(res) = {id}
   AND res2.end_time >= {end_time}
   {/if}
   AND id(res) <> id(res2)
-RETURN count(DISTINCT(res2)) as count_items
+RETURN {
+  group: {if:group}res2.{:group}{/if}{unless:group}res2.type{/unless}, 
+  count_items: count(DISTINCT(res2))
+} // count per ecmd
 
 
 // name: get_similar_resource_ids_by_entities_v1
