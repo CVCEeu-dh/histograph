@@ -262,6 +262,8 @@ RETURN {
 } as result
 {if:orderby}
   ORDER BY {:orderby}
+  SKIP {offset}
+  LIMIT {limit}
 {/if}
 
 // name: add_comment_to_resource

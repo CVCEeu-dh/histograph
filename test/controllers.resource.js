@@ -115,6 +115,24 @@ describe('controller:resource', function() {
         done();
       });
   });
+  
+  it('should show a list of 20 resources from a specific date', function (done) {
+    session
+      .get('/api/resource?limit=20&from=1988-01-01&to=1989-01-03')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exists(err);
+        // console.log(res.body.info)
+        //console.log(_.map(res.body.result.items, function(d){return d.props.start_date}))
+        should.equal(res.body.info.limit, 20)
+        should.equal(res.body.info.start_date, '1988-01-01T00:00:00.000Z');
+        should.equal(res.body.info.end_date, '1989-01-03T00:00:00.000Z');
+        should.equal(res.body.info.start_time, 567993600);
+        
+        done();
+      });
+  });
 })
 
 describe('controller:resource (related users)', function() {
@@ -169,15 +187,32 @@ describe('controller:resource (related entities)', function() {
 describe('controller:resource (related resources)', function() {
   it('should show a list of 10 related letters, if any', function (done) {
     session
-      .get('/api/resource/'+ __resourceA.id +'/related/resource?limit=10&ecmd=letter')
+      .get('/api/resource/'+ __resourceA.id +'/related/resource?limit=13&ecmd=letter')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
-        if(err)
-          console.log(err)
         should.not.exists(err);
-        console.log(res.body.info)
         should.exist(res.body.result.items);
+        should.equal(res.body.info.limit, 13);
+        should.exist(res.body.info.ecmd);
+        should.equal(res.body.info.id, __resourceA.id);
+        should.equal(res.body.info.orderby, 'relevance');
+        done();
+      });
+  });
+  
+  it('should show a list of 10 related letters, if any, sorted by date', function (done) {
+    session
+      .get('/api/resource/'+ __resourceA.id +'/related/resource?limit=10&ecmd=letter&orderby=date')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exists(err);
+        should.exist(res.body.result.items);
+        should.equal(res.body.info.limit, 10);
+        should.exist(res.body.info.ecmd);
+        should.equal(res.body.info.id, __resourceA.id);
+        should.equal(res.body.info.orderby, 'date');
         done();
       });
   });
@@ -209,7 +244,8 @@ describe('controller:resource (related resources)', function() {
         if(err)
           console.log(err)
         should.not.exists(err);
-        console.log(res.body.result)
+        should.exist(res.body.result.timeline)
+        // console.log(res.body.result)
         
         done();
       });

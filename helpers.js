@@ -51,23 +51,6 @@ module.exports = {
     }
   },
   /**
-    Handle causes and stacktraces provided by seraph
-    @err the err string provided by cypher
-    @res the express response object
-  */
-  cypherError: function(err, res) {
-    if(err && err.message) {
-        var result = JSON.parse(err.message);
-
-        if(result.cause)
-          return res.error(400, result.cause);
-
-        return res.error(500, result);
-    }
-    return res.error(400, err.message);
-  },
-  
-  /**
     Given a query and its cypher params, do wonderful stuff.
     The query MUST resturn a list of (source,target,weight) triads.
     @param query  - cypher query
@@ -136,24 +119,25 @@ module.exports = {
     @res the express response object
   */
   cypherQueryError: function(err, res) {
-    // for(i in err)
-    //   console.log(i)
-    // console.log('@helpers.cypherQueryError', err.neo4jException, err.statusCode, err.neo4jCause)
     switch(err.neo4jException) {
       case 'EntityNotFoundException':
-        return res.error(404, {
+        res.error(404, {
           message:  err.neo4jCause.message,
           exception: err.neo4jException
         });
         break;
       case 'ParameterNotFoundException':
-        return res.error(404, {
+        res.error(404, {
           message:  err.neo4jError.message,
           exception: err.neo4jException
         });
         break;
       default:
-        return res.error(err.statusCode, err);
+        if (err.statusCode) {
+          res.error(err.statusCode, err.neo4jError.message.message);
+        } else {
+          res.error(400, err);
+        }
     };
   },
   

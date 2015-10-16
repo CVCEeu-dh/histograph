@@ -109,10 +109,12 @@ describe('controllers: authenticate the user, but failing', function() {
         about      : '' // further info about the user, in markdown
       })
       .expect('Content-Type', /json/)
-      .expect(400)
+      .expect(500)
       .end(function (err, res) {
+        should.not.exist(err)
         should.equal(res.body.status, 'error');
-        should.equal(res.body.error.exception, 'ConstraintViolationException');
+        console.log(res.body)
+        should.equal(res.body.error.code, 500)// cannot find no more 'ConstraintViolationException');
         done();
       })
   });
@@ -248,48 +250,6 @@ describe('controllers: get resource items available to the user', function() {
       __resourceB = resource;
       done();
     });
-  });
-  
-  it('should show a list of 50 resources', function (done) {
-    session
-      .get('/api/resource')
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        should.not.exists(err);
-        //console.log(' resoucre ', res.body)
-        done();
-      });
-  });
-  
-  it('should show a list of 20 resources from a specific date', function (done) {
-    session
-      .get('/api/resource?from=1988-01-01&to=1988-01-02&limit=20')
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        should.not.exists(err);
-        should.equal(res.body.info.params.start_date, '1988-01-01T00:00:00.000Z');
-        should.equal(res.body.info.params.end_date, '1988-01-02T00:00:00.000Z');
-        should.equal(res.body.info.params.start_time, 567993600);
-        done();
-      });
-  });
-  
-  it('should show a list of 20 resources from a specific date', function (done) {
-    session
-      .get('/api/resource?from=1988-01-01&to=1989-01-03')
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        should.not.exists(err);
-        //console.log(_.map(res.body.result.items, function(d){return d.props.start_date}))
-        should.equal(res.body.info.params.start_date, '1988-01-01T00:00:00.000Z');
-        should.equal(res.body.info.params.end_date, '1989-01-03T00:00:00.000Z');
-        should.equal(res.body.info.params.start_time, 567993600);
-        
-        done();
-      });
   });
   
   
@@ -1065,3 +1025,24 @@ describe('controllers: delete the user and their relationships', function() {
   });
 
 });
+
+
+
+describe('controllers: test cypher error message: ', function() {
+  it('should fail miserably on InvalidSyntax', function (done) {
+    neo4j.query('MATCH (x:y{z:{w}}) RETURN n', function (err) {
+      should.exist(err);
+      should.exist(err.code);
+      should.exist(err.message);
+      done();
+    });
+  });
+  
+  it('should not fail ...? undefined parameters ... expect to change on next version of seraph?', function (done) {
+    neo4j.query('MATCH (x:y) WHERE x.d = {d} RETURN x', {},function (err, node) {
+      done();
+    });
+  });
+  
+})
+    

@@ -106,15 +106,34 @@ module.exports = function(io){
     getRelatedItems: function (req, res) {
       var form = validator.request(req, {
             limit: 10,
-            offset: 0
+            offset: 0,
+            orderby: 'relevance'
+          }, {
+            fields: [
+              validator.SPECIALS.orderby
+            ]
           });
+      
       // validate orderby
       if(!form.isValid)
         return helpers.formError(form.errors, res);
-      // get the total available
-      // console.log(form.params)
+      
+     
+      // if any, rewrite the order by according to this specific context
+      var _t = {
+          'date': 'result.dst DESC, result.det DESC',
+          '-date': 'result.dst ASC, result.det ASC',
+          'relevance': undefined // use default value
+        },
+        orderby = ''+form.params.orderby; // original orderby we're going to output
+      
+      
+      form.params.orderby = _t[form.params.orderby]
+      
       Resource.getRelatedResources(form.params, function (err, items, info) {
-        helpers.models.getMany(err, res, items, info, form.params);
+        helpers.models.getMany(err, res, items, info, _.assign(form.params, {
+          orderby: orderby
+        }));
       });
     },
     

@@ -101,8 +101,9 @@ module.exports = function(io) {
       });
       
       neo4j.save(user, 'user', function (err, node) {
+        // console.log(_.keys(err.neo4jError), _.keys(err), _.keys(err.neo4jError.errors))
         if(err)
-          return helpers.cypherError(err, res);
+          return helpers.cypherQueryError(err, res);
         return res.ok();
       });
     }],

@@ -62,6 +62,23 @@ function verify(form, fields, options) {
 
 module.exports = {
   /*
+    Special validation fields
+  */
+  SPECIALS: {
+    orderby: {
+      field: 'orderby',
+      check: 'includedIn',
+      args: [
+        [
+          'date',
+          '-date',
+          'relevance',
+        ]
+      ],
+      error: 'should be something like picture, press or video'
+    }
+  },
+  /*
     Common validation fields
   */
   FIELDS:[
@@ -196,14 +213,6 @@ module.exports = {
         /(with|match|create|remove|set|delete)\s/i,
       ],
       error: 'It cannot contain reserved keywords"'
-    },
-    {
-      field: 'orderby',
-      check: 'matches',
-      args: [
-        /^[,a-zA-Z_\s\.]+$/
-      ],
-      error: 'should be in the format "sortable ASC, sortable DESC"'
     }
   ],
   
