@@ -302,7 +302,11 @@ module.exports = function(io){
     */
     createIssue: function (req, res) {
       var Issue   = require('../models/issue'), 
-          form = validator.request(req);
+          form = validator.request(req, {}, {
+            fields: [
+              validator.SPECIALS.issueType
+            ]
+          });
       // console.log(form.params)
       if(!form.isValid)
         return helpers.formError(form.errors, res);
@@ -366,11 +370,11 @@ module.exports = function(io){
       var type = 'bipartite';
       
       // get the right graph
-      if(req.query.type) {
+      if(req.query.graphtype) {
         if(['monopartite-entity', 'monopartite-resource'].indexOf(req.query.type) == -1) {
-          return res.error({type: req.query.type + 'not found'});
+          return res.error({type: req.query.graphtype + 'not found'});
         }
-        type = req.query.type
+        type = req.query.graphtype
       }
       
       if(type == 'bipartite') {
@@ -403,6 +407,7 @@ module.exports = function(io){
             limit: 100,
             offset: 0
           });
+      console.log(form)
       Resource.getRelatedResourcesGraph({
         id: form.params.id
       },
