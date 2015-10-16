@@ -49,6 +49,31 @@ module.exports = {
     }
   },
   
+  /*
+    Grouping on (node).type properties
+    (facets)
+  */
+  types: {
+    resources: [
+      'external-text',
+      'picture',
+      'press',
+      'video',
+      'cartoon',
+      'facts',
+      'letter',
+      'facsimile',
+      'treaty',
+      'sound',
+      'table',
+      'article',
+      'schema',
+      'map',
+      'graphical-table',
+      'scientific-contribution',
+      'passport'
+    ]
+  },
   
   /*
 
