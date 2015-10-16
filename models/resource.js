@@ -442,9 +442,7 @@ module.exports = {
       module.exports.getByIds({
         ids: _.map(results.items, 'target')
       }, function (err, items){
-        next(null, items, {
-          total_items : results.count_items
-        });
+        next(null, items, results.count_items);
       });
       
     }); 
@@ -472,9 +470,7 @@ module.exports = {
         next(err);
         return;
       }
-      next(null, results.items, {
-        total_items : results.count_items,
-      });
+      next(null, results.items, results.count_items);
     }); 
     
   },
@@ -804,7 +800,6 @@ module.exports = {
                 nextCandidate();
                 return;
               }
-              
               var trustworthiness = .5*(candidate.trustworthiness||0) + .5*(location.trustworthiness||0);
               // if(trustworthiness >= settings.disambiguation.threshold.trustworthiness)
                 _locations.push(_.assign(candidate, location, {
@@ -846,15 +841,29 @@ module.exports = {
           //   return
           // }
           console.log(clc.blackBright('  saving', clc.yellowBright(ent.name),'as', clc.whiteBright(ent.type[0]), ent.trustworthiness,'remaining', q.length()));
+          var additionalProperties = {};
+          if(_.first(ent.type) == 'location') {
+            additionalProperties = {
+              lat: ent.lat,
+              lng: ent.lng,
+              country: ent.country,
+              geoname_id: ent.geoname_id,
+              geoname_fcl: ent.geoname_fcl,
+              geoname_country: ent.geoname_country,
+              geocoding_id: ent.geocoding_id,
+              geocoding_fcl: ent.geocoding_fcl,
+              geocoding_country: ent.geocoding_country
+            }
+          }
           
-          module.exports.createRelatedEntity(resource, {
+          module.exports.createRelatedEntity(resource, _.assign(additionalProperties, {
             name: ent.name,
             type: _.first(ent.type),
             services: ent.services,
             languages: ent.languages,
             frequency: ent.context.length,
             links_wiki: ent.links_wiki
-          }, function (err, entity) {
+          }), function (err, entity) {
             if(err) {
               q.kill();
               return callback(err);
