@@ -4,7 +4,8 @@
   ===
 
 */
-var YAML = require('yamljs'),
+var settings = require('./settings'),
+    YAML = require('yamljs'),
     _    = require('lodash'),
     validator  = require('validator'),
     moment     = require('moment');
@@ -76,7 +77,17 @@ module.exports = {
         ]
       ],
       error: 'should be something like picture, press or video'
-    }
+    },
+    issueType: {
+      field: 'type',
+      check: 'includedIn',
+      args: [
+        [
+          'date'
+        ]
+      ],
+      error: 'should be something like date'
+    },
   },
   /*
     Common validation fields
@@ -165,11 +176,11 @@ module.exports = {
       error: 'should be something like image, text or video'
     },
     {
-      field: 'ecmd',
+      field: 'type',
       check: 'includedIn',
       args: [
-        [
-          'external_text',
+        settings.types? settings.types.resources: [
+          'external-text',
           'picture',
           'press',
           'video',
@@ -183,8 +194,8 @@ module.exports = {
           'article',
           'schema',
           'map',
-          'graphical_table',
-          'scientific_contribution',
+          'graphical-table',
+          'scientific-contribution',
           'passport'
         ]
       ],
@@ -330,9 +341,8 @@ module.exports = {
       safeParams.end_time = +safeParams.end_date.format('X');
     };
     
-    if(params.ecmd) {
-      safeParams.ecmd = 'ECMD_' + params.ecmd.toUpperCase()
-    }
+    if(typeof safeParams.type == 'string')
+      safeParams.type = safeParams.type.split(',');
     
     if(next)
       next(null, safeParams);
