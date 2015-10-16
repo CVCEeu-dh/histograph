@@ -808,7 +808,7 @@ module.exports = {
                   name: candidate.name
                 }));
               
-              nextCandidate();
+              setTimeout(nextCandidate, 5);
               // 
             })
             

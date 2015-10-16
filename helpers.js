@@ -1107,30 +1107,32 @@ module.exports = {
   */
   dbpediaRedirect: function(link, next) {
     var links     = typeof link == 'object'? link: [link],
-        redirects = [];
+        redirects = [],
+        cache     = {};
     var q = async.queue(function (_link, nextLink) {
-      // console.log('link', _link, q.length())
+      if(cache[_link]) {
+        console.log('skipping, already analyzed');
+        redirects.push(cache[_link]);
+        nextLink();
+        return;
+      }
+      
       services.dbpedia({
         link: _link,
         followRedirection: false
       }, function (err, wiki) {
+        var redirection = {};
         if(err) {
-          redirects.push({
-            redirectOf: undefined
-          });
+          redirection.redirectOf = undefined;
         } else if(_.size(wiki) == 0) {
-          redirects.push({
-            redirectOf: undefined
-          });
+          redirection.redirectOf = undefined;
         } else if(!wiki["http://dbpedia.org/resource/" + _link] || !wiki["http://dbpedia.org/resource/" + _link]["http://dbpedia.org/ontology/wikiPageRedirects"]) {
-          redirects.push({
-            redirectOf: _link
-          });
+          redirection.redirectOf = _link;
         } else {
-          redirects.push({
-            redirectOf: path.basename(_.first(wiki["http://dbpedia.org/resource/" + _link]["http://dbpedia.org/ontology/wikiPageRedirects"]).value)
-          });
+          redirection.redirectOf = path.basename(_.first(wiki["http://dbpedia.org/resource/" + _link]["http://dbpedia.org/ontology/wikiPageRedirects"]).value);
         }
+        cache[_link] = redirection;
+        redirects.push(redirection);
         setTimeout(nextLink, 5);
       });
     }, 1);
@@ -1162,7 +1164,6 @@ module.exports = {
     var aligned     = [],
         withWiki    = [],
         withoutWiki = [];
-    
     // step 1
     async.waterfall([
       //
