@@ -319,12 +319,26 @@ module.exports = {
       
       }
       
+      // autotransform stringified array in array
+      // e.g. --mimetype=[image,text]
+      // is transforemd into options.mimetype = ['image', 'text']
+      for(var i in options){
+        if(typeof options[i] != 'string')
+          continue;
+        var pseuroArray = options[i].match(/^\[([^\]]*)\]$/);
+        if(!pseuroArray)
+          continue;
+        options[i] = _.map(pseuroArray[1].split(','), _.trim);
+      }
+      
       console.log(clc.blackBright('   executing query: ', clc.magentaBright(options.cypher), '...\n'));
       
       
       query = parser.agentBrown(queries[path[1]], options);
       console.log(query)
       
+      console.log('with params')
+      console.log(options)
       
       neo4j.query(query, options, function (err, result) {
         console.log(clc.blackBright('\n   result: \n'));
