@@ -58,7 +58,7 @@ ON CREATE SET
   {/if}
   {if:geocoding_id}
     ent.geocoding_id  = {geocoding_id},
-    ent.geocoding_fcl = {geoname_fcl},
+    ent.geocoding_fcl = {geocoding_fcl},
     ent.geocoding_country = {geocoding_country},
   {/if}
   ent.creation_date = {creation_date},
@@ -84,7 +84,7 @@ ON MATCH SET
   {/if}
   {if:geocoding_id}
     ent.geocoding_id  = {geocoding_id},
-    ent.geocoding_fcl = {geoname_fcl},
+    ent.geocoding_fcl = {geocoding_fcl},
     ent.geocoding_country = {geocoding_country},
   {/if}
   ent.last_modification_date = {creation_date},
