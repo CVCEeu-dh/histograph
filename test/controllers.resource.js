@@ -111,7 +111,8 @@ describe('controller:resource', function() {
         if(err)
           console.log(err)
         should.not.exists(err);
-        
+        should.exist(res.body.info.total_items)
+        should.equal(res.body.info.offset, 0)
         done();
       });
   });
@@ -203,14 +204,15 @@ describe('controller:resource (related resources)', function() {
   
   it('should show a list of 10 related letters, if any, sorted by date', function (done) {
     session
-      .get('/api/resource/'+ __resourceA.id +'/related/resource?limit=10&ecmd=letter&orderby=date')
+      .get('/api/resource/'+__resourceA.id+'/related/resource?limit=10&type=picture&orderby=date')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
         should.not.exists(err);
+        // console.log(res.body)
         should.exist(res.body.result.items);
         should.equal(res.body.info.limit, 10);
-        should.exist(res.body.info.ecmd);
+        should.exist(res.body.info.type);
         should.equal(res.body.info.id, __resourceA.id);
         should.equal(res.body.info.orderby, 'date');
         done();

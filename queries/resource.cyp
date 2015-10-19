@@ -228,10 +228,10 @@ MATCH (res1:resource)<-[r1:appears_in]-(ent:entity)-[r2:appears_in]->(res2:resou
   WHERE id(res1) = {id}
     AND ent.score > -1
     {if:mimetype}
-    AND res2.mimetype = {mimetype}
+    AND res2.mimetype IN {mimetype}
     {/if}
-    {if:ecmd}
-    AND res2.ecmd = {ecmd}
+    {if:type}
+    AND res2.type IN {type}
     {/if}
     {if:start_time}
     AND res2.start_time >= {start_time}

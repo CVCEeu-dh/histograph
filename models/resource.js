@@ -140,9 +140,7 @@ module.exports = {
       if(err)
         next(err)
       else
-        next(null, results.items.map(module.exports.normalize), {
-          total_items : results.count_items
-        });
+        next(null, results.items.map(module.exports.normalize), results.count_items);
     });
   },
   normalize: function(node) {
