@@ -34,7 +34,7 @@ angular.module('histograph')
       Filters function for templates
     */
     $scope.removeFilter = function(key, value) {
-      $log.log('CoreCtrl -> removeFilter() - key:', key, '- value:', value)
+      $log.log('FiltersCtrl -> removeFilter() - key:', key, '- value:', value)
       var aliveFilters = _.filter(angular.copy($scope.filters[key]), function (d) {
         return (d != value)
       })
@@ -52,7 +52,9 @@ angular.module('histograph')
       if(!$scope.filters[key])
         $location.search(key, value);
       else {
-        var list = _.compact(_.map(angular.copy($scope.filters[key]).split(','), _.trim));
+        $log.log('FiltersCtrl -> addFilter() - key:', key, '- value:', value)
+        
+        var list = _.compact(_.map(angular.copy($scope.filters[key]), _.trim));
         if(list.indexOf(value) === -1) {
           list.push(value);
           $location.search(key, list.join(','));
