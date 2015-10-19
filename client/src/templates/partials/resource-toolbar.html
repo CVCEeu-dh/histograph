@@ -3,20 +3,37 @@
   <!-- {{params}} -->
   <div class="wrapper">
   <!-- <pagination boundary-links="true" total-items="totalItems" items-per-page="limit" ng-model="currentPage" class="pagination-sm" max-size="4" previous-text="&lsaquo;" rotate="true" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;" ng-change='setPage(currentPage)'></pagination> -->
-    <div class="btn-group" uib-dropdown is-open="false">
+    <span class="filters" ng-if="isFiltered">
+     
+        <!-- type -->
+        <span ng-repeat='filter in filters.type'><span class="filter">{{filter}}<span ng-click='removeFilter("type",filter)'>&nbsp;<i class="fa fa-times-circle"></i></span></span>{{!$last? ', ': ''}}</span>
+        
+        
+      
+    </span>
+    <!-- type:button -->
+    <div ng-if='!filters.type' class="btn-group" uib-dropdown is-open="false">
+      
       <button id="single-button" type="button" class="btn btn-default" uib-dropdown-toggle>
-      <span ng-if="groups.length > 0">{{groups}}</span>
-      <span ng-if="groups.length == 0">all kind of resource</span>
+      
+      <span ng-if="!isFiltered">all kind of resource</span>
        <span class="caret"></span>
       </button>
       <ul class="uib-dropdown-menu dropdown-menu" role="menu" aria-labelledby="single-button">
-        <li ng-repeat="item in availableGroups">
-          <a ng-click="addGroup(item)">
-            {{item.group|ecmd}} ({{item.count_items}})
+        <li ng-repeat="item in facets.type">
+          <a ng-click="addFilter('type', item.group)">
+            {{item.group}} ({{item.count_items}})
           </a>
         </li>
       </ul>
     </div>
+    
+    <!-- date -->
+    <span class="filters" ng-if="isFiltered">
+      <span ng-repeat='filter in filters.from'><span class="filter">{{filter}}<span ng-click='removeFilter("type",filter)'>&nbsp;<i class="fa fa-times-circle"></i></span></span></span>
+    
+      <span ng-repeat='filter in filters.to'><span class="filter">{{filter}}<span ng-click='removeFilter("type",filter)'>&nbsp;<i class="fa fa-times-circle"></i></span></span></span>
+    </span>
     <!-- Single button -->
     <div class="btn-group" uib-dropdown is-open="false">
       <button id="single-button" type="button" class="btn btn-default" uib-dropdown-toggle>

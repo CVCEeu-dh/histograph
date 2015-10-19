@@ -249,7 +249,7 @@ angular
               return ResourceRelatedFactory
             },
             resources: function(ResourceRelatedFactory, $stateParams, $location) {
-              // console.log('state params', $stateParams, )
+              
               return ResourceRelatedFactory.get(angular.extend({
                 id: $stateParams.id,
                 model: 'resource',

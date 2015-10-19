@@ -131,7 +131,7 @@ angular.module('histograph')
     /*
       set facets
     */
-    $scope.setAvailableGroups(resources.info.groups);
+    $scope.setFacets('type', resources.info.groups);
     
     $log.debug('ResourcesCtrl ready');
     /*
@@ -164,12 +164,14 @@ angular.module('histograph')
         $scope.loading = false;
         $scope.offset  = res.info.offset;
         $scope.limit   = res.info.limit;
+        $scope.totalItems = res.info.total_items;
         if($scope.offset > 0)
           $scope.addRelatedItems(res.result.items);
         else
           $scope.setRelatedItems(res.result.items);
         // reset if needed
-        $scope.setAvailableGroups(res.info.groups);
+        $scope.setFacets('type', res.info.groups);
+        
       }) 
     };
     /*

@@ -381,7 +381,7 @@ a#header-logo img{
 */
 #perspective{
   position: fixed;
-  width: 400px;
+  width: 480px;
   top:  100px;
   bottom: 50px;
   /*overflow: hidden;*/
@@ -397,7 +397,7 @@ a#header-logo img{
 }
 
 #perspective-menu{
-  width: 400px;
+  width: 480px;
 }
 
 #perspective-menu > ul{
@@ -475,12 +475,12 @@ a#header-logo img{
 */
 
 #see-also{
-  width: 360px;
-  margin-left: 390px;
+  width: 320px;
+  margin-left: 480px;
   overflow: auto;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 50px 10px 0 25px;
+  padding: 50px 10px 0 10px;
   /*border-left: 1px solid #d4d4d4;*/
   /*-webkit-transition: margin-left .3s cubic-bezier(0.65, 0.05, 0.36, 1); 
    -moz-transition: margin-left .3s cubic-bezier(0.65, 0.05, 0.36, 1);
@@ -491,7 +491,7 @@ a#header-logo img{
 #see-also-menu {
   left: 0px;
   right: 0px;
-  padding-left: 400px;
+  padding-left: 480px;
   z-index: 10;
 }
 
@@ -545,7 +545,7 @@ a#header-logo img{
   background: #f0f0f0;
   z-index: 4;
   width: 350px;
-  left: 400px;
+  left: 480px;
 }
 
 .toolbar .wrapper{
@@ -882,7 +882,7 @@ a#header-logo img{
 #milkyway{
   position: fixed;
   top: 120px;
-  left: 760px;
+  left: 840px;
   right: 20px;
   bottom: 70px;
   background: #e8e8e8;

@@ -26,7 +26,7 @@ angular.module('histograph')
         $log.info('IndexCtrl -> sync() returned', res.result.items.length, 'items');
         $scope.setRelatedItems(res.result.items);
         $scope.totalItems = res.info.total_items;
-        $scope.limit = res.info.params.limit;
+        $scope.limit = res.info.limit;
         $scope.loading = false;
       });
       

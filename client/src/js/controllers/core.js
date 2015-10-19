@@ -176,52 +176,6 @@ angular.module('histograph')
         $location.search('orderby', sorting.value)
     }
     
-    /*
-      choose multiple ecmd
-      aka category.
-      Gruop MUST be shipped with label, value and count_items
-    */
-    $scope.groups = []; // chose groups...
-    $scope.availableGroups = []
-    $scope.setAvailableGroups = function(availableGroups) {
-      $scope.availableGroups = availableGroups;
-    };
-    // array of groups
-    $scope.setGroups = function(groups) {
-      $scope.groups = groups;
-    }
-    // add a single 
-    $scope.addGroup = function(group) {
-      $scope.groups.push(group);
-    }
-    $scope.removeGroup = function(group) {
-      // remove a specific group from the set
-      $scope.groups = [];
-    }
-    
-    /*
-      choose multiple mimetype handlers.
-      In children controllers, use setAvailableSortings to update the list.
-    */
-    $scope.mimetype = 'all documents';
-    $scope.availableMimetypes = [
-      {
-        label: 'images',
-        checked: false,
-      },
-      {
-        label: 'texts',
-        checked: false
-      }
-    ];
-    
-    $scope.setAvailableMimetypes = function(availableMimetypes) {
-      $scope.availableMimetypes = availableMimetypes;
-    };
-    
-    $scope.setMimetype = function(mimetype) {
-      $scope.mimetype = mimetype;
-    }
     
     /**
      handle redirection from directive
@@ -631,13 +585,7 @@ angular.module('histograph')
       $scope.queueRedirect();
     };
     
-    /*
-      Filters
-    */
-    $scope.removeFilter = function(key, value) {
-      $log.log('CoreCtrl -> removeFilter() - key:', key, '- value:', value)
-      $location.search(key, null);
-    }
+    
     
     /*
       Open an issue modal
