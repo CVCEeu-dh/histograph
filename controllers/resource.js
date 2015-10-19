@@ -407,7 +407,7 @@ module.exports = function(io){
             limit: 100,
             offset: 0
           });
-      console.log(form)
+      // console.log(form)
       Resource.getRelatedResourcesGraph({
         id: form.params.id
       },
