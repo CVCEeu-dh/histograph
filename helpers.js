@@ -604,9 +604,13 @@ module.exports = {
             q.push(locations);
             q.drain = nextReconciliation;
           },
+          
           // places entities (countries and cities) by using geocoding services
           function (nextReconciliation) {
             var q = async.queue(function (location, nextLocation) {
+              // read file
+              // if(settings.cache.services)
+              //   fs.readFile(path.join(settings.cache.services, )
               module.exports.geocoding(location.disambiguated.name, function (err, nodes){
                 if(err == IS_EMPTY) {
                   nextLocation();
@@ -711,31 +715,49 @@ module.exports = {
     };
     // if(options.language)
     //   params.language = options.language
-    
-    services.geocoding(params, function (err, results) {
-      if(err == IS_EMPTY)
-        next(null, [])
-      else if(err)
-        next(err)
-      else
-        next(null, results.filter(function(location) {
-          return location._fcl;
-        }).map(function (location) {
-          return {
-            fcl:           location._fcl,
-            geocoding_fcl:     location._fcl,
-            geocoding_lat:     +location.geometry.location.lat,
-            geocoding_lng:     +location.geometry.location.lng,
-            lat:             +location.geometry.location.lat,
-            lng:             +location.geometry.location.lng,
-            __name:            location._name,
-            country:         location._country,
-            geocoding_id:      location._id,
-            geocoding_q:       location._query,
-            geocoding_name:    location._name,
-            geocoding_country: location._country
-          };
-        }));
+    module.exports.cache.read({
+      namespace: 'services',
+      ref: 'geocoding:' + options.text
+    }, function (err, contents) {
+      if(contents) {
+        next(null, contents);
+        return;
+      }
+      services.geocoding(params, function (err, results) {
+        if(err == IS_EMPTY)
+          next(null, [])
+        else if(err)
+          next(err)
+        else {
+          var results = results.filter(function(location) {
+            return location._fcl;
+          }).map(function (location) {
+            
+            return {
+              fcl:           location._fcl,
+              lat:             +location.geometry.location.lat,
+              lng:             +location.geometry.location.lng,
+              country:         location._country,
+              geocoding_fcl:     location._fcl,
+              geocoding_lat:     +location.geometry.location.lat,
+              geocoding_lng:     +location.geometry.location.lng,
+              
+              geocoding_id:      location._id,
+              geocoding_q:       location._query,
+              geocoding_name:    location._name,
+              geocoding_country: location._country,
+              __name:            location._name,
+              
+            };
+          });
+          module.exports.cache.write(JSON.stringify(results), {
+            namespace: 'services',
+            ref: 'geocoding:' + options.text
+          }, function(err) {
+            next(null, results);
+          });
+        }  
+      }); 
     });
   },
   /**
@@ -1310,6 +1332,56 @@ module.exports = {
     }, best.left, best.right);
     
     next(null, merged);
+  },
+  
+  /*
+    JSON cache and 
+    options must contain 'namespace' and 'ref'
+    e.g
+    helpers.cache.write(contents, {
+      namespace: 'services',
+      ref: 'Rome, Italy'
+    }, function(err) {
+      // handle err
+    })
+  */
+  cache: {
+    /*
+      
+    */
+    naming: function(options) {
+      var md5 = require('md5');
+      return path.join(settings.paths.cache[options.namespace], md5(options.ref) + '.json')
+    },
+    write: function(contents, options, next) {
+      if(_.isEmpty(settings.paths.cache[options.namespace]))
+        next(IS_EMPTY)
+      else
+        fs.writeFile(module.exports.cache.naming(options), contents, next)
+    },
+    read: function(options, next) {
+      if(_.isEmpty(settings.paths.cache[options.namespace]))
+        next(IS_EMPTY)
+      else
+        fs.readFile(module.exports.cache.naming(options), 'utf8', function (err, contents) {
+          if(err)
+            next(err);
+          else {
+            try {
+              next(null, JSON.parse(contents))
+            } catch(e) {
+              next(null, contents);
+            }
+          }
+        })
+    },
+    unlink: function(options, next) {
+      if(_.isEmpty(settings.paths.cache[options.namespace]))
+        next(IS_EMPTY)
+      else
+        fs.unlink(module.exports.cache.naming(options), next);
+    }
   }
+  
 }
       

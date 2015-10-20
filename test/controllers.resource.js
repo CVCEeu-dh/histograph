@@ -188,14 +188,14 @@ describe('controller:resource (related entities)', function() {
 describe('controller:resource (related resources)', function() {
   it('should show a list of 10 related letters, if any', function (done) {
     session
-      .get('/api/resource/'+ __resourceA.id +'/related/resource?limit=13&ecmd=letter')
+      .get('/api/resource/'+ __resourceA.id +'/related/resource?limit=13&type=letter')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
         should.not.exists(err);
         should.exist(res.body.result.items);
         should.equal(res.body.info.limit, 13);
-        should.exist(res.body.info.ecmd);
+        should.exist(res.body.info.type);
         should.equal(res.body.info.id, __resourceA.id);
         should.equal(res.body.info.orderby, 'relevance');
         done();
@@ -219,7 +219,22 @@ describe('controller:resource (related resources)', function() {
       });
   });
   
-  
+  it('should show a list of 10 related resources containing a specific entity, if any', function (done) {
+    session
+      .get('/api/resource/'+ __resourceA.id+'/related/resource?limit=13&with=17379')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exists(err);
+        
+        should.exist(res.body.result.items);
+        should.equal(res.body.info.limit, 13);
+        should.exist(res.body.info.with);
+        should.equal(res.body.info.id, __resourceA.id);
+        should.equal(res.body.info.orderby, 'relevance');
+        done();
+      });
+  });
   
   it('should show the graph of 10 related resources', function (done) {
     session

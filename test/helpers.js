@@ -70,27 +70,21 @@ describe('helpers: text & geo filters', function() {
 // });
 
 
-// describe('helpers: geocoding api', function() {
-//   this.timeout(5000);
-//   it('should call geocodingapi service and build a new location entity', function (done) {
-//     helpers.geocoding('ruel Lepic, Paris', function (err, res) {
-//       should.not.exist(err, err);
-//       // console.log(res)
-//       should.exist(res[0].geocode_id, res);
-//       done();
-//     });
-//   });
-//   it('should call geocodingapi service and build a new location entity starting from a COuntry', function (done) {
-//     helpers.geocoding('Italia', function (err, res) {
-//       should.not.exist(err, err);
-//       // console.log(res)
-//       should.exist(res[0].geocode_id, res);
-//       should.equal(res[0].name, 'Italy');
-//       should.equal(res[0].name_search, 'italy');
-//       done();
-//     });
-//   });
-// });
+describe('helpers: geocoding api', function() {
+  this.timeout(5000);
+  it('should call geocodingapi service and return basic (node:location) properties', function (done) {
+    helpers.geocoding({
+      text: 'Rome, Italy'
+    }, function (err, res) {
+      should.not.exist(err);
+      should.exist(res[0].geocoding_id);
+      should.equal(res[0].country, 'IT');
+      should.exist(res[0].lat);
+      should.exist(res[0].lng);
+      done();
+    });
+  });
+});
 
 
 // describe('helpers: geonames api', function() {
