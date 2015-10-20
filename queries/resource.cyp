@@ -68,10 +68,10 @@ MATCH (res:resource)
 {if:ids}
   WHERE id(res) IN {ids}
 {/if}
-{?res:start_time__gt} {AND?res:end_time__lt} {AND?res:mimetype__in}
+{?res:start_time__gt} {AND?res:end_time__lt} {AND?res:mimetype__in} {AND?res:type__in}
   WITH res
-{if:entity_id}
-  MATCH (res)--(ent:entity) WHERE id(ent)={entity_id} 
+{if:with}
+  MATCH (res)--(ent:entity) WHERE id(ent) IN {with} 
   WITH res
 {/if}
 {if:orderby}
@@ -84,8 +84,9 @@ SKIP {offset}
 LIMIT {limit}
 
 WITH res
-OPTIONAL MATCH (res)-[r_loc:appears_in]-(loc:`location`)
-
+OPTIONAL MATCH (res)-[r_loc:appears_in]->(loc:`location`)
+WITH res, r_loc, loc
+ORDER BY r_loc.tfidf DESC, r_loc.frequency DESC
 WITH res, collect({  
       id: id(loc),
       type: 'location',
@@ -93,7 +94,8 @@ WITH res, collect({
       rel: r_loc
     })[0..5] as locations   
 OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
-
+WITH res, locations, r_per, per
+ORDER BY r_per.tfidf DESC, r_per.frequency DESC
 WITH res, locations, collect({
       id: id(per),
       type: 'person',
@@ -148,8 +150,20 @@ MATCH (res:resource){if:entity_id}--(ent:entity)
   WHERE id(ent)={entity_id} 
 WITH res
 {/if}
-{?res:start_time__gt} {AND?res:end_time__lt}
-RETURN count(res) as count_items
+{?res:start_time__gt}
+{AND?res:end_time__lt}
+{AND?res:type__in}
+
+WITH DISTINCT res
+{if:with}
+  MATCH (ent:entity)-[:appears_in]->(res)
+  WHERE id(ent) IN {with}
+  WITH DISTINCT res
+{/if}
+RETURN {
+  group: {if:group}res.{:group}{/if}{unless:group}res.type{/unless}, 
+  count_items: count(res)
+} // count per type
 
 
 
@@ -177,7 +191,7 @@ WITH res
 
 // name: count_similar_resource_ids_by_entities
 // get top 100 similar resources sharing the same persons, orderd by time proximity if this info is available
-MATCH (res:resource)-[:appears_in*2]-(res2:resource)
+MATCH (res:resource)<-[:appears_in]-(ent:entity)-[:appears_in]->(res2:resource)
 WHERE id(res) = {id}
   {if:mimetype}
   AND res2.mimetype IN {mimetype}
@@ -189,37 +203,21 @@ WHERE id(res) = {id}
   AND res2.start_time >= {start_time}
   {/if}
   {if:end_time}
-  AND res2.end_time >= {end_time}
+  AND res2.end_time <= {end_time}
   {/if}
+  
   AND id(res) <> id(res2)
+
+WITH DISTINCT res2  
+{if:with}
+  MATCH (ent:entity)-[:appears_in]->(res2)
+  WHERE id(ent) IN {with}
+  WITH DISTINCT res2
+{/if}
 RETURN {
   group: {if:group}res2.{:group}{/if}{unless:group}res2.type{/unless}, 
-  count_items: count(DISTINCT(res2))
-} // count per ecmd
-
-
-// name: get_similar_resource_ids_by_entities_v1
-// get top 100 similar resources sharing the same persons, orderd by time proximity if this info is available
-MATCH (res)<-[R1:appears_in]-(ent:entity)-[R2:appears_in]->(res2:resource)
-  WHERE id(res) = {id} AND ent.score > -1 
-WITH res, ent, res2, R1, R2, {
-  target: id(res2),
-  dst : abs(coalesce(res.start_time, 1000000000) - coalesce(res2.start_time, 0)),
-  det : abs(coalesce(res.end_time, 1000000000) - coalesce(res2.end_time, 0)),
-  //labels: count(DISTINCT(last(labels(ent)))),
-  int : count(DISTINCT ent)
-} as candidate
-RETURN candidate
-ORDER BY
-{unless:orderby}
-  R1.tfidf DESC, R2.tfidf DESC, candidate.dst ASC, candidate.det ASC
-{/unless}
-{if:orderby}
-   ORDER BY {:orderby}
-{/if}
-SKIP {offset}
-LIMIT {limit}
-
+  count_items: count(res2)
+} // count per type
 
 
 // name: get_similar_resource_ids_by_entities
@@ -237,10 +235,16 @@ MATCH (res1:resource)<-[r1:appears_in]-(ent:entity)-[r2:appears_in]->(res2:resou
     AND res2.start_time >= {start_time}
     {/if}
     {if:end_time}
-    AND res2.end_time >= {end_time}
+    AND res2.end_time <= {end_time}
     {/if}
     AND id(res1) <> id(res2)
-  
+WITH  res1, res2, r1, r2, ent
+{if:with}
+  MATCH (ent2:entity)-[:appears_in]->(res2)
+  WHERE id(ent2) IN {with}
+  WITH  res1, res2, r1, r2, ent
+{/if}
+
 WITH res1, res2, count(*) as intersection
 
 MATCH (res1)<-[rel:appears_in]-(r1:entity)
@@ -441,7 +445,7 @@ WITH col, res
 RETURN col, res
 
 
-// name: get_cooccurrences
+// name: get_jaccard_cooccurrences
 //
 MATCH (p1:person)-[r:appear_in_same_document]-(p2:person)
 WHERE id(p1) < id(p2) AND r.jaccard < 0.33
@@ -462,11 +466,10 @@ ORDER BY r.jaccard DESC
 LIMIT {limit}
 
 
-// name: get_filtered_cooccurrences
+// name: get_cooccurrences
 //
 MATCH (p1:person)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:person)
-{?res:start_time__gt} {AND?res:end_time__lt}
-WHERE id(p1) < id(p2)
+  WHERE id(p1) < id(p2)
   {if:start_time}
     AND res.start_time >= {start_time}
   {/if}
@@ -476,9 +479,11 @@ WHERE id(p1) < id(p2)
   {if:mimetype}
     AND res.mimetype in {mimetype}
   {/if}
-  {if:entity_id}
-    AND id(p1) IN {entity_id}
-    AND id(p2) IN {entity_id}
+  {if:type}
+    AND res.type in {type}
+  {/if}
+  {if:with}
+    AND (id(p1) IN {with} OR id(p2) IN {with})
   {/if}
   AND p1.score > -1
   AND p2.score > -1
