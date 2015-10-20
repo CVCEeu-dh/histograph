@@ -469,6 +469,8 @@ apiRouter.route('/suggest/unknown-nodes/:ids([\\d,]+)')
   .get(ctrl.suggest.getUnknownNodes)
 apiRouter.route('/suggest/neighbors/:ids([\\d,]+)')
   .get(ctrl.suggest.getNeighbors)
+apiRouter.route('/suggest/shared-resources/:ids([\\d,]+)')
+  .get(ctrl.suggest.getSharedResources)
 
 /*
   

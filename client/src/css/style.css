@@ -132,6 +132,12 @@ a#header-logo img{
   margin-right: 20px;
 }
 
+.explore .related{
+  float:left;
+  width: 320px;
+  margin: 10px;
+}
+
 .item{
   max-width: 460px;
   margin: 0 auto 100px auto;
@@ -314,6 +320,7 @@ a#header-logo img{
   float: left;
   height: 50px
 }
+
 .header-menu > ul> li> a{
   display: block;
   padding: 15px 0px 13px 0;
@@ -325,6 +332,26 @@ a#header-logo img{
    -moz-transition: border-bottom .3s, color .3s;
      -o-transition: border-bottom .3s, color .3s;
         transition: border-bottom .3s, color .3s;
+}
+
+.header-menu > ul> li> .filter-label{
+  line-height: 21px;
+  margin: 15px 0px;
+  display: inline-block;
+  font-weight: normal;
+}
+
+.header-menu > ul > li> button, .header-menu > ul > li> .dropdown {
+      margin: 8px 5px;
+}
+
+.header-menu > ul> li> .filter{
+  line-height: 21px;
+  margin: 12px 5px;
+  display:inline-block;
+  background: #f0f0f0;
+  padding: 0px 5px;
+  border: 1px solid #E8E8E7;
 }
 
 .header-menu > ul> li.path {
@@ -397,7 +424,7 @@ a#header-logo img{
 }
 
 #perspective-menu{
-  width: 480px;
+  width: 100%
 }
 
 #perspective-menu > ul{
@@ -408,6 +435,19 @@ a#header-logo img{
   display: inline;
   padding: 0;
   margin:0;  
+}
+
+#perspective-menu .dropdown-menu {
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+#perspective-menu .dropdown-menu>li>a{
+  font-size:12px;
+  line-height: 18px
+}
+#perspective-menu .dropdown-menu>li>a:hover {
+  border-bottom: 0px transparent;
 }
 
 .neighbors #perspective-menu {
@@ -475,7 +515,7 @@ a#header-logo img{
 */
 
 #see-also{
-  width: 320px;
+  width: 350px;
   margin-left: 480px;
   overflow: auto;
   overflow-y: auto;
@@ -507,7 +547,12 @@ a#header-logo img{
 
 .index #see-also {
   margin-left:0%;
-  width: 50%;
+  width: 350px;
+}
+
+.explore #see-also{
+  width: 100%;
+  margin-left:0%;
 }
 
 .neighbors.resources #see-also{
@@ -576,18 +621,7 @@ a#header-logo img{
   margin: 10px 5px 10px 5px;
 }
 
-.toolbar .dropdown-menu {
-  max-height: 260px;
-  overflow-y: auto;
-}
 
-.toolbar .dropdown-menu>li>a{
-  font-size:12px;
-  line-height: 18px
-}
-.toolbar .dropdown-menu>li>a:hover {
-  border-bottom: 0px transparent;
-}
 
 .viewpoint-read #see-also .toolbar{
   width: 50%;
@@ -909,7 +943,7 @@ a#header-logo img{
 }
 
 #milkyway.index{
-  left: 50%;
+  left: 350px;
 }
 
 #milkyway.search{
@@ -920,6 +954,9 @@ a#header-logo img{
   left: 57%;
 }
 
+#milkyway.explore{
+  display: none;
+}
 
 #milkyway.InquiriesCtrl, #milkyway.InquiryCtrl, #milkyway.InquiryCreateCtrl{
   display: none;
@@ -1524,7 +1561,7 @@ li.CodeMirror-hint-active {
   font-family: 'proxima-nova';
 }
 
-#tooltip-sigma {
+.tooltip.sigma {
   width: 200px;
   margin-left: -100px;
   margin-top: -50px;
@@ -1532,7 +1569,7 @@ li.CodeMirror-hint-active {
   text-align: center;
 }
 
-#tooltip-sigma .tooltip-inner{
+.tooltip.sigma .tooltip-inner{
   position: relative;
   background: #383838;
   display: inline-block;

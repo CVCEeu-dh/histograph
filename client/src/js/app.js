@@ -83,6 +83,20 @@ angular
         reloadOnSearch: false,
       })
       
+      .state('explore', {
+        url: '/explore',
+        templateUrl: 'templates/explore.html',
+        controller: 'ExploreCtrl',
+        resolve: {
+          resources: function(ResourceFactory, $location) {
+            
+            return ResourceFactory.get(angular.extend({
+              limit: 10
+            }, $location.search())).$promise;
+          },
+        }
+      })
+      
       .state('entity', {
         abstract: true,
         url: '/e/:id',

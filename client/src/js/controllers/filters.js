@@ -7,10 +7,11 @@
  * it was written in order to simplify CoreCtrl debugging
  */
 angular.module('histograph')
-  .controller('FiltersCtrl', function ($scope, $log, $location, EVENTS) {
+  .controller('FiltersCtrl', function ($scope, $log, $location, SuggestFactory,EVENTS) {
     $log.debug('FiltersCtrl ready', $location.search());
     
     $scope.filters = {};
+    $scope.filterItems  = {};
     $scope.facets = {}; // available facets, per filter key
     
     /*
@@ -39,6 +40,12 @@ angular.module('histograph')
         return (d != value)
       })
       
+      if(key == 'with') {
+        var index = _.map($scope.filterItems.with, 'id').indexOf(value);
+        $scope.filterItems.with.splice(index, 1);    
+      }
+         
+        
       if(aliveFilters.length == 0)
         $location.search(key, null);
       else
@@ -60,11 +67,29 @@ angular.module('histograph')
           $location.search(key, list.join(','));
         }
       }
+      $scope.loadFiltersItems()
+      
     }
     
     $scope.setFilter = function(key, value) {
       $location.search(key, value);
     }
+    
+    /*
+      For some field, load complex items (e.g; location, persons etc..);
+      Ids can be resoruce or other.
+    */
+    $scope.loadFiltersItems = function() {
+      // collect ids
+      _.each(angular.copy($scope.filters), function (d, key) {
+        if(key == 'with')
+          SuggestFactory.getUnknownNodes({
+            ids: d
+          }).then(function (res) {
+            $scope.filterItems[key] = res.data.result.items;
+          })
+      });   
+    };
     
     /*
       Filling filters and transform them
@@ -74,13 +99,14 @@ angular.module('histograph')
           filters =  {}
       // handle 'type' and mimetype (pseudo-array)
       for (var i in candidates) {
-        var list = _.compact(_.map(candidates[i].split(','), _.trim));
+        var list = _.unique(_.compact(_.map((''+candidates[i]).split(','), _.trim)));
         filters[i] = list;
       }
       
       $log.debug('FiltersCtrl -> sync()', filters);
       $scope.filters = filters;
       $scope.isFiltered = !_.isEmpty($scope.filters);
+      $scope.loadFiltersItems();
     }
     
     $scope.$on('$locationChangeSuccess', $scope.loadFilters);

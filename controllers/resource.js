@@ -196,27 +196,36 @@ module.exports = function(io){
       We should move this to entities instead.
     */
     getCooccurrences: function (req, res) {
-      validator.queryParams(req.query, function (err, params, warnings) {
-        if(err)
-          return helpers.formError(err, res);
-        // var query = parser.agentBrown(queries.get_filtered_cooccurrences, params);
-        var query = parser.agentBrown(queries.get_cooccurrences, params);
-        // console.log('query', query)
-        
-        helpers.cypherGraph(query, {
-          offset: 0,
-          limit: 100,
-          start_time: params.start_time,
-          end_time: params.end_time
-        }, function (err, graph) {
-          if(err) {
-            return helpers.cypherQueryError(err, res);
-          };
-          return res.ok({
-            graph: graph
+      var form = validator.request(req, {
+            limit: 200,
+            offset: 0
+          },{
+            // increment the min
+            fields: [
+              {
+                field: 'limit',
+                check: 'isInt',
+                args: [
+                  {min: 1, max: 200}
+                ],
+                error: 'should be a number in range 1 to max 200'
+              }
+            ],
           });
+      
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      var query = parser.agentBrown(queries.get_cooccurrences, form.params);
+      
+      helpers.cypherGraph(query, form.params, function (err, graph) {
+        if(err) {
+          return helpers.cypherQueryError(err, res);
+        };
+        return res.ok({
+          graph: graph
         });
-      })
+      });
     },
     
     /*

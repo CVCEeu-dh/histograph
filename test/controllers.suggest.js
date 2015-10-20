@@ -114,7 +114,6 @@ describe('controller:suggest check lucene query', function() {
       .get('/api/suggest?query=improbable query ever')
       .expect(200)
       .end(function (err, res) {
-        console.log(res.body)
         should.not.exist(err) // err on statusCode
         
         done();
@@ -123,6 +122,22 @@ describe('controller:suggest check lucene query', function() {
   
 });
 
+
+describe('controller:suggest get shared resources', function() {
+  it('should get a bunch of resources between a couple of entity ids', function (done) {
+    session
+      .get('/api/suggest/shared-resources/17178,26413')
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exist(err) // err on statusCode
+        should.exist(res.body.info.total_items);
+        should.exist(res.body.info.limit)
+        should.exist(res.body.info.offset)
+        done();
+      })
+  });
+  
+});
 
 
 

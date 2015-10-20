@@ -1,27 +1,4 @@
-/*
-  Sigma addons
-  ---
-  thanks to @jacomyal (it need to be added before creating any new instance of sigmajs)
-*/
-sigma.classes.graph.addMethod('neighbors', function (nodeId) {
-  'use strict';
 
-  var k,
-      neighbors = {},
-      index     = {};
-  
-  if(typeof nodeId == 'object')
-    for(var i in nodeId)
-      index = _.assign(index, this.allNeighborsIndex[nodeId[i]]);
-  else
-    index = this.allNeighborsIndex[nodeId] || {};
-  
-  for (k in index)
-    neighbors[k] = this.nodesIndex[k];
-  neighbors[nodeId] = this.nodesIndex[nodeId];
-  return neighbors;
-});
-        
 /**
  * @ngdoc overview
  * @name histograph
@@ -55,6 +32,7 @@ angular.module('histograph')
         controller: '=',
         redirect: '&',
         addToQueue: '&queue',
+        addFilter: '&filter',
         toggleMenu: '&togglemenu'
       },
       link : function(scope, element, attrs) {
@@ -84,7 +62,30 @@ angular.module('histograph')
         tooltip.edge.isVisible   = false;
         tooltip.edge.text        = '';
         
-        // make a noeud fixed.
+        /*
+          Sigma addons
+          ---
+          thanks to @jacomyal (it need to be added before creating any new instance of sigmajs)
+        */
+        sigma.classes.graph.addMethod('neighbors', function (nodeId) {
+          'use strict';
+
+          var k,
+              neighbors = {},
+              index     = {};
+          
+          if(typeof nodeId == 'object')
+            for(var i in nodeId)
+              index = _.assign(index, this.allNeighborsIndex[nodeId[i]]);
+          else
+            index = this.allNeighborsIndex[nodeId] || {};
+          
+          for (k in index)
+            neighbors[k] = this.nodesIndex[k];
+          neighbors[nodeId] = this.nodesIndex[nodeId];
+          return neighbors;
+        });
+        
         
         
         // Creating sigma instance
@@ -152,6 +153,13 @@ angular.module('histograph')
           camera: 'main',
           container: element.find('#playground')[0]
         });
+        
+        /*
+          Initialize plugins
+          ---
+        */
+        var dragListener = sigma.plugins.dragNodes(si, si.renderers[0]);
+        
         
         
         /*
@@ -275,6 +283,7 @@ angular.module('histograph')
         si.bind('clickNode', function (e){
           // stop the layout runner
           stop();
+          
           // if(e.data.captor.isDragging) {
           //   $log.info('::sigma @clickNode isDragging');
           //   return;
@@ -318,7 +327,7 @@ angular.module('histograph')
               label = [
                 si.graph.nodes(''+e.data.edge.source).label,
                 si.graph.nodes(''+e.data.edge.target).label
-              ].join(' - ');
+              ].join(' - ') + ' / ' + e.data.edge.weight + ' in common';
           
           tooltip.edge.edge = e.data.edge.id;
           if(!tooltip.edge.isVisible)

@@ -218,6 +218,26 @@ module.exports =  function(io){
       })
     },
     
+    getSharedResources: function(req, res) {
+      var form = validator.request(req, {
+            limit: 10,
+            offset: 0
+          });
+      
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      models.getMany({
+        queries: {
+          count_items: queries.count_shared_resources,
+          items: queries.get_shared_resources
+        },
+        params: form.params
+      }, function (err, results) {
+        helpers.models.getMany(err, res, results.items, results.count_items, form.params);
+      })
+    },
+    
     /**
       
     */

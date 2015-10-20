@@ -326,9 +326,16 @@ module.exports = {
         if(typeof options[i] != 'string')
           continue;
         var pseuroArray = options[i].match(/^\[([^\]]*)\]$/);
+        console.log(options[i],'rrrrr', pseuroArray)
         if(!pseuroArray)
           continue;
-        options[i] = _.map(pseuroArray[1].split(','), _.trim);
+        
+        options[i] = _.map(pseuroArray[1].split(','), function(d) {
+          if(isNaN(d))
+            return d.trim();
+          else
+            return +d;
+        });
       }
       
       console.log(clc.blackBright('   executing query: ', clc.magentaBright(options.cypher), '...\n'));

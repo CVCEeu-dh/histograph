@@ -36,6 +36,15 @@ angular.module('histograph')
               ]
             })
         }
+        // add the current target id as the ID
+        scope.addTargetToFilter = function() {
+          $log.log('::gmasp -> addTargetToFilter()');
+          if(scope.target.type == 'node')
+            scope.$parent.addFilter({
+              key: 'with',
+              value: scope.target.data.node.id
+            });
+        }
         
         // enable / disable gasp instance
         scope.$watch('target', function(v) {
@@ -72,14 +81,10 @@ angular.module('histograph')
         target: '=',
         comment: '&comment',
         redirect: '&',
-        queue : '&'
+        queue : '&',
+        filter: '&'
       },
-      template: '<div class="action-group">'+
-                  '<a class="action" href="{{href}}" title="visit" data-action="link" tooltip="{{linkto}}">'+
-                    '<span class="fa fa-link"></span></a>'+
-                  '<a class="action queue" tooltip="add to your current playlist" data-action="queue">'+
-                    '<span class="fa fa-play-circle-o"></span></a>' +
-                '</div>',
+      templateUrl: 'templates/partials/helpers/popit.html',
       link : function(scope, element, attrs) {
         var _gasp = $(element[0]), // gasp instance;
             type,            // element type
@@ -189,6 +194,9 @@ angular.module('histograph')
         $('body').on('sigma.clickStage', function() {
           hide();
         })
+        /*
+          listeners for click event
+        */
         _gasp.find('[data-action=queue]').click(function() {
           if(id)
             scope.queue({
@@ -198,6 +206,19 @@ angular.module('histograph')
           else
             $log.error('cannot queue the give item, id is', id);
         })
+        
+        _gasp.find('[data-action=filter]').click(function() {
+          if(id) {
+            scope.filter({
+              key: 'with',
+              item: id
+            });
+            hide();
+          } else
+            $log.error('cannot queue the give item, id is', id);
+        })
+        
+        
         // $('body').on('mouseleave', '[gasp-type]', function(e) {
         //   setTimeout(function(){
         //     hide();

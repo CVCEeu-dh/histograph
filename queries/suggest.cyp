@@ -206,6 +206,62 @@ RETURN {
 } as result
 LIMIT {limit}
 
+
+// name: count_shared_resources
+// an overview of how many resources are between two entities (one step), according to filters
+MATCH p=(n:entity)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(t:entity)
+  WHERE id(n) in {ids}
+    AND id(t) in {ids}
+    AND id(n) < id(t)
+    {if:start_time}
+      AND res.start_time >= {start_time}
+    {/if}
+    {if:end_time}
+      AND res.end_time <= {end_time}
+    {/if}
+    {if:mimetype}
+      AND res.mimetype in {mimetype}
+    {/if}
+    {if:type}
+      AND res.type in {type}
+    {/if}
+RETURN {
+  group: {if:group}res.{:group}{/if}{unless:group}res.type{/unless}, 
+  count_items: count(res)
+}
+
+
+// name: get_shared_resources
+// an overview of first n resources in between two entities
+MATCH p=(n:entity)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(t:entity)
+  WHERE id(n) in {ids}
+    AND id(t) in {ids}
+    AND id(n) < id(t)
+    {if:start_time}
+      AND res.start_time >= {start_time}
+    {/if}
+    {if:end_time}
+      AND res.end_time <= {end_time}
+    {/if}
+    {if:mimetype}
+      AND res.mimetype in {mimetype}
+    {/if}
+    {if:type}
+      AND res.type in {type}
+    {/if}
+WITH res, r1, r2
+ORDER BY r1.tfidf DESC, r2.tfidf DESC
+SKIP {offset}
+LIMIT {limit}
+WITH distinct res
+RETURN {
+  id: id(res),
+  slug: res.slug,
+  name: res.name
+}
+
+
+
 // name: get_suggestions
 // CHECK
 MATCH (n:resource)
