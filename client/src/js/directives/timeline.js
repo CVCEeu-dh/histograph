@@ -154,8 +154,9 @@ angular.module('histograph')
             });
             return;
           }
-          if(typeof extent[0] == 'object') {
-              tim.ui.brushDateLeft.style({
+          if(extent[0] && typeof extent[0] == 'object') {
+            console.log(extent[0])
+            tim.ui.brushDateLeft.style({
               visibility: 'visible',
               transform: 'translateX(' + (tim.fn.x(extent[0]) + 50) +'px)'
             }).text(tim.fn.asDay(extent[0]));
@@ -234,10 +235,14 @@ angular.module('histograph')
               if(typeof extent[0] == 'object') {
                 var previous = $location.search();
                 
-                $location.search(angular.extend(previous, {
-                  from: d3.time.format("%Y-%m-%d")(extent[0]),
-                  to: d3.time.format("%Y-%m-%d")(extent[1])
-                }));
+                $location.search(angular.extend(previous, 
+                  extent[0]?{
+                    from: d3.time.format("%Y-%m-%d")(extent[0])
+                  } : {},
+                  extent[1]?{ 
+                    to: d3.time.format("%Y-%m-%d")(extent[1])
+                  }: {}
+                ));
                 scope.$apply();
               }
             }, 10)

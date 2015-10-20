@@ -684,29 +684,45 @@ module.exports = {
     };
     if(options.language)
       params.lang = options.language
-    
-    services.geonames(params, function (err, results) {
-      if(err == IS_EMPTY)
-        next(null, [])
-      else
-        next(null, results.map(function (location) {
-          // add prefixes...
-          return {
-            lat:           location.lat,
-            lng:           location.lng,
-            fcl:           location.fcl,
-            country:       location._country,
-            geoname_fcl:     location.fcl,
-            geoname_lat:     +location.lat,
-            geoname_lng:     +location.lng,
-            geoname_id:      location._id,
-            geoname_q:       location._query,
-            geoname_name:    location._name,
-            geoname_country: location._country,
-            __name:          location._name
-          };
-        }));
-    });
+    module.exports.cache.read({
+      namespace: 'services',
+      ref: 'geonames:' + options.text
+    }, function (err, contents) {
+      if(contents) {console.log('using saved data')
+        next(null, contents);
+        return;
+      }
+      services.geonames(params, function (err, results) {
+        if(err == IS_EMPTY)
+          next(null, [])
+        else {
+          var results = results.map(function (location) {
+            // add prefixes...
+            return {
+              lat:           location.lat,
+              lng:           location.lng,
+              fcl:           location.fcl,
+              country:       location._country,
+              geoname_fcl:     location.fcl,
+              geoname_lat:     +location.lat,
+              geoname_lng:     +location.lng,
+              geoname_id:      location._id,
+              geoname_q:       location._query,
+              geoname_name:    location._name,
+              geoname_country: location._country,
+              __name:          location._name
+            };
+          });
+          
+          module.exports.cache.write(JSON.stringify(results), {
+            namespace: 'services',
+            ref: 'geonames:' + options.text
+          }, function(err) {
+            next(null, results);
+          });
+        } 
+      });
+    })
   },
   
   geocoding: function(options, next) {
