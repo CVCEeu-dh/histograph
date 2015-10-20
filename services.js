@@ -149,7 +149,7 @@ module.exports = {
         }
         if(!body.response) {
           console.log(body)
-          next(null, []);
+          next(body.error);
           return
         }
         // console.log(form, 'body', body.response)
