@@ -97,7 +97,7 @@ html
           div(class='view {{currentCtrl}} {{currentState|humanizeState}} {{queueStatus}} viewpoint-{{viewpoint.selected.name}}', infinite-scroll='addMoreItems()', infinite-scroll-collection='relatedItems')
             div(ui-view='')
           
-          div#milkyway(sigma, graph='graph', freeze='freeze' tips='headers.graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentState|humanizeState}} {{queueStatus}} viewpoint-{{viewpoint.selected.name}}', controller='currentCtrl' redirect='redirect(path)', queue="addToQueue(items)")
+          div#milkyway(sigma, graph='graph', freeze='freeze', tips='headers.graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentState|humanizeState}} {{queueStatus}} viewpoint-{{viewpoint.selected.name}}', controller='currentCtrl', redirect='redirect(path)', queue="addToQueue(items)", filter='addFilter(key, value)')
           
           div(id='timeline', timeline, class='{{currentState}} {{queueStatus}}', t='timeline', cxt='contextualTimeline', filters="filters")
             
@@ -175,6 +175,7 @@ html
     script(src='/js/lib/moment.min.js')
     script(src='/js/lib/sigma.min.js')
     script(src='/js/lib/sigma.layout.forceAtlas2.min.js')
+    script(src='/js/lib/sigma.plugins.dragNodes.js')
     //- script(src='/js/lib/sigma.statistics.HITS.js')
     script(src='/js/lib/perfect-scrollbar.min.js')
     script(src='/js/lib/perfect-scrollbar.with-mousewheel.min.js')
@@ -184,7 +185,6 @@ html
     script(src='/js/lib/angular-resource.min.js')
     script(src='/js/lib/angular-cookies.min.js')
     script(src='/js/lib/angular-local-storage.min.js')
-    script(src='/js/lib/angular-masonry.min.js')
     
     script(src='/js/lib/ui-codemirror.min.js')
     
