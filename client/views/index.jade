@@ -99,9 +99,9 @@ html
           
           div#milkyway(sigma, graph='graph', freeze='freeze' tips='headers.graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentState|humanizeState}} {{queueStatus}} viewpoint-{{viewpoint.selected.name}}', controller='currentCtrl' redirect='redirect(path)', queue="addToQueue(items)")
           
-          div(id='timeline', timeline, class='{{currentState}} {{queueStatus}}', t='timeline', cxt='contextualTimeline', filters="params")
+          div(id='timeline', timeline, class='{{currentState}} {{queueStatus}}', t='timeline', cxt='contextualTimeline', filters="filters")
             
-          div(id='pop', gasp, target="target", redirect='redirect(path)', comment="startCommenting(item, tag, hashtag)", queue="queue(item, inprog)")
+          div(id='pop', gasp, target="target", redirect='redirect(path)', filter='addFilter(key, item)', comment="startCommenting(item, tag, hashtag)", queue="queue(item, inprog)")
             
            div(id='popit', popit, target="target", redirect='redirect(path)', comment="startCommenting(item, tag, hashtag)", queue="queue(item, inprog)")
             div(class='action-group')
@@ -151,7 +151,11 @@ html
       div(id="messenger", class="tk-proxima-nova {{messaging? 'active': ''}}")
         div.inner {{ message }}
       
-      div.mouse.tooltip(id='tooltip-sigma')
+      div.mouse.tooltip.sigma(id='tooltip-sigma')
+        div.tooltip-wrapper
+          div.tooltip-inner
+      
+      div.mouse.tooltip.sigma(id='tooltip-sigma-edge')
         div.tooltip-wrapper
           div.tooltip-inner
         
@@ -180,6 +184,7 @@ html
     script(src='/js/lib/angular-resource.min.js')
     script(src='/js/lib/angular-cookies.min.js')
     script(src='/js/lib/angular-local-storage.min.js')
+    script(src='/js/lib/angular-masonry.min.js')
     
     script(src='/js/lib/ui-codemirror.min.js')
     

@@ -77,6 +77,16 @@ angular.module('histograph')
         tooltip.isVisible   = false;
         tooltip.text        = '';
         
+        // edge tooltip
+        tooltip.edge = {};
+        tooltip.edge.tip         = $("#tooltip-sigma-edge");
+        tooltip.edge.el          = tooltip.edge.tip.find('.tooltip-inner');
+        tooltip.edge.isVisible   = false;
+        tooltip.edge.text        = '';
+        
+        // make a noeud fixed.
+        
+        
         // Creating sigma instance
         var timeout,
             
@@ -299,8 +309,8 @@ angular.module('histograph')
         si.bind('overEdge', function(e) {
           // debugger
           // console.log(arguments)
-          if(tooltip.timer)
-            clearTimeout(tooltip.timer);
+          if(tooltip.edge.timer)
+            clearTimeout(tooltip.edge.timer);
           
           var _css = {
                 transform: 'translate('+ e.data.captor.clientX +'px,'+ e.data.captor.clientY +'px)'
@@ -310,17 +320,17 @@ angular.module('histograph')
                 si.graph.nodes(''+e.data.edge.target).label
               ].join(' - ');
           
-          tooltip.edge = e.data.edge.id;
-          if(!tooltip.isVisible)
+          tooltip.edge.edge = e.data.edge.id;
+          if(!tooltip.edge.isVisible)
             _css.opacity = 1.0;
+          console.log(label)
+          if(tooltip.edge.text != label)
+            tooltip.edge.el.text(label);
           
-          if(tooltip.text != label)
-            tooltip.el.text(label);
-          
-          tooltip.isVisible = true;
-          tooltip.text = label
+          tooltip.edge.isVisible = true;
+          tooltip.edge.text = label
           // apply css transf
-          tooltip.tip.css(_css);
+          tooltip.edge.tip.css(_css);
           
         });
         /*
@@ -329,8 +339,17 @@ angular.module('histograph')
           We use the renderer since the tooltip is relqtive to sigma parent element.
         */
         si.bind('overNode', function(e) {
-          // console.log('overnode');
-          // console.log(e.data.node, tooltip.el)
+          // remove tooltip edge
+          if(tooltip.edge.timer)
+            clearTimeout(tooltip.edge.timer);
+          
+          tooltip.edge.tip.css({
+            opacity: 0
+          });
+          
+          tooltip.edge.isVisible = false;
+          
+          
           if(tooltip.timer)
             clearTimeout(tooltip.timer);
           
@@ -364,16 +383,31 @@ angular.module('histograph')
             return;
           if(tooltip.timer)
             clearTimeout(tooltip.timer);
-          tooltip.timer = setTimeout(function() {
+          // tooltip.timer = setTimeout(function() {
             tooltip.tip.css({
               opacity: 0
             });
-          }, 210);
+          // }, 210);
           
           tooltip.isVisible = false;
         })
         
         
+        /*
+          listener outEdge
+        */
+        si.bind('outEdge', function(e) {
+          if(tooltip.edge.timer)
+            clearTimeout(tooltip.edge.timer);
+          
+          tooltip.edge.tip.css({
+            opacity: 0
+          });
+          
+          tooltip.edge.isVisible = false;
+          
+        });
+       
         
         si.bind('clickEdge', function(e) {
           e.data.edge.nodes = {
