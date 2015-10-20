@@ -173,7 +173,7 @@ LIMIT 10
 MATCH (ent)-[r:appears_in]->(res:resource)
 WHERE id(ent) = {id}
 WITH r, res, ent
-ORDER BY r.tfidf DESC, res.start_date DESC
+ORDER BY r.tfidf DESC, res.start_time DESC
 SKIP {offset}
 LIMIT {limit}
 
