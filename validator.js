@@ -110,6 +110,14 @@ module.exports = {
       error: 'ids should contain only numbers and commas'
     },
     {
+      field: 'with',
+      check: 'matches',
+      args: [
+        /[\d,]+/
+      ],
+      error: 'with should contain only numbers and commas'
+    },
+    {
       field: 'limit',
       check: 'isInt',
       args: [
@@ -319,6 +327,11 @@ module.exports = {
     
     if(safeParams.ids)
       safeParams.ids = _.compact(safeParams.ids.split(',')).map(function(d) {
+        return +d;
+      });
+    
+    if(safeParams.with)
+      safeParams.with = _.compact(safeParams.with.split(',')).map(function(d) {
         return +d;
       });
     
