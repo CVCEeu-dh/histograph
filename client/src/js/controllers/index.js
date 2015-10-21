@@ -5,69 +5,13 @@
  * # IndexCtrl
  */
 angular.module('histograph')
-  .controller('ExploreCtrl', function ($scope, $log, resources, ResourceFactory, EVENTS) {
-    $log.debug('ExploreCtrl ready', $scope.params, resources);
-    
-    /*
-      set basic info
-    */
-    $scope.totalItems  = resources.info.total_items;
-    $scope.limit       = resources.info.limit;
-    $scope.offset      = resources.info.offset;
-    
-    /*
-      set facets
-    */
-    $scope.setFacets('type', resources.info.groups);
-    
-    /*
-      Reload related items, with filters.
-    */
-    $scope.sync = function() {
-      $scope.loading = true;
-      ResourceFactory.get(angular.extend({
-        limit: $scope.limit,
-        offset: $scope.offset
-      }, $scope.params), function (res) {
-        $scope.loading = false;
-        $scope.offset  = Math.min(res.info.offset, res.info.total_items);
-        $scope.limit   = res.info.limit;
-        $scope.totalItems = res.info.total_items;
-        if($scope.offset > 0)
-          $scope.addRelatedItems(res.result.items);
-        else
-          $scope.setRelatedItems(res.result.items);
-        // reset if needed
-        $scope.setFacets('type', res.info.groups);
-        
-      }) 
-    }
-    
-    
-    /*
-      listener: EVENTS.API_PARAMS_CHANGED
-      some query parameter has changed, reload the list accordingly.
-    */
-    $scope.$on(EVENTS.API_PARAMS_CHANGED, function() {
-      $scope.offset = 0;
-      $log.debug('ExploreCtrl @API_PARAMS_CHANGED', $scope.params);
-      $scope.sync();
-    });
-    
-    $scope.$on(EVENTS.INFINITE_SCROLL, function (e) {
-      $scope.offset = $scope.offset + $scope.limit;
-      $log.debug('ExploreCtrl @INFINITE_SCROLL', '- skip:',$scope.offset,'- limit:', $scope.limit);
-      $scope.sync();
-    });
-    
-    /*
-      Set related items, with filters.
-    */
-    $scope.setRelatedItems(resources.result.items);
+  .controller('IndexCtrl', function ($scope, $log, ResourceFactory, EVENTS) {
+    $log.debug('ExploreCtrl ready', $scope.params);
+  
   })
   
-  .controller('IndexCtrl', function ($scope, $log, $timeout, ResourceFactory, CooccurrencesFactory, cleanService, InquiryFactory, EVENTS) {
-    $log.debug('IndexCtrl ready', $scope.params);
+  .controller('ExploreCtrl', function ($scope, $log, $timeout, ResourceFactory, CooccurrencesFactory, cleanService, InquiryFactory, EVENTS) {
+    $log.debug('ExploreCtrl ready', $scope.params);
     
     $scope.limit  = 10;
     $scope.offset = 0;

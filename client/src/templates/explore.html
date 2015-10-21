@@ -1,12 +1,18 @@
+<div id='perspective-menu' class="tk-proxima-nova header-menu"ng-include src="'templates/partials/helpers/menu.html'"></div>
+
+
+
 <div ui-view id='see-also'>
   <div  class='{{currentCtrl}}' ng-cloak>
-    <div ng-include src="'templates/partials/resource-toolbar.html'"></div>
+   
     
     <div class="empty-list" ng-if="relatedItems.length == 0">
       There are no related <i>documents</i>.
     </div>
-    <div masonry preserve-order>
-      <div class="wrap" class="masonry-brick" ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/resource-lite.html"'></div>
+    <div>
+      <div class="" ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/resource-lite.html"'></div>
+       <!-- wrap {{loading? 'animated fadeOut': 'animated fadeIn'}}" style="-webkit-animation-delay: {{$index * 100}}ms;
+        animation-delay: {{$index * 100}}ms" -->
     </div>
   </div>
   

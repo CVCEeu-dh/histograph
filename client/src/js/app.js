@@ -84,7 +84,7 @@ angular
       })
       
       .state('explore', {
-        url: '/explore',
+        url: '/r',
         templateUrl: 'templates/explore.html',
         controller: 'ExploreCtrl',
         resolve: {

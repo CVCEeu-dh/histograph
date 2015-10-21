@@ -103,8 +103,10 @@ a#header-logo img{
        -o-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1);
           transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1);
 }
-.view.IndexCtrl{
-  top: 100px;
+.view.index{
+  top: 50px;
+  bottom: 0px;
+  
 }
 
 .view.active{
@@ -551,7 +553,7 @@ a#header-logo img{
 }
 
 .explore #see-also{
-  width: 100%;
+  width: 50%;
   margin-left:0%;
 }
 
@@ -942,8 +944,8 @@ a#header-logo img{
   left: 50%;
 }
 
-#milkyway.index{
-  left: 350px;
+#milkyway.explore{
+  left: 50%;
 }
 
 #milkyway.search{
@@ -954,7 +956,7 @@ a#header-logo img{
   left: 57%;
 }
 
-#milkyway.explore{
+#milkyway.index{
   display: none;
 }
 
@@ -4929,7 +4931,12 @@ Copyright (c) 2015 Daniel Eden
 /*#timeline.search, #timeline.index{
   left: 0%;
 }*/
-
+/*#timeline.index {
+   -webkit-transform: translateY(80px); 
+      -ms-transform: translateY(80px); 
+          transform: translateY(80px);
+}
+*/
 #timeline.active{
   -webkit-transform: translateY(-80px); /* Safari */
       -ms-transform: translateY(-80px); /* IE 9 */
@@ -5067,4 +5074,46 @@ Copyright (c) 2015 Daniel Eden
 
 .modal-content .profile-pic img{
   height: 100%;
+}
+
+
+
+
+/**
+  
+  Introfuction
+
+*/
+#intro {
+  margin: 50px 50px;
+  
+}
+#intro h1 {
+  font-size: 36px;
+  line-height: 72px;
+  font-weight: bold;
+}
+#intro h2 {
+  font-size: 24px;
+  font-weight: bold;
+  line-height: 36px
+}
+
+.grammar{
+
+      font-size: 24px;
+    line-height: 36px;
+    background: #e8e8e8;
+    padding: 36px;
+}
+.grammar-choice {
+  display: inline-block;
+  font-weight: bold;
+  border-bottom:2px solid #151515;
+}
+
+.grammar-choice  button.btn{
+      width: 18px;
+    background: transparent;
+    height: 18px;
 }

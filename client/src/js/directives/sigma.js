@@ -36,9 +36,6 @@ angular.module('histograph')
         toggleMenu: '&togglemenu'
       },
       link : function(scope, element, attrs) {
-        // set the initial target
-        scope.target = false;
-        
         // cutat function for long labels
         var cutat = function (text, cutAt) {
           var t = text.substr(0, cutAt);
@@ -55,7 +52,7 @@ angular.module('histograph')
         tooltip.isVisible   = false;
         tooltip.text        = '';
         
-        // edge tooltip
+        // configure default tooltip for edges
         tooltip.edge = {};
         tooltip.edge.tip         = $("#tooltip-sigma-edge");
         tooltip.edge.el          = tooltip.edge.tip.find('.tooltip-inner');
@@ -85,6 +82,64 @@ angular.module('histograph')
           neighbors[nodeId] = this.nodesIndex[nodeId];
           return neighbors;
         });
+        
+        /*
+          Build slopwly but surely the graph
+          Calculate the differences between pg and g: nodes to delete, nodes to add. 
+        */
+        sigma.classes.graph.addMethod('build', function (g, pg) {
+          'use strict';
+          var self = this;
+          
+          
+          // add pair of nodes ...
+          var i,
+              a,
+              b,
+              c,
+              ns,
+              an,
+              l,
+              k,
+              nt,
+              c;
+          
+          // calculate differences in nodes
+          
+          
+          // the overall node indexes
+          ns = _.indexBy(g.nodes, 'id');
+          an = {};
+          // console.log('rererererere', ns,g.nodes)
+          a = g.edges || [];
+          c = a.length;
+          nt = setInterval(function() {
+            si.killForceAtlas2();
+            c--;
+            if(!an[a[c].source])
+              self.addNode(ns[a[c].source]);
+            if(!an[a[c].target])
+              self.addNode(ns[a[c].target]);
+            
+            an[a[c].source] = true;
+            an[a[c].target] = true;
+            
+            self.addEdge(a[c]);
+            
+            si.startForceAtlas2({
+              adjustSizes :true,
+              linLogMode: true,
+              startingIterations : 10,
+              gravity : 1,
+              edgeWeightInfluence : 1
+            });
+            if(c == 0 || !a[c])
+              clearTimeout(nt);
+            //si.refresh();//self.draw()
+          }, 200);
+          return this;
+        });
+        
         
         
         
@@ -143,7 +198,8 @@ angular.module('histograph')
         
         
         
-        // set theinitial status
+        // set the initial target
+        scope.target = false;
         scope.status = IS_STOPPED;
         scope.lookup = false;
         
@@ -207,32 +263,35 @@ angular.module('histograph')
             si.refresh();
             return;
           }
-            
+          
+          // calculate initital layout duration 
+          layoutDuration = Math.max(Math.min(4* graph.nodes.length * graph.edges.length, maxlayoutDuration),minlayoutDuration)
+          $log.log('::sigma n. nodes', si.graph.nodes.length, ' n. edges', si.graph.edges.length, 'runninn layout atlas for', layoutDuration/1000, 'seconds')
+          
           // refresh the scale for edge color, calculated the extent weights of the edges
           scale.domain(d3.extent(graph.edges, function(d) {return d.weight || 1}));
           
           // Reading new graph
           si.graph.clear();
           si.refresh();
-          // calculate initital layout duration 
-          layoutDuration = Math.max(Math.min(4* si.graph.nodes().length * si.graph.edges().length, maxlayoutDuration),minlayoutDuration)
-          $log.log('::sigma n. nodes', si.graph.nodes().length, ' n. edges', si.graph.edges().length, 'runninn layout atlas for', layoutDuration/1000, 'seconds')
           
           // timout the layout
           timers.play = setTimeout(function() {
-            si.graph.clear().read(graph);
-            si.graph.nodes().forEach(function (n) {
+            graph.nodes = graph.nodes.map(function (n) {
               n.color = n.type?
                 (colors[n.type] || "#353535"):
                 "#353535";
-              n.x = n.x || Math.random()*50
-              n.y = n.y || Math.random()*50
-              n.size = Math.sqrt(si.graph.degree(n.id));
+              n.x = n.x || Math.random()*50;
+              n.y = n.y || Math.random()*50;
+              n.size = 5;//Math.sqrt(si.graph.degree(n.id));
+              return n;
             });
-            si.graph.edges().forEach(function (n) {
-              
+            
+            graph.edges = graph.edges.map(function (n) {
               n.size = n.weight;
+              return n
             });
+            
             
             if(graph.nodes.length > 50) {
               si.settings('labelThreshold', 5.5);
@@ -243,6 +302,11 @@ angular.module('histograph')
               si.settings('labelThreshold', 0);
               si.settings('labelSize', 'fixed');
             }
+            $log.log('::sigma @graph add', graph.edges.length, 'edges,', graph.nodes.length, 'nodes');
+            si.graph.clear().read(graph);
+            
+            
+            
             rescale();
             si.refresh();
             play(); 
