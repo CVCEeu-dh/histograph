@@ -66,6 +66,19 @@ module.exports = {
     Special validation fields
   */
   SPECIALS: {
+    entity: {
+      field: 'entity',
+      check: 'includedIn',
+      args: [
+        [
+          'person',
+          'location',
+          'organization',
+          'social_group'
+        ]
+      ],
+      error: 'should be something like person, location or organization'
+    },
     orderby: {
       field: 'orderby',
       check: 'includedIn',
@@ -141,6 +154,16 @@ module.exports = {
         500
       ],
       error: 'should be at least 3 to 160 chars',
+      optional: true
+    },
+    {
+      field: 'query',
+      check: 'isLength',
+      args: [
+        2,
+        500
+      ],
+      error: 'should be 2 to 500 chars',
       optional: true
     },
     {
