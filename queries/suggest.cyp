@@ -166,10 +166,10 @@ RETURN {
 // get resources by query
 start n=node:node_auto_index({query})
 WHERE 'entity' in labels(n)
-WITH last(labels(n)) as type, count(n) as count_items
+WITH last(labels(n)) as group, count(n) as count_items
 RETURN {
-  type: type,
-  count: count_items
+  group: group, 
+  count_items: count_items
 } AS result
 
 
@@ -289,3 +289,4 @@ SET res.title_search = res.title_search
 // fill the full search index. Cfr scripts/tasks/lucene.js
 MATCH (ent:entity) WHERE has(ent.name_search)
 SET ent.name_search = ent.name_search
+

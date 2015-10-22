@@ -26,7 +26,7 @@ function toLucene(query) {
   if(query.split(/\s/).length > 1)
     return '"' +query.split(/\s/).join(' ')+ '"'
   else
-    return query;
+    return '*'+query+'*';
   
   var q = '*' + query.split(/[^\w]/).map(function (d) {
     return d.trim().toLowerCase()
@@ -396,65 +396,33 @@ module.exports =  function(io){
     },
     
     /*
-      Caption and title multilanguage search.
-      @todo: use the solr endpoint wherever available.
+      Lucene results. can also be used for typeahead, since it is very fast.
     */
-    entities: function (req, res) {
-      
+    getEntities: function (req, res) {
       var form = validator.request(req, {
             limit: 20,
-            offset: 0
+            offset: 0,
+            entity: 'person'
+          }, {
+            fields: [
+              validator.SPECIALS.entity
+            ]
           });
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       
-      var offset = +req.query.offset || 0,
-          limit  = +req.query.limit || 20,
-          q      = toLucene(req.query.query),
-          entity = req.query.entity || 'person',    
-          query  = [
-              
-              'name_search:', q,
-            ].join('');
-      //console.log("query", query)
-      // get countabilly
-      async.parallel({
-        get_matching_entities_count: function (callback) {
-          neo4j.query(queries.get_matching_entities_count, {
-            query: query,
-          }, function (err, items) {
-            if(err)
-              callback(err);
-            else
-              callback(null, items);
-          })
+      var q = 'name_search:' + toLucene(req.query.query);
+      form.params.query = q;
+      
+      models.getMany({
+        queries: {
+          count_items: queries.get_matching_entities_count,
+          items: queries.get_matching_entities
         },
-        get_matching_entities: function (callback) {
-          neo4j.query(queries.get_matching_entities, {
-            query: query,
-            offset: offset,
-            entity: 'person',
-            limit: limit
-          }, function (err, items) {
-            if(err)
-              callback(err);
-            else
-              callback(null, items);
-          })
-        }
+        params: form.params
       }, function (err, results) {
-        if(err)
-          return helpers.cypherQueryError(err, res);
-        return res.ok({
-          items: results.get_matching_entities.map(function (d) {
-            d.props.languages = _.values(d.props.languages)
-            return d;
-          }),
-        }, {
-          total_items: results.get_matching_entities_count,
-          offset: offset,
-          limit: limit
-        });
+        console.log(err)
+        helpers.models.getMany(err, res, results.items, results.count_items, form.params);
       });
     },
     
