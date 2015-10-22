@@ -17,7 +17,7 @@ var settings = require('../settings'),
     should  = require('should');
     
 describe('services: geo', function() {
-  it('should connect to the Geonames endpoint and return some results', function (done) {
+  it('should connect to the Geonames endpoint, if available, and return some results', function (done) {
     this.timeout(15000)
     if(!settings.geonames ||_.isEmpty(settings.geonames.username)) {
       done();
@@ -28,7 +28,8 @@ describe('services: geo', function() {
         
         if(err)
             throw err;
-        console.log(results)
+        // console.log(results)
+        should.equal(results[0].toponymName, 'Rome')
         should.exist(results.length);
         done()
       });
