@@ -29,7 +29,8 @@ var settings  = require('../settings'),
 var session,
     __user,
     __MARVIN, // our special user
-    __resourceA;
+    __resourceA,
+    __resourceB;
 
 before(function () {
   session = new Session();
@@ -90,6 +91,19 @@ describe('controller:suggest  before', function() {
     });
   });
   
+  it('should create a new resource B', function (done){
+    Resource.create(generator.resource.multilanguageB({
+      user: __MARVIN
+    }), function (err, resource) {
+      if(err)
+        throw err;
+      __resourceB = resource;
+      should.not.exist(err)
+      // console.log(__resourceA.props.full_search)
+      done();
+    });
+  });
+  
   it('should authenticate the user', function (done) {
     session
       .post('/login')
@@ -123,6 +137,21 @@ describe('controller:suggest check lucene query', function() {
 });
 
 
+describe('controller:suggest ', function() {
+  it('should get the entity that match "konr"', function (done) {
+    session
+      .get('/api/suggest/entity?query=konr')
+      .expect(200)
+      .end(function (err, res) {
+        console.log(res.body)
+        
+        should.not.exist(err) // err on statusCode
+        done();
+      })
+  });
+  
+});
+
 describe('controller:suggest get shared resources', function() {
   it('should get a bunch of resources between a couple of entity ids', function (done) {
     session
@@ -139,7 +168,139 @@ describe('controller:suggest get shared resources', function() {
   
 });
 
-
+describe('controller:suggest perform some queries', function() {
+  this.timeout(5000)
+  it('should get some suggestions for Yalta', function (done) {
+    session
+      .get('/api/suggest?query=Yalta')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err);
+        should.not.exist(err);
+        should.exist(res.body.result.items.length);
+        done()
+      });
+  });
+  
+  it('should get matches for helmut kohl and mitterrand', function (done) {
+    session
+      .get('/api/suggest/resources?query=helmut kohl mitterrand')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err);
+        // console.log(res.body)
+        should.not.exist(err);
+        should.exist(res.body.result.items.length);
+        done()
+      });
+  });
+  
+  it('should get entities matching for helmut kohl', function (done) {
+    session
+      .get('/api/suggest/entity?query=paris')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        
+        if(err)
+          console.log(err);
+        should.not.exist(err);
+        //citems)
+        should.exist(res.body.info.total_items);
+        should.exist(res.body.result.items.length);
+        done()
+      });
+  });
+  
+  it('should get a nice graph describing matching for helmut kohl', function (done) {
+    session
+      .get('/api/suggest/graph?query=helmut kohl')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err);
+        should.not.exist(err);
+        should.exist(res.body.result.graph);
+        done()
+      });
+  });
+  
+  it('should get the SHORTEST path connecting all four nodes', function (done) {
+    session
+      .get('/api/suggest/all-shortest-paths/26441,27631,11173?limit=33')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err);
+        should.not.exist(err);
+        should.exist(res.body.result.items.length);
+        done()
+      });
+  });
+  
+   
+  it('should get the full path between four nodes', function (done) {
+    session
+      .get('/api/suggest/all-in-between/26859,26858,17366,39404,26400?limit=33')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err);
+        should.not.exist(err);
+        should.exist(res.body.result.graph);
+        done()
+      });
+  });
+  
+  it('should get an unknown node based on id', function (done) {
+    session
+      .get('/api/suggest/unknown-node/'+__resourceA.id)
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err);
+        should.not.exist(err);
+        should.exist(res.body.result.item);
+        done()
+      });
+  });
+  
+  it('should get an unknown node based on ids', function (done) {
+    session
+      .get('/api/suggest/unknown-nodes/'+ __resourceA.id +','+ __resourceB.id)
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err);
+        should.not.exist(err);
+        should.equal(_.map(res.body.result.items, 'id').sort().join(), [__resourceA.id,  __resourceB.id].sort().join());
+        done()
+      });
+  });
+  
+  it('should get the neighbors at distance 1 of four nodes', function (done) {
+    session
+      .get('/api/suggest/neighbors/26441,27631,11173')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err);
+        should.not.exist(err);
+        should.exist(res.body.result.items.length);
+        done()
+      });
+  });
+});
 
 
 
