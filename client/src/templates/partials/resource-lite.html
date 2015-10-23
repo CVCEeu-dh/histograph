@@ -1,7 +1,9 @@
 <div class="related">
   <div class="type"><i class="fa fa-circle type resource"></i> {{relatedItem.props.ecmd|ecmd}} - {{relatedItem.props.mimetype}} {{$index + 1}}/{{totalItems}}</div>
   <h4>
-    <a href='#/r/{{relatedItem.id}}' ng-bind-html='relatedItem.props | title : language'></a>
+    <a href='#/r/{{relatedItem.id}}' ng-if='!relatedItem.annotations || !relatedItem.annotations.length'>{{relatedItem.props|lookup:'title':language}}</a>
+    <a href='#/r/{{relatedItem.id}}' ng-if='relatedItem.annotations && relatedItem.annotations.length' context='relatedItem' marked="relatedItem.annotations|annotate:'title':language"></a>
+  
   </h4>
 
   <div class='actions'>
@@ -19,5 +21,8 @@
   </div>
            
   <img ng-if='relatedItem.props.mimetype=="image"' ng-src="{{relatedItem.props | url : language}}">
-  <blockquote> {{relatedItem.props | abstract : language}}</blockquote>
+  <blockquote ng-if='!relatedItem.annotations || !relatedItem.annotations.length'>{{relatedItem.props|lookup:'caption':language}}</blockquote>
+  <blockquote ng-if='relatedItem.annotations && relatedItem.annotations.length' context='relatedItem' marked="relatedItem.annotations|annotate:'caption':language"></blockquote>
+  
+  <div class='matches' ng-if='relatedItem.annotations' context='relatedItem' marked="relatedItem.annotations|annotate:'url':language"></div>
 </div>

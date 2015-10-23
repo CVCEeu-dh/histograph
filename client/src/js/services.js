@@ -149,47 +149,71 @@ angular.module('histograph')
   })
   
   /*
-    Get/Update/Delete one resource
+    Search & Suggest
   */
-  .factory('SuggestFactory', function ($http) {
-    return {
-      get: function(options) {
-        return $http.get('/api/suggest', {
-          params: options
-        });
+  .factory('SuggestFactory', function ($resource) {
+    return $resource('/api/suggest/:m/:ids', {}, {
+      getUnknownNodes: {
+        method: 'GET',
+        params: {
+          m: 'unknown-nodes'
+        }
       },
-      allShortestPaths: function(options) {
-        return $http.get('/api/suggest/all-shortest-paths/' + options.ids);
+      getEntities: {
+        method: 'GET',
+        params: {
+          m: 'entity'
+        }
       },
-      allInBetween: function(options) {
-        return $http.get('/api/suggest/all-in-between/' + options.ids);
+      getUnknownNode: {
+        method: 'GET',
+        params: {
+          m: 'unknown-node'
+        }
       },
-      getUnknownNode: function(options) {
-        return $http.get('/api/suggest/unknown-node/' + options.id);
-      },
-      getUnknownNodes: function(options) {
-        return $http.get('/api/suggest/unknown-nodes/' + options.ids);
-      },
-      neighbors: function(options) {
-        return $http.get('/api/suggest/neighbors/' + options.ids);
-      },
-      getResources: function(options) {
-        return $http.get('/api/suggest/resources', {
-          params: options
-        });
-      },
-      getEntities: function(options) {
-        return $http.get('/api/suggest/entities', {
-          params: options
-        });
-      },
-      getGraph: function(options) {
-        return $http.get('/api/suggest/graph', {
-          params: options
-        });
-      } 
-    };
+
+    });
   })
+  
+  // .factory('SuggestFactory', function ($http) {
+  //   return {
+  //     get: function(options) {
+  //       return $http.get('/api/suggest', {
+  //         params: options
+  //       });
+  //     },
+  //     allShortestPaths: function(options) {
+  //       return $http.get('/api/suggest/all-shortest-paths/' + options.ids);
+  //     },
+  //     allInBetween: function(options) {
+  //       return $http.get('/api/suggest/all-in-between/' + options.ids);
+  //     },
+  //     getUnknownNode: function(options) {
+  //       return $http.get('/api/suggest/unknown-node/' + options.id);
+  //     },
+  //     getUnknownNodes: function(options) {
+  //       return $http.get('/api/suggest/unknown-nodes/' + options.ids);
+  //     },
+  //     neighbors: function(options) {
+  //       return $http.get('/api/suggest/neighbors/' + options.ids);
+  //     },
+  //     getResources: function(options) {
+  //       return $http.get('/api/suggest/resources', {
+  //         params: options
+  //       });
+  //     },
+  //     getEntities: function(options) {
+  //       return $http.get('/api/suggest/entities', {
+  //         params: options
+  //       });
+  //     },
+  //     getGraph: function(options) {
+  //       return $http.get('/api/suggest/graph', {
+  //         params: options
+  //       });
+  //     } 
+  //   };
+  // })
   /*
     Socket.io service, thqnks to http://briantford.com/blog/angular-socket-io
   */

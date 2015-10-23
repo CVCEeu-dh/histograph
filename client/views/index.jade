@@ -21,20 +21,7 @@ html
 
   body(ng-app='histograph')
     script(type='text/javascript').
-      var socket = io();
-    
-    script(type='text/ng-template', id='suggest.html').
-      <div>
-        <a ng-if='match.model.type=="default"'>
-          search {{query}}
-        </a>
-        <a ng-if='match.model.type!="default"' ng-href='/#/{{match.model.props.type_search=="resource" ? "r": "e"}}/{{match.model.id}}'>
-          {{match.model.props | title: 'en'}}
-        </a>
-        <span ng-if='match.model.type!="default"' ng-click='$parent.$parent.$parent.$parent.queue(match.model.id, true)'>
-          <i class='fa fa-play-circle-o'></i>
-        </span>
-      </div>
+      var socket = io(); 
 
     div(ng-controller='CoreCtrl') 
       div(ng-controller='FiltersCtrl')
@@ -74,7 +61,7 @@ html
                   form(ng-submit='setQuery(query)')
                     div(class='input-group')
                       //- input(type='text', ng-model='query', class='form-control')
-                      input(type='text', name='test', ng-model='__query', typeahead-on-select='setQuery($item, $model, $label)', class='form-control', typeahead-editable='false', placeholder='Search for...', typeahead='item for items in suggest($viewValue)', typeahead-wait-ms='100', typeahead-template-url='suggest.html')
+                      input(type='text', name='test', ng-model='__query', typeahead-on-select='setQuery($item, $model, $label)', class='form-control', typeahead-editable='false', placeholder='Search for...', typeahead='item for items in suggest($viewValue)', typeahead-wait-ms='100', typeahead-template-url='templates/partials/helpers/suggest.html')
                       //- input(type='text', ng-model='query', class='form-control', placeholder='Search for...', bs-typeahead, bs-options='item for items in suggest($viewValue)', data-container='body',data-delay='{ show: 500, hide: 1000000 }')
                       span(class='input-group-btn')
                         a(class='btn btn-default', type='button', ng-href='/#/search/{{query}}') search

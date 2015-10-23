@@ -445,13 +445,13 @@ angular.module('histograph')
         if(toBeAdded.length)
           SuggestFactory.getUnknownNodes({
             ids: toBeAdded
-          }).then(function (res) {
+          }, function (res) {
             $log.log('CoreCtrl -> addToQueue() SuggestFactory', res);
             $scope.playlist = $scope.playlist.concat(res.data.result.items);
             $scope.playlistIds = _.map( $scope.playlist, 'id');
             $scope.queueStatus = 'active';
             $scope.queueRedirect();
-          })
+          });
      }
 
      $scope.queue = function(item, inprog) {
@@ -484,11 +484,13 @@ angular.module('histograph')
           $scope.$apply();
         $scope.queueRedirect();
       } else { // we need to load the item first, then we can update queue status
-        SuggestFactory.getUnknownNode({
-          id: itemId
-        }).then(function (res) {
-          $scope.playlist.push(res.data.result.item);
-          $scope.playlistIds.push(res.data.result.item.id);
+        SuggestFactory.getUnknownNodes({
+          ids: [itemId]
+        }, function (res) {
+          console.log(res)
+          debugger
+          $scope.playlist.push(res.result.items[0]);
+          $scope.playlistIds.push(res.result.items[0].id);
           $scope.queueStatus = 'active';
           if(!inprog)
             $scope.$apply();

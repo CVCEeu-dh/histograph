@@ -6,8 +6,8 @@
  */
 angular.module('histograph')
   .controller('IndexCtrl', function ($scope, $log, ResourceFactory, EVENTS) {
-    $log.debug('ExploreCtrl ready', $scope.params);
-  
+    $log.debug('IndexCtrl ready', $scope.params);
+  // the original index page, almost empty
   })
   
   .controller('ExploreCtrl', function ($scope, $log, $timeout, ResourceFactory, CooccurrencesFactory, cleanService, InquiryFactory, EVENTS) {

@@ -304,6 +304,9 @@ angular.module('histograph')
             }
             $log.log('::sigma @graph add', graph.edges.length, 'edges,', graph.nodes.length, 'nodes');
             si.graph.clear().read(graph);
+            si.graph.nodes().forEach(function (n) {
+              n.size =si.graph.degree(n.id);
+            });
             
             
             

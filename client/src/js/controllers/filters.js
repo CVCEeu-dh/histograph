@@ -7,7 +7,7 @@
  * it was written in order to simplify CoreCtrl debugging
  */
 angular.module('histograph')
-  .controller('FiltersCtrl', function ($scope, $log, $location, SuggestFactory,EVENTS) {
+  .controller('FiltersCtrl', function ($scope, $log, $http, $location, SuggestFactory,EVENTS) {
     $log.debug('FiltersCtrl ready', $location.search());
     
     $scope.filters = {};
@@ -61,7 +61,7 @@ angular.module('histograph')
       else {
         $log.log('FiltersCtrl -> addFilter() - key:', key, '- value:', value)
         
-        var list = _.compact(_.map(angular.copy($scope.filters[key]), _.trim));
+        var list = _.unique(_.compact(_.map(angular.copy($scope.filters[key]), _.trim)));
         if(list.indexOf(value) === -1) {
           list.push(value);
           $location.search(key, list.join(','));
@@ -85,8 +85,8 @@ angular.module('histograph')
         if(key == 'with')
           SuggestFactory.getUnknownNodes({
             ids: d
-          }).then(function (res) {
-            $scope.filterItems[key] = res.data.result.items;
+          }, function (res) {
+            $scope.filterItems[key] = res.result.items;
           })
       });   
     };
@@ -109,7 +109,38 @@ angular.module('histograph')
       $scope.loadFiltersItems();
     }
     
-    
+    /*
+      typeahead, with filters.
+    */
+    $scope.typeaheadSuggest = function(q, label) {
+      $log.log('FiltersCtrl -> typeahead()', q, label);
+      // return $http.get('/api/suggest/entity', {
+      //   params: {
+      //     query: q
+      //   }
+      // }).then(function(response){
+      //   console.log(response)
+      //   return [{type:'default'}].concat(response.data.result.items)
+      // });
+      
+      return SuggestFactory.get({
+        m: label,
+      
+        query: q,
+        limit: 10
+      }).$promise.then(function(res){
+        if(res.status != 'ok')
+          return [];
+        return [{type: 'default'}].concat(res.result.items)
+      })
+      // }, function(res){
+      //   if(res.status != 'ok')
+      //     return [];
+      //   console.log(res.result.items)
+      //   return [{type: 'default'}].concat(res.result.items)
+        
+      // })
+    }
     /*
       The combinatio of choices.
       load facets?
@@ -124,12 +155,13 @@ angular.module('histograph')
             connector: {
               type: 'of type',
               relatedTo: 'which contains',
+              notRelatedTo: 'related to anyone',
               from: 'from',
               to: 'to'
             },
             types: [
               {
-                name: 'any kind of documents',
+                name: 'of any kind',
               },
               {
                 name: 'mostly pictures',
@@ -145,7 +177,7 @@ angular.module('histograph')
               }
             ],
             relatedTo: {
-              autosuggest: 'entity'
+              typeahead: 'entity'
             }
           },
           {
@@ -255,6 +287,7 @@ angular.module('histograph')
     $scope.setSubject = function(grammar, subject) {
       grammar.subject = subject
     }
+    
     $scope.setType = function(subject, type) {
       subject.type = type;
       if(type.filter)
@@ -262,5 +295,6 @@ angular.module('histograph')
       else
         $scope.removeFilter('type')
     }
+    
     $scope.$on('$locationChangeSuccess', $scope.loadFilters);
   })

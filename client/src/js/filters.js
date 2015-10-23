@@ -217,6 +217,40 @@ angular.module('histograph')
       }
     };
   })
+  /*
+    Translate
+  */
+  .filter('lookup', function($sce) {
+    return function(props, field, language, cutAt) {
+      if(!props)
+        return props
+      var content = props[field + '_' + language]
+      if(content)
+        return content;
+      else
+        return props[field + '_' + _.first(props.languages)] || 'not available'
+    }
+  })
+  
+  /*
+    Return the correct field for annotation purposes.
+  */
+  .filter('annotate', function($sce) {
+    return function(annotations, field, language) {
+      var annotation = _.get(_.find(annotations, {language:language}), 'annotation'),
+          extra = '';
+          
+      if(!annotation) {
+        annotation = _.get(_.first(annotations), 'annotation');
+        extra = ''; // something like not available in english
+      }
+      
+      if(annotation[field])
+       return extra + annotation[field];
+      
+      return ''
+    }
+  })
   
   .filter('abstract', function($sce) {
     return function(props, language, cutAt) {

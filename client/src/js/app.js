@@ -88,9 +88,9 @@ angular
         templateUrl: 'templates/explore.html',
         controller: 'ExploreCtrl',
         resolve: {
-          resources: function(ResourceFactory, $location) {
+          resources: function(ResourcesFactory, $location) {
             
-            return ResourceFactory.get(angular.extend({
+            return ResourcesFactory.get(angular.extend({
               limit: 10
             }, $location.search())).$promise;
           },
