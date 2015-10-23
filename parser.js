@@ -105,8 +105,9 @@ module.exports = {
    annotate a string acciording to the splitpoints.
    points is a Yaml
    */
-  annotate: function(content, points) {
-    var splitpoints = [], // sorted left and right points in order to segment content. 
+  annotate: function(content, points, options) {
+    var options = options || {},
+        splitpoints = [], // sorted left and right points in order to segment content. 
         chunks = []; // the annotation chunks to be enriched.
     
     // sort points by context.left ASC, context.right ASC
@@ -127,32 +128,103 @@ module.exports = {
       return d
     });
     
+    // console.log(splitpoints)
     for(var i = 0; i < splitpoints.length - 1; i++) {
+      
+      // get the leftmost or rightmost for this splitpoint
+      var ls = _.unique(_.map(points.filter(function(d) {
+        return d.context.left == splitpoints[i] || d.context.right == splitpoints[i + 1]
+      }), 'id'));
+      
       chunks.push({
         s: content.slice(splitpoints[i], splitpoints[i + 1]),
         l: splitpoints[i],
         r: splitpoints[i + 1],
-        links: _.map(_.filter(points, {context:{left:splitpoints[i]}}), 'id')
+        links: ls
       })
     };
     
-    // join chunks as markdown string like a pro
-    return _.reduce(chunks, function(reduced, c) {
-      var res = [reduced.s || reduced];
-      
-      if(c.links.length)
-        res.push('[', c.s, '](', c.links.join(','), ')');
-      else
-        res.push(c.s);
+    if(!options.isMatch)
+      // join chunks as markdown string like a pro
+      return _.reduce(chunks, function(reduced, c) {
+        var res = [reduced.s || reduced];
+        
+        if(c.links.length)
+          res.push('[', c.s, '](', c.links.join(','), ')');
+        else
+          res.push(c.s);
+          
+        return res.join('');
+      });
+    else {
+      var mch = [],
+        fch = chunks.filter(function (d) {
+          return d.links.length
+        });
+      // concatenate adjacent fch (filtered chunks)
+      for(var i = 0, l = fch.length; i < l; i++) {
+        if(i == 0 && fch[i].l > 0)
+           mch.push(' [...] ')
+        if(fch[i].links.length && fch[i].links[0] != -1)
+          mch.push('[', fch[i].s, '](', fch[i].links.join(','), ')');
+        else
+          mch.push(fch[i].s)
+        if(i + 1 < l && fch[i].r != fch[i+1].l)
+          mch.push(' [...] ')
+        else if(i == l-1 && fch[i].r < content.length)
+          mch.push(' [...] ')
+          
+      }
 
-      return res.join('');
-    });
+      return mch.join('')
+      // .filter(function (d) {
+      //   return d.links.length
+      // })
+    }
+      
   },
 
   yaml: function(yaml) {
     return YAML.parse(yaml)
   },
   
+  /*
+    get the chunks from a YAML content for the specific ids only,
+    then annotate them.
+    @param content - the text to be annotated
+    @param options.points  - list of splitpoint contexts, with optional identifier
+    @param options.ids     - list of ids to filter the splitpoints with
+  */
+  annotateMatches: function(content, options) {
+    var points = [],
+        contexts = [];
+    options.points.forEach(function (d) {
+      // reduce the annotation for the given ids ONLY.
+      if(options.ids.indexOf(+d.id) == -1)
+        return;
+      // get the very first sentence with a simple tokenizer.
+      
+      // add the new interval as km splitpoint
+      points.push({
+        id: -1,
+        context: {
+          left:  Math.max(0, d.context.left - 50),
+          right: d.context.left
+        }
+      },{
+        id: -1,
+        context: {
+          left: d.context.right,
+          right: Math.min(d.context.right + 50, content.length),
+        }
+      });
+      points.push(d);
+    });
+    // console.log(points);
+    return module.exports.annotate(content, points, {
+      isMatch: true
+    });
+  },
   // divide a long text in paragraphs (really simple one)
   // according to multiple linebreaks
   paragraphs: function (options) {
