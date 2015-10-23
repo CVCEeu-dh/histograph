@@ -106,20 +106,7 @@ module.exports = {
       });
       
       item.positionings = _.filter(versions, {type:'positioning'});
-      item.annotations = _.map(_.filter(versions, {type:'annotation'}), function (d) {
-        var content = [
-          item.props['title_'+ d.language] || '',
-          item.props['caption_'+ d.language] || ''
-        ].join('§ ');
-        
-        var annotations = parser.annotate(content, d.yaml).split('§ ');
-        
-        d.annotated = {
-          title: annotations[0],
-          source: annotations[1]
-        };
-        return d;
-      });
+      item.annotations = _.filter(versions, {type:'annotation'});
       item.collections = _.values(item.collections);
       
       next(null, module.exports.normalize(item));
@@ -140,10 +127,79 @@ module.exports = {
       if(err)
         next(err)
       else
-        next(null, results.items.map(module.exports.normalize), results.count_items);
+        next(null, module.exports.normalize(results.items, params), results.count_items);
     });
   },
-  normalize: function(node) {
+  /*
+    Get annotated text
+    for a given (resource:resource) node and (annotation:annotation)
+  */
+  getAnnotatedText: function(resource, annotation, params) {
+        var annotations,
+            availableAnnotationFields = [],
+            content;
+        // parse Yaml if it it hasn't been done yet
+        if(typeof annotation.yaml == 'string')
+          annotation.yaml = YAML.parse(annotation.yaml);
+         
+        // recover content from disambiguation field section, as a list (antd not as a string)
+        content = settings.disambiguation.fields.map(function (field){
+          var c = module.exports.getText(resource, {
+            fields: [field],
+            language: annotation.language
+          });
+          if(c.length) // recreate a fields list of known annotations
+            availableAnnotationFields.push(field);
+          return c;
+        });
+        
+        if(params.with && _.last(settings.disambiguation.fields) == 'url')   {
+          // for the NON URL fields, just do the same as before
+          var fulltext = content.pop(),
+              offset   = _.compact(content).reduce(function(p,c) {
+                return p.length + c.length + '§ '.length;
+              });
+          // console.log(annotation.yaml)
+          // Annotate the fields as usual, just filtering the points. Note the _.compact that eliminates empty content :()
+          annotations = parser.annotate(_.compact(content).join('§ '), annotation.yaml.filter(function (d) {
+            return params.with.indexOf(+d.id) != -1
+          })).split('§ ');
+          
+          // annotate partials MATCHES only
+          annotations.push(parser.annotateMatches(fulltext, {
+            points: annotation.yaml,
+            ids: params.with,
+            offset: offset - 2
+          }));
+          content.push(fulltext); // pop before, push right now. TO BE REFACTORED.
+        } else {
+          
+          annotations = parser.annotate(_.compact(content).join('§ '), annotation.yaml, {}).split('§ ');
+        }
+        
+        annotation.annotated = {};
+        
+        availableAnnotationFields.forEach(function (field, i){
+          annotation.annotated[field] = annotations[i];
+        });
+        // console.log('\n\n',resource.slug, annotation.language, annotations)
+        return {
+          language: annotation.language,
+          annotation: annotation.annotated
+        }
+    
+  },
+  normalize: function(node, params) {
+    if(_.isArray(node))
+      return node.map(function (n) {
+        return module.exports.normalize(n, params);
+      });
+    // resolve annotations, if they've been provided
+    if(node.annotations) {
+      node.annotations = _.map(_.filter(node.annotations, {service: 'ner'}), function(ann){
+        return module.exports.getAnnotatedText(node.props, ann, params);
+      });
+    }
     node.persons = _.values(node.persons).filter(function (n) {
       return n.id
     });
@@ -162,20 +218,25 @@ module.exports = {
     Provide here a list of valid ids
   */
   getByIds: function(params, next) {
+    // remove orderby from params
+    // console.log(params)
+    if(params.orderby)
+      delete params.orderby
     
     var query = parser.agentBrown(rQueries.get_resources, params);
     // console.log(params.ids)
-    neo4j.query(query, {
-      ids: params.ids,
-      limit: params.ids.length,
+    
+    neo4j.query(query, _.assign(params, {
+      //limit: params.offset ids.length,
       offset: 0
-    }, function (err, items) {
+    }), function (err, items) {
       if(err) {
+        console.log(err)
         next(err);
         return;
       }
-      
-      var itemsAsDict = _.indexBy(items.map(module.exports.normalize), 'id');
+      // console.log(params, items.length)
+      var itemsAsDict = _.indexBy(_.map(module.exports.normalize(items, params),'id'));
       
       next(null, params.ids.map(function (id) {
         return itemsAsDict[''+id]
@@ -437,9 +498,9 @@ module.exports = {
         next(err);
         return;
       }
-      module.exports.getByIds({
+      module.exports.getByIds(_.assign(params, {
         ids: _.map(results.items, 'target')
-      }, function (err, items){
+      }), function (err, items){
         next(null, items, results.count_items);
       });
       

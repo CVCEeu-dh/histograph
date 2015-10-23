@@ -221,16 +221,16 @@ describe('controller:resource (related resources)', function() {
   
   it('should show a list of 10 related resources containing a specific entity, if any', function (done) {
     session
-      .get('/api/resource/'+ __resourceA.id+'/related/resource?limit=13&with=17379')
+      .get('/api/resource/177/related/resource?limit=1&with=17379')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
         should.not.exists(err);
         
         should.exist(res.body.result.items);
-        should.equal(res.body.info.limit, 13);
+        should.equal(res.body.info.limit, 1);
         should.exist(res.body.info.with);
-        should.equal(res.body.info.id, __resourceA.id);
+        should.equal(res.body.info.id, 177)// __resourceA.id);
         should.equal(res.body.info.orderby, 'relevance');
         done();
       });

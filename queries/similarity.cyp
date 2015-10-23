@@ -33,8 +33,7 @@ WITH  SUM(toFloat(x.tf * y.tf)) AS xyDotProduct,
 WITH  p1, p2, xyDotProduct, xLength, yLength, toFloat(xLength * yLength) AS d
 WHERE d > 0
 MERGE (p1)-[r:appear_in_same_document]-(p2)
-SET   r.cosine_similarity = xyDotProduct / d
-
+SET   r.cosine = xyDotProduct / d
 
 
 // name: computate_jaccard_distance

@@ -65,11 +65,8 @@ WITH res, locations, persons, organizations, collect({
 // name: get_resources
 // get resources with number of comments, if any
 MATCH (res:resource)
-{if:ids}
-  WHERE id(res) IN {ids}
-{/if}
-{?res:start_time__gt} {AND?res:end_time__lt} {AND?res:mimetype__in} {AND?res:type__in}
-  WITH res
+  {?res:ids__inID} {AND?res:start_time__gt} {AND?res:end_time__lt} {AND?res:mimetype__in} {AND?res:type__in}
+WITH res
 {if:with}
   MATCH (res)--(ent:entity) WHERE id(ent) IN {with} 
   WITH res
@@ -82,7 +79,6 @@ ORDER BY res.start_time DESC
 {/unless}
 SKIP {offset} 
 LIMIT {limit}
-
 WITH res
 OPTIONAL MATCH (res)-[r_loc:appears_in]->(loc:`location`)
 WITH res, r_loc, loc
@@ -119,7 +115,7 @@ WITH res, locations, persons, organizations, collect({
       rel: r_soc
     })[0..5] as social_groups
 
-{if:entity_id}
+{if:with}
   OPTIONAL MATCH (res)--(ann:annotation) 
   WITH res, ann, locations, persons, organizations, social_groups
 {/if}
@@ -128,8 +124,8 @@ RETURN {
   id:id(res),
   type: 'resource',
   props: res,
-  {if:entity_id}
-    ann: ann,
+  {if:with}
+    annotations: collect(ann),
   {/if}
   persons:     persons,
   organizations: organizations,
@@ -140,7 +136,7 @@ RETURN {
 ORDER BY {:orderby}
 {/if}
 {unless:orderby}
-ORDER BY res.start_time DESC
+ORDER BY resource.props.start_time DESC
 {/unless}
 
 

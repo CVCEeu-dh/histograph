@@ -44,12 +44,21 @@ var fs          = require('fs'),
         based on similarity
       */
       'calculate-similarity': [
+        tasks.entity.tfidf,
         tasks.entity.cleanSimilarity,   
-        tasks.entity.jaccard   
+        tasks.entity.jaccard,
+        tasks.entity.cosine
       ],
+      
+      'chunks': [
+        tasks.entity.getMany,
+        tasks.entity.chunks
+      ],
+      
       'query': [
         tasks.helpers.cypher.raw
       ],
+      
       'text-of-resource': [
         tasks.resource.getOne,
         tasks.resource.getText

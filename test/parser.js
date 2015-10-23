@@ -61,7 +61,20 @@ describe('parser:annotate and chunk', function() {
       ids: [25867, 27035],
       points: points
     });
-    console.log(annotateMatches)
+    
+    should.equal(annotateMatches, 'European Parliament Resolution on the Treaty of [Nice](25867) and the future of the European Union (31 May 2001 [...] corporating Parliament’s opinion on the Treaty of [Nice](25867) and the Declaration on the Future of [Europe](27035). The European Parliament notes that the Treaty of [Nice](25867) removes the last remaining formal obstacle to enl [...] ')
+    // console.log(annotateMatches)
+    done()
+  });
+  
+  it('should output the matching chunks for two specific id, with offset', function (done) {
+    // body...
+    var annotateMatches =  parser.annotateMatches('jKl'+text, {
+      ids: [25867, 27035],
+      points: points,
+      offset: -3
+    });
+    should.equal(annotateMatches, ' [...] KlEuropean Parliament Resolution on the Treaty of [Nice](25867) and the future of the European Union (31 May 2001 [...] corporating Parliament’s opinion on the Treaty of [Nice](25867) and the Declaration on the Future of [Europe](27035). The European Parliament notes that the Treaty of [Nice](25867) removes the last remaining formal obstacle to enl [...] ')
     done()
   });
   
@@ -99,7 +112,7 @@ describe('parser:agentBrown cypher template parser', function() {
       'RETURN count(*)', {
         resource_id: 1203
       });
-    should.equal(q3, 'MATCH (inq:inquiry)--(res:resource)  WHERE id(res) = 1203 RETURN count(*)');
+    should.equal(q3, 'MATCH (inq:inquiry)--(res:resource)  WHERE id(res) = {resource_id} RETURN count(*)');
     
     done()
   });

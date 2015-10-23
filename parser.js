@@ -21,7 +21,8 @@ module.exports = {
           differs: '<>',
           pattern: '=~', // MUST be replaced by a neo4j valid regexp.
           in: 'IN',
-          ID: 'id(node) ='
+          ID: 'id(node) =',
+          inID: 'id(node) IN'
         };
     
     return cypherQuery
@@ -85,8 +86,8 @@ module.exports = {
           if(!filters[property])
             return '';
           
-          if(method == 'ID')
-            segments = [methods[method].replace('node', node), filters[property]];
+          if(method == 'ID' || method == 'inID')
+            segments = [methods[method].replace('node', node), '{'+property+'}'];
           
           if(_concatenate && operand == undefined)
             _concatenate = false; // start with WHERE
@@ -144,9 +145,9 @@ module.exports = {
       })
     };
     
-    if(!options.isMatch)
+    if(!options.isMatch) {
       // join chunks as markdown string like a pro
-      return _.reduce(chunks, function(reduced, c) {
+      var result =  _.reduce(chunks, function(reduced, c) {
         var res = [reduced.s || reduced];
         
         if(c.links.length)
@@ -156,7 +157,10 @@ module.exports = {
           
         return res.join('');
       });
-    else {
+      // reduce when there is just one chunk
+      return typeof result == 'string'? result: result.s;
+      
+    } else {
       var mch = [],
         fch = chunks.filter(function (d) {
           return d.links.length
@@ -164,7 +168,7 @@ module.exports = {
       // concatenate adjacent fch (filtered chunks)
       for(var i = 0, l = fch.length; i < l; i++) {
         if(i == 0 && fch[i].l > 0)
-           mch.push(' [...] ')
+          mch.push(' [...] ')
         if(fch[i].links.length && fch[i].links[0] != -1)
           mch.push('[', fch[i].s, '](', fch[i].links.join(','), ')');
         else
@@ -173,9 +177,8 @@ module.exports = {
           mch.push(' [...] ')
         else if(i == l-1 && fch[i].r < content.length)
           mch.push(' [...] ')
-          
       }
-
+      
       return mch.join('')
       // .filter(function (d) {
       //   return d.links.length
@@ -198,27 +201,40 @@ module.exports = {
   annotateMatches: function(content, options) {
     var points = [],
         contexts = [];
+        
+        
     options.points.forEach(function (d) {
       // reduce the annotation for the given ids ONLY.
       if(options.ids.indexOf(+d.id) == -1)
         return;
+      var left  = +d.context.left,
+          right = +d.context.right;
       // get the very first sentence with a simple tokenizer.
-      
+      if(options.offset) {
+        left -= options.offset;
+        right -= options.offset;
+      }
       // add the new interval as km splitpoint
       points.push({
         id: -1,
         context: {
-          left:  Math.max(0, d.context.left - 50),
-          right: d.context.left
+          left:  Math.max(0, left - 50),
+          right: left
         }
       },{
         id: -1,
         context: {
-          left: d.context.right,
-          right: Math.min(d.context.right + 50, content.length),
+          left: right,
+          right: Math.min(right + 50, content.length),
         }
       });
-      points.push(d);
+      points.push({
+        id: d.id,
+        context: {
+          left:  left,
+          right: right
+        }
+      });
     });
     // console.log(points);
     return module.exports.annotate(content, points, {
