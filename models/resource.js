@@ -227,7 +227,7 @@ module.exports = {
     // console.log(params.ids)
     
     neo4j.query(query, _.assign(params, {
-      //limit: params.offset ids.length,
+      limit: params.limit || params.ids.length,
       offset: 0
     }), function (err, items) {
       if(err) {
@@ -235,8 +235,9 @@ module.exports = {
         next(err);
         return;
       }
+      
       // console.log(params, items.length)
-      var itemsAsDict = _.indexBy(_.map(module.exports.normalize(items, params),'id'));
+      var itemsAsDict = _.indexBy(module.exports.normalize(items, params),'id');
       
       next(null, params.ids.map(function (id) {
         return itemsAsDict[''+id]

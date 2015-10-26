@@ -313,7 +313,8 @@ a#header-logo img{
   margin: 0;
   display: block;
   border-bottom: 1px solid #d8d8d8;
-  height: 50px
+  height: 50px;
+  box-shadow: 0px 0px 6px #ccc;
 }
 
 .header-menu > ul> li{
@@ -522,7 +523,7 @@ a#header-logo img{
   overflow: auto;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 50px 10px 0 10px;
+  padding: 0px 10px 0 10px;
   /*border-left: 1px solid #d4d4d4;*/
   /*-webkit-transition: margin-left .3s cubic-bezier(0.65, 0.05, 0.36, 1); 
    -moz-transition: margin-left .3s cubic-bezier(0.65, 0.05, 0.36, 1);

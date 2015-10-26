@@ -210,8 +210,8 @@ describe('model:resource ', function() {
     }, function (err, items, info) {
       if(err)
         throw err;
-      // console.log(items[0])
-      should.exist(items.length)
+      should.equal(_.map(items, 'id').join(), [__resourceB.id, __resourceA.id].join());
+      should.equal(items.length, 2)
       should.exist(info.total_items)
       done()
     })
