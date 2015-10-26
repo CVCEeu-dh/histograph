@@ -59,6 +59,18 @@ var fs          = require('fs'),
         tasks.helpers.cypher.raw
       ],
       
+      /*
+        simulate ctrl requests for an already auth user.
+        It makes uses of test environment
+      */
+      'api': [
+        tasks.helpers.marvin.create,
+        tasks.helpers.marvin.login,
+        tasks.helpers.marvin.api,
+        tasks.helpers.marvin.logout,
+        tasks.helpers.marvin.remove,
+      ],
+      
       'text-of-resource': [
         tasks.resource.getOne,
         tasks.resource.getText

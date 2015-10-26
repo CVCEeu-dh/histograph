@@ -226,7 +226,9 @@ module.exports = {
               console.log(clc.blackBright('   user', clc.magentaBright('MARVIN'), 'generated'));
           
               callback(null, _.assign(options, {
-                marvin: user
+                marvin: _.assign(user, {
+                  pwd: generator.user.marvin().password // its password, before it is encrypted
+                })
               }));
             }
           });
@@ -244,6 +246,56 @@ module.exports = {
         else
           callback(null, options);
       });
+    },
+    /*
+      Authenticate the user (options.marvin)
+    */
+    login: function(options, callback) {
+      console.log(clc.yellowBright('\n   tasks.helpers.marvin.login'));
+      
+      var app = require('../../server').app,
+          Session   = require('supertest-session')({
+            app: app
+          });
+          
+      options.session = new Session();
+      options.session
+        .post('/login')
+        .send({
+          username   : options.marvin.username,
+          password   : options.marvin.pwd,
+        })
+        .end(function (err, res) {
+          if(err)
+            callback(err);
+          else
+            callback(null, options);
+        })
+    },
+    
+    api: function(options, callback) {
+      console.log(clc.yellowBright('\n   tasks.helpers.marvin.api'));
+      
+      options.session
+        .get(options.path)
+        .end(function (err, res) {
+          if(err)
+            callback(err);
+          else {
+            console.log('   evaluating', options.part)
+            console.log(_.get(res, options.part))
+            callback(null, options);
+          }
+        });
+    },
+    /*
+      Authenticate the user
+    */
+    logout: function(options, callback) {
+      console.log(clc.yellowBright('\n   tasks.helpers.marvin.logout'));
+      
+      options.session.destroy();
+      callback(null, options);
     }
   },
   /*
