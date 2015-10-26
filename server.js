@@ -159,7 +159,25 @@ clientRouter.route('/activate')
 clientRouter.route('/auth/twitter')
   .get(function (req, res, next) {
     if(req.query.next) {
-      req.session.redirectAfterLogin = req.query.next;
+      var qs = '';
+      
+      if(req.query.jsonparams) {
+        try{
+          var params = JSON.parse(req.query.jsonparams),
+              qsp =  [];
+              
+          for(var key in params) {
+            qsp.push(encodeURIComponent(key) + '=' + encodeURIComponent(params[key]));
+          }
+          
+          if(qsp.length)
+            qs = '?' + qsp.join('&')
+        } catch(e){
+          
+        }
+      }
+      req.session.redirectAfterLogin = req.query.next + qs;
+      
       console.log(req.query, req.params, req.session)
     }
     

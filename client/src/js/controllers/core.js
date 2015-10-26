@@ -10,7 +10,8 @@ angular.module('histograph')
   
   .controller('CoreCtrl', function ($scope, $rootScope, $location, $state, $timeout, $route, $log, $timeout, $http, $routeParams, $modal, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, localStorageService, EVENTS, VIZ, MESSAGES, ORDER_BY) {
     $log.debug('CoreCtrl ready');
-    $scope.locationPath = $location.path(); 
+    $scope.locationPath = $location.path();
+    $scope.locationJson  = JSON.stringify($location.search()); 
     
     var suggestionTimeout = 0;
     

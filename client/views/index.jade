@@ -42,8 +42,7 @@ html
                
                 div(class='inline', style='position:relative')
                   div(dropdown, dropdown-append-to-body='true', is-open='status.isopen')
-                    span(dropdown-toggle, ng-disabled='disabled')
-                      {{ language }}
+                    span(dropdown-toggle, ng-disabled='disabled') {{ language }}
                       i(class='fa fa-down')
           
                     ul(class='dropdown-menu', role='menu', )
@@ -76,9 +75,9 @@ html
               h5 welcome to histograph
               form
                 div(class="btn-group-vertical", role="group")
-                  a(ng-href='/auth/twitter?next={{locationPath}}', class='btn btn-default expanded') login with twitter 
+                  a(ng-href='/auth/twitter?next={{locationPath}}&jsonparams={{locationJson}}', class='btn btn-default expanded') login with twitter 
                     i(class='fa fa-twitter')
-                  a(ng-href='/auth/google?next={{locationPath}}', class='btn btn-default expanded') login with google 
+                  a(ng-href='/auth/google?next={{locationPath}}&jsonparams={{locationJson}}', class='btn btn-default expanded') login with google 
                     i(class='fa fa-google-plus')
         else
           div(class='view {{currentCtrl}} {{currentState|humanizeState}} {{queueStatus}} viewpoint-{{viewpoint.selected.name}}', infinite-scroll='addMoreItems()', infinite-scroll-collection='relatedItems')
