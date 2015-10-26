@@ -81,7 +81,7 @@ module.exports = {
     var query = parser.agentBrown(rQueries.get_resource)
     neo4j.query(rQueries.get_resource, {
       id: resource.id
-    }, function(err, items) {
+    }, function (err, items) {
       
       if(err) {
         console.log(err.neo4jError)
@@ -95,7 +95,7 @@ module.exports = {
       var item = items[0].resource;
       
       // yaml parsing
-      var versions = _.map(_.filter(_.values(item.versions),function(d) {
+      var versions = _.map(_.filter(_.values(item.versions),function (d) {
         //filter
         return d.yaml && d.yaml.length > 0
       }), function (d) {
@@ -108,7 +108,7 @@ module.exports = {
       item.positionings = _.filter(versions, {type:'positioning'});
       item.annotations = _.filter(versions, {type:'annotation'});
       item.collections = _.values(item.collections);
-      
+      // console.log(item.annotations)
       next(null, module.exports.normalize(item));
     });  
   },
@@ -153,7 +153,7 @@ module.exports = {
           return c;
         });
         
-        if(params.with && _.last(settings.disambiguation.fields) == 'url')   {
+        if(params && params.with && _.last(settings.disambiguation.fields) == 'url')   {
           // for the NON URL fields, just do the same as before
           var fulltext = content.pop(),
               offset   = _.compact(content).reduce(function(p,c) {
@@ -196,7 +196,7 @@ module.exports = {
       });
     // resolve annotations, if they've been provided
     if(node.annotations) {
-      node.annotations = _.map(_.filter(node.annotations, {service: 'ner'}), function(ann){
+      node.annotations = _.map(_.filter(node.annotations), function (ann) {
         return module.exports.getAnnotatedText(node.props, ann, params);
       });
     }
@@ -623,8 +623,6 @@ module.exports = {
         });
         
         
-        // check that there is no slug as such
-        
         // save resource, then go to next task.
         neo4j.save(resource, function (err, node) {
           if(err)
@@ -663,6 +661,56 @@ module.exports = {
           callback(null, node);
         })
         
+      },
+      
+      /*
+        2. C check date
+      */
+      function checkDate(resource, callback) {
+        if(!isNaN(resource.start_time)) {
+          callback(null, resource);
+          return
+        }
+        var dates = [],
+            toUpdate = {},
+            candidates,
+            best_candidate;
+        // get the date field, from the title, each language
+        resource.languages.forEach(function (language) {
+          console.log(clc.blackBright('   checking date in title for language'), language);
+          dates.push(_.assign({
+            language: language
+          }, helpers.reconcileHumanDate(resource['title_' + language], language)));
+        });
+        // get the top result; candidates can be n empty array (no undefined stuff.)
+        candidates = _.sortBy(_.values(_.groupBy(_.filter(dates, 'start_time'), 'start_time')), function (d){
+          return -d.length;
+        });
+        
+        if(candidates.length) {
+          best_candidate = _.first(candidates);
+          // get date languages, sorted by language e.g '[de,en,fr]'
+          toUpdate['date_languages'] = _.map(best_candidate, 'language').sort();
+          _.assign(toUpdate, {
+            start_time: best_candidate[0].start_time,
+            end_time: best_candidate[0].end_time,
+            start_date: best_candidate[0].start_date,
+            end_date: best_candidate[0].end_date
+          })
+          console.log(toUpdate)
+          // if(languages)
+        }
+        // do not save empty object
+        if(!_.size(toUpdate)) {
+          callback(null, resource);
+          return
+        }
+        neo4j.save(_.assign(resource, toUpdate), function (err, node) {
+          if(err)
+            return callback(err);
+          console.log('resource saved')
+          callback(null, node);
+        })
       },
       /*
       
@@ -914,6 +962,7 @@ module.exports = {
               geocoding_country: ent.geocoding_country
             }
           }
+          // console.log(ent.context)
           
           module.exports.createRelatedEntity(resource, _.assign(additionalProperties, {
             name: ent.name,
@@ -927,16 +976,30 @@ module.exports = {
               q.kill();
               return callback(err);
             }
-            // complete the yaml of this specific language
-            _.forEach(ent.context, function (d) {
-              yaml[d.language] = (yaml[d.language] || []).concat({
+           
+            
+            for(var i in ent.context) {
+              if(!yaml[ent.context[i].language])
+                yaml[ent.context[i].language] = [];
+              yaml[ent.context[i].language].push({
                 id: entity.id,
                 context: {
-                  left: d.left,
-                  right: d.right
+                  left: ent.context[i].left,
+                  right: ent.context[i].right
                 }
               });
-            });
+            }
+            // complete the yaml of this specific language
+            // _.forEach(ent.context, function (d) {
+            //   yaml[d.language] = (yaml[d.language] || []).concat([{
+            //     id: entity.id,
+            //     context: {
+            //       left: d.left,
+            //       right: d.right
+            //     }
+            //   }]);
+            // });
+            console.log(yaml['en'])
             nextEntity();
           })
         }, 1);

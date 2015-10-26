@@ -95,20 +95,20 @@ angular.module('histograph')
     
     /**
       Annotations
-      watch language
+      watch language - moved to a proper template, language driven
     */
-    $scope.$watch('language', function (language) {
-      if($scope.item.annotations.length) {
-        // evaluate according to language ...
-        for( var i in $scope.item.annotations) {
-          if($scope.item.annotations[i].language == $scope.language) {
-            $scope.currentAnnotation = $scope.item.annotations[i];
-            break;
-          }
-        }
+    // $scope.$watch('language', function (language) {
+    //   if($scope.item.annotations.length) {
+    //     // evaluate according to language ...
+    //     for( var i in $scope.item.annotations) {
+    //       if($scope.item.annotations[i].language == $scope.language) {
+    //         $scope.currentAnnotation = $scope.item.annotations[i];
+    //         break;
+    //       }
+    //     }
         
-      }
-    });
+    //   }
+    // });
     
     
   })

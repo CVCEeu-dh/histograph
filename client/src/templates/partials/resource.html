@@ -7,6 +7,7 @@
         
         
         <div>
+          <span>{{item.props.type}}<span> — 
           <span ng-click="openIssueModal('date', item)" class="empty" ng-if="!item.props.start_time" tooltip='click to add a date'>no date found</span>
           <a ng-href="#/r/{{item.id}}/inq/create/date" tooltip='click to propose a different date' ng-if="item.props.start_time">{{item.props|guessInterval}}</a>
           
@@ -22,8 +23,11 @@
           </span>
         </div>
         <h3 class="" data-id='{{item.id}}'>
-          <span ng-if="currentAnnotation" ng-href="#/r/{{item.id}}" context="item" marked="currentAnnotation.annotated.title"></span>
-          <span ng-if="!currentAnnotation" ng-href="#/r/{{item.id}}" ng-bind-html="item.props | title:language"></span>
+         <!--  <span ng-if="currentAnnotation" ng-href="#/r/{{item.id}}" context="item" marked="currentAnnotation.annotated.title"></span>
+          <span ng-if="!currentAnnotation" ng-href="#/r/{{item.id}}" ng-bind-html="item.props | title:language"></span> -->
+          
+          <span ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'title':language"></span>
+          
         </h3>
         <!-- <div class="collections">
           <div class="collection" ng-repeat="collection in item.collections"><a ng-href="#/c/{{collection.id}}">{{collection.name|humanize}}</a></div>
@@ -61,11 +65,14 @@
         </div>
         
         <!-- <a data-id='{{item.id}}'> view on graph</a> or <a ng-click='queue(item.id, true)'> add to playlist</a> -->
-        <div annotator>
+        <!-- div annotator>
           <blockquote ng-if="currentAnnotation" class="caption"  context="item" marked="currentAnnotation.annotated.source" ></blockquote>
           <blockquote ng-if="!currentAnnotation" class="caption"  ng-bind-html="item.props | caption : language">
           </blockquote>
-        </div>
+        </div -->
+        
+        <blockquote ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'caption':language"></blockquote>
+        
         <!-- Single button -->
         <div ng-if='item.props.mimetype=="image"'>
           <div ng-if="versions.length > 1" class="btn-group" dropdown is-open="status.isopen" tooltip="view a different version">
@@ -85,9 +92,13 @@
           </div>
         </div>
         
-        <div annotator>
+        <div class='full-text' ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'url':language"></div>
+        
+        
+        <!-- <div annotator>
         <div class="full-text" ng-if='item.props.mimetype!="image"' lazytext url='item.props|url:language'></div>
-        </div>
+        </div -->
+        
         <blockquote ng-if="item.props.stakeholders||item.props.caption">
          {{item.props.stakeholders||item.props.caption}}
         </blockquote>

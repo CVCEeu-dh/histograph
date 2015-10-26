@@ -102,6 +102,19 @@ describe('controller:resource before', function() {
 
 
 describe('controller:resource', function() {
+  it('should get a specific resource', function (done) {
+    session
+      .get('/api/resource/51690')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err)
+        should.not.exists(err);
+        done();
+      });
+  });
+  
   it('should sort the list of resource', function (done) {
     session
       .get('/api/resource/')
