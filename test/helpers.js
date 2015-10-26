@@ -191,7 +191,7 @@ describe('helpers: geocoding api', function() {
 //   });
 // });
 
-describe('human date service', function() {
+describe('helpers: human date service', function() {
   it('should test reconcileInterval', function (done) {
     var d = helpers.reconcileIntervals({
       start_date: '2015-06-07',
@@ -240,6 +240,15 @@ describe('human date service', function() {
   //     done();
   //   });
   // });
+  it('should find 21 DEc 1954 in german text', function (done) {
+    helpers.reconcileHumanDate('Brief von Duncan Sandys an Jean Monnet (London, 21. Dezember 1954)', 'de', function (err, res) {
+      should.not.exist(err, err);
+      
+      should.equal(res.start_date, '1954-12-21T00:00:00+00:00'); // utc format
+      should.equal(res.end_date, '1954-12-21T23:59:00+00:00');
+      done();
+    });
+  });
   
   it('should transform 1er et 2 juin 1955 in two day span', function (done) {
     helpers.reconcileHumanDate('1er et 2 juin 1955', 'fr', function (err, res) {

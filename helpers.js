@@ -865,7 +865,7 @@ module.exports = {
     Dummy Time transformation with moment.
   */
   reconcileHumanDate: function(humanDate, lang, next) {
-    var date = humanDate.match(/(\d*)[\sert\-]*(\d*)\s*([^\s\(\)]*)\s?(\d{4})/),
+    var date = humanDate.replace(/[\.\,]/g, '').match(/(\d*)[\sert\-]*(\d*)\s*([^\s\(\)]*)\s?(\d{4})/),
         start_date,
         end_date,
         result = {};
@@ -875,7 +875,7 @@ module.exports = {
     
     if(!date) {
       // check other patterns
-      var candidate = humanDate.match(/(\d{2,4})?[^\d](\d{2,4})/);
+      var candidate = humanDate.replace(/[\.\,]/g, '').match(/(\d{2,4})?[^\d](\d{2,4})/);
       if(!candidate) {
         if(next)
           next(IS_EMPTY);
@@ -1204,7 +1204,7 @@ module.exports = {
         withoutWiki = [];
     // step 1
     async.waterfall([
-      //
+      // disambiguate rerdirection
       function disambiguateDbpediaRedirect (callback) {
             // entities having a wiki link
         withWiki = _.filter(entities, function (d) {
@@ -1220,7 +1220,14 @@ module.exports = {
             callback(err);
             return
           }
-          callback(null, _.merge(withWiki, redirects).concat(withoutWiki));
+          var merged = [],
+              i,
+              l;
+          for(i=0, l=redirects.length; i < l; i++) {
+            withWiki[i].redirectOf = redirects[i].redirectOf
+          }
+          // console.log(withWiki)
+          callback(null, withWiki.concat(withoutWiki));
         })
       },
       
@@ -1232,6 +1239,7 @@ module.exports = {
             return d.type + '_' + d.redirectOf
           return d.type + '_' + d.name
         })).map(function (aliases) {
+          // console.log(aliases)
           // ... then remap the extracted entities in order to have group of same entity.
           var _d = {
             name: _.first(_.unique(_.map(aliases, 'name'))),
@@ -1243,6 +1251,7 @@ module.exports = {
           };
           // assemble various context related to the entity
           _d.context = _.flatten(_.map(aliases, function (d) {
+            // console.log(d.context)
             return d.context
           }));
           
