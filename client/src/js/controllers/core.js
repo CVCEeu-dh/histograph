@@ -189,10 +189,12 @@ angular.module('histograph')
       Will automatically update the graph view
       according tho the nodes edges propsed here.
       @param graph    - a collection of nodes and edges given as lists
-      
+      @param options.center    - (optional) a list of node ids fo set as fixed
     */
-    $scope.setGraph = function(graph) {
+    $scope.setGraph = function(graph, options) {
       $log.info('CoreCtrl -> setGraph', graph.nodes.length, 'nodes', graph.edges.length, 'edges')
+      if(options && options.centers)
+        graph.centers = options.centers;
       $scope.graph = graph;
     };
     

@@ -277,16 +277,20 @@ angular.module('histograph')
           
           // timout the layout
           timers.play = setTimeout(function() {
+            // set size, and fixes what need to be fixed. If there are fixed nodes, the camera should center on it
             graph.nodes = graph.nodes.map(function (n) {
               n.color = n.type?
                 (colors[n.type] || "#353535"):
                 "#353535";
               n.x = n.x || Math.random()*50;
               n.y = n.y || Math.random()*50;
+              if(graph.centers && graph.centers.indexOf(n.id) !== -1) {
+                n.fixed = true;
+              }
               n.size = 5;//Math.sqrt(si.graph.degree(n.id));
               return n;
             });
-            
+            console.log(graph.nodes)
             graph.edges = graph.edges.map(function (n) {
               n.size = n.weight;
               return n
@@ -399,7 +403,7 @@ angular.module('histograph')
           tooltip.edge.edge = e.data.edge.id;
           if(!tooltip.edge.isVisible)
             _css.opacity = 1.0;
-          console.log(label)
+          // console.log(label)
           if(tooltip.edge.text != label)
             tooltip.edge.el.text(label);
           
@@ -600,6 +604,7 @@ angular.module('histograph')
             linLogMode: true,
             startingIterations : 10,
             gravity : 1,
+            slowDown: 10,
             edgeWeightInfluence : 1
           });
           $log.debug('::sigma -> play()')
@@ -656,6 +661,7 @@ angular.module('histograph')
             context.closePath(); 
               
           }
+          
           context.fillStyle = node.discard? "rgba(0,0,0, .11)": node.color;
           context.beginPath();
           context.arc(

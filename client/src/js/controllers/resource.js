@@ -143,7 +143,9 @@ angular.module('histograph')
       type: 'graph',
       limit: 100
     }, function(res) {
-      $scope.setGraph(res.result.graph)
+      $scope.setGraph(res.result.graph, {
+        centers: [$scope.item.id]
+      });
     });
     
     $log.log('ResourcesCtrl -> setRelatedItems - items', resources.result.items);
