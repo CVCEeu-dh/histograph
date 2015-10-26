@@ -159,10 +159,22 @@ angular.module('histograph')
           m: 'unknown-nodes'
         }
       },
+      getStats: {
+        method: 'GET',
+        params: {
+          m: 'stats'
+        }
+      },
       getEntities: {
         method: 'GET',
         params: {
           m: 'entity'
+        }
+      },
+      getResources: {
+        method: 'GET',
+        params: {
+          m: 'resource'
         }
       },
       getUnknownNode: {
@@ -173,6 +185,13 @@ angular.module('histograph')
       },
 
     });
+  })
+  
+  /*
+    Add / get :model related to resource
+  */
+  .factory('SuggestVizFactory', function ($resource) {
+    return $resource('/api/suggest/:type');
   })
   
   // .factory('SuggestFactory', function ($http) {

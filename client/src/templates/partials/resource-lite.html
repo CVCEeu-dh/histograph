@@ -12,7 +12,7 @@
     </button>
   </div>
                 
-  <div style="margin-bottom: 10px">
+  <div class="meta">
     <span gasp-type="date" class="empty" gasp-parent="{{item.type}}-{{item.id}}" ng-if="!relatedItem.props.start_time">no date found</span>
     <span class='date' ng-if="relatedItem.props.start_time"> {{relatedItem.props|guessInterval}}</span>
     <span ng-if='relatedItem.persons.length' class='tags'> — <i>persons in the document</i>:
@@ -24,5 +24,5 @@
   <blockquote ng-if='!relatedItem.annotations || !relatedItem.annotations.length' marked="relatedItem.props|lookup:'caption':language"></blockquote>
   <blockquote ng-if='relatedItem.annotations && relatedItem.annotations.length' context='relatedItem' marked="relatedItem.annotations|annotate:'caption':language"></blockquote>
   
-  <div class='matches' ng-if='relatedItem.annotations' context='relatedItem' marked="relatedItem.annotations|annotate:'url':language"></div>
+  <!-- div class='matches' ng-if='relatedItem.annotations' context='relatedItem' marked="relatedItem.annotations|annotate:'url':language"></div -->
 </div>

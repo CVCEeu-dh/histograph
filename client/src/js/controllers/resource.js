@@ -141,11 +141,15 @@ angular.module('histograph')
       id: $stateParams.id,
       model: 'resource',
       type: 'graph',
-      limit: 100
+      limit: 100,
+      query:  $stateParams.query
     }, function(res) {
-      $scope.setGraph(res.result.graph, {
-        centers: [$scope.item.id]
-      });
+      if($stateParams.query)
+        $scope.setGraph(res.result.graph);
+      else
+        $scope.setGraph(res.result.graph, {
+          centers: [$scope.item.id]
+        });
     });
     
     $log.log('ResourcesCtrl -> setRelatedItems - items', resources.result.items);

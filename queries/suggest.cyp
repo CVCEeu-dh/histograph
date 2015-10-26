@@ -19,6 +19,8 @@ RETURN {
 } AS result
 
 
+
+
 // name: count_all_in_between
 // 
 MATCH p=(n)-[r:appears_in*..3]-(t) WHERE id(n) in {ids} AND id(t) in {ids}
@@ -106,12 +108,47 @@ RETURN {
 } LIMIT {limit}
 
 
-// name: get_matching_resources_count
-// get resources by query
-start n=node:node_auto_index({query})
-RETURN count(n) as total_count
 
-// name: get_matching_resources
+// name: count
+// global facets for a specific query
+start res=node:node_auto_index({resource_query})
+WITH res
+RETURN {
+  group: 'resource',
+  type: res.type,
+  count_items: count(res)
+} as g
+UNION
+start ent=node:node_auto_index({entity_query})
+WITH ent
+RETURN {
+  group: 'entity',
+  type: last(labels(ent)),
+  count_items: count(ent)
+} as g
+
+
+
+// name: count_resources
+// get resources by query
+start res=node:node_auto_index({query})
+WITH res
+{?res:start_time__gt}
+{AND?res:end_time__lt}
+{AND?res:type__in}
+WITH DISTINCT res
+{if:with}
+  MATCH (ent:entity)-[:appears_in]->(res)
+  WHERE id(ent) IN {with}
+  WITH DISTINCT res
+{/if}
+RETURN {
+  group: res.type,
+  count_items: count(res)
+} // count per type
+
+
+// name: get_resources
 // get resources by query
 start res=node:node_auto_index({query})
 WITH res

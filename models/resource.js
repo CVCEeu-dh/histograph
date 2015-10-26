@@ -141,7 +141,7 @@ module.exports = {
         // parse Yaml if it it hasn't been done yet
         if(typeof annotation.yaml == 'string')
           annotation.yaml = YAML.parse(annotation.yaml);
-         
+        annotation.yaml == null && console.log(annotation)
         // recover content from disambiguation field section, as a list (antd not as a string)
         content = settings.disambiguation.fields.map(function (field){
           var c = module.exports.getText(resource, {

@@ -471,8 +471,11 @@ apiRouter.route('/collection/:id/related/resources')
 */
 apiRouter.route('/suggest')
   .get(ctrl.suggest.suggest)
-apiRouter.route('/suggest/resources')
-  .get(ctrl.suggest.resources)
+
+apiRouter.route('/suggest/stats')
+  .get(ctrl.suggest.getStats)
+apiRouter.route('/suggest/resource')
+  .get(ctrl.suggest.getResources)
 apiRouter.route('/suggest/entity')
   .get(ctrl.suggest.getEntities)
 apiRouter.route('/suggest/graph')

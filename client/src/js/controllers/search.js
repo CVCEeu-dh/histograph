@@ -5,45 +5,46 @@
  * # SearchCtrl
  */
 angular.module('histograph')
-  .controller('SearchCtrl', function ($scope, $log, $stateParams, socket, resources, entities, SuggestFactory, EVENTS) {
-    $log.debug('SearchCtrl ready, query "', $stateParams.query, '" matches', resources.data.info.total_count, 'documents', entities.data.info.total_count, 'entities');
+  .controller('SearchCtrl', function ($scope, $log, $stateParams, socket, SuggestFactory, stats, EVENTS) {
+    $log.debug('SearchCtrl ready, query "', $stateParams.query, '" matches', stats);
+    // $log.debug('SearchCtrl ready, query "', $stateParams.query, '" matches', resources.data.info.total_count, 'documents', entities.data.info.total_count, 'entities');
     
-    $scope.pagetitle = 'documents found';
+    // $scope.pagetitle = 'documents found';
     
-    $scope.matchingResources = {
-      totalItems: resources.data.info.total_count,
-    }
+    // $scope.matchingResources = {
+    //   totalItems: resources.data.info.total_count,
+    // }
 
-    $scope.matchingEntities  = {
-      types: _.indexBy(entities.data.info.total_items, 'type'),
-    };
+    // $scope.matchingEntities  = {
+    //   types: _.indexBy(entities.data.info.total_items, 'type'),
+    // };
     
-    $scope.matchingQuery = $stateParams.query;
+    // $scope.matchingQuery = $stateParams.query;
     
     
-    /*
-      Graph
-    */
-    $scope.setHeader('graph', 'network of search results for "'+ $stateParams.query+'"');
+    // /*
+    //   Graph
+    // */
+    // $scope.setHeader('graph', 'network of search results for "'+ $stateParams.query+'"');
     
-    SuggestFactory.getGraph({
-      query: $stateParams.query,
-      limit: 2000
-    }).then(function(res) {
-      $log.log('res', res)
-      res.data.result.graph.nodes.map(function (d) {
-        d.color  = d.type == 'person'? "#D44A33": "#6891A2";
-        d.type   = d.type || 'res';
-        d.x = Math.random()*50;
-        d.y = Math.random()*50;
-        //d.label = d.name;
-        return d;
-      })
-      $log.debug('SearchCtrl set graph', res.data.result.graph.nodes.length);
+    // SuggestFactory.getGraph({
+    //   query: $stateParams.query,
+    //   limit: 2000
+    // }).then(function(res) {
+    //   $log.log('res', res)
+    //   res.data.result.graph.nodes.map(function (d) {
+    //     d.color  = d.type == 'person'? "#D44A33": "#6891A2";
+    //     d.type   = d.type || 'res';
+    //     d.x = Math.random()*50;
+    //     d.y = Math.random()*50;
+    //     //d.label = d.name;
+    //     return d;
+    //   })
+    //   $log.debug('SearchCtrl set graph', res.data.result.graph.nodes.length);
       
-      // once done, load the other viz
-      $scope.setGraph(res.data.result.graph)
-    });
+    //   // once done, load the other viz
+    //   $scope.setGraph(res.data.result.graph)
+    // });
     
     // /*
     //   sync

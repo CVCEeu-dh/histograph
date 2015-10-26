@@ -162,6 +162,10 @@ angular.module('histograph')
     };
     
     $scope.setSorting = function(sorting) {
+      if(!sorting) {
+        $log.info('CoreCtrl -> setSorting() ignore undefined sorting')
+        return;
+      }
       if(typeof sorting == 'string') {
         var sorting = _.first(_.filter(ORDER_BY, {value: sorting}));
         if(sorting) {

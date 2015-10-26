@@ -271,6 +271,7 @@ module.exports =  function(io){
       })
     },
     
+    
     /*
     */
     getNeighbors: function (req, res) {
@@ -318,8 +319,8 @@ module.exports =  function(io){
       
       // lucene.setSearchTerm('name_search:' + req.query.query);
       // entity_query = '' + lucene.getFormattedSearchTerm();
-      console.log('resource_query', resource_query)
-          console.log('entity_query', entity_query)
+      // console.log('resource_query', resource_query)
+      //     console.log('entity_query', entity_query)
       
       neo4j.query(queries.lucene_query, {
         resource_query: resource_query,
@@ -344,56 +345,42 @@ module.exports =  function(io){
     },
     
     /*
-      Caption and title multilanguage search.
-      @todo: use the solr endpoint wherever available.
+      Basic element counting
     */
-    resources: function (req, res) {
-      var Resource = require('../models/resource');
-      var offset = +req.query.offset || 0,
-          limit  = +req.query.limit || 20,
-          q      = toLucene(req.query.query),
-          query  = [
-              'full_search:', q
-            ].join('');
+    getStats: function (req, res) {
+      var resource_query,
+          entity_query;
+          
+      var form = validator.request(req, {
+            limit: 20,
+            offset: 0,
+            language: 'en'
+          });
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
       
-      // get countabilly
-      async.parallel({
-        get_matching_resources_count: function (callback) {
-          neo4j.query(queries.get_matching_resources_count, {
-            query: query,
-          }, function (err, items) {
-            if(err)
-              callback(err);
-            else
-              callback(null, items);
-          })
-        },
-        get_matching_resources: function (callback) {
-          neo4j.query(queries.get_matching_resources, {
-            query: query,
-            offset: offset,
-            limit: limit
-          }, function (err, items) {
-            if(err) {
-              console.log(err)
-              callback(err);
-            } else
-              callback(null, items);
-          })
+      resource_query = 'full_search:' + toLucene(req.query.query) + ' OR title_search:' + toLucene(req.query.query);
+      entity_query = 'name_search:' + toLucene(req.query.query);
+      
+      neo4j.query(queries.count, {
+        resource_query: resource_query,
+        entity_query: entity_query
+        
+      }, function (err, groups) {
+        if (err) {
+          
         }
-      }, function (err, results) {
         if(err)
           return helpers.cypherQueryError(err, res);
         
         return res.ok({
-          items: results.get_matching_resources.map(Resource.normalize),
+          items: []
         }, {
-          total_count: results.get_matching_resources_count.total_count,
-          offset: offset,
-          limit: limit
+          groups: groups
         });
-      });
+      })
     },
+    
     
     /*
       Lucene results. can also be used for typeahead, since it is very fast.
@@ -421,7 +408,35 @@ module.exports =  function(io){
         },
         params: form.params
       }, function (err, results) {
-        console.log(err)
+        helpers.models.getMany(err, res, results.items, results.count_items, form.params);
+      });
+    },
+    
+    /*
+      Lucene results. can also be used for typeahead, since it is very fast.
+    */
+    getResources: function (req, res) {
+      var form = validator.request(req, {
+            limit: 20,
+            offset: 0,
+          }, {
+            
+          });
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      var q = 'full_search:' + toLucene(req.query.query);
+      form.params.query = q;
+      
+      models.getMany({
+        queries: {
+          count_items: queries.count_resources,
+          items: queries.get_resources
+        },
+        params: form.params
+      }, function (err, results) {
+        if(err)
+          console.log(err)
         helpers.models.getMany(err, res, results.items, results.count_items, form.params);
       });
     },

@@ -403,36 +403,55 @@ angular
       
       .state('search', {
         abstract:true,
-        url: '/search/{query:[^/]*}',
+        url: '/search/{query}',
         templateUrl: 'templates/search.html',
         controller: 'SearchCtrl',
         resolve: {
-          resources: function(SuggestFactory, $stateParams) {
-            // clean limit here
-            return SuggestFactory.getResources({
-              query: $stateParams.query,
-              limit: 10
-            });
-          },
-          entities: function(SuggestFactory, $stateParams) {
-            // clean limit here
-            console.log($stateParams)
-            return SuggestFactory.getEntities({
-              query: $stateParams.query,
-              limit: 10
-            });
+          stats: function(SuggestFactory, $stateParams) {
+           return SuggestFactory.getStats({
+              query: $stateParams.query
+            }).$promise;
           }
         }
       })
         .state('search.resources', {
           url: '',
           templateUrl: 'templates/partials/resources.html',
-          controller: 'SearchResourcesCtrl',
+          controller: 'ResourcesCtrl',
+          resolve: {
+            relatedVizFactory: function(SuggestVizFactory) {
+              return SuggestVizFactory
+            },
+            relatedFactory: function(SuggestFactory) {
+              return //SuggestRelatedFactory
+            },
+            resources: function(SuggestFactory, $stateParams) {
+              // angular.extend({
+              //   id: $stateParams.id,
+              //   model: 'resource',
+              //   limit: 10
+              // }, $location.search())).$promise;
+              return SuggestFactory.getResources({
+                query: $stateParams.query,
+                limit: 10
+              }).$promise;
+            }
+          }
         })
         .state('search.persons', {
           url: '/per',
           templateUrl: 'templates/partials/entities.html',
           controller: 'SearchEntitiesCtrl',
+          resolve: {
+            entities: function(SuggestFactory, $stateParams) {
+            // clean limit here
+            console.log($stateParams)
+              return SuggestFactory.getEntities({
+                query: $stateParams.query,
+                limit: 10
+              });
+            }
+          }
         })
         .state('search.locations', {
           url: '/loc',
