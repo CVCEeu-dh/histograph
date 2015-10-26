@@ -155,6 +155,7 @@ module.exports = {
         
         if(params && params.with && _.last(settings.disambiguation.fields) == 'url')   {
           // for the NON URL fields, just do the same as before
+          console.log('content', resource.title_en, annotation.language)
           var fulltext = content.pop(),
               offset   = _.compact(content).reduce(function(p,c) {
                 return p.length + c.length + '§ '.length;
@@ -196,7 +197,7 @@ module.exports = {
       });
     // resolve annotations, if they've been provided
     if(node.annotations) {
-      node.annotations = _.map(_.filter(node.annotations), function (ann) {
+      node.annotations = _.map(_.filter(node.annotations, 'language'), function (ann) {
         return module.exports.getAnnotatedText(node.props, ann, params);
       });
     }
