@@ -155,7 +155,7 @@ module.exports = {
         
         if(params && params.with && _.last(settings.disambiguation.fields) == 'url')   {
           // for the NON URL fields, just do the same as before
-          console.log('content', resource.title_en, annotation.language)
+          // console.log('content', resource.title_en, annotation.language)
           var fulltext = content.pop(),
               offset   = _.compact(content).reduce(function(p,c) {
                 return p.length + c.length + '§ '.length;
