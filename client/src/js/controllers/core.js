@@ -494,8 +494,7 @@ angular.module('histograph')
         SuggestFactory.getUnknownNodes({
           ids: [itemId]
         }, function (res) {
-          console.log(res)
-          debugger
+          
           $scope.playlist.push(res.result.items[0]);
           $scope.playlistIds.push(res.result.items[0].id);
           $scope.queueStatus = 'active';
