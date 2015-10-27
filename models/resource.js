@@ -680,9 +680,10 @@ module.exports = {
         // get the date field, from the title, each language
         resource.languages.forEach(function (language) {
           console.log(clc.blackBright('   checking date in title for language'), language);
-          dates.push(_.assign({
-            language: language
-          }, helpers.reconcileHumanDate(resource['title_' + language], language)));
+          if(!_.isEmpty(resource['title_' + language]))
+            dates.push(_.assign({
+              language: language
+            }, helpers.reconcileHumanDate(resource['title_' + language], language)));
         });
         // get the top result; candidates can be n empty array (no undefined stuff.)
         candidates = _.sortBy(_.values(_.groupBy(_.filter(dates, 'start_time'), 'start_time')), function (d){
