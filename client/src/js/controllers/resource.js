@@ -161,24 +161,43 @@ angular.module('histograph')
     */
     $scope.sync = function() {
       $scope.loading = true;
-      relatedFactory.get(angular.extend({
-        id: $stateParams.id,
-        model: 'resource',
-        limit: $scope.limit,
-        offset: $scope.offset
-      }, $scope.params), function (res) {
-        $scope.loading = false;
-        $scope.offset  = res.info.offset;
-        $scope.limit   = res.info.limit;
-        $scope.totalItems = res.info.total_items;
-        if($scope.offset > 0)
-          $scope.addRelatedItems(res.result.items);
-        else
-          $scope.setRelatedItems(res.result.items);
-        // reset if needed
-        $scope.setFacets('type', res.info.groups);
-        
-      }) 
+      if($stateParams.query)
+        relatedFactory.getResources(angular.extend($scope.params, {
+          query: $stateParams.query,
+          limit: 10,
+          offset: $scope.offset
+        }), function (res) {
+          $scope.loading = false;
+          $scope.offset  = res.info.offset;
+          $scope.limit   = res.info.limit;
+          $scope.totalItems = res.info.total_items;
+          if($scope.offset > 0)
+            $scope.addRelatedItems(res.result.items);
+          else
+            $scope.setRelatedItems(res.result.items);
+          // reset if needed
+          $scope.setFacets('type', res.info.groups);
+          
+        });
+      else
+        relatedFactory.get(angular.extend({
+          id: $stateParams.id,
+          model: 'resource',
+          limit: $scope.limit,
+          offset: $scope.offset
+        }, $scope.params), function (res) {
+          $scope.loading = false;
+          $scope.offset  = res.info.offset;
+          $scope.limit   = res.info.limit;
+          $scope.totalItems = res.info.total_items;
+          if($scope.offset > 0)
+            $scope.addRelatedItems(res.result.items);
+          else
+            $scope.setRelatedItems(res.result.items);
+          // reset if needed
+          $scope.setFacets('type', res.info.groups);
+          
+        }) 
     };
     /*
       listener: EVENTS.API_PARAMS_CHANGED
