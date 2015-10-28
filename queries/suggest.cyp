@@ -152,6 +152,15 @@ RETURN {
 // get resources by query
 start res=node:node_auto_index({query})
 WITH res
+{?res:start_time__gt}
+{AND?res:end_time__lt}
+{AND?res:type__in}
+WITH DISTINCT res
+{if:with}
+  MATCH (ent:entity)-[:appears_in]->(res)
+  WHERE id(ent) IN {with}
+  WITH DISTINCT res
+{/if}
 SKIP {offset}
 LIMIT {limit}
 WITH res

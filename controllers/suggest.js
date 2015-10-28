@@ -305,7 +305,7 @@ module.exports =  function(io){
           entity_query;
           
       var form = validator.request(req, {
-            limit: 20,
+            limit: 5,
             offset: 0,
             language: 'en'
           });
@@ -325,7 +325,7 @@ module.exports =  function(io){
       neo4j.query(queries.lucene_query, {
         resource_query: resource_query,
         entity_query: entity_query,
-        limit: req.query.limit || 4,
+        limit: form.params.limit,
         language: form.params.language
       }, function (err, items) {
         if (err) {
