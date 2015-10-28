@@ -103,12 +103,26 @@ angular
         templateUrl: 'templates/entity.html',
         controller: 'EntityCtrl',
         reloadOnSearch: false,
+        grammar: {
+          name: 'resource',
+          label: 'explore next',
+          choices: [
+            {
+              name: 'entity.resources',
+              label: 'documents'
+            }, {
+              name: 'entity.persons',
+              label: 'people'
+            }
+          ]
+        },
         resolve: {
           entity: function(EntityFactory, $stateParams) {
             return EntityFactory.get({
               id: $stateParams.id
             }).$promise;
           },
+          // cooccurrences (appearing with)
           persons: function(EntityRelatedFactory, $stateParams) {
             return EntityRelatedFactory.get({
               id: $stateParams.id,
@@ -129,6 +143,36 @@ angular
           url: '',
           templateUrl: 'templates/partials/entities.html',
           controller: 'EntitiesCtrl',
+          grammar: {
+            label: 'people',
+            connector: {
+              type: 'in documents of type',
+              relatedTo: 'which contains',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: [
+              {
+                name: 'in any kind of documents',
+              },
+              {
+                name: 'in pictures',
+                filter: 'type=picture'
+              },
+              {
+                name: 'in letters',
+                filter: 'type=letter'
+              },
+              {
+                name: 'in treaty',
+                filter: 'type=treaty'
+              }
+            ],
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
           resolve: {
             model: function(){
               return 'person'
@@ -139,12 +183,13 @@ angular
             relatedFactory: function(EntityRelatedFactory) {
               return EntityRelatedFactory
             },
-            entities: function(EntityRelatedFactory, $stateParams) {
-              return EntityRelatedFactory.get({
+            entities: function(EntityRelatedFactory, $stateParams, $location) {
+              return EntityRelatedFactory.get(angular.extend({}, $location.search(), {
                 id: $stateParams.id,
                 model: 'person',
-                limit: 10
-              }).$promise;
+                limit: 10,
+                offset: 0
+              })).$promise;
             }
           }
         })
@@ -198,6 +243,36 @@ angular
           url: '/r',
           templateUrl: 'templates/partials/resources.html',
           controller: 'ResourcesCtrl',
+          grammar: {
+            label: 'documents',
+            connector: {
+              type: 'of type',
+              relatedTo: 'which contains',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: [
+              {
+                name: 'of any kind',
+              },
+              {
+                name: 'pictures',
+                filter: 'type=picture'
+              },
+              {
+                name: 'letters',
+                filter: 'type=letter'
+              },
+              {
+                name: 'treaty',
+                filter: 'type=treaty'
+              }
+            ],
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
           resolve: {
             relatedVizFactory: function(EntityRelatedVizFactory) {
               return EntityRelatedVizFactory
@@ -205,12 +280,12 @@ angular
             relatedFactory: function(EntityRelatedFactory) {
               return EntityRelatedFactory
             },
-            resources: function(EntityRelatedFactory, $stateParams) {
-              return EntityRelatedFactory.get({
+            resources: function(EntityRelatedFactory, $stateParams, $location) {
+              return EntityRelatedFactory.get(angular.extend({},$location.search(), {
                 id: $stateParams.id,
                 model: 'resource',
                 limit: 10
-              }).$promise;
+              })).$promise;
             },
           }
         })
@@ -461,6 +536,19 @@ angular
         url: '/neighbors/{ids:[0-9,]+}',
         templateUrl: 'templates/neighbors.html',
         controller: 'NeighborsCtrl',
+        grammar: {
+          name: 'neighbors',
+          label: 'connect',
+          choices: [
+            {
+              name: 'neighbors.resources',
+              label: 'documents'
+            }, {
+              name: 'neighbors.persons',
+              label: 'people'
+            }
+          ]
+        },
         resolve: {
           allInBetween: function(SuggestFactory, $stateParams) {
             return SuggestFactory.allInBetween({
@@ -469,9 +557,8 @@ angular
           }
         }
       })
-        
         .state('neighbors.resources', {
-          url: '/r',
+          url: '',
           templateUrl: 'templates/partials/neighbors.html',
           controller: 'NeighborsResourcesCtrl',
         })

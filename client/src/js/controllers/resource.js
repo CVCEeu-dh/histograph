@@ -161,8 +161,9 @@ angular.module('histograph')
     */
     $scope.sync = function() {
       $scope.loading = true;
+
       if($stateParams.query)
-        relatedFactory.getResources(angular.extend($scope.params, {
+        relatedFactory.getResources(angular.extend({},angular.copy($scope.params), {
           query: $stateParams.query,
           limit: 10,
           offset: $scope.offset

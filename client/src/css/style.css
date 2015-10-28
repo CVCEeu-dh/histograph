@@ -766,6 +766,32 @@ a#header-logo img{
   width: 100%;
 }
 
+.related .profile-pic{
+  border: 0px transparent;
+  width: 40px;
+  margin-left: 0;
+  border-radius: 40px;
+  overflow: hidden;
+  height: 40px;
+  background: #d4d4d4;
+  margin-right: 10px;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+.related.entity{
+  padding-top: 10px;  
+}
+
+.related.entity h4 {
+  margin: 0 15px 10px 60px;
+}
+
+.related.entity .type{
+  margin: 0px 10px 0px 30px;
+}
+
 .inquiry {
   padding: 0px;
 }
@@ -815,17 +841,7 @@ a#header-logo img{
   margin: 10px 30px;
   position:relative;
 }
-.related .profile-pic{
-  border: 0px transparent;
-  width: 40px;
-  margin-left: 0;
-  border-radius: 40px;
-  overflow: hidden;
-  height: 40px;
-  background: #d4d4d4;
-  margin-right: 10px;
-  float: left;
-}
+
 
 .comment{
   margin: 0px;

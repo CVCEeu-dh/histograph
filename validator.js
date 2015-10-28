@@ -79,6 +79,14 @@ module.exports = {
       ],
       error: 'should be something like person, location or organization'
     },
+    'with': {
+      field: 'with',
+      check: 'matches',
+      args: [
+        /\d[\d,]+/
+      ],
+      error: 'with should contain only numbers and commas, at least one'
+    },
     orderby: {
       field: 'orderby',
       check: 'includedIn',

@@ -22,7 +22,7 @@ RETURN {
 
 
 // name: count_all_in_between
-// 
+// return grouped by labels (resource, location person ...)
 MATCH p=(n)-[r:appears_in*..3]-(t) WHERE id(n) in {ids} AND id(t) in {ids}
 RETURN extract(n in filter(x IN nodes(p) WHERE NOT id(x) IN {ids})|{
     type: last(labels(n)),
@@ -41,6 +41,14 @@ RETURN extract(n IN nodes(p)| {
 ORDER BY count
 SKIP {offset}
 LIMIT {limit}
+
+
+// name: count_all_shortest_paths
+MATCH (n),(t) WHERE id(n) in {ids} AND id(t) in {ids}
+WITH n, t
+MATCH p=allShortestPaths((n)-[r:appears_in*..3]-(t))
+WITH nodes(p) as ns
+UNWIND ns as n return count(distinct n)
 
 
 // name: all_shortest_paths

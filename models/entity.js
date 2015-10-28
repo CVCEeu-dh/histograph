@@ -16,7 +16,9 @@ var settings  = require('../settings'),
     crowdsourcing = require('../crowdsourcing/entity.js'),
     clc       = require('cli-color'),
     async     = require('async'),
-    _         = require('lodash');
+    _         = require('lodash'),
+    
+    Resource  = require('../models/resource');
     
     
 
@@ -121,45 +123,24 @@ module.exports = {
       }));
     });
   },
-  getRelatedResources: function(properties, next) {
-    async.parallel({
-      totalItems: function(callback) {
-        neo4j.query(queries.count_related_resources,  {
-          id: properties.id
-        }, function (err, result) {
-          if(err)
-            callback(err);
-          else
-            callback(null, result.total_items);
-        });
+  /*
+    get related resoruces
+  */
+  getRelatedResources: function(params, next) {
+    models.getMany({
+      queries: {
+        count_items: queries.count_related_resources,
+        items: queries.get_related_resources
       },
-      items: function(callback) {
-        neo4j.query(queries.get_related_resources, {
-          id: properties.id,
-          limit: properties.limit,
-          offset: properties.offset
-        }, function (err, items) {
-          if(err)
-            callback(err)
-          else
-            callback(null, items.map(function (d) {
-              d.locations = _.values(d.locations || {});
-              d.persons   = _.values(d.persons || {});
-              d.places    = _.values(d.places || {});
-              return d;
-            }));
-        })
-      }
+      params: params
     }, function (err, results) {
-      // results is now equals to: {one: 1, two: 2}
       if(err) {
+        console.log(err)
         next(err);
         return;
       }
-      next(null, results.items, {
-        total_items: results.totalItems
-      })
-    });  
+      next(null, Resource.normalize(results.items, params), results.count_items);
+    });
   },
   
   /*
@@ -172,21 +153,14 @@ module.exports = {
         count_items: queries.count_related_entities,
         items: queries.get_related_entities
       },
-      params: {
-        entity: params.entity,
-        id: +params.id,
-        limit: +params.limit || 10,
-        offset: +params.offset || 0
-      }
+      params: params
     }, function (err, results) {
       if(err) {
         console.log(err)
         next(err);
         return;
       }
-      next(null, results.items, {
-        total_items : results.count_items
-      });
+      next(null, results.items, results.count_items);
     });
   },
   /*
@@ -247,24 +221,6 @@ module.exports = {
     })
   },
 
-  
-  
-  getRelatedPersons: function(id, properties, next) {
-    var options = _.merge({
-      id: +id,
-      offset: 0,
-      limit: 20
-    }, properties);
-
-    neo4j.query(queries.get_related_persons, options, function (err, items) {
-      if(err) {
-        next(err);
-        return
-      }
-
-      next(null, items);
-    });  
-  },
   
   
   

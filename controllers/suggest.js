@@ -62,13 +62,14 @@ module.exports =  function(io){
       api/suggest/allinbetween
     */
     allInBetween: function(req, res) {
-      var ids = toIds(req.params.ids);
-      if(!ids.length)
-        return res.error(400, {ids: 'not valid list of id'})
-      
+      // At least two with
       var form = validator.request(req, {
             limit: 20,
             offset: 0
+          }, {
+            fields: [
+              validator.SPECIALS.with
+            ]
           });
       if(!form.isValid)
         return helpers.formError(form.errors, res);
@@ -79,7 +80,7 @@ module.exports =  function(io){
           items: queries.all_in_between,
         },
         params: {
-          ids: ids,
+          ids: form.params.with,
           limit: form.params.limit,
           offset: form.params.offset
         }
@@ -442,9 +443,18 @@ module.exports =  function(io){
     },
     
     getGraph: function (req, res) {
+      var form = validator.request(req, {
+            limit: 20,
+            offset: 0,
+          }, {
+            
+          });
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
       var offset = +req.query.offset || 0,
           limit  = +req.query.limit || 20,
-          q      = toLucene(req.query.query),
+          q      = toLucene(form.params.query),
           query  = [
               'full_search:', q,
               ' OR name_search:', q,

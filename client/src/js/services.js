@@ -183,7 +183,12 @@ angular.module('histograph')
           m: 'unknown-node'
         }
       },
-
+      allInBetween:{
+        method: 'GET',
+        params: {
+          m: 'all-in-between'
+        }
+      }
     });
   })
   

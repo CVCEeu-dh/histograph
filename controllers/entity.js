@@ -144,25 +144,25 @@ module.exports = function(io){
         return helpers.formError(form.errors, res);
       // get the total available
       entity.getRelatedResources(form.params, function (err, items, info) {
-        if(err)
-          return helpers.cypherQueryError(err, res);
-        return res.ok({items: items}, info);
+        helpers.models.getMany(err, res, items, info, form.params);
       });
     }, // get graph of resources and other stugff, a graph object of nodes and edges
     
     getRelatedEntities: function (req, res) {
       var form = validator.request(req, {
-            limit: 50,
-            offset: 0
+            limit: 10,
+            offset: 0,
+          }, {
+            fields: [
+              validator.SPECIALS.entity
+            ],
           });
       
       if(!form.isValid)
         return helpers.formError(form.errors, res);
      
       entity.getRelatedEntities(form.params, function (err, items, info) {
-        if(err)
-          return helpers.cypherQueryError(err, res);
-        return res.ok({items: items}, info);
+        helpers.models.getMany(err, res, items, info, form.params);
       });
     },
     

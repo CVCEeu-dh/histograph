@@ -148,7 +148,7 @@ angular.module('histograph')
     $scope.setChoice = function(choice) {
       var path = $scope.getState().href(choice.name).replace(/^#/,'').replace('%20', ' ');
       $log.log('FilterCtrl -> setChoice', choice.name, '- path:', path );
-      
+      debugger
       $location.path(path).search($location.search())
     }
     
