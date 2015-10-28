@@ -249,12 +249,55 @@ angular
             }).$promise;
           },
           
+        },
+        grammar: {
+          name: 'resource',
+          label: 'explore next',
+          choices: [
+            {
+              name: 'resource.resources',
+              label: 'documents'
+            }, {
+              name: 'resource.persons',
+              label: 'people'
+            }
+          ]
         }
       })
         .state('resource.resources', {
           url: '',
           templateUrl: 'templates/partials/resources.html',
           controller: 'ResourcesCtrl',
+          grammar: {
+            label: 'documents',
+            connector: {
+              type: 'in documents of type',
+              relatedTo: 'which contains',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: [
+              {
+                name: 'of any kind',
+              },
+              {
+                name: 'pictures',
+                filter: 'type=picture'
+              },
+              {
+                name: 'letters',
+                filter: 'type=letter'
+              },
+              {
+                name: 'treaty',
+                filter: 'type=treaty'
+              }
+            ],
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
           resolve: {
             relatedVizFactory: function(ResourceRelatedVizFactory) {
               return ResourceRelatedVizFactory
@@ -276,6 +319,38 @@ angular
           url: '/per',
           templateUrl: 'templates/partials/entities.html',
           controller: 'EntitiesCtrl',
+          // added custom grammar dict
+          // diplay people [in documents of type] ...
+          grammar: {
+            label: 'people',
+            connector: {
+              type: 'in documents of type',
+              relatedTo: 'which contains',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: [
+              {
+                name: 'in any kind of documents',
+              },
+              {
+                name: 'in pictures',
+                filter: 'type=picture'
+              },
+              {
+                name: 'in letters',
+                filter: 'type=letter'
+              },
+              {
+                name: 'in treaty',
+                filter: 'type=treaty'
+              }
+            ],
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
           resolve: {
             model: function(){
               return 'person'
@@ -403,9 +478,22 @@ angular
       
       .state('search', {
         abstract:true,
-        url: '/search/{query}',
+        url: '/search/:query',
         templateUrl: 'templates/search.html',
         controller: 'SearchCtrl',
+        grammar: {
+          name: 'resource',
+          label: '',
+          choices: [
+            {
+              name: 'search.resources',
+              label: 'documents'
+            }, {
+              name: 'search.persons',
+              label: 'people'
+            }
+          ]
+        },
         resolve: {
           stats: function(SuggestFactory, $stateParams) {
            return SuggestFactory.getStats({
@@ -418,38 +506,102 @@ angular
           url: '',
           templateUrl: 'templates/partials/resources.html',
           controller: 'ResourcesCtrl',
+          grammar: {
+            label: 'documents',
+            connector: {
+              type: 'of type',
+              relatedTo: 'which contains',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: [
+              {
+                name: 'any kind of documents',
+              },
+              {
+                name: 'pictures',
+                filter: 'type=picture'
+              },
+              {
+                name: 'letters',
+                filter: 'type=letter'
+              },
+              {
+                name: 'treaty',
+                filter: 'type=treaty'
+              }
+            ],
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
           resolve: {
             relatedVizFactory: function(SuggestVizFactory) {
               return SuggestVizFactory
             },
             relatedFactory: function(SuggestFactory) {
-              return //SuggestRelatedFactory
+              return SuggestFactory
             },
-            resources: function(SuggestFactory, $stateParams) {
-              // angular.extend({
-              //   id: $stateParams.id,
-              //   model: 'resource',
-              //   limit: 10
-              // }, $location.search())).$promise;
-              return SuggestFactory.getResources({
+            resources: function(SuggestFactory, $stateParams, $location) {
+              return SuggestFactory.getResources(angular.extend($location.search(), {
                 query: $stateParams.query,
                 limit: 10
-              }).$promise;
+              })).$promise;
             }
           }
         })
         .state('search.persons', {
           url: '/per',
           templateUrl: 'templates/partials/entities.html',
-          controller: 'SearchEntitiesCtrl',
+          controller: 'EntitiesCtrl',
+          grammar: {
+            label: 'people',
+            connector: {
+              type: 'in documents of type',
+              relatedTo: 'which contains',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: [
+              {
+                name: 'in any kind of documents',
+              },
+              {
+                name: 'in pictures',
+                filter: 'type=picture'
+              },
+              {
+                name: 'in letters',
+                filter: 'type=letter'
+              },
+              {
+                name: 'in treaties',
+                filter: 'type=treaty'
+              }
+            ],
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
           resolve: {
+            model: function(){
+              return 'person'
+            },
+            relatedVizFactory: function(SuggestVizFactory) {
+              return SuggestVizFactory
+            },
+            relatedFactory: function(ResourceRelatedFactory) {
+              return ResourceRelatedFactory
+            },
             entities: function(SuggestFactory, $stateParams) {
             // clean limit here
-            console.log($stateParams)
+            // console.log($stateParams)
               return SuggestFactory.getEntities({
                 query: $stateParams.query,
                 limit: 10
-              });
+              }).$promise;
             }
           }
         })

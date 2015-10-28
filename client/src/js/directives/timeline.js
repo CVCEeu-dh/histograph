@@ -155,7 +155,7 @@ angular.module('histograph')
             return;
           }
           if(extent[0] && typeof extent[0] == 'object') {
-            console.log(extent[0])
+            // console.log(extent[0])
             tim.ui.brushDateLeft.style({
               visibility: 'visible',
               transform: 'translateX(' + (tim.fn.x(extent[0]) + 50) +'px)'

@@ -325,7 +325,7 @@ a#header-logo img{
 }
 
 .header-menu > ul> li> a{
-  display: block;
+  display: inline;
   padding: 15px 0px 13px 0;
   line-height: 21px;
   border-bottom: 1px solid transparent;
@@ -563,7 +563,7 @@ a#header-logo img{
 }
 
 .search #see-also{
-  margin-left: 20%;
+  margin-left: 10px;
 }
 
 .viewpoint-read #see-also-menu {
@@ -956,7 +956,7 @@ a#header-logo img{
 }
 
 #milkyway.search{
-  left: 52%;
+  left: 370px;
 }
 
 #milkyway.neighbors{

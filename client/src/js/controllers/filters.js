@@ -8,12 +8,12 @@
  */
 angular.module('histograph')
   .controller('FiltersCtrl', function ($scope, $log, $http, $location, SuggestFactory,EVENTS) {
-    $log.debug('FiltersCtrl ready', $location.search());
+    $log.debug('FiltersCtrl ready, filters active:', $location.search());
     
     $scope.filters = {};
     $scope.filterItems  = {};
     $scope.facets = {}; // available facets, per filter key
-    
+    $scope.qs = ''; // the location.search() object as querystring
     /*
       e.g.
       setFacets('type', [
@@ -74,6 +74,7 @@ angular.module('histograph')
     $scope.setFilter = function(key, value) {
       $location.search(key, value);
     }
+
     
     /*
       For some field, load complex items (e.g; location, persons etc..);
@@ -96,36 +97,36 @@ angular.module('histograph')
     */
     $scope.loadFilters = function() {
       var candidates = $location.search(),
-          filters =  {}
+          filters =  {},
+          qs = [];
       // handle 'type' and mimetype (pseudo-array)
       for (var i in candidates) {
         var list = _.unique(_.compact(_.map((''+candidates[i]).split(','), _.trim)));
         filters[i] = list;
+        qs.push(encodeURIComponent(i) + '=' +encodeURIComponent(candidates[i]));
       }
-      
-      $log.debug('FiltersCtrl -> sync()', filters);
+      // set query for search ctrl
+      if(filters['query'])
+        $scope.query = filters['query'].join('');
+      $log.debug('FiltersCtrl -> loadFilters()', filters);
       $scope.filters = filters;
       $scope.isFiltered = !_.isEmpty($scope.filters);
+      $scope.qs = qs.join('&');
       $scope.loadFiltersItems();
+      
     }
     
     /*
       typeahead, with filters.
     */
-    $scope.typeaheadSuggest = function(q, label) {
-      $log.log('FiltersCtrl -> typeahead()', q, label);
-      // return $http.get('/api/suggest/entity', {
-      //   params: {
-      //     query: q
-      //   }
-      // }).then(function(response){
-      //   console.log(response)
-      //   return [{type:'default'}].concat(response.data.result.items)
-      // });
+    $scope.typeaheadSuggest = function(q, type) {
+      $log.log('FiltersCtrl -> typeahead()', q, type);
+      // suggest only stuff from 2 chars on
+      if(q.trim().length < 2)
+        return;
       
       return SuggestFactory.get({
-        m: label,
-      
+        m: type,
         query: q,
         limit: 10
       }).$promise.then(function(res){
@@ -133,160 +134,26 @@ angular.module('histograph')
           return [];
         return [{type: 'default'}].concat(res.result.items)
       })
-      // }, function(res){
-      //   if(res.status != 'ok')
-      //     return [];
-      //   console.log(res.result.items)
-      //   return [{type: 'default'}].concat(res.result.items)
-        
-      // })
     }
     /*
       The combinatio of choices.
       load facets?
     */
-    $scope.grammar = {
-      explore: {
-        name: 'explore',
-        subjects: [
-          {
-            name: 'documents',
-            link: '/r',
-            connector: {
-              type: 'of type',
-              relatedTo: 'which contains',
-              notRelatedTo: 'related to anyone',
-              from: 'from',
-              to: 'to'
-            },
-            types: [
-              {
-                name: 'of any kind',
-              },
-              {
-                name: 'mostly pictures',
-                filter: 'type=picture'
-              },
-              {
-                name: 'letters',
-                filter: 'type=letter'
-              },
-              {
-                name: 'treaty',
-                filter: 'type=treaty'
-              }
-            ],
-            relatedTo: {
-              typeahead: 'entity'
-            }
-          },
-          {
-            name: 'people',
-            link: '/e',
-            connector: {
-              type: 'in documents of type'
-            },
-            types: [
-              {
-                name: 'in any kind of documents',
-              },
-              {
-                name: 'in pictures',
-                filter: 'type=picture'
-              },
-              {
-                name: 'in letters',
-                filter: 'type=letter'
-              },
-              {
-                name: 'in treaty',
-                filter: 'type=treaty'
-              }
-            ],
-            relatedTo: [
-              {
-                name: 'wherever'
-              }
-            ]
-          },
-          {
-            name: 'organizations',
-            connector: {
-              type: 'in documents of type'
-            },
-            types: [
-              {
-                name: 'in any kind of documents',
-              },
-              {
-                name: 'in pictures',
-              },
-              {
-                name: 'in letters',
-              },
-              {
-                name: 'in treaty'
-              }
-            ],
-            relatedTo: [
-              {
-                name: 'every'
-              }
-            ]
-          },
-        ],
-        
-      },
-      connect: {
-        name: 'find',
-        subjects: [
-          {
-            name: 'all kind of documents' 
-          },
-        ],
-        relatedTo: [ // aka collecting between
-          {
-            name: 'documents'
-          },
-          {
-            name: 'people'
-          },
-          {
-            name: 'organizations' 
-          },
-        ],
-        from: [
-          {
-            name: 'from the beginning of time' 
-          }
-        ],
-        to: [
-          {
-            name: 'to the end of time' 
-          }
-        ]
-      },
-      search: {
-        name: 'search',
-        subjects: [
-          {
-            name: 'documents' 
-          },
-          {
-            name: 'people' 
-          },
-          {
-            name: 'organizations' 
-          },
-        ]
-      },
-    };
+    $scope.grammar;
     
-    $scope.grammar.explore.subject = $scope.grammar.explore.subjects[0];
-    
-    $scope.setSubject = function(grammar, subject) {
-      grammar.subject = subject
+    /*
+      Set a choiche from the choices provided by the ruler
+      (i.e. the root grammar)
+    */
+    $scope.setChoice = function(choice) {
+      var path = $scope.getState().href(choice.name).replace(/^#/,'').replace('%20', ' ');
+      $log.log('FilterCtrl -> setChoice', choice.name, '- path:', path );
+      
+      $location.path(path).search($location.search())
     }
+    
+    // set from the currentState
+    
     
     $scope.setType = function(subject, type) {
       subject.type = type;
@@ -297,4 +164,29 @@ angular.module('histograph')
     }
     
     $scope.$on('$locationChangeSuccess', $scope.loadFilters);
+    
+    /*
+      Watch for currentState changes in ui.router.
+      Cfr StateChangeSuccess listener in core.js
+    */
+    $scope.$watch('currentState', function(state) {
+      if(!state)
+        return;
+      $log.log('FiltersCtrl @currentState', state);
+      var $state = $scope.getState(),
+          parentState = $state.get(state.name.split('.')[0]);
+      
+      // set (or unset) search query if any
+      $scope.query = $state.params.query;
+        
+      
+      // ruler is the parentstate grammar
+      if(parentState && parentState.abstract) {
+        $scope.ruler = parentState.grammar;
+      }
+      
+      if(state.grammar)
+        $scope.grammar = state.grammar
+    
+     })
   })

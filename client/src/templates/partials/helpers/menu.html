@@ -1,11 +1,13 @@
 <ul>
-  <li class='path'>
+  <li class='path'>/
     <a  ui-sref="index">home</a>
   </li>
   <li class='path split'>/</li>
   <li class='path'>
-    <a ng-if='item' class="active" href="#">{{item.type || 'resource'}}#{{item.id}}</a>
-    <b ng-if='matchingQuery'>search "{{matchingQuery}}"</b>
+    <span ng-if='query'>search result for <b>{{query}}</b> in</span>
+    <span ng-if='item'>starting from 
+    <a class="active" href="#">{{item.type || 'document'}}#{{item.id}}</a>
+    </span>
     
   </li>
   

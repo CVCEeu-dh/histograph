@@ -74,6 +74,13 @@ angular.module('histograph')
       $scope.viewpoint.selected = value;
     }
     
+    /*
+      Get the current $state
+    */
+    $scope.getState = function() {
+      return $state;
+    }
+    
     
     // the current search query, if any
     // $scope.query =  $routeParams.query || '';
@@ -352,7 +359,8 @@ angular.module('histograph')
     var _resizeTimer;
     $rootScope.$on('$stateChangeSuccess', function (e, state) {
       $log.log('CoreCtrl @stateChangeSuccess', state.name);
-      $scope.currentState = state.name ;// r.$$route.controller;
+      // the ui.router state (cfr app.js)
+      $scope.currentState = state;
       
       $scope.unsetMessage();
       // $scope.setMessage(MESSAGES.LOADED, 1500);
