@@ -1,9 +1,10 @@
 <div class="related entity">
-    <i class='fa fa-circle type {{model}}'></i>{{relatedItem.type}}    
-    <div  ng-if="relatedItem.props.thumbnail" class="profile-pic">
-      <div class="profile-pic-wrapper">
-        
-        <img ng-src="{{relatedItem.props.thumbnail}}">
+    <div class="type" style='margin-bottom: 0'><i class='fa fa-circle type {{model}}'></i>{{relatedItem.type}}  | {{$index + 1}} out of {{totalItems}} 
+      <div  ng-if="relatedItem.props.thumbnail" class="profile-pic">
+        <div class="profile-pic-wrapper">
+          
+          <img ng-src="{{relatedItem.props.thumbnail}}">
+        </div>
       </div>
     </div>
     <h4>
@@ -23,5 +24,5 @@
       {{relatedItem.props | abstract : language : 100}}
     </blockquote>
               
-    <a data-id='{{relatedItem.id}}'>view on graph</a>
+    <!-- <a data-id='{{relatedItem.id}}'>view on graph</a> -->
   </div>
