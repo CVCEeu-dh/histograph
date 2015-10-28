@@ -275,7 +275,7 @@ module.exports = {
     
     api: function(options, callback) {
       console.log(clc.yellowBright('\n   tasks.helpers.marvin.api'));
-      
+      console.log(clc.blackBright('\n   path:'), options.path);
       options.session
         .get(options.path)
         .end(function (err, res) {
