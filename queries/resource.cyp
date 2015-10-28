@@ -68,8 +68,8 @@ MATCH (res:resource)
   {?res:ids__inID} {AND?res:start_time__gt} {AND?res:end_time__lt} {AND?res:mimetype__in} {AND?res:type__in}
 WITH res
 {if:with}
-  MATCH (res)--(ent:entity) WHERE id(ent) IN {with} 
-  WITH res
+  MATCH (res)-[:appears_in]-(ent:entity) WHERE id(ent) IN {with} 
+  WITH DISTINCT res
 {/if}
 {if:orderby}
 ORDER BY {:orderby}
