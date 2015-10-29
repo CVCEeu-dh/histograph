@@ -1341,7 +1341,7 @@ li.CodeMirror-hint-active {
   background: #585858;
   /*border: 1px solid #C5C5C6;*/
   border-radius: 3px;
-  z-index: 10;
+  z-index: 11;
   box-shadow: 0 5px 10px rgba(0,0,0,.175);
   opacity: .9;
   transition: opacity .22s ease-in-out;
@@ -5139,4 +5139,18 @@ Copyright (c) 2015 Daniel Eden
   width: 18px;
   background: transparent;
   height: 18px;
+}
+
+/*
+  Special btn
+*/
+.more{
+  text-align:center;
+  margin-bottom: 20px;
+}
+.more button.btn {
+  font-size: 14px;
+  display: inline-block;
+  background: transparent;
+  font-style: italic;
 }

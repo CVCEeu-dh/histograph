@@ -631,7 +631,7 @@ angular
               return SuggestFactory
             },
             resources: function(SuggestFactory, $stateParams, $location) {
-              return SuggestFactory.getResources(angular.extend($location.search(), {
+              return SuggestFactory.getResources(angular.extend({},$location.search(), {
                 query: $stateParams.query,
                 limit: 10
               })).$promise;

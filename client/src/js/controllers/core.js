@@ -134,7 +134,7 @@ angular.module('histograph')
     
     $scope.addMoreItems = function() {
       $log.log('CoreCtrl > addMoreItems');
-      $scope.$broadcast(EVENTS.INFINITE_SCROLL);
+      //$scope.$broadcast(EVENTS.INFINITE_SCROLL);
     }
     
     /*
