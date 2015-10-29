@@ -200,6 +200,14 @@ angular.module('histograph')
     return $resource('/api/suggest/all-in-between/:ids/:model/:type');
   })
   
+  .factory('SearchFactory', function ($resource) {
+    return $resource('/api/suggest/:model');
+  })
+  
+  .factory('SearchVizFactory', function ($resource) {
+    return $resource('/api/suggest/:type');
+  })
+  
   
   
   // .factory('SuggestFactory', function ($http) {

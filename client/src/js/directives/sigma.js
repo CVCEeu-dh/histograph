@@ -604,7 +604,7 @@ angular.module('histograph')
             linLogMode: true,
             startingIterations : 20,
             gravity : 1,
-            slowDown:0.5,
+            slowDown: 10,
             edgeWeightInfluence : 2
           });
           $log.debug('::sigma -> play()')

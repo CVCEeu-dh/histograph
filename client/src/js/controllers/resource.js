@@ -142,14 +142,15 @@ angular.module('histograph')
       model: 'resource',
       type: 'graph',
       limit: 100,
-      query:  $stateParams.query
+      query:  $stateParams.query,
+      ids:    $stateParams.ids,
     }, function(res) {
-      if($stateParams.query)
-        $scope.setGraph(res.result.graph);
-      else
+      if($scope.item && $scope.item.id)
         $scope.setGraph(res.result.graph, {
           centers: [$scope.item.id]
         });
+      else
+        $scope.setGraph(res.result.graph);
     });
     
     $log.log('ResourcesCtrl -> setRelatedItems - items', resources.result.items);
@@ -162,27 +163,10 @@ angular.module('histograph')
     $scope.sync = function() {
       $scope.loading = true;
 
-      if($stateParams.query)
-        relatedFactory.getResources(angular.extend({},angular.copy($scope.params), {
-          query: $stateParams.query,
-          limit: 10,
-          offset: $scope.offset
-        }), function (res) {
-          $scope.loading = false;
-          $scope.offset  = res.info.offset;
-          $scope.limit   = res.info.limit;
-          $scope.totalItems = res.info.total_items;
-          if($scope.offset > 0)
-            $scope.addRelatedItems(res.result.items);
-          else
-            $scope.setRelatedItems(res.result.items);
-          // reset if needed
-          $scope.setFacets('type', res.info.groups);
-          
-        });
-      else
+      
         relatedFactory.get(angular.extend({
           id: $stateParams.id,
+          query: $stateParams.query,
           model: 'resource',
           limit: $scope.limit,
           offset: $scope.offset

@@ -454,7 +454,7 @@ a#header-logo img{
 }
 
 .neighbors #perspective-menu {
-    width: 25%;
+    /*width: 25%;*/
 }
 
 .viewpoint-read #perspective-menu {
@@ -558,8 +558,9 @@ a#header-logo img{
   margin-left:0%;
 }
 
-.neighbors.resources #see-also{
-  margin-left: 25%;
+.neighbors #see-also{
+  /*margin-left: 25%;*/
+  margin-left: 10px;
 }
 
 .search #see-also{
@@ -971,12 +972,8 @@ a#header-logo img{
   left: 50%;
 }
 
-#milkyway.search{
+#milkyway.search, #milkyway.neighbors{
   left: 370px;
-}
-
-#milkyway.neighbors{
-  left: 57%;
 }
 
 #milkyway.index{

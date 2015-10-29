@@ -64,7 +64,7 @@ MATCH (n),(t)
   WHERE id(n) in {ids}
     AND id(t) in {ids}
 WITH n, t
-MATCH p=allShortestPaths((n)-[:appears_in*..4]-(t))
+MATCH p=allShortestPaths((n)-[:appears_in*..3]-(t))
 WITH filter(x in nodes(p) WHERE last(labels(x))='resource') as ns UNWIND ns as res
 return id(res) as id
 SKIP {offset}

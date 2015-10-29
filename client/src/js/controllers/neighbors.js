@@ -7,7 +7,7 @@
 angular.module('histograph')
   .controller('NeighborsCtrl', function ($scope, $log, $stateParams, socket) {
     $log.log('NeighborsCtrl ready, ids:', $stateParams.ids);
-    // $scope.syncQueue($stateParams.ids);
+    $scope.syncQueue($stateParams.ids);
     
     // $scope.syncGraph = function () {
     //   SuggestVizFactory.allInBetween({

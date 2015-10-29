@@ -551,7 +551,7 @@ module.exports =  function(io){
                 id: paths[i].rels[j].id,
                 source: paths[i].rels[j].start,
                 target: paths[i].rels[j].end,
-                weight: paths[i].rels[j].properties.tfidf
+                weight: paths[i].rels[j].properties.frequency
               }
           }
         }

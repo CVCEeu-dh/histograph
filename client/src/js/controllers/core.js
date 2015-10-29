@@ -136,6 +136,12 @@ angular.module('histograph')
       $log.log('CoreCtrl > addMoreItems');
       //$scope.$broadcast(EVENTS.INFINITE_SCROLL);
     }
+    /*
+      Manual trigger.
+    */
+    $scope.more = function() {
+      $scope.$broadcast(EVENTS.INFINITE_SCROLL);
+    }
     
     /*
       language handlers
@@ -211,6 +217,8 @@ angular.module('histograph')
     };
     
     $scope.suggest = function(query) {
+      if(query.trim().length < 2)
+        return;
       // $log.info('CoreCtrl -> suggest', query);
       $scope.query = ''+ query
       $scope.freeze = 'sigma'

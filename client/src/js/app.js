@@ -573,7 +573,7 @@ angular
         controller: 'NeighborsCtrl',
         grammar: {
           name: 'neighbors',
-          label: 'connect',
+          label: 'explore the network of',
           choices: [
             {
               name: 'neighbors.resources',
@@ -596,6 +596,36 @@ angular
           url: '',
           templateUrl: 'templates/partials/resources.html',
           controller: 'ResourcesCtrl',
+          grammar: {
+            label: 'documents',
+            connector: {
+              type: 'of type',
+              relatedTo: 'which contains',
+              notRelatedTo: 'between',
+              from: 'from',
+              to: 'to'
+            },
+            types: [
+              {
+                name: 'of any kind',
+              },
+              {
+                name: 'pictures',
+                filter: 'type=picture'
+              },
+              {
+                name: 'letters',
+                filter: 'type=letter'
+              },
+              {
+                name: 'treaty',
+                filter: 'type=treaty'
+              }
+            ],
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
           resolve: {
             relatedVizFactory: function(SuggestAllInBetweenVizFactory) {
               return SuggestAllInBetweenVizFactory;
@@ -612,8 +642,8 @@ angular
             }
           }
         })
-        .state('neighbors.people', {
-          url: '/people',
+        .state('neighbors.persons', {
+          url: '/per',
           templateUrl: 'templates/partials/entities.html',
           controller: 'EntitiesCtrl',
           resolve: {
@@ -621,17 +651,19 @@ angular
               return 'person'
             },
             relatedVizFactory: function(SuggestVizFactory) {
-              return SuggestVizFactory
+              return SuggestAllInBetweenVizFactory
             },
             relatedFactory: function(ResourceRelatedFactory) {
-              return SuggestFactory
+              return SuggestAllInBetweenFactory
             },
-            entities: function(SuggestFactory, $stateParams) {
+            entities: function(SuggestAllInBetweenFactory, $stateParams) {
             // clean limit here
             // console.log($stateParams)
-              return SuggestFactory.getEntities({
-                limit: 10
-              }).$promise;
+              return SuggestAllInBetweenFactory.get({
+                ids: $stateParams.ids,
+                limit: 10,
+                model: 'person'
+              }).$promise; 
             }
           }
         })
@@ -656,7 +688,7 @@ angular
         },
         resolve: {
           stats: function(SuggestFactory, $stateParams) {
-           return SuggestFactory.getStats({
+            return SuggestFactory.getStats({
               query: $stateParams.query
             }).$promise;
           }
@@ -697,14 +729,15 @@ angular
             }
           },
           resolve: {
-            relatedVizFactory: function(SuggestVizFactory) {
-              return SuggestVizFactory
+            relatedVizFactory: function(SearchVizFactory) {
+              return SearchVizFactory
             },
-            relatedFactory: function(SuggestFactory) {
-              return SuggestFactory
+            relatedFactory: function(SearchFactory) {
+              return SearchFactory
             },
-            resources: function(SuggestFactory, $stateParams, $location) {
-              return SuggestFactory.getResources(angular.extend({},$location.search(), {
+            resources: function(SearchFactory, $stateParams, $location) {
+              return SearchFactory.get(angular.extend({},$location.search(), {
+                model: 'resource',
                 query: $stateParams.query,
                 limit: 10
               })).$promise;
@@ -780,33 +813,7 @@ angular
           templateUrl: 'templates/partials/entities.html',
           controller: 'SearchEntitiesCtrl',
         })
-      //   .state('search.entities', {
-      //     url: '/{entity:person|location}/',
-      //     templateUrl: 'templates/partials/resources.html',
-      //     controller: 'SearchResourcesCtrl',
-      //   })
-      // .state('searchentity', {
-      //   url: '/search/{query}/{entity:person|location}',
-      //   templateUrl: 'templates/search.html',
-      //   controller: 'SearchCtrl',
-      //   resolve: {
-      //     resources: function(SuggestFactory, $stateParams) {
-      //       // clean limit here
-      //       return SuggestFactory.getResources({
-      //         query: $stateParams.query,
-      //         limit: 10
-      //       });
-      //     },
-      //     entities: function(SuggestFactory, $stateParams) {
-      //       // clean limit here
-      //       return SuggestFactory.getEntities({
-      //         query: $stateParams.query,
-      //         entity: $stateParams.entity,
-      //         limit: 10
-      //       });
-      //     }
-      //   }
-      // });
+     
   })
   .config(function ($httpProvider) {
     $httpProvider.interceptors.push(function ($q, $log, $rootScope, EVENTS) {
