@@ -332,9 +332,14 @@ angular
             {
               name: 'resource.resources',
               label: 'documents'
-            }, {
+            }, 
+            {
               name: 'resource.persons',
               label: 'people'
+            },
+            {
+              name: 'resource.organizations',
+              label: 'organizations (experimental)'
             }
           ]
         }
@@ -449,6 +454,36 @@ angular
           url: '/org',
           templateUrl: 'templates/partials/entities.html',
           controller: 'EntitiesCtrl',
+          grammar: {
+            label: 'organizations',
+            connector: {
+              type: 'in documents of type',
+              relatedTo: 'which contains',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: [
+              {
+                name: 'in any kind of documents',
+              },
+              {
+                name: 'in pictures',
+                filter: 'type=picture'
+              },
+              {
+                name: 'in letters',
+                filter: 'type=letter'
+              },
+              {
+                name: 'in treaty',
+                filter: 'type=treaty'
+              }
+            ],
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
           resolve: {
             model: function(){
               return 'organization'
@@ -549,18 +584,56 @@ angular
             }
           ]
         },
-        resolve: {
-          allInBetween: function(SuggestFactory, $stateParams) {
-            return SuggestFactory.allInBetween({
-              ids: $stateParams.ids
-            });
-          }
-        }
+        // resolve: {
+        //   allInBetween: function(SuggestFactory, $stateParams) {
+        //     return SuggestFactory.allInBetween({
+        //       ids: $stateParams.ids
+        //     });
+        //   }
+        // }
       })
         .state('neighbors.resources', {
           url: '',
-          templateUrl: 'templates/partials/neighbors.html',
-          controller: 'NeighborsResourcesCtrl',
+          templateUrl: 'templates/partials/resources.html',
+          controller: 'ResourcesCtrl',
+          resolve: {
+            relatedVizFactory: function(SuggestAllInBetweenVizFactory) {
+              return SuggestAllInBetweenVizFactory;
+            },
+            relatedFactory: function(SuggestAllInBetweenFactory) {
+              return SuggestAllInBetweenFactory;
+            },
+            resources: function(SuggestAllInBetweenFactory, $stateParams) {
+              return SuggestAllInBetweenFactory.get({
+                ids: $stateParams.ids,
+                limit: 10,
+                model: 'resource'
+              }).$promise; 
+            }
+          }
+        })
+        .state('neighbors.people', {
+          url: '/people',
+          templateUrl: 'templates/partials/entities.html',
+          controller: 'EntitiesCtrl',
+          resolve: {
+            model: function(){
+              return 'person'
+            },
+            relatedVizFactory: function(SuggestVizFactory) {
+              return SuggestVizFactory
+            },
+            relatedFactory: function(ResourceRelatedFactory) {
+              return SuggestFactory
+            },
+            entities: function(SuggestFactory, $stateParams) {
+            // clean limit here
+            // console.log($stateParams)
+              return SuggestFactory.getEntities({
+                limit: 10
+              }).$promise;
+            }
+          }
         })
       
       .state('search', {

@@ -31,7 +31,7 @@ RETURN extract(n in filter(x IN nodes(p) WHERE NOT id(x) IN {ids})|{
 
 
 // name: all_in_between
-// 
+// serendipity graph
 MATCH p=(n)-[r:appears_in*..3]-(t) WHERE id(n) in {ids} AND id(t) in {ids}
 RETURN extract(n IN nodes(p)| {
   id: id(n),
@@ -41,6 +41,67 @@ RETURN extract(n IN nodes(p)| {
 ORDER BY count
 SKIP {offset}
 LIMIT {limit}
+
+
+// name: count_all_in_between_resources
+// return grouped by resource type (picture, treaty ...)
+MATCH (n),(t)
+  WHERE id(n) in {ids}
+    AND id(t) in {ids}
+WITH n, t
+MATCH p=allShortestPaths((n)-[:appears_in*..4]-(t))
+WITH filter(x in nodes(p) WHERE last(labels(x))='resource') as ns UNWIND ns as res
+WITH distinct res
+RETURN {
+  group: res.type, 
+  count_items: count(res)
+}
+
+
+// name: get_all_in_between_resources
+// return a set of id for the all-in-between resource.
+MATCH (n),(t)
+  WHERE id(n) in {ids}
+    AND id(t) in {ids}
+WITH n, t
+MATCH p=allShortestPaths((n)-[:appears_in*..4]-(t))
+WITH filter(x in nodes(p) WHERE last(labels(x))='resource') as ns UNWIND ns as res
+return id(res) as id
+SKIP {offset}
+LIMIT {limit}
+
+
+// name: get_all_in_between_graph
+// retutn rels, nodes and
+MATCH (n)-[r:appears_in*..2]-(t:{:entity})
+  WHERE id(n) in {ids}
+  // top common nodes at distance 0 to 2
+WITH t, count(DISTINCT r) as rr 
+WHERE rr > 1
+WITH t, rr
+ORDER BY rr DESC
+LIMIT 100
+  // how do we reach top common nodes
+MATCH p=allShortestPaths((n)-[r:appears_in*..2]-(t))
+WHERE id(n) in {ids}
+WITH p, reduce(tfidf=toFloat(0), r in relationships(p)|tfidf + COALESCE(r.tfidf,0.0)) as tfidf
+RETURN extract( n IN nodes(p)| {
+  id: id(n),
+  type: last(labels(n)),
+  label: coalesce(n.name, n.title_en, n.title_fr)
+}) AS ns, relationships(p) as rels, tfidf, length(p) as lp ORDER BY length(p) ASC, tfidf DESC
+LIMIT {limit}
+
+
+// name: get_shortest_paths_graph
+// weightened graph (tfidf)
+MATCH (n),(t)
+  WHERE id(n) in {ids}
+    AND id(t) in {ids}
+WITH n, t
+MATCH p=allShortestPaths((n)-[:appears_in*..3]-(t))
+WITH p, reduce(tfidf=toFloat(0), r in relationships(p)|tfidf + COALESCE(r.tfidf,0.0)) as tfidf
+RETURN p ORDER BY length(p), tfidf DESC LIMIT 50
 
 
 // name: count_all_shortest_paths

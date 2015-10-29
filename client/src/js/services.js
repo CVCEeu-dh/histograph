@@ -192,12 +192,15 @@ angular.module('histograph')
     });
   })
   
-  /*
-    Add / get :model related to resource
-  */
-  .factory('SuggestVizFactory', function ($resource) {
-    return $resource('/api/suggest/:type');
+  .factory('SuggestAllInBetweenFactory', function ($resource) {
+    return $resource('/api/suggest/all-in-between/:ids/:model');
   })
+  
+  .factory('SuggestAllInBetweenVizFactory', function ($resource) {
+    return $resource('/api/suggest/all-in-between/:ids/:model/:type');
+  })
+  
+  
   
   // .factory('SuggestFactory', function ($http) {
   //   return {

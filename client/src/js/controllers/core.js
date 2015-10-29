@@ -562,10 +562,10 @@ angular.module('histograph')
       if(ids.length != $scope.playlist.length) {
         SuggestFactory.getUnknownNodes({
           ids: ids
-        }).then(function (res) {
-          $scope.playlist = res.data.result.items;
+        }, function (res) {
+          $scope.playlist = res.result.items;
           
-          $scope.playlistIds = res.data.result.items.map(function (d) {
+          $scope.playlistIds = res.result.items.map(function (d) {
             return d.id;
           });
           

@@ -126,7 +126,7 @@ module.exports = {
       field: 'ids',
       check: 'matches',
       args: [
-        /[\d,]+/
+        /\d[\d,]+/
       ],
       error: 'ids should contain only numbers and commas'
     },
@@ -332,7 +332,7 @@ module.exports = {
       if(options.required)
         fields = fields.map(function (d) {
           if(options.required[d.field])
-            d.optional = options.required[d.field];
+            d.required = options.required[d.field];
           return d;
         });
     }

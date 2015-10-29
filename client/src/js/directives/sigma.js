@@ -602,10 +602,10 @@ angular.module('histograph')
           si.startForceAtlas2({
             adjustSizes :true,
             linLogMode: true,
-            startingIterations : 10,
+            startingIterations : 20,
             gravity : 1,
-            slowDown: 10,
-            edgeWeightInfluence : 1
+            slowDown:0.5,
+            edgeWeightInfluence : 2
           });
           $log.debug('::sigma -> play()')
         }

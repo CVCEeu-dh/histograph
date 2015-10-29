@@ -480,6 +480,12 @@ apiRouter.route('/suggest/entity')
   .get(ctrl.suggest.getEntities)
 apiRouter.route('/suggest/graph')
   .get(ctrl.suggest.getGraph)
+
+apiRouter.route('/suggest/all-in-between/:ids(\\d[\\d,]+)/graph')
+  .get(ctrl.suggest.getAllInBetweenGraph)
+apiRouter.route('/suggest/all-in-between/:ids(\\d[\\d,]+)/resource')
+  .get(ctrl.suggest.getAllInBetweenResources)
+  
 apiRouter.route('/suggest/all-shortest-paths/:ids([\\d,]+)')
   .get(ctrl.suggest.allShortestPaths)
 apiRouter.route('/suggest/all-in-between')

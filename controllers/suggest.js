@@ -15,7 +15,9 @@ var settings   = require('../settings'),
     queries    = require('decypher')('./queries/suggest.cyp'),
     
     async      = require('async'),
-    _          = require('lodash');
+    _          = require('lodash'),
+    
+    Resource   = require('../models/resource');
 
 
 /*
@@ -68,8 +70,11 @@ module.exports =  function(io){
             offset: 0
           }, {
             fields: [
-              validator.SPECIALS.with
-            ]
+              validator.SPECIALS.ids
+            ],
+            required: {
+              'ids': true
+            }
           });
       if(!form.isValid)
         return helpers.formError(form.errors, res);
@@ -471,6 +476,96 @@ module.exports =  function(io){
           graph: graph
         });
       })
+    },
+    
+    /*
+      get all in between resource by using the allinbetween algo.
+      Queries: get_all_in_between_resources, count_all_in_between_resources
+      Nothe that ids list is required (it comes withthe request)
+    */
+    getAllInBetweenResources: function(req, res) {
+      var form = validator.request(req, {
+            limit: 10,
+            offset: 0
+          });
+      
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      models.getMany({
+        queries: {
+          count_items: queries.count_all_in_between_resources,
+          items: queries.get_all_in_between_resources
+        },
+        params: form.params
+      }, function (err, results) {
+        if(err)
+          console.log(err)
+        
+        Resource.getByIds(_.assign(form.params, {
+          ids: _.map(results.items, 'id')
+        }), function (err, items){
+          helpers.models.getMany(err, res, items, results.count_items, form.params);
+        });
+        
+      });
+    },
+    /*
+      get all in between algorrithm
+      takes the top common nodes at distance 0,2.
+      Require form.params.entity (entity otherwise)
+    */
+    getAllInBetweenGraph: function(req, res) {
+      var nodes = {},
+          edges = {},
+          query = '';
+          
+      var form = validator.request(req, {
+            limit: 20,
+            offset: 0,
+            entity: 'person'
+          }, {
+            fields: [
+              validator.SPECIALS.entity
+            ]
+          });
+      
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      query = parser.agentBrown(queries.get_all_in_between_graph, form.params);
+      
+      neo4j.query(query, form.params, function (err, paths) {
+        // console.log(paths)
+        // for each path
+        for(var i=0, lp=paths.length; i < lp; i++){
+          //for each nodes
+          for(var j=0, ln=paths[i].ns.length; j < ln; j++)
+            if(!nodes[paths[i].ns[j].id])
+              nodes[paths[i].ns[j].id] = paths[i].ns[j]
+          // for each relationship
+          for(var j=0, lr=paths[i].rels.length; j < lr; j++) {
+            // console.log(paths[i].rels[j])
+            if(!edges[paths[i].rels[j].id])
+              edges[paths[i].rels[j].id] = {
+                id: paths[i].rels[j].id,
+                source: paths[i].rels[j].start,
+                target: paths[i].rels[j].end,
+                weight: paths[i].rels[j].properties.tfidf
+              }
+          }
+        }
+        
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({
+          graph: {
+            nodes: _.values(nodes),
+            edges: _.values(edges)
+          }
+        });
+      })
+      
     }
   }
 }
