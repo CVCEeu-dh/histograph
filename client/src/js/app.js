@@ -76,7 +76,7 @@ angular
       .otherwise("/");
     $stateProvider
       .state('index', {
-        url: '/',
+        url: '/in',
        
         templateUrl: 'templates/index.html',
         controller: 'IndexCtrl',
@@ -84,17 +84,57 @@ angular
       })
       
       .state('explore', {
-        url: '/r',
+        url: '/',
         templateUrl: 'templates/explore.html',
         controller: 'ExploreCtrl',
-        resolve: {
-          resources: function(ResourcesFactory, $location) {
+        grammar: {
+          name: 'resource',
+          label: 'explore next',
+          choices: [
+            {
+              name: 'entity.resources',
+              label: 'documents'
+            }, {
+              name: 'entity.persons',
+              label: 'people'
+            }
+          ],
+          connector: {
+              type: 'in documents of type',
+              relatedTo: 'which contains',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: [
+              {
+                name: 'in any kind of documents',
+              },
+              {
+                name: 'in pictures',
+                filter: 'type=picture'
+              },
+              {
+                name: 'in letters',
+                filter: 'type=letter'
+              },
+              {
+                name: 'in treaty',
+                filter: 'type=treaty'
+              }
+            ],
+            relatedTo: {
+              typeahead: 'entity'
+            }
+        },
+        // resolve: {
+        //   resources: function(ResourcesFactory, $location) {
             
-            return ResourcesFactory.get(angular.extend({
-              limit: 10
-            }, $location.search())).$promise;
-          },
-        }
+        //     return ResourcesFactory.get(angular.extend({
+        //       limit: 10
+        //     }, $location.search())).$promise;
+        //   },
+        // }
       })
       
       .state('entity', {
@@ -114,7 +154,7 @@ angular
               name: 'entity.persons',
               label: 'people'
             }
-          ]
+          ],
         },
         resolve: {
           entity: function(EntityFactory, $stateParams) {
