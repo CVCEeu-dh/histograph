@@ -89,7 +89,8 @@ RETURN extract( n IN nodes(p)| {
   id: id(n),
   type: last(labels(n)),
   label: coalesce(n.name, n.title_en, n.title_fr)
-}) AS ns, relationships(p) as rels, tfidf, length(p) as lp ORDER BY length(p) ASC, tfidf DESC
+}) AS ns, relationships(p) as rels, tfidf, length(p) as lp
+ORDER BY length(p) ASC, tfidf DESC
 LIMIT {limit}
 
 
