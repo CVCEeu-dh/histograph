@@ -450,15 +450,7 @@ angular.module('histograph')
           tooltip.tip.css(_css);
         });
 
-        /*
-          listener outNode
-        */
-        si.bind('outNode', function(e) {
-          
-          // if(e.data.edge && (tooltip.node == e.data.edge.source || tooltip.node == e.data.edge.target )) {
-          //   return; // i.e, the overnode is thrown before the corresponding outEdge event.
-          // }
-          // console.log('outEdge outNode')
+        var outNode = function(){
           if(!tooltip.isVisible)
             return;
           if(tooltip.timer)
@@ -467,16 +459,10 @@ angular.module('histograph')
             tooltip.tip.css({
               opacity: 0
             });
-          // }, 210);
-          
-          tooltip.isVisible = false;
-        })
+           tooltip.isVisible = false;
+        }
         
-        
-        /*
-          listener outEdge
-        */
-        si.bind('outEdge', function(e) {
+        var outEdge = function() {
           if(tooltip.edge.timer)
             clearTimeout(tooltip.edge.timer);
           
@@ -485,8 +471,12 @@ angular.module('histograph')
           });
           
           tooltip.edge.isVisible = false;
-          
-        });
+        }
+        /*
+          listener outNode, outEdge
+        */
+        si.bind('outNode', outNode);
+        si.bind('outEdge', outEdge);
        
         
         si.bind('clickEdge', function(e) {
@@ -518,6 +508,9 @@ angular.module('histograph')
               update: true
             });
           $('body').trigger('sigma.clickStage');
+          // clear dummy tooltip
+          outEdge();
+          outNode();
         })
         
         /*
