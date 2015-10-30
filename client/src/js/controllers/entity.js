@@ -77,7 +77,7 @@ angular.module('histograph')
         id: $stateParams.id,
         model: model,
         type: 'graph',
-        limit: 1000
+        limit: 100
       }, function(res) {
         $scope.setGraph(res.result.graph)
       });

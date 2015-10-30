@@ -488,7 +488,8 @@ module.exports =  function(io){
       // build a nodes edges graph
       helpers.cypherGraph(queries.get_matching_entities_graph, {
         query: q, 
-        limit: 100
+        limit: 100,
+        entity: form.params.entity
       }, function (err, graph) {
         if(err)
           return helpers.cypherQueryError(err, res);
