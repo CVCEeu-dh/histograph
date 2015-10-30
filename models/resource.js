@@ -201,6 +201,9 @@ module.exports = {
         return module.exports.getAnnotatedText(node.props, ann, params);
       });
     }
+    node.curators = _.values(node.curators || []).filter(function (n) {
+      return n.id
+    });
     node.persons = _.values(node.persons).filter(function (n) {
       return n.id
     });

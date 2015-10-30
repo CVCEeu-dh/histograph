@@ -205,7 +205,7 @@ angular.module('histograph')
   })
   
   .factory('SearchVizFactory', function ($resource) {
-    return $resource('/api/suggest/:type');
+    return $resource('/api/suggest/:model/:type');
   })
   
   

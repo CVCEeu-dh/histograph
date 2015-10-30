@@ -447,7 +447,7 @@ module.exports =  function(io){
       });
     },
     
-    getGraph: function (req, res) {
+    getResourcesGraph: function (req, res) {
       var form = validator.request(req, {
             limit: 20,
             offset: 0,
@@ -457,17 +457,37 @@ module.exports =  function(io){
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       
-      var offset = +req.query.offset || 0,
-          limit  = +req.query.limit || 20,
-          q      = toLucene(form.params.query),
-          query  = [
-              'full_search:', q,
-              ' OR name_search:', q,
-            ].join('');
-            
+      var query = 'full_search:' + toLucene(form.params.query);
+      console.log('///',query ,'////')
       // build a nodes edges graph
-      helpers.cypherGraph(queries.get_graph_matching_entities, {
+      helpers.cypherGraph(queries.get_matching_resources_graph, {
         query: query, 
+        limit: 100
+      }, function (err, graph) {
+        console.log(err)
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({
+          graph: graph
+        });
+      })
+    },
+    
+    getEntitiesGraph: function (req, res) {
+      var form = validator.request(req, {
+            limit: 20,
+            offset: 0,
+          }, {
+            
+          });
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      var q = 'name_search:' + toLucene(form.params.query);
+
+      // build a nodes edges graph
+      helpers.cypherGraph(queries.get_matching_entities_graph, {
+        query: q, 
         limit: 100
       }, function (err, graph) {
         if(err)
@@ -477,6 +497,7 @@ module.exports =  function(io){
         });
       })
     },
+    
     
     /*
       get all in between resource by using the allinbetween algo.

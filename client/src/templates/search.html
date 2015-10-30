@@ -1,4 +1,18 @@
 <div id='perspective-menu' class="tk-proxima-nova header-menu"ng-include src="'templates/partials/helpers/menu.html'"></div>
+
+<div id="perspective">
+
+  <ul class="facets">
+    <li ng-repeat='stat in resourcesStats'>
+      <a ng-click='setFilter("type",stat.type)'> <label>{{stat.count_items}}</label> {{stat.type}}
+      </a>
+    </li>
+    <li></li>
+    <li ng-repeat='stat in entitiesStats'>
+       <label>{{stat.count_items}}</label> {{stat.type}}
+    </li>
+  </ul>
+</div>
 <!-- <div id="perspective" class="secondary {{queueStatus}}">
   
   <div class="toolbar tk-proxima-nova">
@@ -13,40 +27,6 @@
   <div class='{{matchingEntities.loading? "animated fadeOut": "animated fadeIn"}}' ng-repeat='relatedItem in matchingEntities.items' ng-include='"templates/partials/entity-lite.html"'></div>
 </div> -->
 
-<div id='see-also-menu' class="tk-proxima-nova header-menu {{state}}">
-  <ul>
-    <li>
-      <a ui-sref-active-eq="active" ui-sref="search.resources">
-        <i class="fa fa-circle type resource"></i> resources ({{matchingResources.totalItems}})
-      </a>
-    </li>
-    
-    <li ng-if='matchingEntities.types.person'>
-      <a ui-sref-active-eq="active" ui-sref="search.persons">
-        <i class="fa fa-circle type person"></i> {{matchingEntities.totalItems}} people ({{matchingEntities.types.person.count}})
-      </a>
-    </li>
-    
-    <li  ng-if='matchingEntities.types.location' >
-      <a ui-sref-active-eq="active" ui-sref="search.locations">
-        <i class="fa fa-circle type location"></i> {{matchingEntities.totalItems}} locations ({{matchingEntities.types.location.count}})
-      </a>
-    </li>
-    
-    <li ng-if='matchingEntities.types.organization'>
-      <a  ui-sref-active-eq="active" ui-sref="search.organization">
-        <i class="fa fa-circle type organization"></i> {{matchingEntities.totalItems}} organizations ({{matchingEntities.types.organization.count}})
-      </a>
-    </li>
-    
-    <li ng-if='matchingEntities.types.social_groups'>
-      <a ui-sref-active-eq="active" ui-sref="search.social_groups">
-        <i class="fa fa-circle type social_group"></i> {{matchingEntities.totalItems}} social group ({{matchingEntities.types.social_group.count}})
-      </a>
-    </li>
-   
-  </ul>
-</div>
 
 <div ui-view id='see-also'>
   <div class='{{currentCtrl}}' ng-cloak>

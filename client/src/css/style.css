@@ -33,9 +33,9 @@ h1,h2,h3,h4{
 header{
   height: 50px;
   position: fixed;
-  left:0;
-  right:0;
-  top: 0;
+  left:10px;
+  right:10px;
+  top: 10px;
   background: white;
   border-bottom: 1px solid #f0f0f0;
   z-index: 15;
@@ -141,11 +141,19 @@ a#header-logo img{
 }
 
 .item{
+  position: relative;
+  border: 1px solid #E1E1E0;
+  border-bottom-width: 3px;
+  background: white;
+  margin: 10px 0;
+  background-clip: padding-box;
+  border-radius: 2px;
   max-width: 460px;
-  margin: 0 auto 100px auto;
+  /*margin: 0 auto 100px auto;*/
   font-size: 13px;
     line-height: 21px;
 }
+
 
 .item h3>span{
   font-weight: bold;
@@ -167,7 +175,9 @@ a#header-logo img{
 .item blockquote {
   font-size: 13px;
   line-height: 21px;
-  padding: 12px 15px;
+  padding: 20px 40px;
+  margin: 0px;
+  background: transparent;
 }
 
 .item img{
@@ -181,18 +191,33 @@ a#header-logo img{
   width: 40px;
 }
 
-.item .collection{
+.item .collection {
   color: #959595;
 }
 
-.item .actions{
-  text-align: center;
-  margin: 15px 0;  
+.item .actions {
+      position: absolute;
+    top: 10px;
+    right: 10px; 
 }
 
-.item .type{
+.item .actions .action{
+  border-radius: 30px;
+  border-width: 0;
+  border: 1px solid #E8E8E7;
   color: #a5a5a5;
-  margin: 0px 0px 10px 0px;
+  width: 30px;
+  padding: 0px;
+  height: 30px;
+}
+
+.item .type {
+  color: #a5a5a5;
+  margin: 20px 40px 0px 40px;
+}
+
+.item .context {
+  margin: 0px 40px;
 }
 
 .empty {
@@ -234,8 +259,12 @@ a#header-logo img{
 
 .item.resource, .item.collection, .item.entity{
   /*border: 1px solid #eee;*/
-  margin: 40px auto 0px 50px;
-  padding: 0 20px 10px 0px;
+  /*margin: 40px auto 0px 50px;*/
+  padding: 10px 0px 10px 0px;
+}
+
+.item.resource h3 {
+  margin: 20px 40px;  
 }
 
 .item .collections{
@@ -249,17 +278,23 @@ a#header-logo img{
   margin: 10px 0;
 }
 
-.item.resource h3 {
-  margin: 20px 0;  
-}
 
 .item .language.active {
   border-bottom: 1px solid
 }
 .item .full-text{
-      background-color: #f5f5f5;
-  padding: 15px 15px;
+  background-color: white;
+  padding: 15px 40px;
   position: relative;
+}
+
+.item .meta{
+  margin: 20px 40px;
+}
+.item .doi {
+  border-top: 1px solid #E1E1E0 ;
+  padding: 10px 40px 0 40px;
+  color: #757575;
 }
 
 .item.entity h3, .item.entity .description{
@@ -303,6 +338,8 @@ a#header-logo img{
   position: fixed;
   top: 50px;
   height: 50px;
+  left:10px;
+  right:10px;
   background: white;
   z-index: 11;
 }
@@ -411,14 +448,15 @@ a#header-logo img{
 */
 #perspective{
   position: fixed;
-  width: 480px;
+  width: 470px;
   top:  100px;
+  left: 10px;
   bottom: 50px;
   /*overflow: hidden;*/
   overflow: auto;
   overflow-y: auto;
   overflow-x: hidden;
-  background: white;
+  /*background: white;*/
   border-right: 1px solid #E8E8E7;
   -webkit-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1), width .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
      -moz-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1), width .3s cubic-bezier(0.65, 0.05, 0.36, 1);
@@ -426,13 +464,31 @@ a#header-logo img{
           transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1), width .3s cubic-bezier(0.65, 0.05, 0.36, 1);
 }
 
-#perspective-menu{
-  width: 100%
+.search #perspective{
+  width: 180px;
+}
+
+#perspective ul.facets{
+  list-style-type: none;
+  margin: 20px 0 0 40px;
+  padding: 0;
+}
+
+#perspective ul.facets li{
+  
+}
+
+#perspective ul.facets a{
+  cursor: pointer;
+  display: block;
+  color: #151515;
+  border-bottom: 1px solid transparent;
 }
 
 #perspective-menu > ul{
   padding-left: 50px;
 }
+
 
 #perspective-menu a.inline{
   display: inline;
@@ -564,7 +620,7 @@ a#header-logo img{
 }
 
 .search #see-also{
-  margin-left: 10px;
+  margin-left: 200px;
 }
 
 .viewpoint-read #see-also-menu {
@@ -973,7 +1029,7 @@ a#header-logo img{
 }
 
 #milkyway.search, #milkyway.neighbors{
-  left: 370px;
+  left: 560px;
 }
 
 #milkyway.index{
@@ -1753,8 +1809,8 @@ Copyright (c) 2015 Daniel Eden
   }
 
   50% {
-    -webkit-transform: scale3d(1.05, 1.05, 1.05);
-    transform: scale3d(1.05, 1.05, 1.05);
+    -webkit-transform: scale3d(1.75, 1.75, 1.75);
+    transform: scale3d(1.75, 1.75, 1.75);
   }
 
   100% {
@@ -1770,8 +1826,8 @@ Copyright (c) 2015 Daniel Eden
   }
 
   50% {
-    -webkit-transform: scale3d(1.05, 1.05, 1.05);
-    transform: scale3d(1.05, 1.05, 1.05);
+    -webkit-transform: scale3d(1.75, 1.75, 1.75);
+    transform: scale3d(1.75, 1.75, 1.75);
   }
 
   100% {

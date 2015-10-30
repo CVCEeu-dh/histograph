@@ -6,17 +6,11 @@
         <!-- /div -->
         
         
-        <div>
-          <span>{{item.props.type}}<span> — 
-          <span ng-click="openIssueModal('date', item)" class="empty" ng-if="!item.props.start_time" tooltip='click to add a date'>no date found</span>
-          <a ng-href="#/r/{{item.id}}/inq/create/date" tooltip='click to propose a different date' ng-if="item.props.start_time">{{item.props|guessInterval}}</a>
+        <div class="type">
+          <span><i class="fa fa-circle type resource"></i> {{item.props.type}}<span>
           
-          <span ng-repeat="location in item.places">
-            <a class="tag location" ng-click="toggleMenu($event, item, location, 'place')">{{location.name}}</a><!-- 
-            <a ng-if="location.geocode_id" ng-click="toggleInquirer(location)" class="tag location" >{{location.geocode_formatted_address}}</a>
-            <a ng-if="location.geonames_id" class="tag location" >{{location.geonames_toponymName}}, {{location.geonames_countryName}}</a>
-             --><span ng-if="!$last">-</span>
-          </span>
+          
+          
         
           <span  ng-if="item.inquiries">—
           <a ng-href='#/r/{{item.id}}/inq' tooltip="view the related {{item.inquiries}} inquiries"><label>{{item.inquiries}}</label> <i class="fa fa-comment"></i></a>
@@ -29,36 +23,50 @@
           <span ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'title':language"></span>
           
         </h3>
-        <!-- <div class="collections">
-          <div class="collection" ng-repeat="collection in item.collections"><a ng-href="#/c/{{collection.id}}">{{collection.name|humanize}}</a></div>
-        </div> -->
         
+        <div class='context'>
+          <span ng-repeat="location in item.places">
+              <a class="tag location" ng-click="toggleMenu($event, item, location, 'place')">{{location.name}}</a><!-- 
+              <a ng-if="location.geocode_id" ng-click="toggleInquirer(location)" class="tag location" >{{location.geocode_formatted_address}}</a>
+              <a ng-if="location.geonames_id" class="tag location" >{{location.geonames_toponymName}}, {{location.geonames_countryName}}</a>
+               --><span ng-if="!$last">-</span>
+            </span>
           
-        
-        <span ng-if="item.persons.length" class="tags"><i>persons in the document</i>:
-          <span ng-repeat="per in item.persons"><span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip-append-to-body="true" tooltip='{{per.props.name}} - {{per.props.description}} ({{per.props.birth_date | date:"yyyy"}} - {{per.props.death_date | date:"yyyy"}}) {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name}}{{$last? '':  ', '}}</span></span>
-        </span>
-        <span ng-if="item.social_groups.length" class="tags"><i>  —  groups</i>:
-          <span ng-repeat="per in item.social_groups"><span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip-append-to-body="true" tooltip='{{per.props.name}} {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name}}{{$last? '':  ', '}}</span></span>
-        </span>
-        <span ng-if="item.organizations.length" class="tags"><i>  —  organizations</i>:
-          <span ng-repeat="per in item.organizations"><span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip-append-to-body="true" tooltip='{{per.props.name}} {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name}}{{$last? '':  ', '}}</span></span>
-        </span>
-        
-        <span ng-if="item.props.languages.length">  —  <i>available in</i>:
-          <span class="language {{lang == language? 'active':''}}" ng-repeat="lang in item.props.languages" ng-click='setLanguage(lang)'>{{lang}} </span>
-        </span>
-        
+          <span ng-click="openIssueModal('date', item)" class="empty" ng-if="!item.props.start_time" tooltip='click to add a date'>no date found</span>
+            <a ng-href="#/r/{{item.id}}/inq/create/date" tooltip='click to propose a different date' ng-if="item.props.start_time">{{item.props|guessInterval}}</a>
+          <!-- <div class="collections">
+            <div class="collection" ng-repeat="collection in item.collections"><a ng-href="#/c/{{collection.id}}">{{collection.name|humanize}}</a></div>
+          </div> -->
+        </div>
+          
+        <div class="meta">
+          <span ng-if="item.persons.length" class="tags"><i>persons in the document</i>:
+            <span ng-repeat="per in item.persons"><span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip-append-to-body="true" tooltip='{{per.props.name}} - {{per.props.description}} ({{per.props.birth_date | date:"yyyy"}} - {{per.props.death_date | date:"yyyy"}}) {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name}}{{$last? '':  ', '}}</span></span>
+          </span>
+          <span ng-if="item.social_groups.length" class="tags"><i>  —  groups</i>:
+            <span ng-repeat="per in item.social_groups"><span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip-append-to-body="true" tooltip='{{per.props.name}} {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name}}{{$last? '':  ', '}}</span></span>
+          </span>
+          <span ng-if="item.organizations.length" class="tags"><i>  —  organizations</i>:
+            <span ng-repeat="per in item.organizations"><span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip-append-to-body="true" tooltip='{{per.props.name}} {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name}}{{$last? '':  ', '}}</span></span>
+          </span>
+          
+          <span ng-if="item.props.languages.length">  —  <i>available in</i>:
+            <span class="language {{lang == language? 'active':''}}" ng-repeat="lang in item.props.languages" ng-click='setLanguage(lang)'>{{lang}} </span>
+          </span>
+        </div>
         <div class="actions">
           <div class="btn-group">
             
-            <a class="btn btn-default" tooltip-append-to-body="true" tooltip="create a new inquiry" ng-href="#/r/{{item.id}}/inq/create">
+            <a class="btn btn-default action" tooltip-append-to-body="true" tooltip="create a new inquiry" ng-href="#/r/{{item.id}}/inq/create">
               <i class="fa fa-comment-o"></i>
             </a>
-            <button class="btn btn-default" tooltip-append-to-body="true" ng-click='favourite()' tooltip="add to my favourite">
-              <i class="fa fa-heart-o"></i>
+            <button ng-if='!isFavItem' class="btn btn-default action" tooltip-append-to-body="true" ng-click='favourite()' tooltip="add to favourite items">
+              <i class="fa fa-heart-o"></i> {{item.curators.length}}
             </button>
-            <button class="btn btn-default" tooltip-append-to-body="true" tooltip="add to bookmark list" ng-click="queue(item.id, true)">
+            <button ng-if='isFavItem' class="btn btn-default action" tooltip-append-to-body="true" ng-click='unfavourite()' tooltip="this resource belongs to your favourite collection">
+              <i class="fa fa-heart animated pulse"></i> {{item.curators.length}}
+            </button>
+            <button class="btn btn-default action" tooltip-append-to-body="true" tooltip="add to bookmark list" ng-click="queue(item.id, true)">
               <i class="fa fa-play-circle-o"></i>
             </button>
           </div>
@@ -98,10 +106,10 @@
         <!-- <div annotator>
         <div class="full-text" ng-if='item.props.mimetype!="image"' lazytext url='item.props|url:language'></div>
         </div -->
-        
+        <!-- 
         <blockquote ng-if="item.props.stakeholders||item.props.caption">
          {{item.props.stakeholders||item.props.caption}}
-        </blockquote>
+        </blockquote> -->
         
         <div class="doi">{{item.props.doi}}</div>
         

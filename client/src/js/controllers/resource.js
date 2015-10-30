@@ -39,6 +39,7 @@ angular.module('histograph')
         model: 'user',  
       }, {}, function (res) {
         console.log('ResourceCtrl -> favourite() - result:', res.status);
+        $scope.isFavItem = true;
       });
     }
     
@@ -66,6 +67,10 @@ angular.module('histograph')
       on load
     */
     $scope.item = resource.result.item;
+    // $scope.isFavItem = resource.result.item.filter(function(d) {
+    //   return d.curators.length && _.find(d.curators, {}
+    // }).length
+    $scope.isFavItem = typeof _.find(resource.result.item.curators, {id: $scope.user.id}) == 'object'
     
     $log.info('ResourceCtrl', resource);
     

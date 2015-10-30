@@ -822,20 +822,19 @@ angular
             model: function(){
               return 'person'
             },
-            relatedVizFactory: function(SuggestVizFactory) {
-              return SuggestVizFactory
+            relatedVizFactory: function(SearchVizFactory) {
+              return SearchVizFactory
             },
-            relatedFactory: function(ResourceRelatedFactory) {
-              return ResourceRelatedFactory
+            relatedFactory: function(SearchFactory) {
+              return SearchFactory
             },
-            entities: function(SuggestFactory, $stateParams) {
-            // clean limit here
-            // console.log($stateParams)
-              return SuggestFactory.getEntities({
+            entities: function(SearchFactory, $stateParams, $location) {
+              return SearchFactory.get(angular.extend({},$location.search(), {
+                model: 'entity',
                 query: $stateParams.query,
                 limit: 10
-              }).$promise;
-            }
+              })).$promise;
+            },
           }
         })
         .state('search.locations', {

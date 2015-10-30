@@ -2,10 +2,19 @@
 // get resource with its version and comments
 MATCH (res) WHERE id(res) = {id}
 WITH res
-OPTIONAL MATCH (res)-[r_loc:appears_in]-(loc:`location`)
-WITH res, r_loc, loc
-ORDER BY r_loc.tfidf DESC, r_loc.frequency DESC
+OPTIONAL MATCH (res)<-[r_cur:curates]-(u:`user`)
+WITH res, r_cur, u
+ORDER BY r_cur.creation_time DESC
 WITH res, collect({  
+      id: id(u),
+      username: u.username,
+      rel: r_cur
+    })[0..10] as curators // safety limits, to be improved with time
+    
+OPTIONAL MATCH (res)-[r_loc:appears_in]-(loc:`location`)
+WITH res, curators, r_loc, loc
+ORDER BY r_loc.tfidf DESC, r_loc.frequency DESC
+WITH res, curators, collect({  
       id: id(loc),
       type: 'location',
       props: loc,
@@ -13,60 +22,58 @@ WITH res, collect({
     })[0..5] as locations
 
 OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
-WITH res, locations, r_per, per
+WITH res, curators, locations, r_per, per
 ORDER BY r_per.tfidf DESC, r_per.frequency DESC
-WITH res, locations, collect({
+WITH res, curators, locations, collect({
       id: id(per),
       type: 'person',
       props: per,
       rel: r_per
     })[0..5] as persons
-OPTIONAL MATCH (res)-[r_org:appears_in]-(org:`organization`)
 
-WITH res, locations, persons, collect({  
+OPTIONAL MATCH (res)-[r_org:appears_in]-(org:`organization`)
+WITH res, curators, locations, persons, collect({  
       id: id(org),
       type: 'organization',
       props: org,
       rel: r_org
     })[0..5] as organizations
-OPTIONAL MATCH (res)-[r_soc:appears_in]-(soc:`social_group`)
 
-WITH res, locations, persons, organizations, collect({
+OPTIONAL MATCH (res)-[r_soc:appears_in]-(soc:`social_group`)
+WITH res, curators, locations, persons, organizations, collect({
       id: id(soc),
       type: 'social_group',
       props: soc,
       rel: r_soc
     })[0..5] as social_groups
 
+OPTIONAL MATCH (ver)-[:describes]->(res)
+OPTIONAL MATCH (res)-[:belongs_to]->(col)
+OPTIONAL MATCH (com)-[:mentions]->(res)
+OPTIONAL MATCH (inq)-[:questions]->(res)
 
-
-    OPTIONAL MATCH (ver)-[:describes]->(res)
-    OPTIONAL MATCH (res)-[:belongs_to]->(col)
-    OPTIONAL MATCH (com)-[:mentions]->(res)
-    OPTIONAL MATCH (inq)-[:questions]->(res)
-
- 
-    RETURN {
-      resource: {
-        id: id(res),
-        props: res,
-        versions: EXTRACT(p in COLLECT(DISTINCT ver)|{name: p.name, id:id(p), yaml:p.yaml, language:p.language, type: last(labels(p))}),
-        locations: locations,
-        persons:   persons,
-        organizations: organizations,
-        social_groups:  social_groups,
-        collections: EXTRACT(p in COLLECT(DISTINCT col)|{name: p.name, id:id(p), type: 'collection'}),
-        comments: count(distinct com),
-        inquiries: count(distinct inq)
-      }
-    } AS result
+RETURN {
+  resource: {
+    id: id(res),
+    props: res,
+    curators: curators,
+    versions: EXTRACT(p in COLLECT(DISTINCT ver)|{name: p.name, id:id(p), yaml:p.yaml, language:p.language, type: last(labels(p))}),
+    locations: locations,
+    persons:   persons,
+    organizations: organizations,
+    social_groups:  social_groups,
+    collections: EXTRACT(p in COLLECT(DISTINCT col)|{name: p.name, id:id(p), type: 'collection'}),
+    comments: count(distinct com),
+    inquiries: count(distinct inq)
+  }
+} AS result
 
 
 // name: get_resources
 // get resources with number of comments, if any
-MATCH (res:resource)
+MATCH (res:resource)<-[appears_in]-()
   {?res:ids__inID} {AND?res:start_time__gt} {AND?res:end_time__lt} {AND?res:mimetype__in} {AND?res:type__in}
-WITH res
+WITH DISTINCT res
 {if:with}
   MATCH (res)-[:appears_in]-(ent:entity) WHERE id(ent) IN {with} 
   WITH DISTINCT res
@@ -142,10 +149,8 @@ ORDER BY resource.props.start_time DESC
 
 // name: count_resources
 // count resources having a version, with current filters
-MATCH (res:resource){if:entity_id}--(ent:entity)
-  WHERE id(ent)={entity_id} 
-WITH res
-{/if}
+MATCH (res:resource)<-[:appears_in]-()
+WITH DISTINCT res
 {?res:start_time__gt}
 {AND?res:end_time__lt}
 {AND?res:type__in}
@@ -564,7 +569,8 @@ LIMIT 500
 MATCH (res:resource)-[:appears_in]-(ent:person)
 WHERE id(res) = {id} AND ent.score > -1
 WITH ent
-MATCH (res3:resource)<--(ent)-->(res2:resource)
+LIMIT 10
+MATCH (res3:resource)<-[:appears_in]-(ent)-->(res2:resource)
 WHERE res2 <> res3
 WITH res2, res3, count(distinct ent) as intersection
 RETURN {

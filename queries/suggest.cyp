@@ -302,24 +302,52 @@ SKIP {offset}
 LIMIT {limit}
 
 
-// name: get_graph_matching_entities
-//
-START p1=node:node_auto_index({query})
-MATCH (p1)-[r:appears_in]-(p2)
-WHERE ('resource' IN labels(p1) OR 'person' IN labels(p1)) AND ('resource' IN labels(p2) OR 'person' IN labels(p2))
+// name: get_matching_resources_graph
+// e.g. START m=node:node_auto_index('full_search:*goerens*')
+START m=node:node_auto_index({query})
+MATCH (m)<-[r:appears_in]-(ent)
+WITH ent, collect(DISTINCT m) as ms
+  WHERE length(ms)>1
+MATCH (m)<-[r:appears_in]-(ent)
+  WHERE m in ms
 RETURN {
   source: {
-    id: id(p1),
-    type: LAST(labels(p1)),
-    label: COALESCE(p1.name, p1.title_en, p1.title_fr, p1.title_de, p1.title_search)
+    id: id(m),
+    type: LAST(labels(m)),
+    label: COALESCE(m.name, m.title_en, m.title_fr, m.title_de)
   },
   target: {
-    id: id(p2),
-    type: LAST(labels(p2)),
-    label: COALESCE(p2.name, p2.title_en, p2.title_fr, p2.title_de, p2.title_search)
+    id: id(ent),
+    type: LAST(labels(ent)),
+    label: COALESCE(ent.name, ent.title_en, ent.title_fr, ent.title_de)
   },
-  weight: 1 
+  weight: 1
 } as result
+ORDER BY length(ms) DESC, r.tfidf DESC
+LIMIT {limit}
+
+// name: get_matching_entities_graph
+// e.g. START m=node:node_auto_index('full_search:*goerens*')
+START m=node:node_auto_index({query})
+WHERE last(labels(m)) = {entity}
+MATCH (m)-[r:appears_in]->(ent)
+WITH ent, collect(DISTINCT m) as ms
+  WHERE length(ms)>1
+MATCH (m)-[r:appears_in]->(ent)
+  WHERE m in ms
+RETURN {
+  source: {
+    id: id(m),
+    type: LAST(labels(m)),
+    label: COALESCE(m.name, m.title_en, m.title_fr, m.title_de)
+  },
+  target: {
+    id: id(ent),
+    type: LAST(labels(ent)),
+    label: COALESCE(ent.name, ent.title_en, ent.title_fr, ent.title_de)
+  }
+} as result
+ORDER BY length(ms) DESC, r.tfidf DESC
 LIMIT {limit}
 
 

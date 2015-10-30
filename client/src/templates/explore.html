@@ -14,6 +14,11 @@
        <!-- wrap {{loading? 'animated fadeOut': 'animated fadeIn'}}" style="-webkit-animation-delay: {{$index * 100}}ms;
         animation-delay: {{$index * 100}}ms" -->
     </div>
+    
+    <div class='more' ng-if='offset + limit < totalItems'>
+      <button ng-click='more()' class='btn btn-default more'>{{loading?'loading...':'load more'}}</button>
+    </div>
+    
   </div>
   
 </div>
