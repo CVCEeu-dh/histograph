@@ -1,12 +1,10 @@
-<div id='perspective-menu' class="tk-proxima-nova header-menu">
-  <ul>
-    <li>
-      <a ui-sref="index">explore</a> / <b>your activity</b></a>
-    </li>
-  </ul>
-</div>
+<div id='perspective-menu' class="tk-proxima-nova header-menu"ng-include src="'templates/partials/helpers/menu.html'"></div>
 
-<div id="perspective" class="{{queueStatus}} reduced">
+
+
+<div ui-view id='see-also'></div>
+
+<!-- <div id="perspective" class="{{queueStatus}} reduced">
   
   <div class="related" ng-repeat="relatedItem in perspectiveItems" data-id='{{relatedItem.id}}'>
     <span class="type">{{relatedItem.type}}</span>
@@ -14,4 +12,4 @@
     <blockquote>{{relatedItem.props.content}}
     </blockquote>
   </div>
-</div>
+</div> -->

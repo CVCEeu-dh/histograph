@@ -147,7 +147,18 @@ angular.module('histograph')
   .factory('UserFactory', function ($resource) {
     return $resource('/api/user/:method');
   })
-  
+  /*
+    Add / get :model related to user related
+  */
+  .factory('UserRelatedFactory', function ($resource) {
+    return $resource('/api/user/:id/related/:model');
+  })
+  /*
+    Add / get :model related to resource
+  */
+  .factory('UserRelatedVizFactory', function ($resource) {
+    return $resource('/api/user/:id/related/:model/:type');
+  })
   /*
     Search & Suggest
   */

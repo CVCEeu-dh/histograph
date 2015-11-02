@@ -408,7 +408,8 @@ angular
         /u/username - the PUBLIC profile of another user
       */
       .state('user', {
-        url: '/u',
+        url: '/u/:id',
+        abstract: true,
         templateUrl: 'templates/user.html',
         controller: 'UserCtrl',
         resolve: {
@@ -419,6 +420,57 @@ angular
           }
         }
       })
+        .state('user.resources', {
+          url: '',
+          templateUrl: 'templates/partials/resources.html',
+          controller: 'ResourcesCtrl',
+          grammar: {
+            label: 'documents',
+            connector: {
+              type: 'of type',
+              relatedTo: 'which contains',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: [
+              {
+                name: 'of any kind',
+              },
+              {
+                name: 'pictures',
+                filter: 'type=picture'
+              },
+              {
+                name: 'letters',
+                filter: 'type=letter'
+              },
+              {
+                name: 'treaty',
+                filter: 'type=treaty'
+              }
+            ],
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
+          resolve: {
+            relatedVizFactory: function(UserRelatedVizFactory) {
+              return UserRelatedVizFactory
+            },
+            relatedFactory: function(UserRelatedFactory) {
+              return UserRelatedFactory
+            },
+            resources: function(UserRelatedFactory, $stateParams, $location) {
+              return UserRelatedFactory.get(angular.extend({},$location.search(), {
+                id: $stateParams.id,
+                model: 'resource',
+                limit: 10
+              })).$promise;
+            },
+          }
+        })
+
        /*
         resources
         @todo

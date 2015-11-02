@@ -89,9 +89,30 @@ module.exports = {
         next(err);
         return;
       }
-      next(null, results.items, {
-        total_items : results.count_items
-      });
+      next(null, results.items, results.count_items);
+    });
+  },
+
+  /*
+    Return a list of last touched resources
+  */
+  getRelatedResources: function(user, params, next) {
+    models.getMany({
+      queries: {
+        count_items: queries.count_related_resources,
+        items: queries.get_related_resources
+      },
+      params: {
+        limit:  params.limit || 10,
+        offset: params.offset || 0
+      }
+    }, function (err, results) {
+      if(err) {
+        console.log(err)
+        next(err);
+        return;
+      }
+      next(null, results.items, results.count_items);
     });
   }
 };

@@ -155,6 +155,20 @@ module.exports = function(io) {
           return helpers.cypherQueryError(err, res);
         return res.ok({items: items}, info);
       });
+    },
+
+    getRelatedResources: function(req, res) {
+      var form = validator.request(req, {
+            limit: 10,
+            offset: 0
+          });
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+
+      User.getRelatedResources(form.params, function (err, items, info) {
+        helpers.models.getMany(err, res, items, info, form.params);
+      })
+
     }
   }
 };
