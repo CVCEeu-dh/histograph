@@ -10,67 +10,7 @@
  * Quietly used by CoreCtrl.
  */
 angular.module('histograph')
-  .directive('gmasp', function ($log, $location) {
-    return {
-      restrict : 'A',
-      templateUrl: 'templates/partials/helpers/network-legend.html',
-      scope:{
-        target : '='
-      },
-      link : function(scope, element, attrs) {
-        var _gasp = $(element[0]); // gasp instance;
-        scope.enabled = false;
-        $log.log('::gmasp ready');
-        
-        scope.addTargetToQueue = function() {
-          $log.log('::gmasp -> addTargetToQueue()')
-          if(scope.target.type == 'node')
-            scope.$parent.addToQueue({
-              items: [ scope.target.data.node.id ]
-            });
-          else if(scope.target.type == 'edge')
-            scope.$parent.addToQueue({
-              items: [
-                scope.target.data.edge.nodes.source.id,
-                scope.target.data.edge.nodes.target.id
-              ]
-            })
-        }
-        // add the current target id as the ID
-        scope.addTargetToFilter = function() {
-          $log.log('::gmasp -> addTargetToFilter()');
-          if(scope.target.type == 'node')
-            scope.$parent.addFilter({
-              key: 'with',
-              value: scope.target.data.node.id
-            });
-        }
-        
-        // enable / disable gasp instance
-        scope.$watch('target', function(v) {
-          $log.log('::gmasp @target - value:', v);
-          if(!v || !v.type) {
-            // make it NOT visible
-            scope.enabled = false;
-            return;
-          }
-          // handle label according to target type (node or edge)
-          if(v.type=='node') {
-            scope.href  = '#/' + (v.data.node.type=='resource'? 'r': 'e') + '/' + v.data.node.id;
-            scope.label = v.data.node.label;
-            scope.type = v.data.node.type;
-          } else if(v.type == 'edge') {
-            scope.href  = false;
-            scope.left  = v.data.edge.nodes.source;
-            scope.right = v.data.edge.nodes.target;
-          }
-          // make it visible
-          scope.enabled = true;
-          
-        })
-      }
-    }
-  })
+  
   /*
     Jquery Popup.
   */

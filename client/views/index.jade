@@ -27,17 +27,17 @@ html
       div(ng-controller='FiltersCtrl')
         if user.username
           header 
-          
+            a(id='header-logo', href='#/')
+              img(src='images/hg_v.png')
              
             
             div(class='row', ng-cloak)
               div(class='col-sm-8')
-                a(id='header-logo', href='#/')
-                  img(src='images/hg_v.png')
+                a(id='header-title', href='#/')
                   span histograph
                 a(href='#/profile')
                   img(src=user.picture)
-                  span {{user.username}} 
+                  //- span {{user.username}} 
                 
                
                 div(class='inline', style='position:relative')
@@ -144,7 +144,6 @@ html
       div.mouse.tooltip.sigma(id='tooltip-sigma-edge')
         div.tooltip-wrapper
           div.tooltip-inner
-        
         
       each val in scripts
         script(src=val)

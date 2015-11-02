@@ -350,29 +350,14 @@ angular.module('histograph')
         
         /*
           sigma clickNode
+
         */
         si.bind('clickNode', function (e){
+           $log.log('::sigma @clickNode');
           // stop the layout runner
           stop();
-          
-          // if(e.data.captor.isDragging) {
-          //   $log.info('::sigma @clickNode isDragging');
-          //   return;
-          // }
-          
-          $log.log('::sigma @clickNode', e.data);
-          
-          // calculate the node do keep
-          var toKeep = si.graph.neighbors(e.data.node.id);
-           
-          // enlighten the egonetwork
-          si.graph.nodes().forEach(function (n) {
-            n.discard = !toKeep[n.id];
-          });
-          si.graph.edges().forEach(function (e) {
-            e.discard = !(toKeep[e.source] && toKeep[e.target])
-          });
-          
+
+          // set the proper target for our gasp popup
           scope.lookup = true;
           scope.target = {
             type: 'node',
@@ -382,7 +367,11 @@ angular.module('histograph')
           scope.$apply();
           // refresh the view
           si.refresh();
+          
+         
         });
+
+
         
         
         
@@ -479,20 +468,13 @@ angular.module('histograph')
         si.bind('outEdge', outEdge);
        
         
-        si.bind('clickEdge', function(e) {
+        si.bind('clickEdge', function (e) {
+          // enrich data with single nodes
           e.data.edge.nodes = {
             source: si.graph.nodes(''+e.data.edge.source),
             target: si.graph.nodes(''+e.data.edge.target)
           };
-          var toKeep = si.graph.neighbors([''+e.data.edge.source, ''+e.data.edge.target]);
-           
-          // enlighten the egonetwork
-          si.graph.nodes().forEach(function (n) {
-            n.discard = !toKeep[n.id];
-          });
-          si.graph.edges().forEach(function (e) {
-            e.discard = !(toKeep[e.source] && toKeep[e.target])
-          });
+          
           
           scope.target = {
             type: 'edge',
@@ -545,6 +527,27 @@ angular.module('histograph')
             $log.error(e)
           }
         }
+
+        /*
+          Show the egonetwork of the current target
+          @param nodes - a list of nodes
+        */
+        scope.egonetwork = function(nodes) {
+
+          // calculate the node do keep
+          var toKeep = si.graph.neighbors(nodes);
+           
+          // enlighten the egonetwork
+          si.graph.nodes().forEach(function (n) {
+            n.discard = !toKeep[n.id];
+          });
+          si.graph.edges().forEach(function (e) {
+            e.discard = !(toKeep[e.source] && toKeep[e.target])
+          });
+          
+          // refresh the view
+          si.refresh();
+        };
         /*
           sigma rescale
           start the force atlas layout
@@ -608,10 +611,14 @@ angular.module('histograph')
         */
         function stop() {
           clearTimeout(timeout);
+          if(scope.status == IS_RUNNING) {
+            si.killForceAtlas2();
+            $log.debug('::sigma -> stop()')
+          } else {
+            $log.debug('::sigma -> stop() skipping, it was stopped already')
+          }
           scope.status = IS_STOPPED;
           
-          si.killForceAtlas2();
-          $log.debug('::sigma -> stop()')
         }
         function zoomin() {
           sigma.misc.animation.camera(
@@ -850,4 +857,93 @@ angular.module('histograph')
         // sigma.svg.hovers.def = function() {}
       }
     }
-  });
+  })
+.directive('gmasp', function ($log, $location) {
+    return {
+      restrict : 'A',
+      templateUrl: 'templates/partials/helpers/network-legend.html',
+      scope:{
+        target : '='
+      },
+      link : function(scope, element, attrs) {
+        var _gasp = $(element[0]); // gasp instance;
+        scope.enabled = false;
+        $log.log('::gmasp ready');
+        
+        scope.addTargetToQueue = function() {
+          $log.log('::gmasp -> addTargetToQueue()')
+          if(scope.target.type == 'node')
+            scope.$parent.addToQueue({
+              items: [ scope.target.data.node.id ]
+            });
+          else if(scope.target.type == 'edge')
+            scope.$parent.addToQueue({
+              items: [
+                scope.target.data.edge.nodes.source.id,
+                scope.target.data.edge.nodes.target.id
+              ]
+            })
+        }
+        // add the current target id as the ID
+        scope.addTargetToFilter = function() {
+          $log.log('::gmasp -> addTargetToFilter()');
+          if(scope.target.type == 'node')
+            scope.$parent.addFilter({
+              key: 'with',
+              value: scope.target.data.node.id
+            });
+          else
+            scope.$parent.addFilter({
+              key: 'with',
+              value: [scope.target.data.edge.nodes.source.id, scope.target.data.edge.nodes.target.id].join(',')
+            });
+        }
+        
+        /*
+          display node or edge egonetwork
+
+        */
+        scope.egonetwork = function() {
+          $log.log('::gmasp -> egonetwork()');
+          
+          var nodes = [];
+          if(scope.target.type == 'node')
+            nodes.push(scope.target.data.node.id)
+          else
+            nodes.push(
+              scope.target.data.edge.nodes.source.id,
+              scope.target.data.edge.nodes.target.id
+            );
+          scope.$parent.egonetwork(nodes);
+        }
+
+        /*
+          Enable or disable GMASP according to scope.target nature.
+        */
+        scope.$watch('target', function(v) {
+          $log.log('::gmasp @target - value:', v);
+          if(!v || !v.type) {
+            // make it NOT visible
+            scope.enabled = false;
+            return;
+          }
+          // handle label according to target type (node or edge)
+          if(v.type=='node') {
+            scope.href  = '#/' + (v.data.node.type=='resource'? 'r': 'e') + '/' + v.data.node.id;
+            scope.label = v.data.node.label;
+            scope.type = v.data.node.type;
+            scope.filterby = 'filter by ' + v.data.node.label;
+          } else if(v.type == 'edge') {
+            scope.href   = false;
+            scope.weight = v.data.edge.weight;
+            scope.left   = v.data.edge.nodes.source;
+            scope.right  = v.data.edge.nodes.target;
+            scope.filterby = 'filter by ' + v.data.edge.nodes.source.label +', '+v.data.edge.nodes.target.label;
+          }
+          // make it visible
+          scope.enabled = true;
+          
+        })
+      }
+    }
+  })

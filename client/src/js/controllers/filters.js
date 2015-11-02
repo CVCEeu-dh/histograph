@@ -62,10 +62,13 @@ angular.module('histograph')
         $log.log('FiltersCtrl -> addFilter() - key:', key, '- value:', value)
         
         var list = _.unique(_.compact(_.map(angular.copy($scope.filters[key]), _.trim)));
-        if(list.indexOf(value) === -1) {
-          list.push(value);
+        
+        (''+value).split(',').forEach(function(v){
+          if(list.indexOf(value) === -1)
+            list.push(value);
+        })
+        if(list.length)
           $location.search(key, list.join(','));
-        }
       }
       $scope.loadFiltersItems()
       

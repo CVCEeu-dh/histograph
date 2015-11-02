@@ -87,11 +87,22 @@ module.exports = function(io){
     getItems: function (req, res) {
       var form = validator.request(req, {
             limit: 50,
-            offset: 0
+            offset: 0,
+            orderby: 'date'
+          }, {
+            fields: [
+              validator.SPECIALS.orderby
+            ]
           });
       
       if(!form.isValid)
         return helpers.formError(form.errors, res);
+
+      var _t = {
+          'date': 'res.start_time ASC',
+          'relevance': undefined // use default value
+        },
+        orderby = form.params.orderby = _t[''+form.params.orderby]; 
 
       Resource.getMany(form.params, function (err, items, info) {
         helpers.models.getMany(err, res, items, info, form.params);

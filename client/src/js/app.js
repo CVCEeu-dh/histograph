@@ -32,6 +32,7 @@ angular
     // 'mgcrea.ngStrap'
     'perfect_scrollbar',
     'LocalStorageModule',
+    'wu.masonry'
   ])
   .constant("EVENTS", {
     USE_USER: 'use_user',
@@ -85,17 +86,18 @@ angular
       
       .state('explore', {
         url: '/',
+        abstract: true,
         templateUrl: 'templates/explore.html',
         controller: 'ExploreCtrl',
         grammar: {
           name: 'resource',
-          label: 'explore next',
+          label: 'show',
           choices: [
             {
-              name: 'entity.resources',
+              name: 'explore.resources',
               label: 'documents'
             }, {
-              name: 'entity.persons',
+              name: 'explore.persons',
               label: 'people'
             }
           ],
@@ -136,6 +138,76 @@ angular
         //   },
         // }
       })
+        .state('explore.resources', {
+          url: '',
+          templateUrl: 'templates/partials/resources-masonry.html',
+          controller: 'ExploreResourcesCtrl',
+          grammar: {
+            label: 'documents',
+            connector: {
+              type: 'in documents of type',
+              relatedTo: 'which contains',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: [
+              {
+                name: 'in any kind of documents',
+              },
+              {
+                name: 'in pictures',
+                filter: 'type=picture'
+              },
+              {
+                name: 'in letters',
+                filter: 'type=letter'
+              },
+              {
+                name: 'in treaty',
+                filter: 'type=treaty'
+              }
+            ],
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
+        })
+        .state('explore.persons', {
+          url: 'per',
+          template: '<div></div>',
+          controller: 'ExploreEntitiesCtrl',
+          grammar: {
+            label: 'people',
+            connector: {
+              type: 'in documents of type',
+              relatedTo: 'which contains',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: [
+              {
+                name: 'in any kind of documents',
+              },
+              {
+                name: 'in pictures',
+                filter: 'type=picture'
+              },
+              {
+                name: 'in letters',
+                filter: 'type=letter'
+              },
+              {
+                name: 'in treaty',
+                filter: 'type=treaty'
+              }
+            ],
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
+        })
       
       .state('entity', {
         abstract: true,

@@ -188,7 +188,7 @@ WHERE id(ent) = {id}
     WITH res, r, ent
     MATCH (res)<-[:appears_in]-(ent2)
     WHERE id(ent) IN {with}
-    WITH distinct res
+    WITH distinct res, r
   {/if}
 WITH r, res, ent
 ORDER BY r.tfidf DESC, res.start_time DESC

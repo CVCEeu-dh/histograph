@@ -20,6 +20,9 @@ module.exports = {
       '/js/lib/codemirror-addon-simple.js',
       '/js/lib/codemirror-addon-show-hint.js',
 
+      '/js/lib/masonry.pkgd.min.js',
+      '/js/lib/imagesloaded.pkgd.min.js',
+
       '/js/lib/annotator.min.js',
       '/js/lib/annotorious.min.js',
       '/js/lib/annotorious-merge.js',   
@@ -37,6 +40,9 @@ module.exports = {
       '/js/lib/angular-resource.min.js',
       '/js/lib/angular-cookies.min.js',
       '/js/lib/angular-local-storage.min.js',
+
+
+      '/js/lib/angular-masonry.min.js',  
 
       '/js/lib/ui-codemirror.min.js',
 

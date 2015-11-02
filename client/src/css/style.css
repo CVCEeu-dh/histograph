@@ -79,15 +79,22 @@ a:focus, a:hover{
   text-decoration: none;
 }
 
-a#header-logo {
-   color: #151515 ;
-   margin-right: 50px;
+a#header-title {
+  color: #151515 ;
+  margin-right: 50px;
 }
 
-a#header-logo img{
-  display: inline-block;
+#header-logo{
+  position:absolute;
+  left:0px;
+  right: 10px;
+  height: 50px;
+  width: 50px;
+}
+#header-logo img{
   height: 25px;
-  padding: 0px 5px 0 0;
+  padding: 0;
+  margin: 12px;
 }
 
 .view{
@@ -136,7 +143,7 @@ a#header-logo img{
 
 .explore .related{
   float:left;
-  width: 320px;
+  width: 230px;
   margin: 10px;
 }
 
@@ -612,6 +619,7 @@ a#header-logo img{
 .explore #see-also{
   width: 50%;
   margin-left:0%;
+    width: 100%;
 }
 
 .neighbors #see-also{
@@ -1024,9 +1032,14 @@ a#header-logo img{
   left: 50%;
 }
 
-#milkyway.explore{
-  left: 50%;
+#milkyway.explore.resources{
+  display: none;left: 50%;
 }
+
+#milkyway.explore.persons{
+  left: 20px;
+}
+
 
 #milkyway.search, #milkyway.neighbors{
   left: 560px;
@@ -1123,6 +1136,26 @@ height: 150px;
 #milkyway .gasp .text{
   display: inline;
   float:left;
+  position: relative;
+}
+
+#milkyway .gasp .text .weight{
+      position: absolute;
+    top: -10px;
+    left: 22px;
+    text-align: center;
+}
+
+#milkyway .gasp .text a{
+  color: #A9A2A2;
+  text-decoration: none;
+  border: 0px transparent
+}
+
+#milkyway .gasp .text a:hover{
+  color: #ffffff;
+  text-decoration: none;
+  border: 0px transparent
 }
 
 #milkyway .gasp .action-group{
@@ -1133,13 +1166,14 @@ height: 150px;
 #milkyway .gasp .action{
   display: inline-block;
   line-height: 40px;
-  width: 40px;
-  color: white;
+  width: 30px;
+  color: #A9A2A2;
   overflow: hidden;
-    -webkit-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
-     -moz-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
-       -o-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
-          transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+  cursor: pointer;
+    -webkit-transition: color .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
+     -moz-transition: color .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+       -o-transition: color .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+          transition: color .3s cubic-bezier(0.65, 0.05, 0.36, 1);
 }
 #milkyway .gasp .action.disabled {
   opacity: .1; 
@@ -1170,7 +1204,8 @@ height: 150px;
 
 #milkyway .gasp a.action:hover, #milkyway .gasp a.action:focus{
   border-bottom: 0px solid transparent;
-  background: #989898
+  /*background: #989898*/
+  color: white;
 }
 
 
@@ -5206,4 +5241,14 @@ Copyright (c) 2015 Daniel Eden
   display: inline-block;
   background: transparent;
   font-style: italic;
+}
+
+/*
+  Masonry brick
+*/
+.masonry-brick{
+  display: none;
+}
+.masonry-brick.loaded {
+  display: block;
 }

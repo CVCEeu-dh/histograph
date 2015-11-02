@@ -139,12 +139,12 @@ RETURN {
   locations:    locations,
   social_groups:   social_groups
 } as resource
-{if:orderby}
-ORDER BY {:orderby}
-{/if}
-{unless:orderby}
-ORDER BY resource.props.start_time DESC
-{/unless}
+//{if:orderby}
+//ORDER BY {:orderby}
+//{/if}
+//{unless:orderby}
+ORDER BY resource.props.start_time ASC
+//{/unless}
 
 
 // name: count_resources
