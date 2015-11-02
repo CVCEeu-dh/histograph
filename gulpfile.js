@@ -38,7 +38,7 @@ gulp.task('scripts', function() {
     return './client/src' + d 
   }))
     .pipe($.concat('scripts.min.js'))
-    .pipe($.uglify())
+    // .pipe($.uglify())
     // Output files
     .pipe(gulp.dest('./client/dist/js'))
     .pipe($.size({title: 'js'}))
