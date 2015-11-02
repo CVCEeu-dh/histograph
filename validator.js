@@ -66,6 +66,17 @@ module.exports = {
     Special validation fields
   */
   SPECIALS: {
+    query: {
+      field: 'query',
+      check: 'isLength',
+      args: [
+        2,
+        500
+      ],
+      error: 'should be 2 to 500 chars',
+      optional: false,
+      required: true,
+    },
     entity: {
       field: 'entity',
       check: 'includedIn',
@@ -329,12 +340,7 @@ module.exports = {
       if(options.fields)
         fields = _.unique((options.fields || []).concat(module.exports.FIELDS), 'field');
       // specify which fields are required (when usually they're not) or viceversa. Cfr module.exports.FIELDS
-      if(options.required)
-        fields = fields.map(function (d) {
-          if(options.required[d.field])
-            d.required = options.required[d.field];
-          return d;
-        });
+      
     }
     
     // verify  

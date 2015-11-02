@@ -75,6 +75,7 @@ angular.module('histograph')
     $scope.syncGraph = function() {
       relatedVizFactory.get({
         id: $stateParams.id,
+        query: $stateParams.query,
         model: model,
         type: 'graph',
         limit: 100
@@ -89,7 +90,8 @@ angular.module('histograph')
         id: $stateParams.id,
         model: model,
         limit: $scope.limit,
-        offset: $scope.offset
+        offset: $scope.offset,
+        query: $stateParams.query
       }), function (res) {
         $scope.loading = false;
         $scope.offset  = res.info.offset;

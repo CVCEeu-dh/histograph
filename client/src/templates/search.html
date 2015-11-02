@@ -2,12 +2,14 @@
 
 <div id="perspective">
 
-  <ul class="facets">
+  <ul class="facets" ng-if='currentState.name == "search.resources"'>
     <li ng-repeat='stat in resourcesStats'>
       <a ng-click='setFilter("type",stat.type)'> <label>{{stat.count_items}}</label> {{stat.type}}
       </a>
     </li>
-    <li></li>
+   </ul>
+  <ul class="facets"  ng-if='currentState.name != "search.resources"'>
+    
     <li ng-repeat='stat in entitiesStats'>
        <label>{{stat.count_items}}</label> {{stat.type}}
     </li>

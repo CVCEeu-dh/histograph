@@ -477,12 +477,11 @@ module.exports =  function(io){
       var form = validator.request(req, {
             limit: 20,
             offset: 0,
-          }, {
-            
+            query: '' // empty query by defual it's INVALID
           });
       if(!form.isValid)
         return helpers.formError(form.errors, res);
-      
+      console.log(form.params)
       var q = 'name_search:' + toLucene(form.params.query);
 
       // build a nodes edges graph

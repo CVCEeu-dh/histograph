@@ -123,6 +123,18 @@ describe('controller:suggest  before', function() {
 
 
 describe('controller:suggest check lucene query', function() {
+  it('should get a FORM ERROR because query has not been defined', function (done) {
+    session
+      .get('/api/suggest/person/graph')
+      .expect(400)
+      .end(function (err, res) {
+        // console.log(res.body)
+        should.exist(res.body.error)
+        should.not.exist(err) // err on statusCode, 400
+        
+        done();
+      })
+  });
   it('should get the resource A because of "IMPROBABLE QUERY EVER" query', function (done) {
     session
       .get('/api/suggest?query=improbable query ever')
@@ -143,9 +155,8 @@ describe('controller:suggest ', function() {
       .get('/api/suggest/entity?query=konr')
       .expect(200)
       .end(function (err, res) {
-        console.log(res.body)
-        
         should.not.exist(err) // err on statusCode
+        should.exist(res.body.result.items)
         done();
       })
   });
@@ -172,7 +183,7 @@ describe('controller:suggest perform some queries', function() {
   this.timeout(5000)
   it('should get some suggestions for Yalta', function (done) {
     session
-      .get('/api/suggest?query=Yalta')
+      .get('/api/suggest/resource?query=Yalta')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
@@ -186,7 +197,7 @@ describe('controller:suggest perform some queries', function() {
   
   it('should get matches for helmut kohl and mitterrand', function (done) {
     session
-      .get('/api/suggest/resources?query=helmut kohl mitterrand')
+      .get('/api/suggest/resource?query=helmut kohl mitterrand')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
@@ -218,7 +229,7 @@ describe('controller:suggest perform some queries', function() {
   
   it('should get a nice graph describing matching for helmut kohl', function (done) {
     session
-      .get('/api/suggest/graph?query=helmut kohl')
+      .get('/api/suggest/resource/graph?query=helmut kohl')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
@@ -245,16 +256,18 @@ describe('controller:suggest perform some queries', function() {
   });
   
    
-  it('should get the full path between four nodes', function (done) {
+  it('should get the resources between four nodes', function (done) {
     session
-      .get('/api/suggest/all-in-between/26859,26858,17366,39404,26400?limit=33')
+      .get('/api/suggest/all-in-between/26859,26858,17366,39404,26400/resource?limit=33')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
         if(err)
           console.log(err);
         should.not.exist(err);
-        should.exist(res.body.result.graph);
+        // console.log(res.body)
+        should.exist(res.body.result.items);
+        should.exist(res.body.info.total_items);
         done()
       });
   });
