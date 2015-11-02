@@ -12,7 +12,7 @@ var express       = require('express'),        // call express
 
     app           = exports.app = express(),                 // define our app using express
     port          = settings.port || process.env.PORT || 8000,
-    env           = process.env.NODE_ENV || 'development'
+    env           = settings.env || process.env.NODE_ENV || 'development',
     server        = app.listen(port),
     io            = require('socket.io')
                       .listen(server),
@@ -36,10 +36,13 @@ var express       = require('express'),        // call express
 
     
 
-    clientRouter = express.Router(),
-    apiRouter    = express.Router(),
+    clientRouter  = express.Router(),
+    apiRouter     = express.Router(),
 
-    _            = require('lodash');        // set our port
+    _             = require('lodash'),
+    
+    // app client scripts dependencies (load scripts in jade)
+    clientFiles  = require('./client/src/files')[env];
 
 
 // initilalize session middleware
@@ -117,9 +120,10 @@ express.response.error = function(statusCode, err) {
 */
 clientRouter.route('/').
   get(function(req, res) { // test route to make sure everything is working (accessed at GET http://localhost:8080/api)
-    res.render('production' == env? 'index-lite':'index', {
+    res.render('index', {
       user: req.user || 'anonymous',
-      message: 'hooray! welcome to our api!'
+      message: 'hooray! welcome to our api!',
+      scripts: clientFiles.scripts
     });
   });
   
@@ -144,7 +148,8 @@ clientRouter.route('/logout')
     req.logout();
     res.render('index', {
       user: req.user || 'anonymous',
-      message: 'hooray! welcome to our api!'
+      message: 'hooray! welcome to our api!',
+      scripts: scripts
     });
   });
 

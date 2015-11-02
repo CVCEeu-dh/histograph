@@ -8,6 +8,8 @@
 var settings = require('../settings'),
     parsers  = require('../parser'),
     async    = require('async'),
+
+    _        = require('lodash'),
     neo4j    = require('seraph')(settings.neo4j.host);
     
     
