@@ -2,26 +2,4 @@
 
 
 
-<div ui-view id='see-also'>
-  <div  class='{{currentCtrl}}' ng-cloak>
-   
-    
-    <div class="empty-list" ng-if="relatedItems.length == 0">
-      There are no related <i>documents</i>.
-    </div>
-    
-    <div masonry column-width='5'>
-      <div>
-        <div class="masonry-brick" ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/resource-lite.html"'></div>
-         <!-- wrap {{loading? 'animated fadeOut': 'animated fadeIn'}}" style="-webkit-animation-delay: {{$index * 100}}ms;
-          animation-delay: {{$index * 100}}ms" -->
-      </div>
-    </div>
-
-    <div class='more' ng-if='offset + limit < totalItems'>
-      <button ng-click='more()' class='btn btn-default more'>{{loading?'loading...':'load more items'}}</button>
-    </div>
-    
-  </div>
-  
-</div>
+<div ui-view id='see-also'></div>
