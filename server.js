@@ -149,7 +149,7 @@ clientRouter.route('/logout')
     res.render('index', {
       user: req.user || 'anonymous',
       message: 'hooray! welcome to our api!',
-      scripts: scripts
+      scripts: clientFiles.scripts
     });
   });
 
