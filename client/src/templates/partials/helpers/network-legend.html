@@ -15,7 +15,7 @@
     </span>
   </div> 
   <div class="action-group">
-    <a class="action slide enabled"  title="filter" uib-tooltip='{{filterby}}'  uib-tooltip-append-to-body='true' ng-click="addTargetToFilter()">
+    <a class="action slide enabled"  title="filter" uib-tooltip='{{filterby}}' uib-tooltip-placement='bottom'  uib-tooltip-append-to-body='true' ng-click="addTargetToFilter()">
       <span class="fa fa-filter"></span></a>
 
 <!-- 
@@ -23,10 +23,10 @@
     <a class="action slide {{target.type == 'node'? 'enabled': 'disabled'}}"  href="{{href}}" title="visit" data-action="link" uib-tooltip="link {{linkto}}" uib-tooltip-append-to-body='true'>
       <span class="fa fa-link"></span></a> -->
     
-    <a class="action slide enabled"  title="show connected nodes" uib-tooltip='show connected nodes'  uib-tooltip-append-to-body='true' ng-click="egonetwork()">
+    <a class="action slide enabled"  title="show connected nodes" uib-tooltip='show connected nodes' uib-tooltip-placement='bottom'  uib-tooltip-append-to-body='true' ng-click="egonetwork()">
       <span class="fa fa-eye"></span></a>
 
-    <a class="action queue" ng-click="addTargetToQueue()" tooltip="add to your bookmark list" data-action="queue">
+    <a class="action queue" ng-click="addTargetToQueue()" uib-tooltip-placement='bottom'  uib-tooltip="add to your bookmark list" data-action="queue">
       <span class="fa fa-play-circle-o"></span></a>
             
   </div>
