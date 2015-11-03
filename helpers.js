@@ -58,6 +58,7 @@ module.exports = {
     @return (err, graph) - error, or a graph of nodes and edges
   */
   cypherGraph: function(query, params, next) {
+    query= parser.agentBrown(query, params);
     neo4j.query(query, params, function (err, items) {
       if(err) {
         next(err);

@@ -72,7 +72,7 @@ angular.module('histograph')
     Add / get :model related to resource
   */
   .factory('ResourceRelatedVizFactory', function ($resource) {
-    return $resource('/api/resource/:id/related/:model/:type');
+    return $resource('/api/resource/:id/related/:model/:viz');
   })
   /*
     POST Save a new inquiry (modify it) or GET list of inquiries
@@ -118,7 +118,7 @@ angular.module('histograph')
     type  - type of viz, eg graph or timeline
   */
   .factory('EntityRelatedVizFactory', function ($resource) {
-    return $resource('/api/entity/:id/related/:model/:type');
+    return $resource('/api/entity/:id/related/:model/:viz');
   })
   /*
     GET cooccurrences
@@ -157,7 +157,7 @@ angular.module('histograph')
     Add / get :model related to resource
   */
   .factory('UserRelatedVizFactory', function ($resource) {
-    return $resource('/api/user/:id/related/:model/:type');
+    return $resource('/api/user/:id/related/:model/:viz');
   })
   /*
     Search & Suggest
@@ -208,7 +208,7 @@ angular.module('histograph')
   })
   
   .factory('SuggestAllInBetweenVizFactory', function ($resource) {
-    return $resource('/api/suggest/all-in-between/:ids/:model/:type');
+    return $resource('/api/suggest/all-in-between/:ids/:model/:viz');
   })
   
   .factory('SearchFactory', function ($resource) {
@@ -216,7 +216,7 @@ angular.module('histograph')
   })
   
   .factory('SearchVizFactory', function ($resource) {
-    return $resource('/api/suggest/:model/:type');
+    return $resource('/api/suggest/:model/:viz');
   })
   
   

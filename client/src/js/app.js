@@ -412,6 +412,16 @@ angular
         abstract: true,
         templateUrl: 'templates/user.html',
         controller: 'UserCtrl',
+        grammar: {
+          name: 'user',
+          label: 'show user',
+          choices: [
+            {
+              name: 'user.resources',
+              label: 'favourite documents'
+            }
+          ],
+        },
         resolve: {
           pulse: function(UserFactory, $stateParams) {
             return UserFactory.get({
@@ -425,7 +435,7 @@ angular
           templateUrl: 'templates/partials/resources.html',
           controller: 'ResourcesCtrl',
           grammar: {
-            label: 'documents',
+            label: 'favourite documents',
             connector: {
               type: 'of type',
               relatedTo: 'which contains',

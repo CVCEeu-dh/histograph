@@ -616,6 +616,11 @@ a#header-title {
   width: 350px;
 }
 
+.user #see-also {
+  margin-left:0%;
+  width: 350px;
+}
+
 .explore #see-also{
   width: 50%;
   margin-left:0%;
@@ -1043,6 +1048,10 @@ a#header-title {
 
 #milkyway.search, #milkyway.neighbors{
   left: 560px;
+}
+
+#milkyway.user{
+  left: 360px;
 }
 
 #milkyway.index{

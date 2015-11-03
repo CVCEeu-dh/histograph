@@ -45,8 +45,23 @@ RETURN DISTINCT target
 
 // name: count_related_resources
 // get last "touched" resources, by type
-MATCH (u:user)-[r]-(res:resource)
-WHERE id(u) = {id}
+MATCH (u:user)-[r]-(res:resource){if:with}<-[:appears_in]-(ent){/if}
+  WHERE id(u) = {id}
+  {if:mimetype}
+    AND res.mimetype IN {mimetype}
+  {/if}
+  {if:type}
+    AND res.type IN {type}
+  {/if}
+  {if:start_time}
+    AND res.start_time >= {start_time}
+  {/if}
+  {if:end_time}
+    AND res.end_time <= {end_time}
+  {/if}
+  {if:with}
+    AND id(ent) in {with}
+  {/if}
 WITH collect(res) as resources
 WITH resources, length(resources) as total_items
 UNWIND resources as res
@@ -58,26 +73,41 @@ RETURN {
 
 // name: get_related_resources
 // get last "touched" resources
-MATCH (u:user)-[r]-(res:resource)
-WHERE id(u) = {id}
+MATCH (u:user)-[r]-(res:resource){if:with}<-[:appears_in]-(ent){/if}
+  WHERE id(u) = {id}
+  {if:mimetype}
+    AND res.mimetype IN {mimetype}
+  {/if}
+  {if:type}
+    AND res.type IN {type}
+  {/if}
+  {if:start_time}
+    AND res.start_time >= {start_time}
+  {/if}
+  {if:end_time}
+    AND res.end_time <= {end_time}
+  {/if}
+  {if:with}
+    AND id(ent) in {with}
+  {/if}
 WITH r,res
 ORDER BY r.creation_time DESC
-SKIP {offset} 
+SKIP {offset}
 LIMIT {limit}
-WITH r.creation_time AS creation_time , res
+WITH r AS u_rel, res
 OPTIONAL MATCH (res)-[r_loc:appears_in]->(loc:`location`)
-WITH creation_time, res, r_loc, loc
+WITH u_rel, res, r_loc, loc
 ORDER BY r_loc.tfidf DESC, r_loc.frequency DESC
-WITH creation_time, res, collect({  
+WITH u_rel, res, collect({  
       id: id(loc),
       type: 'location',
       props: loc,
       rel: r_loc
     })[0..5] as locations   
 OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
-WITH creation_time, res, locations, r_per, per
+WITH u_rel, res, locations, r_per, per
 ORDER BY r_per.tfidf DESC, r_per.frequency DESC
-WITH creation_time, res, locations, collect({
+WITH u_rel, res, locations, collect({
       id: id(per),
       type: 'person',
       props: per,
@@ -85,7 +115,7 @@ WITH creation_time, res, locations, collect({
     })[0..5] as persons
 OPTIONAL MATCH (res)-[r_org:appears_in]-(org:`organization`)
 
-WITH creation_time, res, locations, persons, collect({  
+WITH u_rel, res, locations, persons, collect({  
       id: id(org),
       type: 'organization',
       props: org,
@@ -93,7 +123,7 @@ WITH creation_time, res, locations, persons, collect({
     })[0..5] as organizations
 OPTIONAL MATCH (res)-[r_soc:appears_in]-(soc:`social_group`)
 
-WITH creation_time, res, locations, persons, organizations, collect({
+WITH u_rel, res, locations, persons, organizations, collect({
       id: id(soc),
       type: 'social_group',
       props: soc,
@@ -101,8 +131,9 @@ WITH creation_time, res, locations, persons, organizations, collect({
     })[0..5] as social_groups
 
 {if:with}
+WITH u_rel, res, locations, persons, organizations, social_groups
   OPTIONAL MATCH (res)--(ann:annotation) 
-  WITH creation_time, res, ann, locations, persons, organizations, social_groups
+  WITH u_rel, res, locations, persons, organizations, social_groups, collect(ann) as annotations
 {/if}
 
 RETURN {
@@ -110,7 +141,7 @@ RETURN {
   type: 'resource',
   props: res,
   {if:with}
-    annotations: collect(ann),
+    annotations: annotations,
   {/if}
   persons:     persons,
   organizations: organizations,
@@ -121,7 +152,7 @@ RETURN {
 //ORDER BY {:orderby}
 //{/if}
 //{unless:orderby}
-ORDER BY creation_time ASC
+ORDER BY u_rel.creation_time DESC
 
 // name: remove_user
 // WARNING!!!! destroy everything related to the user, as if it never existed.
@@ -132,8 +163,23 @@ DELETE n, r
 
 // name: get_related_resources_graph
 // bipartite graph of related resoruces and entities in between
-MATCH (res:resource)-[r]-(u:user)
-WHERE id(u)={id}
+MATCH (u:user)-[r]-(res:resource){if:with}<-[:appears_in]-(ent){/if}
+  WHERE id(u)={id}
+  {if:mimetype}
+    AND res.mimetype IN {mimetype}
+  {/if}
+  {if:type}
+    AND res.type IN {type}
+  {/if}
+  {if:start_time}
+    AND res.start_time >= {start_time}
+  {/if}
+  {if:end_time}
+    AND res.end_time <= {end_time}
+  {/if}
+  {if:with}
+    AND id(ent) in {with}
+  {/if}
 WITH res
 MATCH (ent:entity)-[r:appears_in]->(res)
 WITH res, r, ent
@@ -141,9 +187,9 @@ ORDER BY r.tfidf DESC
 WITH ent, collect(DISTINCT res) as resources
 WITH ent, resources, length(resources) as weight
 WHERE weight > 1
-WITH ent, resources, weight
+WITH ent, resources
 UNWIND resources as res
-MATCH p=(res)-[r]-(ent)
+MATCH p=(res)-[r:appears_in]-(ent)
 return{
   source: {
     id: id(res),
@@ -155,5 +201,5 @@ return{
     type: last(labels(ent)),
     label: COALESCE(ent.name, ent.title_en, ent.title_fr)
   },
-  weight: weight
+  weight: r.frequency
 }

@@ -149,7 +149,7 @@ module.exports = function(io) {
     },
     /*
       Return a list of last user-touched resources.
-      
+
     */
     getRelatedResources: function(req, res) {
       var form = validator.request(req, {
@@ -159,6 +159,7 @@ module.exports = function(io) {
           });
       if(!form.isValid)
         return helpers.formError(form.errors, res);
+      console.log(form)
       User.getRelatedResources({
         id: form.params.id
       }, form.params, function (err, items, info) {
@@ -170,12 +171,20 @@ module.exports = function(io) {
       Get bipartite graph of user most loved resource network
     */
     getRelatedResourcesGraph: function (req, res) {
+      var form = validator.request(req, {
+            id: req.user.id // default the single user
+          });
+       if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
       User.getRelatedResourcesGraph({
         id: form.params.id
       },
-      {
+      _.assign({}, form.params,{
         limit: 500
-      }, function (err, graph) {
+      }), function (err, graph) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
         return res.ok({
           graph: graph
         }, _.assign({

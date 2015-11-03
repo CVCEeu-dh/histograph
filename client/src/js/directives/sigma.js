@@ -17,6 +17,7 @@ angular.module('histograph')
         '<div id="playground"></div>' +
         '<div gmasp target="target"></div>' +
         '<div id="tips" ng-if="tips.length > 0"><div>{{tips}}</div></div>' +
+        '<div id="graph-empty" ng-if="graph.nodes.length"><div>{{tips}}</div></div>' +
         '<div id="commands" class="{{lookup?\'lookup\':\'\'}}">' +
           '<div tooltip="view all nodes" tooltip-append-to-body="true" class="action {{lookup? \'bounceIn animated\': \'hidden\'}}" ng-click="toggleLookup()"><i class="fa fa-eye"></i></div>' +
           '<div class="action {{status==\'RUNNING\'? \'bounceIn animated\': \'\'}}" ng-click="togglePlay()"><i class="fa fa-{{status==\'RUNNING\' ? \'stop\': \'play\'}}"></i></div>' +
@@ -597,8 +598,8 @@ angular.module('histograph')
           
           si.startForceAtlas2({
             adjustSizes :true,
-            linLogMode: true,
-            startingIterations : 10,
+            linLogMode: false,
+            startingIterations : 20,
             gravity : 1,
             slowDown: 10,
             edgeWeightInfluence : 1

@@ -210,6 +210,13 @@ angular.module('histograph')
       @param options.center    - (optional) a list of node ids fo set as fixed
     */
     $scope.setGraph = function(graph, options) {
+      if(!graph || !graph.nodes || !graph.edges) {
+        $log.warn('CoreCtrl -> setGraph() build an empty graph, response is empty')
+        graph = {
+          nodes: [],
+          edges:[]
+        };
+      }
       $log.info('CoreCtrl -> setGraph', graph.nodes.length, 'nodes', graph.edges.length, 'edges')
       if(options && options.centers)
         graph.centers = options.centers;

@@ -136,11 +136,25 @@ describe('controller:user (related users)', function() {
       .expect(200)
       .end(function (err, res) {
         should.equal(res.body.result.items.length, 1);
-        should.exist(res.body.info.total_items)
-        should.exist(res.body.info.limit)
-        should.exist(res.body.info.offset)
-        should.exist(res.body.info.id)
+        should.exist(res.body.info.total_items);
+        should.exist(res.body.info.limit);
+        should.exist(res.body.info.offset);
+        should.exist(res.body.info.id);
         should.not.exists(err);
+        done();
+      });
+  });
+
+  it('should get the graph of user curated resources', function (done) {
+    session
+      .get('/api/user/'+ __user.id +'/related/resource/graph')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.exist(res.body.result.graph.nodes.length);
+        should.exist(res.body.result.graph.edges.length);
+        should.exist(res.body.info.id);
+        should.not.exist(err);
         done();
       });
   });

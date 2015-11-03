@@ -123,7 +123,7 @@ module.exports = {
     @param params - object contianing the params ffor the cypher query
   */
   getRelatedResourcesGraph: function(user, params, next) {
-    helpers.cypherGraph(queries.get_related_resources_graph, params, function (err, graph) {
+    helpers.cypherGraph(queries.get_related_resources_graph, _.assign({}, user, params), function (err, graph) {
       if(err)
         next(err);
       else

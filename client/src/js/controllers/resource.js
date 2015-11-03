@@ -142,22 +142,21 @@ angular.module('histograph')
     /*
       Load graph data
     */
-    relatedVizFactory.get({
-      id: $stateParams.id,
-      model: 'resource',
-      type: 'graph',
-      limit: 100,
-      query:  $stateParams.query,
-      ids:    $stateParams.ids,
-    }, function(res) {
-      if($scope.item && $scope.item.id)
-        $scope.setGraph(res.result.graph, {
-          centers: [$scope.item.id]
-        });
-      else
-        $scope.setGraph(res.result.graph);
-    });
-    
+    $scope.syncGraph = function() {
+      relatedVizFactory.get(angular.extend({
+        model: 'resource',
+        viz: 'graph',
+        limit: 100,
+      },  $stateParams, $scope.params), function(res) {
+        if($scope.item && $scope.item.id)
+          $scope.setGraph(res.result.graph, {
+            centers: [$scope.item.id]
+          });
+        else
+          $scope.setGraph(res.result.graph);
+      });
+    }
+
     $log.log('ResourcesCtrl -> setRelatedItems - items', resources.result.items);
     $scope.setRelatedItems(resources.result.items);
     
@@ -198,6 +197,7 @@ angular.module('histograph')
       $scope.offset = 0;
       $log.debug('ResourcesCtrl @API_PARAMS_CHANGED', $scope.params);
       $scope.sync();
+      $scope.syncGraph();
     });
     // $scope.$on(EVENTS.PAGE_CHANGED, function(e, params) {
     //   $log.debug('ResourcesCtrl @PAGE_CHANGED', params);
@@ -211,4 +211,6 @@ angular.module('histograph')
       
       $scope.sync();
     });
+
+    $scope.syncGraph();
   })
