@@ -6,8 +6,8 @@
 */
 var settings   = require('../settings'),
     helpers    = require('../helpers'),
-    validator  = require('validator'),
-    _validator  = require('../validator'),
+    validator  = require('../validator'),
+
     multer     = require('multer'),
     _          = require('lodash'),
     neo4j      = require('seraph')(settings.neo4j.host),
@@ -30,17 +30,6 @@ var settings   = require('../settings'),
         error: 'password have to ...'
       }
     ];
-
-// do try catch
-var validate = function(form, fields) {
-  var errors = [];
-  for(i in fields)
-    if(!validator[fields[i].check].apply(this, [form[fields[i].field]].concat(fields[i].args)))
-      errors.push(fields[i]);
-  if(errors.length)
-    return errors;
-  return true;
-};
 
 
 module.exports = function(io) {
@@ -112,24 +101,28 @@ module.exports = function(io) {
       Send an activation link by email.
     */
     activate: [multer(), function (req, res) {
-      var result = validate(req.query, [
-        {
-          field: 'email',
-          check: 'isEmail',
-          error: 'it is not a real email'
-        },
-        {
-          field: 'k',
-          check: 'isLength',
-          args: [
-            8,
-          ],
-          error: 'please provide the k. Otherwise, contact the system administator'
-        }
-      ]);
-
-      if(result !== true)
-        return res.error(400, {form: result});
+      var form = validator.request(req, {
+            limit: 10,
+            offset: 0
+          }, {
+            fields:[
+              {
+                field: 'email',
+                check: 'isEmail',
+                error: 'it is not a real email'
+              },
+              {
+                field: 'k',
+                check: 'isLength',
+                args: [
+                  8,
+                ],
+                error: 'please provide the k. Otherwise, contact the system administator'
+              }
+            ]
+          });
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
 
       neo4j.query('MATCH(n:user {email:{email}, activation:{key}}) SET n.status={status} RETURN n', {
         email: req.query.email,
@@ -139,14 +132,12 @@ module.exports = function(io) {
         if(err)
           return res.error(400, {message: 'bad request'});
         return res.ok();
-      })
-
-      
+      });
     }],
 
 
     pulse: function(req, res) {
-      var form = _validator.request(req, {
+      var form = validator.request(req, {
             limit: 10,
             offset: 0
           });
@@ -156,19 +147,41 @@ module.exports = function(io) {
         return res.ok({items: items}, info);
       });
     },
-
+    /*
+      Return a list of last user-touched resources.
+      
+    */
     getRelatedResources: function(req, res) {
       var form = validator.request(req, {
             limit: 10,
-            offset: 0
+            offset: 0,
+            id: req.user.id // default the single user
           });
       if(!form.isValid)
         return helpers.formError(form.errors, res);
-
-      User.getRelatedResources(form.params, function (err, items, info) {
+      User.getRelatedResources({
+        id: form.params.id
+      }, form.params, function (err, items, info) {
         helpers.models.getMany(err, res, items, info, form.params);
-      })
+      });
+    },
 
-    }
+    /*
+      Get bipartite graph of user most loved resource network
+    */
+    getRelatedResourcesGraph: function (req, res) {
+      User.getRelatedResourcesGraph({
+        id: form.params.id
+      },
+      {
+        limit: 500
+      }, function (err, graph) {
+        return res.ok({
+          graph: graph
+        }, _.assign({
+          type: 'monopartite'
+        }, form.params));
+      });
+    },
   }
 };

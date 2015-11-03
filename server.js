@@ -317,7 +317,9 @@ apiRouter.route('/user/session')// api session info
 apiRouter.route('/user/pulse') // api session info
   .get(ctrl.user.pulse)
 apiRouter.route('/user/:id(\\d+)/related/resource') // api session info
-  .get(ctrl.user.pulse)
+  .get(ctrl.user.getRelatedResources)
+apiRouter.route('/user/:id(\\d+)/related/resource/graph') // api session info
+  .get(ctrl.user.getRelatedResourcesGraph)
   
 
 /*
