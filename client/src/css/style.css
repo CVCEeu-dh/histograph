@@ -25,11 +25,16 @@ header ul.menu li a {
 header ul.menu li.active a {
   color: #151515;
   font-weight:bold;
+  border-bottom: 0px transparent;
 }
 
 header ul.menu li a:hover{
   color: #f74917;
   border-bottom: 0px transparent;
+}
+
+header ul.menu li.active a:hover{
+  color: #151515;
 }
 
 a#header-title {
@@ -295,13 +300,15 @@ a#header-title {
 */
   
 .header-menu{
-  position: fixed;
-  top: 50px;
-  height: 50px;
-  left:10px;
-  right:10px;
-  background: white;
-  z-index: 11;
+position: fixed;
+    top: 60px;
+    height: 40px;
+    left: 10px;
+    right: 10px;
+    background: #f5f5f5;
+    z-index: 11;
+    /*border-top: 1px solid #ccc;*/
+
 }
 
 
@@ -310,7 +317,7 @@ a#header-title {
   margin: 0;
   display: block;
   border-bottom: 1px solid #d8d8d8;
-  height: 50px;
+  height: 40px;
   box-shadow: 0px 0px 6px #ccc;
 }
 
@@ -342,7 +349,7 @@ a#header-title {
 }
 
 .header-menu > ul > li> button, .header-menu > ul > li> .dropdown {
-      margin: 8px 5px;
+      margin: 4px 5px;
 }
 
 .header-menu > ul> li> .filter{
@@ -5173,7 +5180,7 @@ Copyright (c) 2015 Daniel Eden
 }
 
 .grammar{
-  line-height: 48px;
+  line-height: 40px;
   
 }
 .grammar-choice {

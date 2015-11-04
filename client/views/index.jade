@@ -111,14 +111,14 @@ html
 
                 ul.menu
                   li(class='{{currentState.name == "explore.resources"?"active":""}}')
-                    a(href='#/') explore
+                    a(href='#/') documents
 
-                  li
-                    a(href='#/per')  graph
+                  li(class='{{currentState.name == "explore.persons"?"active":""}}')
+                    a(href='#/per')  people
                  
-                  li
+                  li(class='{{currentState.name == "search.resources" || currentState.name == "search.persons" ?"active":""}}')
                     form#search-field(ng-submit='setQuery(query)')
-                      input(type='text', name='test', ng-model='__query', typeahead-on-select='setQuery($item, $model, $label)', class='form-control', typeahead-editable='false', placeholder='Search for...', typeahead='item for items in suggest($viewValue)', typeahead-wait-ms='100', typeahead-template-url='templates/partials/helpers/suggest.html')
+                      input(type='text', name='test', ng-model='__query', typeahead-on-select='setQuery($item, $model, $label)', class='form-control', typeahead-editable='false', placeholder='search', typeahead='item for items in suggest($viewValue)', typeahead-wait-ms='100', typeahead-template-url='templates/partials/helpers/suggest.html')
                   //- input(type='text', ng-model='query', class='form-control', placeholder='Search for...', bs-typeahead, bs-options='item for items in suggest($viewValue)', data-container='body',data-delay='{ show: 500, hide: 1000000 }')
                   //- span(class='input-group-btn')
                   //-  a(class='btn btn-default', type='button', ng-href='/#/search/{{query}}') search
