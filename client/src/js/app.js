@@ -72,6 +72,15 @@ angular
       .setPrefix('histograph')
       .setNotify(true, true);
   })
+  .config(function ($uibTooltipProvider) {
+    $uibTooltipProvider.options({
+      placement: 'top',
+      animation: true,
+      popupDelay: 0,
+      popupCloseDelay: 500,
+      appendToBody: true
+    })
+  })
   .config(function ($stateProvider, $urlRouterProvider) {
     $urlRouterProvider
       .otherwise("/");
