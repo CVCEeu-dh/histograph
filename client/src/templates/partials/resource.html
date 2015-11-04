@@ -19,7 +19,7 @@
         <h3 class="" data-id='{{item.id}}'>
          <!--  <span ng-if="currentAnnotation" ng-href="#/r/{{item.id}}" context="item" marked="currentAnnotation.annotated.title"></span>
           <span ng-if="!currentAnnotation" ng-href="#/r/{{item.id}}" ng-bind-html="item.props | title:language"></span> -->
-          
+          <span ng-if='!item.annotations || !item.annotations.length' marked="item.props|lookup:'title':language"></span>
           <span ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'title':language"></span>
           
         </h3>

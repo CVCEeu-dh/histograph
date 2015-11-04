@@ -8,7 +8,7 @@
  * directive to show a grapgh of nodes and edges thanks to @Yomguithereal!!! 
  */
 angular.module('histograph')
-  .directive('sigma', function ($log, $location) {
+  .directive('sigma', function ($log, $location, $timeout) {
     'use strict';
 
     return {
@@ -17,7 +17,7 @@ angular.module('histograph')
         '<div id="playground"></div>' +
         '<div gmasp target="target"></div>' +
         '<div id="tips" ng-if="tips.length > 0"><div>{{tips}}</div></div>' +
-        '<div id="graph-empty" ng-if="graph.nodes.length"><div>{{tips}}</div></div>' +
+        '<div id="sigma-messenger" ng-if="message.visible"><div class="inner">{{message.text}}</div></div>' +
         '<div id="commands" class="{{lookup?\'lookup\':\'\'}}">' +
           '<div tooltip="view all nodes" tooltip-append-to-body="true" class="action {{lookup? \'bounceIn animated\': \'hidden\'}}" ng-click="toggleLookup()"><i class="fa fa-eye"></i></div>' +
           '<div class="action {{status==\'RUNNING\'? \'bounceIn animated\': \'\'}}" ng-click="togglePlay()"><i class="fa fa-{{status==\'RUNNING\' ? \'stop\': \'play\'}}"></i></div>' +
@@ -60,6 +60,26 @@ angular.module('histograph')
         tooltip.edge.isVisible   = false;
         tooltip.edge.text        = '';
         
+        /*
+          Sigma messenger
+        */
+        scope.message = {
+          text: 'loading graph',
+          visible: false
+        };
+
+        scope.showMessage = function(text) {
+          if(scope.message.timer)
+            $timeout.cancel(scope.message.timer);
+          scope.message.timer = $timeout(scope.hideMessage, 1500);
+          scope.message.text = text;
+          scope.message.visible = true;
+        }
+
+
+        scope.hideMessage = function(text) {
+          scope.message.visible = false
+        }
         /*
           Sigma addons
           ---
@@ -515,6 +535,7 @@ angular.module('histograph')
            $log.info('::sigma --> focus()', nodeId, _.map(si.graph.nodes(), 'id'))
           var node = si.graph.nodes(nodeId);
           try{
+
             sigma.misc.animation.camera(
               si.cameras.main,
               {
@@ -524,8 +545,13 @@ angular.module('histograph')
               },
               {duration: 250}
             );
+            scope.showMessage('hey');
+
           } catch(e) {
-            $log.error(e)
+            $log.error(e);
+            scope.showMessage('not found');
+          } finally {
+            scope.$apply();
           }
         }
 

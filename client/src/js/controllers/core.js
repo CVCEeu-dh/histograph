@@ -477,7 +477,7 @@ angular.module('histograph')
             ids: toBeAdded
           }, function (res) {
             $log.log('CoreCtrl -> addToQueue() SuggestFactory', res);
-            $scope.playlist = $scope.playlist.concat(res.data.result.items);
+            $scope.playlist = $scope.playlist.concat(res.result.items);
             $scope.playlistIds = _.map( $scope.playlist, 'id');
             $scope.queueStatus = 'active';
             $scope.queueRedirect();

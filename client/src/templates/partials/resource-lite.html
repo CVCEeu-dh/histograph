@@ -7,9 +7,14 @@
   </h4>
 
   <div class='actions'>
-    <button class='btn btn-default action' tooltip='add to bookmark list' tooltip-append-to-body="true" ng-click='queue(relatedItem.id, true)'>
-      <i class='fa fa-play-circle-o'></i>
-    </button>
+    <div class="btn-group">
+      <button class='btn btn-default action' uib-tooltip="view in graph (if it's visible)" data-id='{{relatedItem.id}}'>
+        <i class='fa fa-eye'></i>
+      </button>
+      <button class='btn btn-default action' uib-tooltip='add to bookmark list' tooltip-append-to-body="true" ng-click='queue(relatedItem.id, true)'>
+        <i class='fa fa-play-circle-o'></i>
+      </button>
+    </div>
   </div>
                 
   <div class="meta">
