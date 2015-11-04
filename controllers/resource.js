@@ -207,7 +207,8 @@ module.exports = function(io){
       We should move this to entities instead.
     */
     getCooccurrences: function (req, res) {
-      var form = validator.request(req, {
+      var query = '',
+          form = validator.request(req, {
             limit: 200,
             offset: 0
           },{
@@ -227,15 +228,19 @@ module.exports = function(io){
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       
-      var query = parser.agentBrown(queries.get_cooccurrences, form.params);
-      
+      if(!form.params.from && !form.params.to && !form.params.with && !form.params.type) {
+        query = parser.agentBrown(queries.get_precomputated_cooccurrences, form.params);
+        form.params.precomputated = true;
+      } else {
+        query = parser.agentBrown(queries.get_cooccurrences, form.params);
+      }
       helpers.cypherGraph(query, form.params, function (err, graph) {
         if(err) {
           return helpers.cypherQueryError(err, res);
         };
         return res.ok({
           graph: graph
-        });
+        },form.params);
       });
     },
     

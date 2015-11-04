@@ -2,14 +2,86 @@
 html
   head
     title histograph
-    meta(name='pinterest', content='nopin', description = "contents subject to copyright")
+    meta(name='pinterest', content='nopin', description="contents subject to copyright")
+    
     link(href='/css/bootstrap.min.css', rel='stylesheet')
     link(href='/css/font-awesome.min.css', rel='stylesheet')
     link(href='/css/perfect-scrollbar.min.css', rel='stylesheet')
     link(href='/css/annotator.css', rel='stylesheet')
     link(href='/css/annotorious.css', rel='stylesheet')
     link(href='/css/codemirror.css', rel='stylesheet')
+    
+    style(type='text/css').
+
+      html{
+        height: 100%
+      }
+      body{
+        font-size: 12px;
+        line-height: 20px;
+        color: #1d1d1d;
+        height: 100%;
+        overflow: hidden;
+        background-color: #f0f0f0;
+      }
+
+      h1,h2,h3,h4{
+        font-weight:normal;
+        font-size: inherit;
+        line-height: inherit;
+      }
+
+      header{
+        height: 50px;
+        position: fixed;
+        left:10px;
+        right:10px;
+        top: 10px;
+        background: white;
+        border-bottom: 1px solid #f0f0f0;
+        z-index: 15;
+        line-height: 50px;
+        font-size:13px;
+        padding: 0 50px;
+      }
+
+      header ul{
+        float: right;
+        display: inline-block;
+        list-style-type: none;
+      }
+
+      header ul li{
+        display: inline-block;
+        padding: 0 0px 0 40px;
+      }
+
       
+
+      header img {
+        display: inline-block;
+        height: 25px;
+        padding: 0px 10px 0 0;
+      }
+
+      blockquote{
+        padding: 10px 15px;
+        font-size: 12px;
+        line-height: 18px;
+        font-style: italic;
+        border: 0px solid transparent;
+        background: #eee;
+      }
+
+      a{
+        color: #FF5742;
+      }
+      a:focus, a:hover{
+        color: #151515;
+        border-bottom: 1px solid #151515;
+        text-decoration: none;
+      }
+
     link(href='/css/style.css', rel='stylesheet')
   
     script(src='/socket.io/socket.io.js')
@@ -33,39 +105,42 @@ html
              
             
             div(class='row', ng-cloak)
-              div(class='col-sm-8')
+              div(class='col-sm-12')
                 a(id='header-title', href='#/')
                   span histograph
-                a(href='#/u/'+user.id)
-                  img(src=user.picture)
-                  //- span {{user.username}} 
-                
-               
-                div(class='inline', style='position:relative')
-                  div(dropdown, dropdown-append-to-body='true', is-open='status.isopen')
-                    span(dropdown-toggle, ng-disabled='disabled') {{ language }}
-                      i(class='fa fa-down')
-          
-                    ul(class='dropdown-menu', role='menu', )
-                      li(ng-repeat='lang in availableLanguages', ng-click='setLanguage(lang)') {{lang}}
-                
-                   
-                a(href='/logout')
-                  span  logout
-                  
-                  
-                  
-              div(class='col-sm-4')
-                div(id='search-field')
-                  //- form (ng-submit='setQuery(query)')
-                  form(ng-submit='setQuery(query)')
-                    div(class='input-group')
-                      //- input(type='text', ng-model='query', class='form-control')
+
+                ul.menu
+                  li(class='{{currentState.name == "explore.resources"?"active":""}}')
+                    a(href='#/') explore
+
+                  li
+                    a(href='#/per')  graph
+                 
+                  li
+                    form#search-field(ng-submit='setQuery(query)')
                       input(type='text', name='test', ng-model='__query', typeahead-on-select='setQuery($item, $model, $label)', class='form-control', typeahead-editable='false', placeholder='Search for...', typeahead='item for items in suggest($viewValue)', typeahead-wait-ms='100', typeahead-template-url='templates/partials/helpers/suggest.html')
-                      //- input(type='text', ng-model='query', class='form-control', placeholder='Search for...', bs-typeahead, bs-options='item for items in suggest($viewValue)', data-container='body',data-delay='{ show: 500, hide: 1000000 }')
-                      span(class='input-group-btn')
-                        a(class='btn btn-default', type='button', ng-href='/#/search/{{query}}') search
-              
+                  //- input(type='text', ng-model='query', class='form-control', placeholder='Search for...', bs-typeahead, bs-options='item for items in suggest($viewValue)', data-container='body',data-delay='{ show: 500, hide: 1000000 }')
+                  //- span(class='input-group-btn')
+                  //-  a(class='btn btn-default', type='button', ng-href='/#/search/{{query}}') search
+          
+                  //- li
+                  //-   div(dropdown, dropdown-append-to-body='true', is-open='status.isopen')
+                  //-     span(dropdown-toggle, ng-disabled='disabled') {{ language }}
+                  //-       i(class='fa fa-down')
+            
+                  //-     ul(class='dropdown-menu', role='menu', )
+                  //-       li(ng-repeat='lang in availableLanguages', ng-click='setLanguage(lang)') {{lang}}
+                  
+                  li  
+                    a(href='#/u/'+user.id)
+                      img(src=user.picture)
+                      span {{user.username}} 
+                  li
+                    a(href='/logout') logout
+                  
+                  
+                  
+                
             div(id='history')
               div(history='', trails='trails')
             

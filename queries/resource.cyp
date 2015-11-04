@@ -446,25 +446,30 @@ WITH col, res
 RETURN col, res
 
 
-// name: get_jaccard_cooccurrences
+// name: get_precomputated_cooccurrences
 //
 MATCH (p1:person)-[r:appear_in_same_document]-(p2:person)
-WHERE id(p1) < id(p2) AND r.jaccard < 0.33
+WHERE id(p1) < id(p2)
+WITH p1,p2,r
+ORDER BY r.intersections DESC
+LIMIT {limit}
+WITH p1,p2,r
 RETURN {
   source: {
     id: id(p1),
     type: 'person',
-    label: COALESCE(p1.name, p1.title_en, p1.title_fr)
+    label: COALESCE(p1.name, p1.title_en, p1.title_fr),
+    url: p1.thumbnail
   },
   target: {
     id: id(p2),
     type: 'person',
-    label: COALESCE(p2.name, p2.title_en, p2.title_fr)
+    label: COALESCE(p2.name, p2.title_en, p2.title_fr),
+    url: p2.thumbnail
   },
-  weight: r.jaccard
-}
-ORDER BY r.jaccard DESC
-LIMIT {limit}
+  weight: r.intersections
+} as result
+
 
 
 // name: get_cooccurrences
@@ -496,12 +501,14 @@ RETURN {
     source: {
       id: id(p1),
       type: 'person',
-      label: COALESCE(p1.name, p1.title_en, p1.title_fr)
+      label: COALESCE(p1.name, p1.title_en, p1.title_fr),
+      url: p1.thumbnail
     },
     target: {
       id: id(p2),
       type: 'person',
-      label: COALESCE(p2.name, p2.title_en, p2.title_fr)
+      label: COALESCE(p2.name, p2.title_en, p2.title_fr),
+      url: p2.thumbnail
     },
     weight: w
   } as result

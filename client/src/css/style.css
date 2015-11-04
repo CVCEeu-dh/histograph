@@ -12,71 +12,24 @@
   display: none !important;
 }
 
-html{
-  height: 100%
-}
-body{
+header ul.menu li a {
+  color: #757575;
+  /* text-transform: uppercase; */
+  /* font-weight: bold; */
   font-size: 12px;
-  line-height: 20px;
-  color: #1d1d1d;
-  height: 100%;
-  overflow: hidden;
-  background-color: #f0f0f0;
+  display: block;
+  line-height: 44px;
+  padding-top: 5px;
 }
 
-h1,h2,h3,h4{
-  font-weight:normal;
-  font-size: inherit;
-  line-height: inherit;
-}
-
-header{
-  height: 50px;
-  position: fixed;
-  left:10px;
-  right:10px;
-  top: 10px;
-  background: white;
-  border-bottom: 1px solid #f0f0f0;
-  z-index: 15;
-  line-height: 50px;
-  font-size:13px;
-  padding: 0 50px;
-}
-
-header ul{
-  float: right;
-  display: inline-block;
-  list-style-type: none;
-}
-
-header ul li{
-  display: inline-block;
-  padding: 0 0px 0 40px;
-}
-
-header img {
-  display: inline-block;
-  height: 25px;
-  padding: 0px 10px 0 0;
-}
-
-blockquote{
-  padding: 10px 15px;
-  font-size: 12px;
-  line-height: 18px;
-  font-style: italic;
-  border: 0px solid transparent;
-  background: #eee;
-}
-
-a{
-  color: #FF5742;
-}
-a:focus, a:hover{
+header ul.menu li.active a {
   color: #151515;
-  border-bottom: 1px solid #151515;
-  text-decoration: none;
+  font-weight:bold;
+}
+
+header ul.menu li a:hover{
+  color: #f74917;
+  border-bottom: 0px transparent;
 }
 
 a#header-title {
