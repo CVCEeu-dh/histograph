@@ -325,7 +325,7 @@ position: fixed;
   list-style-type: none;
   display: inline-block;
   float: left;
-  height: 50px
+  height: 40px;
 }
 
 .header-menu > ul> li> a{
@@ -362,7 +362,7 @@ position: fixed;
 }
 
 .header-menu > ul> li.path {
-  line-height: 50px;
+  line-height: 40px;
 }
 
 .header-menu > ul> li.path.split {
