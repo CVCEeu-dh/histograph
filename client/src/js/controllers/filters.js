@@ -85,14 +85,18 @@ angular.module('histograph')
     */
     $scope.loadFiltersItems = function() {
       // collect ids
-      _.each(angular.copy($scope.filters), function (d, key) {
-        if(key == 'with')
-          SuggestFactory.getUnknownNodes({
-            ids: d
-          }, function (res) {
-            $scope.filterItems[key] = res.result.items;
-          })
-      });   
+      if(!$scope.filters.with) {
+        $scope.filterItems.with = [];
+      } else {
+        _.each(angular.copy($scope.filters), function (d, key) {
+          if(key == 'with')
+            SuggestFactory.getUnknownNodes({
+              ids: d
+            }, function (res) {
+              $scope.filterItems[key] = res.result.items;
+            })
+        });   
+      }
     };
     
     /*
