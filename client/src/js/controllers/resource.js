@@ -124,6 +124,7 @@ angular.module('histograph')
     $scope.totalItems  = resources.info.total_items;
     $scope.limit       = resources.info.limit;
     $scope.offset      = resources.info.offset;
+    $scope.loading     = false;
     // $scope.page        = 1; // always first page!!
     
     /*
@@ -165,7 +166,7 @@ angular.module('histograph')
       Reload related items, with filters.
     */
     $scope.sync = function() {
-      $scope.loading = true;
+      $scope.lock();
 
       
         relatedFactory.get(angular.extend({
@@ -175,7 +176,7 @@ angular.module('histograph')
           limit: $scope.limit,
           offset: $scope.offset
         }, $scope.params), function (res) {
-          $scope.loading = false;
+          $scope.unlock();
           $scope.offset  = res.info.offset;
           $scope.limit   = res.info.limit;
           $scope.totalItems = res.info.total_items;

@@ -237,11 +237,7 @@ module.exports = function(io){
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       
-      entity.getRelatedResourcesGraph({
-        id: form.params.id,
-        limit: form.params.limit,
-        offset: form.params.offset
-      }, function (err, graph) {
+      entity.getRelatedResourcesGraph(form.params, function (err, graph) {
         return res.ok({
           graph: graph
         }, {

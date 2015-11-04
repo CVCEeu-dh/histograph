@@ -73,19 +73,17 @@ angular.module('histograph')
       Load graph data
     */
     $scope.syncGraph = function() {
-      relatedVizFactory.get({
-        id: $stateParams.id,
-        query: $stateParams.query,
+      relatedVizFactory.get(angular.extend({
         model: model,
-        type: 'graph',
+        viz: 'graph',
         limit: 100
-      }, function(res) {
+      }, $stateParams, $scope.params), function (res) {
         $scope.setGraph(res.result.graph)
       });
     }
     
     $scope.sync = function() {
-      $scope.loading = true;
+      $scope.lock();
       relatedFactory.get(angular.extend({}, $scope.params, {
         id: $stateParams.id,
         model: model,
@@ -93,9 +91,10 @@ angular.module('histograph')
         offset: $scope.offset,
         query: $stateParams.query
       }), function (res) {
-        $scope.loading = false;
+        $scope.unlock();
         $scope.offset  = res.info.offset;
         $scope.limit   = res.info.limit;
+        $scope.totalItems = res.info.total_items;
         if($scope.offset > 0)
           $scope.addRelatedItems(res.result.items);
         else
@@ -115,51 +114,9 @@ angular.module('histograph')
       $scope.offset = 0;
       $log.debug('EntitiesCtrl @API_PARAMS_CHANGED', $scope.params);
       $scope.sync();
+      $scope.syncGraph();
     });
     
     $scope.setRelatedItems(entities.result.items);
     $scope.syncGraph();
   });
-
-// .controller('EntitiesCtrl', function ($scope, $log, $stateParams, entities, model, relatedFactory, relatedVizFactory, EVENTS){
-//   $log.log('EntitiesCtrl ready - model:', model, entities.info.total_items);
-//   $scope.model = model
-//   /*
-//     Load graph data
-//   */
-//   relatedVizFactory.get({
-//     id: $stateParams.id,
-//     model: model,
-//     type: 'graph',
-//     limit: 1000
-//   }, function(res) {
-//     $scope.setGraph(res.result.graph)
-//   });
-    
-//   /*
-//     Reload related items, with filters.
-//   */
-//   $scope.sync = function(params) {
-//     $scope.loading = true;
-//     relatedFactory.get({
-//       id: $stateParams.id,
-//       model: model,
-//       limit: 10,
-//       offset: (params.page-1) * 10
-//     }, function (res) {
-//       $scope.loading = false;
-//       $scope.setRelatedItems(res.result.items);
-//     })
-//   }
-  
-//   $scope.$on(EVENTS.PAGE_CHANGED, function(e, params) {
-//     $log.debug('ResourceCtrl @PAGE_CHANGED', params);
-//     $scope.page = params.page
-//     $scope.sync(params);
-//   });
-  
-//   $scope.totalItems  = entities.info.total_items;
-//   $scope.limit       = 10;
-//   $scope.page        = 1;
-//   $scope.setRelatedItems(entities.result.items);
-// })

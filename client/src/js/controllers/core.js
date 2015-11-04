@@ -364,7 +364,16 @@ angular.module('histograph')
       }
     }
     
+    /*
+      Use it when it's busy in doing something
+    */
+    $scope.lock = function() {
+      $scope.isBusy = true;
+    }
   
+    $scope.unlock = function() {
+      $scope.isBusy = false;
+    }
     /*
     
       Events listeners
@@ -372,11 +381,20 @@ angular.module('histograph')
     
     */
     var _resizeTimer;
+    $rootScope.$on('$stateChangeStart', function (e, state) {
+      if(state.resolve) {
+        $scope.lock(); 
+      }
+    })
+
     $rootScope.$on('$stateChangeSuccess', function (e, state) {
       $log.log('CoreCtrl @stateChangeSuccess', state.name);
       // the ui.router state (cfr app.js)
       $scope.currentState = state;
       
+      if(state.resolve)
+        $scope.unlock();
+
       $scope.unsetMessage();
       // $scope.setMessage(MESSAGES.LOADED, 1500);
       $scope.freeze = false;

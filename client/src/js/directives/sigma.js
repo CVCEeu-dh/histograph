@@ -17,7 +17,7 @@ angular.module('histograph')
         '<div id="playground"></div>' +
         '<div gmasp target="target"></div>' +
         '<div id="tips" ng-if="tips.length > 0"><div>{{tips}}</div></div>' +
-        '<div id="sigma-messenger" ng-if="message.visible"><div class="inner">{{message.text}}</div></div>' +
+        '<div id="sigma-messenger" ng-if="message.text.length" class="animated {{message.visible? \'fadeIn\': \'fadeOut\'}}"><div class="inner">{{message.text}}</div></div>' +
         '<div id="commands" class="{{lookup?\'lookup\':\'\'}}">' +
           '<div tooltip="view all nodes" tooltip-append-to-body="true" class="action {{lookup? \'bounceIn animated\': \'hidden\'}}" ng-click="toggleLookup()"><i class="fa fa-eye"></i></div>' +
           '<div class="action {{status==\'RUNNING\'? \'bounceIn animated\': \'\'}}" ng-click="togglePlay()"><i class="fa fa-{{status==\'RUNNING\' ? \'stop\': \'play\'}}"></i></div>' +
@@ -64,7 +64,7 @@ angular.module('histograph')
           Sigma messenger
         */
         scope.message = {
-          text: 'loading graph',
+          text: '',
           visible: false
         };
 
@@ -284,7 +284,7 @@ angular.module('histograph')
             si.refresh();
             return;
           }
-          
+          scope.showMessage('preparing graph with '+ graph.nodes.length + ' nodes ...');
           // calculate initital layout duration 
           layoutDuration = Math.max(Math.min(4* graph.nodes.length * graph.edges.length, maxlayoutDuration),minlayoutDuration)
           $log.log('::sigma n. nodes', si.graph.nodes.length, ' n. edges', si.graph.edges.length, 'runninn layout atlas for', layoutDuration/1000, 'seconds')
@@ -545,7 +545,7 @@ angular.module('histograph')
               },
               {duration: 250}
             );
-            scope.showMessage('hey');
+            scope.showMessage(node.label);
 
           } catch(e) {
             $log.error(e);
@@ -624,7 +624,7 @@ angular.module('histograph')
           
           si.startForceAtlas2({
             adjustSizes :true,
-            linLogMode: true,
+            linLogMode: false,
             startingIterations : 20,
             gravity : 20,
             slowDown: 10,

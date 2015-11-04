@@ -4,13 +4,16 @@
   </li>
   <li class='path split'>/</li> -->
   <li class='path'>
+    
     <span ng-if='query'>search result for <b>{{query}}</b> in</span>
     <span ng-if='item'>starting from 
-    <a class="active" href="#">{{item.type || 'document'}}#{{item.id}}</a>
+      <a class="active" href="#">{{item.type || 'document'}}#{{item.id}}</a>
     </span>
     
   </li>
   
+
+
   <li ng-include src="'templates/partials/helpers/grammar.html'"></li>
   
   <!-- sort -->
