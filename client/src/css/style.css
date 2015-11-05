@@ -468,11 +468,11 @@ position: fixed;
   overflow-y: auto;
 }
 
-#perspective-menu .dropdown-menu>li>a{
+#perspective-menu .dropdown-menu >li a{
   font-size:12px;
   line-height: 18px
 }
-#perspective-menu .dropdown-menu>li>a:hover {
+#perspective-menu .dropdown-menu>li a:hover {
   border-bottom: 0px transparent;
 }
 
@@ -5284,4 +5284,30 @@ Copyright (c) 2015 Daniel Eden
     transform: scale(1.0);
     -webkit-transform: scale(1.0);
   }
+}
+
+
+.popover-content .dropdown-menu{
+  width: 220px;
+  max-height: 260px;
+  overflow-x : hidden;
+  overflow-y : auto;
+}
+
+
+.popover-content ul.dropdown-menu > li{
+  padding: 0;
+}
+
+.popover-content ul.dropdown-menu > li a{
+  padding: 10px 15px;
+
+font-size:12px;
+  line-height: 18px
+
+
+}
+
+.popover-content ul.dropdown-menu >li a:hover {
+  border-bottom: 0px transparent;
 }

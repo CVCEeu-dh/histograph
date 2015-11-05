@@ -71,13 +71,15 @@ RETURN {
 
 // name: get_resources
 // get resources with number of comments, if any
-MATCH (res:resource)<-[appears_in]-()
+MATCH (res:resource)<-[:appears_in]-(ent)
+{if:with}
+  WHERE id(ent) IN {with} 
+  
+{/if}
+WITH DISTINCT res
   {?res:ids__inID} {AND?res:start_time__gt} {AND?res:end_time__lt} {AND?res:mimetype__in} {AND?res:type__in}
 WITH DISTINCT res
-{if:with}
-  MATCH (res)-[:appears_in]-(ent:entity) WHERE id(ent) IN {with} 
-  WITH DISTINCT res
-{/if}
+
 {if:orderby}
 ORDER BY {:orderby}
 {/if}
@@ -149,30 +151,32 @@ ORDER BY resource.props.start_time ASC
 
 // name: count_resources
 // count resources having a version, with current filters
-MATCH (res:resource)<-[:appears_in]-()
+MATCH (res:resource)<-[:appears_in]-(ent)
+{if:with}
+  WHERE id(ent) IN {with}
+{/if}
 WITH DISTINCT res
 {?res:start_time__gt}
 {AND?res:end_time__lt}
 {AND?res:type__in}
 
-WITH DISTINCT res
-{if:with}
-  MATCH (ent:entity)-[:appears_in]->(res)
-  WHERE id(ent) IN {with}
-  WITH DISTINCT res
-{/if}
+WITH collect(res) as resources
+WITH resources, length(resources) as total_items
+UNWIND resources as res
+
 RETURN {
   group: {if:group}res.{:group}{/if}{unless:group}res.type{/unless}, 
-  count_items: count(res)
+  count_items: count(res),
+  total_items: total_items
 } // count per type
 
 
 
 // name: get_resources_by_ids
 // get resources with number of comments, if any
-MATCH (res:resource)
+MATCH (res:resource)<-[:appears_in]-()
 WHERE id(res) in {ids}
-WITH res
+WITH DISTINCT res
     OPTIONAL MATCH (ver)-[:describes]->(res)
     OPTIONAL MATCH (ent)-[:appears_in]->(res)
     OPTIONAL MATCH (res)-[:belongs_to]->(col)
@@ -474,7 +478,15 @@ RETURN {
 
 // name: get_cooccurrences
 //
+{if:with}
+MATCH (res:resource)<-[:appears_in]-(ent2:entity)
+  WHERE id(ent2) IN {with}
+WITH res
+  MATCH (p1:person)-[r1:appears_in]->(res)<-[r2:appears_in]-(p2:person)
+{/if}
+{unless:with}
 MATCH (p1:person)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:person)
+{/unless}
   WHERE id(p1) < id(p2)
   {if:start_time}
     AND res.start_time >= {start_time}
@@ -488,9 +500,7 @@ MATCH (p1:person)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:person)
   {if:type}
     AND res.type in {type}
   {/if}
-  {if:with}
-    AND (id(p1) IN {with} OR id(p2) IN {with})
-  {/if}
+  
   AND p1.score > -1
   AND p2.score > -1
 WITH p1, p2, res
