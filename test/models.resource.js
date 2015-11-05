@@ -11,6 +11,7 @@
 
 var settings  = require('../settings'),
     should    = require('should'),
+    _         = require('lodash'),
     
     generator = require('../generator')({
                   suffix: 'resource'
