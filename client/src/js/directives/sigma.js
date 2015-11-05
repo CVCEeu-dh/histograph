@@ -688,6 +688,25 @@ angular.module('histograph')
             context.closePath(); 
               
           }
+
+          // draw a round all around
+          if(node.ghost == 0 && !node.center) {
+            context.fillStyle = "rgba(0,0,0, .11)";
+            context.beginPath();
+            context.arc(
+              node[prefix + 'x'],
+              node[prefix + 'y'],
+              node[prefix + 'size'] + 12,
+              0,
+              Math.PI * 2,
+              true
+            );
+            
+            context.fill();
+            context.closePath();
+            
+          }
+
           // draw the main node
           context.fillStyle = node.discard? "rgba(0,0,0, .11)": node.color;
           context.beginPath();
@@ -703,6 +722,8 @@ angular.module('histograph')
           context.fill();
           context.closePath();
           
+          
+
           // draw a square: node is a central node
           if(node.center) {
             var l = node[prefix + 'size'] + 12;
@@ -752,8 +773,11 @@ angular.module('histograph')
             );
             context.stroke();
           } else {
+          if(source.ghost == 1 || target.ghost == 1)
+              context.strokeStyle = "rgba(0,0,0, .047)"
           
-          context.strokeStyle = edge.discard? '#e8E8E8' : scale(edge.weight||1)//color;
+          else
+            context.strokeStyle = edge.discard? '#e8E8E8' : scale(edge.weight||1)//color;
           context.lineWidth = edge.discard? 1: 2;//edge[prefix + 'weight'] || edge.weight || 1;
           context.beginPath();
           context.moveTo(

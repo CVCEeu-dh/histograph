@@ -77,7 +77,28 @@ LIMIT {limit}
 
 
 // name: get_all_in_between_graph
-// retutn rels, nodes and
+// retutn rels, nodes from a) the shortes path and b) enlarged path
+MATCH (n),(t)
+  WHERE id(n) in {ids}
+    AND id(t) in {ids}
+WITH n, t
+MATCH p=allShortestPaths((n)-[:appears_in*..4]-(t))
+{if:type}
+  AND ALL(x in FILTER(x in nodes(p) WHERE last(labels(x)) = 'resource') WHERE x.type in {type})
+{/if}
+{if:start_time}
+  AND ALL(x in FILTER(x in nodes(p) WHERE last(labels(x)) = 'resource') WHERE x.start_time >= {start_time})
+{/if}
+{if:end_time}
+  AND ALL(x in FILTER(x in nodes(p) WHERE last(labels(x)) = 'resource') WHERE x.end_time <= {end_time})
+{/if}
+RETURN extract( n IN nodes(p)| {
+  id: id(n),
+  type: last(labels(n)),
+  ghost: 0,
+  label: coalesce(n.name, n.title_en, n.title_fr)
+}) AS ns, relationships(p) as rels, 1 as tfidf, length(p) as lp
+UNION
 MATCH (n)-[r:appears_in*..2]-(t:{:entity})
   WHERE id(n) in {ids} AND id(n) <> id(t)
   // top common nodes at distance 0 to 2
@@ -85,18 +106,25 @@ WITH t, count(DISTINCT r) as rr
 WHERE rr > 1
 WITH t, rr
 ORDER BY rr DESC
-LIMIT 100
+LIMIT 50
   // how do we reach top common nodes
 MATCH p=allShortestPaths((n)-[r:appears_in*..2]-(t))
-WHERE id(n) in {ids} 
+WHERE id(n) in {ids} AND id(n) <> id(t)
 {if:type}
   AND ALL(x in FILTER(x in nodes(p) WHERE last(labels(x)) = 'resource') WHERE x.type in {type})
+{/if}
+{if:start_time}
+  AND ALL(x in FILTER(x in nodes(p) WHERE last(labels(x)) = 'resource') WHERE x.start_time >= {start_time})
+{/if}
+{if:end_time}
+  AND ALL(x in FILTER(x in nodes(p) WHERE last(labels(x)) = 'resource') WHERE x.end_time <= {end_time})
 {/if}
 
 WITH p, reduce(tfidf=toFloat(0), r in relationships(p)|tfidf + COALESCE(r.tfidf,0.0)) as tfidf
 RETURN extract( n IN nodes(p)| {
   id: id(n),
   type: last(labels(n)),
+  ghost: 1,
   label: coalesce(n.name, n.title_en, n.title_fr)
 }) AS ns, relationships(p) as rels, tfidf, length(p) as lp
 ORDER BY length(p) ASC, tfidf DESC
