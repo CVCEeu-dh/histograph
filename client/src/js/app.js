@@ -816,12 +816,11 @@ angular
             relatedFactory: function(SuggestAllInBetweenFactory) {
               return SuggestAllInBetweenFactory;
             },
-            resources: function(SuggestAllInBetweenFactory, $stateParams) {
-              return SuggestAllInBetweenFactory.get({
-                ids: $stateParams.ids,
+            resources: function(SuggestAllInBetweenFactory, $stateParams, $location) {
+              return SuggestAllInBetweenFactory.get(angular.extend({
                 limit: 10,
                 model: 'resource'
-              }).$promise; 
+              }, $stateParams, $location.search())).$promise; 
             }
           }
         })

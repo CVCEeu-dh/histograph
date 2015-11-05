@@ -148,8 +148,12 @@ angular.module('histograph')
         model: 'resource',
         viz: 'graph',
         limit: 100,
-      },  $stateParams, $scope.params), function(res) {
-        if($scope.item && $scope.item.id)
+      },  $stateParams, $scope.params), function (res) {
+        if($stateParams.ids) {
+          $scope.setGraph(res.result.graph, {
+            centers: $stateParams.ids
+          });
+        } else if($scope.item && $scope.item.id)
           $scope.setGraph(res.result.graph, {
             centers: [$scope.item.id]
           });
@@ -168,27 +172,24 @@ angular.module('histograph')
     $scope.sync = function() {
       $scope.lock();
 
-      
-        relatedFactory.get(angular.extend({
-          id: $stateParams.id,
-          query: $stateParams.query,
-          model: 'resource',
-          limit: $scope.limit,
-          offset: $scope.offset
-        }, $scope.params), function (res) {
-          $scope.unlock();
-          $scope.offset  = res.info.offset;
-          $scope.limit   = res.info.limit;
-          $scope.totalItems = res.info.total_items;
-          if($scope.offset > 0)
-            $scope.addRelatedItems(res.result.items);
-          else
-            $scope.setRelatedItems(res.result.items);
-          // reset if needed
-          $scope.setFacets('type', res.info.groups);
-          
-        }) 
+      relatedFactory.get(angular.extend({
+        model: 'resource',
+        limit: $scope.limit,
+        offset: $scope.offset
+      }, $stateParams, $scope.params), function (res) {
+        $scope.unlock();
+        $scope.offset  = res.info.offset;
+        $scope.limit   = res.info.limit;
+        $scope.totalItems = res.info.total_items;
+        if($scope.offset > 0)
+          $scope.addRelatedItems(res.result.items);
+        else
+          $scope.setRelatedItems(res.result.items);
+        // reset if needed
+        $scope.setFacets('type', res.info.groups);
+      }) 
     };
+
     /*
       listener: EVENTS.API_PARAMS_CHANGED
       some query parameter has changed, reload the list accordingly.

@@ -576,9 +576,9 @@ angular.module('histograph')
       
       // Otherwise check the current state
       
-      if($state.current.controller == 'NeighborsResourcesCtrl') {
+      if($scope.currentState.name == 'neighbors.resources') {
         $log.log('    redirect to: /#/neighbors/'+$scope.playlistIds.join(',')); 
-        $location.path('/neighbors/'+$scope.playlistIds.join(',')+'/r');
+        $location.path('/neighbors/'+$scope.playlistIds.join(','));
       }
     };
     

@@ -51,7 +51,9 @@ MATCH (n),(t)
 WITH n, t
 MATCH p=allShortestPaths((n)-[:appears_in*..4]-(t))
 WITH filter(x in nodes(p) WHERE last(labels(x))='resource') as ns UNWIND ns as res
-WITH distinct res
+WITH DISTINCT res
+  {?res:start_time__gt} {AND?res:end_time__lt} {AND?res:mimetype__in} {AND?res:type__in}
+WITH DISTINCT res
 RETURN {
   group: res.type, 
   count_items: count(res)
@@ -64,9 +66,11 @@ MATCH (n),(t)
   WHERE id(n) in {ids}
     AND id(t) in {ids}
 WITH n, t
-MATCH p=allShortestPaths((n)-[:appears_in*..3]-(t))
+MATCH p=allShortestPaths((n)-[:appears_in*..4]-(t))
 WITH filter(x in nodes(p) WHERE last(labels(x))='resource') as ns UNWIND ns as res
-WITH distinct res
+WITH DISTINCT res
+  {?res:start_time__gt} {AND?res:end_time__lt} {AND?res:mimetype__in} {AND?res:type__in}
+WITH DISTINCT res
 return id(res) as id
 SKIP {offset}
 LIMIT {limit}
@@ -75,7 +79,7 @@ LIMIT {limit}
 // name: get_all_in_between_graph
 // retutn rels, nodes and
 MATCH (n)-[r:appears_in*..2]-(t:{:entity})
-  WHERE id(n) in {ids}
+  WHERE id(n) in {ids} AND id(n) <> id(t)
   // top common nodes at distance 0 to 2
 WITH t, count(DISTINCT r) as rr 
 WHERE rr > 1
@@ -84,7 +88,11 @@ ORDER BY rr DESC
 LIMIT 100
   // how do we reach top common nodes
 MATCH p=allShortestPaths((n)-[r:appears_in*..2]-(t))
-WHERE id(n) in {ids}
+WHERE id(n) in {ids} 
+{if:type}
+  AND ALL(x in FILTER(x in nodes(p) WHERE last(labels(x)) = 'resource') WHERE x.type in {type})
+{/if}
+
 WITH p, reduce(tfidf=toFloat(0), r in relationships(p)|tfidf + COALESCE(r.tfidf,0.0)) as tfidf
 RETURN extract( n IN nodes(p)| {
   id: id(n),

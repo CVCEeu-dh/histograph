@@ -306,12 +306,12 @@ angular.module('histograph')
               n.x = n.x || Math.random()*50;
               n.y = n.y || Math.random()*50;
               if(graph.centers && graph.centers.indexOf(n.id) !== -1) {
-                n.fixed = true;
+                n.center = true;
               }
               n.size = 5;//Math.sqrt(si.graph.degree(n.id));
               return n;
             });
-            console.log(graph.nodes)
+            // console.log(graph.nodes)
             graph.edges = graph.edges.map(function (n) {
               n.size = n.weight;
               return n
@@ -532,7 +532,7 @@ angular.module('histograph')
           if(typeof nodeId == 'object') { // it is an event ideed
             nodeId = $(this).attr('data-id');
           }
-           $log.info('::sigma --> focus()', nodeId, _.map(si.graph.nodes(), 'id'))
+          $log.info('::sigma --> focus()', nodeId);//, _.map(si.graph.nodes(), 'id'))
           var node = si.graph.nodes(nodeId);
           try{
 
@@ -688,7 +688,7 @@ angular.module('histograph')
             context.closePath(); 
               
           }
-          
+          // draw the main node
           context.fillStyle = node.discard? "rgba(0,0,0, .11)": node.color;
           context.beginPath();
           context.arc(
@@ -703,6 +703,18 @@ angular.module('histograph')
           context.fill();
           context.closePath();
           
+          // draw a square: node is a central node
+          if(node.center) {
+            var l = node[prefix + 'size'] + 12;
+            context.fillStyle = '#383838';
+            context.rect(
+              node[prefix + 'x'] - l/2,
+              node[prefix + 'y'] - l/2,
+              l,
+              l
+            );
+             context.fill();
+          }
         };
         
         
@@ -808,7 +820,18 @@ angular.module('histograph')
           var fontSize,
               prefix = settings('prefix') || '',
               size = node[prefix + 'size'];
-          
+          if(node.center) {
+            fontSize = settings('defaultLabelSize');
+            context.font = (settings('fontStyle') ? settings('fontStyle') + ' ' : '') +
+              fontSize + 'px ' + settings('font');
+            context.fillStyle = settings('defaultLabelColor');
+            context.fillText(
+              cutat(node.label, 22),
+              Math.round(node[prefix + 'x'] + size + 9),
+              Math.round(node[prefix + 'y'] + fontSize / 3)
+            );
+            return;
+          }
           if(node.discard)
             return;
           

@@ -521,9 +521,9 @@ module.exports =  function(io){
         params: form.params
       }, function (err, results) {
         if(err)
-          console.log(err)
+          return helpers.cypherQueryError(err, res);
         
-        Resource.getByIds(_.assign(form.params, {
+        Resource.getByIds(_.assign({}, form.params, {
           ids: _.map(results.items, 'id')
         }), function (err, items){
           helpers.models.getMany(err, res, items, results.count_items, form.params);
@@ -542,11 +542,12 @@ module.exports =  function(io){
           query = '';
           
       var form = validator.request(req, {
-            limit: 20,
+            limit: 100,
             offset: 0,
             entity: 'person'
           }, {
             fields: [
+              validator.SPECIALS.graphLimit,
               validator.SPECIALS.entity
             ]
           });
