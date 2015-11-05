@@ -432,6 +432,10 @@ module.exports = function(io){
             limit: 100,
             offset: 0
           });
+
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
       // console.log(form)
       Resource.getRelatedResourcesGraph({
         id: form.params.id
