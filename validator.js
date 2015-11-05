@@ -66,6 +66,14 @@ module.exports = {
     Special validation fields
   */
   SPECIALS: {
+    graphLimit: {
+      field: 'limit',
+      check: 'isInt',
+      args: [
+        {min: 1, max: 200}
+      ],
+      error: 'should be a number in range 1 to max 200'
+    },
     query: {
       field: 'query',
       check: 'isLength',
