@@ -558,6 +558,8 @@ module.exports =  function(io){
       query = parser.agentBrown(queries.get_all_in_between_graph, form.params);
       
       neo4j.query(query, form.params, function (err, paths) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
         // console.log(paths)
         // for each path
         for(var i=0, lp=paths.length; i < lp; i++){
@@ -578,8 +580,6 @@ module.exports =  function(io){
           }
         }
         
-        if(err)
-          return helpers.cypherQueryError(err, res);
         return res.ok({
           graph: {
             nodes: _.values(nodes),

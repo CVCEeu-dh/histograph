@@ -78,11 +78,9 @@ LIMIT {limit}
 
 // name: get_all_in_between_graph
 // retutn rels, nodes from a) the shortes path and b) enlarged path
-MATCH (n),(t)
+MATCH p=allShortestPaths((n)-[:appears_in*..4]-(t))
   WHERE id(n) in {ids}
     AND id(t) in {ids}
-WITH n, t
-MATCH p=allShortestPaths((n)-[:appears_in*..4]-(t))
 {if:type}
   AND ALL(x in FILTER(x in nodes(p) WHERE last(labels(x)) = 'resource') WHERE x.type in {type})
 {/if}
