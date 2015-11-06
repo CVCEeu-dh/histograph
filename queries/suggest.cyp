@@ -90,12 +90,15 @@ MATCH p=allShortestPaths((n)-[:appears_in*..4]-(t))
 {if:end_time}
   AND ALL(x in FILTER(x in nodes(p) WHERE last(labels(x)) = 'resource') WHERE x.end_time <= {end_time})
 {/if}
+WITH p, reduce(tfidf=toFloat(0), r in relationships(p)|tfidf + COALESCE(r.tfidf,0.0)) as tfidf
 RETURN extract( n IN nodes(p)| {
   id: id(n),
   type: last(labels(n)),
   ghost: 0,
   label: coalesce(n.name, n.title_en, n.title_fr)
-}) AS ns, relationships(p) as rels, 1 as tfidf, length(p) as lp
+}) AS ns, relationships(p) as rels, tfidf, length(p) as lp
+ORDER BY lp ASC, tfidf DESC
+LIMIT {limit}
 UNION
 MATCH (n)-[r:appears_in*..2]-(t:{:entity})
   WHERE id(n) in {ids} AND id(n) <> id(t)
