@@ -448,29 +448,27 @@ module.exports =  function(io){
     },
     
     getResourcesGraph: function (req, res) {
-      var form = validator.request(req, {
+      var query = '',
+          form = validator.request(req, {
             limit: 20,
             offset: 0,
-          }, {
-            
+            query: ''
           });
+
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       
-      var query = 'full_search:' + toLucene(form.params.query);
-      console.log('///',query ,'////')
+      form.params.query = 'full_search:' + toLucene(form.params.query);
+      
+      query = parser.agentBrown(queries.get_matching_resources_graph, form.params);
       // build a nodes edges graph
-      helpers.cypherGraph(queries.get_matching_resources_graph, {
-        query: query, 
-        limit: 100
-      }, function (err, graph) {
-        console.log(err)
+      helpers.cypherGraph(query, form.params, function (err, graph) {
         if(err)
           return helpers.cypherQueryError(err, res);
         return res.ok({
           graph: graph
         });
-      })
+      });
     },
     
     getEntitiesGraph: function (req, res) {

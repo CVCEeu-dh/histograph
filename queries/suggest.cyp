@@ -342,26 +342,32 @@ LIMIT {limit}
 
 // name: get_matching_resources_graph
 // e.g. START m=node:node_auto_index('full_search:*goerens*')
-START m=node:node_auto_index({query})
-MATCH (m)<-[r:appears_in]-(ent)
-WITH ent, collect(DISTINCT m) as ms
-  WHERE length(ms)>1
-MATCH (m)<-[r:appears_in]-(ent)
-  WHERE m in ms
+START res=node:node_auto_index({query})
+WITH res
+{?res:start_time__gt}
+{AND?res:end_time__lt}
+{AND?res:type__in}
+WITH DISTINCT res
+MATCH (res)<-[r:appears_in]-(ent:person)
+WITH ent, collect(DISTINCT res) as resources // only top resources?
+  WHERE length(resources) > 1 // get top connected entities in ms
+WITH ent, resources UNWIND resources as res
+MATCH (res)<-[r:appears_in]-(ent)
 RETURN {
   source: {
-    id: id(m),
-    type: LAST(labels(m)),
-    label: COALESCE(m.name, m.title_en, m.title_fr, m.title_de)
+    id: id(res),
+    type: LAST(labels(res)),
+    label: COALESCE(res.name, res.title_en, res.title_fr, res.title_de)
   },
   target: {
     id: id(ent),
     type: LAST(labels(ent)),
-    label: COALESCE(ent.name, ent.title_en, ent.title_fr, ent.title_de)
+    label: COALESCE(ent.name, ent.title_en, ent.title_fr, ent.title_de),
+    url: ent.thumbnail
   },
-  weight: 1
+  weight: r.frequency
 } as result
-ORDER BY length(ms) DESC, r.tfidf DESC
+ORDER BY r.tfidf DESC
 LIMIT {limit}
 
 // name: get_matching_entities_graph
