@@ -534,6 +534,7 @@ position: fixed;
   width: 25%;
   top: 100px;
 }
+
 /*
 
   related items
@@ -579,6 +580,11 @@ position: fixed;
 .user #see-also {
   margin-left:0%;
   width: 350px;
+}
+
+.resource.inquiries #see-also, .resource.inquiry #see-also, .resource.createInquiry #see-also {
+  margin-left:480px;
+  width: inherit;
 }
 
 .explore #see-also{
@@ -984,6 +990,12 @@ position: fixed;
 #milkyway.viewpoint-read {
   transform: translateX(2000px);
 }
+
+#milkyway.resource.inquiries, #milkyway.resource.createInquiry, #milkyway.resource.inquiry {
+  transform: translateX(2000px);
+}
+
+
 
 #milkyway.viewpoint-network {
   left: 30%;

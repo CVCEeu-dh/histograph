@@ -1,9 +1,10 @@
-<div ui-view>
-<div class="toolbar">
-  <div class="wrapper">
-    <pagination boundary-links="true" total-items="totalItems" ng-model="currentPage" class="pagination-sm" max-size="4" previous-text="&lsaquo;" rotate="true" next-text="&rsaquo;" first-text="&laquo;" last-text="&raquo;"></pagination>
+ <div  class='{{currentCtrl}}' ng-cloak>
+    <div class="empty-list" ng-if="relatedItems.length == 0">
+      There are no related <i>resources</i>.
+    </div>
+    <div offset="{{offset}}" style="-webkit-animation-delay: {{($index - offset) * 100}}ms;
+      animation-delay: {{($index - offset) * 100}}ms"  ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/user-lite.html"'></div>
+    <div class='more' ng-if='totalItems && offset + limit < totalItems'>
+      <button ng-click='more()' class='btn btn-default more'>{{loading?'loading...':'load more items'}}</button>
+    </div>
   </div>
-</div>
-
-<div ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/user-lite.html"'></div>
-</div>

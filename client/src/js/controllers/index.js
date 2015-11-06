@@ -105,7 +105,12 @@ angular.module('histograph')
     $scope.syncGraph = function() {
       CooccurrencesFactory.get($scope.params, function (res){
         $log.log('ExploreEntitiesCtrl CooccurrencesFactory returned a graph of',res.result.graph.nodes.length, 'nodes');
-        $scope.setGraph(res.result.graph)
+        if($scope.filters.with)
+          $scope.setGraph(res.result.graph, {
+            centers: _.map($scope.filters.with, _.parseInt)
+          })
+        else
+          $scope.setGraph(res.result.graph)
       });
     };
     

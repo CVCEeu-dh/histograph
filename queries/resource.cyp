@@ -748,12 +748,31 @@ RETURN  {
 // name:get_related_entities
 // get related nodes that are connected with the entity. test with
 // > node .\scripts\manage.js --task=query --cypher=resource/get_related_entities --id=<ID> --limit=10 --type=person --offset=0
-MATCH (n)-[r]-(ent:{:entity})
-  WHERE id(n) = {id}
+MATCH (ent:{:entity})-[r:appears_in]->(res:resource){if:with}<-[:appears_in]-(ent2){/if}
+  WHERE id(res) = {id} AND ent.score > -1
+  {if:with}
+    AND id(ent2) in {with}
+  {/if}
+WITH ent, r
+  ORDER BY r.tfidf
+  LIMIT 50
 WITH ent
-  MATCH (ent)--(res:resource)
+  MATCH (ent)-[r1:appears_in]->(res:resource)
+  WHERE ent.score > -1
+  {if:start_time}
+    AND res.start_time >= {start_time}
+  {/if}
+  {if:end_time}
+    AND res.end_time <= {end_time}
+  {/if}
+  {if:mimetype}
+    AND res.mimetype in {mimetype}
+  {/if}
+  {if:type}
+    AND res.type in {type}
+  {/if}
   // order by relevance ...
-WITH res
+WITH DISTINCT res
   MATCH (ent1:{:entity})-[r:appears_in]->(res)
   WHERE ent1.score > -1
 WITH ent1, count(DISTINCT r) as w

@@ -343,7 +343,11 @@ LIMIT {limit}
 // name: get_matching_resources_graph
 // e.g. START m=node:node_auto_index('full_search:*goerens*')
 START res=node:node_auto_index({query})
-WITH res
+{if:with}
+  MATCH(res)<-[:appears_in]-(ent:entity)
+  WHERE id(ent) IN {with}
+  WITH DISTINCT res
+{/if}
 {?res:start_time__gt}
 {AND?res:end_time__lt}
 {AND?res:type__in}

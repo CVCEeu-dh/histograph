@@ -3,7 +3,7 @@
   <!-- change sub state -->
   
   &nbsp;{{ruler.label}}
-  <div ng-if='ruler' class='grammar-choice'>
+  <div ng-if='ruler' class='grammar-choice' ng-if='grammar'>
     {{grammar.label}}
     <div class="btn-group" uib-dropdown is-open="false">
       <button id="single-button" type="button" class="btn btn-default" uib-dropdown-toggle>
@@ -28,7 +28,7 @@
         <span ng-if='filters.type'>
             &nbsp;{{grammar.connector.type}}&nbsp;
         </span>
-        <div class='grammar-choice'>
+        <div class='grammar-choice' ng-if='grammar.types'>
           <span ng-if='filters.type'>
             <span ng-repeat='filter in filters.type'>
               <span class="filter "><b>{{filter}}</b><span ng-click='removeFilter("type",filter)'>&nbsp;<i class="fa fa-times-circle"></i></span></span>{{!$last? ', ': ''}}
@@ -57,7 +57,7 @@
         </span>
         
         
-        <div class='grammar-choice'>
+        <div class='grammar-choice' ng-if='grammar.relatedTo'>
           <span ng-if='!filters.with'>
             &nbsp;{{grammar.connector.notRelatedTo}}&nbsp;
           </span>

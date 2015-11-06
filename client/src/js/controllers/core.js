@@ -461,7 +461,7 @@ angular.module('histograph')
       $log.log('CoreCtrl @locationChangeStart');
       
       $scope.$broadcast(EVENTS.LOCATION_CHANGE_START)
-      $scope.setMessage(MESSAGES.LOADING);
+      // $scope.setMessage(MESSAGES.LOADING);
     });
     
     $scope.currentPath;
@@ -715,5 +715,106 @@ angular.module('histograph')
     };
 
    
+  })
+  /*
+    A generic controller for every relatedItem
+  */
+  .controller('RelatedItemsCtrl', function ($scope, $log, $stateParams, $filter, relatedItems, relatedModel, relatedVizFactory, relatedFactory, socket, EVENTS) {
+    
+    $scope.totalItems  = relatedItems.info.total_items;
+    $scope.limit       = relatedItems.info.limit;
+    $scope.offset      = relatedItems.info.offset;
+    $scope.loading     = false;
+    // $scope.page        = 1; // always first page!!
+    
+    /*
+      set order by
+      according to the favourite orderby. Avoid default values.
+    */
+    if(relatedItems.info.orderby != 'relevance')
+      $scope.setSorting(relatedItems.info.orderby);
+    
+    /*
+      set facets
+    */
+    $scope.setFacets('type', relatedItems.info.groups);
+    
+    $log.debug('RelatedItemsCtrl ready');
+    /*
+      Load graph data
+    */
+    $scope.syncGraph = function() {
+      relatedVizFactory.get(angular.extend({
+        model: relatedModel,
+        viz: 'graph',
+        limit: 100,
+      },  $stateParams, $scope.params), function (res) {
+        if($stateParams.ids) {
+          $scope.setGraph(res.result.graph, {
+            centers: $stateParams.ids
+          });
+        } else if($scope.item && $scope.item.id)
+          $scope.setGraph(res.result.graph, {
+            centers: [$scope.item.id]
+          });
+        else
+          $scope.setGraph(res.result.graph);
+      });
+    }
+
+      
+    /*
+      Reload related items, with filters.
+    */
+    $scope.sync = function() {
+      $scope.lock();
+
+      relatedFactory.get(angular.extend({
+        model: relatedModel,
+        limit: $scope.limit,
+        offset: $scope.offset
+      }, $stateParams, $scope.params), function (res) {
+        $scope.unlock();
+        $scope.offset  = res.info.offset;
+        $scope.limit   = res.info.limit;
+        $scope.totalItems = res.info.total_items;
+        if($scope.offset > 0)
+          $scope.addRelatedItems(res.result.items);
+        else
+          $scope.setRelatedItems(res.result.items);
+        // reset if needed
+        $scope.setFacets('type', res.info.groups);
+      }) 
+    };
+
+    /*
+      listener: EVENTS.API_PARAMS_CHANGED
+      some query parameter has changed, reload the list accordingly.
+    */
+    $scope.$on(EVENTS.API_PARAMS_CHANGED, function() {
+      // reset offset
+      $scope.offset = 0;
+      $log.debug('ResourcesCtrl @API_PARAMS_CHANGED', $scope.params);
+      $scope.sync();
+      $scope.syncGraph();
+    });
+    // $scope.$on(EVENTS.PAGE_CHANGED, function(e, params) {
+    //   $log.debug('ResourcesCtrl @PAGE_CHANGED', params);
+    //   $scope.page = params.page
+    //   $scope.sync();
+    // });
+    
+    $scope.$on(EVENTS.INFINITE_SCROLL, function (e) {
+      $scope.offset = $scope.offset + $scope.limit;
+      $log.debug('ResourcesCtrl @INFINITE_SCROLL', '- skip:',$scope.offset,'- limit:', $scope.limit);
+      
+      $scope.sync();
+    });
+
+    $scope.syncGraph();
+    $log.log('RelatedItemsCtrl -> setRelatedItems - items', relatedItems.result.items);
+    $scope.setRelatedItems(relatedItems.result.items);
+    
+    
   })
   
