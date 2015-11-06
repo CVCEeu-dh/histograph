@@ -63,9 +63,30 @@ module.exports = function(io) {
           encrypted,
           user;
       // check if form is valid
-      var result = validate(req.body, fields);
-      if(result !== true)
-        return res.error(400, {form: result})
+      var form = validator.request(req, {
+            email: '',
+            password: ''
+          }, {
+            fields:[
+              {
+                field: 'email',
+                check: 'isEmail',
+                error: 'it is not a real email'
+              },
+              {
+                field: 'password',
+                check: 'isLength',
+                args: [
+                  8,
+                  32
+                ],
+                error: 'password have to ...'
+              }
+            ]
+          });
+
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
 
       // generate a key and activation code
       encrypted = helpers.encrypt(req.body.password, {
@@ -82,7 +103,16 @@ module.exports = function(io) {
       });
 
       // enrich user with password and activation code
-      user = _.assign(req.body, {
+      user = _.assign({
+        username: form.params.username,
+        password: form.params.password,
+        email: form.params.email,
+        first_name: form.params.first_name,
+        last_name:  form.params.last_name,
+        about: form.params.username
+
+      }, {
+        strategy   : 'local',
         password   : encrypted.key,
         salt       : encrypted.salt,
         status     : 'disabled',
@@ -93,7 +123,11 @@ module.exports = function(io) {
         // console.log(_.keys(err.neo4jError), _.keys(err), _.keys(err.neo4jError.errors))
         if(err)
           return helpers.cypherQueryError(err, res);
-        return res.ok();
+        return res.ok({
+          item: {
+            username: form.params.username  
+          } 
+        });
       });
     }],
     /*
@@ -102,8 +136,8 @@ module.exports = function(io) {
     */
     activate: [multer(), function (req, res) {
       var form = validator.request(req, {
-            limit: 10,
-            offset: 0
+            email: '',
+            k:''
           }, {
             fields:[
               {
@@ -123,10 +157,10 @@ module.exports = function(io) {
           });
       if(!form.isValid)
         return helpers.formError(form.errors, res);
-
+      console.log(form)
       neo4j.query('MATCH(n:user {email:{email}, activation:{key}}) SET n.status={status} RETURN n', {
-        email: req.query.email,
-        key: req.query.k,
+        email: form.params.email,
+        key: form.params.k,
         status: 'enabled'
       }, function(err, items) {
         if(err)

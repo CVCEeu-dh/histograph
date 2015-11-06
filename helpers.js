@@ -146,7 +146,9 @@ module.exports = {
     Handle Form errors (Bad request)
   */
   formError: function(err, res) {
-    return res.error(400, err);
+    return res.error(400, {
+      form: err
+    });
   },
 
   /**

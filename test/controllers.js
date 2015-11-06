@@ -47,32 +47,7 @@ describe('controllers: create a new user', function() {
     })
     
   });
-  
-  it('should create a new user into the database', function (done) {
-    session
-      .post('/signup')
-      .send({
-        username   : 'hello-world',
-        password   : 'WorldHello',
-        email      : 'world@globetrotter.it',
-        firstname  : 'Milky',
-        lastame    : 'Way',
-        strategy   : 'local', // the strategy passport who creates his account, like local or google or twitter
-        about      : '' // further info about the user, in markdown
-      })
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        if(err)
-          console.log('create user', err)
-        should.equal(res.body.status, 'ok', res.body)
-        done();
-      })
-  });
-})
 
-
-describe('controllers: authenticate the user, but failing', function() {
   it('should fail on password length', function (done) {
     session
       .post('/signup')
@@ -86,15 +61,37 @@ describe('controllers: authenticate the user, but failing', function() {
         about      : '' // further info about the user, in markdown
       })
       .expect('Content-Type', /json/)
-      .expect(201)
+      .expect(400)
       .end(function(err, res) {
+        should.not.exist(err); // i.e., 400 is the code ;)
         should.equal(res.body.status, 'error');
         should.equal(res.body.error.form[0].field, 'password');
         should.equal(res.body.error.form[0].check, 'isLength');
         done();
       })
   });
-  
+
+  it('should create a new user into the database', function (done) {
+    session
+      .post('/signup')
+      .send({
+        username   : 'hello-world',
+        password   : 'WorldHello',
+        email      : 'world@globetrotter.it',
+        first_name  : 'Milky',
+        last_name    : 'Way',
+        strategy   : 'local', // the strategy passport who creates his account, like local or google or twitter
+        about      : '' // further info about the user, in markdown
+      })
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err) 
+          console.log('create user', res.body)
+        should.equal(res.body.status, 'ok', res.body)
+        done();
+      })
+  });
 
   it('should fail because user exists already', function (done) {
     session
@@ -113,12 +110,14 @@ describe('controllers: authenticate the user, but failing', function() {
       .end(function (err, res) {
         should.not.exist(err)
         should.equal(res.body.status, 'error');
-        console.log(res.body)
         should.equal(res.body.error.code, 500)// cannot find no more 'ConstraintViolationException');
         done();
       })
   });
+})
 
+
+describe('controllers: auth failed', function() {
 
   it('should NOT authenticate the user because of wrong credentials', function (done) {
     session
@@ -130,11 +129,11 @@ describe('controllers: authenticate the user, but failing', function() {
       .expect('Content-Type', /json/)
       .expect(403)
       .end(function (err, res) {
+        should.not.exist(err)
         should.equal(res.body.status, 'error');
         done();
       })
-  })
-
+  });
 
   it('should NOT authenticate the user because it is not enabled', function (done) {
     session
@@ -146,6 +145,7 @@ describe('controllers: authenticate the user, but failing', function() {
       .expect('Content-Type', /json/)
       .expect(403)
       .end(function (err, res) {
+        should.not.exist(err);
         should.equal(res.body.status, 'error');
         done();
       })
@@ -156,8 +156,9 @@ describe('controllers: authenticate the user, but failing', function() {
     session
       .get('/activate?k=AAABBBCCCdddEEEFFF&e=world@globetrotter.it')
       .expect('Content-Type', /json/)
-      .expect(403)
+      .expect(400) // form error
       .end(function (err, res) {
+        should.not.exist(err)
         should.equal(res.body.error.form[0].field, 'email');
         should.equal(res.body.status, 'error');
         done();
@@ -167,7 +168,7 @@ describe('controllers: authenticate the user, but failing', function() {
 
 
 describe('controllers: authenticate the user, succeed', function() {
-  it('should change the activation key, via cypher', function (done) {
+  it('should change the activation key, via cypher (uncrypted, just for test purposes)', function (done) {
     neo4j.query('MATCH(n:user {email:{email}}) SET n.activation = {key} RETURN n', {
       email: 'world@globetrotter.it',
       key: 'AAABBBCCCddd'
