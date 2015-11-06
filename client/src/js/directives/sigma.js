@@ -8,7 +8,7 @@
  * directive to show a grapgh of nodes and edges thanks to @Yomguithereal!!! 
  */
 angular.module('histograph')
-  .directive('sigma', function ($log, $location, $timeout) {
+  .directive('sigma', function ($log, $location, $timeout, EVENTS) {
     'use strict';
 
     return {
@@ -29,7 +29,6 @@ angular.module('histograph')
       scope:{
         graph: '=',
         tips: '=',
-        freeze: '=',
         controller: '=',
         redirect: '&',
         addToQueue: '&queue',
@@ -71,7 +70,7 @@ angular.module('histograph')
         scope.showMessage = function(text) {
           if(scope.message.timer)
             $timeout.cancel(scope.message.timer);
-          scope.message.timer = $timeout(scope.hideMessage, 1500);
+          scope.message.timer = $timeout(scope.hideMessage, 1800);
           scope.message.text = text;
           scope.message.visible = true;
         }
@@ -260,9 +259,21 @@ angular.module('histograph')
           }, 300);
         });
         
-        scope.$watch('freeze', function (v) {
-          if(v=='sigma')
-            stop();
+        scope.$on(EVENTS.LOCATION_CHANGE_START, function (v) {
+          stop();
+           $log.log('::sigma @EVENTS.LOCATION_CHANGE_START');
+          scope.showMessage('loading ...');
+         
+        });
+
+        scope.$on(EVENTS.API_PARAMS_CHANGED, function (v) {
+          $log.log('::sigma @EVENTS.API_PARAMS_CHANGED');
+          scope.showMessage('loading graph ...');
+        });
+
+         scope.$on(EVENTS.STATE_CHANGE_SUCCESS, function (v) {
+          $log.log('::sigma @EVENTS.STATE_CHANGE_SUCCESS');
+          scope.showMessage('loading graph ...');
         });
         
         /*
@@ -284,7 +295,6 @@ angular.module('histograph')
             si.refresh();
             return;
           }
-          scope.showMessage('preparing graph with '+ graph.nodes.length + ' nodes ...');
           // calculate initital layout duration 
           layoutDuration = Math.max(Math.min(4* graph.nodes.length * graph.edges.length, maxlayoutDuration),minlayoutDuration)
           $log.log('::sigma n. nodes', si.graph.nodes.length, ' n. edges', si.graph.edges.length, 'runninn layout atlas for', layoutDuration/1000, 'seconds')
@@ -465,11 +475,12 @@ angular.module('histograph')
             return;
           if(tooltip.timer)
             clearTimeout(tooltip.timer);
-          // tooltip.timer = setTimeout(function() {
+          tooltip.timer = setTimeout(function() {
             tooltip.tip.css({
               opacity: 0
             });
            tooltip.isVisible = false;
+          }, 120)
         }
         
         var outEdge = function() {

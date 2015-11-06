@@ -41,7 +41,10 @@ angular
     PAGE_CHANGED: 'page_changed',
     ANNOTATOR_SHOWN: 'annotationEditorShown',
     ANNOTATOR_HIDDEN: 'annotationEditorHidden',
-    INFINITE_SCROLL: 'infinite_scroll'
+    INFINITE_SCROLL: 'infinite_scroll',
+    // proper angular events (directives needs to be alerted)
+    LOCATION_CHANGE_START: 'LOCATION_CHANGE_START',
+    STATE_CHANGE_SUCCESS: 'STATE_CHANGE_SUCCESS'
   })
   .constant("VIZ", {
     TIMELINE: 'timeline'

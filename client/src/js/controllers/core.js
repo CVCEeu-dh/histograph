@@ -391,13 +391,18 @@ angular.module('histograph')
       $log.log('CoreCtrl @stateChangeSuccess', state.name);
       // the ui.router state (cfr app.js)
       $scope.currentState = state;
-      
+
       if(state.resolve)
         $scope.unlock();
 
       $scope.unsetMessage();
+      
+      // if any graph is availabe, tell sigma that you're
+      // going to send the nodes
+      $scope.$broadcast(EVENTS.STATE_CHANGE_SUCCESS);
+
       // $scope.setMessage(MESSAGES.LOADED, 1500);
-      $scope.freeze = false;
+      
       // set initial params here
       $scope.params = cleanService.params($location.search())
       
@@ -454,7 +459,8 @@ angular.module('histograph')
     */
     $scope.$on('$locationChangeStart', function (e, path) {
       $log.log('CoreCtrl @locationChangeStart');
-      $scope.freeze = 'sigma';
+      
+      $scope.$broadcast(EVENTS.LOCATION_CHANGE_START)
       $scope.setMessage(MESSAGES.LOADING);
     });
     
