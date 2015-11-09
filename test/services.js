@@ -14,6 +14,7 @@
 
 var settings = require('../settings'),
     services = require('../services'),
+    _        = require('lodash'),
     should  = require('should');
     
 describe('services: geo', function() {

@@ -111,7 +111,9 @@ describe('model:entity ', function() {
   it('should return the list of persons related to the entity', function (done) {
     Entity.getRelatedEntities({
       id: __entity.id,
-      entity: 'person'
+      entity: 'person',
+      limit: 10,
+      offset: 0
     }, function (err, items, info) {
       should.not.exist(err, err);
       should.exist(info.total_items);
