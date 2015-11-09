@@ -1,0 +1,14 @@
+ <div  class='{{currentCtrl}}' ng-cloak>
+    
+    <div class="empty-list" ng-if="relatedItems.length == 0">
+      There are no related <i>resources</i>.
+    </div>
+    <div masonry="{transitionDuration: 0}" column-width='5' preserve-order>
+      
+        <div class="masonry-brick" ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/resource-lite.html"'></div>
+      
+    </div>
+    <div class='more' ng-if='offset + limit < totalItems'>
+      <button ng-click='more()' class='btn btn-default more'>{{loading?'loading...':'load more items'}}</button>
+    </div>
+  </div>

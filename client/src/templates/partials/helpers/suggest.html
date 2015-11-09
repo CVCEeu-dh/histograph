@@ -1,0 +1,11 @@
+<div>
+        <a ng-if='match.model.type=="default"'>
+          search {{query}}
+        </a>
+        <a ng-if='match.model.type!="default"' ng-href='/#/{{match.model.props.type_search=="resource" ? "r": "e"}}/{{match.model.id}}'>
+          {{match.model.props | title: 'en'}}
+        </a>
+        <span ng-if='match.model.type!="default"' ng-click='$parent.$parent.$parent.$parent.queue(match.model.id, true)'>
+          <i class='fa fa-play-circle-o'></i>
+        </span>
+      </div>

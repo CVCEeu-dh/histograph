@@ -29,9 +29,9 @@
           </div>
         </div>
         
-        <div class="tags" ng-if="relatedPersons.length > 0">Appearing with:  
+        <div class="tags" style='margin-left:20px; margin-right:20px' ng-if="relatedPersons.length > 0">Appearing with:  
         <span ng-repeat="person in relatedPersons"><span class="person tag" data-id='{{person.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{person.props.name}} - {{person.props.description}} ({{person.props.birth_date | date:"yyyy"}} - {{person.props.death_date | date:"yyyy"}})' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' >
-          {{person.props.name}} ({{person.coappear}})</span>{{$last?'':', '}}</span>
+          {{person.props.name}} ({{person.weight}})</span>{{$last?'':', '}}</span>
         </div><span ng-if="item.props.languages.length">  —  <i>available in</i>:
           <span ng-repeat="lang in item.props.languages" ng-click='setLanguage(lang)'>{{lang}} </span>
         </span>
@@ -47,30 +47,7 @@
 </div>
 
 
-<div id='see-also-menu' class="tk-proxima-nova header-menu">
-   <ul>
-    <li role="menuitem">
-      <a ui-sref-active-eq="active" ui-sref="entity.resources({ id: item.id })">
-        <i class="fa fa-circle type resource"></i>resources
-      </a>
-    </li>
-    <li role="menuitem">
-      <a ui-sref-active-eq="active" ui-sref="entity.persons({ id: item.id })">
-        <i class="fa fa-circle type person"></i>persons
-      </a>
-    </li>
-    <li role="menuitem">
-      <a ui-sref-active-eq="active" ui-sref="entity.organizations({ id: item.id })">
-        <i class="fa fa-circle type organization"></i>organizations
-      </a>
-    </li>
-    <li role="menuitem">
-      <a ui-sref-active-eq="active" ui-sref="entity.locations({ id: item.id })">
-        <i class="fa fa-circle type location"></i>locations
-      </a>
-    </li>
-  </ul>
-</div>
+
 
 <div ui-view id='see-also'>
   <div  class='{{currentCtrl}}'>

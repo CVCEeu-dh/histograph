@@ -1,18 +1,37 @@
 <ul>
-  <li class='path'>
+  <!-- <li class='path'>/
     <a  ui-sref="index">home</a>
   </li>
-  <li class='path split'>/</li>
+  <li class='path split'>/</li> -->
   <li class='path'>
-    <a ng-if='item' class="active" href="#">{{item.type || 'resource'}}#{{item.id}}</a>
-    <b ng-if='matchingQuery'>search "{{matchingQuery}}"</b>
+    
+    <span ng-if='query'>search result for <b>{{query}}</b> in</span>
+    <span ng-if='item'>starting from 
+      <a class="active" href="#">{{item.type || 'document'}}#{{item.id}}</a>
+    </span>
     
   </li>
   
-   <li class='path split'>&nbsp;</li>
+
+
+  <li ng-include src="'templates/partials/helpers/grammar.html'"></li>
+  
+  <!-- sort -->
+  <li>
+    <div class="btn-group" uib-dropdown is-open="false">
+      <button id="single-button" type="button" class="btn btn-default" uib-dropdown-toggle>
+        sorted by {{sorting.label}} <span class="caret"></span>
+      </button>
+      <ul class="uib-dropdown-menu dropdown-menu" role="menu" aria-labelledby="single-button">
+        <li class="{{sorting==item?'active':''}}" ng-repeat="item in availableSortings">
+          <a ng-click='setSorting(item)'>by {{item.label}}</a>
+        </li>
+      </ul>
+    </div>
+  </li>  
   <!-- viewpoint menu-->
-  <li tooltip="{{p.label}}" tooltip-append-to-body='true' ng-repeat="p in viewpoint.available" >
+  <!-- li tooltip="{{p.label}}" tooltip-append-to-body='true' ng-repeat="p in viewpoint.available" >
     <a ng-click='setViewpoint(p)' class='{{ p.name == viewpoint.selected.name? "active": ""}}'><i class="fa fa-{{p.icon}}"></i>
     </a>
-  </li>
+  </li -->
 </ul>

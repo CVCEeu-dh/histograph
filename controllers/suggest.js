@@ -1,27 +1,35 @@
 /**
- * Suggest controller for autocompletion
+ * Suggest controller for autocompletion and search purposes
  * =====================================
  *
  */
-var settings  = require('../settings'),
-    helpers   = require('../helpers'),
-    models    = require('../helpers/models'),
+var settings   = require('../settings'),
+    helpers    = require('../helpers'),
+    models     = require('../helpers/models'),
     
-    parser    = require('../parser.js'),
-    neo4j     = require('seraph')(settings.neo4j.host),
+    parser     = require('../parser.js'),
+    
+    neo4j      = require('seraph')(settings.neo4j.host),
     validator  = require('../validator'),
         
-    queries  = require('decypher')('./queries/suggest.cyp'),
+    queries    = require('decypher')('./queries/suggest.cyp'),
     
-    async     = require('async'),
-    _         = require('lodash');
+    async      = require('async'),
+    _          = require('lodash'),
+    
+    Resource   = require('../models/resource');
 
 
 /*
-  Tiny helper to tranform words in a valid lucenequery
-  according to ccurrent lucene indexes
+  Very basic tiny method to tranform words in a valid lucenequery
+  according to ccurrent lucene indexes.
 */
 function toLucene(query) {
+  if(query.split(/\s/).length > 1)
+    return '"' +query.split(/\s/).join(' ')+ '"'
+  else
+    return '*'+query+'*';
+  
   var q = '*' + query.split(/[^\w]/).map(function (d) {
     return d.trim().toLowerCase()
   }).join('*') + '*';
@@ -56,13 +64,17 @@ module.exports =  function(io){
       api/suggest/allinbetween
     */
     allInBetween: function(req, res) {
-      var ids = toIds(req.params.ids);
-      if(!ids.length)
-        return res.error(400, {ids: 'not valid list of id'})
-      
+      // At least two with
       var form = validator.request(req, {
             limit: 20,
             offset: 0
+          }, {
+            fields: [
+              validator.SPECIALS.ids
+            ],
+            required: {
+              'ids': true
+            }
           });
       if(!form.isValid)
         return helpers.formError(form.errors, res);
@@ -73,7 +85,7 @@ module.exports =  function(io){
           items: queries.all_in_between,
         },
         params: {
-          ids: ids,
+          ids: form.params.with,
           limit: form.params.limit,
           offset: form.params.offset
         }
@@ -212,6 +224,26 @@ module.exports =  function(io){
       })
     },
     
+    getSharedResources: function(req, res) {
+      var form = validator.request(req, {
+            limit: 10,
+            offset: 0
+          });
+      
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      models.getMany({
+        queries: {
+          count_items: queries.count_shared_resources,
+          items: queries.get_shared_resources
+        },
+        params: form.params
+      }, function (err, results) {
+        helpers.models.getMany(err, res, results.items, results.count_items, form.params);
+      })
+    },
+    
     /**
       
     */
@@ -245,6 +277,7 @@ module.exports =  function(io){
       })
     },
     
+    
     /*
     */
     getNeighbors: function (req, res) {
@@ -274,16 +307,36 @@ module.exports =  function(io){
       next(err=null, [])
      */
     suggest: function(req, res) {
-      var q = toLucene(req.query.query);
+      var resource_query,
+          entity_query;
+          
+      var form = validator.request(req, {
+            limit: 5,
+            offset: 0,
+            language: 'en'
+          });
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
       
-  
+      resource_query = 'full_search:' + toLucene(req.query.query) + ' OR title_search:' + toLucene(req.query.query);
+      entity_query = 'name_search:' + toLucene(req.query.query);
+      // lucene.setSearchTerm('full_search:(' + req.query.query + ') OR title_search:(' + req.query.query+')');
+      // resource_query = '' + lucene.getFormattedSearchTerm();
+      
+      // lucene.setSearchTerm('name_search:' + req.query.query);
+      // entity_query = '' + lucene.getFormattedSearchTerm();
+      // console.log('resource_query', resource_query)
+      //     console.log('entity_query', entity_query)
+      
       neo4j.query(queries.lucene_query, {
-        resource_query: [
-          'full_search:', q
-        ].join(''),
-        person_query: 'name_search:' + q,
-        limit: req.query.limit || 4
+        resource_query: resource_query,
+        entity_query: entity_query,
+        limit: form.params.limit,
+        language: form.params.language
       }, function (err, items) {
+        if (err) {
+          
+        }
         if(err)
           return helpers.cypherQueryError(err, res);
         
@@ -298,133 +351,142 @@ module.exports =  function(io){
     },
     
     /*
-      Caption and title multilanguage search.
-      @todo: use the solr endpoint wherever available.
+      Basic element counting
     */
-    resources: function (req, res) {
-      var Resource = require('../models/resource');
-      var offset = +req.query.offset || 0,
-          limit  = +req.query.limit || 20,
-          q      = toLucene(req.query.query),
-          query  = [
-              'full_search:', q
-            ].join('');
-      
-      // get countabilly
-      async.parallel({
-        get_matching_resources_count: function (callback) {
-          neo4j.query(queries.get_matching_resources_count, {
-            query: query,
-          }, function (err, items) {
-            if(err)
-              callback(err);
-            else
-              callback(null, items);
-          })
-        },
-        get_matching_resources: function (callback) {
-          neo4j.query(queries.get_matching_resources, {
-            query: query,
-            offset: offset,
-            limit: limit
-          }, function (err, items) {
-            if(err) {
-              console.log(err)
-              callback(err);
-            } else
-              callback(null, items);
-          })
-        }
-      }, function (err, results) {
-        if(err)
-          return helpers.cypherQueryError(err, res);
-        
-        return res.ok({
-          items: results.get_matching_resources.map(Resource.normalize),
-        }, {
-          total_count: results.get_matching_resources_count.total_count,
-          offset: offset,
-          limit: limit
-        });
-      });
-    },
-    
-    /*
-      Caption and title multilanguage search.
-      @todo: use the solr endpoint wherever available.
-    */
-    entities: function (req, res) {
-      
+    getStats: function (req, res) {
+      var resource_query,
+          entity_query;
+          
       var form = validator.request(req, {
             limit: 20,
-            offset: 0
+            offset: 0,
+            language: 'en'
           });
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       
-      var offset = +req.query.offset || 0,
-          limit  = +req.query.limit || 20,
-          q      = toLucene(req.query.query),
-          entity = req.query.entity || 'person',    
-          query  = [
-              
-              'name_search:', q,
-            ].join('');
-      //console.log("query", query)
-      // get countabilly
-      async.parallel({
-        get_matching_entities_count: function (callback) {
-          neo4j.query(queries.get_matching_entities_count, {
-            query: query,
-          }, function (err, items) {
-            if(err)
-              callback(err);
-            else
-              callback(null, items);
-          })
-        },
-        get_matching_entities: function (callback) {
-          neo4j.query(queries.get_matching_entities, {
-            query: query,
-            offset: offset,
-            entity: 'person',
-            limit: limit
-          }, function (err, items) {
-            if(err)
-              callback(err);
-            else
-              callback(null, items);
-          })
+      resource_query = 'full_search:' + toLucene(req.query.query) + ' OR title_search:' + toLucene(req.query.query);
+      entity_query = 'name_search:' + toLucene(req.query.query);
+      
+      neo4j.query(queries.count, {
+        resource_query: resource_query,
+        entity_query: entity_query
+        
+      }, function (err, groups) {
+        if (err) {
+          
         }
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        
+        return res.ok({
+          items: []
+        }, {
+          groups: groups
+        });
+      })
+    },
+    
+    
+    /*
+      Lucene results. can also be used for typeahead, since it is very fast.
+    */
+    getEntities: function (req, res) {
+      var form = validator.request(req, {
+            limit: 20,
+            offset: 0,
+            entity: 'person'
+          }, {
+            fields: [
+              validator.SPECIALS.entity
+            ]
+          });
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      var q = 'name_search:' + toLucene(req.query.query);
+      form.params.query = q;
+      
+      models.getMany({
+        queries: {
+          count_items: queries.get_matching_entities_count,
+          items: queries.get_matching_entities
+        },
+        params: form.params
       }, function (err, results) {
+        helpers.models.getMany(err, res, results.items, results.count_items, form.params);
+      });
+    },
+    
+    /*
+      Lucene results. can also be used for typeahead, since it is very fast.
+    */
+    getResources: function (req, res) {
+      var form = validator.request(req, {
+            limit: 20,
+            offset: 0,
+          }, {
+            
+          });
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      var q = 'full_search:' + toLucene(req.query.query);
+      form.params.query = q;
+      
+      models.getMany({
+        queries: {
+          count_items: queries.count_resources,
+          items: queries.get_resources
+        },
+        params: form.params
+      }, function (err, results) {
+        if(err)
+          console.log(err)
+        helpers.models.getMany(err, res, results.items, results.count_items, form.params);
+      });
+    },
+    
+    getResourcesGraph: function (req, res) {
+      var query = '',
+          form = validator.request(req, {
+            limit: 20,
+            offset: 0,
+            query: ''
+          });
+
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      form.params.query = 'full_search:' + toLucene(form.params.query);
+      
+      query = parser.agentBrown(queries.get_matching_resources_graph, form.params);
+      // build a nodes edges graph
+      helpers.cypherGraph(query, form.params, function (err, graph) {
         if(err)
           return helpers.cypherQueryError(err, res);
         return res.ok({
-          items: results.get_matching_entities.map(function (d) {
-            d.props.languages = _.values(d.props.languages)
-            return d;
-          }),
-        }, {
-          total_items: results.get_matching_entities_count,
-          offset: offset,
-          limit: limit
+          graph: graph
         });
       });
     },
     
-    getGraph: function (req, res) {
-      var offset = +req.query.offset || 0,
-          limit  = +req.query.limit || 20,
-          q      = toLucene(req.query.query),
-          query  = [
-              'full_search:', q,
-              ' OR name_search:', q,
-            ].join('');
-            
+    getEntitiesGraph: function (req, res) {
+      var form = validator.request(req, {
+            limit: 20,
+            offset: 0,
+            query: '' // empty query by defual it's INVALID
+          });
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      console.log(form.params)
+      var q = 'name_search:' + toLucene(form.params.query);
+
       // build a nodes edges graph
-      helpers.cypherGraph(queries.get_graph_matching_entities, {
-        query: query, 
-        limit: 100
+      helpers.cypherGraph(queries.get_matching_entities_graph, {
+        query: q, 
+        limit: 100,
+        entity: form.params.entity
       }, function (err, graph) {
         if(err)
           return helpers.cypherQueryError(err, res);
@@ -432,6 +494,98 @@ module.exports =  function(io){
           graph: graph
         });
       })
+    },
+    
+    
+    /*
+      get all in between resource by using the allinbetween algo.
+      Queries: get_all_in_between_resources, count_all_in_between_resources
+      Nothe that ids list is required (it comes withthe request)
+    */
+    getAllInBetweenResources: function(req, res) {
+      var form = validator.request(req, {
+            limit: 10,
+            offset: 0
+          });
+      
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      models.getMany({
+        queries: {
+          count_items: queries.count_all_in_between_resources,
+          items: queries.get_all_in_between_resources
+        },
+        params: form.params
+      }, function (err, results) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        
+        Resource.getByIds(_.assign({}, form.params, {
+          ids: _.map(results.items, 'id')
+        }), function (err, items){
+          helpers.models.getMany(err, res, items, results.count_items, form.params);
+        });
+        
+      });
+    },
+    /*
+      get all in between algorrithm
+      takes the top common nodes at distance 0,2.
+      Require form.params.entity (entity otherwise)
+    */
+    getAllInBetweenGraph: function(req, res) {
+      var nodes = {},
+          edges = {},
+          query = '';
+          
+      var form = validator.request(req, {
+            limit: 100,
+            offset: 0,
+            entity: 'person'
+          }, {
+            fields: [
+              validator.SPECIALS.graphLimit,
+              validator.SPECIALS.entity
+            ]
+          });
+      
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      query = parser.agentBrown(queries.get_all_in_between_graph, form.params);
+      
+      neo4j.query(query, form.params, function (err, paths) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        // console.log(paths)
+        // for each path
+        for(var i=0, lp=paths.length; i < lp; i++){
+          //for each nodes
+          for(var j=0, ln=paths[i].ns.length; j < ln; j++)
+            if(!nodes[paths[i].ns[j].id])
+              nodes[paths[i].ns[j].id] = paths[i].ns[j]
+          // for each relationship
+          for(var j=0, lr=paths[i].rels.length; j < lr; j++) {
+            // console.log(paths[i].rels[j])
+            if(!edges[paths[i].rels[j].id])
+              edges[paths[i].rels[j].id] = {
+                id: paths[i].rels[j].id,
+                source: paths[i].rels[j].start,
+                target: paths[i].rels[j].end,
+                weight: paths[i].rels[j].properties.frequency
+              }
+          }
+        }
+        
+        return res.ok({
+          graph: {
+            nodes: _.values(nodes),
+            edges: _.values(edges)
+          }
+        });
+      })
+      
     }
   }
 }

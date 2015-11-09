@@ -44,6 +44,30 @@ var Resource = function() {
 
 
 module.exports = {
+  FIELDS: [
+    'id',
+    'slug',
+    'name',
+    'title_en',
+    'caption_en',
+    'url',
+    'url_en', // the txt file in english
+    'start_date',
+    'end_date',
+    'viaf_id'
+  ],
+  
+  UPDATABLE: [
+    'slug',
+    'name',
+    'title_en',
+    'caption_en',
+    'url_en',
+    'start_date',
+    'end_date',
+    'viaf_id'
+  ],
+
   /**
     get a complete resource object (with versions, comments etc...).
     @param id - numeric identifier only
@@ -57,7 +81,7 @@ module.exports = {
     var query = parser.agentBrown(rQueries.get_resource)
     neo4j.query(rQueries.get_resource, {
       id: resource.id
-    }, function(err, items) {
+    }, function (err, items) {
       
       if(err) {
         console.log(err.neo4jError)
@@ -71,7 +95,7 @@ module.exports = {
       var item = items[0].resource;
       
       // yaml parsing
-      var versions = _.map(_.filter(_.values(item.versions),function(d) {
+      var versions = _.map(_.filter(_.values(item.versions),function (d) {
         //filter
         return d.yaml && d.yaml.length > 0
       }), function (d) {
@@ -82,22 +106,9 @@ module.exports = {
       });
       
       item.positionings = _.filter(versions, {type:'positioning'});
-      item.annotations = _.map(_.filter(versions, {type:'annotation'}), function (d) {
-        var content = [
-          item.props['title_'+ d.language] || '',
-          item.props['caption_'+ d.language] || ''
-        ].join('§ ');
-        
-        var annotations = parser.annotate(content, d.yaml).split('§ ');
-        
-        d.annotated = {
-          title: annotations[0],
-          source: annotations[1]
-        };
-        return d;
-      });
+      item.annotations = _.filter(versions, {type:'annotation'});
       item.collections = _.values(item.collections);
-      
+      // console.log(item.annotations)
       next(null, module.exports.normalize(item));
     });  
   },
@@ -116,12 +127,91 @@ module.exports = {
       if(err)
         next(err)
       else
-        next(null, results.items.map(module.exports.normalize), {
-          total_items : results.count_items
-        });
+        next(null, module.exports.normalize(results.items, params), results.count_items);
     });
   },
-  normalize: function(node) {
+  /*
+    Get annotated text
+    for a given (resource:resource) node and (annotation:annotation)
+  */
+  getAnnotatedText: function(resource, annotation, params) {
+        var annotations,
+            availableAnnotationFields = [],
+            content;
+        // parse Yaml if it it hasn't been done yet
+        if(typeof annotation.yaml == 'string')
+          annotation.yaml = YAML.parse(annotation.yaml);
+        annotation.yaml == null && console.log(annotation)
+        
+        if(!annotation.yaml) {
+          return {
+            language: annotation.language,
+            annotation: ''
+          }
+        }
+        
+        // recover content from disambiguation field section, as a list (antd not as a string)
+        content = settings.disambiguation.fields.map(function (field){
+          var c = module.exports.getText(resource, {
+            fields: [field],
+            language: annotation.language
+          });
+          if(c.length) // recreate a fields list of known annotations
+            availableAnnotationFields.push(field);
+          return c;
+        });
+        
+        if(params && params.with && _.last(settings.disambiguation.fields) == 'url')   {
+          // for the NON URL fields, just do the same as before
+          // console.log('content', resource.title_en, annotation.language)
+          var fulltext = content.pop(),
+              offset   = _.compact(content).reduce(function(p,c) {
+                return p.length + c.length + '§ '.length;
+              });
+          // console.log(annotation.yaml)
+          // Annotate the fields as usual, just filtering the points. Note the _.compact that eliminates empty content :()
+          annotations = parser.annotate(_.compact(content).join('§ '), annotation.yaml.filter(function (d) {
+            return params.with.indexOf(+d.id) != -1
+          })).split('§ ');
+          
+          // annotate partials MATCHES only
+          annotations.push(parser.annotateMatches(fulltext, {
+            points: annotation.yaml,
+            ids: params.with,
+            offset: offset - 2
+          }));
+          content.push(fulltext); // pop before, push right now. TO BE REFACTORED.
+        } else {
+          
+          annotations = parser.annotate(_.compact(content).join('§ '), annotation.yaml, {}).split('§ ');
+        }
+        
+        annotation.annotated = {};
+        
+        availableAnnotationFields.forEach(function (field, i){
+          annotation.annotated[field] = annotations[i];
+        });
+        // console.log('\n\n',resource.slug, annotation.language, annotations)
+        return {
+          language: annotation.language,
+          annotation: annotation.annotated
+        }
+    
+  },
+  normalize: function(node, params) {
+    if(_.isArray(node))
+      return node.map(function (n) {
+        return module.exports.normalize(n, params);
+      });
+    // resolve annotations, if they've been provided
+    if(node.annotations) {
+      node.annotations = _.map(_.filter(node.annotations, 'language'), function (ann) {
+        return module.exports.getAnnotatedText(node.props, ann, params);
+      });
+    }
+    node.curators = _.values(node.curators || []).filter(function (n) {
+      return n.id
+    });
     node.persons = _.values(node.persons).filter(function (n) {
       return n.id
     });
@@ -140,20 +230,26 @@ module.exports = {
     Provide here a list of valid ids
   */
   getByIds: function(params, next) {
+    // remove orderby from params
+    // console.log(params)
+    if(params.orderby)
+      delete params.orderby
     
     var query = parser.agentBrown(rQueries.get_resources, params);
     // console.log(params.ids)
-    neo4j.query(query, {
-      ids: params.ids,
-      limit: params.ids.length,
+    
+    neo4j.query(query, _.assign(params, {
+      limit: params.limit || params.ids.length,
       offset: 0
-    }, function (err, items) {
+    }), function (err, items) {
       if(err) {
+        console.log(err)
         next(err);
         return;
       }
       
-      var itemsAsDict = _.indexBy(items.map(module.exports.normalize), 'id');
+      // console.log(params, items.length)
+      var itemsAsDict = _.indexBy(module.exports.normalize(items, params),'id');
       
       next(null, params.ids.map(function (id) {
         return itemsAsDict[''+id]
@@ -184,6 +280,7 @@ module.exports = {
         format: properties.dateformat || 'YYYY-MM-DD',
         strict: properties.datestrict
       }));
+      
     }
     properties = _.assign(properties, {
       creation_date: now.date,
@@ -207,10 +304,16 @@ module.exports = {
   },
   
   /*
-    Create a nice index
+    Create a nice index according to your legay index.
+    Not needed if using node_auto_index!
   */
   index: function(resource, next) {
-    
+    async.parallel(_.map(['full_search', 'title_search'], function(legacyindex) {
+      return function(n) {
+        console.log('indexing', legacyindex, resource.props[legacyindex])
+        neo4j.legacyindex.add(legacyindex, resource.id, (legacyindex, resource[legacyindex] || resource.props[legacyindex] || '').toLowerCase(), n);
+      }
+    }), next);
   },
   
   /*
@@ -382,6 +485,18 @@ module.exports = {
         next(null, timeline);
     });
   },
+  /*
+    Return the timeline of document related resource.
+  */
+  getRelatedResourcesTimeline: function(resource, next) {
+    helpers.cypherTimeline(rQueries.get_related_resources_timeline, resource, function (err, timeline) {
+      if(err)
+        next(err);
+      else
+        next(null, timeline);
+    });
+  },
+  
   
   getRelatedResources: function (params, next) {
     models.getMany({
@@ -389,23 +504,17 @@ module.exports = {
         count_items: rQueries.count_similar_resource_ids_by_entities,
         items: rQueries.get_similar_resource_ids_by_entities
       },
-      params: {
-        id: +params.id,
-        limit: +params.limit || 10,
-        offset: +params.offset || 0
-      }
+      params: params
     }, function (err, results) {
       if(err) {
         console.log(err)
         next(err);
         return;
       }
-      module.exports.getByIds({
+      module.exports.getByIds(_.assign({}, params, {
         ids: _.map(results.items, 'target')
-      }, function (err, items){
-        next(null, items, {
-          total_items : results.count_items
-        });
+      }), function (err, items){
+        next(null, items, results.count_items);
       });
       
     }); 
@@ -433,11 +542,7 @@ module.exports = {
         next(err);
         return;
       }
-      next(null, results.items, {
-          total_items : results.count_items
-        });
-     
-      
+      next(null, results.items, results.count_items);
     }); 
     
   },
@@ -450,6 +555,9 @@ module.exports = {
       if(d == 'url') {
         if(!_.isEmpty(resource[d + '_' + options.language])) {
           try{
+            var stats = fs.statSync(settings.paths.txt + '/' + resource[d + '_' + options.language]);
+            if(stats.size > (settings.disambiguation.maxSize || 100000))
+              return '';
             return fs.readFileSync(settings.paths.txt + '/' + resource[d + '_' + options.language], {
               encoding: 'utf8'
             }) || '';
@@ -528,8 +636,6 @@ module.exports = {
         });
         
         
-        // check that there is no slug as such
-        
         // save resource, then go to next task.
         neo4j.save(resource, function (err, node) {
           if(err)
@@ -568,6 +674,57 @@ module.exports = {
           callback(null, node);
         })
         
+      },
+      
+      /*
+        2. C check date
+      */
+      function checkDate(resource, callback) {
+        if(!isNaN(resource.start_time)) {
+          callback(null, resource);
+          return
+        }
+        var dates = [],
+            toUpdate = {},
+            candidates,
+            best_candidate;
+        // get the date field, from the title, each language
+        resource.languages.forEach(function (language) {
+          console.log(clc.blackBright('   checking date in title for language'), language);
+          if(!_.isEmpty(resource['title_' + language]))
+            dates.push(_.assign({
+              language: language
+            }, helpers.reconcileHumanDate(resource['title_' + language], language)));
+        });
+        // get the top result; candidates can be n empty array (no undefined stuff.)
+        candidates = _.sortBy(_.values(_.groupBy(_.filter(dates, 'start_time'), 'start_time')), function (d){
+          return -d.length;
+        });
+        
+        if(candidates.length) {
+          best_candidate = _.first(candidates);
+          // get date languages, sorted by language e.g '[de,en,fr]'
+          toUpdate['date_languages'] = _.map(best_candidate, 'language').sort();
+          _.assign(toUpdate, {
+            start_time: best_candidate[0].start_time,
+            end_time: best_candidate[0].end_time,
+            start_date: best_candidate[0].start_date,
+            end_date: best_candidate[0].end_date
+          })
+          console.log(toUpdate)
+          // if(languages)
+        }
+        // do not save empty object
+        if(!_.size(toUpdate)) {
+          callback(null, resource);
+          return
+        }
+        neo4j.save(_.assign(resource, toUpdate), function (err, node) {
+          if(err)
+            return callback(err);
+          console.log('resource saved')
+          callback(null, node);
+        })
       },
       /*
       
@@ -764,7 +921,6 @@ module.exports = {
                 nextCandidate();
                 return;
               }
-              
               var trustworthiness = .5*(candidate.trustworthiness||0) + .5*(location.trustworthiness||0);
               // if(trustworthiness >= settings.disambiguation.threshold.trustworthiness)
                 _locations.push(_.assign(candidate, location, {
@@ -773,7 +929,7 @@ module.exports = {
                   name: candidate.name
                 }));
               
-              nextCandidate();
+              setTimeout(nextCandidate, 5);
               // 
             })
             
@@ -806,29 +962,58 @@ module.exports = {
           //   return
           // }
           console.log(clc.blackBright('  saving', clc.yellowBright(ent.name),'as', clc.whiteBright(ent.type[0]), ent.trustworthiness,'remaining', q.length()));
+          var additionalProperties = {};
+          if(_.first(ent.type) == 'location') {
+            additionalProperties = {
+              lat: ent.lat,
+              lng: ent.lng,
+              country: ent.country,
+              geoname_id: ent.geoname_id,
+              geoname_fcl: ent.geoname_fcl,
+              geoname_country: ent.geoname_country,
+              geocoding_id: ent.geocoding_id,
+              geocoding_fcl: ent.geocoding_fcl,
+              geocoding_country: ent.geocoding_country
+            }
+          }
+          // console.log(ent.context)
           
-          module.exports.createRelatedEntity(resource, {
+          module.exports.createRelatedEntity(resource, _.assign(additionalProperties, {
             name: ent.name,
             type: _.first(ent.type),
             services: ent.services,
             languages: ent.languages,
             frequency: ent.context.length,
             links_wiki: ent.links_wiki
-          }, function (err, entity) {
+          }), function (err, entity) {
             if(err) {
               q.kill();
               return callback(err);
             }
-            // complete the yaml of this specific language
-            _.forEach(ent.context, function (d) {
-              yaml[d.language] = (yaml[d.language] || []).concat({
+           
+            
+            for(var i in ent.context) {
+              if(!yaml[ent.context[i].language])
+                yaml[ent.context[i].language] = [];
+              yaml[ent.context[i].language].push({
                 id: entity.id,
                 context: {
-                  left: d.left,
-                  right: d.right
+                  left: ent.context[i].left,
+                  right: ent.context[i].right
                 }
               });
-            });
+            }
+            // complete the yaml of this specific language
+            // _.forEach(ent.context, function (d) {
+            //   yaml[d.language] = (yaml[d.language] || []).concat([{
+            //     id: entity.id,
+            //     context: {
+            //       left: d.left,
+            //       right: d.right
+            //     }
+            //   }]);
+            // });
+            console.log(yaml['en'])
             nextEntity();
           })
         }, 1);

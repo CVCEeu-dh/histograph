@@ -44,14 +44,21 @@ ON CREATE SET
   {if:lng}
     ent.lng         = {lng},
   {/if}
+  {if:country}
+    ent.country         = {country},
+  {/if}
   {if:geoname_id}
     ent.geoname_id   = {geoname_id},
+  {/if}
+  {if:geoname_fcl}
     ent.geoname_fcl  = {geoname_fcl},
+  {/if}
+  {if:geoname_country}
     ent.geoname_country  = {geoname_country},
   {/if}
   {if:geocoding_id}
     ent.geocoding_id  = {geocoding_id},
-    ent.geocoding_fcl = {geoname_fcl},
+    ent.geocoding_fcl = {geocoding_fcl},
     ent.geocoding_country = {geocoding_country},
   {/if}
   ent.creation_date = {creation_date},
@@ -63,14 +70,21 @@ ON MATCH SET
   {if:lng}
     ent.lng         = {lng},
   {/if}
+  {if:country}
+    ent.country         = {country},
+  {/if}
   {if:geoname_id}
     ent.geoname_id   = {geoname_id},
+  {/if}
+  {if:geoname_fcl}
     ent.geoname_fcl  = {geoname_fcl},
+  {/if}
+  {if:geoname_country}
     ent.geoname_country  = {geoname_country},
   {/if}
   {if:geocoding_id}
     ent.geocoding_id  = {geocoding_id},
-    ent.geocoding_fcl = {geoname_fcl},
+    ent.geocoding_fcl = {geocoding_fcl},
     ent.geocoding_country = {geocoding_country},
   {/if}
   ent.last_modification_date = {creation_date},
@@ -156,31 +170,54 @@ LIMIT 10
 
 // name:get_related_resources
 // get related nodes that are connected with the entity
-MATCH (ent)-[:appears_in]->(res:resource)
+MATCH (ent)-[r:appears_in]->(res:resource){if:with}<-[:appears_in]-(ent2){/if}
 WHERE id(ent) = {id}
-WITH res, ent
-  OPTIONAL MATCH (pla:`place`)-[:appears_in]->(res)
-  OPTIONAL MATCH (per:`person`)-[:appears_in]->(res)
+  {if:with}
+    AND id(ent2) in {with}
+  {/if}
+  {if:start_time}
+    AND res.start_time >= {start_time}
+  {/if}
+  {if:end_time}
+    AND res.end_time <= {end_time}
+  {/if}
+  {if:mimetype}
+    AND res.mimetype in {mimetype}
+  {/if}
+  {if:type}
+    AND res.type in {type}
+  {/if}
+WITH DISTINCT res, r, ent
+ORDER BY r.tfidf DESC, res.start_time DESC
+SKIP {offset}
+LIMIT {limit}
 
-WITH ent, res, pla, per
-ORDER BY res.start_date DESC
+OPTIONAL MATCH (res)-[r_loc:appears_in]-(loc:`location`)
+WITH r, ent, res, collect({  
+      id: id(loc),
+      type: 'location',
+      props: loc,
+      rel: r_loc
+    })[0..5] as locations   
+
+OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
+WITH r, ent, res, locations, collect({
+      id: id(per),
+      type: 'person',
+      props: per,
+      rel: r_per
+    })[0..5] as persons
+
+WITH r, ent, res, locations, persons
+
   RETURN {
     id: id(res),
     props: res,
-    places: extract(n IN collect(DISTINCT pla)| {
-      id: id(n),
-      name: n.name,
-      score: n.score
-    }),
-    persons: extract(n IN collect(DISTINCT per)| {
-      id: id(n),
-      name: n.name,
-      description: n.description,
-      score: n.score
-    })
+    rel: r,
+    locations: locations,
+    persons: persons
   } as result
-
-SKIP {offset} LIMIT {limit}
+ORDER BY r.tfidf DESC, res.start_date DESC
 
 
 // name: signale_related_resource
@@ -192,9 +229,24 @@ WHERE id(ent) = {entity_id} AND id(res) = {resource_id}
 
 
 // name:count_related_resources
-MATCH (ent)-[:appears_in]->(res:resource)
+MATCH (ent)-[:appears_in]->(res:resource){if:with}<-[:appears_in]-(ent2){/if}
 WHERE id(ent) = {id}
-RETURN count(res) as total_items
+  {if:with}
+    AND id(ent2) in {with}
+  {/if}
+  {if:start_time}
+    AND res.start_time >= {start_time}
+  {/if}
+  {if:end_time}
+    AND res.end_time <= {end_time}
+  {/if}
+  {if:mimetype}
+    AND res.mimetype in {mimetype}
+  {/if}
+  {if:type}
+    AND res.type in {type}
+  {/if}
+RETURN count(res) as count_items
 
 
 // name:get_graph
@@ -251,14 +303,35 @@ LIMIT {limit}
 
 // name: get_related_resources_graph
 // monopartite graph of resources
-MATCH (n:entity)
+MATCH (n:entity)-[r:appears_in]->(res:resource){if:with}-[:appears_in]-(ent2){/if}
  WHERE id(n) = {id}
-WITH n
-MATCH (n)-[:appears_in]-(t1:resource), (n)-[:appears_in]-(t:resource)
-WITH t, t1
-MATCH (t)-[:appears_in]-(n:entity)-[:appears_in]-(t1)
-WHERE t <> t1
-WITH t, t1, length(collect(DISTINCT n)) as w
+ {if:with}
+    AND id(ent2) in {with}
+  {/if}
+  {if:start_time}
+    AND res.start_time >= {start_time}
+  {/if}
+  {if:end_time}
+    AND res.end_time <= {end_time}
+  {/if}
+  {if:mimetype}
+    AND res.mimetype in {mimetype}
+  {/if}
+  {if:type}
+    AND res.type in {type}
+  {/if}
+WITH res ORDER BY
+r.tfidf DESC
+LIMIT 25
+WITH collect(id(res)) as resources
+MATCH p=(t:resource)<-[r1:appears_in]-(n:entity)-[r2:appears_in]->(t1:resource)
+//WITH t,r1, n, r2, t1
+//ORDER BY r1.tfidf DESC, r2.tfidf DESC
+WHERE  id(t) > id(t1) AND id(t) in resources AND id(t1) in resources
+WITH t, t1, count(DISTINCT n) as w
+ORDER BY w DESC
+LIMIT {limit}
+WITH t, t1,w
 RETURN {
     source: {
       id: id(t),
@@ -272,8 +345,7 @@ RETURN {
     },
     weight: w 
   } as result
-ORDER BY w DESC
-LIMIT {limit}
+
 
 // name:get_related_persons
 // DEPRECATED get related persons that are connected with the entity, sorted by frequence
@@ -294,9 +366,24 @@ RETURN {
 //
 MATCH (ent)-[r:appears_in]->(res:resource)
   WHERE id(ent) = {id}
-WITH res
+  {if:start_time}
+    AND res.start_time >= {start_time}
+  {/if}
+  {if:end_time}
+    AND res.end_time <= {end_time}
+  {/if}
+  {if:mimetype}
+    AND res.mimetype in {mimetype}
+  {/if}
+  {if:type}
+    AND res.type in {type}
+  {/if}
+WITH ent, res
   MATCH (ent1:{:entity})-[r:appears_in]->(res)
-  WHERE ent1.score > -1
+  WHERE ent1.score > -1 AND id(ent1) <> id(ent)
+  {if:with}
+    AND id(ent1) IN {with}
+  {/if}
 WITH ent1, count(DISTINCT r) as w
 RETURN {
   id: id(ent1),
@@ -309,29 +396,31 @@ SKIP {offset}
 LIMIT {limit}
 
 
+
 // name:count_related_entities
 //
 MATCH (ent)-[r:appears_in]->(res:resource)
   WHERE id(ent) = {id}
-WITH res
+  {if:start_time}
+    AND res.start_time >= {start_time}
+  {/if}
+  {if:end_time}
+    AND res.end_time <= {end_time}
+  {/if}
+  {if:mimetype}
+    AND res.mimetype in {mimetype}
+  {/if}
+  {if:type}
+    AND res.type in {type}
+  {/if}
+WITH ent, res
   MATCH (ent1:{:entity})-[r:appears_in]->(res)
-  WHERE ent1.score > -1
+  WHERE ent1.score > -1 AND id(ent1) <> id(ent)
+  {if:with}
+    AND id(ent1) IN {with}
+  {/if}
 WITH ent1
 RETURN COUNT(DISTINCT ent1) as count_items
-
-
-// name:get_related_places
-// DEPRECATED get related persons that are connected with the entity, sorted by frequence
-MATCH (ent)-[:appears_in]->(res:resource)
-WHERE id(ent) = {id}
-WITH ent, res
-  OPTIONAL MATCH (per:place)-[:appears_in]->(res)
-RETURN {
-  id: id(per),
-  props: per,
-  type: LAST(labels(per)),
-  coappear: COUNT(DISTINCT res)
-} as results ORDER BY results.coappear DESC LIMIT 10
 
 
 // name: get_timeline

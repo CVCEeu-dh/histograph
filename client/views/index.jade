@@ -1,14 +1,87 @@
+<!DOCTYPE html>
 html
   head
     title histograph
-    meta(name='pinterest', content='nopin', description = "contents subject to copyright")
+    meta(name='pinterest', content='nopin', description="contents subject to copyright")
+    
     link(href='/css/bootstrap.min.css', rel='stylesheet')
     link(href='/css/font-awesome.min.css', rel='stylesheet')
     link(href='/css/perfect-scrollbar.min.css', rel='stylesheet')
     link(href='/css/annotator.css', rel='stylesheet')
     link(href='/css/annotorious.css', rel='stylesheet')
     link(href='/css/codemirror.css', rel='stylesheet')
+    
+    style(type='text/css').
+
+      html{
+        height: 100%
+      }
+      body{
+        font-size: 12px;
+        line-height: 20px;
+        color: #1d1d1d;
+        height: 100%;
+        overflow: hidden;
+        background-color: #f0f0f0;
+      }
+
+      h1,h2,h3,h4{
+        font-weight:normal;
+        font-size: inherit;
+        line-height: inherit;
+      }
+
+      header{
+        height: 50px;
+        position: fixed;
+        left:10px;
+        right:10px;
+        top: 10px;
+        background: white;
+        border-bottom: 1px solid #f0f0f0;
+        z-index: 15;
+        line-height: 50px;
+        font-size:13px;
+        padding: 0 50px;
+      }
+
+      header ul{
+        float: right;
+        display: inline-block;
+        list-style-type: none;
+      }
+
+      header ul li{
+        display: inline-block;
+        padding: 0 0px 0 40px;
+      }
+
       
+
+      header img {
+        display: inline-block;
+        height: 25px;
+        padding: 0px 10px 0 0;
+      }
+
+      blockquote{
+        padding: 10px 15px;
+        font-size: 12px;
+        line-height: 18px;
+        font-style: italic;
+        border: 0px solid transparent;
+        background: #eee;
+      }
+
+      a{
+        color: #FF5742;
+      }
+      a:focus, a:hover{
+        color: #151515;
+        border-bottom: 1px solid #151515;
+        text-decoration: none;
+      }
+
     link(href='/css/style.css', rel='stylesheet')
   
     script(src='/socket.io/socket.io.js')
@@ -21,199 +94,135 @@ html
 
   body(ng-app='histograph')
     script(type='text/javascript').
-      var socket = io();
-    
-    script(type='text/ng-template', id='suggest.html').
-      <div>
-        <a ng-if='match.model.type=="default"'>
-          search {{query}}
-        </a>
-        <a ng-if='match.model.type!="default"' ng-href='/#/{{match.model.props.type_search=="resource" ? "r": "e"}}/{{match.model.id}}'>
-          {{match.model.props | title: 'en'}}
-        </a>
-        <span ng-if='match.model.type!="default"' ng-click='$parent.$parent.$parent.$parent.queue(match.model.id, true)'>
-          <i class='fa fa-play-circle-o'></i>
-        </span>
-      </div>
+      var socket = io(); 
 
     div(ng-controller='CoreCtrl') 
-      
-      if user.username
-        header 
-        
-           
-          
-          div(class='row', ng-cloak)
-            div(class='col-sm-8')
-              a(id='header-logo', href='#/')
-                img(src='images/hg_v.png')
-                span histograph
-              a(href='#/profile')
-                img(src=user.picture)
-                span {{user.username}} 
-              
-             
-              div(class='inline', style='position:relative')
-                div(dropdown, dropdown-append-to-body='true', is-open='status.isopen')
-                  span(dropdown-toggle, ng-disabled='disabled')
-                    {{ language }}
-                    i(class='fa fa-down')
-        
-                  ul(class='dropdown-menu', role='menu', )
-                    li(ng-repeat='lang in availableLanguages', ng-click='setLanguage(lang)') {{lang}}
-              
-                 
-              a(href='/logout')
-                span  logout
-                
-                
-                
-            div(class='col-sm-4')
-              div(id='search-field')
-                //- form (ng-submit='setQuery(query)')
-                form(ng-submit='setQuery(query)')
-                  div(class='input-group')
-                    //- input(type='text', ng-model='query', class='form-control')
-                    input(type='text', name='test', ng-model='__query', typeahead-on-select='setQuery($item, $model, $label)', class='form-control', typeahead-editable='false', placeholder='Search for...', typeahead='item for items in suggest($viewValue)', typeahead-wait-ms='100', typeahead-template-url='suggest.html')
-                    //- input(type='text', ng-model='query', class='form-control', placeholder='Search for...', bs-typeahead, bs-options='item for items in suggest($viewValue)', data-container='body',data-delay='{ show: 500, hide: 1000000 }')
-                    span(class='input-group-btn')
-                      a(class='btn btn-default', type='button', ng-href='/#/search/{{query}}') search
-            
-          div(id='history')
-            div(history='', trails='trails')
-          
-      if !user.username
-          div(id='login')
-            div(id='logo')
+      div(ng-controller='FiltersCtrl')
+        if user.username
+          header 
+            a(id='header-logo', href='#/')
               img(src='images/hg_v.png')
-            h5 welcome to histograph
-            form
-              div(class="btn-group-vertical", role="group")
-                a(ng-href='/auth/twitter?next={{locationPath}}', class='btn btn-default expanded') login with twitter 
-                  i(class='fa fa-twitter')
-                a(ng-href='/auth/google?next={{locationPath}}', class='btn btn-default expanded') login with google 
-                  i(class='fa fa-google-plus')
-      else
-        div(class='view {{currentCtrl}} {{currentState|humanizeState}} {{queueStatus}} viewpoint-{{viewpoint.selected.name}}')
-          div(ui-view='', autoscroll='true')
-        
-        div#milkyway(sigma, graph='graph', freeze='freeze' tips='headers.graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentState|humanizeState}} {{queueStatus}} viewpoint-{{viewpoint.selected.name}}', controller='currentCtrl' redirect='redirect(path)', queue="addToQueue(items)")
-        
-        div(id='timeline', timeline, class='{{currentState}} {{queueStatus}}', t='timeline', cxt='contextualTimeline', filters="params")
+             
+            
+            div(class='row', ng-cloak)
+              div(class='col-sm-12')
+                a(id='header-title', href='#/')
+                  span histograph
+
+                ul.menu
+                  li(class='{{currentState.name == "explore.resources"?"active":""}}')
+                    a(href='#/') documents
+
+                  li(class='{{currentState.name == "explore.persons"?"active":""}}')
+                    a(href='#/per')  people
+                 
+                  li(class='{{currentState.name == "search.resources" || currentState.name == "search.persons" ?"active":""}}')
+                    form#search-field(ng-submit='setQuery(query)')
+                      input(type='text', name='test', ng-model='__query', typeahead-on-select='setQuery($item, $model, $label)', class='form-control', typeahead-editable='false', placeholder='search', typeahead='item for items in suggest($viewValue)', typeahead-wait-ms='100', typeahead-template-url='templates/partials/helpers/suggest.html')
+                  //- input(type='text', ng-model='query', class='form-control', placeholder='Search for...', bs-typeahead, bs-options='item for items in suggest($viewValue)', data-container='body',data-delay='{ show: 500, hide: 1000000 }')
+                  //- span(class='input-group-btn')
+                  //-  a(class='btn btn-default', type='button', ng-href='/#/search/{{query}}') search
           
-        div(id='pop', gasp, target="target", redirect='redirect(path)', comment="startCommenting(item, tag, hashtag)", queue="queue(item, inprog)")
-          
-         div(id='popit', popit, target="target", redirect='redirect(path)', comment="startCommenting(item, tag, hashtag)", queue="queue(item, inprog)")
-          div(class='action-group')
-            a(class=' action', title='visit', data-action='link', tooltip='visit entity page')
-              span(class='fa fa-link')
-            a(class=' action', title='vote up')
-              span(class='fa fa-thumbs-o-down')
-            a(class=' action queue', tooltip="add to your current playlist", data-action='queue')
-              span(class='fa fa-play-circle-o')
-            a(class=' action', title='comment', data-action='comment')
-              span(class='fa fa-comment-o')
+                  //- li
+                  //-   div(dropdown, dropdown-append-to-body='true', is-open='status.isopen')
+                  //-     span(dropdown-toggle, ng-disabled='disabled') {{ language }}
+                  //-       i(class='fa fa-down')
+            
+                  //-     ul(class='dropdown-menu', role='menu', )
+                  //-       li(ng-repeat='lang in availableLanguages', ng-click='setLanguage(lang)') {{lang}}
+                  
+                  li  
+                    a(href='#/u/'+user.id)
+                      img(src=user.picture)
+                      span {{user.username}} 
+                  li
+                    a(href='/logout') logout
+                  
+                  
+                  
                 
-        div(id='the-annotator-wrapper')
-          div(id='the-annotator')
+            //- div(id='history')
+            //-   div(history='', trails='trails')
+            
+        if !user.username
+            div(id='login')
+              div(id='logo')
+                img(src='images/hg_v.png')
+              h5 welcome to histograph
+              form
+                div(class="btn-group-vertical", role="group")
+                  a(ng-href='/auth/twitter?next={{locationPath}}&jsonparams={{locationJson}}', class='btn btn-default expanded') login with twitter 
+                    i(class='fa fa-twitter')
+                  a(ng-href='/auth/google?next={{locationPath}}&jsonparams={{locationJson}}', class='btn btn-default expanded') login with google 
+                    i(class='fa fa-google-plus')
+        else
+          div(class='view {{currentCtrl}} {{currentState.name|humanizeState}} {{queueStatus}} viewpoint-{{viewpoint.selected.name}}', infinite-scroll='addMoreItems()', infinite-scroll-collection='relatedItems')
+            div(ui-view='')
           
-        div(id='playlist-resume', ng-class='queueStatus' tooltip-append-to-body='true', tooltip='toggle read queue' ng-click='toggleQueue()')
-          span(class="fa fa-angle-up")
-              
-        div(id='playlist', ng-class='queueStatus')
+          div#milkyway(sigma, graph='graph', freeze='freeze', tips='headers.graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentState.name|humanizeState}} {{queueStatus}} viewpoint-{{viewpoint.selected.name}}', controller='currentCtrl', redirect='redirect(path)', queue="addToQueue(items)", filter='addFilter(key, value)')
           
-          div(ng-if='playlist.length == 0') ... select some element to start playlist ...
-          div(id='playlist-queue')
-            div(id='playlist-queue-rail',perfect-scrollbar, use-both-wheel-axes='true',wheel-propagation="true", refresh-on-change="playlist", suppress-scroll-y="true", wheel-speed="20")
-              div(class='playlist-item', ng-repeat='item in playlist')
-                div(class='playlist-item-wrapper')
-                  div(class='pic', ng-if='item.type == "person"')
-                    a(ng-href='/#/e/{{item.id}}', tooltip-append-to-body='true', tooltip='visit person page')
-                      img(ng-src='{{item.props.thumbnail}}', ng-if='item.props.thumbnail')
-                  div(class='pic', ng-if='item.type == "location" || item.type == "place"')
-                    a(ng-href='/#/e/{{item.id}}', tooltip-append-to-body='true', tooltip='visit location page')
-                      
-                  div(class='pic', ng-if='item.type == "resource"')
-                    a(ng-href='/#/r/{{item.id}}', tooltip-append-to-body='true', tooltip='visit resource page')
-                      img(ng-if='item.props.mimetype == "image" && item.props.url', ng-src='media/{{item.props.url}}')
-                  h5(data-id='{{item.id}}', tooltip-append-to-body='true', tooltip='{{item.props | title : language }}') {{item.props | title : language : 24 }}
-                  a(class='action', ng-click='removeFromQueue(item)', tooltip-append-to-body='true', tooltip='remove from this set')
-                    i(class='fa fa-times-circle')
+          div(id='timeline', timeline, class='{{currentState.name}} {{queueStatus}}', t='timeline', cxt='contextualTimeline', filters="filters")
+            
+          div(id='pop', gasp, target="target", redirect='redirect(path)', filter='addFilter(key, item)', comment="startCommenting(item, tag, hashtag)", queue="queue(item, inprog)")
+            
+           div(id='popit', popit, target="target", redirect='redirect(path)', comment="startCommenting(item, tag, hashtag)", queue="queue(item, inprog)")
+            div(class='action-group')
+              a(class=' action', title='visit', data-action='link', tooltip='visit entity page')
+                span(class='fa fa-link')
+              a(class=' action', title='vote up')
+                span(class='fa fa-thumbs-o-down')
+              a(class=' action queue', tooltip="add to your current playlist", data-action='queue')
+                span(class='fa fa-play-circle-o')
+              a(class=' action', title='comment', data-action='comment')
+                span(class='fa fa-comment-o')
+                  
+          div(id='the-annotator-wrapper')
+            div(id='the-annotator')
+            
+          div(id='playlist-resume', ng-class='queueStatus' tooltip-append-to-body='true', tooltip='toggle read queue' ng-click='toggleQueue()')
+            span(class="fa fa-angle-up")
                 
-          div(id='playlist-actions', class='btn-group')
-            a(ng-href='/#/neighbors/{{playlist | map:"id"}}/r', tooltip-append-to-body='true', tooltip='explore connections between your readlist', class='btn btn-primary')
-              i(class='fa fa-diamond')
-            //- a(ng-href='/#/neighbors/{{playlist | map:"id"}}', tooltip-append-to-body='true', tooltip='explore neighborhood of your readlist', class='btn btn-primary')
-            //-   i(class='fa fa-rocket')
-            //- a(ng-href='/#/neighbors/{{playlist | map:"id"}}', tooltip-append-to-body='true', tooltip='save your readlist', class='btn btn-primary')
-            //-   i(class='fa fa-save')
-      
+          div(id='playlist', ng-class='queueStatus')
+            
+            div(ng-if='playlist.length == 0') ... select some element to start playlist ...
+            div(id='playlist-queue')
+              div(id='playlist-queue-rail',perfect-scrollbar, use-both-wheel-axes='true',wheel-propagation="true", refresh-on-change="playlist", suppress-scroll-y="true", wheel-speed="20")
+                div(class='playlist-item', ng-repeat='item in playlist')
+                  div(class='playlist-item-wrapper')
+                    div(class='pic', ng-if='item.type == "person"')
+                      a(ng-href='/#/e/{{item.id}}', tooltip-append-to-body='true', tooltip='visit person page')
+                        img(ng-src='{{item.props.thumbnail}}', ng-if='item.props.thumbnail')
+                    div(class='pic', ng-if='item.type == "location" || item.type == "place"')
+                      a(ng-href='/#/e/{{item.id}}', tooltip-append-to-body='true', tooltip='visit location page')
+                        
+                    div(class='pic', ng-if='item.type == "resource"')
+                      a(ng-href='/#/r/{{item.id}}', tooltip-append-to-body='true', tooltip='visit resource page')
+                        img(ng-if='item.props.mimetype == "image" && item.props.url', ng-src='media/{{item.props.url}}')
+                    h5(data-id='{{item.id}}', tooltip-append-to-body='true', tooltip='{{item.props | title : language }}') {{item.props | title : language : 24 }}
+                    a(class='action', ng-click='removeFromQueue(item)', tooltip-append-to-body='true', tooltip='remove from this set')
+                      i(class='fa fa-times-circle')
+                  
+            div(id='playlist-actions', class='btn-group')
+              a(ng-href='/#/neighbors/{{playlist | map:"id"}}', tooltip-append-to-body='true', tooltip='explore connections between your readlist', class='btn btn-primary')
+                i(class='fa fa-diamond')
+              //- a(ng-href='/#/neighbors/{{playlist | map:"id"}}', tooltip-append-to-body='true', tooltip='explore neighborhood of your readlist', class='btn btn-primary')
+              //-   i(class='fa fa-rocket')
+              //- a(ng-href='/#/neighbors/{{playlist | map:"id"}}', tooltip-append-to-body='true', tooltip='save your readlist', class='btn btn-primary')
+              //-   i(class='fa fa-save')
+        
       div(id="messenger", class="tk-proxima-nova {{messaging? 'active': ''}}")
         div.inner {{ message }}
       
-      div.mouse.tooltip(id='tooltip-sigma')
+      div.mouse.tooltip.sigma(id='tooltip-sigma')
+        div.tooltip-wrapper
+          div.tooltip-inner
+      
+      div.mouse.tooltip.sigma(id='tooltip-sigma-edge')
         div.tooltip-wrapper
           div.tooltip-inner
         
-      
-    script(src='/js/lib/jquery-2.1.3.min.js') 
-    script(src='/js/lib/d3.min.js')
-    script(src='/js/lib/lodash.min.js') 
-      
-    script(src='/js/lib/codemirror.js')
-    script(src='/js/lib/codemirror-addon-simple.js')
-    script(src='/js/lib/codemirror-addon-show-hint.js')
-      
-    script(src='/js/lib/annotator.min.js')
-    script(src='/js/lib/annotorious.min.js')
-    script(src='/js/lib/annotorious-merge.js')   
-    script(src='/js/lib/marked.min.js')
-    script(src='/js/lib/moment.min.js')
-    script(src='/js/lib/sigma.min.js')
-    script(src='/js/lib/sigma.layout.forceAtlas2.min.js')
-    //- script(src='/js/lib/sigma.statistics.HITS.js')
-    script(src='/js/lib/perfect-scrollbar.min.js')
-    script(src='/js/lib/perfect-scrollbar.with-mousewheel.min.js')
-    script(src='/js/lib/angular.min.js')
-    script(src='js/lib/angular-ui-router.min.js')  
-    script(src='/js/lib/angular-route.min.js')
-    script(src='/js/lib/angular-resource.min.js')
-    script(src='/js/lib/angular-cookies.min.js')
-    script(src='/js/lib/angular-local-storage.min.js')
-    
-    script(src='/js/lib/ui-codemirror.min.js')
-    
-    //- script(src='/js/lib/angular-strap.min.js')
-    //- script(src='/js/lib/angular-strap.tpl.min.js')
-    script(src='/js/lib/ui-bootstrap-tpls.min.js')
-    script(src='/js/lib/angular-perfect-scrollbar.js')
-    
-    script(src='/js/app.js')
-    script(src='/js/services.js')
-    script(src='/js/filters.js')
-    
-    script(src='/js/controllers/core.js')
-    
-    script(src='/js/controllers/all-in-between.js')
-    script(src='/js/controllers/all-shortest-paths.js')
-    script(src='/js/controllers/collection.js')
-    script(src='/js/controllers/entity.js')
-    script(src='/js/controllers/index.js')
-    script(src='/js/controllers/inquiry.js')
-    script(src='/js/controllers/issue.js')
-    script(src='/js/controllers/neighbors.js') 
-    script(src='/js/controllers/search.js')
-    script(src='/js/controllers/resource.js')
-    script(src='/js/controllers/user.js')
+      each val in scripts
+        script(src=val)
     
     
-    
-    
-    script(src='/js/directives/annotator.js') 
-    script(src='/js/directives/annotorious.js') 
-    script(src='/js/directives/sigma.js')   
-    script(src='/js/directives/timeline.js')
-    script(src='/js/directives/history.js')
-    script(src='/js/directives/popit.js')
-    script(src='/js/directives/lazy-text.js')
     

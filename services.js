@@ -147,6 +147,11 @@ module.exports = {
           next(err);
           return;
         }
+        if(!body.response) {
+          console.log(body)
+          next(body.error);
+          return
+        }
         // console.log(form, 'body', body.response)
         next(null, body.response.entities || []);
       })
@@ -204,7 +209,9 @@ module.exports = {
         }
         // FLATTEN YAGO entities by providing only entitites having "best entity"
         if(!body.mentions) {
-          console.log(body)  
+          console.log(body);
+          next(null, []);
+          return;
         }
         
         var entities = body.mentions.filter(function (d) {
@@ -251,6 +258,9 @@ module.exports = {
       }
       
       if(!body.geonames || !body.geonames.length) {
+        if(body.status) {
+          console.log(body.status)
+        }
         next(null, []);
         return;
       };
@@ -298,6 +308,7 @@ module.exports = {
       json: true
     }, function (err, res, body) {
       if(err) {
+        console.log('service geocoding failed')
         next(err);
         return;
       }
@@ -305,6 +316,7 @@ module.exports = {
       // console.log(url)
       if(!body.results.length) {
         if(body.error_message) {
+          console.log('service geocoding failed')
           next(body.error_message)
           return;
         } 

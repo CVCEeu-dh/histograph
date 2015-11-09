@@ -3,6 +3,9 @@
   Resource task collection
 */
 var settings  = require('../../settings'),
+    helpers   = require('../../helpers'),
+
+    neo4j     = require('seraph')(settings.neo4j.host),
     async     = require('async'),
     path      = require('path'),
     fs        = require('fs'),
@@ -10,14 +13,182 @@ var settings  = require('../../settings'),
 
 module.exports = {
   
+  getMany: function(options, callback) {
+    console.log(clc.yellowBright('\n   tasks.resource.getMany'));
+    neo4j.query(
+      ' MATCH (res:resource)\n'+
+      ' RETURN res SKIP {offset} LIMIT {limit}', {
+      limit: +options.limit || 100000,
+      offset: +options.offset || 0
+    }, function (err, nodes) {
+      if(err) {
+        callback(err);
+        return;
+      }
+      console.log(clc.blackBright('   nodes:', clc.magentaBright(nodes.length)));
+      options.fields = Resource.FIELDS;
+      options.records = nodes;
+      callback(null, options)
+      
+    })
+  },
+  
+  getOne: function(options, callback) {
+    console.log(clc.yellowBright('\n   tasks.resource.getOne'),'id:', options.id);
+    neo4j.query(
+      ' MATCH (res:resource)\n'+
+      ' WHERE id(res)={id} RETURN res LIMIT 1', {
+      id: (+options.id || -1)
+    }, function (err, nodes) {
+      if(err) {
+        callback(err);
+        return;
+      }
+      console.log(clc.blackBright('   nodes:', clc.magentaBright(nodes.length)));
+      options.fields = Resource.FIELDS;
+      options.records = nodes;
+      callback(null, options)
+      
+    })
+  },
+  
+  /*
+    cluster date basd on month
+  */
+  dateToMonths: function(options, callback) {
+    console.log(clc.yellowBright('\n   tasks.resource.dateToMonths'));
+    var moment = require('moment');
+    
+    var q = async.queue(function (resource, next) {
+      console.log(clc.blackBright('\n   resource: '), resource.id, clc.cyanBright(resource.slug.substring(0, 24)));
+      
+      var isToUpdate  = false,
+          start_month = moment.utc(resource.start_time, 'X').format('YYYYMM'),
+          end_month   = moment.utc(resource.end_time, 'X').format('YYYYMM');
+          
+      console.log(clc.blackBright('   start_date: '), resource.start_date)
+      console.log(clc.blackBright('   start_month:'), start_month)
+      console.log(clc.blackBright('   end_date:   '),   resource.end_date)
+      console.log(clc.blackBright('   end_month:  '),   end_month)
+        
+      if(start_month != resource.start_month || end_month != resource.end_month )
+        isToUpdate = true;
+      
+      if(isToUpdate) {
+        console.log(clc.blackBright('   updating ...'));
+        
+        neo4j.query('MATCH (res) WHERE id(res) = {id} SET res.start_month = {start_month}, res.end_month = {end_month} RETURN res.name', {
+          id: +resource.id,
+          start_month: start_month,
+          end_month: end_month
+        }, function (err) {
+          if(err) {
+            q.kill()
+            callback(err);
+          } else {
+            console.log(clc.greenBright('    saved!'), clc.blackBright('Remaining:'), q.length())
+        
+            next();
+          }
+        });
+      } else {
+        console.log(clc.blackBright('    nothing to do, skipping. Remaining:'), q.length())
+        setTimeout(next, 2);
+      }
+      
+    }, 10)
+    q.push(_.filter(options.records, 'start_time'));
+    q.drain = function() {
+      callback(null, options);
+    }   
+  },
+  
+  /* check resource nodes for slug and names and date */
+  slugify: function(options, callback) {
+    console.log(clc.yellowBright('\n   tasks.resource.slugify'));
+    var slugs = _.compact(_.map(options.records, 'slug'));
+    // queue: inquirer module needs premises
+    var q = async.queue(function (i, next) {
+      var isToUpdate = false;
+      
+      if(_.isEmpty(options.records[i].name)) {
+        options.records[i].name = _.first(_.compact(settings.languages.map(function (d) {
+          return options.records[i]['title_' + d]
+        })).concat([
+          'title'
+        ]));
+        isToUpdate = true
+      }
+      // if no name has been found, ask the user (or just throw an error)
+      if(_.isEmpty(options.records[i].name)) {
+        console.log(options.records[i])
+        q.kill();
+        callback('no name found for ' + options.records[i].id)
+        return;
+      }
+      
+      // clean from bogus html
+      var newname  = options.records[i].name.replace(/(<([^>]+)>)/ig, '')
+        .replace(/\s+/g, ' ').trim();
+      
+      if(newname != options.records[i].name) {
+        options.records[i].name = newname
+        isToUpdate = true
+      }
+      
+      if(_.isEmpty(options.records[i].slug) || isToUpdate) {
+        options.records[i].slug = helpers.text.slugify(options.records[i].name);
+        //console.log('new slug:', options.records[i].slug)
+        var c = 1,
+            favouriteSlug = options.records[i].slug,
+            slug = '' + favouriteSlug;
+        while(slugs.indexOf(slug) != -1) {
+          
+          slug = favouriteSlug + '-' + c;
+          console.log(clc.redBright('    new slug'),slug)
+          c++
+          
+        }
+        options.records[i].slug = slug;
+        isToUpdate = true
+      }
+      slugs.push(options.records[i].slug)
+        
+      // save the name for the nodes
+      if(isToUpdate) {
+        console.log(clc.blackBright('    updating:'), options.records[i].slug)
+        
+        neo4j.query('MATCH (res) WHERE id(res) = {id} SET res.name = {name}, res.slug = {slug} RETURN res.name', {
+          id: +options.records[i].id,
+          name: options.records[i].name,
+          slug: options.records[i].slug 
+        }, function (err) {
+          if(err) {
+            q.kill()
+            callback(err);
+          } else {
+            console.log(clc.greenBright('    saved!'), clc.blackBright('Remaining:'), q.length())
+        
+            next();
+          }
+        });
+      } else {
+        console.log(clc.blackBright('    nothing to do, skipping. Remaining:'), q.length())
+        setTimeout(next, 2);
+      }
+        
+    }, 5);
+    q.push(_.keys(options.records));
+    q.drain = function() {
+      callback(null, options)
+    }
+  },
   cartoDB: function(options, callback) {
     console.log(clc.yellowBright('\n   tasks.resource.cartoDB'));
     if(!options.target) {
       return callback(' Please specify the file path to write in with --target=path/to/source.tsv');
     }
-      
-    var neo4j    = require('seraph')(settings.neo4j.host);
-    
+
     neo4j.query('Match (loc:location)-[:appears_in]->(r:resource) WHERE has(loc.geocode_lat) RETURN {name: loc.name, lat: loc.geocode_lat, lng: loc.geocode_lng,start_time: r.start_time, start_date: r.start_date, end_time: r.end_time, end_date:r.end_date, title:COALESCE(r.name, r.title_en, r.title_fr), id:id(r)} skip {offset} LIMIT {limit} ', {
         limit: +options.limit || 1000,
         offset: +options.offset || 0
@@ -168,11 +339,10 @@ module.exports = {
   discoverMany: function(options, callback) {
     console.log(clc.yellowBright('\n   tasks.resource.discover'));
     
-    var neo4j    = require('seraph')(settings.neo4j.host);
     var queue = async.waterfall([
       // get pictures and documents having a caption
       function (next) {
-        neo4j.query('MATCH (a:resource) WHERE NOT(has(a.discovered)) AND NOT (a)-[:appears_in]-() RETURN a ORDER BY a.mimetype DESC skip {offset} LIMIT {limit} ', {
+        neo4j.query('MATCH (a:resource) WHERE NOT(has(a.discovered)) AND NOT (a)-[:appears_in]-() RETURN a ORDER BY a.mimetype ASC skip {offset} LIMIT {limit} ', {
           limit: +options.limit || 10,
           offset: +options.offset || 0
         }, function (err, nodes) {
@@ -193,9 +363,11 @@ module.exports = {
           Resource.discover({
             id: node.id
           }, function (err, res) {
-            if(err)
-              throw err;
-            
+            if(err) {
+              q.kill();
+              next(err);
+              return; 
+            }
             res.discovered = true;
             neo4j.save(res, function (err, n) {
               if(err)
@@ -218,6 +390,23 @@ module.exports = {
     });
   },
   /*
+    Simply test the get text function for a specific resource
+  */
+  getText: function(options, callback) {
+    console.log(clc.yellowBright('\n   tasks.resource.getText'));
+    
+    if(!options.language || options.language.length !=2 ) {
+      callback('option --language required, 2 chars lang')
+      return;
+    }
+    var text = Resource.getText(_.first(options.records), {
+      language: options.language,
+      fields: settings.disambiguation.fields
+    });
+    console.log(text);
+    callback(null, options);
+  },
+  /*
     Start the discover chain for one signle dicoument, useful for test purposes.
   */
   discoverOne: function(options, callback) {
@@ -226,7 +415,6 @@ module.exports = {
       callback('option --id required')
       return;
     }
-    var neo4j    = require('seraph')(settings.neo4j.host);
     var queue = async.waterfall([
       // get pictures and documents having a caption
       function (next) {

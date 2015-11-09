@@ -128,12 +128,15 @@ angular.module('histograph')
             return;
           // organise(merge) entitites
           $log.log('::marked @marked changed');
-          
-          entities = scope.context.locations.concat(scope.context.persons)
-          
-          element.html(marked(scope.marked, {
-            renderer: renderer
-          }));
+          if(scope.context) {
+            entities = scope.context.locations.concat(scope.context.persons)//, scope.context.organizations, scope.context.social_groups)
+            
+            element.html(marked(scope.marked, {
+              renderer: renderer
+            }));
+          } else {
+            element.html(marked(scope.marked));
+          }
           
           // apply tooltip
           $compile(element.contents())(scope);

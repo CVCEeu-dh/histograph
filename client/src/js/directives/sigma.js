@@ -1,26 +1,4 @@
-'use strict';
-/*
-  Sigma addons
-  ---
-  thanks to @jacomyal (it need to be added before creating any new instance of sigmajs)
-*/
-sigma.classes.graph.addMethod('neighbors', function (nodeId) {
-  var k,
-      neighbors = {},
-      index     = {};
-  
-  if(typeof nodeId == 'object')
-    for(var i in nodeId)
-      index = _.assign(index, this.allNeighborsIndex[nodeId[i]]);
-  else
-    index = this.allNeighborsIndex[nodeId] || {}
-  
-  for (k in index)
-    neighbors[k] = this.nodesIndex[k];
-  neighbors[nodeId] = this.nodesIndex[nodeId];
-  return neighbors;
-});
-        
+
 /**
  * @ngdoc overview
  * @name histograph
@@ -30,14 +8,16 @@ sigma.classes.graph.addMethod('neighbors', function (nodeId) {
  * directive to show a grapgh of nodes and edges thanks to @Yomguithereal!!! 
  */
 angular.module('histograph')
-  
-  .directive('sigma', function($log, $location) {
+  .directive('sigma', function ($log, $location, $timeout, EVENTS) {
+    'use strict';
+
     return {
       restrict : 'A',
       template: ''+
         '<div id="playground"></div>' +
         '<div gmasp target="target"></div>' +
         '<div id="tips" ng-if="tips.length > 0"><div>{{tips}}</div></div>' +
+        '<div id="sigma-messenger" ng-if="message.text.length" class="animated {{message.visible? \'fadeIn\': \'fadeOut\'}}"><div class="inner">{{message.text}}</div></div>' +
         '<div id="commands" class="{{lookup?\'lookup\':\'\'}}">' +
           '<div tooltip="view all nodes" tooltip-append-to-body="true" class="action {{lookup? \'bounceIn animated\': \'hidden\'}}" ng-click="toggleLookup()"><i class="fa fa-eye"></i></div>' +
           '<div class="action {{status==\'RUNNING\'? \'bounceIn animated\': \'\'}}" ng-click="togglePlay()"><i class="fa fa-{{status==\'RUNNING\' ? \'stop\': \'play\'}}"></i></div>' +
@@ -49,22 +29,19 @@ angular.module('histograph')
       scope:{
         graph: '=',
         tips: '=',
-        freeze: '=',
         controller: '=',
         redirect: '&',
         addToQueue: '&queue',
+        addFilter: '&filter',
         toggleMenu: '&togglemenu'
       },
       link : function(scope, element, attrs) {
-        // set the initial target
-        scope.target = false;
-        
         // cutat function for long labels
         var cutat = function (text, cutAt) {
           var t = text.substr(0, cutAt);
           //re-trim if we are in the middle of a word
-          if(t.length > cutAt)
-            t = t.substr(0, Math.min(t.length, t.lastIndexOf(' '))) + ' ...'
+          if(text.length > cutAt)
+            t = t.substr(0, Math.min(t.length, t.lastIndexOf(' '))) + ' ...';
           return t
         }  
         // configure a default tooltip
@@ -74,6 +51,117 @@ angular.module('histograph')
         tooltip.el          = tooltip.tip.find('.tooltip-inner');
         tooltip.isVisible   = false;
         tooltip.text        = '';
+        
+        // configure default tooltip for edges
+        tooltip.edge = {};
+        tooltip.edge.tip         = $("#tooltip-sigma-edge");
+        tooltip.edge.el          = tooltip.edge.tip.find('.tooltip-inner');
+        tooltip.edge.isVisible   = false;
+        tooltip.edge.text        = '';
+        
+        /*
+          Sigma messenger
+        */
+        scope.message = {
+          text: '',
+          visible: false
+        };
+
+        scope.showMessage = function(text) {
+          if(scope.message.timer)
+            $timeout.cancel(scope.message.timer);
+          scope.message.timer = $timeout(scope.hideMessage, 1800);
+          scope.message.text = text;
+          scope.message.visible = true;
+        }
+
+
+        scope.hideMessage = function(text) {
+          scope.message.visible = false
+        }
+        /*
+          Sigma addons
+          ---
+          thanks to @jacomyal (it need to be added before creating any new instance of sigmajs)
+        */
+        sigma.classes.graph.addMethod('neighbors', function (nodeId) {
+          'use strict';
+
+          var k,
+              neighbors = {},
+              index     = {};
+          
+          if(typeof nodeId == 'object')
+            for(var i in nodeId)
+              index = _.assign(index, this.allNeighborsIndex[nodeId[i]]);
+          else
+            index = this.allNeighborsIndex[nodeId] || {};
+          
+          for (k in index)
+            neighbors[k] = this.nodesIndex[k];
+          neighbors[nodeId] = this.nodesIndex[nodeId];
+          return neighbors;
+        });
+        
+        /*
+          Build slopwly but surely the graph
+          Calculate the differences between pg and g: nodes to delete, nodes to add. 
+        */
+        sigma.classes.graph.addMethod('build', function (g, pg) {
+          'use strict';
+          var self = this;
+          
+          
+          // add pair of nodes ...
+          var i,
+              a,
+              b,
+              c,
+              ns,
+              an,
+              l,
+              k,
+              nt,
+              c;
+          
+          // calculate differences in nodes
+          
+          
+          // the overall node indexes
+          ns = _.indexBy(g.nodes, 'id');
+          an = {};
+          // console.log('rererererere', ns,g.nodes)
+          a = g.edges || [];
+          c = a.length;
+          nt = setInterval(function() {
+            si.killForceAtlas2();
+            c--;
+            if(!an[a[c].source])
+              self.addNode(ns[a[c].source]);
+            if(!an[a[c].target])
+              self.addNode(ns[a[c].target]);
+            
+            an[a[c].source] = true;
+            an[a[c].target] = true;
+            
+            self.addEdge(a[c]);
+            
+            si.startForceAtlas2({
+              adjustSizes :true,
+              linLogMode: true,
+              startingIterations : 10,
+              gravity : 1,
+              edgeWeightInfluence : 1
+            });
+            if(c == 0 || !a[c])
+              clearTimeout(nt);
+            //si.refresh();//self.draw()
+          }, 200);
+          return this;
+        });
+        
+        
+        
         
         // Creating sigma instance
         var timeout,
@@ -104,7 +192,6 @@ angular.module('histograph')
                   enableEdgeHovering : true,
                   minEdgeSize: 1,
                   maxEdgeSize: 2,
-                  enableEdgeHovering: true,
                   defaultEdgeHoverColor: '#000',
                   edgeHoverSizeRatio: 1,
                   edgeHoverExtremities: true
@@ -131,7 +218,8 @@ angular.module('histograph')
         
         
         
-        // set theinitial status
+        // set the initial target
+        scope.target = false;
         scope.status = IS_STOPPED;
         scope.lookup = false;
         
@@ -141,6 +229,13 @@ angular.module('histograph')
           camera: 'main',
           container: element.find('#playground')[0]
         });
+        
+        /*
+          Initialize plugins
+          ---
+        */
+        var dragListener = sigma.plugins.dragNodes(si, si.renderers[0]);
+        
         
         
         /*
@@ -164,9 +259,21 @@ angular.module('histograph')
           }, 300);
         });
         
-        scope.$watch('freeze', function (v) {
-          if(v=='sigma')
-            stop();
+        scope.$on(EVENTS.LOCATION_CHANGE_START, function (v) {
+          stop();
+           $log.log('::sigma @EVENTS.LOCATION_CHANGE_START');
+          scope.showMessage('loading ...');
+         
+        });
+
+        scope.$on(EVENTS.API_PARAMS_CHANGED, function (v) {
+          $log.log('::sigma @EVENTS.API_PARAMS_CHANGED');
+          scope.showMessage('loading graph ...');
+        });
+
+         scope.$on(EVENTS.STATE_CHANGE_SUCCESS, function (v) {
+          $log.log('::sigma @EVENTS.STATE_CHANGE_SUCCESS');
+          scope.showMessage('loading graph ...');
         });
         
         /*
@@ -188,32 +295,38 @@ angular.module('histograph')
             si.refresh();
             return;
           }
-            
+          // calculate initital layout duration 
+          layoutDuration = Math.max(Math.min(4* graph.nodes.length * graph.edges.length, maxlayoutDuration),minlayoutDuration)
+          $log.log('::sigma n. nodes', si.graph.nodes.length, ' n. edges', si.graph.edges.length, 'runninn layout atlas for', layoutDuration/1000, 'seconds')
+          
           // refresh the scale for edge color, calculated the extent weights of the edges
           scale.domain(d3.extent(graph.edges, function(d) {return d.weight || 1}));
           
           // Reading new graph
           si.graph.clear();
           si.refresh();
-          // calculate initital layout duration 
-          layoutDuration = Math.max(Math.min(4* si.graph.nodes().length * si.graph.edges().length, maxlayoutDuration),minlayoutDuration)
-          $log.log('::sigma n. nodes', si.graph.nodes().length, ' n. edges', si.graph.edges().length, 'runninn layout atlas for', layoutDuration/1000, 'seconds')
           
           // timout the layout
           timers.play = setTimeout(function() {
-            si.graph.clear().read(graph);
-            si.graph.nodes().forEach(function (n) {
+            // set size, and fixes what need to be fixed. If there are fixed nodes, the camera should center on it
+            graph.nodes = graph.nodes.map(function (n) {
               n.color = n.type?
                 (colors[n.type] || "#353535"):
                 "#353535";
-              n.x = n.x || Math.random()*50
-              n.y = n.y || Math.random()*50
-              n.size = Math.sqrt(si.graph.degree(n.id));
+              n.x = n.x || Math.random()*50;
+              n.y = n.y || Math.random()*50;
+              if(graph.centers && graph.centers.indexOf(n.id) !== -1) {
+                n.center = true;
+              }
+              n.size = 5;//Math.sqrt(si.graph.degree(n.id));
+              return n;
             });
-            si.graph.edges().forEach(function (n) {
-              
+            // console.log(graph.nodes)
+            graph.edges = graph.edges.map(function (n) {
               n.size = n.weight;
+              return n
             });
+            
             
             if(graph.nodes.length > 50) {
               si.settings('labelThreshold', 5.5);
@@ -224,10 +337,18 @@ angular.module('histograph')
               si.settings('labelThreshold', 0);
               si.settings('labelSize', 'fixed');
             }
+            $log.log('::sigma @graph add', graph.edges.length, 'edges,', graph.nodes.length, 'nodes');
+            si.graph.clear().read(graph);
+            si.graph.nodes().forEach(function (n) {
+              n.size =si.graph.degree(n.id);
+            });
+            
+            
+            
             rescale();
             si.refresh();
             play(); 
-          }, 1000);
+          }, 100);
           
         });
         
@@ -260,28 +381,14 @@ angular.module('histograph')
         
         /*
           sigma clickNode
+
         */
         si.bind('clickNode', function (e){
+           $log.log('::sigma @clickNode');
           // stop the layout runner
           stop();
-          // if(e.data.captor.isDragging) {
-          //   $log.info('::sigma @clickNode isDragging');
-          //   return;
-          // }
-          
-          $log.log('::sigma @clickNode', e.data);
-          
-          // calculate the node do keep
-          var toKeep = si.graph.neighbors(e.data.node.id);
-           
-          // enlighten the egonetwork
-          si.graph.nodes().forEach(function (n) {
-            n.discard = !toKeep[n.id];
-          });
-          si.graph.edges().forEach(function (e) {
-            e.discard = !(toKeep[e.source] && toKeep[e.target])
-          });
-          
+
+          // set the proper target for our gasp popup
           scope.lookup = true;
           scope.target = {
             type: 'node',
@@ -291,35 +398,39 @@ angular.module('histograph')
           scope.$apply();
           // refresh the view
           si.refresh();
+          
+         
         });
+
+
         
         
         
         si.bind('overEdge', function(e) {
           // debugger
           // console.log(arguments)
-          if(tooltip.timer)
-            clearTimeout(tooltip.timer);
+          if(tooltip.edge.timer)
+            clearTimeout(tooltip.edge.timer);
           
           var _css = {
-                transform: 'translate('+ e.data.captor['clientX'] +'px,'+ e.data.captor['clientY'] +'px)'
+                transform: 'translate('+ e.data.captor.clientX +'px,'+ e.data.captor.clientY +'px)'
               },
               label = [
                 si.graph.nodes(''+e.data.edge.source).label,
                 si.graph.nodes(''+e.data.edge.target).label
-              ].join(' - ');
+              ].join(' - ') + ' / ' + e.data.edge.weight + ' in common';
           
-          tooltip.edge = e.data.edge.id;
-          if(!tooltip.isVisible)
+          tooltip.edge.edge = e.data.edge.id;
+          if(!tooltip.edge.isVisible)
             _css.opacity = 1.0;
+          // console.log(label)
+          if(tooltip.edge.text != label)
+            tooltip.edge.el.text(label);
           
-          if(tooltip.text != label)
-            tooltip.el.text(label);
-          
-          tooltip.isVisible = true;
-          tooltip.text = label
+          tooltip.edge.isVisible = true;
+          tooltip.edge.text = label
           // apply css transf
-          tooltip.tip.css(_css);
+          tooltip.edge.tip.css(_css);
           
         });
         /*
@@ -328,13 +439,22 @@ angular.module('histograph')
           We use the renderer since the tooltip is relqtive to sigma parent element.
         */
         si.bind('overNode', function(e) {
-          // console.log('overnode');
-          // console.log(e.data.node, tooltip.el)
+          // remove tooltip edge
+          if(tooltip.edge.timer)
+            clearTimeout(tooltip.edge.timer);
+          
+          tooltip.edge.tip.css({
+            opacity: 0
+          });
+          
+          tooltip.edge.isVisible = false;
+          
+          
           if(tooltip.timer)
             clearTimeout(tooltip.timer);
           
           var _css = {
-            transform: 'translate('+ e.data.captor['clientX'] +'px,'+ e.data.captor['clientY'] +'px)'
+            transform: 'translate('+ e.data.captor.clientX +'px,'+ e.data.captor.clientY +'px)'
           };
           
           if(!tooltip.isVisible)
@@ -350,15 +470,7 @@ angular.module('histograph')
           tooltip.tip.css(_css);
         });
 
-        /*
-          listener outNode
-        */
-        si.bind('outEdge outNode', function(e) {
-          
-          // if(e.data.edge && (tooltip.node == e.data.edge.source || tooltip.node == e.data.edge.target )) {
-          //   return; // i.e, the overnode is thrown before the corresponding outEdge event.
-          // }
-          // console.log('outEdge outNode')
+        var outNode = function(){
           if(!tooltip.isVisible)
             return;
           if(tooltip.timer)
@@ -367,27 +479,34 @@ angular.module('histograph')
             tooltip.tip.css({
               opacity: 0
             });
-          }, 210);
+           tooltip.isVisible = false;
+          }, 120)
+        }
+        
+        var outEdge = function() {
+          if(tooltip.edge.timer)
+            clearTimeout(tooltip.edge.timer);
           
-          tooltip.isVisible = false;
-        })
+          tooltip.edge.tip.css({
+            opacity: 0
+          });
+          
+          tooltip.edge.isVisible = false;
+        }
+        /*
+          listener outNode, outEdge
+        */
+        si.bind('outNode', outNode);
+        si.bind('outEdge', outEdge);
+       
         
-        
-        
-        si.bind('clickEdge', function(e) {
+        si.bind('clickEdge', function (e) {
+          // enrich data with single nodes
           e.data.edge.nodes = {
             source: si.graph.nodes(''+e.data.edge.source),
             target: si.graph.nodes(''+e.data.edge.target)
           };
-          var toKeep = si.graph.neighbors([''+e.data.edge.source, ''+e.data.edge.target]);
-           
-          // enlighten the egonetwork
-          si.graph.nodes().forEach(function (n) {
-            n.discard = !toKeep[n.id];
-          });
-          si.graph.edges().forEach(function (e) {
-            e.discard = !(toKeep[e.source] && toKeep[e.target])
-          });
+          
           
           scope.target = {
             type: 'edge',
@@ -398,11 +517,14 @@ angular.module('histograph')
         })
         
         si.bind('clickStage', function(e) {
-          if(e.data.captor.isDragging == false)
+          if(e.data.captor.isDragging === false)
             toggleLookup({
               update: true
             });
           $('body').trigger('sigma.clickStage');
+          // clear dummy tooltip
+          outEdge();
+          outNode();
         })
         
         /*
@@ -421,9 +543,10 @@ angular.module('histograph')
           if(typeof nodeId == 'object') { // it is an event ideed
             nodeId = $(this).attr('data-id');
           }
-           $log.info('::sigma --> focus()', nodeId, _.map(si.graph.nodes(), 'id'))
+          $log.info('::sigma --> focus()', nodeId);//, _.map(si.graph.nodes(), 'id'))
           var node = si.graph.nodes(nodeId);
           try{
+
             sigma.misc.animation.camera(
               si.cameras.main,
               {
@@ -433,10 +556,36 @@ angular.module('histograph')
               },
               {duration: 250}
             );
+            scope.showMessage(node.label);
+
           } catch(e) {
-            $log.error(e)
+            $log.error(e);
+            scope.showMessage('not found');
+          } finally {
+            scope.$apply();
           }
         }
+
+        /*
+          Show the egonetwork of the current target
+          @param nodes - a list of nodes
+        */
+        scope.egonetwork = function(nodes) {
+
+          // calculate the node do keep
+          var toKeep = si.graph.neighbors(nodes);
+           
+          // enlighten the egonetwork
+          si.graph.nodes().forEach(function (n) {
+            n.discard = !toKeep[n.id];
+          });
+          si.graph.edges().forEach(function (e) {
+            e.discard = !(toKeep[e.source] && toKeep[e.target])
+          });
+          
+          // refresh the view
+          si.refresh();
+        };
         /*
           sigma rescale
           start the force atlas layout
@@ -445,7 +594,7 @@ angular.module('histograph')
         function rescale() {
           sigma.misc.animation.camera(
             si.cameras.main,
-            {x: 0, y: 0, angle: 0, ratio: 1.618},
+            {x: 0, y: 0, angle: 0, ratio: 1.0618},
             {duration: 150}
           );
         };
@@ -486,9 +635,10 @@ angular.module('histograph')
           
           si.startForceAtlas2({
             adjustSizes :true,
-            linLogMode: true,
-            startingIterations : 10,
-            gravity : 1,
+            linLogMode: false,
+            startingIterations : 20,
+            gravity : 20,
+            slowDown: 10,
             edgeWeightInfluence : 1
           });
           $log.debug('::sigma -> play()')
@@ -499,10 +649,14 @@ angular.module('histograph')
         */
         function stop() {
           clearTimeout(timeout);
+          if(scope.status == IS_RUNNING) {
+            si.killForceAtlas2();
+            $log.debug('::sigma -> stop()')
+          } else {
+            $log.debug('::sigma -> stop() skipping, it was stopped already')
+          }
           scope.status = IS_STOPPED;
           
-          si.killForceAtlas2();
-          $log.debug('::sigma -> stop()')
         }
         function zoomin() {
           sigma.misc.animation.camera(
@@ -545,6 +699,26 @@ angular.module('histograph')
             context.closePath(); 
               
           }
+
+          // draw a round all around
+          if(node.ghost == 0 && !node.center) {
+            context.fillStyle = "rgba(0,0,0, .11)";
+            context.beginPath();
+            context.arc(
+              node[prefix + 'x'],
+              node[prefix + 'y'],
+              node[prefix + 'size'] + 12,
+              0,
+              Math.PI * 2,
+              true
+            );
+            
+            context.fill();
+            context.closePath();
+            
+          }
+
+          // draw the main node
           context.fillStyle = node.discard? "rgba(0,0,0, .11)": node.color;
           context.beginPath();
           context.arc(
@@ -559,6 +733,20 @@ angular.module('histograph')
           context.fill();
           context.closePath();
           
+          
+
+          // draw a square: node is a central node
+          if(node.center) {
+            var l = node[prefix + 'size'] + 12;
+            context.fillStyle = '#383838';
+            context.rect(
+              node[prefix + 'x'] - l/2,
+              node[prefix + 'y'] - l/2,
+              l,
+              l
+            );
+             context.fill();
+          }
         };
         
         
@@ -596,8 +784,11 @@ angular.module('histograph')
             );
             context.stroke();
           } else {
+          if(source.ghost == 1 || target.ghost == 1)
+              context.strokeStyle = "rgba(0,0,0, .047)"
           
-          context.strokeStyle = edge.discard? '#e8E8E8' : scale(edge.weight||1)//color;
+          else
+            context.strokeStyle = edge.discard? '#e8E8E8' : scale(edge.weight||1)//color;
           context.lineWidth = edge.discard? 1: 2;//edge[prefix + 'weight'] || edge.weight || 1;
           context.beginPath();
           context.moveTo(
@@ -664,7 +855,18 @@ angular.module('histograph')
           var fontSize,
               prefix = settings('prefix') || '',
               size = node[prefix + 'size'];
-          
+          if(node.center) {
+            fontSize = settings('defaultLabelSize');
+            context.font = (settings('fontStyle') ? settings('fontStyle') + ' ' : '') +
+              fontSize + 'px ' + settings('font');
+            context.fillStyle = settings('defaultLabelColor');
+            context.fillText(
+              cutat(node.label, 22),
+              Math.round(node[prefix + 'x'] + size + 9),
+              Math.round(node[prefix + 'y'] + fontSize / 3)
+            );
+            return;
+          }
           if(node.discard)
             return;
           
@@ -689,7 +891,7 @@ angular.module('histograph')
             settings('defaultLabelColor');
 
           context.fillText(
-            node.label,
+            cutat(node.label, 22),
             Math.round(node[prefix + 'x'] + size + 3),
             Math.round(node[prefix + 'y'] + fontSize / 3)
           );
@@ -740,4 +942,93 @@ angular.module('histograph')
         // sigma.svg.hovers.def = function() {}
       }
     }
-  });
+  })
+.directive('gmasp', function ($log, $location) {
+    return {
+      restrict : 'A',
+      templateUrl: 'templates/partials/helpers/network-legend.html',
+      scope:{
+        target : '='
+      },
+      link : function(scope, element, attrs) {
+        var _gasp = $(element[0]); // gasp instance;
+        scope.enabled = false;
+        $log.log('::gmasp ready');
+        
+        scope.addTargetToQueue = function() {
+          $log.log('::gmasp -> addTargetToQueue()')
+          if(scope.target.type == 'node')
+            scope.$parent.addToQueue({
+              items: [ scope.target.data.node.id ]
+            });
+          else if(scope.target.type == 'edge')
+            scope.$parent.addToQueue({
+              items: [
+                scope.target.data.edge.nodes.source.id,
+                scope.target.data.edge.nodes.target.id
+              ]
+            })
+        }
+        // add the current target id as the ID
+        scope.addTargetToFilter = function() {
+          $log.log('::gmasp -> addTargetToFilter()');
+          if(scope.target.type == 'node')
+            scope.$parent.addFilter({
+              key: 'with',
+              value: scope.target.data.node.id
+            });
+          else
+            scope.$parent.addFilter({
+              key: 'with',
+              value: [scope.target.data.edge.nodes.source.id, scope.target.data.edge.nodes.target.id].join(',')
+            });
+        }
+        
+        /*
+          display node or edge egonetwork
+
+        */
+        scope.egonetwork = function() {
+          $log.log('::gmasp -> egonetwork()');
+          
+          var nodes = [];
+          if(scope.target.type == 'node')
+            nodes.push(scope.target.data.node.id)
+          else
+            nodes.push(
+              scope.target.data.edge.nodes.source.id,
+              scope.target.data.edge.nodes.target.id
+            );
+          scope.$parent.egonetwork(nodes);
+        }
+
+        /*
+          Enable or disable GMASP according to scope.target nature.
+        */
+        scope.$watch('target', function(v) {
+          $log.log('::gmasp @target - value:', v);
+          if(!v || !v.type) {
+            // make it NOT visible
+            scope.enabled = false;
+            return;
+          }
+          // handle label according to target type (node or edge)
+          if(v.type=='node') {
+            scope.href  = '#/' + (v.data.node.type=='resource'? 'r': 'e') + '/' + v.data.node.id;
+            scope.label = v.data.node.label;
+            scope.type = v.data.node.type;
+            scope.filterby = 'filter by ' + v.data.node.label;
+          } else if(v.type == 'edge') {
+            scope.href   = false;
+            scope.weight = v.data.edge.weight;
+            scope.left   = v.data.edge.nodes.source;
+            scope.right  = v.data.edge.nodes.target;
+            scope.filterby = 'filter by ' + v.data.edge.nodes.source.label +', '+v.data.edge.nodes.target.label;
+          }
+          // make it visible
+          scope.enabled = true;
+          
+        })
+      }
+    }
+  })

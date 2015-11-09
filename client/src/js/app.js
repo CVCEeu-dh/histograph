@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * @ngdoc overview
  * @name histograph
@@ -8,20 +6,20 @@
  *
  * Main module of the application.
  */
- CodeMirror.defineSimpleMode("hg", {
-    start: [
-      { regex: /#/,    push: "tag", token: "tag" },
-      { regex: /@/,    push: "user", token: "comment" }
-    ],
-    tag: [
-      { regex: /\s/, pop: true, token: "tag" },
-      { regex: /./, token: "tag" }
-    ],
-    user: [
-      { regex: /\s/, pop: true, token: "comment" },
-      { regex: /./, token: "comment" }
-    ]
-  });
+CodeMirror.defineSimpleMode("hg", {
+  start: [
+    { regex: /#/,    push: "tag", token: "tag" },
+    { regex: /@/,    push: "user", token: "comment" }
+  ],
+  tag: [
+    { regex: /\s/, pop: true, token: "tag" },
+    { regex: /./, token: "tag" }
+  ],
+  user: [
+    { regex: /\s/, pop: true, token: "comment" },
+    { regex: /./, token: "comment" }
+  ]
+});
 
 angular
   .module('histograph', [
@@ -33,7 +31,8 @@ angular
     'ui.codemirror',
     // 'mgcrea.ngStrap'
     'perfect_scrollbar',
-    'LocalStorageModule'
+    'LocalStorageModule',
+    'wu.masonry'
   ])
   .constant("EVENTS", {
     USE_USER: 'use_user',
@@ -41,7 +40,11 @@ angular
     API_PARAMS_CHANGED: 'api_params_changed',
     PAGE_CHANGED: 'page_changed',
     ANNOTATOR_SHOWN: 'annotationEditorShown',
-    ANNOTATOR_HIDDEN: 'annotationEditorHidden'
+    ANNOTATOR_HIDDEN: 'annotationEditorHidden',
+    INFINITE_SCROLL: 'infinite_scroll',
+    // proper angular events (directives needs to be alerted)
+    LOCATION_CHANGE_START: 'LOCATION_CHANGE_START',
+    STATE_CHANGE_SUCCESS: 'STATE_CHANGE_SUCCESS'
   })
   .constant("VIZ", {
     TIMELINE: 'timeline'
@@ -50,6 +53,62 @@ angular
     LOADING: 'loading, please wait',
     LOADED: 'loaded',
     AUTH_REQUIRED: 'please connect with your credentials'
+  })
+  .constant("ORDER_BY", {
+    RELEVANCE: {
+      label: 'relevance',
+      value: 'relevance'
+    },
+    
+    CLOSEST_DATE: {
+      label: 'date (closest)',
+      value: '-date'
+    }
+    
+  })
+  .constant('GRAMMAR', {
+    AS_TYPES: [
+      {
+        name: 'of any kind',
+      },
+      {
+        name: '(pictures)',
+        filter: 'type=picture'
+      },
+      {
+        name: '(cartoons)',
+        filter: 'type=cartoon'
+      },
+      {
+        name: '(letters)',
+        filter: 'type=letter'
+      },
+      {
+        name: '(treaty)',
+        filter: 'type=treaty'
+      }
+    ],
+    IN_TYPES: [
+      {
+        name: 'in any kind of documents',
+      },
+      {
+        name: 'in pictures',
+        filter: 'type=picture'
+      },
+      {
+        name: 'in cartoons',
+        filter: 'type=cartoon'
+      },
+      {
+        name: 'in letters',
+        filter: 'type=letter'
+      },
+      {
+        name: 'in treaty',
+        filter: 'type=treaty'
+      }
+    ]
   })
   /*
     Local-storage module config. cfr
@@ -60,17 +119,135 @@ angular
       .setPrefix('histograph')
       .setNotify(true, true);
   })
-  .config(function ($stateProvider, $urlRouterProvider) {
+  .config(function ($uibTooltipProvider) {
+    $uibTooltipProvider.options({
+      placement: 'top',
+      animation: true,
+      popupDelay: 0,
+      popupCloseDelay: 500,
+      appendToBody: true
+    })
+  })
+  .config(function ($stateProvider, $urlRouterProvider, GRAMMAR) {
     $urlRouterProvider
       .otherwise("/");
     $stateProvider
       .state('index', {
-        url: '/',
+        url: '/in',
        
         templateUrl: 'templates/index.html',
         controller: 'IndexCtrl',
         reloadOnSearch: false,
       })
+      
+      .state('explore', {
+        url: '/',
+        abstract: true,
+        templateUrl: 'templates/explore.html',
+        controller: 'ExploreCtrl',
+        grammar: {
+          name: 'resource',
+          label: 'show',
+          choices: [
+            {
+              name: 'explore.resources',
+              label: 'documents'
+            }, {
+              name: 'explore.persons',
+              label: 'people'
+            }
+          ],
+          connector: {
+              type: 'in documents of type',
+              relatedTo: 'which contains',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: [
+              {
+                name: 'in any kind of documents',
+              },
+              {
+                name: 'in pictures',
+                filter: 'type=picture'
+              },
+              {
+                name: 'in letters',
+                filter: 'type=letter'
+              },
+              {
+                name: 'in treaty',
+                filter: 'type=treaty'
+              }
+            ],
+            relatedTo: {
+              typeahead: 'entity'
+            }
+        },
+        // resolve: {
+        //   resources: function(ResourcesFactory, $location) {
+            
+        //     return ResourcesFactory.get(angular.extend({
+        //       limit: 10
+        //     }, $location.search())).$promise;
+        //   },
+        // }
+      })
+        .state('explore.resources', {
+          url: '',
+          templateUrl: 'templates/partials/resources-masonry.html',
+          controller: 'ExploreResourcesCtrl',
+          grammar: {
+            label: 'documents',
+            connector: {
+              type: 'in documents of type',
+              relatedTo: 'which contains',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: [
+              {
+                name: 'in any kind of documents',
+              },
+              {
+                name: 'in pictures',
+                filter: 'type=picture'
+              },
+              {
+                name: 'in letters',
+                filter: 'type=letter'
+              },
+              {
+                name: 'in treaty',
+                filter: 'type=treaty'
+              }
+            ],
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
+        })
+        .state('explore.persons', {
+          url: 'per',
+          template: '<div></div>',
+          controller: 'ExploreEntitiesCtrl',
+          grammar: {
+            label: 'people',
+            connector: {
+              type: 'in documents of type',
+              relatedTo: 'which contains',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: GRAMMAR.IN_TYPES,
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
+        })
       
       .state('entity', {
         abstract: true,
@@ -78,12 +255,26 @@ angular
         templateUrl: 'templates/entity.html',
         controller: 'EntityCtrl',
         reloadOnSearch: false,
+        grammar: {
+          name: 'resource',
+          label: 'explore next',
+          choices: [
+            {
+              name: 'entity.resources',
+              label: 'documents'
+            }, {
+              name: 'entity.persons',
+              label: 'people'
+            }
+          ],
+        },
         resolve: {
           entity: function(EntityFactory, $stateParams) {
             return EntityFactory.get({
               id: $stateParams.id
             }).$promise;
           },
+          // cooccurrences (appearing with)
           persons: function(EntityRelatedFactory, $stateParams) {
             return EntityRelatedFactory.get({
               id: $stateParams.id,
@@ -104,6 +295,36 @@ angular
           url: '',
           templateUrl: 'templates/partials/entities.html',
           controller: 'EntitiesCtrl',
+          grammar: {
+            label: 'people',
+            connector: {
+              type: 'in documents of type',
+              relatedTo: 'which contains',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: [
+              {
+                name: 'in any kind of documents',
+              },
+              {
+                name: 'in pictures',
+                filter: 'type=picture'
+              },
+              {
+                name: 'in letters',
+                filter: 'type=letter'
+              },
+              {
+                name: 'in treaty',
+                filter: 'type=treaty'
+              }
+            ],
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
           resolve: {
             model: function(){
               return 'person'
@@ -114,12 +335,13 @@ angular
             relatedFactory: function(EntityRelatedFactory) {
               return EntityRelatedFactory
             },
-            entities: function(EntityRelatedFactory, $stateParams) {
-              return EntityRelatedFactory.get({
+            entities: function(EntityRelatedFactory, $stateParams, $location) {
+              return EntityRelatedFactory.get(angular.extend({}, $location.search(), {
                 id: $stateParams.id,
                 model: 'person',
-                limit: 10
-              }).$promise;
+                limit: 10,
+                offset: 0
+              })).$promise;
             }
           }
         })
@@ -173,6 +395,36 @@ angular
           url: '/r',
           templateUrl: 'templates/partials/resources.html',
           controller: 'ResourcesCtrl',
+          grammar: {
+            label: 'documents',
+            connector: {
+              type: 'of type',
+              relatedTo: 'which contains',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: [
+              {
+                name: 'of any kind',
+              },
+              {
+                name: 'pictures',
+                filter: 'type=picture'
+              },
+              {
+                name: 'letters',
+                filter: 'type=letter'
+              },
+              {
+                name: 'treaty',
+                filter: 'type=treaty'
+              }
+            ],
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
           resolve: {
             relatedVizFactory: function(EntityRelatedVizFactory) {
               return EntityRelatedVizFactory
@@ -180,12 +432,12 @@ angular
             relatedFactory: function(EntityRelatedFactory) {
               return EntityRelatedFactory
             },
-            resources: function(EntityRelatedFactory, $stateParams) {
-              return EntityRelatedFactory.get({
+            resources: function(EntityRelatedFactory, $stateParams, $location) {
+              return EntityRelatedFactory.get(angular.extend({},$location.search(), {
                 id: $stateParams.id,
                 model: 'resource',
                 limit: 10
-              }).$promise;
+              })).$promise;
             },
           }
         })
@@ -196,9 +448,20 @@ angular
         /u/username - the PUBLIC profile of another user
       */
       .state('user', {
-        url: '/u',
+        url: '/u/:id',
+        abstract: true,
         templateUrl: 'templates/user.html',
         controller: 'UserCtrl',
+        grammar: {
+          name: 'user',
+          label: 'show user',
+          choices: [
+            {
+              name: 'user.resources',
+              label: 'favourite documents'
+            }
+          ],
+        },
         resolve: {
           pulse: function(UserFactory, $stateParams) {
             return UserFactory.get({
@@ -207,6 +470,57 @@ angular
           }
         }
       })
+        .state('user.resources', {
+          url: '',
+          templateUrl: 'templates/partials/resources.html',
+          controller: 'ResourcesCtrl',
+          grammar: {
+            label: 'favourite documents',
+            connector: {
+              type: 'of type',
+              relatedTo: 'which contains',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: [
+              {
+                name: 'of any kind',
+              },
+              {
+                name: 'pictures',
+                filter: 'type=picture'
+              },
+              {
+                name: 'letters',
+                filter: 'type=letter'
+              },
+              {
+                name: 'treaty',
+                filter: 'type=treaty'
+              }
+            ],
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
+          resolve: {
+            relatedVizFactory: function(UserRelatedVizFactory) {
+              return UserRelatedVizFactory
+            },
+            relatedFactory: function(UserRelatedFactory) {
+              return UserRelatedFactory
+            },
+            resources: function(UserRelatedFactory, $stateParams, $location) {
+              return UserRelatedFactory.get(angular.extend({},$location.search(), {
+                id: $stateParams.id,
+                model: 'resource',
+                limit: 10
+              })).$promise;
+            },
+          }
+        })
+
        /*
         resources
         @todo
@@ -224,34 +538,95 @@ angular
             }).$promise;
           },
           
+        },
+        grammar: {
+          name: 'resource',
+          label: 'explore next',
+          choices: [
+            {
+              name: 'resource.resources',
+              label: 'documents'
+            }, 
+            {
+              name: 'resource.persons',
+              label: 'people'
+            },
+            {
+              name: 'resource.users',
+              label: 'researchers'
+            },
+            {
+              name: 'resource.inquiries',
+              label: 'inquiries'
+            },
+
+            {
+              name: 'resource.organizations',
+              label: 'organizations (experimental)'
+            }
+          ]
         }
       })
         .state('resource.resources', {
           url: '',
           templateUrl: 'templates/partials/resources.html',
-          controller: 'ResourcesCtrl',
+          controller: 'RelatedItemsCtrl',
+          grammar: {
+            label: 'documents',
+            connector: {
+              type: 'in documents of type',
+              relatedTo: 'which contains',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: GRAMMAR.AS_TYPES,
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
           resolve: {
+            relatedModel: function() {
+              return 'resource'
+            },
             relatedVizFactory: function(ResourceRelatedVizFactory) {
               return ResourceRelatedVizFactory
             },
             relatedFactory: function(ResourceRelatedFactory) {
               return ResourceRelatedFactory
             },
-            resources: function(ResourceRelatedFactory, $stateParams) {
-              return ResourceRelatedFactory.get({
+            relatedItems: function(ResourceRelatedFactory, $stateParams, $location) {
+              
+              return ResourceRelatedFactory.get(angular.extend({
                 id: $stateParams.id,
                 model: 'resource',
                 limit: 10
-              }).$promise;
+              }, $location.search())).$promise;
             },
           }
         })
         .state('resource.persons', {
           url: '/per',
           templateUrl: 'templates/partials/entities.html',
-          controller: 'EntitiesCtrl',
+          controller: 'RelatedItemsCtrl',
+          // added custom grammar dict
+          // diplay people [in documents of type] ...
+          grammar: {
+            label: 'people',
+            connector: {
+              type: 'in documents of type',
+              relatedTo: 'which contains',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: GRAMMAR.IN_TYPES,
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
           resolve: {
-            model: function(){
+            relatedModel: function(){
               return 'person'
             },
             relatedVizFactory: function(ResourceRelatedVizFactory) {
@@ -260,12 +635,12 @@ angular
             relatedFactory: function(ResourceRelatedFactory) {
               return ResourceRelatedFactory
             },
-            entities: function(ResourceRelatedFactory, $stateParams) {
-              return ResourceRelatedFactory.get({
+            relatedItems: function(ResourceRelatedFactory, $stateParams, $location) {
+              return ResourceRelatedFactory.get(angular.extend({
                 id: $stateParams.id,
                 model: 'person',
                 limit: 10
-              }).$promise;
+              }, $location.search())).$promise;
             }
           }
         })
@@ -273,8 +648,38 @@ angular
           url: '/org',
           templateUrl: 'templates/partials/entities.html',
           controller: 'EntitiesCtrl',
+          grammar: {
+            label: 'organizations',
+            connector: {
+              type: 'in documents of type',
+              relatedTo: 'which contains',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: [
+              {
+                name: 'in any kind of documents',
+              },
+              {
+                name: 'in pictures',
+                filter: 'type=picture'
+              },
+              {
+                name: 'in letters',
+                filter: 'type=letter'
+              },
+              {
+                name: 'in treaty',
+                filter: 'type=treaty'
+              }
+            ],
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
           resolve: {
-            model: function(){
+            relatedModel: function(){
               return 'organization'
             },
             relatedVizFactory: function(ResourceRelatedVizFactory) {
@@ -296,17 +701,70 @@ angular
         .state('resource.users', {
           url: '/u',
           templateUrl: 'templates/partials/users.html',
-          controller: 'UsersCtrl',
-          resolve: {
-            users: function(ResourceRelatedFactory, $stateParams) {
-              return ResourceRelatedFactory.get({
-                id: $stateParams.id,
-                model: 'user'
-              }).$promise;
+          controller: 'RelatedItemsCtrl',
+          grammar: {
+            label: 'researchers',
+            connector: {
+              type: 'in documents of type',
+              relatedTo: 'which contains',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
             }
+          },
+          resolve: {
+            relatedModel: function(){
+              return 'user'
+            },
+            relatedVizFactory: function(ResourceRelatedVizFactory) {
+              return ResourceRelatedVizFactory
+            },
+            relatedFactory: function(ResourceRelatedFactory) {
+              return ResourceRelatedFactory
+            },
+            relatedItems: function(ResourceRelatedFactory, $stateParams, $location) {
+              return ResourceRelatedFactory.get(angular.extend({
+                id: $stateParams.id,
+                model: 'user',
+                limit: 10
+              }, $location.search())).$promise;
+            },
           }
         })
-        
+
+        .state('resource.inquiries', {
+          url: '/inq',
+          templateUrl: 'templates/partials/inquiries.html',
+          controller: 'RelatedItemsCtrl',
+          grammar: {
+            label: 'inquiries',
+            connector: {
+              type: 'in documents of type',
+              relatedTo: 'which contains',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            }
+          },
+          resolve: {
+            relatedModel: function(){
+              return 'inquiry'
+            },
+            relatedVizFactory: function(ResourceRelatedVizFactory) {
+              return ResourceRelatedVizFactory
+            },
+            relatedFactory: function(ResourceRelatedFactory) {
+              return ResourceRelatedFactory
+            },
+            relatedItems: function(ResourceRelatedFactory, $stateParams, $location) {
+              return ResourceRelatedFactory.get(angular.extend({
+                id: $stateParams.id,
+                model: 'inquiry',
+                limit: 10
+              }, $location.search())).$promise;
+            },
+          }
+        })
         .state('resource.inquiry', {
           url: '/inq/{inquiry_id:[0-9,]+}',
           templateUrl: 'templates/partials/inquiry.html',
@@ -319,25 +777,12 @@ angular
             }
           }
         })
-        .state('resource.inquiries', {
-          url: '/inq',
-          templateUrl: 'templates/partials/inquiries.html',
-          controller: 'InquiriesCtrl',
-          resolve: {
-            inquiries: function(ResourceRelatedFactory, $stateParams) {
-              return ResourceRelatedFactory.get({
-                id: $stateParams.id,
-                model: 'inquiry',
-                limit: 10
-              }).$promise;
-            },
-          }
+        
+        .state('resource.createInquiry', {
+          url: '/inq/create',
+          templateUrl: 'templates/partials/inquiries.create.html',
+          controller: 'InquiryCreateCtrl'
         })
-          .state('resource.inquiries.create', {
-            url: '/create',
-            templateUrl: 'templates/partials/inquiries.create.html',
-            controller: 'InquiryCreateCtrl'
-          })
           .state('resource.inquiries.createIssue', {
             url: '/create/{type:date|title}',
             templateUrl: 'templates/partials/issues.create.html',
@@ -360,53 +805,230 @@ angular
         url: '/neighbors/{ids:[0-9,]+}',
         templateUrl: 'templates/neighbors.html',
         controller: 'NeighborsCtrl',
-        resolve: {
-          allInBetween: function(SuggestFactory, $stateParams) {
-            return SuggestFactory.allInBetween({
-              ids: $stateParams.ids
-            });
-          }
-        }
+        grammar: {
+          name: 'neighbors',
+          label: 'explore the network of',
+          choices: [
+            {
+              name: 'neighbors.resources',
+              label: 'documents'
+            }, {
+              name: 'neighbors.persons',
+              label: 'people'
+            }
+          ]
+        },
+        // resolve: {
+        //   allInBetween: function(SuggestFactory, $stateParams) {
+        //     return SuggestFactory.allInBetween({
+        //       ids: $stateParams.ids
+        //     });
+        //   }
+        // }
       })
-        
         .state('neighbors.resources', {
-          url: '/r',
-          templateUrl: 'templates/partials/neighbors.html',
-          controller: 'NeighborsResourcesCtrl',
+          url: '',
+          templateUrl: 'templates/partials/resources.html',
+          controller: 'ResourcesCtrl',
+          grammar: {
+            label: 'documents',
+            connector: {
+              type: 'of type',
+              relatedTo: 'which contains',
+              notRelatedTo: 'between',
+              from: 'from',
+              to: 'to'
+            },
+            types: [
+              {
+                name: 'of any kind',
+              },
+              {
+                name: 'pictures',
+                filter: 'type=picture'
+              },
+              {
+                name: 'letters',
+                filter: 'type=letter'
+              },
+              {
+                name: 'treaty',
+                filter: 'type=treaty'
+              }
+            ],
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
+          resolve: {
+            relatedVizFactory: function(SuggestAllInBetweenVizFactory) {
+              return SuggestAllInBetweenVizFactory;
+            },
+            relatedFactory: function(SuggestAllInBetweenFactory) {
+              return SuggestAllInBetweenFactory;
+            },
+            resources: function(SuggestAllInBetweenFactory, $stateParams, $location) {
+              return SuggestAllInBetweenFactory.get(angular.extend({
+                limit: 10,
+                model: 'resource'
+              }, $stateParams, $location.search())).$promise; 
+            }
+          }
+        })
+        .state('neighbors.persons', {
+          url: '/per',
+          templateUrl: 'templates/partials/entities.html',
+          controller: 'EntitiesCtrl',
+          resolve: {
+            model: function(){
+              return 'person'
+            },
+            relatedVizFactory: function(SuggestVizFactory) {
+              return SuggestAllInBetweenVizFactory
+            },
+            relatedFactory: function(ResourceRelatedFactory) {
+              return SuggestAllInBetweenFactory
+            },
+            entities: function(SuggestAllInBetweenFactory, $stateParams) {
+            // clean limit here
+            // console.log($stateParams)
+              return SuggestAllInBetweenFactory.get({
+                ids: $stateParams.ids,
+                limit: 10,
+                model: 'person'
+              }).$promise; 
+            }
+          }
         })
       
       .state('search', {
         abstract:true,
-        url: '/search/{query:[^/]*}',
+        url: '/search/:query',
         templateUrl: 'templates/search.html',
         controller: 'SearchCtrl',
+        grammar: {
+          name: 'resource',
+          label: '',
+          choices: [
+            {
+              name: 'search.resources',
+              label: 'documents'
+            }, {
+              name: 'search.persons',
+              label: 'people'
+            }
+          ]
+        },
         resolve: {
-          resources: function(SuggestFactory, $stateParams) {
-            // clean limit here
-            return SuggestFactory.getResources({
-              query: $stateParams.query,
-              limit: 10
-            });
-          },
-          entities: function(SuggestFactory, $stateParams) {
-            // clean limit here
-            console.log($stateParams)
-            return SuggestFactory.getEntities({
-              query: $stateParams.query,
-              limit: 10
-            });
+          stats: function(SuggestFactory, $stateParams) {
+            return SuggestFactory.getStats({
+              query: $stateParams.query
+            }).$promise;
           }
         }
       })
         .state('search.resources', {
           url: '',
           templateUrl: 'templates/partials/resources.html',
-          controller: 'SearchResourcesCtrl',
+          controller: 'ResourcesCtrl',
+          grammar: {
+            label: 'documents',
+            connector: {
+              type: 'of type',
+              relatedTo: 'which contains',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: [
+              {
+                name: 'any kind of documents',
+              },
+              {
+                name: 'pictures',
+                filter: 'type=picture'
+              },
+              {
+                name: 'letters',
+                filter: 'type=letter'
+              },
+              {
+                name: 'treaty',
+                filter: 'type=treaty'
+              }
+            ],
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
+          resolve: {
+            relatedVizFactory: function(SearchVizFactory) {
+              return SearchVizFactory
+            },
+            relatedFactory: function(SearchFactory) {
+              return SearchFactory
+            },
+            resources: function(SearchFactory, $stateParams, $location) {
+              return SearchFactory.get(angular.extend({},$location.search(), {
+                model: 'resource',
+                query: $stateParams.query,
+                limit: 10
+              })).$promise;
+            }
+          }
         })
         .state('search.persons', {
           url: '/per',
           templateUrl: 'templates/partials/entities.html',
-          controller: 'SearchEntitiesCtrl',
+          controller: 'EntitiesCtrl',
+          grammar: {
+            label: 'people',
+            connector: {
+              type: 'in documents of type',
+              relatedTo: 'which contains',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: [
+              {
+                name: 'in any kind of documents',
+              },
+              {
+                name: 'in pictures',
+                filter: 'type=picture'
+              },
+              {
+                name: 'in letters',
+                filter: 'type=letter'
+              },
+              {
+                name: 'in treaties',
+                filter: 'type=treaty'
+              }
+            ],
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
+          resolve: {
+            model: function(){
+              return 'person'
+            },
+            relatedVizFactory: function(SearchVizFactory) {
+              return SearchVizFactory
+            },
+            relatedFactory: function(SearchFactory) {
+              return SearchFactory
+            },
+            entities: function(SearchFactory, $stateParams, $location) {
+              return SearchFactory.get(angular.extend({},$location.search(), {
+                model: 'entity',
+                query: $stateParams.query,
+                limit: 10
+              })).$promise;
+            },
+          }
         })
         .state('search.locations', {
           url: '/loc',
@@ -423,33 +1045,7 @@ angular
           templateUrl: 'templates/partials/entities.html',
           controller: 'SearchEntitiesCtrl',
         })
-      //   .state('search.entities', {
-      //     url: '/{entity:person|location}/',
-      //     templateUrl: 'templates/partials/resources.html',
-      //     controller: 'SearchResourcesCtrl',
-      //   })
-      // .state('searchentity', {
-      //   url: '/search/{query}/{entity:person|location}',
-      //   templateUrl: 'templates/search.html',
-      //   controller: 'SearchCtrl',
-      //   resolve: {
-      //     resources: function(SuggestFactory, $stateParams) {
-      //       // clean limit here
-      //       return SuggestFactory.getResources({
-      //         query: $stateParams.query,
-      //         limit: 10
-      //       });
-      //     },
-      //     entities: function(SuggestFactory, $stateParams) {
-      //       // clean limit here
-      //       return SuggestFactory.getEntities({
-      //         query: $stateParams.query,
-      //         entity: $stateParams.entity,
-      //         limit: 10
-      //       });
-      //     }
-      //   }
-      // });
+     
   })
   .config(function ($httpProvider) {
     $httpProvider.interceptors.push(function ($q, $log, $rootScope, EVENTS) {

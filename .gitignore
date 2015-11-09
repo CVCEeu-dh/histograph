@@ -9,6 +9,10 @@ settings.js
 *.csv
 
 contents
+dist
 
 __*.*
 __*
+TODO
+*.gdf
+*.gexf

@@ -42,31 +42,14 @@ module.exports = {
         item: item
       }, info || {});
     },
-    getMany: function (err, res, items, info) {
+    getMany: function (err, res, items, info, params) {
       if(err && err != IS_EMPTY)
         return module.exports.cypherQueryError(err, res);
-      return res.ok({
-        items: items || []
-      }, info);
+      res.ok({
+        items: items
+      }, _.assign(info || {}, params || {}));
     }
-  }, 
-  /**
-    Handle causes and stacktraces provided by seraph
-    @err the err string provided by cypher
-    @res the express response object
-  */
-  cypherError: function(err, res) {
-    if(err && err.message) {
-        var result = JSON.parse(err.message);
-
-        if(result.cause)
-          return res.error(400, result.cause);
-
-        return res.error(500, result);
-    }
-    return res.error(400, err.message);
   },
-  
   /**
     Given a query and its cypher params, do wonderful stuff.
     The query MUST resturn a list of (source,target,weight) triads.
@@ -75,6 +58,7 @@ module.exports = {
     @return (err, graph) - error, or a graph of nodes and edges
   */
   cypherGraph: function(query, params, next) {
+    query= parser.agentBrown(query, params);
     neo4j.query(query, params, function (err, items) {
       if(err) {
         next(err);
@@ -136,24 +120,25 @@ module.exports = {
     @res the express response object
   */
   cypherQueryError: function(err, res) {
-    // for(i in err)
-    //   console.log(i)
-    // console.log('@helpers.cypherQueryError', err.neo4jException, err.statusCode, err.neo4jCause)
     switch(err.neo4jException) {
       case 'EntityNotFoundException':
-        return res.error(404, {
+        res.error(404, {
           message:  err.neo4jCause.message,
           exception: err.neo4jException
         });
         break;
       case 'ParameterNotFoundException':
-        return res.error(404, {
+        res.error(404, {
           message:  err.neo4jError.message,
           exception: err.neo4jException
         });
         break;
       default:
-        return res.error(err.statusCode, err);
+        if (err.statusCode) {
+          res.error(err.statusCode, err.neo4jError.message.message);
+        } else {
+          res.error(400, err);
+        }
     };
   },
   
@@ -161,7 +146,9 @@ module.exports = {
     Handle Form errors (Bad request)
   */
   formError: function(err, res) {
-    return res.error(400, err);
+    return res.error(400, {
+      form: err
+    });
   },
 
   /**
@@ -425,7 +412,7 @@ module.exports = {
       }
       
       return text.toLowerCase()
-        .replace(/[^a-z]/g, '-')
+        .replace(/[^a-z0-9]/g, '-')
         .replace(/-{1,}/g,'-')
         .replace(/-$/,'')
         .replace(/^-/, '');
@@ -620,9 +607,13 @@ module.exports = {
             q.push(locations);
             q.drain = nextReconciliation;
           },
+          
           // places entities (countries and cities) by using geocoding services
           function (nextReconciliation) {
             var q = async.queue(function (location, nextLocation) {
+              // read file
+              // if(settings.cache.services)
+              //   fs.readFile(path.join(settings.cache.services, )
               module.exports.geocoding(location.disambiguated.name, function (err, nodes){
                 if(err == IS_EMPTY) {
                   nextLocation();
@@ -696,29 +687,45 @@ module.exports = {
     };
     if(options.language)
       params.lang = options.language
-    
-    services.geonames(params, function (err, results) {
-      if(err == IS_EMPTY)
-        next(null, [])
-      else
-        next(null, results.map(function (location) {
-          // add prefixes...
-          return {
-            lat:           location.lat,
-            lng:           location.lng,
-            fcl:           location.fcl,
-            country:       location._country,
-            geoname_fcl:     location.fcl,
-            geoname_lat:     +location.lat,
-            geoname_lng:     +location.lng,
-            geoname_id:      location._id,
-            geoname_q:       location._query,
-            geoname_name:    location._name,
-            geoname_country: location._country,
-            __name:          location._name
-          };
-        }));
-    });
+    module.exports.cache.read({
+      namespace: 'services',
+      ref: 'geonames:' + options.text
+    }, function (err, contents) {
+      if(contents) {console.log('using saved data')
+        next(null, contents);
+        return;
+      }
+      services.geonames(params, function (err, results) {
+        if(err == IS_EMPTY)
+          next(null, [])
+        else {
+          var results = results.map(function (location) {
+            // add prefixes...
+            return {
+              lat:           location.lat,
+              lng:           location.lng,
+              fcl:           location.fcl,
+              country:       location._country,
+              geoname_fcl:     location.fcl,
+              geoname_lat:     +location.lat,
+              geoname_lng:     +location.lng,
+              geoname_id:      location._id,
+              geoname_q:       location._query,
+              geoname_name:    location._name,
+              geoname_country: location._country,
+              __name:          location._name
+            };
+          });
+          
+          module.exports.cache.write(JSON.stringify(results), {
+            namespace: 'services',
+            ref: 'geonames:' + options.text
+          }, function(err) {
+            next(null, results);
+          });
+        } 
+      });
+    })
   },
   
   geocoding: function(options, next) {
@@ -727,31 +734,49 @@ module.exports = {
     };
     // if(options.language)
     //   params.language = options.language
-    
-    services.geocoding(params, function (err, results) {
-      if(err == IS_EMPTY)
-        next(null, [])
-      else if(err)
-        next(err)
-      else
-        next(null, results.filter(function(location) {
-          return location._fcl;
-        }).map(function (location) {
-          return {
-            fcl:           location._fcl,
-            geocoding_fcl:     location._fcl,
-            geocoding_lat:     +location.geometry.location.lat,
-            geocoding_lng:     +location.geometry.location.lng,
-            lat:             +location.geometry.location.lat,
-            lng:             +location.geometry.location.lng,
-            __name:            location._name,
-            country:         location._country,
-            geocoding_id:      location._id,
-            geocoding_q:       location._query,
-            geocoding_name:    location._name,
-            geocoding_country: location._country
-          };
-        }));
+    module.exports.cache.read({
+      namespace: 'services',
+      ref: 'geocoding:' + options.text
+    }, function (err, contents) {
+      if(contents) {
+        next(null, contents);
+        return;
+      }
+      services.geocoding(params, function (err, results) {
+        if(err == IS_EMPTY)
+          next(null, [])
+        else if(err)
+          next(err)
+        else {
+          var results = results.filter(function(location) {
+            return location._fcl;
+          }).map(function (location) {
+            
+            return {
+              fcl:           location._fcl,
+              lat:             +location.geometry.location.lat,
+              lng:             +location.geometry.location.lng,
+              country:         location._country,
+              geocoding_fcl:     location._fcl,
+              geocoding_lat:     +location.geometry.location.lat,
+              geocoding_lng:     +location.geometry.location.lng,
+              
+              geocoding_id:      location._id,
+              geocoding_q:       location._query,
+              geocoding_name:    location._name,
+              geocoding_country: location._country,
+              __name:            location._name,
+              
+            };
+          });
+          module.exports.cache.write(JSON.stringify(results), {
+            namespace: 'services',
+            ref: 'geocoding:' + options.text
+          }, function(err) {
+            next(null, results);
+          });
+        }  
+      }); 
     });
   },
   /**
@@ -826,8 +851,12 @@ module.exports = {
       start_date: start.format(), // ISO format
       start_time: +start.format('X'),
       end_date: end.format(),
-      end_time: +end.format('X')
+      end_time: +end.format('X'),
     };
+    
+    // calculate month
+    result.start_month = moment.utc(result.start_time, 'X').format('YYYYMM');
+    result.end_month   = moment.utc(result.end_time, 'X').format('YYYYMM');
     
     if(next)
       next(null, result);
@@ -839,7 +868,7 @@ module.exports = {
     Dummy Time transformation with moment.
   */
   reconcileHumanDate: function(humanDate, lang, next) {
-    var date = humanDate.match(/(\d*)[\sert\-]*(\d*)\s*([^\s\(\)]*)\s?(\d{4})/),
+    var date = humanDate.replace(/[\.\,]/g, '').match(/(\d*)[\sert\-]*(\d*)\s*([^\s\(\)]*)\s?(\d{4})/),
         start_date,
         end_date,
         result = {};
@@ -849,7 +878,7 @@ module.exports = {
     
     if(!date) {
       // check other patterns
-      var candidate = humanDate.match(/(\d{2,4})?[^\d](\d{2,4})/);
+      var candidate = humanDate.replace(/[\.\,]/g, '').match(/(\d{2,4})?[^\d](\d{2,4})/);
       if(!candidate) {
         if(next)
           next(IS_EMPTY);
@@ -1119,30 +1148,32 @@ module.exports = {
   */
   dbpediaRedirect: function(link, next) {
     var links     = typeof link == 'object'? link: [link],
-        redirects = [];
+        redirects = [],
+        cache     = {};
     var q = async.queue(function (_link, nextLink) {
-      // console.log('link', _link, q.length())
+      if(cache[_link]) {
+        console.log('skipping, already analyzed');
+        redirects.push(cache[_link]);
+        nextLink();
+        return;
+      }
+      
       services.dbpedia({
         link: _link,
         followRedirection: false
       }, function (err, wiki) {
+        var redirection = {};
         if(err) {
-          redirects.push({
-            redirectOf: undefined
-          });
+          redirection.redirectOf = undefined;
         } else if(_.size(wiki) == 0) {
-          redirects.push({
-            redirectOf: undefined
-          });
+          redirection.redirectOf = undefined;
         } else if(!wiki["http://dbpedia.org/resource/" + _link] || !wiki["http://dbpedia.org/resource/" + _link]["http://dbpedia.org/ontology/wikiPageRedirects"]) {
-          redirects.push({
-            redirectOf: _link
-          });
+          redirection.redirectOf = _link;
         } else {
-          redirects.push({
-            redirectOf: path.basename(_.first(wiki["http://dbpedia.org/resource/" + _link]["http://dbpedia.org/ontology/wikiPageRedirects"]).value)
-          });
+          redirection.redirectOf = path.basename(_.first(wiki["http://dbpedia.org/resource/" + _link]["http://dbpedia.org/ontology/wikiPageRedirects"]).value);
         }
+        cache[_link] = redirection;
+        redirects.push(redirection);
         setTimeout(nextLink, 5);
       });
     }, 1);
@@ -1174,10 +1205,9 @@ module.exports = {
     var aligned     = [],
         withWiki    = [],
         withoutWiki = [];
-    
     // step 1
     async.waterfall([
-      //
+      // disambiguate rerdirection
       function disambiguateDbpediaRedirect (callback) {
             // entities having a wiki link
         withWiki = _.filter(entities, function (d) {
@@ -1193,7 +1223,14 @@ module.exports = {
             callback(err);
             return
           }
-          callback(null, _.merge(withWiki, redirects).concat(withoutWiki));
+          var merged = [],
+              i,
+              l;
+          for(i=0, l=redirects.length; i < l; i++) {
+            withWiki[i].redirectOf = redirects[i].redirectOf
+          }
+          // console.log(withWiki)
+          callback(null, withWiki.concat(withoutWiki));
         })
       },
       
@@ -1205,6 +1242,7 @@ module.exports = {
             return d.type + '_' + d.redirectOf
           return d.type + '_' + d.name
         })).map(function (aliases) {
+          // console.log(aliases)
           // ... then remap the extracted entities in order to have group of same entity.
           var _d = {
             name: _.first(_.unique(_.map(aliases, 'name'))),
@@ -1216,6 +1254,7 @@ module.exports = {
           };
           // assemble various context related to the entity
           _d.context = _.flatten(_.map(aliases, function (d) {
+            // console.log(d.context)
             return d.context
           }));
           
@@ -1321,6 +1360,56 @@ module.exports = {
     }, best.left, best.right);
     
     next(null, merged);
+  },
+  
+  /*
+    JSON cache and 
+    options must contain 'namespace' and 'ref'
+    e.g
+    helpers.cache.write(contents, {
+      namespace: 'services',
+      ref: 'Rome, Italy'
+    }, function(err) {
+      // handle err
+    })
+  */
+  cache: {
+    /*
+      
+    */
+    naming: function(options) {
+      var md5 = require('md5');
+      return path.join(settings.paths.cache[options.namespace], md5(options.ref) + '.json')
+    },
+    write: function(contents, options, next) {
+      if(_.isEmpty(settings.paths.cache[options.namespace]))
+        next(IS_EMPTY)
+      else
+        fs.writeFile(module.exports.cache.naming(options), contents, next)
+    },
+    read: function(options, next) {
+      if(_.isEmpty(settings.paths.cache[options.namespace]))
+        next(IS_EMPTY)
+      else
+        fs.readFile(module.exports.cache.naming(options), 'utf8', function (err, contents) {
+          if(err)
+            next(err);
+          else {
+            try {
+              next(null, JSON.parse(contents))
+            } catch(e) {
+              next(null, contents);
+            }
+          }
+        })
+    },
+    unlink: function(options, next) {
+      if(_.isEmpty(settings.paths.cache[options.namespace]))
+        next(IS_EMPTY)
+      else
+        fs.unlink(module.exports.cache.naming(options), next);
+    }
   }
+  
 }
       

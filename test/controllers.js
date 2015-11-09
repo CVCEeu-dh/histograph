@@ -47,32 +47,7 @@ describe('controllers: create a new user', function() {
     })
     
   });
-  
-  it('should create a new user into the database', function (done) {
-    session
-      .post('/signup')
-      .send({
-        username   : 'hello-world',
-        password   : 'WorldHello',
-        email      : 'world@globetrotter.it',
-        firstname  : 'Milky',
-        lastame    : 'Way',
-        strategy   : 'local', // the strategy passport who creates his account, like local or google or twitter
-        about      : '' // further info about the user, in markdown
-      })
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        if(err)
-          console.log('create user', err)
-        should.equal(res.body.status, 'ok', res.body)
-        done();
-      })
-  });
-})
 
-
-describe('controllers: authenticate the user, but failing', function() {
   it('should fail on password length', function (done) {
     session
       .post('/signup')
@@ -86,15 +61,37 @@ describe('controllers: authenticate the user, but failing', function() {
         about      : '' // further info about the user, in markdown
       })
       .expect('Content-Type', /json/)
-      .expect(201)
+      .expect(400)
       .end(function(err, res) {
+        should.not.exist(err); // i.e., 400 is the code ;)
         should.equal(res.body.status, 'error');
         should.equal(res.body.error.form[0].field, 'password');
         should.equal(res.body.error.form[0].check, 'isLength');
         done();
       })
   });
-  
+
+  it('should create a new user into the database', function (done) {
+    session
+      .post('/signup')
+      .send({
+        username   : 'hello-world',
+        password   : 'WorldHello',
+        email      : 'world@globetrotter.it',
+        first_name  : 'Milky',
+        last_name    : 'Way',
+        strategy   : 'local', // the strategy passport who creates his account, like local or google or twitter
+        about      : '' // further info about the user, in markdown
+      })
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err) 
+          console.log('create user', res.body)
+        should.equal(res.body.status, 'ok', res.body)
+        done();
+      })
+  });
 
   it('should fail because user exists already', function (done) {
     session
@@ -109,14 +106,18 @@ describe('controllers: authenticate the user, but failing', function() {
         about      : '' // further info about the user, in markdown
       })
       .expect('Content-Type', /json/)
-      .expect(400)
+      .expect(500)
       .end(function (err, res) {
+        should.not.exist(err)
         should.equal(res.body.status, 'error');
-        should.equal(res.body.error.exception, 'ConstraintViolationException');
+        should.equal(res.body.error.code, 500)// cannot find no more 'ConstraintViolationException');
         done();
       })
   });
+})
 
+
+describe('controllers: auth failed', function() {
 
   it('should NOT authenticate the user because of wrong credentials', function (done) {
     session
@@ -128,11 +129,11 @@ describe('controllers: authenticate the user, but failing', function() {
       .expect('Content-Type', /json/)
       .expect(403)
       .end(function (err, res) {
+        should.not.exist(err)
         should.equal(res.body.status, 'error');
         done();
       })
-  })
-
+  });
 
   it('should NOT authenticate the user because it is not enabled', function (done) {
     session
@@ -144,6 +145,7 @@ describe('controllers: authenticate the user, but failing', function() {
       .expect('Content-Type', /json/)
       .expect(403)
       .end(function (err, res) {
+        should.not.exist(err);
         should.equal(res.body.status, 'error');
         done();
       })
@@ -154,8 +156,9 @@ describe('controllers: authenticate the user, but failing', function() {
     session
       .get('/activate?k=AAABBBCCCdddEEEFFF&e=world@globetrotter.it')
       .expect('Content-Type', /json/)
-      .expect(403)
+      .expect(400) // form error
       .end(function (err, res) {
+        should.not.exist(err)
         should.equal(res.body.error.form[0].field, 'email');
         should.equal(res.body.status, 'error');
         done();
@@ -165,7 +168,7 @@ describe('controllers: authenticate the user, but failing', function() {
 
 
 describe('controllers: authenticate the user, succeed', function() {
-  it('should change the activation key, via cypher', function (done) {
+  it('should change the activation key, via cypher (uncrypted, just for test purposes)', function (done) {
     neo4j.query('MATCH(n:user {email:{email}}) SET n.activation = {key} RETURN n', {
       email: 'world@globetrotter.it',
       key: 'AAABBBCCCddd'
@@ -248,48 +251,6 @@ describe('controllers: get resource items available to the user', function() {
       __resourceB = resource;
       done();
     });
-  });
-  
-  it('should show a list of 50 resources', function (done) {
-    session
-      .get('/api/resource')
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        should.not.exists(err);
-        //console.log(' resoucre ', res.body)
-        done();
-      });
-  });
-  
-  it('should show a list of 20 resources from a specific date', function (done) {
-    session
-      .get('/api/resource?from=1988-01-01&to=1988-01-02&limit=20')
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        should.not.exists(err);
-        should.equal(res.body.info.params.start_date, '1988-01-01T00:00:00.000Z');
-        should.equal(res.body.info.params.end_date, '1988-01-02T00:00:00.000Z');
-        should.equal(res.body.info.params.start_time, 567993600);
-        done();
-      });
-  });
-  
-  it('should show a list of 20 resources from a specific date', function (done) {
-    session
-      .get('/api/resource?from=1988-01-01&to=1989-01-03')
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        should.not.exists(err);
-        //console.log(_.map(res.body.result.items, function(d){return d.props.start_date}))
-        should.equal(res.body.info.params.start_date, '1988-01-01T00:00:00.000Z');
-        should.equal(res.body.info.params.end_date, '1989-01-03T00:00:00.000Z');
-        should.equal(res.body.info.params.start_time, 567993600);
-        
-        done();
-      });
   });
   
   
@@ -410,7 +371,7 @@ describe('controllers: get resource items available to the user', function() {
   
   it('should get a single resource MONOPARTITE graph object', function (done) {
     session
-      .get('/api/resource/'+__resourceA.id+'/related/resource/graph?type=monopartite-entity')
+      .get('/api/resource/'+__resourceA.id+'/related/resource/graph?graphtype=monopartite-entity')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
@@ -579,8 +540,8 @@ describe('controllers: issues', function() {
       })
       .expect('Content-Type', /json/)
       .end(function (err, res) {
-        if(err)
-          console.log(err);
+        should.not.exist(err);
+        console.log(res.body)
         should.exist(res.body.result.item);
         done()
       });
@@ -706,139 +667,7 @@ describe('controllers: issues', function() {
 });
 
 
-describe('controllers: suggest queries', function() {
-  this.timeout(5000)
-  it('should get some suggestions for Yalta', function (done) {
-    session
-      .get('/api/suggest?query=Yalta')
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        if(err)
-          console.log(err);
-        should.not.exist(err);
-        should.exist(res.body.result.items.length);
-        done()
-      });
-  });
-  
-  it('should get matches for helmut kohl and mitterrand', function (done) {
-    session
-      .get('/api/suggest/resources?query=helmut kohl mitterrand')
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        if(err)
-          console.log(err);
-        // console.log(res.body)
-        should.not.exist(err);
-        should.exist(res.body.result.items.length);
-        done()
-      });
-  });
-  
-  it('should get entities matching for helmut kohl', function (done) {
-    session
-      .get('/api/suggest/entities?query=paris')
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        
-        if(err)
-          console.log(err);
-        should.not.exist(err);
-        //citems)
-        should.exist(res.body.info.total_items);
-        should.exist(res.body.result.items.length);
-        done()
-      });
-  });
-  
-  it('should get a nice graph describing matching for helmut kohl', function (done) {
-    session
-      .get('/api/suggest/graph?query=helmut kohl')
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        if(err)
-          console.log(err);
-        should.not.exist(err);
-        should.exist(res.body.result.graph);
-        done()
-      });
-  });
-  
-  it('should get the SHORTEST path connecting all four nodes', function (done) {
-    session
-      .get('/api/suggest/all-shortest-paths/26441,27631,11173?limit=33')
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        if(err)
-          console.log(err);
-        should.not.exist(err);
-        should.exist(res.body.result.items.length);
-        done()
-      });
-  });
-  
-   
-  it('should get the full path between four nodes', function (done) {
-    session
-      .get('/api/suggest/all-in-between/26859,26858,17366,39404,26400?limit=33')
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        if(err)
-          console.log(err);
-        should.not.exist(err);
-        should.exist(res.body.result.graph);
-        done()
-      });
-  });
-  
-  it('should get an unknown node based on id', function (done) {
-    session
-      .get('/api/suggest/unknown-node/'+__resourceA.id)
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        if(err)
-          console.log(err);
-        should.not.exist(err);
-        should.exist(res.body.result.item);
-        done()
-      });
-  });
-  
-  it('should get an unknown node based on ids', function (done) {
-    session
-      .get('/api/suggest/unknown-nodes/'+ __resourceA.id +','+ __resourceB.id)
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        if(err)
-          console.log(err);
-        should.not.exist(err);
-        should.equal(_.map(res.body.result.items, 'id').sort().join(), [__resourceA.id,  __resourceB.id].sort().join());
-        done()
-      });
-  });
-  
-  it('should get the neighbors at distance 1 of four nodes', function (done) {
-    session
-      .get('/api/suggest/neighbors/26441,27631,11173')
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        if(err)
-          console.log(err);
-        should.not.exist(err);
-        should.exist(res.body.result.items.length);
-        done()
-      });
-  });
-});
+
 
 describe('controllers: collections', function() {
   var __collection;
@@ -1011,13 +840,13 @@ describe('controllers: play with entities', function() {
   });
   it('should get a single entity MONOPARTITE graph object', function (done) {
     session
-      .get('/api/entity/'+__entity.id+'/related/person/graph?type=monopartite-entity')
+      .get('/api/entity/'+__entity.id+'/related/person/graph?graphtype=monopartite-entity')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
-        if(err)
-          console.log('ERROR', err);
         should.not.exist(err);
+        if(res.body.status=='error')
+          console.log('ERROR', res.body);
         
         should.exist(res.body.result.graph);
         done()
@@ -1065,3 +894,25 @@ describe('controllers: delete the user and their relationships', function() {
   });
 
 });
+
+
+
+describe('controllers: test cypher error message: ', function() {
+  it('should fail miserably on InvalidSyntax', function (done) {
+    neo4j.query('MATCH (x:y{z:{w}}) RETURN n', function (err) {
+      should.exist(err);
+      should.exist(err.code);
+      should.exist(err.message);
+      done();
+    });
+  });
+  
+  it('should not fail ...? undefined parameters ... expect to change on next version of seraph?', function (done) {
+    neo4j.query('MATCH (x:y) WHERE id(x) = {d} RETURN x', {}, function (err, node) {
+      // Neo.ClientError.Statement.ParameterMissing
+      done();
+    });
+  });
+  
+})
+    

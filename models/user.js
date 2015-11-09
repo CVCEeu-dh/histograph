@@ -79,19 +79,55 @@ module.exports = {
         count_items: queries.count_pulse,
         items: queries.get_pulse
       },
-      params: {
-        limit:  params.limit || 10,
-        offset: params.offset || 0
-      }
+      params: params
     }, function (err, results) {
       if(err) {
         console.log(err)
         next(err);
         return;
       }
-      next(null, results.items, {
-        total_items : results.count_items
-      });
+      next(null, results.items, results.count_items);
+    });
+  },
+
+  /*
+    Return a list of last touched resources
+
+    Test query with user id:
+    node .\scripts\manage.js --task=query
+        --cypher=user/get_related_resources
+        --id=31507 --limit=10 --offset=0
+  
+  */
+  getRelatedResources: function(user, params, next) {
+    models.getMany({
+      queries: {
+        count_items: queries.count_related_resources,
+        items: queries.get_related_resources
+      },
+      params: params
+    }, function (err, results) {
+      if(err) {
+        console.log(err)
+        next(err);
+        return;
+      }
+      next(null, results.items, results.count_items);
+    });
+  },
+  /*
+    Return the bipartite graph with nodes and edges
+    for the given user's related resoruces (with entities appearing in between).
+
+    @param user - object containing at least the numeric user id
+    @param params - object contianing the params ffor the cypher query
+  */
+  getRelatedResourcesGraph: function(user, params, next) {
+    helpers.cypherGraph(queries.get_related_resources_graph, _.assign({}, user, params), function (err, graph) {
+      if(err)
+        next(err);
+      else
+        next(null, graph);
     });
   }
 };

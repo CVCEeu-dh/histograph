@@ -5,12 +5,14 @@
 
 */
 var express       = require('express'),        // call express
+    compress      = require('compression'),
     session       = require('express-session'),
     
     settings      = require('./settings'),
 
     app           = exports.app = express(),                 // define our app using express
     port          = settings.port || process.env.PORT || 8000,
+    env           = settings.env || process.env.NODE_ENV || 'development',
     server        = app.listen(port),
     io            = require('socket.io')
                       .listen(server),
@@ -34,10 +36,13 @@ var express       = require('express'),        // call express
 
     
 
-    clientRouter = express.Router(),
-    apiRouter    = express.Router(),
+    clientRouter  = express.Router(),
+    apiRouter     = express.Router(),
 
-    _            = require('lodash');        // set our port
+    _             = require('lodash'),
+    
+    // app client scripts dependencies (load scripts in jade)
+    clientFiles  = require('./client/src/files')[env];
 
 
 // initilalize session middleware
@@ -49,14 +54,25 @@ var sessionMiddleware = session({
   saveUninitialized: true
 })
 
-console.log('logs',settings.paths.accesslog);
+console.log('logs:', settings.paths.accesslog);
+console.log('env: ', env);
+
+app.use(compress());
+
 // configure logger
 app.use(morgan('combined', {
   stream: fs.createWriteStream(settings.paths.accesslog, {flags: 'a'})
 }));
 
+if ('production' == env) {
+  app.use(express.static('./client/dist'));
+} else {
+  app.use(express.static('./client/src'));
+}
+
+
 // configure static files and jade templates
-app.use(express.static('./client/src'));
+
 app.set('views', './client/views');
 app.set('view engine', 'jade');
 
@@ -104,13 +120,13 @@ express.response.error = function(statusCode, err) {
 */
 clientRouter.route('/').
   get(function(req, res) { // test route to make sure everything is working (accessed at GET http://localhost:8080/api)
-   
-      res.render('index', {
-        user: req.user || 'anonymous',
-        message: 'hooray! welcome to our api!'
-      });
-    
+    res.render('index', {
+      user: req.user || 'anonymous',
+      message: 'hooray! welcome to our api!',
+      scripts: clientFiles.scripts
+    });
   });
+  
 
 clientRouter.route('/login')
   .post(function (req, res, next) {
@@ -132,7 +148,8 @@ clientRouter.route('/logout')
     req.logout();
     res.render('index', {
       user: req.user || 'anonymous',
-      message: 'hooray! welcome to our api!'
+      message: 'hooray! welcome to our api!',
+      scripts: clientFiles.scripts
     });
   });
 
@@ -147,7 +164,25 @@ clientRouter.route('/activate')
 clientRouter.route('/auth/twitter')
   .get(function (req, res, next) {
     if(req.query.next) {
-      req.session.redirectAfterLogin = req.query.next;
+      var qs = '';
+      
+      if(req.query.jsonparams) {
+        try{
+          var params = JSON.parse(req.query.jsonparams),
+              qsp =  [];
+              
+          for(var key in params) {
+            qsp.push(encodeURIComponent(key) + '=' + encodeURIComponent(params[key]));
+          }
+          
+          if(qsp.length)
+            qs = '?' + qsp.join('&')
+        } catch(e){
+          
+        }
+      }
+      req.session.redirectAfterLogin = req.query.next + qs;
+      
       console.log(req.query, req.params, req.session)
     }
     
@@ -281,6 +316,10 @@ apiRouter.route('/user/session')// api session info
   .get(ctrl.user.session)
 apiRouter.route('/user/pulse') // api session info
   .get(ctrl.user.pulse)
+apiRouter.route('/user/:id(\\d+)/related/resource') // api session info
+  .get(ctrl.user.getRelatedResources)
+apiRouter.route('/user/:id(\\d+)/related/resource/graph') // api session info
+  .get(ctrl.user.getRelatedResourcesGraph)
   
 
 /*
@@ -369,6 +408,8 @@ apiRouter.route('/resource/:id(\\d+)/related/:entity(person|location|organizatio
   .get(ctrl.resource.getRelatedEntitiesGraph);
 apiRouter.route('/resource/:id(\\d+)/related/resource/graph')
   .get(ctrl.resource.getRelatedResourcesGraph);
+apiRouter.route('/resource/:id(\\d+)/related/resource/timeline')
+  .get(ctrl.resource.getRelatedResourcesTimeline);
 apiRouter.route('/cooccurrences') // @todo move to entity controller.
   .get(ctrl.resource.getCooccurrences)
 
@@ -439,15 +480,26 @@ apiRouter.route('/collection/:id/related/resources')
 */
 apiRouter.route('/suggest')
   .get(ctrl.suggest.suggest)
-apiRouter.route('/suggest/resources')
-  .get(ctrl.suggest.resources)
-apiRouter.route('/suggest/entities')
-  .get(ctrl.suggest.entities)
-apiRouter.route('/suggest/graph')
-  .get(ctrl.suggest.getGraph)
+
+apiRouter.route('/suggest/stats')
+  .get(ctrl.suggest.getStats)
+apiRouter.route('/suggest/resource')
+  .get(ctrl.suggest.getResources)
+apiRouter.route('/suggest/entity')
+  .get(ctrl.suggest.getEntities)
+apiRouter.route('/suggest/resource/graph')
+  .get(ctrl.suggest.getResourcesGraph)
+apiRouter.route('/suggest/:entity(person|location|organization)/graph')
+  .get(ctrl.suggest.getEntitiesGraph)
+
+apiRouter.route('/suggest/all-in-between/:ids(\\d[\\d,]+)/resource/graph')
+  .get(ctrl.suggest.getAllInBetweenGraph)
+apiRouter.route('/suggest/all-in-between/:ids(\\d[\\d,]+)/resource')
+  .get(ctrl.suggest.getAllInBetweenResources)
+  
 apiRouter.route('/suggest/all-shortest-paths/:ids([\\d,]+)')
   .get(ctrl.suggest.allShortestPaths)
-apiRouter.route('/suggest/all-in-between/:ids([\\d,]+)')
+apiRouter.route('/suggest/all-in-between')
   .get(ctrl.suggest.allInBetween)
 apiRouter.route('/suggest/unknown-node/:id([\\d,]+)')
   .get(ctrl.suggest.getUnknownNode)
@@ -455,6 +507,8 @@ apiRouter.route('/suggest/unknown-nodes/:ids([\\d,]+)')
   .get(ctrl.suggest.getUnknownNodes)
 apiRouter.route('/suggest/neighbors/:ids([\\d,]+)')
   .get(ctrl.suggest.getNeighbors)
+apiRouter.route('/suggest/shared-resources/:ids([\\d,]+)')
+  .get(ctrl.suggest.getSharedResources)
 
 /*
   

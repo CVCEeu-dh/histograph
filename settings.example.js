@@ -49,6 +49,31 @@ module.exports = {
     }
   },
   
+  /*
+    Grouping on (node).type properties
+    (facets)
+  */
+  types: {
+    resources: [
+      'external-text',
+      'picture',
+      'press',
+      'video',
+      'cartoon',
+      'facts',
+      'letter',
+      'facsimile',
+      'treaty',
+      'sound',
+      'table',
+      'article',
+      'schema',
+      'map',
+      'graphical-table',
+      'scientific-contribution',
+      'passport'
+    ]
+  },
   
   /*
 
@@ -129,5 +154,24 @@ module.exports = {
     clientSecret: "xxx000"
   },
   
+  /*
+    Refine here the task that would be available through node scripts/manage.js task manager.
+  */ 
+   availableTasks: {
+    'cartoDB': [
+      'tasks.resource.cartoDB',
+      'tasks.helpers.csv.stringify'
+    ],
+    'discover-entities': [
+      'tasks.entity.discoverMany'
+    ],
+    
+    'import-resources': [
+      'tasks.helpers.csv.parse',
+      'tasks.helpers.marvin.create',
+      'tasks.resource.importData',
+      'tasks.helpers.marvin.remove'
+    ]
+  }
   
 };

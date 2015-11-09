@@ -1,0 +1,89 @@
+<!-- global template for grammar based on current state-->
+<div class='grammar'>
+  <!-- change sub state -->
+  
+  &nbsp;{{ruler.label}}
+  <div ng-if='ruler' class='grammar-choice' ng-if='grammar'>
+    {{grammar.label}}
+    <div class="btn-group" uib-dropdown is-open="false">
+      <button id="single-button" type="button" class="btn btn-default" uib-dropdown-toggle>
+        <i class='fa fa-angle-down'></i>
+      </button>
+      <ul class="uib-dropdown-menu dropdown-menu" role="menu" aria-labelledby="single-button">
+        <li ng-repeat="item in ruler.choices">
+          <a ng-click='setChoice(item)'>
+            {{item.label}}
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  
+  <!-- grammar: filters -->
+  
+        <b ng-if='totalItems'>
+        {{totalItems}}
+        </b>
+        
+        <span ng-if='filters.type'>
+            &nbsp;{{grammar.connector.type}}&nbsp;
+        </span>
+        <div class='grammar-choice' ng-if='grammar.types'>
+          <span ng-if='filters.type'>
+            <span ng-repeat='filter in filters.type'>
+              <span class="filter "><b>{{filter}}</b><span ng-click='removeFilter("type",filter)'>&nbsp;<i class="fa fa-times-circle"></i></span></span>{{!$last? ', ': ''}}
+            </span>
+          </span>
+          <span ng-if='!filters.type'>
+            {{grammar.types[0].name}}
+          </span>
+          <div class="btn-group" uib-dropdown is-open="false">
+            <button id="single-button" type="button" class="btn btn-default" uib-dropdown-toggle>
+              <i class='fa fa-angle-down'></i>
+            </button>
+            <ul class="uib-dropdown-menu dropdown-menu" role="menu" aria-labelledby="single-button">
+              <li ng-repeat="item in grammar.types">
+                <a ng-click='setType(grammar, item)'>
+                  {{item.name}}
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        
+        <!-- typeahead -->
+        <span ng-if='filters.with'>
+          &nbsp;{{grammar.connector.relatedTo}}&nbsp;
+        </span>
+        
+        
+        <div class='grammar-choice' ng-if='grammar.relatedTo'>
+          <span ng-if='!filters.with'>
+            &nbsp;{{grammar.connector.notRelatedTo}}&nbsp;
+          </span>
+          <button uib-popover-template="'templates/partials/helpers/typeahead-popup.html'" popover-title="{{dynamicPopover.title}}" popover-placement="bottom" popover-title="{{dynamicPopover.title}}" type="button" class="btn btn-default"><i class='fa fa-angle-down'></i></button>
+          
+          <span ng-repeat='item in filterItems.with'>
+            <span class="filter {{item.type}}"><b>{{item.props.name}}</b><span tooltip-append-to-body="true" tooltip='remove {{item.props.name}} from filters' ng-click='removeFilter("with",item.id)'>&nbsp;<i class="fa fa-times-circle"></i></span></span>{{!$last? ', ': ''}}
+          </span>
+        </div>
+        
+        
+        <span ng-if="filters.from">
+          &nbsp;{{grammar.connector.from}}&nbsp;
+        
+          <span ng-repeat='filter in filters.from'>
+            <span class="filter "><b>{{filter}}</b><span ng-click='removeFilter("from",filter)'>&nbsp;<i class="fa fa-times-circle"></i></span></span>
+          </span>
+        </span>
+        
+        <span ng-if="filters.to">
+          &nbsp;{{grammar.connector.to}}&nbsp;
+          <span ng-repeat='filter in filters.to'>
+            <span class="filter"><b>{{filter}}</b><span ng-click='removeFilter("to",filter)'>&nbsp;<i class="fa fa-times-circle"></i></span></span>
+          </span>
+        </span>
+        
+        
+        
+      </div>

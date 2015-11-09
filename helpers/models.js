@@ -8,6 +8,8 @@
 var settings = require('../settings'),
     parsers  = require('../parser'),
     async    = require('async'),
+
+    _        = require('lodash'),
     neo4j    = require('seraph')(settings.neo4j.host);
     
     
@@ -42,7 +44,16 @@ module.exports = {
         neo4j.query(query, options.params, function (err, result) {
           if(err)
             return callback(err);
-          callback(null, isNaN(result.count_items)? result: result.count_items)
+          if(!isNaN(result.count_items))
+            callback(null, {
+              total_items: result.count_items
+            })
+          else {
+            callback(null, {
+              groups: result,
+              total_items: _.sum(result, 'count_items') 
+            })
+          }
         })
       },
       items: function (callback) {

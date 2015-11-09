@@ -12,10 +12,29 @@
 'use strict';
 
 
-var services = require('../services'),
+var settings = require('../settings'),
+    services = require('../services'),
+    _        = require('lodash'),
     should  = require('should');
     
-describe('services: ', function() {
+describe('services: geo', function() {
+  it('should connect to the Geonames endpoint, if available, and return some results', function (done) {
+    this.timeout(15000)
+    if(!settings.geonames ||_.isEmpty(settings.geonames.username)) {
+      done();
+    } else
+      services.geonames({
+        address: 'Roma'
+      }, function (err, results){
+        
+        if(err)
+            throw err;
+        // console.log(results)
+        should.equal(results[0].toponymName, 'Rome')
+        should.exist(results.length);
+        done()
+      });
+  })
   // it('should connect to the Textrazor endpoint and return some results', function (done) {
   //   this.timeout(15000)
   //   services.textrazor({

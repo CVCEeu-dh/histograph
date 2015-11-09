@@ -144,25 +144,25 @@ module.exports = function(io){
         return helpers.formError(form.errors, res);
       // get the total available
       entity.getRelatedResources(form.params, function (err, items, info) {
-        if(err)
-          return helpers.cypherQueryError(err, res);
-        return res.ok({items: items}, info);
+        helpers.models.getMany(err, res, items, info, form.params);
       });
     }, // get graph of resources and other stugff, a graph object of nodes and edges
     
     getRelatedEntities: function (req, res) {
       var form = validator.request(req, {
-            limit: 50,
-            offset: 0
+            limit: 10,
+            offset: 0,
+          }, {
+            fields: [
+              validator.SPECIALS.entity
+            ],
           });
       
       if(!form.isValid)
         return helpers.formError(form.errors, res);
      
       entity.getRelatedEntities(form.params, function (err, items, info) {
-        if(err)
-          return helpers.cypherQueryError(err, res);
-        return res.ok({items: items}, info);
+        helpers.models.getMany(err, res, items, info, form.params);
       });
     },
     
@@ -187,7 +187,22 @@ module.exports = function(io){
       var form = validator.request(req, {
             limit: 100,
             offset: 0
+          }, {
+            // increment the min
+            fields: [
+              {
+                field: 'limit',
+                check: 'isInt',
+                args: [
+                  {min: 1, max: 1000}
+                ],
+                error: 'should be a number in range 1 to max 1000'
+              }
+            ],
           });
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
       entity.getRelatedEntitiesGraph({
         id: form.params.id,
         entity: form.params.entity,
@@ -206,12 +221,23 @@ module.exports = function(io){
       var form = validator.request(req, {
             limit: 100,
             offset: 0
+          }, {
+            // increment the min
+            fields: [
+              {
+                field: 'limit',
+                check: 'isInt',
+                args: [
+                  {min: 1, max: 1000}
+                ],
+                error: 'should be a number in range 1 to max 1000'
+              }
+            ],
           });
-      entity.getRelatedResourcesGraph({
-        id: form.params.id,
-        limit: form.params.limit,
-        offset: form.params.offset
-      }, function (err, graph) {
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      entity.getRelatedResourcesGraph(form.params, function (err, graph) {
         return res.ok({
           graph: graph
         }, {
@@ -219,43 +245,6 @@ module.exports = function(io){
         });
       });
     },
-    /*
-      DEPRECATED
-    */
-    getGraph: function (req, res) {
-      
-      var type = 'bipartite';
-      
-      // get the right graph
-      if(req.query.type) {
-        if(['monopartite-entity', 'monopartite-resource'].indexOf(req.query.type) == -1) {
-          return res.error({type: req.query.type + 'not found'});
-        }
-        type = req.query.type
-      }
-      
-      
-      if(type == 'bipartite') {
-        entity.getGraph(req.params.id, {}, function (err, graph) {
-           if(err)
-            return helpers.cypherQueryError(err, res);
-          return res.ok({
-            graph: graph
-          }, {
-            type: type
-          });
-        });
-      } else if(type == 'monopartite-entity') {
-        entity.getGraphPersons(req.params.id, {}, function (err, graph) {
-           if(err)
-            return helpers.cypherQueryError(err, res);
-          return res.ok({
-            graph: graph
-          }, {
-            type: type
-          });
-        });
-      }
-    }
+    
   }
 }

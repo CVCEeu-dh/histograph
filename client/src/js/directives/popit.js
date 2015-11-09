@@ -10,58 +10,7 @@
  * Quietly used by CoreCtrl.
  */
 angular.module('histograph')
-  .directive('gmasp', function ($log, $location) {
-    return {
-      restrict : 'A',
-      templateUrl: 'templates/partials/helpers/network-legend.html',
-      scope:{
-        target : '='
-      },
-      link : function(scope, element, attrs) {
-        var _gasp = $(element[0]); // gasp instance;
-        scope.enabled = false;
-        $log.log('::gmasp ready');
-        
-        scope.addTargetToQueue = function() {
-          $log.log('::gmasp -> addTargetToQueue()')
-          if(scope.target.type == 'node')
-            scope.$parent.addToQueue({
-              items: [ scope.target.data.node.id ]
-            });
-          else if(scope.target.type == 'edge')
-            scope.$parent.addToQueue({
-              items: [
-                scope.target.data.edge.nodes.source.id,
-                scope.target.data.edge.nodes.target.id
-              ]
-            })
-        }
-        
-        // enable / disable gasp instance
-        scope.$watch('target', function(v) {
-          $log.log('::gmasp @target - value:', v);
-          if(!v || !v.type) {
-            // make it NOT visible
-            scope.enabled = false;
-            return;
-          }
-          // handle label according to target type (node or edge)
-          if(v.type=='node') {
-            scope.href  = '#/' + (v.data.node.type=='resource'? 'r': 'e') + '/' + v.data.node.id;
-            scope.label = v.data.node.label;
-            scope.type = v.data.node.type;
-          } else if(v.type == 'edge') {
-            scope.href  = false;
-            scope.left  = v.data.edge.nodes.source;
-            scope.right = v.data.edge.nodes.target;
-          }
-          // make it visible
-          scope.enabled = true;
-          
-        })
-      }
-    }
-  })
+  
   /*
     Jquery Popup.
   */
@@ -72,14 +21,10 @@ angular.module('histograph')
         target: '=',
         comment: '&comment',
         redirect: '&',
-        queue : '&'
+        queue : '&',
+        filter: '&'
       },
-      template: '<div class="action-group">'+
-                  '<a class="action" href="{{href}}" title="visit" data-action="link" tooltip="{{linkto}}">'+
-                    '<span class="fa fa-link"></span></a>'+
-                  '<a class="action queue" tooltip="add to your current playlist" data-action="queue">'+
-                    '<span class="fa fa-play-circle-o"></span></a>' +
-                '</div>',
+      templateUrl: 'templates/partials/helpers/popit.html',
       link : function(scope, element, attrs) {
         var _gasp = $(element[0]), // gasp instance;
             type,            // element type
@@ -189,6 +134,9 @@ angular.module('histograph')
         $('body').on('sigma.clickStage', function() {
           hide();
         })
+        /*
+          listeners for click event
+        */
         _gasp.find('[data-action=queue]').click(function() {
           if(id)
             scope.queue({
@@ -198,6 +146,19 @@ angular.module('histograph')
           else
             $log.error('cannot queue the give item, id is', id);
         })
+        
+        _gasp.find('[data-action=filter]').click(function() {
+          if(id) {
+            scope.filter({
+              key: 'with',
+              item: id
+            });
+            hide();
+          } else
+            $log.error('cannot queue the give item, id is', id);
+        })
+        
+        
         // $('body').on('mouseleave', '[gasp-type]', function(e) {
         //   setTimeout(function(){
         //     hide();

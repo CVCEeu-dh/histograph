@@ -11,6 +11,7 @@
 
 var settings  = require('../settings'),
     should    = require('should'),
+    _         = require('lodash'),
     
     generator = require('../generator')({
                   suffix: 'resource'
@@ -210,8 +211,8 @@ describe('model:resource ', function() {
     }, function (err, items, info) {
       if(err)
         throw err;
-      // console.log(items[0])
-      should.exist(items.length)
+      should.equal(_.map(items, 'id').join(), [__resourceB.id, __resourceA.id].join());
+      should.equal(items.length, 2)
       should.exist(info.total_items)
       done()
     })
@@ -269,6 +270,16 @@ describe('model:resource ', function() {
       done()
     })
   })
+  
+  it('should return the timeline of related resources', function (done) {
+    Resource.getRelatedResourcesTimeline({
+       id: __resourceA.id
+    }, function (err, res) {
+      should.not.exist(err);
+      done()
+    })
+  })
+  
   it('should get a NOT found error', function (done) {
     Resource.get(111600000000, function (err, res) {
       should.exist(err)

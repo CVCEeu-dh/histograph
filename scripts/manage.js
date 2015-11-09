@@ -12,6 +12,7 @@
   task=
 */
 var fs          = require('fs'),
+    settings    = require('../settings'),
     options     = require('minimist')(process.argv.slice(2));
     async       = require('async'),
     _           = require('lodash'),
@@ -22,41 +23,59 @@ var fs          = require('fs'),
                     filter  :  /(.*).js$/
                   }),
     
-    availableTasks = {
+    availableTasks = _.assign({
       'setup': [
-        tasks.setup
+        tasks.setup.indexes,
+        // Not enabled, since we're only using auto_index // tasks.lucene.drop,
+        // Not enabled, since we're only using auto_index // tasks.lucene.init
       ],
-      'cartoDB': [
-        tasks.helpers.tick.start,
-        tasks.resource.cartoDB,
-        tasks.helpers.csv.stringify,
-        tasks.helpers.tick.end
-      ],
-      'discover-entities': [
-        tasks.helpers.tick.start,
-        tasks.entity.discoverMany,
-        tasks.helpers.tick.end
+      
+      'index': [
+        tasks.lucene.update
       ],
       'discover-resource': [
-        tasks.helpers.tick.start,
-        tasks.resource.discoverOne,
-        tasks.helpers.tick.end
+        tasks.resource.discoverOne
       ],
       'discover-resources': [
         tasks.resource.discoverMany
       ],
-      'import-resources': [
-        tasks.helpers.csv.parse,
-        tasks.helpers.marvin.create,
-        tasks.resource.importData,
-        tasks.helpers.marvin.remove
+      /*
+        computate (ent:entity:person)--(ent:entity:person) links
+        based on similarity
+      */
+      'calculate-similarity': [
+        tasks.entity.tfidf,
+        tasks.entity.cleanSimilarity,   
+        tasks.entity.jaccard,
+        tasks.entity.cosine
       ],
+      
+      'chunks': [
+        tasks.entity.getMany,
+        tasks.entity.chunks
+      ],
+      
       'query': [
-        tasks.helpers.tick.start,
-        tasks.helpers.cypher.raw,
-        tasks.helpers.tick.end
+        tasks.helpers.cypher.raw
       ],
-    };
+      
+      /*
+        simulate ctrl requests for an already auth user.
+        It makes uses of test environment
+      */
+      'api': [
+        tasks.helpers.marvin.create,
+        tasks.helpers.marvin.login,
+        tasks.helpers.marvin.api,
+        tasks.helpers.marvin.logout,
+        tasks.helpers.marvin.remove,
+      ],
+      
+      'text-of-resource': [
+        tasks.resource.getOne,
+        tasks.resource.getText
+      ]
+    }, settings.availableTasks || {});
 
 console.log(clc.whiteBright( "\n\n +-+-+ "));
 console.log(clc.whiteBright( " |H|G| "));
@@ -74,8 +93,14 @@ async.waterfall([
   // send initial options
   function init(callback) {
     callback(null, options);
-  }
-].concat(availableTasks[options.task]), function (err) {
+  },
+  tasks.helpers.tick.start
+].concat(_.map(availableTasks[options.task],function (d){
+  
+  if(typeof d == 'function')
+    return d;
+  return _.get(tasks, d.replace('tasks.', ''))
+})).concat([tasks.helpers.tick.end]), function (err) {
   if(err) {
     console.warn(err);
     console.log(clc.blackBright('\n task'), clc.whiteBright(options.task), clc.redBright('exit with error'));

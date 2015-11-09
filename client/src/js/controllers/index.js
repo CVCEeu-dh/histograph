@@ -5,58 +5,17 @@
  * # IndexCtrl
  */
 angular.module('histograph')
-  .controller('IndexCtrl', function ($scope, $log, $timeout, ResourcesFactory, CooccurrencesFactory, cleanService, InquiryFactory, EVENTS) {
+  .controller('IndexCtrl', function ($scope, $log, ResourceFactory, EVENTS) {
     $log.debug('IndexCtrl ready', $scope.params);
+  // the original index page, almost empty
+  })
+  
+  .controller('ExploreCtrl', function ($scope, $log, $timeout, ResourceFactory, CooccurrencesFactory, cleanService, InquiryFactory, EVENTS) {
+    $log.debug('ExploreCtrl ready', $scope.params);
     
-    $scope.pagetitle = 'A list of resources to start with'
-    /*
-      Reload resources according to scope params
-    */
-    $scope.sync = function(options) {
-      
-      $scope.loading = true;
-      var params = angular.copy($scope.params);
-      if(options && options.page)
-        params.offset = (options.page - 1)*($scope.limit || 20)
-      else
-        $scope.setGraph({nodes:[], edges:[]});
-      // load resources
-      $log.log('IndexCtrl -> sync() - params:', params);
-      ResourcesFactory.get(params, function (res) {
-        $log.info('IndexCtrl -> sync() returned', res.result.items.length, 'items');
-        $scope.setRelatedItems(res.result.items);
-        $scope.totalItems = res.info.total_items;
-        $scope.limit = res.info.params.limit;
-        $scope.loading = false;
-      });
-      
-      if(!options) {
-        $scope.currentPage=1;
-        $scope.syncGraph();
-      }
-        
-       
-      // InquiryFactory.get({limit: 20}, function(res) {
-      //   console.log(res);
-      //   $scope.inquiries = res.result.items
-      // })
-    };
     
-    $scope.syncGraph = function() {
-      console.log($scope.params)
-      CooccurrencesFactory.get($scope.params, function (res){
-          res.result.graph.nodes.map(function (d) {
-            d.color  = d.type == 'person'? "#D44A33": "#6891A2";
-            d.type   = d.type || 'res';
-            d.x = Math.random()*50;
-            d.y = Math.random()*50;
-            //d.label = d.name;
-            return d;
-          });
-          $log.log('IndexCtrl CooccurrencesFactory returned a graph of',res.result.graph.nodes.length, 'nodes');
-          $scope.setGraph(res.result.graph)
-        });
-    };
+    
+    
     
     /*
       Set graph title
@@ -66,25 +25,8 @@ angular.module('histograph')
       seealso: 'A list of resources to start with'
     });
     
-    /*
-      clean previous graph
-    */
-     
+   
     
-    
-    /*
-      listener: EVENTS.API_PARAMS_CHANGED
-      some query parameter has changed, reload the list accordingly.
-    */
-    $scope.$on(EVENTS.API_PARAMS_CHANGED, function() {
-      $log.log('IndexCtrl @API_PARAMS_CHANGED', $scope.params);
-      $scope.sync();
-    });
-    $scope.$on(EVENTS.PAGE_CHANGED, function(e, params) {
-      $log.log('IndexCtrl @PAGE_CHANGED', params);
-      $scope.sync(params);
-    });
-    $scope.sync();
     
     /*
       listener: $scope.timeline
@@ -95,4 +37,93 @@ angular.module('histograph')
         return;
       $log.log('IndexCtrl @timeline ready');
     });
+    
+    // start
+    // $scope.sync();
+    // $scope.syncGraph();
   })
+  
+  /*
+    wall of resources
+  */
+  .controller('ExploreResourcesCtrl', function ($scope, $log, ResourceFactory, EVENTS) {
+    $log.debug('ExploreResourcesCtrl ready', $scope.params);
+    $scope.limit  = 20;
+    $scope.offset = 0;
+    /*
+      Reload related items, with filters.
+    */
+    $scope.sync = function() {
+      $scope.loading = true;
+      ResourceFactory.get(angular.extend({
+        limit: $scope.limit,
+        offset: $scope.offset
+      }, $scope.params), function (res) {
+        $scope.loading = false;
+        $scope.offset  = res.info.offset;
+        $scope.limit   = res.info.limit;
+        $scope.totalItems = res.info.total_items;
+        if($scope.offset > 0)
+          $scope.addRelatedItems(res.result.items);
+        else
+          $scope.setRelatedItems(res.result.items);
+        // reset if needed
+        $scope.setFacets('type', res.info.groups);
+        
+      }) 
+    }
+    
+    
+    /*
+      listener: EVENTS.API_PARAMS_CHANGED
+      some query parameter has changed, reload the list accordingly.
+    */
+    $scope.$on(EVENTS.API_PARAMS_CHANGED, function() {
+      $scope.offset = 0;
+      $log.debug('ExploreCtrl @API_PARAMS_CHANGED', $scope.params);
+      $scope.sync();
+      // $scope.syncGraph();
+    });
+    
+    $scope.$on(EVENTS.INFINITE_SCROLL, function (e) {
+      $scope.offset = $scope.offset + $scope.limit;
+      $log.debug('ExploreCtrl @INFINITE_SCROLL', '- skip:',$scope.offset,'- limit:', $scope.limit);
+      $scope.sync();
+    });
+
+    $scope.sync();
+  })
+
+
+.controller('ExploreEntitiesCtrl', function ($scope, $log, CooccurrencesFactory, EVENTS) {
+    $log.debug('ExploreEntitiesCtrl ready', $scope.params);
+    $scope.limit  = 20;
+    $scope.offset = 0;
+    /*
+      Reload related items, with filters.
+    */
+    $scope.syncGraph = function() {
+      CooccurrencesFactory.get($scope.params, function (res){
+        $log.log('ExploreEntitiesCtrl CooccurrencesFactory returned a graph of',res.result.graph.nodes.length, 'nodes');
+        if($scope.filters.with)
+          $scope.setGraph(res.result.graph, {
+            centers: _.map($scope.filters.with, _.parseInt)
+          })
+        else
+          $scope.setGraph(res.result.graph)
+      });
+    };
+    
+    
+    /*
+      listener: EVENTS.API_PARAMS_CHANGED
+      some query parameter has changed, reload the list accordingly.
+    */
+    $scope.$on(EVENTS.API_PARAMS_CHANGED, function() {
+      $scope.offset = 0;
+      $log.debug('ExploreEntitiesCtrl @API_PARAMS_CHANGED', $scope.params);
+      $scope.syncGraph();
+    });
+    
+    $scope.syncGraph();
+  });

@@ -1,5 +1,3 @@
-'use strict';
-
 /**
  * @ngdoc overview
  * @name histograph
@@ -19,7 +17,7 @@ angular.module('histograph')
       },
       template: '<div class="brushdate left tk-proxima-nova"></div><div class="brushdate right tk-proxima-nova"></div><div class="date left tk-proxima-nova"></div><div class="date right tk-proxima-nova"></div><div class="mouse tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div><div class="viewer"></div>',
       link : function(scope, element, attrs) {
-        
+        'use strict';
         /*
           Timeline config
           ---
@@ -156,8 +154,9 @@ angular.module('histograph')
             });
             return;
           }
-          if(typeof extent[0] == 'object') {
-              tim.ui.brushDateLeft.style({
+          if(extent[0] && typeof extent[0] == 'object') {
+            // console.log(extent[0])
+            tim.ui.brushDateLeft.style({
               visibility: 'visible',
               transform: 'translateX(' + (tim.fn.x(extent[0]) + 50) +'px)'
             }).text(tim.fn.asDay(extent[0]));
@@ -206,10 +205,11 @@ angular.module('histograph')
             if(left == right) {
               $log.log('::timeline @brushend, click on the timeline just clear the things');
               tim.fn.clear();
-              $location.search({
+              var previous = $location.search();
+              $location.search(angular.extend(previous,{
                   from: null,
                   to: null
-                });
+                }));
                 scope.$apply();
               
               return;
@@ -233,11 +233,16 @@ angular.module('histograph')
               //console.log(d3.time.format("%Y-%m-%d")(extent[0]))
                // console.log('extent',extent[0], typeof extent[0], isNaN(extent[0]))
               if(typeof extent[0] == 'object') {
-             
-                $location.search({
-                  from: d3.time.format("%Y-%m-%d")(extent[0]),
-                  to: d3.time.format("%Y-%m-%d")(extent[1])
-                });
+                var previous = $location.search();
+                
+                $location.search(angular.extend(previous, 
+                  extent[0]?{
+                    from: d3.time.format("%Y-%m-%d")(extent[0])
+                  } : {},
+                  extent[1]?{ 
+                    to: d3.time.format("%Y-%m-%d")(extent[1])
+                  }: {}
+                ));
                 scope.$apply();
               }
             }, 10)
@@ -312,27 +317,27 @@ angular.module('histograph')
             return d.t*1000
           });
           
-          if(scope.timeline.length < 1000)
+          // if(scope.timeline.length < 1000)
             dataset = angular.copy(scope.timeline).map(function (d) {
               d.t*=1000; // different level of aggregation
               return d;
             });
-          else {
-            dataset = angular.copy(scope.timeline).map(function (d) {
-              d.t*=1000; // different level of aggregation
-              d.m = tim.fn.asYear(new Date(d.t));
-              return d;
-            });
-            dataset = _.map(_.groupBy(dataset, 'm'), function (values, k) {
-              return {
-                weight: _.sum(values, 'weight'),
-                k: k,
-                t: _.min(values, 't').t,
-                t1: _.max(values, 't').t
-              };
-            });
-            console.log('::timeline -> draw() - sample:',_.take(dataset, 5))
-          }
+          // else {
+          //   dataset = angular.copy(scope.timeline).map(function (d) {
+          //     d.t*=1000; // different level of aggregation
+          //     d.m = tim.fn.asYear(new Date(d.t));
+          //     return d;
+          //   });
+          //   dataset = _.map(_.groupBy(dataset, 'm'), function (values, k) {
+          //     return {
+          //       weight: _.sum(values, 'weight'),
+          //       k: k,
+          //       t: _.min(values, 't').t,
+          //       t1: _.max(values, 't').t
+          //     };
+          //   });
+          //   console.log('::timeline -> draw() - sample:',_.take(dataset, 5))
+          // }
            
           weigthExtent = d3.extent(dataset, function (d) {
             return d.weight
@@ -397,7 +402,7 @@ angular.module('histograph')
               y: function(d) {
                 return tim.fn.y(d.weight)
               },
-              width: 4,
+              width: 3,
               height: function(d) {
                 return 30 - tim.fn.y(d.weight)
               }

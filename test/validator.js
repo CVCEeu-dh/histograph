@@ -135,4 +135,27 @@ describe('validator: check mimetype field', function() {
     done();
   });
   
+  it('should work with multiple TYPE filters, comma separated', function (done) {
+    var form = validator.request({}, {
+      type: 'letter,press'
+    })
+    console.log(form.params)
+    should.not.exist(form.errors);
+    should.exist(form.params.type);
+    should.equal(form.params.type.length, 2);
+    should.equal(form.isValid, true);
+    done();
+  });
+  it('should NOT work with unrecognized TYPE filters, comma separated', function (done) {
+    var form = validator.request({}, {
+      type: 'letter,press'
+    })
+    console.log(form.params)
+    should.not.exist(form.errors);
+    should.exist(form.params.type);
+    should.equal(form.params.type.length, 2);
+    should.equal(form.isValid, true);
+    done();
+  });
+  
 });

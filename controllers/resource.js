@@ -87,17 +87,25 @@ module.exports = function(io){
     getItems: function (req, res) {
       var form = validator.request(req, {
             limit: 50,
-            offset: 0
+            offset: 0,
+            orderby: 'date'
+          }, {
+            fields: [
+              validator.SPECIALS.orderby
+            ]
           });
       
       if(!form.isValid)
         return helpers.formError(form.errors, res);
 
+      var _t = {
+          'date': 'res.start_time ASC',
+          'relevance': undefined // use default value
+        },
+        orderby = form.params.orderby = _t[''+form.params.orderby]; 
+
       Resource.getMany(form.params, function (err, items, info) {
-        return helpers.models.getMany(err, res, items, {
-          params: form.params,
-          total_items: info.total_items
-        });
+        helpers.models.getMany(err, res, items, info, form.params);
       });
     },
 
@@ -108,18 +116,35 @@ module.exports = function(io){
     */
     getRelatedItems: function (req, res) {
       var form = validator.request(req, {
-            limit: 50,
-            offset: 0
+            limit: 10,
+            offset: 0,
+            orderby: 'relevance'
+          }, {
+            fields: [
+              validator.SPECIALS.orderby
+            ]
           });
       
+      // validate orderby
       if(!form.isValid)
         return helpers.formError(form.errors, res);
-      // get the total available
-      // console.log(form.params)
+      
+     
+      // if any, rewrite the order by according to this specific context
+      var _t = {
+          'date': 'result.dst DESC, result.det DESC',
+          '-date': 'result.dst ASC, result.det ASC',
+          'relevance': undefined // use default value
+        },
+        orderby = ''+form.params.orderby; // original orderby we're going to output
+      
+      
+      form.params.orderby = _t[form.params.orderby]
+      
       Resource.getRelatedResources(form.params, function (err, items, info) {
-        if(err)
-          return helpers.cypherQueryError(err, res);
-        return res.ok({items: items}, info);
+        helpers.models.getMany(err, res, items, info, _.assign(form.params, {
+          orderby: orderby
+        }));
       });
     },
     
@@ -137,9 +162,7 @@ module.exports = function(io){
         return helpers.formError(form.errors, res);
      
       Resource.getRelatedEntities(form.params, function (err, items, info) {
-        if(err)
-          return helpers.cypherQueryError(err, res);
-        return res.ok({items: items}, info);
+        helpers.models.getMany(err, res, items, info, form.params);
       });
     },
     
@@ -150,7 +173,22 @@ module.exports = function(io){
       var form = validator.request(req, {
             limit: 100,
             offset: 0
+          },{
+            // increment the min
+            fields: [
+              {
+                field: 'limit',
+                check: 'isInt',
+                args: [
+                  {min: 1, max: 1000}
+                ],
+                error: 'should be a number in range 1 to max 1000'
+              }
+            ],
           });
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
       Resource.getRelatedEntitiesGraph({
         id: form.params.id,
         entity: form.params.entity,
@@ -169,26 +207,41 @@ module.exports = function(io){
       We should move this to entities instead.
     */
     getCooccurrences: function (req, res) {
-      validator.queryParams(req.query, function (err, params, warnings) {
-        if(err)
-          return helpers.formError(err, res);
-        var query = parser.agentBrown(queries.get_cooccurrences, params);
-        // console.log('query', query)
-        
-        helpers.cypherGraph(query, {
-          offset: 0,
-          limit: 500,
-          start_time: params.start_time,
-          end_time: params.end_time
-        }, function (err, graph) {
-          if(err) {
-            return helpers.cypherQueryError(err, res);
-          };
-          return res.ok({
-            graph: graph
+      var query = '',
+          form = validator.request(req, {
+            limit: 200,
+            offset: 0
+          },{
+            // increment the min
+            fields: [
+              {
+                field: 'limit',
+                check: 'isInt',
+                args: [
+                  {min: 1, max: 200}
+                ],
+                error: 'should be a number in range 1 to max 200'
+              }
+            ],
           });
-        });
-      })
+      
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      if(!form.params.from && !form.params.to && !form.params.with && !form.params.type) {
+        query = parser.agentBrown(queries.get_precomputated_cooccurrences, form.params);
+        form.params.precomputated = true;
+      } else {
+        query = parser.agentBrown(queries.get_cooccurrences, form.params);
+      }
+      helpers.cypherGraph(query, form.params, function (err, graph) {
+        if(err) {
+          return helpers.cypherQueryError(err, res);
+        };
+        return res.ok({
+          graph: graph
+        },form.params);
+      });
     },
     
     /*
@@ -274,7 +327,11 @@ module.exports = function(io){
     */
     createIssue: function (req, res) {
       var Issue   = require('../models/issue'), 
-          form = validator.request(req);
+          form = validator.request(req, {}, {
+            fields: [
+              validator.SPECIALS.issueType
+            ]
+          });
       // console.log(form.params)
       if(!form.isValid)
         return helpers.formError(form.errors, res);
@@ -338,11 +395,11 @@ module.exports = function(io){
       var type = 'bipartite';
       
       // get the right graph
-      if(req.query.type) {
+      if(req.query.graphtype) {
         if(['monopartite-entity', 'monopartite-resource'].indexOf(req.query.type) == -1) {
-          return res.error({type: req.query.type + 'not found'});
+          return res.error({type: req.query.graphtype + 'not found'});
         }
-        type = req.query.type
+        type = req.query.graphtype
       }
       
       if(type == 'bipartite') {
@@ -375,6 +432,11 @@ module.exports = function(io){
             limit: 100,
             offset: 0
           });
+
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      // console.log(form)
       Resource.getRelatedResourcesGraph({
         id: form.params.id
       },
@@ -408,6 +470,27 @@ module.exports = function(io){
       });
     },
     
+    getRelatedResourcesTimeline: function (req, res) {
+      var form = validator.request(req, {
+            limit: 100,
+            offset: 0
+          });
+      
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      Resource.getRelatedResourcesTimeline({
+        id: form.params.id
+      }, function (err, timeline) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({
+          timeline: timeline
+        }, {
+          params: form.params
+        });
+      })
+    },
     
     /*
       Create a relationship bzetween the current user and the resoruce

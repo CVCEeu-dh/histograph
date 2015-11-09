@@ -51,7 +51,7 @@ angular.module('histograph')
           params: options
         });
       }
-    }
+    };
   })
   /*
     Add a comment to a resource
@@ -72,7 +72,7 @@ angular.module('histograph')
     Add / get :model related to resource
   */
   .factory('ResourceRelatedVizFactory', function ($resource) {
-    return $resource('/api/resource/:id/related/:model/:type');
+    return $resource('/api/resource/:id/related/:model/:viz');
   })
   /*
     POST Save a new inquiry (modify it) or GET list of inquiries
@@ -118,7 +118,7 @@ angular.module('histograph')
     type  - type of viz, eg graph or timeline
   */
   .factory('EntityRelatedVizFactory', function ($resource) {
-    return $resource('/api/entity/:id/related/:model/:type');
+    return $resource('/api/entity/:id/related/:model/:viz');
   })
   /*
     GET cooccurrences
@@ -139,7 +139,7 @@ angular.module('histograph')
       downvote: function(options) {
         return $http.post('/api/comment/' + options.id + '/downvote');
       },
-    }
+    };
   })
   /*
     Get a list of resource
@@ -147,49 +147,119 @@ angular.module('histograph')
   .factory('UserFactory', function ($resource) {
     return $resource('/api/user/:method');
   })
-  
   /*
-    Get/Update/Delete one resource
+    Add / get :model related to user related
   */
-  .factory('SuggestFactory', function ($http) {
-    return {
-      get: function(options) {
-        return $http.get('/api/suggest', {
-          params: options
-        });
-      },
-      allShortestPaths: function(options) {
-        return $http.get('/api/suggest/all-shortest-paths/' + options.ids);
-      },
-      allInBetween: function(options) {
-        return $http.get('/api/suggest/all-in-between/' + options.ids);
-      },
-      getUnknownNode: function(options) {
-        return $http.get('/api/suggest/unknown-node/' + options.id);
-      },
-      getUnknownNodes: function(options) {
-        return $http.get('/api/suggest/unknown-nodes/' + options.ids);
-      },
-      neighbors: function(options) {
-        return $http.get('/api/suggest/neighbors/' + options.ids);
-      },
-      getResources: function(options) {
-        return $http.get('/api/suggest/resources', {
-          params: options
-        });
-      },
-      getEntities: function(options) {
-        return $http.get('/api/suggest/entities', {
-          params: options
-        });
-      },
-      getGraph: function(options) {
-        return $http.get('/api/suggest/graph', {
-          params: options
-        });
-      } 
-    }
+  .factory('UserRelatedFactory', function ($resource) {
+    return $resource('/api/user/:id/related/:model');
   })
+  /*
+    Add / get :model related to resource
+  */
+  .factory('UserRelatedVizFactory', function ($resource) {
+    return $resource('/api/user/:id/related/:model/:viz');
+  })
+  /*
+    Search & Suggest
+  */
+  .factory('SuggestFactory', function ($resource) {
+    return $resource('/api/suggest/:m/:ids', {}, {
+      getUnknownNodes: {
+        method: 'GET',
+        params: {
+          m: 'unknown-nodes'
+        }
+      },
+      getStats: {
+        method: 'GET',
+        params: {
+          m: 'stats'
+        }
+      },
+      getEntities: {
+        method: 'GET',
+        params: {
+          m: 'entity'
+        }
+      },
+      getResources: {
+        method: 'GET',
+        params: {
+          m: 'resource'
+        }
+      },
+      getUnknownNode: {
+        method: 'GET',
+        params: {
+          m: 'unknown-node'
+        }
+      },
+      allInBetween:{
+        method: 'GET',
+        params: {
+          m: 'all-in-between'
+        }
+      }
+    });
+  })
+  
+  .factory('SuggestAllInBetweenFactory', function ($resource) {
+    return $resource('/api/suggest/all-in-between/:ids/:model');
+  })
+  
+  .factory('SuggestAllInBetweenVizFactory', function ($resource) {
+    return $resource('/api/suggest/all-in-between/:ids/:model/:viz');
+  })
+  
+  .factory('SearchFactory', function ($resource) {
+    return $resource('/api/suggest/:model');
+  })
+  
+  .factory('SearchVizFactory', function ($resource) {
+    return $resource('/api/suggest/:model/:viz');
+  })
+  
+  
+  
+  // .factory('SuggestFactory', function ($http) {
+  //   return {
+  //     get: function(options) {
+  //       return $http.get('/api/suggest', {
+  //         params: options
+  //       });
+  //     },
+  //     allShortestPaths: function(options) {
+  //       return $http.get('/api/suggest/all-shortest-paths/' + options.ids);
+  //     },
+  //     allInBetween: function(options) {
+  //       return $http.get('/api/suggest/all-in-between/' + options.ids);
+  //     },
+  //     getUnknownNode: function(options) {
+  //       return $http.get('/api/suggest/unknown-node/' + options.id);
+  //     },
+  //     getUnknownNodes: function(options) {
+  //       return $http.get('/api/suggest/unknown-nodes/' + options.ids);
+  //     },
+  //     neighbors: function(options) {
+  //       return $http.get('/api/suggest/neighbors/' + options.ids);
+  //     },
+  //     getResources: function(options) {
+  //       return $http.get('/api/suggest/resources', {
+  //         params: options
+  //       });
+  //     },
+  //     getEntities: function(options) {
+  //       return $http.get('/api/suggest/entities', {
+  //         params: options
+  //       });
+  //     },
+  //     getGraph: function(options) {
+  //       return $http.get('/api/suggest/graph', {
+  //         params: options
+  //       });
+  //     } 
+  //   };
+  // })
   /*
     Socket.io service, thqnks to http://briantford.com/blog/angular-socket-io
   */
@@ -212,7 +282,7 @@ angular.module('histograph')
               callback.apply(socket, args);
             }
           });
-        })
+        });
       }
     };
   });

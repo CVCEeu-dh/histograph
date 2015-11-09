@@ -8,9 +8,10 @@
  */
 angular.module('histograph')
   
-  .controller('CoreCtrl', function ($scope, $rootScope, $location, $state, $timeout, $route, $log, $timeout, $http, $routeParams, $modal, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, localStorageService, EVENTS, VIZ, MESSAGES) {
+  .controller('CoreCtrl', function ($scope, $rootScope, $location, $state, $timeout, $route, $log, $timeout, $http, $routeParams, $modal, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, localStorageService, EVENTS, VIZ, MESSAGES, ORDER_BY) {
     $log.debug('CoreCtrl ready');
-    $scope.locationPath = $location.path(); 
+    $scope.locationPath = $location.path();
+    $scope.locationJson  = JSON.stringify($location.search()); 
     
     var suggestionTimeout = 0;
     
@@ -73,6 +74,13 @@ angular.module('histograph')
       $scope.viewpoint.selected = value;
     }
     
+    /*
+      Get the current $state
+    */
+    $scope.getState = function() {
+      return $state;
+    }
+    
     
     // the current search query, if any
     // $scope.query =  $routeParams.query || '';
@@ -104,6 +112,10 @@ angular.module('histograph')
       $scope.relatedItems = relatedItems;
     };
     
+    $scope.addRelatedItems = function(relatedItems) {
+      $log.log('CoreCtrl > addRelatedItems', relatedItems.length);
+      $scope.relatedItems = ($scope.relatedItems || []).concat(relatedItems);
+    }
     
     $scope.relatedPage = 1;
     $scope.relatedCount = 0; // total number of items
@@ -120,9 +132,19 @@ angular.module('histograph')
       });
     }
     
+    $scope.addMoreItems = function() {
+      $log.log('CoreCtrl > addMoreItems');
+      //$scope.$broadcast(EVENTS.INFINITE_SCROLL);
+    }
+    /*
+      Manual trigger.
+    */
+    $scope.more = function() {
+      $scope.$broadcast(EVENTS.INFINITE_SCROLL);
+    }
+    
     /*
       language handlers
-      Please cehck that each controller clean or replace this list
     */
     $scope.language = 'en';
     
@@ -133,6 +155,45 @@ angular.module('histograph')
     $scope.setLanguage = function(lang) {
       $scope.language = lang
     }
+    
+    
+    /*
+      sorting order handlers.
+      In children controllers, use setAvailableSortings to update the list.
+    */
+    
+    
+    $scope.availableSortings = [
+      ORDER_BY.RELEVANCE,
+      ORDER_BY.CLOSEST_DATE
+    ];
+    
+    $scope.sorting = ORDER_BY.RELEVANCE;
+    
+    $scope.setAvailableSortings = function(availableSortings) {
+      $scope.availableSortings = availableSortings;
+    };
+    
+    $scope.setSorting = function(sorting) {
+      if(!sorting) {
+        $log.info('CoreCtrl -> setSorting() ignore undefined sorting')
+        return;
+      }
+      if(typeof sorting == 'string') {
+        var sorting = _.first(_.filter(ORDER_BY, {value: sorting}));
+        if(sorting) {
+          $scope.sorting = sorting;
+          $location.search('orderby', sorting.value)
+        }
+        return;
+      }
+      $scope.sorting = sorting;
+      if(sorting.value == 'relevance')
+        $location.search('orderby', null);
+      else
+        $location.search('orderby', sorting.value)
+    }
+    
     
     /**
      handle redirection from directive
@@ -146,14 +207,25 @@ angular.module('histograph')
       Will automatically update the graph view
       according tho the nodes edges propsed here.
       @param graph    - a collection of nodes and edges given as lists
-      
+      @param options.center    - (optional) a list of node ids fo set as fixed
     */
-    $scope.setGraph = function(graph) {
+    $scope.setGraph = function(graph, options) {
+      if(!graph || !graph.nodes || !graph.edges) {
+        $log.warn('CoreCtrl -> setGraph() build an empty graph, response is empty')
+        graph = {
+          nodes: [],
+          edges:[]
+        };
+      }
       $log.info('CoreCtrl -> setGraph', graph.nodes.length, 'nodes', graph.edges.length, 'edges')
+      if(options && options.centers)
+        graph.centers = options.centers;
       $scope.graph = graph;
     };
     
     $scope.suggest = function(query) {
+      if(query.trim().length < 2)
+        return;
       // $log.info('CoreCtrl -> suggest', query);
       $scope.query = ''+ query
       $scope.freeze = 'sigma'
@@ -292,7 +364,16 @@ angular.module('histograph')
       }
     }
     
+    /*
+      Use it when it's busy in doing something
+    */
+    $scope.lock = function() {
+      $scope.isBusy = true;
+    }
   
+    $scope.unlock = function() {
+      $scope.isBusy = false;
+    }
     /*
     
       Events listeners
@@ -300,13 +381,28 @@ angular.module('histograph')
     
     */
     var _resizeTimer;
+    $rootScope.$on('$stateChangeStart', function (e, state) {
+      if(state.resolve) {
+        $scope.lock(); 
+      }
+    })
+
     $rootScope.$on('$stateChangeSuccess', function (e, state) {
       $log.log('CoreCtrl @stateChangeSuccess', state.name);
-      $scope.currentState = state.name ;// r.$$route.controller;
-      
+      // the ui.router state (cfr app.js)
+      $scope.currentState = state;
+
+      if(state.resolve)
+        $scope.unlock();
+
       $scope.unsetMessage();
+      
+      // if any graph is availabe, tell sigma that you're
+      // going to send the nodes
+      $scope.$broadcast(EVENTS.STATE_CHANGE_SUCCESS);
+
       // $scope.setMessage(MESSAGES.LOADED, 1500);
-      $scope.freeze = false;
+      
       // set initial params here
       $scope.params = cleanService.params($location.search())
       
@@ -363,8 +459,9 @@ angular.module('histograph')
     */
     $scope.$on('$locationChangeStart', function (e, path) {
       $log.log('CoreCtrl @locationChangeStart');
-      $scope.freeze = 'sigma';
-      $scope.setMessage(MESSAGES.LOADING);
+      
+      $scope.$broadcast(EVENTS.LOCATION_CHANGE_START)
+      // $scope.setMessage(MESSAGES.LOADING);
     });
     
     $scope.currentPath;
@@ -402,13 +499,13 @@ angular.module('histograph')
         if(toBeAdded.length)
           SuggestFactory.getUnknownNodes({
             ids: toBeAdded
-          }).then(function (res) {
+          }, function (res) {
             $log.log('CoreCtrl -> addToQueue() SuggestFactory', res);
-            $scope.playlist = $scope.playlist.concat(res.data.result.items);
+            $scope.playlist = $scope.playlist.concat(res.result.items);
             $scope.playlistIds = _.map( $scope.playlist, 'id');
             $scope.queueStatus = 'active';
             $scope.queueRedirect();
-          })
+          });
      }
 
      $scope.queue = function(item, inprog) {
@@ -441,11 +538,12 @@ angular.module('histograph')
           $scope.$apply();
         $scope.queueRedirect();
       } else { // we need to load the item first, then we can update queue status
-        SuggestFactory.getUnknownNode({
-          id: itemId
-        }).then(function (res) {
-          $scope.playlist.push(res.data.result.item);
-          $scope.playlistIds.push(res.data.result.item.id);
+        SuggestFactory.getUnknownNodes({
+          ids: [itemId]
+        }, function (res) {
+          
+          $scope.playlist.push(res.result.items[0]);
+          $scope.playlistIds.push(res.result.items[0].id);
           $scope.queueStatus = 'active';
           if(!inprog)
             $scope.$apply();
@@ -484,9 +582,9 @@ angular.module('histograph')
       
       // Otherwise check the current state
       
-      if($state.current.controller == 'NeighborsResourcesCtrl') {
+      if($scope.currentState.name == 'neighbors.resources') {
         $log.log('    redirect to: /#/neighbors/'+$scope.playlistIds.join(',')); 
-        $location.path('/neighbors/'+$scope.playlistIds.join(',')+'/r');
+        $location.path('/neighbors/'+$scope.playlistIds.join(','));
       }
     };
     
@@ -503,10 +601,10 @@ angular.module('histograph')
       if(ids.length != $scope.playlist.length) {
         SuggestFactory.getUnknownNodes({
           ids: ids
-        }).then(function (res) {
-          $scope.playlist = res.data.result.items;
+        }, function (res) {
+          $scope.playlist = res.result.items;
           
-          $scope.playlistIds = res.data.result.items.map(function (d) {
+          $scope.playlistIds = res.result.items.map(function (d) {
             return d.id;
           });
           
@@ -542,13 +640,7 @@ angular.module('histograph')
       $scope.queueRedirect();
     };
     
-    /*
-      Filters
-    */
-    $scope.removeFilter = function(key, value) {
-      $log.log('CoreCtrl -> removeFilter() - key:', key, '- value:', value)
-      $location.search(key, null);
-    }
+    
     
     /*
       Open an issue modal
@@ -623,5 +715,106 @@ angular.module('histograph')
     };
 
    
+  })
+  /*
+    A generic controller for every relatedItem
+  */
+  .controller('RelatedItemsCtrl', function ($scope, $log, $stateParams, $filter, relatedItems, relatedModel, relatedVizFactory, relatedFactory, socket, EVENTS) {
+    
+    $scope.totalItems  = relatedItems.info.total_items;
+    $scope.limit       = relatedItems.info.limit;
+    $scope.offset      = relatedItems.info.offset;
+    $scope.loading     = false;
+    // $scope.page        = 1; // always first page!!
+    
+    /*
+      set order by
+      according to the favourite orderby. Avoid default values.
+    */
+    if(relatedItems.info.orderby != 'relevance')
+      $scope.setSorting(relatedItems.info.orderby);
+    
+    /*
+      set facets
+    */
+    $scope.setFacets('type', relatedItems.info.groups);
+    
+    $log.debug('RelatedItemsCtrl ready');
+    /*
+      Load graph data
+    */
+    $scope.syncGraph = function() {
+      relatedVizFactory.get(angular.extend({
+        model: relatedModel,
+        viz: 'graph',
+        limit: 100,
+      },  $stateParams, $scope.params), function (res) {
+        if($stateParams.ids) {
+          $scope.setGraph(res.result.graph, {
+            centers: $stateParams.ids
+          });
+        } else if($scope.item && $scope.item.id)
+          $scope.setGraph(res.result.graph, {
+            centers: [$scope.item.id]
+          });
+        else
+          $scope.setGraph(res.result.graph);
+      });
+    }
+
+      
+    /*
+      Reload related items, with filters.
+    */
+    $scope.sync = function() {
+      $scope.lock();
+
+      relatedFactory.get(angular.extend({
+        model: relatedModel,
+        limit: $scope.limit,
+        offset: $scope.offset
+      }, $stateParams, $scope.params), function (res) {
+        $scope.unlock();
+        $scope.offset  = res.info.offset;
+        $scope.limit   = res.info.limit;
+        $scope.totalItems = res.info.total_items;
+        if($scope.offset > 0)
+          $scope.addRelatedItems(res.result.items);
+        else
+          $scope.setRelatedItems(res.result.items);
+        // reset if needed
+        $scope.setFacets('type', res.info.groups);
+      }) 
+    };
+
+    /*
+      listener: EVENTS.API_PARAMS_CHANGED
+      some query parameter has changed, reload the list accordingly.
+    */
+    $scope.$on(EVENTS.API_PARAMS_CHANGED, function() {
+      // reset offset
+      $scope.offset = 0;
+      $log.debug('ResourcesCtrl @API_PARAMS_CHANGED', $scope.params);
+      $scope.sync();
+      $scope.syncGraph();
+    });
+    // $scope.$on(EVENTS.PAGE_CHANGED, function(e, params) {
+    //   $log.debug('ResourcesCtrl @PAGE_CHANGED', params);
+    //   $scope.page = params.page
+    //   $scope.sync();
+    // });
+    
+    $scope.$on(EVENTS.INFINITE_SCROLL, function (e) {
+      $scope.offset = $scope.offset + $scope.limit;
+      $log.debug('ResourcesCtrl @INFINITE_SCROLL', '- skip:',$scope.offset,'- limit:', $scope.limit);
+      
+      $scope.sync();
+    });
+
+    $scope.syncGraph();
+    $log.log('RelatedItemsCtrl -> setRelatedItems - items', relatedItems.result.items);
+    $scope.setRelatedItems(relatedItems.result.items);
+    
+    
   })
   

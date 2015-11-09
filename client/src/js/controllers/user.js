@@ -13,4 +13,4 @@ angular.module('histograph')
     $log.debug('UsersCtrl ready', $stateParams.id, 'loaded', users);
     $scope.relatedItems = users.result.items;
     $scope.totalItems = users.info.total_count || 0;
-  })
+  });

@@ -2,7 +2,94 @@
 // get resource with its version and comments
 MATCH (res) WHERE id(res) = {id}
 WITH res
+OPTIONAL MATCH (res)<-[r_cur:curates]-(u:`user`)
+WITH res, r_cur, u
+ORDER BY r_cur.creation_time DESC
+WITH res, collect({  
+      id: id(u),
+      username: u.username,
+      rel: r_cur
+    })[0..10] as curators // safety limits, to be improved with time
+    
 OPTIONAL MATCH (res)-[r_loc:appears_in]-(loc:`location`)
+WITH res, curators, r_loc, loc
+ORDER BY r_loc.tfidf DESC, r_loc.frequency DESC
+WITH res, curators, collect({  
+      id: id(loc),
+      type: 'location',
+      props: loc,
+      rel: r_loc
+    })[0..5] as locations
+
+OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
+WITH res, curators, locations, r_per, per
+ORDER BY r_per.tfidf DESC, r_per.frequency DESC
+WITH res, curators, locations, collect({
+      id: id(per),
+      type: 'person',
+      props: per,
+      rel: r_per
+    })[0..5] as persons
+
+OPTIONAL MATCH (res)-[r_org:appears_in]-(org:`organization`)
+WITH res, curators, locations, persons, collect({  
+      id: id(org),
+      type: 'organization',
+      props: org,
+      rel: r_org
+    })[0..5] as organizations
+
+OPTIONAL MATCH (res)-[r_soc:appears_in]-(soc:`social_group`)
+WITH res, curators, locations, persons, organizations, collect({
+      id: id(soc),
+      type: 'social_group',
+      props: soc,
+      rel: r_soc
+    })[0..5] as social_groups
+
+OPTIONAL MATCH (ver)-[:describes]->(res)
+OPTIONAL MATCH (res)-[:belongs_to]->(col)
+OPTIONAL MATCH (com)-[:mentions]->(res)
+OPTIONAL MATCH (inq)-[:questions]->(res)
+
+RETURN {
+  resource: {
+    id: id(res),
+    props: res,
+    curators: curators,
+    versions: EXTRACT(p in COLLECT(DISTINCT ver)|{name: p.name, id:id(p), yaml:p.yaml, language:p.language, type: last(labels(p))}),
+    locations: locations,
+    persons:   persons,
+    organizations: organizations,
+    social_groups:  social_groups,
+    collections: EXTRACT(p in COLLECT(DISTINCT col)|{name: p.name, id:id(p), type: 'collection'}),
+    comments: count(distinct com),
+    inquiries: count(distinct inq)
+  }
+} AS result
+
+
+// name: get_resources
+// get resources with number of comments, if any
+MATCH (res:resource)<-[:appears_in]-(ent)
+{if:with}
+  WHERE id(ent) IN {with} 
+  
+{/if}
+WITH DISTINCT res
+  {?res:ids__inID} {AND?res:start_time__gt} {AND?res:end_time__lt} {AND?res:mimetype__in} {AND?res:type__in}
+WITH DISTINCT res
+
+{if:orderby}
+ORDER BY {:orderby}
+{/if}
+{unless:orderby}
+ORDER BY res.start_time DESC
+{/unless}
+SKIP {offset} 
+LIMIT {limit}
+WITH res
+OPTIONAL MATCH (res)-[r_loc:appears_in]->(loc:`location`)
 WITH res, r_loc, loc
 ORDER BY r_loc.tfidf DESC, r_loc.frequency DESC
 WITH res, collect({  
@@ -10,8 +97,7 @@ WITH res, collect({
       type: 'location',
       props: loc,
       rel: r_loc
-    })[0..5] as locations
-
+    })[0..5] as locations   
 OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
 WITH res, locations, r_per, per
 ORDER BY r_per.tfidf DESC, r_per.frequency DESC
@@ -38,86 +124,7 @@ WITH res, locations, persons, organizations, collect({
       rel: r_soc
     })[0..5] as social_groups
 
-
-
-    OPTIONAL MATCH (ver)-[:describes]->(res)
-    OPTIONAL MATCH (res)-[:belongs_to]->(col)
-    OPTIONAL MATCH (com)-[:mentions]->(res)
-    OPTIONAL MATCH (inq)-[:questions]->(res)
-
- 
-    RETURN {
-      resource: {
-        id: id(res),
-        props: res,
-        versions: EXTRACT(p in COLLECT(DISTINCT ver)|{name: p.name, id:id(p), yaml:p.yaml, language:p.language, type: last(labels(p))}),
-        locations: locations,
-        persons:   persons,
-        organizations: organizations,
-        social_groups:  social_groups,
-        collections: EXTRACT(p in COLLECT(DISTINCT col)|{name: p.name, id:id(p), type: 'collection'}),
-        comments: count(distinct com),
-        inquiries: count(distinct inq)
-      }
-    } AS result
-
-
-// name: get_resources
-// get resources with number of comments, if any
-MATCH (res:resource)
-{if:ids}
-  WHERE id(res) IN {ids}
-{/if}
-{?res:start_time__gt} {AND?res:end_time__lt} {AND?res:mimetype__in}
-  WITH res
-{if:entity_id}
-  MATCH (res)--(ent:entity) WHERE id(ent)={entity_id} 
-  WITH res
-{/if}
-{if:orderby}
-ORDER BY {:orderby}
-{/if}
-{unless:orderby}
-ORDER BY res.start_time DESC
-{/unless}
-SKIP {offset} 
-LIMIT {limit}
-
-WITH res
-OPTIONAL MATCH (res)-[r_loc:appears_in]-(loc:`location`)
-
-WITH res, collect({  
-      id: id(loc),
-      type: 'location',
-      props: loc,
-      rel: r_loc
-    })[0..5] as locations   
-OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
-
-WITH res, locations, collect({
-      id: id(per),
-      type: 'person',
-      props: per,
-      rel: r_per
-    })[0..5] as persons
-OPTIONAL MATCH (res)-[r_org:appears_in]-(org:`organization`)
-
-WITH res, locations, persons, collect({  
-      id: id(org),
-      type: 'organization',
-      props: org,
-      rel: r_org
-    })[0..5] as organizations
-OPTIONAL MATCH (res)-[r_soc:appears_in]-(soc:`social_group`)
-
-WITH res, locations, persons, organizations, collect({
-      id: id(soc),
-      type: 'social_group',
-      props: soc,
-      rel: r_soc
-    })[0..5] as social_groups
-
-{if:entity_id}
+{if:with}
   OPTIONAL MATCH (res)--(ann:annotation) 
   WITH res, ann, locations, persons, organizations, social_groups
 {/if}
@@ -126,38 +133,50 @@ RETURN {
   id:id(res),
   type: 'resource',
   props: res,
-  {if:entity_id}
-    ann: ann,
+  {if:with}
+    annotations: collect(ann),
   {/if}
   persons:     persons,
   organizations: organizations,
   locations:    locations,
   social_groups:   social_groups
 } as resource
-{if:orderby}
-ORDER BY {:orderby}
-{/if}
-{unless:orderby}
-ORDER BY res.start_time DESC
-{/unless}
+//{if:orderby}
+//ORDER BY {:orderby}
+//{/if}
+//{unless:orderby}
+ORDER BY resource.props.start_time ASC
+//{/unless}
 
 
 // name: count_resources
 // count resources having a version, with current filters
-MATCH (res:resource){if:entity_id}--(ent:entity)
-  WHERE id(ent)={entity_id} 
-WITH res
+MATCH (res:resource)<-[:appears_in]-(ent)
+{if:with}
+  WHERE id(ent) IN {with}
 {/if}
-{?res:start_time__gt} {AND?res:end_time__lt}
-RETURN count(res) as count_items
+WITH DISTINCT res
+{?res:start_time__gt}
+{AND?res:end_time__lt}
+{AND?res:type__in}
+
+WITH collect(res) as resources
+WITH resources, length(resources) as total_items
+UNWIND resources as res
+
+RETURN {
+  group: {if:group}res.{:group}{/if}{unless:group}res.type{/unless}, 
+  count_items: count(res),
+  total_items: total_items
+} // count per type
 
 
 
 // name: get_resources_by_ids
 // get resources with number of comments, if any
-MATCH (res:resource)
+MATCH (res:resource)<-[:appears_in]-()
 WHERE id(res) in {ids}
-WITH res
+WITH DISTINCT res
     OPTIONAL MATCH (ver)-[:describes]->(res)
     OPTIONAL MATCH (ent)-[:appears_in]->(res)
     OPTIONAL MATCH (res)-[:belongs_to]->(col)
@@ -177,62 +196,87 @@ WITH res
 
 // name: count_similar_resource_ids_by_entities
 // get top 100 similar resources sharing the same persons, orderd by time proximity if this info is available
-MATCH (res:resource)-[:appears_in*2]-(e)
+MATCH (res:resource)<-[:appears_in]-(ent:entity)-[:appears_in]->(res2:resource)
 WHERE id(res) = {id}
-RETURN count(DISTINCT(e)) as count_items
+  {if:mimetype}
+  AND res2.mimetype IN {mimetype}
+  {/if}
+  {if:type}
+  AND res2.type IN {type}
+  {/if}
+  {if:start_time}
+  AND res2.start_time >= {start_time}
+  {/if}
+  {if:end_time}
+  AND res2.end_time <= {end_time}
+  {/if}
+  
+  AND id(res) <> id(res2)
+
+WITH DISTINCT res2  
+{if:with}
+  MATCH (ent:entity)-[:appears_in]->(res2)
+  WHERE id(ent) IN {with}
+  WITH DISTINCT res2
+{/if}
+RETURN {
+  group: {if:group}res2.{:group}{/if}{unless:group}res2.type{/unless}, 
+  count_items: count(res2)
+} // count per type
 
 
 // name: get_similar_resource_ids_by_entities
-// get top 100 similar resources sharing the same persons, orderd by time proximity if this info is available
-MATCH p=(res)<-[:appears_in]-(ent:entity)-[:appears_in]->(res2:resource)
-WHERE id(res) = {id} AND ent.score > -1 
-RETURN {
-  target: id(res2),
-  dst : abs(coalesce(res.start_time, 1000000000) - coalesce(res2.start_time, 0)),
-  det : abs(coalesce(res.end_time, 1000000000) - coalesce(res2.end_time, 0)),
-  labels: count(DISTINCT(last(labels(ent)))),
-  int : count(DISTINCT ent)
-} as candidate
-ORDER BY 
-candidate.int DESC, candidate.labels DESC, candidate.dst ASC, candidate.det ASC
+//
+MATCH (res1:resource)<-[r1:appears_in]-(ent:entity)-[r2:appears_in]->(res2:resource)
+  WHERE id(res1) = {id}
+    AND ent.score > -1
+    {if:mimetype}
+    AND res2.mimetype IN {mimetype}
+    {/if}
+    {if:type}
+    AND res2.type IN {type}
+    {/if}
+    {if:start_time}
+    AND res2.start_time >= {start_time}
+    {/if}
+    {if:end_time}
+    AND res2.end_time <= {end_time}
+    {/if}
+    AND id(res1) <> id(res2)
+WITH  res1, res2, r1, r2, ent
+{if:with}
+  MATCH (ent2:entity)-[:appears_in]->(res2)
+  WHERE id(ent2) IN {with}
+  WITH  res1, res2, r1, r2, ent
+{/if}
+
+WITH res1, res2, count(*) as intersection
+
+MATCH (res1)<-[rel:appears_in]-(r1:entity)
+WITH res1, res2, intersection, count(rel) as H1
+
+MATCH (res2)<-[rel:appears_in]-(r1:entity)
+WITH res1,res2, intersection, H1, count(rel) as H2
+WITH res1, res2, intersection, H1+H2 as union
+WITH res1, res2, intersection, union, toFloat(intersection)/toFloat(union) as JACCARD
+
+{unless:orderby}
+ORDER BY JACCARD DESC
 SKIP {offset}
 LIMIT {limit}
-
-
-// name: get_similar_resources
-// get resources that match well with a given one
-// recommendation system ,et oui
-START res = node({id})
-MATCH (res)-[*1..2]-(res2:resource)
-  OPTIONAL MATCH (per:person)--(res2)
-  OPTIONAL MATCH (loc:location)--(res2)
-WHERE res <> res2
-  WITH res, res2,
-    abs(res.start_time-res2.start_time) as proximity,
-  collect(DISTINCT per) as persons,
-    collect(DISTINCT loc) as locations
-  WITH res2, persons, locations, proximity,
-    length(persons) as person_similarity,
-    length(locations) * 0.01 as location_similarity
-  WITH res2, persons, locations, proximity, person_similarity, location_similarity, person_similarity + location_similarity as entity_similarity
-
-  RETURN {
-    id: id(res2),
-    props: res2,
-    persons: persons,
-    locations: locations,
-    ratings: {
-      location_similarity: location_similarity,
-      person_similarity: person_similarity,
-      entity_similarity: entity_similarity,
-      proximity: proximity
-    }
-  } AS result
-  ORDER BY entity_similarity DESC, proximity ASC, person_similarity DESC, location_similarity DESC
-  LIMIT 25
-
-
-
+{/unless}
+RETURN {
+  target: id(res2),
+  type: LAST(labels(res2)),
+  dst : abs(coalesce(res1.start_time, 1000000000) - coalesce(res2.start_time, 0)),
+  det : abs(coalesce(res1.end_time, 1000000000) - coalesce(res2.end_time, 0)),
+  weight: JACCARD
+} as result
+{if:orderby}
+  ORDER BY {:orderby}
+  SKIP {offset}
+  LIMIT {limit}
+{/if}
 
 // name: add_comment_to_resource
 // add a comment to a resource, by user username. At least one #tag should be provided
@@ -289,6 +333,16 @@ RETURN col
       res.start_date = {start_date},
       res.end_date   = {end_date},
     {/if}
+    {if:start_month}
+      res.start_month = {start_month},
+      res.end_month   = {end_month},
+    {/if}
+    {if:full_search}
+      res.full_search = {full_search},
+    {/if}
+    {if:title_search}
+      res.title_search = {title_search},
+    {/if}
     {if:url}
       res.url = {url},
     {/if}
@@ -327,6 +381,16 @@ RETURN col
       res.end_time   = {end_time},
       res.start_date = {start_date},
       res.end_date   = {end_date},
+    {/if}
+    {if:start_month}
+      res.start_month = {start_month},
+      res.end_month   = {end_month},
+    {/if}
+    {if:full_search}
+      res.full_search = {full_search},
+    {/if}
+    {if:title_search}
+      res.title_search = {title_search},
     {/if}
     {if:url}
       res.url = {url},
@@ -386,26 +450,79 @@ WITH col, res
 RETURN col, res
 
 
+// name: get_precomputated_cooccurrences
+//
+MATCH (p1:person)-[r:appear_in_same_document]-(p2:person)
+WHERE id(p1) < id(p2)
+WITH p1,p2,r
+ORDER BY r.intersections DESC
+LIMIT {limit}
+WITH p1,p2,r
+RETURN {
+  source: {
+    id: id(p1),
+    type: 'person',
+    label: COALESCE(p1.name, p1.title_en, p1.title_fr),
+    url: p1.thumbnail
+  },
+  target: {
+    id: id(p2),
+    type: 'person',
+    label: COALESCE(p2.name, p2.title_en, p2.title_fr),
+    url: p2.thumbnail
+  },
+  weight: r.intersections
+} as result
+
+
+
 // name: get_cooccurrences
 //
-MATCH (p1:person)-[r1:appears_in]-(res:resource)-[r2:appears_in]-(p2:person)
-{?res:start_time__gt} {AND?res:end_time__lt}
-WITH p1, p2, length(collect(DISTINCT res)) as w
+{if:with}
+MATCH (res:resource)<-[:appears_in]-(ent2:entity)
+  WHERE id(ent2) IN {with}
+WITH res
+  MATCH (p1:person)-[r1:appears_in]->(res)<-[r2:appears_in]-(p2:person)
+{/if}
+{unless:with}
+MATCH (p1:person)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:person)
+{/unless}
+  WHERE id(p1) < id(p2)
+  {if:start_time}
+    AND res.start_time >= {start_time}
+  {/if}
+  {if:end_time}
+    AND res.end_time <= {end_time}
+  {/if}
+  {if:mimetype}
+    AND res.mimetype in {mimetype}
+  {/if}
+  {if:type}
+    AND res.type in {type}
+  {/if}
+  
+  AND p1.score > -1
+  AND p2.score > -1
+WITH p1, p2, res
+ORDER BY r1.tfidf DESC, r2.tfidf DESC
+// limit here?
+WITH p1, p2, count(DISTINCT res) as w
 RETURN {
     source: {
       id: id(p1),
-      type: LAST(labels(p1)),
-      label: COALESCE(p1.name, p1.title_en, p1.title_fr)
+      type: 'person',
+      label: COALESCE(p1.name, p1.title_en, p1.title_fr),
+      url: p1.thumbnail
     },
     target: {
       id: id(p2),
-      type: LAST(labels(p2)),
-      label: COALESCE(p2.name, p2.title_en, p2.title_fr)
+      type: 'person',
+      label: COALESCE(p2.name, p2.title_en, p2.title_fr),
+      url: p2.thumbnail
     },
     weight: w
   } as result
 ORDER BY w DESC
-SKIP {offset}
 LIMIT {limit}
 
 
@@ -437,16 +554,14 @@ RETURN {
 ORDER BY result.weight DESC
 LIMIT {limit}
 
-
 // name: get_related_entities_graph
-// monopartite graph of entities
-MATCH (n:resource)
- WHERE id(n) = {id}
-WITH n
- MATCH (p1:{:entity})-[:appears_in]->(n)<-[:appears_in]-(p2:{:entity})
+//
+MATCH (n)<-[r1:appears_in]-(ent:{:entity})-[r2:appears_in]->(res:resource)
+  WHERE id(n) = {id}
+WITH res
+MATCH (p1:{:entity})-[:appears_in]->(res)<-[:appears_in]-(p2:{:entity})
  WHERE p1.score > -1 AND p2.score > -1
-WITH p1, p2, count(DISTINCT n) as w
-  
+WITH p1, p2, count(DISTINCT res) as w
 RETURN {
     source: {
       id: id(p1),
@@ -461,7 +576,12 @@ RETURN {
     weight: w 
   } as result
 ORDER BY w DESC
-LIMIT {limit}
+LIMIT 500
+
+
+
+
+
 
 
 // name: get_related_resources_graph
@@ -469,7 +589,8 @@ LIMIT {limit}
 MATCH (res:resource)-[:appears_in]-(ent:person)
 WHERE id(res) = {id} AND ent.score > -1
 WITH ent
-MATCH (res3:resource)<--(ent)-->(res2:resource)
+LIMIT 10
+MATCH (res3:resource)<-[:appears_in]-(ent)-->(res2:resource)
 WHERE res2 <> res3
 WITH res2, res3, count(distinct ent) as intersection
 RETURN {
@@ -490,14 +611,67 @@ LIMIT {limit}
 
 
 
+// name: count_timeline
+//
+MATCH (res:resource)
+WHERE res.start_time IS NOT NULL
+{?res:start_time__gt} {AND?res:end_time__lt}
+return count(distinct res.start_time)
 
 
 // name: get_timeline
 //
 MATCH (res:resource)
-{?res:start_time__gt} {AND?res:end_time__lt}
-WITH res.start_time as t, length(COLLECT(res)) as weight
-WHERE t IS NOT NULL
+  WHERE has(res.start_month)
+{if:start_time}
+  AND res.start_time >= {start_time}
+{/if}
+{if:end_time}
+  AND res.end_time <= {end_time}
+{/if} 
+WITH  res.start_month as tm, min(res.start_time) as t, count(res) as weight
+RETURN t, weight
+
+
+// name: get_related_resources_timeline
+//
+MATCH (res:resource)<-[:appears_in]-(ent:entity)
+WHERE id(res) = {id}
+  
+WITH ent
+MATCH (res:resource)<-[:appears_in]-(ent)
+WHERE has(res.start_month)
+  {if:mimetype}
+  AND res.mimetype = {mimetype}
+  {/if}
+  {if:ecmd}
+  AND res.ecmd = {ecmd}
+  {/if}
+  {if:start_time}
+  AND res.start_time >= {start_time}
+  {/if}
+  {if:end_time}
+  AND res.end_time >= {end_time}
+  {/if}
+
+  
+WITH  res.start_month as tm, min(res.start_time) as t, count(res) as weight
+RETURN tm, t, weight
+ORDER BY tm ASC
+
+
+
+// name: get_timeline_per_day
+//
+MATCH (res:resource)
+WHERE has(res.start_time)
+{if:start_time}
+  AND res.start_time >= {start_time}
+{/if}
+{if:end_time}
+  AND res.end_time <= {end_time}
+{/if} 
+WITH  res.start_time as t, count(res) as weight
 RETURN t, weight
 
 
@@ -574,12 +748,31 @@ RETURN  {
 // name:get_related_entities
 // get related nodes that are connected with the entity. test with
 // > node .\scripts\manage.js --task=query --cypher=resource/get_related_entities --id=<ID> --limit=10 --type=person --offset=0
-MATCH (n)-[r]-(ent:{:entity})
-  WHERE id(n) = {id}
+MATCH (ent:{:entity})-[r:appears_in]->(res:resource){if:with}<-[:appears_in]-(ent2){/if}
+  WHERE id(res) = {id} AND ent.score > -1
+  {if:with}
+    AND id(ent2) in {with}
+  {/if}
+WITH ent, r
+  ORDER BY r.tfidf
+  LIMIT 50
 WITH ent
-  MATCH (ent)--(res:resource)
+  MATCH (ent)-[r1:appears_in]->(res:resource)
+  WHERE ent.score > -1
+  {if:start_time}
+    AND res.start_time >= {start_time}
+  {/if}
+  {if:end_time}
+    AND res.end_time <= {end_time}
+  {/if}
+  {if:mimetype}
+    AND res.mimetype in {mimetype}
+  {/if}
+  {if:type}
+    AND res.type in {type}
+  {/if}
   // order by relevance ...
-WITH res
+WITH DISTINCT res
   MATCH (ent1:{:entity})-[r:appears_in]->(res)
   WHERE ent1.score > -1
 WITH ent1, count(DISTINCT r) as w

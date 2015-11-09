@@ -4,7 +4,8 @@
   ===
 
 */
-var YAML = require('yamljs'),
+var settings = require('./settings'),
+    YAML = require('yamljs'),
     _    = require('lodash'),
     validator  = require('validator'),
     moment     = require('moment');
@@ -62,6 +63,73 @@ function verify(form, fields, options) {
 
 module.exports = {
   /*
+    Special validation fields
+  */
+  SPECIALS: {
+    graphLimit: {
+      field: 'limit',
+      check: 'isInt',
+      args: [
+        {min: 1, max: 200}
+      ],
+      error: 'should be a number in range 1 to max 200'
+    },
+    query: {
+      field: 'query',
+      check: 'isLength',
+      args: [
+        2,
+        500
+      ],
+      error: 'should be 2 to 500 chars',
+      optional: false,
+      required: true,
+    },
+    entity: {
+      field: 'entity',
+      check: 'includedIn',
+      args: [
+        [
+          'person',
+          'location',
+          'organization',
+          'social_group'
+        ]
+      ],
+      error: 'should be something like person, location or organization'
+    },
+    'with': {
+      field: 'with',
+      check: 'matches',
+      args: [
+        /\d[\d,]+/
+      ],
+      error: 'with should contain only numbers and commas, at least one'
+    },
+    orderby: {
+      field: 'orderby',
+      check: 'includedIn',
+      args: [
+        [
+          'date',
+          '-date',
+          'relevance',
+        ]
+      ],
+      error: 'should be something like picture, press or video'
+    },
+    issueType: {
+      field: 'type',
+      check: 'includedIn',
+      args: [
+        [
+          'date'
+        ]
+      ],
+      error: 'should be something like date'
+    },
+  },
+  /*
     Common validation fields
   */
   FIELDS:[
@@ -77,9 +145,17 @@ module.exports = {
       field: 'ids',
       check: 'matches',
       args: [
-        /[\d,]+/
+        /\d[\d,]+/
       ],
       error: 'ids should contain only numbers and commas'
+    },
+    {
+      field: 'with',
+      check: 'matches',
+      args: [
+        /[\d,]+/
+      ],
+      error: 'with should contain only numbers and commas'
     },
     {
       field: 'limit',
@@ -87,7 +163,7 @@ module.exports = {
       args: [
         {min: 1, max: 100}
       ],
-      error: 'should be a number in range 1 to max 50'
+      error: 'should be a number in range 1 to max 100'
     },
     {
       field: 'offset',
@@ -105,6 +181,16 @@ module.exports = {
         500
       ],
       error: 'should be at least 3 to 160 chars',
+      optional: true
+    },
+    {
+      field: 'query',
+      check: 'isLength',
+      args: [
+        2,
+        500
+      ],
+      error: 'should be 2 to 500 chars',
       optional: true
     },
     {
@@ -148,6 +234,32 @@ module.exports = {
       error: 'should be something like image, text or video'
     },
     {
+      field: 'type',
+      check: 'includedIn',
+      args: [
+        settings.types? settings.types.resources: [
+          'external-text',
+          'picture',
+          'press',
+          'video',
+          'cartoon',
+          'facts',
+          'letter',
+          'facsimile',
+          'treaty',
+          'sound',
+          'table',
+          'article',
+          'schema',
+          'map',
+          'graphical-table',
+          'scientific-contribution',
+          'passport'
+        ]
+      ],
+      error: 'should be something like picture, press or video'
+    },
+    {
       field: 'from',
       check: 'matches',
       args: [
@@ -170,14 +282,6 @@ module.exports = {
         /(with|match|create|remove|set|delete)\s/i,
       ],
       error: 'It cannot contain reserved keywords"'
-    },
-    {
-      field: 'orderby',
-      check: 'matches',
-      args: [
-        /^[,a-zA-Z_\s\.]+$/
-      ],
-      error: 'should be in the format "sortable ASC, sortable DESC"'
     }
   ],
   
@@ -244,12 +348,7 @@ module.exports = {
       if(options.fields)
         fields = _.unique((options.fields || []).concat(module.exports.FIELDS), 'field');
       // specify which fields are required (when usually they're not) or viceversa. Cfr module.exports.FIELDS
-      if(options.required)
-        fields = fields.map(function (d) {
-          if(options.required[d.field])
-            d.optional = options.required[d.field];
-          return d;
-        });
+      
     }
     
     // verify  
@@ -276,6 +375,11 @@ module.exports = {
         return +d;
       });
     
+    if(safeParams.with)
+      safeParams.with = _.compact(safeParams.with.split(',')).map(function(d) {
+        return +d;
+      });
+    
     if(safeParams.limit)
       safeParams.limit = +safeParams.limit;
     
@@ -294,6 +398,9 @@ module.exports = {
       safeParams.end_date = moment.utc(params.to,'YYYY-MM-DD', true);
       safeParams.end_time = +safeParams.end_date.format('X');
     };
+    
+    if(typeof safeParams.type == 'string')
+      safeParams.type = safeParams.type.split(',');
     
     if(next)
       next(null, safeParams);

@@ -2,7 +2,7 @@
 </div>
 
 
-<div id="perspective" class="{{queueStatus}} reduced">
+<!-- <div id="perspective" class="{{queueStatus}} reduced">
   
   <div class="related" ng-repeat="relatedItem in playlist" ng-if="relatedItem.type == 'resource'" data-id='{{relatedItem.id}}'>
        
@@ -54,27 +54,8 @@
               
     <a data-id='{{relatedItem.id}}'>view on graph</a>
   </div>
-</div>
+</div> -->
 
-<div id='see-also-menu' class="tk-proxima-nova header-menu">
-  <ul>
-    <li>
-      <a ui-sref-active-eq="active" ui-sref="neighbors.resources">
-        <b>{{related.resource || 0}}</b> resources
-      </a>
-    </li>
-    <li ng-if='related.person'>
-      <a>
-        <b>{{related.person}}</b> persons
-      </a>
-    </li>
-    <li ng-if='related.location'>
-      <a>
-        <b>{{related.location}}</b> location
-      </a>
-    </li>
-  </ul>
-</div>
 
 
 <div ui-view id='see-also' ng-cloak>

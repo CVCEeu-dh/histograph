@@ -1,8 +1,10 @@
 'use strict';
 
 var settings = require('../settings'),
-    request = require('supertest'),
-    should  = require('should');
+    request  = require('supertest'),
+    should   = require('should'),
+    
+    helpers  = require('../helpers');
 
 var app = require('../server').app;
 
@@ -35,4 +37,44 @@ describe('core:cache discover', function() {
       done();
     }
   });
+  
+  it('should save a test file to check that cache SERVICES folder is writeable', function (done) {
+    if(settings.paths.cache.services)
+      helpers.cache.write(JSON.stringify({a:'b'}),{
+        namespace: 'services',
+        ref: 'test'
+      }, function (err) {
+        should.not.exist(err);
+        done();
+      });
+    else
+      done();
+  });
+  
+  it('should read a test file to check that the previous cache file has been written', function (done) {
+    if(settings.paths.cache.services)
+      helpers.cache.read({
+        namespace: 'services',
+        ref: 'test'
+      }, function (err, contents) {
+        should.not.exist(err);
+        should.equal(contents.a, 'b')
+        done();
+      })
+    else
+      done();
+  })    
+        
+  it('should unlink a test file', function (done) {
+    if(settings.paths.cache.services)
+      helpers.cache.unlink({
+        namespace: 'services',
+        ref: 'test'
+      }, function (err) {
+        should.not.exist(err);
+        done();
+      })
+    else
+      done();
+  })
 });

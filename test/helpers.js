@@ -70,27 +70,21 @@ describe('helpers: text & geo filters', function() {
 // });
 
 
-// describe('helpers: geocoding api', function() {
-//   this.timeout(5000);
-//   it('should call geocodingapi service and build a new location entity', function (done) {
-//     helpers.geocoding('ruel Lepic, Paris', function (err, res) {
-//       should.not.exist(err, err);
-//       // console.log(res)
-//       should.exist(res[0].geocode_id, res);
-//       done();
-//     });
-//   });
-//   it('should call geocodingapi service and build a new location entity starting from a COuntry', function (done) {
-//     helpers.geocoding('Italia', function (err, res) {
-//       should.not.exist(err, err);
-//       // console.log(res)
-//       should.exist(res[0].geocode_id, res);
-//       should.equal(res[0].name, 'Italy');
-//       should.equal(res[0].name_search, 'italy');
-//       done();
-//     });
-//   });
-// });
+describe('helpers: geocoding api', function() {
+  this.timeout(5000);
+  it('should call geocodingapi service and return basic (node:location) properties', function (done) {
+    helpers.geocoding({
+      text: 'Rome, Italy'
+    }, function (err, res) {
+      should.not.exist(err);
+      should.exist(res[0].geocoding_id);
+      should.equal(res[0].country, 'IT');
+      should.exist(res[0].lat);
+      should.exist(res[0].lng);
+      done();
+    });
+  });
+});
 
 
 // describe('helpers: geonames api', function() {
@@ -197,7 +191,7 @@ describe('helpers: text & geo filters', function() {
 //   });
 // });
 
-describe('human date service', function() {
+describe('helpers: human date service', function() {
   it('should test reconcileInterval', function (done) {
     var d = helpers.reconcileIntervals({
       start_date: '2015-06-07',
@@ -246,6 +240,15 @@ describe('human date service', function() {
   //     done();
   //   });
   // });
+  it('should find 21 DEc 1954 in german text', function (done) {
+    helpers.reconcileHumanDate('Brief von Duncan Sandys an Jean Monnet (London, 21. Dezember 1954)', 'de', function (err, res) {
+      should.not.exist(err, err);
+      
+      should.equal(res.start_date, '1954-12-21T00:00:00+00:00'); // utc format
+      should.equal(res.end_date, '1954-12-21T23:59:00+00:00');
+      done();
+    });
+  });
   
   it('should transform 1er et 2 juin 1955 in two day span', function (done) {
     helpers.reconcileHumanDate('1er et 2 juin 1955', 'fr', function (err, res) {

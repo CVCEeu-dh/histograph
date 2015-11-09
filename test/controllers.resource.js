@@ -102,6 +102,19 @@ describe('controller:resource before', function() {
 
 
 describe('controller:resource', function() {
+  it('should get a specific resource', function (done) {
+    session
+      .get('/api/resource/51690')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err)
+        should.not.exists(err);
+        done();
+      });
+  });
+  
   it('should sort the list of resource', function (done) {
     session
       .get('/api/resource/')
@@ -111,6 +124,25 @@ describe('controller:resource', function() {
         if(err)
           console.log(err)
         should.not.exists(err);
+        should.exist(res.body.info.total_items)
+        should.equal(res.body.info.offset, 0)
+        done();
+      });
+  });
+  
+  it('should show a list of 20 resources from a specific date', function (done) {
+    session
+      .get('/api/resource?limit=20&from=1988-01-01&to=1989-01-03')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exists(err);
+        // console.log(res.body.info)
+        //console.log(_.map(res.body.result.items, function(d){return d.props.start_date}))
+        should.equal(res.body.info.limit, 20)
+        should.equal(res.body.info.start_date, '1988-01-01T00:00:00.000Z');
+        should.equal(res.body.info.end_date, '1989-01-03T00:00:00.000Z');
+        should.equal(res.body.info.start_time, 567993600);
         
         done();
       });
@@ -167,17 +199,52 @@ describe('controller:resource (related entities)', function() {
 
 
 describe('controller:resource (related resources)', function() {
-  it('should show a list of 10 related resources', function (done) {
+  it('should show a list of 10 related letters, if any', function (done) {
     session
-      .get('/api/resource/'+ __resourceA.id +'/related/resource?limit=10')
+      .get('/api/resource/'+ __resourceA.id +'/related/resource?limit=13&type=letter')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
-        if(err)
-          console.log(err)
         should.not.exists(err);
-        // console.log(res.body.result)
         should.exist(res.body.result.items);
+        should.equal(res.body.info.limit, 13);
+        should.exist(res.body.info.type);
+        should.equal(res.body.info.id, __resourceA.id);
+        should.equal(res.body.info.orderby, 'relevance');
+        done();
+      });
+  });
+  
+  it('should show a list of 10 related letters, if any, sorted by date', function (done) {
+    session
+      .get('/api/resource/'+__resourceA.id+'/related/resource?limit=10&type=picture&orderby=date')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exists(err);
+        // console.log(res.body)
+        should.exist(res.body.result.items);
+        should.equal(res.body.info.limit, 10);
+        should.exist(res.body.info.type);
+        should.equal(res.body.info.id, __resourceA.id);
+        should.equal(res.body.info.orderby, 'date');
+        done();
+      });
+  });
+  
+  it('should show a list of 10 related resources containing a specific entity, if any', function (done) {
+    session
+      .get('/api/resource/177/related/resource?limit=1&with=17379')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exists(err);
+        
+        should.exist(res.body.result.items);
+        should.equal(res.body.info.limit, 1);
+        should.exist(res.body.info.with);
+        should.equal(res.body.info.id, 177)// __resourceA.id);
+        should.equal(res.body.info.orderby, 'relevance');
         done();
       });
   });
@@ -200,6 +267,22 @@ describe('controller:resource (related resources)', function() {
       });
   });
   
+  it('should get the timeline of related resources', function (done) {
+    session
+      .get('/api/resource/'+ __resourceA.id +'/related/resource/timeline')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        if(err)
+          console.log(err)
+        should.not.exists(err);
+        should.exist(res.body.result.timeline)
+        // console.log(res.body.result)
+        
+        done();
+      });
+  });
+  
   it('should show the graph of 10 related people', function (done) {
     session
       .get('/api/resource/'+ __resourceA.id +'/related/person/graph')
@@ -216,6 +299,7 @@ describe('controller:resource (related resources)', function() {
         done();
       });
   });
+  
 })
 
 
