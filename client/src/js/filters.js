@@ -228,7 +228,12 @@ angular.module('histograph')
       if(content)
         return content;
       else
-        return props[field + '_' + _.first(props.languages)] || 'not available';
+        for(var i in props.languages) {
+          content = props[field + '_' + props.languages[i]];
+          if(content)
+            return content
+        }
+        return props[field] || (field + ' not available');
     }
   })
   
