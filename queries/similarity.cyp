@@ -18,7 +18,8 @@ MATCH (e)-[r3:appears_in]->(res:resource)
   WHERE has(r3.frequency) AND r3.tf < 1
     SET
       r3.tfidf = r3.tf * log(num_of_docs/num_of_docs_per_ent),
-      e.df = num_of_docs_per_ent
+      e.df = num_of_docs_per_ent,
+      e.specificity = num_of_docs_per_ent/num_of_docs
 
 
 // name: computate_cosine_similarity
