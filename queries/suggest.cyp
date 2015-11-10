@@ -445,13 +445,64 @@ WITH res, r1, r2
 ORDER BY r1.tfidf DESC, r2.tfidf DESC
 SKIP {offset}
 LIMIT {limit}
+WITH DISTINCT res
+OPTIONAL MATCH (per:person)-[r_per:appears_in]->(res)
+WHERE per.score > -1
+WITH res, per, r_per
+ORDER BY r_per.tfidf DESC
+WITH res, collect({
+      id: id(per),
+      type: 'person',
+      props:per
+    })[0..5] as persons
+RETURN {
+  id: id(res),
+  props: res,
+  type: 'resource',
+  persons: persons
+} as result
+
+
+// name: count_shared_entities
+// an overview of how many entities are between two resources (one step), according to filters
+MATCH p=(n:resource)-[r1:appears_in]->(res:{:entity})<-[r2:appears_in]-(t:resource)
+  WHERE id(n) in {ids}
+    AND id(t) in {ids}
+    AND id(n) < id(t)
+RETURN {
+  group: {if:group}res.{:group}{/if}{unless:group}res.type{/unless}, 
+  count_items: count(res)
+}
+
+
+// name: get_shared_entities
+// an overview of first n entities in between two resources
+MATCH p=(n:entity)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(t:entity)
+  WHERE id(n) in {ids}
+    AND id(t) in {ids}
+    AND id(n) < id(t)
+    {if:start_time}
+      AND res.start_time >= {start_time}
+    {/if}
+    {if:end_time}
+      AND res.end_time <= {end_time}
+    {/if}
+    {if:mimetype}
+      AND res.mimetype in {mimetype}
+    {/if}
+    {if:type}
+      AND res.type in {type}
+    {/if}
+WITH res, r1, r2
+ORDER BY r1.tfidf DESC, r2.tfidf DESC
+SKIP {offset}
+LIMIT {limit}
 WITH distinct res
 RETURN {
   id: id(res),
   slug: res.slug,
   name: res.name
 }
-
 
 
 // name: get_suggestions

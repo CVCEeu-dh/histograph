@@ -507,8 +507,10 @@ apiRouter.route('/suggest/unknown-nodes/:ids([\\d,]+)')
   .get(ctrl.suggest.getUnknownNodes)
 apiRouter.route('/suggest/neighbors/:ids([\\d,]+)')
   .get(ctrl.suggest.getNeighbors)
-apiRouter.route('/suggest/shared-resources/:ids([\\d,]+)')
+apiRouter.route('/suggest/shared/:ids([\\d,]+)/resource')
   .get(ctrl.suggest.getSharedResources)
+apiRouter.route('/suggest/shared/:ids([\\d,]+)/:entity(person|location|organization)')
+  .get(ctrl.suggest.getSharedEntities)
 
 /*
   
