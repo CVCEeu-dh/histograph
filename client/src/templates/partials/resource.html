@@ -114,7 +114,10 @@
          {{item.props.stakeholders||item.props.caption}}
         </blockquote> -->
         
-        <div class="doi">{{item.props.doi}}</div>
+        <div class="doi">
+          <span marked="item.props|lookup:'ipr':language"></span>
+        </div>
+
         
         <div class="discussion" ng-if="item.comments.length > 0">
           <div class="comment" ng-repeat="com in item.comments">
