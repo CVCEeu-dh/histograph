@@ -558,6 +558,9 @@ LIMIT {limit}
 //
 MATCH (n)<-[r1:appears_in]-(ent:{:entity})-[r2:appears_in]->(res:resource)
   WHERE id(n) = {id}
+WITH r1, r2, res
+  ORDER BY r1.tfidf DESC, r2.tfidf DESC
+  LIMIT 100
 WITH res
 MATCH (p1:{:entity})-[:appears_in]->(res)<-[:appears_in]-(p2:{:entity})
  WHERE p1.score > -1 AND p2.score > -1
@@ -586,12 +589,18 @@ LIMIT 500
 
 // name: get_related_resources_graph
 //
-MATCH (res:resource)-[:appears_in]-(ent:person)
+MATCH (res:resource)-[r1:appears_in]-(ent:entity)
 WHERE id(res) = {id} AND ent.score > -1
+WITH r1, ent
+ORDER BY r1.tfidf DESC
+LIMIT 5
 WITH ent
-LIMIT 10
-MATCH (res3:resource)<-[:appears_in]-(ent)-->(res2:resource)
-WHERE res2 <> res3
+MATCH (res3:resource)<-[r1:appears_in]-(ent)-[r2:appears_in]->(res2:resource)
+
+WHERE id(res2) < id(res3)
+WITH r1, r2, res2, res3, ent
+  ORDER BY r1.tfidf DESC, r2.tfidf DESC
+  LIMIT 100
 WITH res2, res3, count(distinct ent) as intersection
 RETURN {
   source: {

@@ -435,6 +435,10 @@ position: fixed;
   width: 180px;
 }
 
+.graph #perspective {
+  display: none;
+}
+
 #perspective ul.facets{
   list-style-type: none;
   margin: 20px 0 0 40px;
@@ -1014,6 +1018,10 @@ position: fixed;
 }
 
 #milkyway.explore.persons{
+  left: 20px;
+}
+
+#milkyway.graph{
   left: 20px;
 }
 

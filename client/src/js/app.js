@@ -567,6 +567,19 @@ angular
           ]
         }
       })
+        .state('resource.graph', {
+          url: '/g',
+          template: '<div></div>',
+          controller: 'GraphCtrl',
+          resolve:{
+            relatedModel: function() {
+              return 'resource'
+            },
+            relatedVizFactory: function(ResourceRelatedVizFactory) {
+              return ResourceRelatedVizFactory
+            }
+          }
+        })
         .state('resource.resources', {
           url: '',
           templateUrl: 'templates/partials/resources.html',

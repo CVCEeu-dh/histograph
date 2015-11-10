@@ -811,10 +811,39 @@ angular.module('histograph')
       $scope.sync();
     });
 
-    $scope.syncGraph();
+    // $scope.syncGraph();
     $log.log('RelatedItemsCtrl -> setRelatedItems - items', relatedItems.result.items);
     $scope.setRelatedItems(relatedItems.result.items);
     
     
   })
+  /*
+    Make graph easily readable
+  */
+  .controller('GraphCtrl', function ($scope, $log, $stateParams, relatedModel, relatedVizFactory, EVENTS) {
+    /*
+      Load graph data
+    */
+    $scope.syncGraph = function() {
+      relatedVizFactory.get(angular.extend({
+        model: relatedModel,
+        viz: 'graph',
+        limit: 100,
+      },  $stateParams, $scope.params), function (res) {
+        if($stateParams.ids) {
+          $scope.setGraph(res.result.graph, {
+            centers: $stateParams.ids
+          });
+        } else if($scope.item && $scope.item.id)
+          $scope.setGraph(res.result.graph, {
+            centers: [$scope.item.id]
+          });
+        else
+          $scope.setGraph(res.result.graph);
+      });
+    }
+
+    $scope.syncGraph();
+     $log.log('GraphCtrl -> ready');
+  });
   
