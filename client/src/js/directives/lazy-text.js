@@ -4,9 +4,13 @@
  * @description
  * # histograph
  *
- * Main module of the application. require marked
+ * This module contains some directives involved in displaying text and enabling
+ * interactions between the items and the windows with various techniques.
  */
 angular.module('histograph')
+  /*
+    This directive display the text content from a text file via $http.get
+  */
   .directive('lazytext', function($compile, $log, $http) {
     return {
       restrict : 'A',
@@ -31,7 +35,22 @@ angular.module('histograph')
     }
   })
   /*
-    Basic infinite-scroll directive for ui-views
+    Enable large view of item and related items. 
+    Use it and delete if via specific EVENTS
+  */
+  .directive('fullsize', function ($log) {
+    return {
+      restrict : 'A',
+      templateUrl: 'templates/partials/resource-fullsize.html',
+      scope:{},
+      link: function(scope, elem, attrs) {
+        $log.log('::fullsize enabled');
+      }
+    };
+  })
+  /*
+    Basic infinite-scroll directive for ui-views.
+    To be improved
   */
   .directive('infiniteScroll', function($log) {
     'use strict';

@@ -1,0 +1,30 @@
+<div class="inner {{status}}">
+  
+  <div class='nodes'>
+    <div class="line animated {{status=='loading'?'fadeOut':'fadeIn'}}" style="-webkit-animation-delay: 250ms;
+        animation-delay: 250ms"></div>
+    <div ng-repeat='relatedItem in items' class="animated {{status=='loading'?'fadeOut':'fadeIn'}}" style="-webkit-animation-delay: {{$index * 100}}ms;
+        animation-delay: {{$index * 100}}ms">
+      <div ng-if='relatedItem.type=="person"' class='node person'>
+        <div class='thumbnail'>
+          <div class="thumbnail-wrapper" style='background-image: url({{relatedItem.props.thumbnail}})'>    
+            
+          </div>
+        </div>
+        <div class='content'>
+          <h4 marked="relatedItem.props|lookup:'name':language"></h4>
+          <div class='date'>{{relatedItem.props.birth_time | datesOfAPerson : relatedItem.props.death_time}}</div>
+        </div>
+        <div class='clear'></div>
+      </div>
+    </div>
+  </div>
+
+  <div class='edges' perfect-scrollbar use-both-wheel-axes='true' wheel-propagation="true" refresh-on-change="sharedItems" suppress-scroll-x="true" wheel-speed="20">
+    <div ng-repeat='relatedItem in sharedItems' class="animated {{status=='loading'?'fadeOut':'fadeIn'}}" style="-webkit-animation-delay: {{$index * 100}}ms;
+        animation-delay: {{$index * 100}}ms">
+      <div ng-if='relatedItem.type=="resource"' ng-include='"templates/partials/resource-lite.html"'></div>
+      <div ng-if='relatedItem.type!="resource"' ng-include='"templates/partials/entity-lite.html"'></div>
+    </div>
+  </div>
+</div>

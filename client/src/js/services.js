@@ -163,41 +163,54 @@ angular.module('histograph')
     Search & Suggest
   */
   .factory('SuggestFactory', function ($resource) {
-    return $resource('/api/suggest/:m/:ids', {}, {
+    return $resource('/api/suggest/:m/:ids/:model', {}, {
       getUnknownNodes: {
         method: 'GET',
         params: {
-          m: 'unknown-nodes'
+          m: 'unknown-nodes',
+          model: ''
         }
       },
       getStats: {
         method: 'GET',
         params: {
-          m: 'stats'
+          m: 'stats',
+          model: ''
         }
       },
       getEntities: {
         method: 'GET',
         params: {
-          m: 'entity'
+          m: 'entity',
+          model: ''
         }
       },
       getResources: {
         method: 'GET',
         params: {
-          m: 'resource'
+          m: 'resource',
+          model: ''
         }
       },
       getUnknownNode: {
         method: 'GET',
         params: {
-          m: 'unknown-node'
+          m: 'unknown-node',
+          model: ''
         }
       },
       allInBetween:{
         method: 'GET',
         params: {
-          m: 'all-in-between'
+          m: 'all-in-between',
+          model: ''
+        }
+      },
+      getShared:{
+        method: 'GET',
+        params: {
+          m: 'shared',
+          model: 'resource' // default
         }
       }
     });

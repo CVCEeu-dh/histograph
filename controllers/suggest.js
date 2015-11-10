@@ -243,6 +243,26 @@ module.exports =  function(io){
         helpers.models.getMany(err, res, results.items, results.count_items, form.params);
       })
     },
+
+    getSharedEntities: function(req, res) {
+      var form = validator.request(req, {
+            limit: 10,
+            offset: 0
+          });
+      
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      models.getMany({
+        queries: {
+          count_items: queries.count_shared_entities,
+          items: queries.get_shared_entities
+        },
+        params: form.params
+      }, function (err, results) {
+        helpers.models.getMany(err, res, results.items, results.count_items, form.params);
+      })
+    },
     
     /**
       

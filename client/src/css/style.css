@@ -1179,6 +1179,137 @@ height: 150px;
   border-radius: 2px;
 }
 
+/*
+  
+  Sigma snippets
+  ~~~~~~~~~~~~~~~~~~~~~~~~
+  
+  Cfr snippets directive
+*/
+#sigma-snippets {
+  opacity: 1;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  bottom: 10px;
+  width: 320px;
+  border-radius: 2px;
+  text-align: center;
+  z-index: 11;
+  background: transparent;
+  pointer-events: none;
+}
+
+#sigma-snippets > .inner {
+  visibility: hidden;
+  width: 100%;
+  height:100%;
+      pointer-events: auto;
+  
+}
+
+#sigma-snippets > .inner.loading, #sigma-snippets > .inner.enabled {
+  visibility: visible;
+  box-shadow: 0px 0px 8px #ccc;
+}
+
+#sigma-snippets .nodes {
+  position: relative;
+    background-color: #383838;
+    border-radius: 3px;    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+#sigma-snippets .edges{
+  overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    position: absolute;
+    top: 140px;
+    bottom: 0px;
+    width: 100%;
+        background: #eee;
+}
+
+#sigma-snippets .edges .related{
+  margin: 0;
+  width: auto;
+  border:0px transparent;
+  padding-top:10px;
+      border-bottom: 1px solid #ccc;
+    border-radius: 0;
+    text-align: left;
+}
+
+#sigma-snippets .edges .related h4{
+  margin-left: 15px;
+}
+
+
+#sigma-snippets .nodes .line {
+  position: absolute;
+  width: 4px;
+  background-color: #4dc3ba;
+  height: 70px;
+  top: 20px;
+  left: 34px;
+} 
+
+#sigma-snippets .node {
+  position: relative;
+}
+
+#sigma-snippets .node:hover {
+
+}
+#sigma-snippets .node .thumbnail {
+  width: 50px;
+  height: 50px;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: transparent;
+  border:0px transparent;
+  margin:0;
+  padding: 0;
+}
+#sigma-snippets .node .thumbnail-wrapper {
+  width: 50px;
+  height: 50px;
+  background-size:cover;
+  background-color: black;
+  background-repeat:no-repeat;
+  background-position:center;
+  border-radius: 50px;
+  border: 3px solid #4dc3ba;
+}
+
+
+
+#sigma-snippets .node .content {
+margin-left: 50px;
+    min-height: 70px;
+}
+
+#sigma-snippets .node .content .date{
+  text-align: left;
+  margin: 0 10px 0 20px;
+  color: #A9A2A2;
+}
+
+#sigma-snippets h4{
+  text-align: left;
+  margin: 0 20px;
+  font-weight: bold;
+  color: white;
+  padding-top: 12px;
+}
+
+#sigma-snippets h4 p{
+  margin: 0;
+  padding: 0;
+}
+
 .fa.type{
   padding: 0;
   margin: 0;
