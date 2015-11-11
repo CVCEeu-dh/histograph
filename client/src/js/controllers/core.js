@@ -222,6 +222,15 @@ angular.module('histograph')
         graph.centers = options.centers;
       $scope.graph = graph;
     };
+
+    /*
+      Generic broadcaster toward sigma directive.
+      You can use this function to broadcast events to sigma graph.
+    */
+    $scope.triggerGraphEvent = function(eventName, data) {
+      $scope.$broadcast(eventName, data);
+    };
+
     
     $scope.suggest = function(query) {
       if(query.trim().length < 2)
@@ -821,10 +830,14 @@ angular.module('histograph')
     Make graph easily readable
   */
   .controller('GraphCtrl', function ($scope, $log, $stateParams, relatedModel, relatedVizFactory, EVENTS) {
+    // sort of preload
+    if($scope.item)
+      $scope.triggerGraphEvent(EVENTS.SIGMA_SET_ITEM, $scope.item)
     /*
       Load graph data
     */
     $scope.syncGraph = function() {
+      // send a message
       relatedVizFactory.get(angular.extend({
         model: relatedModel,
         viz: 'graph',
