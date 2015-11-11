@@ -44,7 +44,9 @@ angular
     INFINITE_SCROLL: 'infinite_scroll',
     // proper angular events (directives needs to be alerted)
     LOCATION_CHANGE_START: 'LOCATION_CHANGE_START',
-    STATE_CHANGE_SUCCESS: 'STATE_CHANGE_SUCCESS'
+    STATE_CHANGE_SUCCESS: 'STATE_CHANGE_SUCCESS',
+    // sigma spefcific events
+    SIGMA_SET_ITEM: 'sigma_set_item'
   })
   .constant("VIZ", {
     TIMELINE: 'timeline'
