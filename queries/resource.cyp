@@ -583,41 +583,128 @@ LIMIT 500
 
 
 
+// name: get_related_resources_bipartite_graph
+MATCH (res1:resource)<-[r1:appears_in]-(ent:entity)-[r2:appears_in]->(res2:resource)
+  WHERE id(res1) = {id}
+    AND ent.score > -1
+    {if:mimetype}
+    AND res2.mimetype IN {mimetype}
+    {/if}
+    {if:type}
+    AND res2.type IN {type}
+    {/if}
+    {if:start_time}
+    AND res2.start_time >= {start_time}
+    {/if}
+    {if:end_time}
+    AND res2.end_time <= {end_time}
+    {/if}
 
+WITH  res1, res2, r1, r2, ent
+{if:with}
+  MATCH (ent2:entity)-[:appears_in]->(res2)
+  WHERE id(ent2) IN {with}
+  WITH  res1, res2, r1, r2, ent
+{/if}
+
+WITH res1, res2, count(*) as intersection
+
+MATCH (res1)<-[rel:appears_in]-(r1:entity)
+WITH res1, res2, intersection, count(r1) as H1
+
+MATCH (res2)<-[rel:appears_in]-(r1:entity)
+WITH res1,res2, intersection, H1, count(r1) as H2
+WITH res1, res2, intersection, H1+H2 as union
+WITH res1, res2, intersection, union, toFloat(intersection)/toFloat(union) as JACCARD
+ORDER BY JACCARD DESC
+LIMIT 50 // top 50 resources
+WITH (collect(res2) + res1) as ghosts
+UNWIND ghosts as ghost
+MATCH (ghost)<-[r:appears_in]-(ent:person)
+WITH ghost, r, ent
+ORDER BY r.tfidf DESC
+WITH ghost, collect(DISTINCT ent)[0..10] as entities
+WHERE length(entities) > 1
+UNWIND entities as ent
+MATCH (ghost)<-[r:appears_in]-(ent)
+RETURN {
+  source: {
+    id: id(ghost),
+    type: 'resource',
+    label: COALESCE(ghost.name, ghost.title_en, ghost.title_fr)
+  },
+  target: {
+    id: id(ent),
+    type: LAST(labels(ent)),
+    label: ent.name
+  },
+  weight: r.frequency
+} as result
+ORDER BY r.tfidf DESC
+LIMIT 250
 
 
 
 // name: get_related_resources_graph
 //
-MATCH (res:resource)-[r1:appears_in]-(ent:entity)
-WHERE id(res) = {id} AND ent.score > -1
-WITH r1, ent
-ORDER BY r1.tfidf DESC
-LIMIT 5
-WITH ent
-MATCH (res3:resource)<-[r1:appears_in]-(ent)-[r2:appears_in]->(res2:resource)
+MATCH (res1:resource)<-[r1:appears_in]-(ent:entity)-[r2:appears_in]->(res2:resource)
+  WHERE id(res1) = {id}
+    AND ent.score > -1
+    {if:mimetype}
+    AND res2.mimetype IN {mimetype}
+    {/if}
+    {if:type}
+    AND res2.type IN {type}
+    {/if}
+    {if:start_time}
+    AND res2.start_time >= {start_time}
+    {/if}
+    {if:end_time}
+    AND res2.end_time <= {end_time}
+    {/if}
 
-WHERE id(res2) < id(res3)
-WITH r1, r2, res2, res3, ent
-  ORDER BY r1.tfidf DESC, r2.tfidf DESC
-  LIMIT 100
-WITH res2, res3, count(distinct ent) as intersection
+WITH  res1, res2, r1, r2, ent
+{if:with}
+  MATCH (ent2:entity)-[:appears_in]->(res2)
+  WHERE id(ent2) IN {with}
+  WITH  res1, res2, r1, r2, ent
+{/if}
+
+WITH res1, res2, count(*) as intersection
+
+MATCH (res1)<-[rel:appears_in]-(r1:entity)
+WITH res1, res2, intersection, count(r1) as H1
+
+MATCH (res2)<-[rel:appears_in]-(r1:entity)
+WITH res1,res2, intersection, H1, count(r1) as H2
+WITH res1, res2, intersection, H1+H2 as union
+WITH res1, res2, intersection, union, toFloat(intersection)/toFloat(union) as JACCARD
+ORDER BY JACCARD DESC
+LIMIT 50 // top 50 resources
+WITH (collect(res2) + res1) as resources
+UNWIND resources as P
+UNWIND resources as Q
+MATCH (P)<-[rA:appears_in]-(ent:person)-[rB:appears_in]->(Q)
+WHERE id(P) < id(Q)
+WITH P, Q, ent
+ORDER BY ent.specificity DESC
+
+WITH P, Q, count(distinct ent) as intersection
 RETURN {
   source: {
-    id: id(res2),
-    type: LAST(labels(res2)),
-    label: COALESCE(res2.name, res2.title_en, res2.title_fr)
+    id: id(P),
+    type: 'resource',
+    label: COALESCE(P.name, P.title_en, P.title_fr)
   },
   target: {
-    id: id(res3),
-    type: LAST(labels(res3)),
-    label: COALESCE(res3.name, res3.title_en, res3.title_fr)
+    id: id(Q),
+    type:'resource',
+    label: COALESCE(Q.name, Q.title_en, Q.title_fr)
   },
   weight: intersection
 } as result
 ORDER BY intersection DESC
 LIMIT {limit}
-
 
 
 // name: count_timeline
