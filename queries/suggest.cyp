@@ -465,43 +465,37 @@ RETURN {
 
 // name: count_shared_entities
 // an overview of how many entities are between two resources (one step), according to filters
-MATCH p=(n:resource)-[r1:appears_in]->(res:{:entity})<-[r2:appears_in]-(t:resource)
+MATCH p=(n:resource)<-[r1:appears_in]-(ent:entity)-[r2:appears_in]->(t:resource)
   WHERE id(n) in {ids}
     AND id(t) in {ids}
     AND id(n) < id(t)
+WITH collect(ent) as entities
+WITH entities, length(entities) as total_items
+UNWIND entities as ent
 RETURN {
-  group: {if:group}res.{:group}{/if}{unless:group}res.type{/unless}, 
-  count_items: count(res)
+  group: last(labels(ent)), 
+  count_items: count(ent),
+  total_items: total_items
 }
 
 
 // name: get_shared_entities
 // an overview of first n entities in between two resources
-MATCH p=(n:entity)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(t:entity)
+MATCH p=(n:resource)<-[r1:appears_in]->(ent:{:entity})<-[r2:appears_in]->(t:resource)
   WHERE id(n) in {ids}
     AND id(t) in {ids}
     AND id(n) < id(t)
-    {if:start_time}
-      AND res.start_time >= {start_time}
-    {/if}
-    {if:end_time}
-      AND res.end_time <= {end_time}
-    {/if}
-    {if:mimetype}
-      AND res.mimetype in {mimetype}
-    {/if}
-    {if:type}
-      AND res.type in {type}
-    {/if}
-WITH res, r1, r2
-ORDER BY r1.tfidf DESC, r2.tfidf DESC
+WITH ent, r1, r2
+ORDER BY ent.specificity DESC
 SKIP {offset}
 LIMIT {limit}
-WITH distinct res
+WITH distinct ent
 RETURN {
-  id: id(res),
-  slug: res.slug,
-  name: res.name
+  id: id(ent),
+  slug: ent.slug,
+  name: ent.name,
+  type: LAST(labels(ent)),
+  props: ent
 }
 
 

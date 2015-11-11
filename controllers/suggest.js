@@ -247,7 +247,12 @@ module.exports =  function(io){
     getSharedEntities: function(req, res) {
       var form = validator.request(req, {
             limit: 10,
-            offset: 0
+            offset: 0,
+            entity: 'person'
+          }, {
+            fields: [
+              validator.SPECIALS.entity
+            ]
           });
       
       if(!form.isValid)
