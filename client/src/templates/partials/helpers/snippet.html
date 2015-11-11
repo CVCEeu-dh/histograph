@@ -1,11 +1,12 @@
 <div class="inner {{status}}">
   
   <div class='nodes'>
-    <div class="line animated {{status=='loading'?'fadeOut':'fadeIn'}}" style="-webkit-animation-delay: 250ms;
+    <div ng-if='items.length > 1' class="line animated {{status=='loading'?'fadeOut':'fadeIn'}}" style="-webkit-animation-delay: 250ms;
         animation-delay: 250ms"></div>
     <div ng-repeat='relatedItem in items' class="animated {{status=='loading'?'fadeOut':'fadeIn'}}" style="-webkit-animation-delay: {{$index * 100}}ms;
         animation-delay: {{$index * 100}}ms">
-      <div ng-if='relatedItem.type=="person"' class='node person'>
+      <!-- person node -->
+      <div ng-if='relatedItem.type=="person"' class='node person' data-id="{{related_item.id}}">
         <div class='thumbnail'>
           <div class="thumbnail-wrapper" style='background-image: url({{relatedItem.props.thumbnail}})'>    
             
@@ -17,11 +18,57 @@
         </div>
         <div class='clear'></div>
       </div>
+
+      <!-- resource node -->
+      <div ng-if='relatedItem.type=="resource"' data-id="{{related_item.id}}" class='node resource'>
+        <div class='thumbnail'>
+          <div class="thumbnail-wrapper" ng-if='relatedItem.props.mimetype=="image"' style='background-image: url(media/{{relatedItem.props.url}})'>    
+            
+          </div>
+          <div class="thumbnail-wrapper" ng-if='relatedItem.props.mimetype!="image"'>   </div>
+        </div>
+        <div class='content'>
+          <h4 marked="relatedItem.props|lookup:'title':language"></h4>
+          <div class='date'>{{relatedItem.props | guessInterval}} {{language}}</div>
+          
+        </div>
+        <div class='clear'></div>
+      </div>
     </div>
   </div>
+  <!-- use detail only if a single node has been selected -->
+  <div class='detail' ng-if='items.length == 1'>
+    <div ng-repeat='relatedItem in items'>
+      <div ng-if='relatedItem.type=="person"'>
+        {{relatedItem}}
+      </div>
+      <div ng-if='relatedItem.type=="resource"'>
+        <div class="meta">
+          <span ng-if="relatedItem.persons.length" class="tags"><i>persons in the document</i>:
+            <span ng-repeat="per in relatedItem.persons"><span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.props.name}} - {{per.props.description}} ({{per.props.birth_date | date:"yyyy"}} - {{per.props.death_date | date:"yyyy"}}) {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{relatedItem.type}}-{{relatedItem.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name}}{{$last? '':  ', '}}</span></span>
+          </span>
+          <span ng-if="relatedItem.social_groups.length" class="tags"><i>  —  groups</i>:
+            <span ng-repeat="per in relatedItem.social_groups"><span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.props.name}} {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{relatedItem.type}}-{{relatedItem.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name}}{{$last? '':  ', '}}</span></span>
+          </span>
+          <span ng-if="relatedItem.organizations.length" class="tags"><i>  —  organizations</i>:
+            <span ng-repeat="per in relatedItem.organizations"><span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.props.name}} {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{relatedItem.type}}-{{relatedItem.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name}}{{$last? '':  ', '}}</span></span>
+          </span>
+        </div>
+        <blockquote ng-if='relatedItem.annotations && relatedItem.annotations.length' context='relatedItem' marked="relatedItem.annotations|annotate:'caption':language"></blockquote>
+        <blockquote ng-if='!relatedItem.annotations'marked="relatedItem.props|lookup:'caption':language"></blockquote>
+        <div ng-if='relatedItem.props.mimetype=="image"'>
+          <img  ng-src="media/{{relatedItem.props.url}}">
+        </div>
+        <div class="doi">
+          <span marked="relatedItem.props|lookup:'ipr':language"></span>
+        </div>
 
-  <div class='edges' perfect-scrollbar use-both-wheel-axes='true' wheel-propagation="true" refresh-on-change="sharedItems" suppress-scroll-x="true" wheel-speed="20">
-    <div ng-repeat='relatedItem in sharedItems' class="animated {{status=='loading'?'fadeOut':'fadeIn'}}" style="-webkit-animation-delay: {{$index * 100}}ms;
+      </div>
+    </div>
+  </div>
+  <!-- edges is full of sharedItems  -->
+  <div ng-if="sharedItems.length" class='edges' >
+    <div ng-repeat='relatedItem in sharedItems' class="animated {{status=='loading'?'fadeOut':'slideInUp'}}" style="-webkit-animation-delay: {{$index * 100}}ms;
         animation-delay: {{$index * 100}}ms">
       <div ng-if='relatedItem.type=="resource"' ng-include='"templates/partials/resource-lite.html"'></div>
       <div ng-if='relatedItem.type!="resource"' ng-include='"templates/partials/entity-lite.html"'></div>

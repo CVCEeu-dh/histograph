@@ -262,9 +262,8 @@ angular.module('histograph')
         
         scope.$on(EVENTS.LOCATION_CHANGE_START, function (v) {
           stop();
-           $log.log('::sigma @EVENTS.LOCATION_CHANGE_START');
+          $log.log('::sigma @EVENTS.LOCATION_CHANGE_START');
           scope.showMessage('loading ...');
-         
         });
 
         scope.$on(EVENTS.API_PARAMS_CHANGED, function (v) {
@@ -272,9 +271,19 @@ angular.module('histograph')
           scope.showMessage('loading graph ...');
         });
 
-         scope.$on(EVENTS.STATE_CHANGE_SUCCESS, function (v) {
+        scope.$on(EVENTS.STATE_CHANGE_SUCCESS, function (e, v) {
           $log.log('::sigma @EVENTS.STATE_CHANGE_SUCCESS');
           scope.showMessage('loading graph ...');
+        });
+        
+        scope.$on(EVENTS.SIGMA_SET_ITEM, function (e, item) {
+          $log.log('::sigma @EVENTS.SIGMA_SET_ITEM', item);
+          scope.target = {
+            type: 'node',
+            data: {
+              node: item
+            }
+          };
         });
         
         /*
@@ -286,9 +295,6 @@ angular.module('histograph')
           $log.log('::sigma @graph changed');
           
           stop();
-          
-          scope.target = false;
-          
           // clean graph if there are no nodes, then exit
           if(!graph || !graph.nodes || !graph.nodes.length) {
             $log.log('::sigma @graph empty, clear...');

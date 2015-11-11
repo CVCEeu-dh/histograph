@@ -24,11 +24,25 @@ angular.module('histograph')
 
 
         scope.status = 'disabled';
+        
+        // get language from above (dangersous)
+        scope.language = scope.$parent.$parent.language;
 
         // will contain the target, explained
         scope.items = [];
         // will contain the inbetween items between target4S EDGE nodes
         scope.sharedItems = [];
+
+        /*
+          Load a bunch of items
+        */
+        scope.fill = function(items) {
+          $log.log('::snippets -> fill() n. items:',items.length);
+          // do not remove items at the end of __fadeOutTimer 
+          clearTimeout(__fadeOutTimer)
+          scope.status = 'enabled'
+          scope.items = items;    
+        }
         /*
           Show snippet
         */
@@ -36,9 +50,13 @@ angular.module('histograph')
           $log.log('::snippets -> show() type:', target.type);
           scope.status = 'loading';
 
-          var items = [];
+          var itemsIdsToLoad = [];
           if(target.type == 'node') {
-            items.push(target.data.node.id);
+            if(target.data.node.props) {// if the node has already  been loaded
+              scope.fill([target.data.node])
+            } else
+              itemsIdsToLoad.push(target.data.node.id);
+
           } else if(target.type == 'edge') {
             var s = target.data.edge.nodes.source,
                 t = target.data.edge.nodes.target;
@@ -47,11 +65,11 @@ angular.module('histograph')
             scope.right =  t;
             scope.weight = target.data.edge.weight;
 
-            items.push(s.id, t.id);
+            itemsIdsToLoad.push(s.id, t.id);
             // same type? loaded shared resources
             if(s.type == t.type) {
               SuggestFactory.getShared({
-                ids: items,
+                ids: itemsIdsToLoad,
                 model: s.type == 'resource'? 'person': 'resource'
               }, function (res) {
                 if(res.result && res.result.items.length)
@@ -60,16 +78,12 @@ angular.module('histograph')
             }
           }
 
-          if(items.length > 0) 
+          if(itemsIdsToLoad.length > 0) 
             SuggestFactory.getUnknownNodes({
-              ids: items
+              ids: itemsIdsToLoad
             }, function (res) {
-              // do not remove items
-              clearTimeout(__fadeOutTimer)
-              scope.status = 'enabled'
-              $log.log('::snippets -> show()', res);
               if(res.result && res.result.items.length)
-                scope.items = res.result.items;
+                scope.fill(res.result.items);
                 // load in between
             });
         };
