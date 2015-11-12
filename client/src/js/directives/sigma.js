@@ -16,7 +16,7 @@ angular.module('histograph')
       template: ''+
         '<div id="playground"></div>' +
         '<div gmasp target="target"></div>' +
-        '<div id="tips" ng-if="tips.length > 0"><div>{{tips}}</div></div>' +
+        //'<div id="tips" ng-if="tips.length > 0"><div>{{tips}}</div></div>' +
         '<div snippets id="sigma-snippets" target="target"></div>' +
         '<div id="sigma-messenger" ng-if="message.text.length" class="animated {{message.visible? \'fadeIn\': \'fadeOut\'}}"><div class="inner">{{message.text}}</div></div>' +
         '<div id="commands" class="{{lookup?\'lookup\':\'\'}}">' +
@@ -34,7 +34,8 @@ angular.module('histograph')
         redirect: '&',
         addToQueue: '&queue',
         addFilter: '&filter',
-        toggleMenu: '&togglemenu'
+        toggleMenu: '&togglemenu',
+        setMessage:  '&setmessage',
       },
       link : function(scope, element, attrs) {
         // cutat function for long labels
@@ -263,17 +264,19 @@ angular.module('histograph')
         scope.$on(EVENTS.LOCATION_CHANGE_START, function (v) {
           stop();
           $log.log('::sigma @EVENTS.LOCATION_CHANGE_START');
-          scope.showMessage('loading ...');
+          scope.setMessage({message: 'loading ...'});
         });
 
-        scope.$on(EVENTS.API_PARAMS_CHANGED, function (v) {
-          $log.log('::sigma @EVENTS.API_PARAMS_CHANGED');
-          scope.showMessage('loading graph ...');
-        });
+        // scope.$on(EVENTS.API_PARAMS_CHANGED, function (v, stateName) {
+        //   if(stateName.indexOf('graph') != -1)
+        //   $log.log('::sigma @EVENTS.API_PARAMS_CHANGED');
+        //   scope.setMessage({message: 'loading graph ...'});
+        // });
 
-        scope.$on(EVENTS.STATE_CHANGE_SUCCESS, function (e, v) {
-          $log.log('::sigma @EVENTS.STATE_CHANGE_SUCCESS');
-          scope.showMessage('loading graph ...');
+        scope.$on(EVENTS.STATE_CHANGE_SUCCESS, function (e, stateName) {
+          $log.log('::sigma @EVENTS.STATE_CHANGE_SUCCESS', stateName);
+          if(stateName.indexOf('graph') != -1)
+            scope.setMessage({message: 'loading graph ...'});
         });
         
         scope.$on(EVENTS.SIGMA_SET_ITEM, function (e, item) {
@@ -356,7 +359,7 @@ angular.module('histograph')
             si.refresh();
             play(); 
           }, 100);
-          
+          scope.setMessage({message: false});
         });
         
          /*
