@@ -156,7 +156,7 @@ angular
               label: 'documents'
             }, {
               name: 'explore.persons',
-              label: 'people'
+              label: 'graph of people'
             }
           ],
           connector: {
@@ -236,7 +236,7 @@ angular
           template: '<div></div>',
           controller: 'ExploreEntitiesCtrl',
           grammar: {
-            label: 'people',
+            label: 'graph of people',
             connector: {
               type: 'in documents of type',
               relatedTo: 'which contains',
@@ -263,10 +263,13 @@ angular
           choices: [
             {
               name: 'entity.resources',
-              label: 'documents'
+              label: 'related documents'
+            },  {
+              name: 'entity.graph',
+              label: 'graph of related people'
             }, {
               name: 'entity.persons',
-              label: 'people'
+              label: 'related people'
             }
           ],
         },
@@ -293,12 +296,39 @@ angular
           // }
         }
       })
-        .state('entity.persons', {
-          url: '',
-          templateUrl: 'templates/partials/entities.html',
-          controller: 'EntitiesCtrl',
+        .state('entity.graph', {
+          url: '/g',
+          template: '<div></div>',
+          controller: 'GraphCtrl',
           grammar: {
-            label: 'people',
+            label: 'graph of related people',
+            connector: {
+              type: 'in documents of type',
+              relatedTo: 'which contains',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: GRAMMAR.IN_TYPES,
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
+          resolve:{
+            relatedModel: function() {
+              return 'person'
+            },
+            relatedVizFactory: function(EntityRelatedVizFactory) {
+              return EntityRelatedVizFactory
+            }
+          }
+        })
+        .state('entity.persons', {
+          url: '/per',
+          templateUrl: 'templates/partials/entities.html',
+          controller: 'RelatedItemsCtrl',
+          grammar: {
+            label: 'related people',
             connector: {
               type: 'in documents of type',
               relatedTo: 'which contains',
@@ -328,7 +358,7 @@ angular
             }
           },
           resolve: {
-            model: function(){
+            relatedModel: function(){
               return 'person'
             },
             relatedVizFactory: function(EntityRelatedVizFactory) {
@@ -337,7 +367,7 @@ angular
             relatedFactory: function(EntityRelatedFactory) {
               return EntityRelatedFactory
             },
-            entities: function(EntityRelatedFactory, $stateParams, $location) {
+            relatedItems: function(EntityRelatedFactory, $stateParams, $location) {
               return EntityRelatedFactory.get(angular.extend({}, $location.search(), {
                 id: $stateParams.id,
                 model: 'person',
@@ -394,11 +424,11 @@ angular
           }
         })
         .state('entity.resources', {
-          url: '/r',
+          url: '',
           templateUrl: 'templates/partials/resources.html',
-          controller: 'ResourcesCtrl',
+          controller: 'RelatedItemsCtrl',
           grammar: {
-            label: 'documents',
+            label: 'related documents',
             connector: {
               type: 'of type',
               relatedTo: 'which contains',
@@ -428,13 +458,16 @@ angular
             }
           },
           resolve: {
+            relatedModel: function() {
+              return 'resource'
+            },
             relatedVizFactory: function(EntityRelatedVizFactory) {
               return EntityRelatedVizFactory
             },
             relatedFactory: function(EntityRelatedFactory) {
               return EntityRelatedFactory
             },
-            resources: function(EntityRelatedFactory, $stateParams, $location) {
+            relatedItems: function(EntityRelatedFactory, $stateParams, $location) {
               return EntityRelatedFactory.get(angular.extend({},$location.search(), {
                 id: $stateParams.id,
                 model: 'resource',
@@ -550,6 +583,10 @@ angular
               label: 'documents'
             }, 
             {
+              name: 'resource.graph',
+              label: 'graph of documents'
+            }, 
+            {
               name: 'resource.persons',
               label: 'people'
             },
@@ -573,6 +610,20 @@ angular
           url: '/g',
           template: '<div></div>',
           controller: 'GraphCtrl',
+          grammar: {
+            label: 'graph of documents',
+            connector: {
+              type: 'in documents of type',
+              relatedTo: 'which contains',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: GRAMMAR.AS_TYPES,
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
           resolve:{
             relatedModel: function() {
               return 'resource'

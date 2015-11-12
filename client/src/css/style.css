@@ -439,6 +439,15 @@ position: fixed;
   display: none;
 }
 
+.resource #perspective, .entity #perspective {
+  width: auto;
+  right: 370px;
+}
+
+.resource #perspective .item, .entity #perspective .item {
+  max-width: 100%;
+}
+
 #perspective ul.facets{
   list-style-type: none;
   margin: 20px 0 0 40px;
@@ -589,6 +598,16 @@ position: fixed;
 .resource.inquiries #see-also, .resource.inquiry #see-also, .resource.createInquiry #see-also {
   margin-left:480px;
   width: inherit;
+}
+
+.resource #see-also{
+  margin-left: auto;
+  margin-right: 0px;
+}
+
+.entity #see-also{
+  margin-left: auto;
+  margin-right: 0px;
 }
 
 .explore #see-also{
@@ -985,22 +1004,11 @@ position: fixed;
   right: 20px;
   bottom: 70px;
   background: #e8e8e8;
+  display:none;
   /*-webkit-transition: left .3s cubic-bezier(0.65, 0.05, 0.36, 1);
      -moz-transition: left .3s cubic-bezier(0.65, 0.05, 0.36, 1);
        -o-transition: left .3s cubic-bezier(0.65, 0.05, 0.36, 1);
           transition: left .3s cubic-bezier(0.65, 0.05, 0.36, 1);*/
-}
-
-#milkyway.viewpoint-read {
-  transform: translateX(2000px);
-}
-
-#milkyway.resource.inquiries, #milkyway.resource.createInquiry, #milkyway.resource.inquiry {
-  transform: translateX(2000px);
-}
-
-#milkyway.resource.resources{
-  display: none;
 }
 
 #milkyway.viewpoint-network {
@@ -1021,9 +1029,11 @@ position: fixed;
 
 #milkyway.explore.persons{
   left: 20px;
+  display: block
 }
 
 #milkyway.graph{
+  display: block;
   left: 20px;
 }
 
@@ -1199,11 +1209,11 @@ height: 150px;
 #sigma-snippets {
   opacity: 1;
   position: absolute;
-  top: 0px;
-  left: 0px;
-  bottom: 0px;
+  top: 10px;
+  left: 10px;
+  bottom: 10px;
   width: 320px;
-  /*border-radius: 2px;*/
+  border-radius: 2px;
   text-align: center;
   z-index: 11;
   background: transparent;
@@ -1218,7 +1228,7 @@ height: 150px;
   overflow: hidden;
   overflow-x: hidden;
   overflow-y: auto;
-  background: #383838;
+  
 }
 
 #sigma-snippets > .inner.loading, #sigma-snippets > .inner.enabled {
@@ -1262,6 +1272,20 @@ height: 150px;
   top: 20px;
   left: 34px;
 } 
+
+#sigma-snippets .nodes .line .weight{
+      position: absolute;
+    top: 40px;
+    background: #575757;
+    line-height: 20px;
+    /* width: 20px; */
+    height: 20px;
+    border-radius: 4px;
+    font-weight: bold;
+    left: 12px;
+    color: white;
+    padding: 0 10px;
+}
 
 #sigma-snippets .node {
   position: relative;
@@ -5397,13 +5421,32 @@ Copyright (c) 2015 Daniel Eden
 
 .grammar{
   line-height: 40px;
-  
 }
+
 .grammar-choice {
   display: inline-block;
   font-weight: bold;
   line-height: 24px;
-  border-bottom:2px solid #151515;
+  border: 1px solid #b8b8b8;
+  border-radius: 5px;
+  padding: 0 5px;
+}
+
+.grammar-choice.ruler{
+  background: #585858;
+    border: 1px solid transparent;
+    color: #e8e8e8;
+    font-weight: normal;
+}
+
+.grammar-choice.ruler button.btn{
+  background: transparent;
+  color: white;
+  border: 1px solid transparent;
+}
+
+.grammar-choice .grammar-item{
+  color: white;
 }
 
 .grammar-choice  button.btn{
