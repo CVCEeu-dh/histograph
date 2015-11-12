@@ -165,9 +165,9 @@ module.exports = {
           // for the NON URL fields, just do the same as before
           // console.log('content', resource.title_en, annotation.language)
           var fulltext = content.pop(),
-              offset   = _.compact(content).reduce(function(p,c) {
+              offset   = content.length? _.compact(content).reduce(function(p,c) {
                 return p.length + c.length + '§ '.length;
-              });
+              }): 0;
           // console.log(annotation.yaml)
           // Annotate the fields as usual, just filtering the points. Note the _.compact that eliminates empty content :()
           annotations = parser.annotate(_.compact(content).join('§ '), annotation.yaml.filter(function (d) {
