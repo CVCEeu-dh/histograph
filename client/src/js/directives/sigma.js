@@ -15,7 +15,7 @@ angular.module('histograph')
       restrict : 'A',
       template: ''+
         '<div id="playground"></div>' +
-        '<div gmasp target="target"></div>' +
+        // '<div gmasp target="target"></div>' +
         //'<div id="tips" ng-if="tips.length > 0"><div>{{tips}}</div></div>' +
         '<div snippets id="sigma-snippets" target="target"></div>' +
         '<div id="sigma-messenger" ng-if="message.text.length" class="animated {{message.visible? \'fadeIn\': \'fadeOut\'}}"><div class="inner">{{message.text}}</div></div>' +
