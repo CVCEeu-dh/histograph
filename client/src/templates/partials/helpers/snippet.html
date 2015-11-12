@@ -9,7 +9,7 @@
     <div ng-repeat='relatedItem in items' class="animated {{status=='loading'?'fadeOut':'fadeIn'}}" style="-webkit-animation-delay: {{$index * 100}}ms;
         animation-delay: {{$index * 100}}ms">
       <!-- person node -->
-      <div ng-if='relatedItem.type=="person"' class='node person' data-id="{{related_item.id}}">
+      <div ng-if='relatedItem.type=="person"' class='node person' data-id="{{relatedItem.id}}">
         <div class='thumbnail'>
           <div class="thumbnail-wrapper" style='background-image: url({{relatedItem.props.thumbnail}})'>    
             
@@ -18,6 +18,12 @@
         <div class='content'>
           <h4><a ng-href='#/e/{{relatedItem.id}}' marked="relatedItem.props|lookup:'name':language"></a></h4>
           <div class='date'>{{relatedItem.props.birth_time | datesOfAPerson : relatedItem.props.death_time}}</div>
+        </div>
+        <div class="actions">
+          <a class="action" title="filter" uib-tooltip="filter by " uib-tooltip-placement="top" uib-tooltip-append-to-body="true" ng-click="addToFilter(relatedItem)">
+            <span class="fa fa-filter"></span></a>
+          <a class="action" title="filter" uib-tooltip="add to your bookmarks" uib-tooltip-placement="top" uib-tooltip-append-to-body="true" ng-click="queue(relatedItem)">
+            <span class="fa fa-bookmark-o"></span></a>
         </div>
         <div class='clear'></div>
       </div>
@@ -43,7 +49,8 @@
   <div class='detail' ng-if='items.length == 1'>
     <div ng-repeat='relatedItem in items'>
       <div ng-if='relatedItem.type=="person"'>
-        {{relatedItem}}
+        <blockquote  marked="relatedItem.props|lookup:'abstract':language">
+        </blockquote>
       </div>
       <div ng-if='relatedItem.type=="resource"'>
         <div class="meta">
@@ -71,7 +78,7 @@
   </div>
   <!-- edges is full of sharedItems  -->
   <div ng-if="sharedItems.length" class='edges' >
-    <div ng-repeat='relatedItem in sharedItems' class="animated {{status=='loading'?'fadeOut':'slideInUp'}}" style="-webkit-animation-delay: {{$index * 100}}ms;
+    <div ng-repeat='relatedItem in sharedItems' class="animated {{status=='loading'?'fadeOut':'fadeIn'}}" style="-webkit-animation-delay: {{$index * 100}}ms;
         animation-delay: {{$index * 100}}ms">
       <div ng-if='relatedItem.type=="resource"' ng-include='"templates/partials/resource-lite.html"'></div>
       <div ng-if='relatedItem.type!="resource"' ng-include='"templates/partials/entity-lite.html"'></div>
