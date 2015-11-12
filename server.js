@@ -226,7 +226,7 @@ clientRouter.route('/auth/google/callback')
 clientRouter.route('/media/:file')
   .get(function (req, res, next) {
     var filename = path.join(settings.paths.media, req.params.file);
-    res.sendFile(filename, {root: __dirname}, function (err) {
+    res.sendFile(filename, {root: path.isAbsolute(settings.paths.media)?'':__dirname}, function (err) {
       if(err) {
         res.status(err.status).end();
       }
