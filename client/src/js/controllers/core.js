@@ -353,6 +353,10 @@ angular.module('histograph')
     $scope.messaging = false;
     var _messengerTimer;
     $scope.setMessage = function(message, timeout) {
+      if(!message) {
+        $scope.unsetMessage();
+        return;
+      }
       timeout = timeout || 5000;
       $scope.message = message;
       $scope.messaging = true;
@@ -408,7 +412,7 @@ angular.module('histograph')
       
       // if any graph is availabe, tell sigma that you're
       // going to send the nodes
-      $scope.$broadcast(EVENTS.STATE_CHANGE_SUCCESS);
+      $scope.$broadcast(EVENTS.STATE_CHANGE_SUCCESS, state.name);
 
       // $scope.setMessage(MESSAGES.LOADED, 1500);
       
@@ -470,7 +474,7 @@ angular.module('histograph')
       $log.log('CoreCtrl @locationChangeStart');
       
       $scope.$broadcast(EVENTS.LOCATION_CHANGE_START)
-      // $scope.setMessage(MESSAGES.LOADING);
+      $scope.setMessage(MESSAGES.LOADING);
     });
     
     $scope.currentPath;
@@ -752,24 +756,24 @@ angular.module('histograph')
     /*
       Load graph data
     */
-    $scope.syncGraph = function() {
-      relatedVizFactory.get(angular.extend({
-        model: relatedModel,
-        viz: 'graph',
-        limit: 100,
-      },  $stateParams, $scope.params), function (res) {
-        if($stateParams.ids) {
-          $scope.setGraph(res.result.graph, {
-            centers: $stateParams.ids
-          });
-        } else if($scope.item && $scope.item.id)
-          $scope.setGraph(res.result.graph, {
-            centers: [$scope.item.id]
-          });
-        else
-          $scope.setGraph(res.result.graph);
-      });
-    }
+    // $scope.syncGraph = function() {
+    //   relatedVizFactory.get(angular.extend({
+    //     model: relatedModel,
+    //     viz: 'graph',
+    //     limit: 100,
+    //   },  $stateParams, $scope.params), function (res) {
+    //     if($stateParams.ids) {
+    //       $scope.setGraph(res.result.graph, {
+    //         centers: $stateParams.ids
+    //       });
+    //     } else if($scope.item && $scope.item.id)
+    //       $scope.setGraph(res.result.graph, {
+    //         centers: [$scope.item.id]
+    //       });
+    //     else
+    //       $scope.setGraph(res.result.graph);
+    //   });
+    // }
 
       
     /*
@@ -805,7 +809,7 @@ angular.module('histograph')
       $scope.offset = 0;
       $log.debug('ResourcesCtrl @API_PARAMS_CHANGED', $scope.params);
       $scope.sync();
-      $scope.syncGraph();
+      // $scope.syncGraph();
     });
     // $scope.$on(EVENTS.PAGE_CHANGED, function(e, params) {
     //   $log.debug('ResourcesCtrl @PAGE_CHANGED', params);
@@ -855,6 +859,11 @@ angular.module('histograph')
           $scope.setGraph(res.result.graph);
       });
     }
+
+    $scope.$on(EVENTS.API_PARAMS_CHANGED, function() {
+      $log.debug('ResourcesCtrl @API_PARAMS_CHANGED', $scope.params);
+      $scope.syncGraph();
+    });
 
     $scope.syncGraph();
      $log.log('GraphCtrl -> ready');
