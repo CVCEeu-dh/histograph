@@ -20,7 +20,8 @@ module.exports = {
     cache: {
       disambiguation: './contents/cache/disambiguation',
       dbpedia: './contents/cache/dbpedia',
-      queries: './contents/cache/queries'
+      queries: './contents/cache/queries',
+      services: './contents/cache/services',
     }
   },
 

@@ -74,4 +74,4 @@ gulp.task('build', function() {
 });
 
 // Default
-gulp.task('default', ['templates', 'scripts', 'styles', 'images']);
+gulp.task('default', ['templates', 'scripts', 'styles', 'images', 'fonts']);
