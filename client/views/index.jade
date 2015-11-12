@@ -159,7 +159,7 @@ html
           div(class='view {{currentCtrl}} {{currentState.name|humanizeState}} {{queueStatus}} viewpoint-{{viewpoint.selected.name}}', infinite-scroll='addMoreItems()', infinite-scroll-collection='relatedItems')
             div(ui-view='')
           
-          div#milkyway(sigma, graph='graph', freeze='freeze', tips='headers.graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentState.name|humanizeState}} {{queueStatus}} viewpoint-{{viewpoint.selected.name}}', controller='currentCtrl', redirect='redirect(path)', queue="addToQueue(items)", filter='addFilter(key, value)')
+          div#milkyway(sigma, graph='graph', freeze='freeze', tips='headers.graph', togglemenu='toggleMenu(e, item, tag)', class='{{currentState.name|humanizeState}} {{queueStatus}} viewpoint-{{viewpoint.selected.name}}', controller='currentCtrl', setmessage='setMessage(message)', redirect='redirect(path)', queue="addToQueue(items)", filter='addFilter(key, value)')
           
           div(id='timeline', timeline, class='{{currentState.name}} {{queueStatus}}', t='timeline', cxt='contextualTimeline', filters="filters")
             
