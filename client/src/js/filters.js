@@ -220,20 +220,34 @@ angular.module('histograph')
   /*
     Translate
   */
-  .filter('lookup', function($sce) {
+  .filter('lookup', function() {
     return function(props, field, language, cutAt) {
+      var __t = function(text) {// cutat
+        if(typeof text != 'string')
+          return text;
+        if(isNaN(cutAt))
+          return text;//$sce.trustAsHtml(text);
+        //trim the string to the maximum length
+        var t = text.substr(0, cutAt);
+        //re-trim if we are in the middle of a word
+        if(text.length > cutAt)
+          t = t.substr(0, Math.min(t.length, t.lastIndexOf(' '))) + ' ...';
+        // if there is a cut at, we will strip the html
+        return t;
+      };
+
       if(!props)
         return props
       var content = props[field + '_' + language]
       if(content)
-        return content;
+        return __t(content);
       else
         for(var i in props.languages) {
           content = props[field + '_' + props.languages[i]];
           if(content)
-            return content
+            return __t(content)
         }
-        return props[field] || (field + ' not available');
+        return __t(props[field]) || (field + ' not available');
     }
   })
   
