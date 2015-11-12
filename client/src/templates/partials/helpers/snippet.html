@@ -2,7 +2,10 @@
   
   <div class='nodes'>
     <div ng-if='items.length > 1' class="line animated {{status=='loading'?'fadeOut':'fadeIn'}}" style="-webkit-animation-delay: 250ms;
-        animation-delay: 250ms"></div>
+        animation-delay: 250ms">
+        <div class='weight'>{{weight}}</div>
+    </div>
+    
     <div ng-repeat='relatedItem in items' class="animated {{status=='loading'?'fadeOut':'fadeIn'}}" style="-webkit-animation-delay: {{$index * 100}}ms;
         animation-delay: {{$index * 100}}ms">
       <!-- person node -->
@@ -13,14 +16,14 @@
           </div>
         </div>
         <div class='content'>
-          <h4 marked="relatedItem.props|lookup:'name':language"></h4>
+          <h4><a ng-href='#/e/{{relatedItem.id}}' marked="relatedItem.props|lookup:'name':language"></a></h4>
           <div class='date'>{{relatedItem.props.birth_time | datesOfAPerson : relatedItem.props.death_time}}</div>
         </div>
         <div class='clear'></div>
       </div>
 
       <!-- resource node -->
-      <div ng-if='relatedItem.type=="resource"' data-id="{{related_item.id}}" class='node resource'>
+      <div ng-if='relatedItem.type=="resource"' data-id="{{relatedItem.id}}" class='node resource'>
         <div class='thumbnail'>
           <div class="thumbnail-wrapper" ng-if='relatedItem.props.mimetype=="image"' style='background-image: url(media/{{relatedItem.props.url}})'>    
             
