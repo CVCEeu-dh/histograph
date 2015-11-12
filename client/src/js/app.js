@@ -895,7 +895,7 @@ angular
         .state('neighbors.resources', {
           url: '',
           templateUrl: 'templates/partials/resources.html',
-          controller: 'ResourcesCtrl',
+          controller: 'RelatedItemsCtrl',
           grammar: {
             label: 'documents',
             connector: {
@@ -927,13 +927,16 @@ angular
             }
           },
           resolve: {
+            relatedModel: function() {
+              return 'resource'
+            },
             relatedVizFactory: function(SuggestAllInBetweenVizFactory) {
               return SuggestAllInBetweenVizFactory;
             },
             relatedFactory: function(SuggestAllInBetweenFactory) {
               return SuggestAllInBetweenFactory;
             },
-            resources: function(SuggestAllInBetweenFactory, $stateParams, $location) {
+            relatedItems: function(SuggestAllInBetweenFactory, $stateParams, $location) {
               return SuggestAllInBetweenFactory.get(angular.extend({
                 limit: 10,
                 model: 'resource'
@@ -996,7 +999,7 @@ angular
         .state('search.resources', {
           url: '',
           templateUrl: 'templates/partials/resources.html',
-          controller: 'ResourcesCtrl',
+          controller: 'RelatedItemsCtrl',
           grammar: {
             label: 'documents',
             connector: {
@@ -1028,13 +1031,16 @@ angular
             }
           },
           resolve: {
+            relatedModel: function() {
+              return 'resource'
+            },
             relatedVizFactory: function(SearchVizFactory) {
               return SearchVizFactory
             },
             relatedFactory: function(SearchFactory) {
               return SearchFactory
             },
-            resources: function(SearchFactory, $stateParams, $location) {
+            relatedItems: function(SearchFactory, $stateParams, $location) {
               return SearchFactory.get(angular.extend({},$location.search(), {
                 model: 'resource',
                 query: $stateParams.query,

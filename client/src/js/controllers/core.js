@@ -756,24 +756,24 @@ angular.module('histograph')
     /*
       Load graph data
     */
-    // $scope.syncGraph = function() {
-    //   relatedVizFactory.get(angular.extend({
-    //     model: relatedModel,
-    //     viz: 'graph',
-    //     limit: 100,
-    //   },  $stateParams, $scope.params), function (res) {
-    //     if($stateParams.ids) {
-    //       $scope.setGraph(res.result.graph, {
-    //         centers: $stateParams.ids
-    //       });
-    //     } else if($scope.item && $scope.item.id)
-    //       $scope.setGraph(res.result.graph, {
-    //         centers: [$scope.item.id]
-    //       });
-    //     else
-    //       $scope.setGraph(res.result.graph);
-    //   });
-    // }
+    $scope.syncGraph = function() {
+      relatedVizFactory.get(angular.extend({
+        model: relatedModel,
+        viz: 'graph',
+        limit: 100,
+      },  $stateParams, $scope.params), function (res) {
+        if($stateParams.ids) {
+          $scope.setGraph(res.result.graph, {
+            centers: $stateParams.ids
+          });
+        } else if($scope.item && $scope.item.id)
+          $scope.setGraph(res.result.graph, {
+            centers: [$scope.item.id]
+          });
+        else
+          $scope.setGraph(res.result.graph);
+      });
+    }
 
       
     /*
@@ -809,13 +809,10 @@ angular.module('histograph')
       $scope.offset = 0;
       $log.debug('ResourcesCtrl @API_PARAMS_CHANGED', $scope.params);
       $scope.sync();
-      // $scope.syncGraph();
+      if($stateParams.ids || $stateParams.query)
+        $scope.syncGraph();
     });
-    // $scope.$on(EVENTS.PAGE_CHANGED, function(e, params) {
-    //   $log.debug('ResourcesCtrl @PAGE_CHANGED', params);
-    //   $scope.page = params.page
-    //   $scope.sync();
-    // });
+    
     
     $scope.$on(EVENTS.INFINITE_SCROLL, function (e) {
       $scope.offset = $scope.offset + $scope.limit;
@@ -828,7 +825,8 @@ angular.module('histograph')
     $log.log('RelatedItemsCtrl -> setRelatedItems - items', relatedItems.result.items);
     $scope.setRelatedItems(relatedItems.result.items);
     
-    
+    if($stateParams.ids || $stateParams.query)
+      $scope.syncGraph();
   })
   /*
     Make graph easily readable

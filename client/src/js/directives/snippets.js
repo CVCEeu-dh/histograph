@@ -101,8 +101,48 @@ angular.module('histograph')
           }, 400);
         };
 
-    
+        /*
+          Add current item to the queue
+        */
+        scope.queue = function(item) {
+          $log.log('::snippets -> addToQueue() id:', item.id || item);
+          scope.$parent.addToQueue({
+            items: [ item.id || item ]
+          });
+        }
 
+        /*
+          Add current item as filter
+        */
+        scope.addToFilter = function(item) {
+          $log.log('::snippets -> addToFilter() id:', item.id);
+          scope.$parent.addFilter({
+            key: 'with',
+            value: item.id
+          });
+        };
+        
+        /*
+          display node or edge egonetwork
+
+        */
+        scope.egonetwork = function() {
+          $log.log('::gmasp -> egonetwork()');
+          
+          var nodes = [];
+          if(scope.target.type == 'node')
+            nodes.push(scope.target.data.node.id)
+          else
+            nodes.push(
+              scope.target.data.edge.nodes.source.id,
+              scope.target.data.edge.nodes.target.id
+            );
+          scope.$parent.egonetwork(nodes);
+        }
+    
+        /*
+          Watch target changes
+        */
         scope.$watch('target', function(t) {
           $log.log('::snippets @target');
           if(t)
