@@ -83,5 +83,10 @@
       <div ng-if='relatedItem.type=="resource"' ng-include='"templates/partials/resource-lite.html"'></div>
       <div ng-if='relatedItem.type!="resource"' ng-include='"templates/partials/entity-lite.html"'></div>
     </div>
+
+    <!-- load more -->
+    <div class='more' ng-if='totalItems && offset + limit < totalItems'>
+      <button ng-click='more()' class='btn btn-default more'>{{status=='loading'?'loading...':'load more items'}}</button>
+    </div>
   </div>
 </div>

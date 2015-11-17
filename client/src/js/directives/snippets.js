@@ -32,17 +32,70 @@ angular.module('histograph')
         scope.items = [];
         // will contain the inbetween items between target4S EDGE nodes
         scope.sharedItems = [];
+        // the nature of the shared items
+        scope.sharedItemsModel = 'resource';
+        // will contain the focused item ids
+        scope.itemsIds = [];
+        // will contain the total shared Items
+        scope.totalItems = 0;
+        // limit and offset. reset offset on api param chage.
+        scope.limit = 10;
+        //
+        scope.offset = 0;
+        
 
         /*
           Load a bunch of items
         */
         scope.fill = function(items) {
-          $log.log('::snippets -> fill() n. items:',items.length);
+          $log.log('::snippets -> fill() n. items:',items.length, _.map(items, 'id'));
           // do not remove items at the end of __fadeOutTimer 
           clearTimeout(__fadeOutTimer)
           scope.status = 'enabled'
-          scope.items = items;    
-        }
+          scope.items = items;
+          
+        };
+
+
+
+        /*
+          load shared items.
+          with limits and offsets.
+        */
+        scope.sync = function() {
+          $log.log('::snippets -> sync() getSharedItems between:' , scope.itemsIds);
+          SuggestFactory.getShared(angular.extend({
+            ids: scope.itemsIds,
+            model: scope.sharedItemsModel
+          }, scope.$parent.$parent.params, {
+            limit: scope.limit,
+            offset: scope.offset
+          }), function (res) {
+            if(scope.offset > 0)
+              scope.sharedItems = scope.sharedItems.concat(res.result.items)
+            else {
+              scope.sharedItems = res.result.items;
+              scope.totalItems  = res.info.total_items;
+            }
+          })
+        };
+
+        /*
+          Change offset and sync again, loading the next n items.
+        */
+        scope.more = function() {
+          // new offset
+          var offset = scope.offset + scope.limit;
+          $log.log('::snippets -> more() new offset:', offset);
+          
+          if(offset < scope.totalItems) {
+
+            scope.offset = offset;
+            scope.sync();
+          }
+            
+        };
+
         /*
           Show snippet
         */
@@ -63,18 +116,15 @@ angular.module('histograph')
 
             scope.left = s;
             scope.right =  t;
+            scope.offset = 0;
             scope.weight = target.data.edge.weight;
 
             itemsIdsToLoad.push(s.id, t.id);
             // same type? loaded shared resources
             if(s.type == t.type) {
-              SuggestFactory.getShared({
-                ids: itemsIdsToLoad,
-                model: s.type == 'resource'? 'person': 'resource'
-              }, function (res) {
-                if(res.result && res.result.items.length)
-                  scope.sharedItems = res.result.items;
-              })
+              scope.itemsIds = itemsIdsToLoad;
+              scope.sharedItemsModel = t.type == 'resource'? 'person' : 'resource';
+              scope.sync();
             }
           }
 
@@ -82,6 +132,7 @@ angular.module('histograph')
             SuggestFactory.getUnknownNodes({
               ids: itemsIdsToLoad
             }, function (res) {
+              
               if(res.result && res.result.items.length)
                 scope.fill(res.result.items);
                 // load in between
@@ -93,6 +144,7 @@ angular.module('histograph')
         scope.hide = function() {
           $log.log('::snippets -> hide()');
           scope.status = 'loading';
+          scope.itemsIds = [];
           __fadeOutTimer = setTimeout(function(){
             scope.items = [];
             scope.sharedItems = [];
@@ -150,6 +202,17 @@ angular.module('histograph')
           else
             scope.hide();
         });
+
+        /*
+          Listen to api params changes
+        */
+        scope.$on(EVENTS.API_PARAMS_CHANGED, function(e, params) {
+          $log.log('::snippets @EVENTS.API_PARAMS_CHANGED');
+          scope.offset = 0;
+          if(scope.itemsIds.length)
+            scope.sync();
+        });
+
       }
     }
   })

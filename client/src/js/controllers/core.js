@@ -485,7 +485,7 @@ angular.module('histograph')
       // same state as before???
       if($scope.currentPath == $location.path()) {
         $scope.params = $location.search();
-        $scope.$broadcast(EVENTS.API_PARAMS_CHANGED);
+        $scope.$broadcast(EVENTS.API_PARAMS_CHANGED, angular.copy($scope.params));
       
       }
       $scope.currentPath = $location.path();

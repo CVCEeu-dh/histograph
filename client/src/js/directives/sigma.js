@@ -260,6 +260,12 @@ angular.module('histograph')
             si.refresh();
           }, 300);
         });
+        /*
+          watch current target.
+        */
+        scope.$watch('target', function(t) {
+          
+        })
         
         scope.$on(EVENTS.LOCATION_CHANGE_START, function (v) {
           stop();
