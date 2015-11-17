@@ -3,7 +3,7 @@
   <div class='nodes'>
     <div ng-if='items.length > 1' class="line animated {{status=='loading'?'fadeOut':'fadeIn'}}" style="-webkit-animation-delay: 250ms;
         animation-delay: 250ms">
-        <div class='weight'>{{weight}}</div>
+        <div class='weight'>{{totalItems}}</div>
     </div>
     
     <div ng-repeat='relatedItem in items' class="animated {{status=='loading'?'fadeOut':'fadeIn'}}" style="-webkit-animation-delay: {{$index * 100}}ms;
