@@ -20,22 +20,7 @@ var settings   = require('../settings'),
     Resource   = require('../models/resource');
 
 
-/*
-  Very basic tiny method to tranform words in a valid lucenequery
-  according to ccurrent lucene indexes.
-*/
-function toLucene(query) {
-  if(query.split(/\s/).length > 1)
-    return '"' +query.split(/\s/).join(' ')+ '"'
-  else
-    return '*'+query+'*';
-  
-  var q = '*' + query.split(/[^\w]/).map(function (d) {
-    return d.trim().toLowerCase()
-  }).join('*') + '*';
-  return q;
-  
-}
+
 /*
   Tiny helper to tranform words in a valid neo4j regexp
 */
@@ -343,15 +328,15 @@ module.exports =  function(io){
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       
-      resource_query = 'full_search:' + toLucene(req.query.query) + ' OR title_search:' + toLucene(req.query.query);
-      entity_query = 'name_search:' + toLucene(req.query.query);
+      resource_query = '(' + parser.toLucene(req.query.query, 'full_search') + ') OR (' + parser.toLucene(req.query.query, 'title_search') + ')';
+      entity_query = parser.toLucene(req.query.query, 'name_search');
       // lucene.setSearchTerm('full_search:(' + req.query.query + ') OR title_search:(' + req.query.query+')');
       // resource_query = '' + lucene.getFormattedSearchTerm();
       
       // lucene.setSearchTerm('name_search:' + req.query.query);
       // entity_query = '' + lucene.getFormattedSearchTerm();
       // console.log('resource_query', resource_query)
-      //     console.log('entity_query', entity_query)
+          // console.log('entity_query', entity_query)
       
       neo4j.query(queries.lucene_query, {
         resource_query: resource_query,
@@ -389,9 +374,9 @@ module.exports =  function(io){
           });
       if(!form.isValid)
         return helpers.formError(form.errors, res);
-      
-      resource_query = 'full_search:' + toLucene(req.query.query) + ' OR title_search:' + toLucene(req.query.query);
-      entity_query = 'name_search:' + toLucene(req.query.query);
+
+      resource_query = '(' + parser.toLucene(req.query.query, 'full_search') + ') OR (' + parser.toLucene(req.query.query, 'title_search') + ')';
+      entity_query = parser.toLucene(req.query.query, 'name_search');
       
       neo4j.query(queries.count, {
         resource_query: resource_query,
@@ -429,7 +414,7 @@ module.exports =  function(io){
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       
-      var q = 'name_search:' + toLucene(req.query.query);
+      var q = parser.toLucene(req.query.query, 'name_search');
       form.params.query = q;
       
       models.getMany({
@@ -456,7 +441,7 @@ module.exports =  function(io){
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       
-      var q = 'full_search:' + toLucene(req.query.query);
+      var q = parser.toLucene(req.query.query, 'full_search');
       form.params.query = q;
       
       models.getMany({
@@ -483,7 +468,7 @@ module.exports =  function(io){
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       
-      form.params.query = 'full_search:' + toLucene(form.params.query);
+      form.params.query = parser.toLucene(form.params.query, 'full_search');
       
       query = parser.agentBrown(queries.get_matching_resources_graph, form.params);
       // build a nodes edges graph
@@ -505,7 +490,7 @@ module.exports =  function(io){
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       console.log(form.params)
-      var q = 'name_search:' + toLucene(form.params.query);
+      var q = parser.toLucene(form.params.query, 'name_search');
 
       // build a nodes edges graph
       helpers.cypherGraph(queries.get_matching_entities_graph, {

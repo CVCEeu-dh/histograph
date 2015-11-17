@@ -6,6 +6,54 @@ var YAML = require('yamljs'),
 
 
 module.exports = {
+  /*
+    Produce a quite acceptable lucene query from a natural query search.
+  'ciao "mamma°bella" ciao'.replace(/("?)\s("?)/g, function(m, a ,b) { console.log(m, 'a:',typeof a,a.length,'- b:',typeof b, b.length); return 'SPACE'})
+    for each field
+    in order to avoid parser exception
+  */
+  toLucene: function(query, field) {
+    //excape chars + - && || ! ( ) { } [ ] ^ " ~ * ? : \
+    // replace query
+    var Q = '(:D)',
+        S = '[-_°]',
+        q;
+    // transform /ciao "mamma bella" ciao/ in 
+    // /ciao (:-)mamma[-_°]bella(:-) ciao/
+    // note that it transform only COUPLES
+    q = query.replace(/"[^"]*"/g, function (m) {
+      return m.split(/\s/).join(S).replace(/"/g, Q)
+    });
+
+    // delete all the remaining " chars
+    q = q.split('"').join('');
+    console.log(q)
+    // transform spaces from /ciao "mamma[-_°]bella" ciao/
+    // to a list of ["ciao", ""mamma[-_°]bella"", "ciao"]
+    // then JOIN with OR operator
+    q = q.split(/\s/).filter(function (d){
+      return d.trim().length > 1
+    });
+
+    q = q.reduce(function (a, b, i) {
+      // if d is wrapped by ""      
+      var l = [a];
+
+      l.push(a.lastIndexOf(Q) === (a.length - Q.length)? '"': '*')
+      l.push(' OR ', field, ':');
+      l.push(b.indexOf(Q) === -1? '*': '"');
+      l.push(b);
+
+      return l.join('')
+    })
+    console.log(q)
+    q = q.split(S).join(' ')
+    console.log(q)
+    q = q.split(Q).join('');
+    console.log(q)
+    return [field, ':', q.indexOf('"') === 0?'':'*', q, q.lastIndexOf('"') === 0?'':'*'].join('');
+  
+  },
   /**
     Neo4j Chypher filter query parser. REplace the {?<neo4jVariableName>}
     with proper WHERE chain.

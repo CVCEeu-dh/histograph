@@ -13,6 +13,30 @@ var parser  = require('../parser.js'),
 
 
 
+describe('parser:lucene', function() {
+  it('understand a good natural query', function (done) {
+    var q = parser.toLucene('ciao "mamma bella" ciao', 'field_to'); // complete 
+    should.equal(q, 'field_to:*ciao* OR field_to:"mamma bella" OR field_to:*ciao*')
+    done();
+  });
+
+  it('understand a not yet complete natural query', function (done) {
+    var q   = parser.toLucene('ciao "mamma bella ciao', 'field_to'), // incomplete
+        q1  = parser.toLucene('ciao "mamma bella ciao" che "', 'field_to'), // incomplete
+        q2  = parser.toLucene('ciao "mamma bella ciao" che "ci siamo', 'field_to'); // incomplete
+    should.equal(q, 'field_to:*ciao* OR field_to:*mamma* OR field_to:*bella* OR field_to:*ciao*');
+    should.equal(q1, 'field_to:*ciao* OR field_to:"mamma bella ciao" OR field_to:*che*');
+    should.equal(q2, 'field_to:*ciao* OR field_to:"mamma bella ciao" OR field_to:*che* OR field_to:*ci* OR field_to:*siamo*');
+    done();
+  })
+
+  it('ignore lucene query provided by the user', function (done) {
+    var q   = parser.toLucene('ciao AND title:"mamma" bella ciao', 'field_to'); // incomplete
+    
+    done();
+  })
+});
+
 describe('parser:paragraphs', function() {
   it('should split a long document in paragraphs', function (done) {
     // body...

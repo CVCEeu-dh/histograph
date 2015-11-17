@@ -5596,3 +5596,27 @@ font-size:12px;
 .popover-content ul.dropdown-menu >li a:hover {
   border-bottom: 0px transparent;
 }
+
+/*
+  media improvements
+  cf.http://getbootstrap.com/css/#responsive-utilities
+*/
+@media screen and (min-width: 1200px) {
+  .entity #see-also, .resource #see-also{
+    width: 480px;
+  }
+
+  .resource #perspective, .entity #perspective{
+    right: 500px;
+  }
+}
+
+@media screen and (max-width: 992px) {
+  .entity #see-also, .resource #see-also{
+    width: 280px;
+  }
+
+  .resource #perspective, .entity #perspective{
+    right: 300px;
+  }
+}
