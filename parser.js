@@ -27,7 +27,7 @@ module.exports = {
 
     // delete all the remaining " chars
     q = q.split('"').join('');
-    console.log(q)
+    
     // transform spaces from /ciao "mamma[-_°]bella" ciao/
     // to a list of ["ciao", ""mamma[-_°]bella"", "ciao"]
     // then JOIN with OR operator
@@ -35,23 +35,16 @@ module.exports = {
       return d.trim().length > 1
     });
 
-    q = q.reduce(function (a, b, i) {
-      // if d is wrapped by ""      
-      var l = [a];
-
-      l.push(a.lastIndexOf(Q) === (a.length - Q.length)? '"': '*')
-      l.push(' OR ', field, ':');
-      l.push(b.indexOf(Q) === -1? '*': '"');
-      l.push(b);
-
-      return l.join('')
-    })
-    console.log(q)
-    q = q.split(S).join(' ')
-    console.log(q)
-    q = q.split(Q).join('');
-    console.log(q)
-    return [field, ':', q.indexOf('"') === 0?'':'*', q, q.lastIndexOf('"') === 0?'':'*'].join('');
+    q = q.map(function (d) {
+      // has BOTH matches of Q?
+      var l = [field, ':'];
+      if(d.indexOf(Q) === -1)
+        l.push('*', d, '*')
+      else
+        l.push('"', d, '"')
+      return l.join('').split(Q).join('')
+    }).join(' AND ').split(S).join(' ');
+    return q;
   
   },
   /**

@@ -16,7 +16,7 @@ var parser  = require('../parser.js'),
 describe('parser:lucene', function() {
   it('understand a good natural query', function (done) {
     var q = parser.toLucene('ciao "mamma bella" ciao', 'field_to'); // complete 
-    should.equal(q, 'field_to:*ciao* OR field_to:"mamma bella" OR field_to:*ciao*')
+    should.equal(q, 'field_to:*ciao* AND field_to:"mamma bella" AND field_to:*ciao*')
     done();
   });
 
@@ -24,9 +24,9 @@ describe('parser:lucene', function() {
     var q   = parser.toLucene('ciao "mamma bella ciao', 'field_to'), // incomplete
         q1  = parser.toLucene('ciao "mamma bella ciao" che "', 'field_to'), // incomplete
         q2  = parser.toLucene('ciao "mamma bella ciao" che "ci siamo', 'field_to'); // incomplete
-    should.equal(q, 'field_to:*ciao* OR field_to:*mamma* OR field_to:*bella* OR field_to:*ciao*');
-    should.equal(q1, 'field_to:*ciao* OR field_to:"mamma bella ciao" OR field_to:*che*');
-    should.equal(q2, 'field_to:*ciao* OR field_to:"mamma bella ciao" OR field_to:*che* OR field_to:*ci* OR field_to:*siamo*');
+    should.equal(q, 'field_to:*ciao* AND field_to:*mamma* AND field_to:*bella* AND field_to:*ciao*');
+    should.equal(q1, 'field_to:*ciao* AND field_to:"mamma bella ciao" AND field_to:*che*');
+    should.equal(q2, 'field_to:*ciao* AND field_to:"mamma bella ciao" AND field_to:*che* AND field_to:*ci* AND field_to:*siamo*');
     done();
   })
 
@@ -36,6 +36,16 @@ describe('parser:lucene', function() {
     done();
   })
 });
+
+
+describe('parser:lucene real use case', function() {
+  it('understand "jacques delors"', function (done) {
+    var q = parser.toLucene('"jacques delors"', 'field_to'); // complete  
+    console.log(q)
+    done();
+  });
+})
+
 
 describe('parser:paragraphs', function() {
   it('should split a long document in paragraphs', function (done) {
