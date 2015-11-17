@@ -1030,7 +1030,7 @@ position: fixed;
 }
 
 #milkyway.explore.persons{
-  left: 20px;
+  left: 10px;
   display: block
 }
 
@@ -1217,10 +1217,10 @@ height: 150px;
 #sigma-snippets {
   opacity: 1;
   position: absolute;
-  top: 10px;
-  left: 10px;
-  bottom: 10px;
-  width: 320px;
+  top: 0px;
+  left: 0px;
+  bottom: 0px;
+  width: 340px;
   border-radius: 2px;
   text-align: center;
   z-index: 11;
@@ -1237,6 +1237,7 @@ height: 150px;
   overflow-x: hidden;
   overflow-y: auto;
   max-height: 100%;
+  background: #949494;
 }
 
 #sigma-snippets > .inner.loading, #sigma-snippets > .inner.enabled {
@@ -1267,8 +1268,8 @@ height: 150px;
 } 
 
 #sigma-snippets .edges{
- 
-        background: #eee;
+  padding-top:5px;
+
 }
 
 #sigma-snippets .edges .related{
@@ -1276,9 +1277,10 @@ height: 150px;
   width: auto;
   border:0px transparent;
   padding-top:10px;
-      border-bottom: 1px solid #ccc;
+      border-bottom: 2px solid #949494;
     border-radius: 0;
     text-align: left;
+    margin: 5px 10px
 }
 
 #sigma-snippets .edges .related h4{
