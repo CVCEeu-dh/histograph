@@ -492,6 +492,15 @@ angular.module('histograph')
       
       $scope.unsetMessage();
     });
+
+    /*
+      listener socket disconnection
+      ---
+    */
+    socket.on('disconnect', function(){
+      // debugger
+      location.reload(true);
+    })
     
      /*
     
