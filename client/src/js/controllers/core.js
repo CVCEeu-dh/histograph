@@ -518,16 +518,18 @@ angular.module('histograph')
         });
         
         $log.log('CoreCtrl -> addToQueue() - n. items:', items.length,'- n. to be added:', toBeAdded.length)
-        if(toBeAdded.length)
+        if(toBeAdded.length) {
+          
           SuggestFactory.getUnknownNodes({
             ids: toBeAdded
           }, function (res) {
             $log.log('CoreCtrl -> addToQueue() SuggestFactory', res);
             $scope.playlist = $scope.playlist.concat(res.result.items);
             $scope.playlistIds = _.map( $scope.playlist, 'id');
-            $scope.queueStatus = 'active';
+            // $scope.queueStatus = 'active'; @todo: simply blink the 
             $scope.queueRedirect();
           });
+        }
      }
 
      $scope.queue = function(item, inprog) {
@@ -543,7 +545,7 @@ angular.module('histograph')
       $log.log('   ', itemId, isAlreadyInQueue?'is already presend in readlist, skipping ...': 'adding', $scope.playlistIds.indexOf(itemId))
       
       if(isAlreadyInQueue) {
-        $scope.queueStatus = 'active';
+        // $scope.queueStatus = 'active';
         if(!inprog)
           $scope.$apply();
         return;
@@ -555,7 +557,7 @@ angular.module('histograph')
       if(typeof item == 'object') {
         $scope.playlist.push(item);
         $scope.playlistIds.push(item.id);
-        $scope.queueStatus = 'active';
+        // $scope.queueStatus = 'active';
         if(!inprog)
           $scope.$apply();
         $scope.queueRedirect();
@@ -566,7 +568,7 @@ angular.module('histograph')
           
           $scope.playlist.push(res.result.items[0]);
           $scope.playlistIds.push(res.result.items[0].id);
-          $scope.queueStatus = 'active';
+          // $scope.queueStatus = 'active';
           if(!inprog)
             $scope.$apply();
           // collect the ids in order to get the right redirect location
@@ -585,7 +587,7 @@ angular.module('histograph')
       if(storedItems.length) {
         $scope.playlist    = storedItems;
         $scope.playlistIds = _.map(storedItems, 'id');
-        $scope.queueStatus = 'active';
+        // $scope.queueStatus = 'active';
       }
     }
     
@@ -636,7 +638,7 @@ angular.module('histograph')
     };
      
     $scope.toggleQueue = function(item) {
-      if($scope.queueStatus == 'sleep')
+      if($scope.queueStatus != 'active')
         $scope.queueStatus = 'active';
       else
         $scope.queueStatus = 'sleep';

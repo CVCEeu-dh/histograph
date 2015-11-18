@@ -15,8 +15,9 @@ angular.module('histograph')
       restrict : 'A',
       templateUrl: 'templates/partials/helpers/snippet.html',
       scope:{
-        target: '=',
-        center: '='
+        center: '=',
+        target: '='
+        
       },
       link: function(scope, elem){
         $log.log('::snippets ------------');
@@ -65,6 +66,7 @@ angular.module('histograph')
         */
         scope.sync = function() {
           $log.log('::snippets -> sync() getSharedItems between:' , scope.itemsIds);
+          $log.debug('::snippets -> sync() center:', scope.center)
           SuggestFactory.getShared(angular.extend({
             ids: scope.itemsIds,
             model: scope.sharedItemsModel
@@ -180,7 +182,7 @@ angular.module('histograph')
 
         */
         scope.egonetwork = function() {
-          $log.log('::gmasp -> egonetwork()');
+          $log.log('::snippets -> egonetwork()');
           
           var nodes = [];
           if(scope.target.type == 'node')
@@ -191,9 +193,36 @@ angular.module('histograph')
               scope.target.data.edge.nodes.target.id
             );
           scope.$parent.egonetwork(nodes);
+        };
+
+        scope.setTarget = function(item) {
+          $log.log('::snippets -> setTarget() id:', item.id);
+          scope.status = 'targeting'
+          // wait for the translation to end, then
+          __fadeOutTimer = setTimeout(function() {
+            scope.target = {
+              type: 'node',
+              data: {
+                node: item
+              }
+            };
+            scope.$apply();
+          }, 400);
         }
-    
+
         /*
+          Listener: scope.center
+          ---
+          Watch center item changes. Whenever item is selected
+        */
+        scope.$watch('center', function(v) {
+          $log.log('::snippets @center');
+          
+        });
+
+        /*
+          Listener: scope.target
+          ---
           Watch target changes
         */
         scope.$watch('target', function(t) {
@@ -203,6 +232,8 @@ angular.module('histograph')
           else
             scope.hide();
         });
+
+
 
         /*
           Listen to api params changes

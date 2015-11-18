@@ -1,4 +1,7 @@
-<div class="inner {{status}}">
+<div class='snip {{status}} {{center.type}}' data-id='{{center.id}}' ng-if='center' ng-click='setTarget(center)' style='background-image: url({{center.props.thumbnail}})' uib-tooltip="{{center.props|lookup:'name':language}}" tooltip-placement='right'>
+  <!-- <h2>{{center.props|lookup:'name':language}}</h2> -->
+</div>
+<div class="inner {{center?'wait':''}} {{status}}">
   
   <div class='nodes'>
     <div ng-if='items.length > 1' class="line">

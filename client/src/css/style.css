@@ -12,6 +12,16 @@
   display: none !important;
 }
 
+header{
+  -webkit-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
+     -moz-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+       -o-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+          transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+}
+header.active{
+  transform: translateX(200px);
+}
+
 header ul.menu li a {
   color: #757575;
   /* text-transform: uppercase; */
@@ -19,7 +29,25 @@ header ul.menu li a {
   font-size: 12px;
   display: block;
   line-height: 44px;
-  padding-top: 5px;
+
+  position:relative;
+}
+
+header ul.menu .number {
+      position: absolute;
+    /* width: 20px; */
+    padding: 0 5px 0 5px;
+    height: 20px;
+    color: white;
+    text-align: center;
+    line-height: 20px;
+    top: 5px;
+    right: -25px;
+    background: #333333;
+    border-radius: 10px;
+    font-weight: bold;
+    margin-left: 5px;
+    font-size: 10px;
 }
 
 header ul.menu li.active a {
@@ -57,16 +85,15 @@ a#header-title {
 
 .view{
   position: absolute;
-  top: 100px;
+  top: 60px;
   bottom: 50px;
   left:0;
   width: 100%;
   background: #f0f0f0;
-  overflow-y : scroll;
-  -webkit-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
-     -moz-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1);
-       -o-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1);
-          transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+  -webkit-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
+     -moz-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+       -o-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+          transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
 }
 .view.index{
   top: 50px;
@@ -75,8 +102,9 @@ a#header-title {
 }
 
 .view.active{
-  bottom: 130px;
+  /*bottom: 130px;*/
   /*padding-bottom: 80px;*/
+  transform: translateX(200px);
 }
 
 /*
@@ -302,8 +330,8 @@ a#header-title {
 */
   
 .header-menu{
-position: fixed;
-    top: 60px;
+  position: absolute;
+    top: 0px;
     height: 40px;
     left: 10px;
     right: 10px;
@@ -312,7 +340,6 @@ position: fixed;
     /*border-top: 1px solid #ccc;*/
 
 }
-
 
 .header-menu > ul{
   padding: 0 20px 0 10px;
@@ -416,9 +443,9 @@ position: fixed;
   
 */
 #perspective{
-  position: fixed;
+  position: absolute;
   width: 470px;
-  top:  100px;
+  top:  40px;
   left: 10px;
   bottom: 50px;
   /*overflow: hidden;*/
@@ -427,10 +454,10 @@ position: fixed;
   overflow-x: hidden;
   /*background: white;*/
   border-right: 1px solid #E8E8E7;
-  -webkit-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1), width .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
-     -moz-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1), width .3s cubic-bezier(0.65, 0.05, 0.36, 1);
-       -o-transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1), width .3s cubic-bezier(0.65, 0.05, 0.36, 1);
-          transition: bottom .3s cubic-bezier(0.65, 0.05, 0.36, 1), width .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+  -webkit-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1), width .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
+     -moz-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1), width .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+       -o-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1), width .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+          transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1), width .3s cubic-bezier(0.65, 0.05, 0.36, 1);
 }
 
 .search #perspective{
@@ -510,8 +537,9 @@ position: fixed;
 }
 
 #perspective.active{
-  bottom: 130px;
+  /*bottom: 130px;*/
   /*padding-bottom: 80px;*/
+  /*transform: translateX(200px);*/
 }
 
 #perspective-actions{
@@ -557,8 +585,12 @@ position: fixed;
 */
 
 #see-also{
+  position:absolute;
+  right: 10px;
+  top: 40px;
+  bottom: 0px;
   width: 350px;
-  margin-left: 480px;
+  /*margin-left: 480px;*/
   overflow: auto;
   overflow-y: auto;
   overflow-x: hidden;
@@ -619,8 +651,8 @@ position: fixed;
 }
 
 .neighbors #see-also{
-  /*margin-left: 25%;*/
-  margin-left: 10px;
+  left: 0px;
+  right: auto;
 }
 
 .search #see-also{
@@ -1007,10 +1039,10 @@ position: fixed;
   bottom: 70px;
   background: #e8e8e8;
   display:none;
-  /*-webkit-transition: left .3s cubic-bezier(0.65, 0.05, 0.36, 1);
-     -moz-transition: left .3s cubic-bezier(0.65, 0.05, 0.36, 1);
-       -o-transition: left .3s cubic-bezier(0.65, 0.05, 0.36, 1);
-          transition: left .3s cubic-bezier(0.65, 0.05, 0.36, 1);*/
+  -webkit-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+     -moz-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+       -o-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+          transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
 }
 
 #milkyway.viewpoint-network {
@@ -1018,7 +1050,8 @@ position: fixed;
 }
 
 #milkyway.active{
-  bottom: 150px;
+  /*bottom: 150px;*/
+  transform: translateX(200px)
 }
 
 #milkyway.AllShortestPathsCtrl, #milkyway.NeighborsCtrl, #milkyway.SearchCtrl{
@@ -1229,6 +1262,34 @@ height: 150px;
   overflow: hidden;
 }
 
+#sigma-snippets > .snip {
+  background: #949494;
+  width: 50px;
+  height: 50px;
+  border-radius: 50px;
+  position:absolute;
+  left: 10px;
+  top: 10px;
+  border: 3px solid #f6941c;
+  pointer-events: auto;
+  background-size: cover;
+  background-color: black;
+  background-repeat:no-repeat;
+  background-position:center;
+  border-radius: 50px;
+  cursor: pointer;
+  transform: translateX(0px);
+  -webkit-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
+     -moz-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+       -o-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+          transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+}
+
+#sigma-snippets > .snip.person {
+  border: 3px solid #4dc3ba; 
+}
+
+
 #sigma-snippets > .inner {
  
   width: 100%;
@@ -1246,11 +1307,24 @@ height: 150px;
           transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
 }
 
+#sigma-snippets > .inner.wait{
+  -webkit-transition-delay: .3s; /* Safari */
+    transition-delay: .3s;
+}
+
 #sigma-snippets > .inner.loading, #sigma-snippets > .inner.enabled {
   transform: translateX(0px);
-  
-  /*box-shadow: 0px 0px 8px #ccc;*/
+  -webkit-transition-delay: 0s; /* Safari */
+    transition-delay: 0s;
+}
 
+#sigma-snippets > .snip.loading, #sigma-snippets > .snip.targeting, #sigma-snippets > .snip.enabled {
+  transform: translateX(-150px);
+}
+
+#sigma-snippets > .snip.disabled {
+  -webkit-transition-delay: .3s; /* Safari */
+    transition-delay: .3s;
 }
 
 #sigma-snippets .nodes {
@@ -1732,7 +1806,45 @@ li.CodeMirror-hint-active {
   ~~~~~~~~~~~~~~~~~~~~~~~~
   
 */
-#playlist { 
+
+#playlist{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 200px;
+  z-index: 0;
+  height: 100%;
+  background:#191c1d;
+  -webkit-transform: translateX(-200px); /* Safari */
+      -ms-transform: translateX(-200px); /* IE 9 */
+          transform: translateX(-200px);
+  -webkit-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
+     -moz-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+       -o-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+          transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+}
+
+#playlist.active{
+  -webkit-transform: translateX(0px); /* Safari */
+      -ms-transform: translateX(0px); /* IE 9 */
+          transform: translateX(0px);
+}
+
+#playlist-queue{
+  position: absolute;
+  top: 100px;
+  bottom: 200px;
+  left: 0;
+    /* background: #151515; */
+    /* border-top: 1px solid rgba(255,255,255,0.03); */
+  color: #f5f5f5;
+    overflow-y: hidden;
+    overflow: hidden;
+  color: #f5f5f5;
+}
+
+
+#dep-playlist { 
   position: fixed;
   bottom: -80px;
   left: 0;
@@ -1747,21 +1859,21 @@ li.CodeMirror-hint-active {
   
 }
 
-#playlist.active{
+#dep-playlist.active{
   -webkit-transform: translateY(-80px); /* Safari */
       -ms-transform: translateY(-80px); /* IE 9 */
           transform: translateY(-80px);
     
 }
 
-#playlist.sleep{
+#dep-playlist.sleep{
   -webkit-transform: translateY(-5px); /* Safari */
       -ms-transform: translateY(-5px); /* IE 9 */
           transform: translateY(-5px);
    
 }
 
-#playlist-resume{
+#dep-playlist-resume{
   position: fixed;
   bottom: -150px;
   width: 50px;
@@ -1781,11 +1893,11 @@ li.CodeMirror-hint-active {
   
 }
 
-#playlist-resume:hover{
+#dep-playlist-resume:hover{
   background-color: #FF5742;
 }
 
-#playlist-resume span{
+#dep-playlist-resume span{
   line-height: 50px;
   -webkit-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
      -moz-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
@@ -1793,22 +1905,22 @@ li.CodeMirror-hint-active {
           transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
 }
 
-#playlist-resume.active {
+#dep-playlist-resume.active {
   color: #f5f5f5;
   bottom: 15px;
 }
 
-#playlist-resume.sleep {
+#dep-playlist-resume.sleep {
   bottom: 5px;
 }
 
-#playlist-resume.sleep span{
+#dep-playlist-resume.sleep span{
   -webkit-transform:rotate(180deg);
   -ms-transform:rotate(180deg); /* IE 9 */
           transform:  rotate(180deg);
 }
 
-#playlist-actions{
+#dep-playlist-actions{
   position: absolute;
   left: 70px;
   bottom: 0;
@@ -1819,13 +1931,13 @@ li.CodeMirror-hint-active {
   padding: 15px 5px;
 }
 
-#playlist-actions .btn{
+#dep-playlist-actions .btn{
   height: 50px;
   line-height: 37px;
   width: 50px;
 }
 
-#playlist-queue{
+#dep-playlist-queue{
   position:absolute;
   right: 20px;
   bottom: 0px;
@@ -1836,7 +1948,7 @@ li.CodeMirror-hint-active {
   color: #f5f5f5;
 }
 
-#playlist-queue-rail {
+#dep-playlist-queue-rail {
   position: absolute;
   width: 100%;
   height: 100%;
@@ -1846,7 +1958,7 @@ li.CodeMirror-hint-active {
   white-space: nowrap;
 }
 
-#playlist-wrapper{
+#dep-playlist-wrapper{
   position: absolute;
 }
 
@@ -5313,9 +5425,9 @@ Copyright (c) 2015 Daniel Eden
 }
 */
 #timeline.active{
-  -webkit-transform: translateY(-80px); /* Safari */
-      -ms-transform: translateY(-80px); /* IE 9 */
-          transform: translateY(-80px);
+  -webkit-transform: translateX(200px); /* Safari */
+      -ms-transform: translateX(200px); /* IE 9 */
+          transform: translateX(200px);
     
 }
 #timeline svg{

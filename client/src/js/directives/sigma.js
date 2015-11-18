@@ -17,7 +17,7 @@ angular.module('histograph')
         '<div id="playground"></div>' +
         // '<div gmasp target="target"></div>' +
         //'<div id="tips" ng-if="tips.length > 0"><div>{{tips}}</div></div>' +
-        '<div snippets id="sigma-snippets" target="target"></div>' +
+        '<div snippets id="sigma-snippets" target="target" center="center"></div>' +
         '<div id="sigma-messenger" ng-if="message.text.length" class="animated {{message.visible? \'fadeIn\': \'fadeOut\'}}"><div class="inner">{{message.text}}</div></div>' +
         '<div id="commands" class="{{lookup?\'lookup\':\'\'}}">' +
           '<div tooltip="view all nodes" tooltip-append-to-body="true" class="action {{lookup? \'bounceIn animated\': \'hidden\'}}" ng-click="toggleLookup()"><i class="fa fa-eye"></i></div>' +
@@ -287,12 +287,14 @@ angular.module('histograph')
         
         scope.$on(EVENTS.SIGMA_SET_ITEM, function (e, item) {
           $log.log('::sigma @EVENTS.SIGMA_SET_ITEM', item);
+          scope.center = item;
           scope.target = {
             type: 'node',
             data: {
               node: item
             }
           };
+          
         });
         
         /*
@@ -307,6 +309,7 @@ angular.module('histograph')
           // clean graph if there are no nodes, then exit
           if(!graph || !graph.nodes || !graph.nodes.length) {
             $log.log('::sigma @graph empty, clear...');
+            scope.setMessage({message: 'there are no connected elements'});
             si.graph.clear();
             si.refresh();
             return;
@@ -541,6 +544,7 @@ angular.module('histograph')
           // clear dummy tooltip
           outEdge();
           outNode();
+
         })
         
         /*
@@ -621,20 +625,22 @@ angular.module('histograph')
         */
         function toggleLookup(options) {
           $log.debug('::sigma -> toggleLookup()')
+          
+          scope.lookup = false;
+          scope.target = false;
+          tooltip.node = false;
+          
+          if(options && options.update)
+            scope.$apply();
           si.graph.nodes().forEach(function (n) {
             n.discard = false;
           });
           si.graph.edges().forEach(function (e) {
             e.discard = false
           });
-          scope.lookup = false;
-          scope.target = false;
-          tooltip.node = false;
           // refresh the view
           // rescale()
           si.refresh();
-          if(options && options.update)
-            scope.$apply();
         }
         /*
           sigma play

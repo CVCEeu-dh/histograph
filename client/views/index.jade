@@ -99,7 +99,7 @@ html
     div(ng-controller='CoreCtrl') 
       div(ng-controller='FiltersCtrl')
         if user.username
-          header 
+          header(class='{{queueStatus}}') 
             a(id='header-logo', href='#/')
               img(src='images/hg_v.png')
              
@@ -110,6 +110,11 @@ html
                   span histograph
 
                 ul.menu
+                  li
+                    a(ng-click='toggleQueue()', uib-tooltip='open bookmark list', tooltip-placement='bottom')
+                      i.fa.fa-bookmark-o
+                      div.number.animated {{playlist.length}}
+
                   li(class='{{currentState.name == "explore.resources"?"active":""}}')
                     a(href='#/') documents
 
@@ -179,14 +184,22 @@ html
           div(id='the-annotator-wrapper')
             div(id='the-annotator')
             
-          div(id='playlist-resume', ng-class='queueStatus' tooltip-append-to-body='true', tooltip='toggle read queue' ng-click='toggleQueue()')
+          //- div(id='playlist-resume', ng-class='queueStatus' tooltip-append-to-body='true', tooltip='toggle read queue' ng-click='toggleQueue()')
             span(class="fa fa-angle-up")
-                
+          
+          div.mouse.tooltip.sigma(id='tooltip-sigma')
+            div.tooltip-wrapper
+              div.tooltip-inner
+          
+          div.mouse.tooltip.sigma(id='tooltip-sigma-edge')
+            div.tooltip-wrapper
+              div.tooltip-inner
+
           div(id='playlist', ng-class='queueStatus')
             
             div(ng-if='playlist.length == 0') ... select some element to start playlist ...
-            div(id='playlist-queue')
-              div(id='playlist-queue-rail',perfect-scrollbar, use-both-wheel-axes='true',wheel-propagation="true", refresh-on-change="playlist", suppress-scroll-y="true", wheel-speed="20")
+            div(id='playlist-queue', perfect-scrollbar, use-both-wheel-axes='false', suppress-scroll-x="true", wheel-propagation="true", refresh-on-change="playlist",)
+              div(id='playlist-queue-rail')
                 div(class='playlist-item', ng-repeat='item in playlist')
                   div(class='playlist-item-wrapper')
                     div(class='pic', ng-if='item.type == "person"')
@@ -215,13 +228,7 @@ html
       div(id="messenger", class="tk-proxima-nova {{messaging? 'active': ''}}")
         div.inner {{ message }}
       
-      div.mouse.tooltip.sigma(id='tooltip-sigma')
-        div.tooltip-wrapper
-          div.tooltip-inner
       
-      div.mouse.tooltip.sigma(id='tooltip-sigma-edge')
-        div.tooltip-wrapper
-          div.tooltip-inner
         
       each val in scripts
         script(src=val)
