@@ -61,3 +61,14 @@ MERGE (p1)-[r:appear_in_same_document]-(p2)
     r.jaccard  = jaccard,
     r.intersections  = intersection,
     r.union    = union
+
+
+
+// name: get_clones
+// get copuples of person having same specificity, sorted by jaccard and union
+MATCH (p1)-[r:appear_in_same_document]-(p2)
+WHERE id(p1) < id(p2) AND r.union > 2 AND r.intersections > 2 AND p2.specificity = p1.specificity
+WITH p1, p2, r
+RETURN p1.name, p2.name, p1.specificity, p2.specificity, r.jaccard, r.union, r.intersections
+ORDER BY r.jaccard DESC, r.union DESC
+LIMIT 500
