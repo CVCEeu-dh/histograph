@@ -277,8 +277,23 @@ LIMIT {limit}
 
 // name: get_related_entities_graph
 // monopartite graph of entities
-MATCH (n)-[r]-(t:resource)
- WHERE id(n) = {id}
+MATCH (n)-[r]-(t:resource){if:with}<-[:appears_in]-(ent2){/if}
+  WHERE id(n) = {id}
+  {if:with}
+    AND id(ent2) in {with}
+  {/if}
+  {if:start_time}
+    AND t.start_time >= {start_time}
+  {/if}
+  {if:end_time}
+    AND t.end_time <= {end_time}
+  {/if}
+  {if:mimetype}
+    AND t.mimetype in {mimetype}
+  {/if}
+  {if:type}
+    AND t.type in {type}
+  {/if}
 WITH t
  MATCH (p1:{:entity})-[:appears_in]-(t)-[:appears_in]-(p2:{:entity})
  WHERE p1.score > -1 AND p2.score > -1
