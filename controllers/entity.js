@@ -203,12 +203,7 @@ module.exports = function(io){
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       
-      entity.getRelatedEntitiesGraph({
-        id: form.params.id,
-        entity: form.params.entity,
-        limit: form.params.limit,
-        offset: form.params.offset
-      }, function (err, graph) {
+      entity.getRelatedEntitiesGraph(form.params, function (err, graph) {
         return res.ok({
           graph: graph
         }, {
