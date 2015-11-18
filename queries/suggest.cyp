@@ -401,7 +401,15 @@ LIMIT {limit}
 
 // name: count_shared_resources
 // an overview of how many resources are between two entities (one step), according to filters
-MATCH p=(n:entity)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(t:entity)
+{if:with}
+  MATCH (res:resource)<-[r0:appears_in]-(ent)
+    WHERE id(ent) in {with}
+  WITH distinct res
+  MATCH p=(n:entity)-[r1:appears_in]->(res)<-[r2:appears_in]-(t:entity)
+{/if}
+{unless:with}
+  MATCH p=(n:entity)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(t:entity)
+{/unless}
   WHERE id(n) in {ids}
     AND id(t) in {ids}
     AND id(n) < id(t)
@@ -416,7 +424,7 @@ MATCH p=(n:entity)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(t:entity)
     {/if}
     {if:type}
       AND res.type in {type}
-    {/if}
+    {/if}  
 RETURN {
   group: {if:group}res.{:group}{/if}{unless:group}res.type{/unless}, 
   count_items: count(res)
@@ -425,7 +433,15 @@ RETURN {
 
 // name: get_shared_resources
 // an overview of first n resources in between two entities
-MATCH p=(n:entity)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(t:entity)
+{if:with}
+  MATCH (res:resource)<-[r:appears_in]-(ent)
+    WHERE id(ent) in {with}
+  WITH distinct res
+  MATCH p=(n:entity)-[r1:appears_in]->(res)<-[r2:appears_in]-(t:entity)
+{/if}
+{unless:with}
+  MATCH p=(n:entity)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(t:entity)
+{/unless}
   WHERE id(n) in {ids}
     AND id(t) in {ids}
     AND id(n) < id(t)
@@ -441,6 +457,7 @@ MATCH p=(n:entity)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(t:entity)
     {if:type}
       AND res.type in {type}
     {/if}
+    
 WITH res, r1, r2
 ORDER BY r1.tfidf DESC, r2.tfidf DESC
 SKIP {offset}
