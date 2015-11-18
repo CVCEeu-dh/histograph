@@ -19,7 +19,7 @@ MATCH (e)-[r3:appears_in]->(res:resource)
     SET
       r3.tfidf = r3.tf * log(num_of_docs/num_of_docs_per_ent),
       e.df = num_of_docs_per_ent,
-      e.specificity = num_of_docs_per_ent/num_of_docs
+      e.specificity = toFloat(num_of_docs_per_ent)/toFloat(num_of_docs)
 
 
 // name: computate_cosine_similarity
@@ -45,14 +45,19 @@ WHERE id(p1) < id(p2)
 // WITH r1, r2, p1, p2, count(*) as intersection
 WITH p1, p2, count(*) as intersection
 
-MATCH (p1)-[rel:appears_in]->(r1:resource)
-WITH p1,p2, intersection, count(rel) as H1
-MATCH (p2)-[rel:appears_in]->(r1:resource)
-WITH p1,p2, intersection, H1, count(rel) as H2
-WITH p1, p2, intersection, H1+H2 as union
-WITH p1, p2, intersection, union, toFloat(intersection)/toFloat(union) as JACCARD
+MATCH (p1)-[rel:appears_in]->(res1:resource)
+WITH p1,p2, intersection, collect(res1) as H1
+
+MATCH (p2)-[rel:appears_in]->(res2:resource)
+WITH p1,p2, intersection, H1, collect(res2) as H2
+
+WITH p1, p2, intersection, H1+H2 as U UNWIND U as res
+WITH p1, p2, intersection, count(distinct res) as union
+WITH p1, p2, intersection, union, toFloat(intersection)/toFloat(union) as jaccard
+
+
 MERGE (p1)-[r:appear_in_same_document]-(p2)
   SET
-    r.jaccard = JACCARD,
+    r.jaccard  = jaccard,
     r.intersections  = intersection,
-    r.union  = union
+    r.union    = union
