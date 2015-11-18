@@ -142,6 +142,14 @@ module.exports = {
       error: 'id not valid'
     },
     {
+      field: 'center',
+      check: 'isInt',
+      args: [
+        0
+      ],
+      error: 'center should be a valid integer id'
+    },
+    {
       field: 'ids',
       check: 'matches',
       args: [
