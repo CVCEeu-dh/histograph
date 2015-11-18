@@ -656,7 +656,7 @@ a#header-title {
 }
 
 .search #see-also{
-  margin-left: 200px;
+  left: 200px;
 }
 
 .viewpoint-read #see-also-menu {
@@ -1824,6 +1824,16 @@ li.CodeMirror-hint-active {
           transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
 }
 
+#playlist-close{
+  position: absolute;
+  color: #DEDEDE;
+  right: 10px;
+  top: 10px;
+  width: 30px;
+  height: 30px;
+  cursor:pointer;
+  text-align: right;
+}
 #playlist.active{
   -webkit-transform: translateX(0px); /* Safari */
       -ms-transform: translateX(0px); /* IE 9 */

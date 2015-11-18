@@ -196,9 +196,10 @@ html
               div.tooltip-inner
 
           div(id='playlist', ng-class='queueStatus')
-            
+            div#playlist-close(ng-click='closeQueue()')
+              i.fa.fa-close
             div(ng-if='playlist.length == 0') ... select some element to start playlist ...
-            div(id='playlist-queue', perfect-scrollbar, use-both-wheel-axes='false', suppress-scroll-x="true", wheel-propagation="true", refresh-on-change="playlist",)
+            div#playlist-queue(perfect-scrollbar, use-both-wheel-axes='false', suppress-scroll-x="true", wheel-propagation="true", refresh-on-change="playlist",)
               div(id='playlist-queue-rail')
                 div(class='playlist-item', ng-repeat='item in playlist')
                   div(class='playlist-item-wrapper')
