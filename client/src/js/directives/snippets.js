@@ -15,7 +15,8 @@ angular.module('histograph')
       restrict : 'A',
       templateUrl: 'templates/partials/helpers/snippet.html',
       scope:{
-        target: '='
+        target: '=',
+        center: '='
       },
       link: function(scope, elem){
         $log.log('::snippets ------------');
@@ -143,14 +144,14 @@ angular.module('histograph')
         */
         scope.hide = function() {
           $log.log('::snippets -> hide()');
-          scope.status = 'loading';
+          scope.status = 'disabled';
           scope.itemsIds = [];
-          __fadeOutTimer = setTimeout(function(){
-            scope.items = [];
-            scope.sharedItems = [];
-            scope.status = 'disabled';
-            scope.$apply();
-          }, 400);
+          // __fadeOutTimer = setTimeout(function(){
+          //   scope.items = [];
+          //   scope.sharedItems = [];
+          //   scope.status = 'disabled';
+          //   scope.$apply();
+          // }, 400);
         };
 
         /*

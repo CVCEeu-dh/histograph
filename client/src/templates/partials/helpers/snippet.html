@@ -1,13 +1,11 @@
 <div class="inner {{status}}">
   
   <div class='nodes'>
-    <div ng-if='items.length > 1' class="line animated {{status=='loading'?'fadeOut':'fadeIn'}}" style="-webkit-animation-delay: 250ms;
-        animation-delay: 250ms">
+    <div ng-if='items.length > 1' class="line">
         <div class='weight'>{{totalItems}}</div>
     </div>
     
-    <div ng-repeat='relatedItem in items' class="animated {{status=='loading'?'fadeOut':'fadeIn'}}" style="-webkit-animation-delay: {{$index * 100}}ms;
-        animation-delay: {{$index * 100}}ms">
+    <div ng-repeat='relatedItem in items'>
       <!-- person node -->
       <div ng-if='relatedItem.type=="person"' class='node person' data-id="{{relatedItem.id}}">
         <div class='thumbnail'>
@@ -78,8 +76,7 @@
   </div>
   <!-- edges is full of sharedItems  -->
   <div ng-if="sharedItems.length" class='edges' >
-    <div ng-repeat='relatedItem in sharedItems' class="animated {{status=='loading'?'fadeOut':'fadeIn'}}" style="-webkit-animation-delay: {{$index * 100}}ms;
-        animation-delay: {{$index * 100}}ms">
+    <div ng-repeat='relatedItem in sharedItems'>
       <div ng-if='relatedItem.type=="resource"' ng-include='"templates/partials/resource-lite.html"'></div>
       <div ng-if='relatedItem.type!="resource"' ng-include='"templates/partials/entity-lite.html"'></div>
     </div>
