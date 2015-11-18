@@ -66,11 +66,9 @@
             <button ng-if='isFavItem' class="btn btn-default action" ng-click='unfavourite()' tooltip="this resource belongs to your favourite collection">
               <i class="fa fa-heart animated pulse"></i> {{item.curators.length}}
             </button>
-            <button class="btn btn-default action" data-id='{{item.id}}' uib-tooltip="view on graph">
-              <i class="fa fa-eye"></i>
-            </button>
+            
             <button class="btn btn-default action" tooltip="add to bookmark list" ng-click="queue(item.id, true)">
-              <i class="fa fa-play-circle-o"></i>
+              <i class="fa fa-bookmark-o"></i>
             </button>
           </div>
         </div>
