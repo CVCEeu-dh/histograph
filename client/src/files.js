@@ -48,6 +48,8 @@ module.exports = {
 
       //-   '/js/lib/angular-strap.min.js',
       //-   '/js/lib/angular-strap.tpl.min.js',
+      // '/js/lib/ui-bootstrap-tpls.min.js',
+      '/js/lib/ui-bootstrap.min.js',
       '/js/lib/ui-bootstrap-tpls.min.js',
       '/js/lib/angular-perfect-scrollbar.js',
 

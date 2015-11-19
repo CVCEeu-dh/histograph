@@ -164,6 +164,13 @@ angular.module('histograph')
   */
   .factory('SuggestFactory', function ($resource) {
     return $resource('/api/suggest/:m/:ids/:model', {}, {
+      getVIAF: {
+        method: 'GET',
+        params: {
+          m: 'viaf',
+          model:''
+        }
+      },
       getUnknownNodes: {
         method: 'GET',
         params: {

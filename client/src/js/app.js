@@ -126,7 +126,7 @@ angular
       placement: 'top',
       animation: true,
       popupDelay: 0,
-      popupCloseDelay: 500,
+      popupCloseDelay: 50,
       appendToBody: true
     })
   })

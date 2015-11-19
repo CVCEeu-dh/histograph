@@ -8,7 +8,7 @@
  */
 angular.module('histograph')
   
-  .controller('CoreCtrl', function ($scope, $rootScope, $location, $state, $timeout, $route, $log, $timeout, $http, $routeParams, $modal, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, localStorageService, EVENTS, VIZ, MESSAGES, ORDER_BY) {
+  .controller('CoreCtrl', function ($scope, $rootScope, $location, $state, $timeout, $route, $log, $timeout, $http, $routeParams, $modal, $uibModal, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, localStorageService, EVENTS, VIZ, MESSAGES, ORDER_BY) {
     $log.debug('CoreCtrl ready');
     $scope.locationPath = $location.path();
     $scope.locationJson  = JSON.stringify($location.search()); 
@@ -672,14 +672,56 @@ angular.module('histograph')
       $scope.queueRedirect();
     };
     
-    
-    
+    /*
+      Inpect
+      ---
+      Open the inspector issue modal
+      and load the desired items.
+
+    */
+    $scope.inspect = function(items) {
+      if(typeof items != 'object')
+        items = [items];
+
+      $log.log('CoreCtrl -> inspect() - item:', items);
+      var language = $scope.language;
+
+      var modalInstance = $uibModal.open({
+        animation: true,
+        templateUrl: 'templates/modals/inspect.html',
+        controller: 'InspectModalCtrl',
+        windowClass: "modal fade in",
+        resolve: {
+          items: function(SuggestFactory) {
+            return SuggestFactory.getUnknownNodes({ids: items}).$promise
+          },
+          relatedModel: function() {
+            return 'resource'
+          },
+          relatedFactory: function(EntityRelatedFactory) {
+            return EntityRelatedFactory
+          },
+          language: function() {
+            return language
+          }
+        }
+        // resolve: {
+        //   items: function () {
+        //     return $scope.items;
+        //   }
+        // }
+      });
+    };
+
+    // $scope.inspect([26414])//27329]);
     /*
       Open an issue modal
     */
     $scope.openIssueModal = function (type, target) {
       $scope.freeze = 'sigma';
       $log.log('CoreCtrl -> openIssueModal - type:', type, 'target_id', target.id)
+      
+
       var modalInstance = $modal.open({
         animation: false,
         templateUrl: 'templates/partials/comment-modal.html',
@@ -695,6 +737,7 @@ angular.module('histograph')
           target: function(){
             return target;
           },
+          
           items: function() {
             return ResourceRelatedFactory.get({
               id: target.id,
@@ -720,6 +763,67 @@ angular.module('histograph')
       $scope.isAnnotating = false;
     })
     
+  })
+  /*
+    Inspect an entity.
+    Items are entity items
+  */
+  .controller('InspectModalCtrl', function ($scope, $log, $uibModalInstance, items, relatedFactory, relatedModel, SuggestFactory, language) {
+    $scope.mergeMode = items.length > 1;
+    $scope.items = items.result.items;
+    $scope.limit = 1;
+    $scope.offset = 0;
+    $scope.modalStatus = 'quiet';
+    $scope.language = language;
+
+    $scope.ok = function () {
+      $uibModalInstance.close();
+    };
+
+    $scope.cancel = function () {
+      $uibModalInstance.dismiss('cancel');
+    };
+
+    $scope.next = function() {
+      $scope.offset = Math.min($scope.totalItems -1, $scope.offset + 1);
+      $scope.sync();
+    };
+
+    $scope.previous = function() {
+      $scope.offset = Math.max($scope.offset -1, 0);
+      $scope.sync();
+    };
+
+    $scope.sync = function(){
+      $scope.modalStatus = 'loading';
+      if($scope.items.length == 1) {
+        relatedFactory.get({
+          id: $scope.items[0].id,
+          model: relatedModel,
+          limit: $scope.limit,
+          offset: $scope.offset
+        }, function (res) {
+          $scope.relatedItems = res.result.items;
+          $scope.totalItems = res.info.total_items;
+        });
+      }
+    };
+
+    $scope.sync();
+
+    // if the item has not viaf_id or wiki_id IDENTIFIER attached, propose a set of probable entities. The user will then choose.
+    for(var i=0, l=$scope.items.length; i < l; i++)
+      if(_.isEmpty($scope.items[i].props.links_viaf) || _.isEmpty($scope.items[i].props.links_wiki)){
+        $scope.chooseVIAF = true;
+        SuggestFactory.getVIAF({
+          query: $scope.items[i].props.name
+        }, function(res) {
+          $scope.items[i].viafItems = _.map(_.values(_.groupBy(res.result.items, 'viafid')), function(d){
+            return _.first(d)
+          });
+        })
+        break; // only the first item
+      }
   })
   /*
     This controller handle the modal bootstrap that allow users to propose a new content for something.

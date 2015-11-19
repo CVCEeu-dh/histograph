@@ -1782,13 +1782,18 @@ li.CodeMirror-hint-active {
   font-size: 15px;
   display: inline-block;
   text-align: center;
-  color: #f0f0f0;
+  cursor: pointer;
+  color: #A9A2A2;
+    -webkit-transition: color .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
+     -moz-transition: color .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+       -o-transition: color .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+          transition: color .3s cubic-bezier(0.65, 0.05, 0.36, 1);
 }
 
 #pop .action:hover{
   color: white;
   border: 0px transparent;
-  background: rgba(234,53,48, .7);
+  /*background: rgba(234,53,48, .7);*/
 }
 
 #pop .action span{
@@ -5542,16 +5547,27 @@ Copyright (c) 2015 Daniel Eden
 /*
   bootstrap: modal;
 */
+.modal-dialog{
+  height: 100%;
+  margin: 0 auto;
+}
+
 .modal-backdrop{
-  background-color: #f0f0f0;
+  background-color: #151515;
 }
 
 .modal-content{
+  position:absolute;
+  width: 100%;
+  top:100px;
+  bottom: 100px;
+
   background-color: white;
-  border: 1px solid #E8E8E7;
+  border: 1px solid #383838;
   background-clip: padding-box;
   border-radius: 2px;
   box-shadow: none;
+  box-shadow: 0 0 6px #686868;
 }
 
 .modal-content form {
@@ -5572,6 +5588,157 @@ Copyright (c) 2015 Daniel Eden
   height: 100%;
 }
 
+/*
+  bootstrap: modal;
+  Inspector component
+*/
+.modal-content .nodes {
+  position: absolute;
+    background-color: #383838;
+    left: 0px;
+    top: 0;
+    bottom: 0;
+    width: 320px;
+}
+
+.modal-content .nodes .node h4 a {
+  color: #DEDEDE;
+  border-bottom: 1px solid;
+  display: inline-block;
+  -webkit-transition: color .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
+     -moz-transition: color .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+       -o-transition: color .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+          transition: color .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+}
+
+.modal-content .nodes .node h4 a:hover{
+  color: white;
+}
+
+.modal-content .node .thumbnail {
+  width: 50px;
+  height: 50px;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: transparent;
+  border:0px transparent;
+  margin:0;
+  padding: 0;
+}
+
+.modal-content .node .thumbnail-wrapper {
+  width: 50px;
+  height: 50px;
+  background-size:cover;
+  background-color: black;
+  background-repeat:no-repeat;
+  background-position:center;
+  border-radius: 50px;
+  border: 3px solid #4dc3ba;
+}
+
+.modal-content .node.resource .thumbnail-wrapper{
+  border: 3px solid #f6941c;
+}
+
+.modal-content  .node .content {
+  margin-left: 50px;
+  height: 70px;
+}
+
+.modal-content .node .detail {
+  position: absolute;
+  width: 100%;
+  top:70px;
+  left:0;
+  bottom: 0;
+  overflow: auto;
+}
+
+.modal-content  .node .detail blockquote{
+  font-family: inherit;
+  margin: 0;
+  background: transparent;
+  color: #D3CFCF;
+}
+
+.modal-content  .node .detail .meta{
+  margin: 0 15px;
+  color: #D3CFCF;
+}
+
+.modal-content .node .content .date{
+  text-align: left;
+  margin: 0 10px 0 20px;
+  color: #A9A2A2;
+}
+
+.modal-content  h4{
+  text-align: left;
+  margin: 0 20px;
+  font-weight: bold;
+  color: white;
+  padding-top: 12px;
+}
+
+.modal-content  h4 p{
+  margin: 0;
+  padding: 0;
+}
+
+.modal-content .viaf{
+  margin: 0 15px;
+  color: #A9A2A2;
+}
+
+.modal-content .viaf table{
+  
+  border-radius: 2px;
+}
+
+.modal-content .viaf .question{
+  margin-bottom: 10px;
+  color: #A9A2A2;
+}
+
+.modal-content .viaf .question b{
+  color: white;
+}
+
+.modal-content .viaf .viaf-item {
+  background: #2E2E2E
+}
+
+.modal-content .viaf .viaf-item td{
+      border-top: 0px transparent;
+}
+
+.modal-content .viaf .tag{
+  padding: 0 5px;
+  border-radius: 2px;
+  margin-left: 2px;
+  display: inline-block;
+  background: #4D4D4D;
+  color: #A9A2A2;
+}
+
+.modal-content .viaf .tag:hover{
+  border: 0px transparent;
+}
+
+.modal-content .modal-header.with-sidebar{
+  margin-left: 320px;
+}
+
+.modal-content .modal-body.with-sidebar{
+      overflow-y: auto;
+    position: absolute;
+    top: 52px;
+    bottom: 0;
+    left:320px;
+    right: 0;
+}
 
 
 
@@ -5746,5 +5913,11 @@ font-size:12px;
 
   .resource #perspective, .entity #perspective{
     right: 300px;
+  }
+}
+
+@media screen and (min-width: 768px) {
+  .modal-dialog {
+    width: 700px;
   }
 }

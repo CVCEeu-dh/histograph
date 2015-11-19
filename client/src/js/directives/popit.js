@@ -22,7 +22,8 @@ angular.module('histograph')
         comment: '&comment',
         redirect: '&',
         queue : '&',
-        filter: '&'
+        filter: '&',
+        inspect: '&'
       },
       templateUrl: 'templates/partials/helpers/popit.html',
       link : function(scope, element, attrs) {
@@ -156,6 +157,19 @@ angular.module('histograph')
             hide();
           } else
             $log.error('cannot queue the give item, id is', id);
+        })
+        
+        /*
+          listeners for click event
+        */
+        _gasp.find('[data-action=inspect]').click(function() {
+          if(id) {
+            scope.inspect({
+              item: id
+            });
+            scope.$apply();
+          } else
+            $log.error(':: gasper cannot inspect the give item, id is', id);
         })
         
         
