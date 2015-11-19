@@ -51,17 +51,17 @@ WITH p1,p2, intersection, collect(res1) as H1
 MATCH (p2)-[rel:appears_in]->(res2:resource)
 WITH p1,p2, intersection, H1, collect(res2) as H2
 
-WITH p1, p2, intersection, [length(H1)-intersection, length(H2)-intersection] as complements, H1+H2 as U UNWIND U as res
-WITH p1, p2, intersection, complements, count(distinct res) as union
-WITH p1, p2, intersection,  union, toFloat(intersection)/toFloat(union) as jaccard, complements
-WITH p1, p2, intersection,  union, jaccard, complements
+WITH p1, p2, intersection, ABS(length(H1)-intersection - length(H2)-intersection) as cdiff, H1+H2 as U UNWIND U as res
+WITH p1, p2, intersection, cdiff, count(distinct res) as union
+WITH p1, p2, intersection,  union, toFloat(intersection)/toFloat(union) as jaccard, cdiff
+WITH p1, p2, intersection,  union, jaccard, toFloat(cdiff)/toFloat(union) as overlapping
 
 MERGE (p1)-[r:appear_in_same_document]-(p2)
   SET
-    r.jaccard  = jaccard,
+    r.jaccard     = jaccard,
     r.intersections  = intersection,
-    r.union    = union,
-    r.complements = complements
+    r.union       = union,
+    r.overlapping = overlapping
 
 
 
