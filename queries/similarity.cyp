@@ -51,16 +51,17 @@ WITH p1,p2, intersection, collect(res1) as H1
 MATCH (p2)-[rel:appears_in]->(res2:resource)
 WITH p1,p2, intersection, H1, collect(res2) as H2
 
-WITH p1, p2, intersection, H1+H2 as U UNWIND U as res
-WITH p1, p2, intersection, count(distinct res) as union
-WITH p1, p2, intersection, union, toFloat(intersection)/toFloat(union) as jaccard
-
+WITH p1, p2, intersection, [length(H1)-intersection, length(H2)-intersection] as complements, H1+H2 as U UNWIND U as res
+WITH p1, p2, intersection, complements, count(distinct res) as union
+WITH p1, p2, intersection,  union, toFloat(intersection)/toFloat(union) as jaccard, complements
+WITH p1, p2, intersection,  union, jaccard, complements
 
 MERGE (p1)-[r:appear_in_same_document]-(p2)
   SET
     r.jaccard  = jaccard,
     r.intersections  = intersection,
-    r.union    = union
+    r.union    = union,
+    r.complements = complements
 
 
 
@@ -72,3 +73,11 @@ WITH p1, p2, r
 RETURN p1.name, p2.name, p1.specificity, p2.specificity, r.jaccard, r.union, r.intersections
 ORDER BY r.jaccard DESC, r.union DESC
 LIMIT 500
+
+// name: get_top_similar_entity
+MATCH (p1)-[r:appear_in_same_document]-(p2)
+WHERE id(p1) = {id}
+WITH p1, p2, r
+RETURN p1.name, p2.name, p2.wiki_id, p1.specificity, p2.specificity, r.jaccard, r.union, r.intersections, r.difference
+ORDER BY r.jaccard DESC, r.union DESC
+LIMIT 1
