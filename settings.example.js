@@ -6,7 +6,8 @@
 module.exports = {
   baseurl: 'http://localhost:8000', // the remote address used to handle OAuth2 callbacks, without TRAILING slashes
   port: 8000,
-  
+  env: 'development', // production | development
+
   secret: {
     cookie: 'cookie secret', // cookie salt
     salt: 'salt secret for password', // password salt
@@ -111,7 +112,10 @@ module.exports = {
   
   viaf: {
     endpoint: 'http://www.viaf.org/viaf/',
-    format: 'viaf.xml'
+    format: 'viaf.xml',
+    autosuggest: {
+      endpoint: 'http://www.viaf.org/viaf/AutoSuggest'
+    }
   },
   
   geonames : {

@@ -148,6 +148,18 @@ describe('controller:suggest check lucene query', function() {
   
 });
 
+describe('controller:suggest viaf', function() {
+  it('should return the viaf api results for spaak', function (done) {
+    session
+      .get('/api/suggest/viaf?query=spaak')
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exist(err) // err on statusCode
+        console.log(res.body.result.items)
+        done();
+      })
+  })
+});
 
 describe('controller:suggest ', function() {
   it('should get the entity that match "konr"', function (done) {

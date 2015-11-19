@@ -160,32 +160,85 @@ module.exports = {
     VIAF reconciliation service.
     @param options.link
   */
-  viaf: function(options, next) {
-    if(!settings.dbpedia || !settings.dbpedia.endpoint) {
-      next('settings.dbpedia.endpoint not found')
-      return;
-    };
-    if(isNaN(options.link)) {
-      next('viaf link should be a numeric identifier')
-      return;
-    };
-    
-    var url = settings.viaf.endpoint + options.link + '/' + settings.viaf.format;
-    console.log(clc.blackBright('viaf service'), url);
-    request
-      .get({
-        url: url
-      }, function (err, res, body) {
-        if(err) {
-          console.log(clc.red('error'), err);
-          next(err);
-          return;
-        }
-        //console.log(body)
-        next(null, body);
-      });
+  viaf: {
+    reconcile: function(options, next) {
+      if(!settings.dbpedia || !settings.dbpedia.endpoint) {
+        next('settings.dbpedia.endpoint not found')
+        return;
+      };
+      if(isNaN(options.link)) {
+        next('viaf link should be a numeric identifier')
+        return;
+      };
+      
+      var url = settings.viaf.endpoint + options.link + '/' + settings.viaf.format;
+      console.log(clc.blackBright('viaf service'), url);
+      request
+        .get({
+          url: url
+        }, function (err, res, body) {
+          if(err) {
+            console.log(clc.red('error'), err);
+            next(err);
+            return;
+          }
+          //console.log(body)
+          next(null, body);
+        });
+    },
+
+    autosuggest: function(options, next) {
+      if(!settings.viaf) {
+        next('settings.viaf not found')
+        return;
+      }
+
+      request
+        .get({
+          url: settings.viaf.autosuggest.endpoint,//url,
+          json: true,
+          qs: {
+            query: options.query
+          },
+          headers: {
+            'Accept':  'application/json'
+          }
+        }, function (err, res, body) {
+          if(err) {
+            next(err);
+            return;
+          }
+          next(null, body)
+        });
+    },
+    links: function(options, next) {
+      if(!settings.viaf) {
+        next('settings.viaf not found')
+        return;
+      };
+      
+      var url =  settings.viaf.links.endpoint + options.link + '/justlinks.json';
+      console.log(clc.blackBright('   viaf links:'), url);
+
+      request
+        .get({
+          url: url,//url,
+          json: true,
+          headers: {
+            'Accept':  'application/json'
+          }
+        }, function (err, res, body) {
+          if(err) {
+            next(err);
+            return;
+          }
+          next(null, body)
+        });
+    }
   },
   
+
+
   yagoaida: function(options, next) {
     if(!settings.yagoaida || !settings.yagoaida.endpoint) {
       next('settings.yagoaida.endopoint not found')

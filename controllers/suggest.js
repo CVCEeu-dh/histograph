@@ -596,6 +596,34 @@ module.exports =  function(io){
         });
       })
       
-    }
+    },
+
+    /*
+      Proxy suggest for VIAF
+    */
+    viaf: {
+      autosuggest: function(req, res) {
+        var services = require('../services');
+
+        var form = validator.request(req, {
+          limit: 10,
+          offset: 0,
+          query: ''
+        });
+        console.log(form)
+        if(!form.isValid)
+          return helpers.models.formError(form.errors, res);
+        services.viaf.autosuggest({
+          query: form.params.query
+        }, function (err, result){
+          if(err)
+            res.error();
+          else
+            res.ok({
+              items: result.result
+            },form.params);
+        })
+      }
+    },
   }
 }
