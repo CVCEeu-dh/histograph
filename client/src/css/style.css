@@ -625,8 +625,7 @@ a#header-title {
 }
 
 .user #see-also {
-  margin-left:0%;
-  width: 350px;
+  left: 0;
 }
 
 .resource.inquiries #see-also, .resource.inquiry #see-also, .resource.createInquiry #see-also {
@@ -1073,7 +1072,7 @@ a#header-title {
 }
 
 
-#milkyway.search {
+#milkyway.search, #milkyway.user {
   left: 560px;
   display: block
 }

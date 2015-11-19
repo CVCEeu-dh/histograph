@@ -751,7 +751,7 @@ angular.module('histograph')
   /*
     A generic controller for every relatedItem
   */
-  .controller('RelatedItemsCtrl', function ($scope, $log, $stateParams, $filter, relatedItems, relatedModel, relatedVizFactory, relatedFactory, socket, EVENTS) {
+  .controller('RelatedItemsCtrl', function ($scope, $log, $stateParams, $filter, specials, relatedItems, relatedModel, relatedVizFactory, relatedFactory, socket, EVENTS) {
     
     $scope.totalItems  = relatedItems.info.total_items;
     $scope.limit       = relatedItems.info.limit;
@@ -826,16 +826,16 @@ angular.module('histograph')
     $scope.$on(EVENTS.API_PARAMS_CHANGED, function() {
       // reset offset
       $scope.offset = 0;
-      $log.debug('ResourcesCtrl @API_PARAMS_CHANGED', $scope.params);
+      $log.debug('RelatedItemsCtrl @API_PARAMS_CHANGED', $scope.params);
       $scope.sync();
-      if($stateParams.ids || $stateParams.query)
+      if($stateParams.ids || $stateParams.query || ~~!specials.indexOf('syncGraph'))
         $scope.syncGraph();
     });
     
     
     $scope.$on(EVENTS.INFINITE_SCROLL, function (e) {
       $scope.offset = $scope.offset + $scope.limit;
-      $log.debug('ResourcesCtrl @INFINITE_SCROLL', '- skip:',$scope.offset,'- limit:', $scope.limit);
+      $log.debug('RelatedItemsCtrl @INFINITE_SCROLL', '- skip:',$scope.offset,'- limit:', $scope.limit);
       
       $scope.sync();
     });
@@ -844,7 +844,7 @@ angular.module('histograph')
     $log.log('RelatedItemsCtrl -> setRelatedItems - items', relatedItems.result.items);
     $scope.setRelatedItems(relatedItems.result.items);
     
-    if($stateParams.ids || $stateParams.query)
+    if($stateParams.ids || $stateParams.query || ~~!specials.indexOf('syncGraph'))
       $scope.syncGraph();
   })
   /*
@@ -883,6 +883,7 @@ angular.module('histograph')
     });
 
     $scope.syncGraph();
-     $log.log('GraphCtrl -> ready');
-  });
+    $log.log('GraphCtrl -> ready');
+  })
+  
   

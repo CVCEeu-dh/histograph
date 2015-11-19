@@ -315,6 +315,11 @@ angular
             }
           },
           resolve:{
+            specials: function() {
+              return [
+
+              ]
+            },
             relatedModel: function() {
               return 'person'
             },
@@ -358,6 +363,11 @@ angular
             }
           },
           resolve: {
+            specials: function() {
+              return [
+
+              ]
+            },
             relatedModel: function(){
               return 'person'
             },
@@ -458,6 +468,11 @@ angular
             }
           },
           resolve: {
+            specials: function() {
+              return [
+
+              ]
+            },
             relatedModel: function() {
               return 'resource'
             },
@@ -508,7 +523,7 @@ angular
         .state('user.resources', {
           url: '',
           templateUrl: 'templates/partials/resources.html',
-          controller: 'ResourcesCtrl',
+          controller: 'RelatedItemsCtrl',
           grammar: {
             label: 'favourite documents',
             connector: {
@@ -540,13 +555,21 @@ angular
             }
           },
           resolve: {
+            specials: function() {
+              return [
+                'syncGraph'
+              ]
+            },
+            relatedModel: function() {
+              return 'resource'
+            },
             relatedVizFactory: function(UserRelatedVizFactory) {
               return UserRelatedVizFactory
             },
             relatedFactory: function(UserRelatedFactory) {
               return UserRelatedFactory
             },
-            resources: function(UserRelatedFactory, $stateParams, $location) {
+            relatedItems: function(UserRelatedFactory, $stateParams, $location) {
               return UserRelatedFactory.get(angular.extend({},$location.search(), {
                 id: $stateParams.id,
                 model: 'resource',
@@ -625,6 +648,11 @@ angular
             }
           },
           resolve:{
+            specials: function() {
+              return [
+
+              ]
+            },
             relatedModel: function() {
               return 'resource'
             },
@@ -652,6 +680,11 @@ angular
             }
           },
           resolve: {
+            specials: function() {
+              return [
+
+              ]
+            },
             relatedModel: function() {
               return 'resource'
             },
@@ -692,6 +725,11 @@ angular
             }
           },
           resolve: {
+            specials: function() {
+              return [
+
+              ]
+            },
             relatedModel: function(){
               return 'person'
             },
@@ -745,6 +783,11 @@ angular
             }
           },
           resolve: {
+            specials: function() {
+              return [
+
+              ]
+            },
             relatedModel: function(){
               return 'organization'
             },
@@ -779,6 +822,11 @@ angular
             }
           },
           resolve: {
+            specials: function() {
+              return [
+
+              ]
+            },
             relatedModel: function(){
               return 'user'
             },
@@ -813,6 +861,11 @@ angular
             }
           },
           resolve: {
+            specials: function() {
+              return [
+
+              ]
+            },
             relatedModel: function(){
               return 'inquiry'
             },
@@ -927,6 +980,11 @@ angular
             }
           },
           resolve: {
+            specials: function() {
+              return [
+
+              ]
+            },
             relatedModel: function() {
               return 'resource'
             },
@@ -1031,6 +1089,11 @@ angular
             }
           },
           resolve: {
+            specials: function() {
+              return [
+
+              ]
+            },
             relatedModel: function() {
               return 'resource'
             },
