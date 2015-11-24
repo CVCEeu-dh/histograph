@@ -46,13 +46,25 @@
 </div>
 <div class="modal-header with-sidebar">
   <h3 class="modal-title">
-    <a ng-click='previous()' class='action'><i class='fa fa-angle-left'></i></a>
-    <span>{{offset + limit}} / {{totalItems}} documents {{language}}</span>
-    <a ng-click='next()' class='action'><i class='fa fa-angle-right'></i></a>
+    <a ng-click='previous()' class='action left'><i class='fa fa-angle-left'></i></a>
+    <span ng-if='modalStatus!="quiet"'>{{modalStatus}}</span><span ng-if='modalStatus!="loading"'>{{offset + limit}} / {{totalItems}} documents</span>
+    <a ng-click='next()' class='action right'><i class='fa fa-angle-right'></i></a>
   </h3>
+  <table class='table'>
+    <tr ng-repeat='relatedItem in items'>
+      <td>Is <b>{{relatedItem.props|lookup:'name':language}}</b> in this picture?</td>
+      <td>
+        <div class='btn-group' >
+          <button class='btn btn-default' ng-click='upvote()'>yes</button>
+          <button class='btn btn-default'  ng-click='downvote()'>no</button>
+        </div>
+      </td>
+    </tr>
+  </div>
 </div>
 <div class="modal-body with-sidebar">
   <div ng-repeat='relatedItem in relatedItems'>
       <div  ng-include='"templates/partials/resource-lite.html"'></div>
   </div>
 </div>
+

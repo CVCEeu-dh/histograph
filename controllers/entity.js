@@ -70,9 +70,29 @@ module.exports = function(io){
     */
     updateRelatedResource: function (req, res) {
       var form = validator.request(req);
-      if(req.query.action == 'discard')
+      // discard
+      if(form.params.action == 'discard')
         return res.ok({}, form.params);
-      return res.ok({}, form.params);
+      // upvote or downvote.
+      if(form.params.action) {
+        Entity.updateRelatedResource({
+          id: +form.params.entity_id
+        },
+        {
+          id: +form.params.resource_id
+        },
+        req.user,
+        form.params, function (err, item) {
+          if(err)
+            return helpers.cypherQueryError(err, res);
+          return res.ok({
+            item: item
+          }, form.params);
+        })
+      } else {
+        return res.ok({}, form.params);
+      }
+        
       // if(!form.params.action) {
       //   // create a relationship
       //   Entity.addRelatedResource();

@@ -768,13 +768,14 @@ angular.module('histograph')
     Inspect an entity.
     Items are entity items
   */
-  .controller('InspectModalCtrl', function ($scope, $log, $uibModalInstance, items, relatedFactory, relatedModel, SuggestFactory, language) {
+  .controller('InspectModalCtrl', function ($scope, $log, $uibModalInstance, items, relatedFactory, relatedModel, EntityRelatedExtraFactory, SuggestFactory, language ) {
     $scope.mergeMode = items.length > 1;
     $scope.items = items.result.items;
     $scope.limit = 1;
     $scope.offset = 0;
     $scope.modalStatus = 'quiet';
     $scope.language = language;
+    
 
     $scope.ok = function () {
       $uibModalInstance.close();
@@ -784,7 +785,35 @@ angular.module('histograph')
       $uibModalInstance.dismiss('cancel');
     };
 
+    $scope.upvote = function() {
+      $scope.modalStatus = 'voting';
+      
+      EntityRelatedExtraFactory.save({
+        id: $scope.items[0].id,
+        model: relatedModel,
+        related_id: $scope.relatedItems[0].id,
+        extra: 'upvote'
+      }, {}, function (res) {
+        $log.log('InspectModalCtrl -> upvote()', res.status);
+        $scope.modalStatus = 'voted';
+      })
+    }
+
+    $scope.downvote = function () {
+      $scope.modalStatus = 'voting';
+      EntityRelatedExtraFactory.save({
+        id: $scope.items[0].id,
+        model: relatedModel,
+        related_id: $scope.relatedItems[0].id,
+        extra: 'downvote'
+      }, {}, function (res) {
+        $log.log('InspectModalCtrl -> downvote()', res.status);
+        $scope.modalStatus = 'voted';
+      });
+    }
+
     $scope.next = function() {
+      $scope.modalStatus = 'quiet';
       $scope.offset = Math.min($scope.totalItems -1, $scope.offset + 1);
       $scope.sync();
     };
@@ -803,6 +832,7 @@ angular.module('histograph')
           limit: $scope.limit,
           offset: $scope.offset
         }, function (res) {
+          $scope.modalStatus = 'quiet';
           $scope.relatedItems = res.result.items;
           $scope.totalItems = res.info.total_items;
         });

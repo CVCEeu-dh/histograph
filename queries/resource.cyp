@@ -32,6 +32,7 @@ WITH res, curators, locations, collect({
     })[0..5] as persons
 
 OPTIONAL MATCH (res)-[r_org:appears_in]-(org:`organization`)
+WHERE not(has(r_org.score)) OR r_org.score > 0
 WITH res, curators, locations, persons, collect({  
       id: id(org),
       type: 'organization',

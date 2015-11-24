@@ -445,7 +445,7 @@ apiRouter.route('/entity/:id(\\d+)/downvote')
   .post(ctrl.entity.downvote)
 
 
-apiRouter.route('/entity/:entity_id(\\d+)/related/resource/:resource_id(\\d)+/:action(upvote|downvote|discard)?')
+apiRouter.route('/entity/:entity_id(\\d+)/related/resource/:resource_id(\\d+)/:action(upvote|downvote|discard)')
   .post(ctrl.entity.updateRelatedResource);
   
 

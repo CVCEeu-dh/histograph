@@ -113,6 +113,9 @@ angular.module('histograph')
   .factory('EntityExtraFactory', function ($resource) {
     return $resource('/api/entity/:id/:extra', {}, {});
   })
+  .factory('EntityRelatedExtraFactory', function ($resource) {
+    return $resource('/api/entity/:id/related/:model/:related_id/:extra', {}, {});
+  })
   /*
     model - the related model
     type  - type of viz, eg graph or timeline

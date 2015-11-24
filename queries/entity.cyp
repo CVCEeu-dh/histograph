@@ -494,7 +494,7 @@ ON MATCH SET
 SET
   ent.last_modification_date = {exec_date},
   ent.last_modification_time = {exec_time}
-return ent, u, res, r1, r2
+return ent, u, res, r1 as rel, r2
 
 
 // name: remove_entity

@@ -14,9 +14,9 @@ module.exports = function(options) {
     entity: {
       social_group: function() {
         return {
-          links_wiki: 'Yalta_Conference',
-          type: 'social_group',
-          name: 'Yalta_Conference',
+          links_wiki: 'TEST_Yalta_Conference' + options.suffix,
+          type: 'social_group' ,
+          name: 'TEST_Yalta_Conference' + options.suffix,
           trustworthiness: 0.8
         }
       }  

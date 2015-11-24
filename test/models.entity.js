@@ -190,10 +190,9 @@ describe('model:entity ', function() {
   it('should upvote a relationship', function (done) {
     Entity.updateRelatedResource(__entity, __resource, __user, {
       action: 'upvote'
-    }, function (err, ent) {
+    }, function (err, result) {
       should.not.exist(err);
-      should.equal(ent.props.score, 1);
-      should.equal(ent.action, 'upvote');
+      should.equal(result.rel.score, 1);
       done();
     }) // we provide the same id for the entity and for the user. Will the neo4j labels work properly?
 
@@ -202,10 +201,9 @@ describe('model:entity ', function() {
   it('should downvote a relationship', function (done) {
     Entity.updateRelatedResource(__entity, __resource, __user, {
       action: 'downvote'
-    }, function (err, ent) {
+    }, function (err, result) {
       should.not.exist(err);
-      should.equal(ent.props.score, -1);
-      should.equal(ent.action, 'downvote');
+      should.equal(result.rel.score, -1);
       done();
     }) // we provide the same id for the entity and for the user. Will the neo4j labels work properly?
 

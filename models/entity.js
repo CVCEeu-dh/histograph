@@ -203,40 +203,51 @@ module.exports = {
 
       if(!!~['upvote', 'downvote'].indexOf(params.action)) {
         if(params.action == 'upvote') {
-          result.ent.upvote = _.unique((result.ent.upvote || []).concat(user.username));
-          if(result.ent.downvote && !!~result.ent.downvote.indexOf(user.username)) {
-            result.ent.downvote = _.remove(result.ent.downvote, user.username);
+          result.rel.properties.upvote = _.unique((result.rel.properties.upvote || []).concat(user.username));
+          if(result.rel.properties.downvote && !!~result.rel.properties.downvote.indexOf(user.username)) {
+            result.rel.properties.downvote = _.remove(result.rel.properties.downvote, user.username);
           }
         }
 
         if(params.action == 'downvote') {
-          result.ent.downvote = _.unique((result.ent.downvote || []).concat(user.username));
-          if(result.ent.upvote && !!~result.ent.upvote.indexOf(user.username)) {
-            result.ent.upvote =_.remove(result.ent.upvote, user.username);
-            // if(result.ent.upvote.length == 0)
-            //   result.ent.upvote = [''] // falsey value
+          result.rel.properties.downvote = _.unique((result.rel.properties.downvote || []).concat(user.username));
+          if(result.rel.properties.upvote && !!~result.rel.properties.upvote.indexOf(user.username)) {
+            result.rel.properties.upvote =_.remove(result.rel.properties.upvote, user.username);
           }
         }
         
-        result.ent.celebrity =  _.compact(_.unique((result.ent.upvote || []).concat(result.ent.downvote|| []))).length;
-        result.ent.score = _.compact((result.ent.upvote || [])).length - _.compact((result.ent.downvote|| [])).length;
+        result.rel.properties.celebrity =  _.compact(_.unique((result.rel.properties.upvote || []).concat(result.rel.properties.downvote|| []))).length;
+        result.rel.properties.score = _.compact((result.rel.properties.upvote || [])).length - _.compact((result.rel.properties.downvote|| [])).length;
+        
         
 
-        neo4j.save(result.ent, function (err, node) {
-          if(err) {
+        neo4j.rel.update(result.rel, function (err) {
+          if(err)
             next(err);
-          }
-          next(null, _.assign({
-            id: node.id,
-            props: node
-          }, params));
-        });
+          else
+            next(null, {
+              id: result.ent.id,
+              props: result.ent,
+              rel: result.rel.properties
+            });
+        })
+
+        // neo4j.save(result.ent, function (err, node) {
+        //   if(err) {
+        //     next(err);
+        //   }
+        //   next(null, {
+        //     id: node.id,
+        //     props: node
+        //   });
+        // });
       } else {
         // nothing special to do
-        next(null, _.assign({
+        next(null, {
           id: result.ent.id,
-          props: result.ent
-        }, params));
+          props: result.ent,
+          rel: result.rel
+        });
       }
     });
   },

@@ -5729,18 +5729,47 @@ Copyright (c) 2015 Daniel Eden
 
 .modal-content .modal-header.with-sidebar{
   margin-left: 320px;
+  height: 100px;
 }
 
 .modal-content .modal-body.with-sidebar{
-      overflow-y: auto;
-    position: absolute;
-    top: 52px;
-    bottom: 0;
-    left:320px;
-    right: 0;
+  overflow-y: auto;
+  position: absolute;
+  top: 100px;
+  bottom: 0px;
+  left:320px;
+  right: 0;
+}
+
+.modal-content .modal-header {
+  padding: 0 15px;
+}
+.modal-content .modal-title {
+  line-height: 49px;
+  text-align: center
+}
+.modal-content .action {
+  width: 30px;
+  height: 30px;
+  margin-top: 10px;
+  border-radius: 30px;
+  line-height: 30px;
+  border: 1px solid #E8E8E7;
+  color: #a5a5a5;
+}
+
+.modal-content .action.right{
+  float: right;
 }
 
 
+.modal-content .action.left{
+  float: left;
+}
+
+.modal-content .table>tbody>tr>td {
+      vertical-align: middle;
+}
 
 /**
   
@@ -5896,6 +5925,12 @@ font-size:12px;
   media improvements
   cf.http://getbootstrap.com/css/#responsive-utilities
 */
+@media screen and (min-width: 768px) {
+  .modal-dialog {
+    width: 700px;
+  }
+}
+
 @media screen and (min-width: 1200px) {
   .entity #see-also, .resource #see-also{
     width: 480px;
@@ -5903,6 +5938,10 @@ font-size:12px;
 
   .resource #perspective, .entity #perspective{
     right: 500px;
+  }
+
+  .modal-dialog {
+    width: 900px;
   }
 }
 
@@ -5916,8 +5955,4 @@ font-size:12px;
   }
 }
 
-@media screen and (min-width: 768px) {
-  .modal-dialog {
-    width: 700px;
-  }
-}
+
