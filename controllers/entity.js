@@ -61,20 +61,18 @@ module.exports = function(io){
     /*
       Update [:appear_in] relationship, entity side
 
-      api: api/entity/:entity_id(\\d+)/related/resource/:resource_id(\\d)+/:action(upvote|downvote|discard)
+      api: api/entity/:entity_id(\\d+)/related/resource/:resource_id(\\d)+/:action(upvote|downvote)
       
       According to `:action` param, modify or create the relationship between an entity and a resource. If there is no action, an upvoted relationship will be created.
       Anyway, the authentified user becomes a "curator" of the entity (he/she knows a lot about it).
 
-      @todo if `:action` param equals 'discard', the curates relationship will be deleted
     */
     updateRelatedResource: function (req, res) {
       var form = validator.request(req);
       // discard
-      if(form.params.action == 'discard')
+      if(form.params.action == 'discard') {
         return res.ok({}, form.params);
-      // upvote or downvote.
-      if(form.params.action) {
+      } else if(form.params.action) {
         Entity.updateRelatedResource({
           id: +form.params.entity_id
         },
@@ -99,6 +97,28 @@ module.exports = function(io){
       // }
       // Entity.updateRelatedResource()
     },
+
+    createRelatedResource: function(req, res) {
+      var form = validator.request(req);
+
+      Entity.createRelatedResource({
+        id: +form.params.entity_id
+      },
+      {
+        id: +form.params.resource_id
+      },
+      req.user,
+      form.params, function (err, item) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({
+          item: item
+        }, form.params);
+      });
+    },
+
+
+
     /*
       Create a comment specific for the entity ?
     */

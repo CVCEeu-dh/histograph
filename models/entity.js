@@ -175,7 +175,52 @@ module.exports = {
   signaleRelatedResource: function(entity, resource, next) {
     
   },
-  
+
+  /*
+    Create a manual [appears_in] relationship between the entity and the resource.
+    api
+    @param entity   - entity.id should be an integer identifier
+    @param resource - resource.id should be an integer identifier
+    @param user     - user.id and user.username should exist
+    @param params   - used only wioth params.action upvote or downvote
+  */
+  createRelatedResource: function(entity, resource, user, params, next) {
+    var now = helpers.now();
+
+    neo4j.query(queries.merge_entity_related_resource, {
+      entity_id: entity.id,
+      resource_id: resource.id,
+      user_id: user.id,
+      exec_date: now.date,
+      exec_time: now.time
+    }, function (err, results) {
+      if(err || !results.length) {
+        next(err || helpers.IS_EMPTY);
+        return;
+      }
+
+      var result = results[0];
+      
+      // upvote automatically, since you admitted that the entity exists
+      var upvotes = [],
+          downvotes = [];
+      upvotes = _.unique((result.ent.upvote || []).concat(user.username));
+      if(result.ent.downvote && !!~result.ent.downvote.indexOf(user.username)) {
+        downvotes = _.remove(result.ent.downvote, user.username);
+      }
+
+      neo4j.save(result.ent, function (err, node) {
+        if(err)
+          next(err);
+        else
+          next(null, {
+            id: result.ent.id,
+            props: result.ent,
+            rel: result.rel.properties
+          });
+      });
+    });
+  },
   /*
     Upvote the related resource.
     api
@@ -230,17 +275,7 @@ module.exports = {
               props: result.ent,
               rel: result.rel.properties
             });
-        })
-
-        // neo4j.save(result.ent, function (err, node) {
-        //   if(err) {
-        //     next(err);
-        //   }
-        //   next(null, {
-        //     id: node.id,
-        //     props: node
-        //   });
-        // });
+        });
       } else {
         // nothing special to do
         next(null, {

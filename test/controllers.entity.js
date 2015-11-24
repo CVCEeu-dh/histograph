@@ -28,6 +28,7 @@ var session,
     __MARVIN,
     __user,
     __resource,
+    __resourceB,
     __entity;
 
 before(function () {
@@ -84,6 +85,17 @@ describe('controller:entity before', function() {
       done();
     });
   });
+
+  it('should create a new resource B', function (done){
+    Resource.create(generator.resource.multilanguageB({
+      user: __MARVIN
+    }), function (err, resource) {
+      if(err)
+        throw err;
+      __resourceB = resource;
+      done();
+    });
+  });
   
   it('should create a new entity, by using links_wiki', function (done) {
     Entity.create({
@@ -116,7 +128,7 @@ describe('controller:entity before', function() {
 });
   
 
-describe('controller:entity biasics', function() {
+describe('controller:entity basics', function() {
   it('should get a specific entity', function (done) {
     session
       .get('/api/entity/' + __entity.id)
@@ -133,7 +145,6 @@ describe('controller:entity biasics', function() {
 describe('controller:entity related items', function() {
 
   it('should upvote the relationship' , function (done) {
-    console.log('' + __entity.id + '->' + __resource.id);
     session
       .post('/api/entity/' + __entity.id +'/related/resource/'+ __resource.id + '/upvote')
       .expect('Content-Type', /json/)
@@ -145,12 +156,44 @@ describe('controller:entity related items', function() {
         done();
       });
   });
+
+  it('should not upvote a NOT CONNECTED resource B', function(done) {
+    session
+      .post('/api/entity/' + __entity.id +'/related/resource/'+ __resourceB.id + '/upvote')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exists(err);
+
+        should.equal(res.body.status, 'empty');
+        done();
+      });
+  })
+
+  it('should create a manual connection, with frequence = 1 resource B', function(done) {
+    session
+      .post('/api/entity/' + __entity.id +'/related/resource/'+ __resourceB.id)
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.exist(res.body.result.item.rel)
+        should.not.exists(err);
+        done();
+      });
+  })
 });
 
 
 describe('controller:entity after', function() {
-  it('should delete the resource', function (done) {
+  it('should delete the resource A', function (done) {
     Resource.remove(__resource, function (err) {
+      if(err)
+        throw err;
+      done();
+    });
+  });
+   it('should delete the resource B', function (done) {
+    Resource.remove(__resourceB, function (err) {
       if(err)
         throw err;
       done();

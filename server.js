@@ -106,6 +106,13 @@ express.response.ok = function(result, info, warnings) {
   return this.json(res);
 };
 
+express.response.empty = function(warnings) {
+  // Since The 204 response MUST NOT include a message-body, we use a dummy 200 with status = empty...
+  return this.status(200).json({
+    status: 'empty'
+  });
+};
+
 express.response.error = function(statusCode, err) {
   return this.status(statusCode).json({
     status: 'error',
@@ -444,8 +451,10 @@ apiRouter.route('/entity/:id(\\d+)/upvote')
 apiRouter.route('/entity/:id(\\d+)/downvote')
   .post(ctrl.entity.downvote)
 
+apiRouter.route('/entity/:entity_id(\\d+)/related/resource/:resource_id(\\d+)')
+  .post(ctrl.entity.createRelatedResource); // create or merge the relationship. The authentified user will become a curator
 
-apiRouter.route('/entity/:entity_id(\\d+)/related/resource/:resource_id(\\d+)/:action(upvote|downvote|discard)')
+apiRouter.route('/entity/:entity_id(\\d+)/related/resource/:resource_id(\\d+)/:action(upvote|downvote)')
   .post(ctrl.entity.updateRelatedResource);
   
 

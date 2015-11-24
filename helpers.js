@@ -136,6 +136,8 @@ module.exports = {
       default:
         if (err.statusCode) {
           res.error(err.statusCode, err.neo4jError.message.message);
+        } else if(err == IS_EMPTY) {
+          res.empty(); // no content
         } else {
           res.error(400, err);
         }
