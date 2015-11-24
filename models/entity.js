@@ -177,6 +177,73 @@ module.exports = {
   },
   
   /*
+    Upvote the related resource.
+    api
+    @param entity   - entity.id should be an integer identifier
+    @param resoruce - resource.id should be an integer identifier
+    @param user     - user.id and user.username should exist
+    @param params   - used only wioth params.action upvote or downvote
+  */
+  updateRelatedResource: function(entity, resource, user, params, next) {
+    var now = helpers.now();
+
+    neo4j.query(queries.update_entity_related_resource, {
+      entity_id: entity.id,
+      resource_id: resource.id,
+      user_id: user.id,
+      exec_date: now.date,
+      exec_time: now.time
+    }, function (err, results) {
+      if(err || !results.length) {
+        next(err || helpers.IS_EMPTY);
+        return;
+      }
+
+      var result = results[0];
+
+      if(!!~['upvote', 'downvote'].indexOf(params.action)) {
+        if(params.action == 'upvote') {
+          result.ent.upvote = _.unique((result.ent.upvote || []).concat(user.username));
+          if(result.ent.downvote && !!~result.ent.downvote.indexOf(user.username)) {
+            result.ent.downvote = _.remove(result.ent.downvote, user.username);
+          }
+        }
+
+        if(params.action == 'downvote') {
+          result.ent.downvote = _.unique((result.ent.downvote || []).concat(user.username));
+          if(result.ent.upvote && !!~result.ent.upvote.indexOf(user.username)) {
+            result.ent.upvote =_.remove(result.ent.upvote, user.username);
+            // if(result.ent.upvote.length == 0)
+            //   result.ent.upvote = [''] // falsey value
+          }
+        }
+        
+        result.ent.celebrity =  _.compact(_.unique((result.ent.upvote || []).concat(result.ent.downvote|| []))).length;
+        result.ent.score = _.compact((result.ent.upvote || [])).length - _.compact((result.ent.downvote|| [])).length;
+        
+
+        neo4j.save(result.ent, function (err, node) {
+          if(err) {
+            next(err);
+          }
+          next(null, _.assign({
+            id: node.id,
+            props: node
+          }, params));
+        });
+      } else {
+        // nothing special to do
+        next(null, _.assign({
+          id: result.ent.id,
+          props: result.ent
+        }, params));
+      }
+    });
+  },
+
+
+
+  /*
     Useful api for downvoting/upvoting
     Note that You can modify the original one only if you're the owner of the comment.
   */
@@ -501,6 +568,11 @@ module.exports = {
     links will contain hidden field about this transaction.
   */
   reconcile: function (from, to, next) {
+    // mark the entities as mergeable. What is the most complete entity?
+    // count the different relationships and check the various fields
+
+    
+
     neo4j.query(queries.get_relationships, {
       id: from.id
     }, function (err, relationships) {
@@ -566,5 +638,18 @@ module.exports = {
       d.abstract = item['abstract_' + item.languages[0]];
     }
     return d
-  }
+  },
+
+  /*
+    This method MUST NOT HAVE an API access.
+    user can contain just the email field.
+  */
+  remove: function(entity, next) {
+    neo4j.query(queries.remove_entity, entity, function (err, res) {
+      if(err)
+        next(err);
+      else
+        next(null);
+    }) 
+  },
 };

@@ -15,7 +15,7 @@ var settings   = require('../settings'),
     _          = require('lodash'),
 
     neo4j      = require('seraph')(settings.neo4j.host),
-    entity     = require('../models/entity');
+    Entity     = require('../models/entity');
     
 
 module.exports = function(io){
@@ -36,7 +36,7 @@ module.exports = function(io){
       if(ids.length == 0)
         return res.error(404);
       if(ids.length == 1)
-        entity.get(req.params.id, function (err, item) {
+        Entity.get(req.params.id, function (err, item) {
           if(err == helpers.IS_EMPTY)
             return res.error(404);
           if(err) 
@@ -46,7 +46,7 @@ module.exports = function(io){
           });
         })
       else
-        entity.getByIds(ids, function (err, items) {
+        Entity.getByIds(ids, function (err, items) {
           if(err == helpers.IS_EMPTY)
             return res.error(404);
           if(err)
@@ -58,7 +58,27 @@ module.exports = function(io){
           });
         });
     },
-    
+    /*
+      Update [:appear_in] relationship, entity side
+
+      api: api/entity/:entity_id(\\d+)/related/resource/:resource_id(\\d)+/:action(upvote|downvote|discard)
+      
+      According to `:action` param, modify or create the relationship between an entity and a resource. If there is no action, an upvoted relationship will be created.
+      Anyway, the authentified user becomes a "curator" of the entity (he/she knows a lot about it).
+
+      @todo if `:action` param equals 'discard', the curates relationship will be deleted
+    */
+    updateRelatedResource: function (req, res) {
+      var form = validator.request(req);
+      if(req.query.action == 'discard')
+        return res.ok({}, form.params);
+      return res.ok({}, form.params);
+      // if(!form.params.action) {
+      //   // create a relationship
+      //   Entity.addRelatedResource();
+      // }
+      // Entity.updateRelatedResource()
+    },
     /*
       Create a comment specific for the entity ?
     */
@@ -96,7 +116,7 @@ module.exports = function(io){
       
       if(!form.isValid)
         return helpers.formError(err, res);
-      entity.update(form.params.id, {
+      Entity.update(form.params.id, {
         upvoted_by: req.user.username
       }, function (err, ent) {
         if(err)
@@ -117,7 +137,7 @@ module.exports = function(io){
       
       if(!form.isValid)
         return helpers.formError(err, res);
-      entity.update(form.params.id, {
+      Entity.update(form.params.id, {
         downvoted_by: req.user.username
       }, function (err, ent) {
         if(err)
@@ -143,7 +163,7 @@ module.exports = function(io){
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       // get the total available
-      entity.getRelatedResources(form.params, function (err, items, info) {
+      Entity.getRelatedResources(form.params, function (err, items, info) {
         helpers.models.getMany(err, res, items, info, form.params);
       });
     }, // get graph of resources and other stugff, a graph object of nodes and edges
@@ -161,13 +181,13 @@ module.exports = function(io){
       if(!form.isValid)
         return helpers.formError(form.errors, res);
      
-      entity.getRelatedEntities(form.params, function (err, items, info) {
+      Entity.getRelatedEntities(form.params, function (err, items, info) {
         helpers.models.getMany(err, res, items, info, form.params);
       });
     },
     
     getRelatedPersons: function (req, res) {
-      entity.getRelatedPersons(req.params.id, {
+      Entity.getRelatedPersons(req.params.id, {
         limit: 10,
         offset: 0
       }, function (err, items) {
@@ -203,7 +223,7 @@ module.exports = function(io){
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       
-      entity.getRelatedEntitiesGraph(form.params, function (err, graph) {
+      Entity.getRelatedEntitiesGraph(form.params, function (err, graph) {
         return res.ok({
           graph: graph
         }, {
@@ -232,7 +252,7 @@ module.exports = function(io){
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       
-      entity.getRelatedResourcesGraph(form.params, function (err, graph) {
+      Entity.getRelatedResourcesGraph(form.params, function (err, graph) {
         return res.ok({
           graph: graph
         }, {

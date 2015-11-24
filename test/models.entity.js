@@ -64,9 +64,9 @@ describe('model:entity ', function() {
   
   it('should create a brand new entity, by using links_wiki', function (done) {
     Entity.create({
-      links_wiki: 'Yalta_Conference',
+      links_wiki: 'TESTESTTESTYalta_Conference',
       type: 'social_group',
-      name: 'Yalta_Conference',
+      name: 'TESTESTTESTYalta_Conference',
       resource: __resource
     }, function (err, entity) {
       should.not.exist(err, err);
@@ -176,8 +176,44 @@ describe('model:entity ', function() {
 });
 
 
+describe('model:entity ', function() {
+  it('should return an error since entity does not exist', function (done) {
+    Entity.updateRelatedResource(__entity, __resource, __entity, {
+      action: 'upvote'
+    },function (err, results) {
+      should.exist(err);
+      should.equal(err, 'is_empty');
+      done();
+    }) // we provide the same id for the entity and for the user. Will the neo4j labels work properly?
 
-describe('model:entity cleaning', function() {
+  });
+  it('should upvote a relationship', function (done) {
+    Entity.updateRelatedResource(__entity, __resource, __user, {
+      action: 'upvote'
+    }, function (err, ent) {
+      should.not.exist(err);
+      should.equal(ent.props.score, 1);
+      should.equal(ent.action, 'upvote');
+      done();
+    }) // we provide the same id for the entity and for the user. Will the neo4j labels work properly?
+
+  });
+
+  it('should downvote a relationship', function (done) {
+    Entity.updateRelatedResource(__entity, __resource, __user, {
+      action: 'downvote'
+    }, function (err, ent) {
+      should.not.exist(err);
+      should.equal(ent.props.score, -1);
+      should.equal(ent.action, 'downvote');
+      done();
+    }) // we provide the same id for the entity and for the user. Will the neo4j labels work properly?
+
+  });
+});
+
+
+describe('model:entity after', function() {
   it('should delete the resource', function (done) {
     Resource.remove(__resource, function (err) {
       if(err)
@@ -194,11 +230,11 @@ describe('model:entity cleaning', function() {
   });
   
   
-  // it('should delete the entity', function (done) {
-  //   User.remove(generator.user.guest(), function (err) {
-  //     if(err)
-  //       throw err;
-  //     done();
-  //   });
-  // });
+  it('should delete the entity', function (done) {
+    Entity.remove(__entity, function (err) {
+      if(err)
+        throw err;
+      done();
+    });
+  });
 });

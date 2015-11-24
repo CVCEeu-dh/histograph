@@ -463,3 +463,42 @@ ON CREATE SET
 ON MATCH SET
   r.reconciled_by = {reconciled_by}
 RETURN r
+
+
+// name: update_entity_related_resource
+// create or merge the cureted by relationship on a specific entity
+MATCH (ent:entity), (u:user), (res:resource)
+WHERE id(ent) = {entity_id}
+  AND id(u) = {user_id}
+  AND id(res) = {resource_id}
+
+WITH ent, u, res
+
+MERGE (ent)-[r1:appears_in]->(res)
+  ON CREATE SET
+    r1.creation_date = {exec_date},
+    r1.creation_time = {exec_time}
+  ON MATCH SET
+    r1.last_modification_date = {exec_date},
+    r1.last_modification_time = {exec_time}
+
+WITH ent, u, res, r1
+
+MERGE (u)-[r2:curates]->(ent)
+ON CREATE SET
+  r2.creation_date = {exec_date},
+  r2.creation_time = {exec_time}
+ON MATCH SET
+  r2.last_modification_date = {exec_date},
+  r2.last_modification_time = {exec_time}
+SET
+  ent.last_modification_date = {exec_date},
+  ent.last_modification_time = {exec_time}
+return ent, u, res, r1, r2
+
+
+// name: remove_entity
+// WARNING!!!! destroy everything related to the user, as if it never existed.
+MATCH (n:entity) WHERE id(n) = {id} WITH n
+OPTIONAL MATCH (n)-[r]-()
+DELETE n, r
