@@ -25,7 +25,7 @@
     </span>
   </div>
            
-  <img ng-if='relatedItem.props.mimetype=="image"' ng-src="{{relatedItem.props | url : language}}">
+  <div class="img" ng-if='relatedItem.props.mimetype=="image" && relatedItem.props.url' style='background-image: url({{relatedItem.props|url:language}})'></div>
   <blockquote ng-if='!relatedItem.annotations || !relatedItem.annotations.length' marked="relatedItem.props|lookup:'caption':language"></blockquote>
   <blockquote ng-if='relatedItem.annotations && relatedItem.annotations.length' context='relatedItem' marked="relatedItem.annotations|annotate:'caption':language"></blockquote>
   

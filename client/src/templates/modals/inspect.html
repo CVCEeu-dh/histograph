@@ -52,7 +52,7 @@
   </h3>
   <table class='table'>
     <tr ng-repeat='relatedItem in items'>
-      <td>Is <b>{{relatedItem.props|lookup:'name':language}}</b> in this picture?</td>
+      <td>Is <b>{{relatedItem.props|lookup:'name':language}} {{relatedItem.props.birth_time | datesOfAPerson : relatedItem.props.death_time}}</b>?</td>
       <td>
         <div class='btn-group' >
           <button class='btn btn-default' ng-click='upvote()'>yes</button>

@@ -32,7 +32,7 @@ angular
     // 'mgcrea.ngStrap'
     'perfect_scrollbar',
     'LocalStorageModule',
-    'wu.masonry'
+    'masonry'
   ])
   .constant("EVENTS", {
     USE_USER: 'use_user',
