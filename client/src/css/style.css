@@ -1414,10 +1414,13 @@ height: 150px;
   margin-left: 15px;
 }
 
-#sigma-snippets .edges .related h4 a {
-  
-
+#sigma-snippets .edges .related.entity h4{
+  margin-left: 60px;
+  margin-top: 0;
+  padding-top: 0;
+  min-height: 30px;
 }
+
 #sigma-snippets .nodes .line {
   position: absolute;
   width: 4px;
@@ -5881,13 +5884,28 @@ Copyright (c) 2015 Daniel Eden
 */
 .more{
   text-align:center;
-  margin-bottom: 20px;
+  margin: 10px 10px 20px 10px;
 }
+
 .more button.btn {
-  font-size: 14px;
-  display: inline-block;
+  font-size: 12px;
+  text-transform: uppercase;
+  display: block;
   background: transparent;
-  font-style: italic;
+  background: #2B2B2B;
+  border: 0px solid;
+  color: #e8e8e8;
+  margin: 10px 0;
+  padding: 14px 0px;  
+  border-radius: 2px;  
+  -webkit-transition: color .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
+     -moz-transition: color .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+       -o-transition: color .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+          transition: color .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+}
+
+.more button.btn:hover{
+  color: white;
 }
 
 /*

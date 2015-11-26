@@ -5,6 +5,6 @@
     <div offset="{{offset}}" style="-webkit-animation-delay: {{($index - offset) * 100}}ms;
       animation-delay: {{($index - offset) * 100}}ms"  ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/resource-lite.html"'></div>
     <div class='more' ng-if='totalItems && offset + limit < totalItems'>
-    	<button ng-click='more()' class='btn btn-default more'>{{loading?'loading...':'load more items'}}</button>
+    	<button ng-click='more()' class='btn btn-default btn-block'>{{loading?'loading...':'load more items'}}</button>
     </div>
   </div>
