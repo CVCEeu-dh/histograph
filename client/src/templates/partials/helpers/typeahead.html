@@ -1,8 +1,8 @@
 <!-- typeahead template for FILTERING purpose -->
-
 <div>
-  <a ng-click='$parent.$parent.$parent.$parent.addFilter("with",match.model.id)'>
-    {{match.model.props | title: 'en'}}
+  <a ng-if='match.model.type != "default"' >
+    
+       <div class='thumbnail' ng-if='match.model.props.thumbnail' style='background-image:url({{match.model.props.thumbnail}})'></div>{{match.model.props | title: 'en'}}
+       <p ng-if='match.model.props.birth_date'>{{match.model.props|datesOfSomeone}}</p>
   </a>
-  
 </div>

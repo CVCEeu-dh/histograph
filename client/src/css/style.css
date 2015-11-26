@@ -557,6 +557,15 @@ a#header-title {
   overflow-y: auto;
 }
 
+#perspective-menu .dropdown-menu.with-typeahead {
+  max-height: none;
+  overflow-y: auto;
+}
+
+#perspective-menu .dropdown-menu .typeahead-in-dropdown ul.dropdown-menu{
+  max-height: 260px;
+}
+
 #perspective-menu .dropdown-menu >li a{
   font-size:12px;
   line-height: 18px
@@ -5879,6 +5888,51 @@ Copyright (c) 2015 Daniel Eden
   height: 18px;
 }
 
+
+/*
+  Typeahead inside a dropdown
+*/
+.with-typeahead{
+  width: 320px;
+}
+.typeahead-in-dropdown{
+  padding: 20px;
+
+}
+
+.typeahead-in-dropdown ul.dropdown-menu {
+  position: static;
+  box-shadow: none;
+  border: 0px solid;
+  max-height: 400px;
+  height: auto;
+  overflow: hidden;
+  overflow-y: auto;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.typeahead-in-dropdown ul.dropdown-menu >li.active{
+  background: #e8e8e8;
+}
+.typeahead-in-dropdown ul.dropdown-menu >li a{
+  display: block;
+  color: #151515;
+  font-weight: normal;
+  margin: 0;
+}
+
+.typeahead-in-dropdown ul.dropdown-menu >li a .thumbnail {
+  background-size:cover;
+  background-color: black;
+  background-repeat:no-repeat;
+  background-position:center;
+  width: 50px;
+  height: 50px;
+  float: left;
+  margin-right: 10px;
+}
 /*
   Special btn
 */

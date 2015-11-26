@@ -1,5 +1,5 @@
 <!-- global template for grammar based on current state-->
-<div class='grammar'>
+<div class='grammar' grammar>
   <!-- change sub state -->
   
   <!-- &nbsp;{{ruler.label}} -->
@@ -61,7 +61,22 @@
           <span ng-if='!filters.with'>
             &nbsp;{{grammar.connector.notRelatedTo}}&nbsp;
           </span>
-          <button uib-popover-template="'templates/partials/helpers/typeahead-popup.html'" popover-title="{{dynamicPopover.title}}" popover-placement="bottom" popover-title="{{dynamicPopover.title}}" type="button" class="btn btn-default"><i class='fa fa-angle-down'></i></button>
+          <div class="btn-group" uib-dropdown is-open="false">
+            <button id="single-button" type="button" class="btn btn-default" uib-dropdown-toggle>
+              <i class='fa fa-angle-down'></i>
+            </button>
+            <ul class="uib-dropdown-menu dropdown-menu with-typeahead" role="menu" aria-labelledby="single-button">
+              <li disable-auto-close>
+                <div class='typeahead-in-dropdown'>
+                  <label>which {{grammar.relatedTo.typeahead}}</label>
+                  <form>
+                    <input autofocus type='text' name='test' ng-model='____q' class='form-control' typeahead-editable='false' placeholder='search person, location, themes...' typeahead='item for items in typeaheadSuggest($viewValue, grammar.relatedTo.typeahead)' typeahead-wait-ms='100' typeahead-on-select='addFilterFromTypeahead($item, $model, $label)' typeahead-template-url='templates/partials/helpers/typeahead.html'/>
+                  </form>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <!-- <button uib-popover-template="'templates/partials/helpers/typeahead-popup.html'" popover-title="{{dynamicPopover.title}}" popover-placement="bottom" popover-title="{{dynamicPopover.title}}" type="button" class="btn btn-default"><i class='fa fa-angle-down'></i></button> -->
           
           <span ng-repeat='item in filterItems.with'>
             <span class="filter {{item.type}}"><b>{{item.props.name}}</b><span tooltip-append-to-body="true" tooltip='remove {{item.props.name}} from filters' ng-click='removeFilter("with",item.id)'>&nbsp;<i class="fa fa-times-circle"></i></span></span>{{!$last? ', ': ''}}

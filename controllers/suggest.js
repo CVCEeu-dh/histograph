@@ -424,6 +424,8 @@ module.exports =  function(io){
         },
         params: form.params
       }, function (err, results) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
         helpers.models.getMany(err, res, results.items, results.count_items, form.params);
       });
     },

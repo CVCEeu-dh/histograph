@@ -8,9 +8,20 @@
  *
  * Single popup menu for entities (downvote, comment, etc...)
  * Quietly used by CoreCtrl.
+ * This script also contains other minor directives connected with the popping up
  */
 angular.module('histograph')
-  
+  .directive('disableAutoClose', function() {
+    // directive for disabling the default
+    // close on 'click' behavior
+    return {
+      link: function($scope, $element) {
+        $element.on('click', function($event) {
+          $event.stopPropagation();
+        });
+      }
+    };
+  })
   /*
     Jquery Popup.
   */

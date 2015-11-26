@@ -428,7 +428,7 @@ angular.module('histograph')
       _resizeTimer = setTimeout(function() {
         $(window).trigger('resize');
       }, 300)
-      
+      // DEPRECATED
       switch($scope.currentCtrl) { // move to translation engine
         case 'SearchCtrl':
           $scope.query = $routeParams.query || '';
@@ -1023,5 +1023,3 @@ angular.module('histograph')
     $scope.syncGraph();
     $log.log('GraphCtrl -> ready');
   })
-  
-  

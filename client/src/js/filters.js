@@ -116,6 +116,23 @@ angular.module('histograph')
       return input.replace('.', ' ');
     };
   })
+  .filter('datesOfSomeone', function() {
+    return function(props) {
+      
+      var start_date_a = moment.utc(props.birth_time, 'X'),
+          start_date_b = moment.utc(props.death_time, 'X');
+      
+      return [
+        '(', 
+          props.birth_place? props.birth_place + ', ': '',
+          start_date_a.isValid()? start_date_a.format('ll'): ' ? ',
+        ' — ',
+          props.death_place? props.death_place + ', ': '',
+          start_date_b.isValid()? start_date_b.format('ll'): ' ... ',
+        ')'
+      ].join(''); // count years
+    };
+  })
   .filter('datesOfAPerson', function() {
     return function(birth_time,death_time) {
       

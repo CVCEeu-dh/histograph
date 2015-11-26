@@ -34,6 +34,16 @@ angular.module('histograph')
       }
     }
   })
+
+  .directive('grammar', function($compile, $log, $http) {
+    return {
+      restrict : 'A',
+      link : function(scope, element, attrs) {
+        scope.item = '';
+      }
+    };
+  })
+
   /*
     Enable large view of item and related items. 
     Use it and delete if via specific EVENTS

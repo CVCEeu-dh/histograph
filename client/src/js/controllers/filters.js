@@ -14,6 +14,8 @@ angular.module('histograph')
     $scope.filterItems  = {};
     $scope.facets = {}; // available facets, per filter key
     $scope.qs = ''; // the location.search() object as querystring
+
+    $scope.____q = '';
     /*
       e.g.
       setFacets('type', [
@@ -50,6 +52,10 @@ angular.module('histograph')
         $location.search(key, null);
       else
         $location.search(key, aliveFilters.join(','));
+    }
+    
+    $scope.addFilterFromTypeahead = function($item, $model, $label) {
+      $scope.addFilter("with", $item.id);
     }
     
     /*
