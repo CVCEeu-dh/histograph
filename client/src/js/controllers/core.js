@@ -398,6 +398,9 @@ angular.module('histograph')
       if(state.resolve) {
         $scope.lock(); 
       }
+      // empty
+      if(!_.isEmpty($scope.relatedItems))
+        $scope.relatedItems = [];
     })
 
     $rootScope.$on('$stateChangeSuccess', function (e, state) {
@@ -413,6 +416,7 @@ angular.module('histograph')
       // if any graph is availabe, tell sigma that you're
       // going to send the nodes
       $scope.$broadcast(EVENTS.STATE_CHANGE_SUCCESS, state.name);
+
 
       // $scope.setMessage(MESSAGES.LOADED, 1500);
       

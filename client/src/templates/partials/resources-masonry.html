@@ -5,7 +5,7 @@
     </div>
     <div masonry='{ "transitionDuration" : "0.4s" , "itemSelector" : ".masonry-brick"}'>
       
-        <div masonry-tile class="masonry-brick" ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/resource-lite.html"'></div>
+        <div masonry-tile='{"imagesLoaded": {"background": ".img"}}' class="masonry-brick" ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/resource-lite.html"'></div>
       
     </div>
     <div class='more' ng-if='offset + limit < totalItems'>

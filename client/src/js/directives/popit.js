@@ -53,6 +53,7 @@ angular.module('histograph')
             case 'person':
             case 'place':
             case 'location':
+            case 'theme':
             case 'personKnown':
               scope.issue  = false;
               scope.href   = '/#/e/' + id;

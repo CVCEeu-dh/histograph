@@ -212,6 +212,9 @@ module.exports = {
     node.curators = _.values(node.curators || []).filter(function (n) {
       return n.id
     });
+    node.themes = _.values(node.themes || []).filter(function (n) {
+      return n.id
+    });
     node.persons = _.values(node.persons).filter(function (n) {
       return n.id
     });

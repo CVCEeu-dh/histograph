@@ -341,23 +341,7 @@ angular
               from: 'from',
               to: 'to'
             },
-            types: [
-              {
-                name: 'in any kind of documents',
-              },
-              {
-                name: 'in pictures',
-                filter: 'type=picture'
-              },
-              {
-                name: 'in letters',
-                filter: 'type=letter'
-              },
-              {
-                name: 'in treaty',
-                filter: 'type=treaty'
-              }
-            ],
+            types: GRAMMAR.IN_TYPES,
             relatedTo: {
               typeahead: 'entity'
             }
@@ -446,23 +430,7 @@ angular
               from: 'from',
               to: 'to'
             },
-            types: [
-              {
-                name: 'of any kind',
-              },
-              {
-                name: 'pictures',
-                filter: 'type=picture'
-              },
-              {
-                name: 'letters',
-                filter: 'type=letter'
-              },
-              {
-                name: 'treaty',
-                filter: 'type=treaty'
-              }
-            ],
+            types: GRAMMAR.IN_TYPES,
             relatedTo: {
               typeahead: 'entity'
             }

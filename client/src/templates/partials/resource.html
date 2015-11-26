@@ -40,17 +40,20 @@
         </div>
           
         <div class="meta">
+          <span ng-if="item.persons.length" class="tags"><i>themes</i>:
+            <span ng-repeat="the in item.themes"><span class="tag theme" data-id='{{the.id}}' gasp-type='theme' gasp-parent='{{item.type}}-{{item.id}}'>{{the.props|lookup:"name":language}}</span>{{$last? '':  ', '}}</span> — 
+          </span>
           <span ng-if="item.persons.length" class="tags"><i>persons in the document</i>:
-            <span ng-repeat="per in item.persons"><span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.props.name}} - {{per.props.description}} ({{per.props.birth_date | date:"yyyy"}} - {{per.props.death_date | date:"yyyy"}}) {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name}}{{$last? '':  ', '}}</span></span>
+            <span ng-repeat="per in item.persons"><span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.props.name}} - {{per.props.description}} ({{per.props.birth_date | date:"yyyy"}} - {{per.props.death_date | date:"yyyy"}}) {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name}}</span>{{$last? '':  ', '}}</span>   — 
           </span>
-          <span ng-if="item.social_groups.length" class="tags"><i>  —  groups</i>:
-            <span ng-repeat="per in item.social_groups"><span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.props.name}} {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name}}{{$last? '':  ', '}}</span></span>
+          <span ng-if="item.social_groups.length" class="tags"><i> groups</i>:
+            <span ng-repeat="per in item.social_groups"><span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.props.name}} {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name}}</span>{{$last? '':  ', '}}</span>   — 
           </span>
-          <span ng-if="item.organizations.length" class="tags"><i>  —  organizations</i>:
-            <span ng-repeat="per in item.organizations"><span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.props.name}} {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name}}{{$last? '':  ', '}}</span></span>
+          <span ng-if="item.organizations.length" class="tags"><i>  organizations</i>:
+            <span ng-repeat="per in item.organizations"><span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.props.name}} {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name}}</span>{{$last? '':  ', '}}</span>   — 
           </span>
           
-          <span ng-if="item.props.languages.length">  —  <i>available in</i>:
+          <span ng-if="item.props.languages.length"> <i>available in</i>:
             <span class="language {{lang == language? 'active':''}}" ng-repeat="lang in item.props.languages" ng-click='setLanguage(lang)'>{{lang}} </span>
           </span>
         </div>
@@ -79,30 +82,37 @@
           <blockquote ng-if="!currentAnnotation" class="caption"  ng-bind-html="item.props | caption : language">
           </blockquote>
         </div -->
-        
-        <blockquote ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'caption':language"></blockquote>
-        
-        <!-- Single button -->
-        <div ng-if='item.props.mimetype=="image"'>
-          <div ng-if="versions.length > 1" class="btn-group" dropdown is-open="status.isopen" tooltip="view a different version">
-            <button type="button" class="btn btn-default dropdown-toggle" dropdown-toggle ng-disabled="disabled">
-              {{currentVersion.service || "accepted"}}<span class="caret"></span>
-            </button>
-            <ul class="dropdown-menu" role="menu">
-              <li ng-repeat="version in item.versions"><a ng-click="switchVersion(version)">{{version.service || "first version"}}</a>
+        <div class='fluid-container'>
+          <div class='row'>
+            <div class='col-lg-5'>
+              <blockquote ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'caption':language"></blockquote>
+            </div>
+          
+            <!-- Single button -->
+            <div class='col-lg-7'>
+              <div ng-if='item.props.mimetype=="image"'>
+                <div ng-if="versions.length > 1" class="btn-group" dropdown is-open="status.isopen" tooltip="view a different version">
+                  <button type="button" class="btn btn-default dropdown-toggle" dropdown-toggle ng-disabled="disabled">
+                    {{currentVersion.service || "accepted"}}<span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu" role="menu">
+                    <li ng-repeat="version in item.versions"><a ng-click="switchVersion(version)">{{version.service || "first version"}}</a>
 
-              <li class="divider"></li>
+                    <li class="divider"></li>
 
-              <li><a ng-click="switchVersion(mergedVersion)">merged version</a></li>
-            </ul>
-          </div>
-          <div>
-            <img  ng-src="media/{{item.props.url}}" annotorious w="item.props.width" h="item.props.height" version="currentVersion">
+                    <li><a ng-click="switchVersion(mergedVersion)">merged version</a></li>
+                  </ul>
+                </div>
+                <div>
+                  <img  ng-src="media/{{item.props.url}}" annotorious w="item.props.width" h="item.props.height" version="currentVersion" />
+                </div>
+              </div>
+          
+              <div class='full-text' ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'url':language"></div>
+            </div>
           </div>
         </div>
-        
-        <div class='full-text' ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'url':language"></div>
-        
+          
         
         <!-- <div annotator>
         <div class="full-text" ng-if='item.props.mimetype!="image"' lazytext url='item.props|url:language'></div>
