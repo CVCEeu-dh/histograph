@@ -48,6 +48,14 @@ WITH res, curators, locations, persons, organizations, collect({
       rel: r_soc
     })[0..5] as social_groups
 
+OPTIONAL MATCH (res)-[r_the:appears_in]-(the:`theme`)
+WITH res, curators, locations, persons, organizations, social_groups, collect({
+      id: id(the),
+      type: 'theme',
+      props: the,
+      rel: r_the
+    })[0..5] as themes
+
 OPTIONAL MATCH (ver)-[:describes]->(res)
 OPTIONAL MATCH (res)-[:belongs_to]->(col)
 OPTIONAL MATCH (com)-[:mentions]->(res)
@@ -63,7 +71,8 @@ RETURN {
     persons:   persons,
     organizations: organizations,
     social_groups:  social_groups,
-    collections: EXTRACT(p in COLLECT(DISTINCT col)|{name: p.name, id:id(p), type: 'collection'}),
+    themes:  themes,
+    //collections: EXTRACT(p in COLLECT(DISTINCT col)|{name: p.name, id:id(p), type: 'collection'}),
     comments: count(distinct com),
     inquiries: count(distinct inq)
   }

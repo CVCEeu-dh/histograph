@@ -22,6 +22,9 @@ MATCH (e)-[r3:appears_in]->(res:resource)
       e.specificity = toFloat(num_of_docs_per_ent)/toFloat(num_of_docs)
 
 
+
+
+
 // name: computate_cosine_similarity
 // Cfr. http://gist.neo4j.org/?8173017
 // Note that tfidf should be computated already. Calculate the cosine similarity between coappearing entities
@@ -54,14 +57,15 @@ WITH p1,p2, intersection, H1, collect(res2) as H2
 WITH p1, p2, intersection, ABS(length(H1)-intersection - length(H2)-intersection) as cdiff, H1+H2 as U UNWIND U as res
 WITH p1, p2, intersection, cdiff, count(distinct res) as union
 WITH p1, p2, intersection,  union, toFloat(intersection)/toFloat(union) as jaccard, cdiff
-WITH p1, p2, intersection,  union, jaccard, toFloat(cdiff)/toFloat(union) as overlapping
+WITH p1, p2, intersection,  union, jaccard, cdiff, toFloat(cdiff)/toFloat(union) as overlapping
 
 MERGE (p1)-[r:appear_in_same_document]-(p2)
   SET
     r.jaccard     = jaccard,
     r.intersections  = intersection,
     r.union       = union,
-    r.overlapping = overlapping
+    r.overlapping = overlapping,
+    r.cdiff       = cdiff
 
 
 
@@ -81,3 +85,5 @@ WITH p1, p2, r
 RETURN p1.name, p2.name, p2.wiki_id, p1.specificity, p2.specificity, r.jaccard, r.union, r.intersections, r.difference
 ORDER BY r.jaccard DESC, r.union DESC
 LIMIT 1
+
+//

@@ -31,13 +31,22 @@ LIMIT {limit}
   MERGE (ent:entity:{:type} {links_wiki: {links_wiki}})
 {/if}
 {unless:links_wiki}
-  MERGE (ent:entity:{:type} {name:{name}})
+  MERGE (ent:entity:{:type} {slug:{slug}})
 {/unless}
 ON CREATE SET
   ent.name          = {name},
   ent.name_search   = {name_search},
   ent.celebrity     = 0,
   ent.score         = 0,
+  {if:name_en}
+    ent.name_en     = {name_en},
+  {/if}
+  {if:name_fr}
+    ent.name_fr     = {name_fr},
+  {/if}
+  {if:name_de}
+    ent.name_de     = {name_de},
+  {/if}
   {if:lat}
     ent.lat         = {lat},
   {/if}
@@ -61,9 +70,20 @@ ON CREATE SET
     ent.geocoding_fcl = {geocoding_fcl},
     ent.geocoding_country = {geocoding_country},
   {/if}
-  ent.creation_date = {creation_date},
-  ent.creation_time = {creation_time}
+  ent.creation_date = {exec_date},
+  ent.creation_time = {exec_time},
+  ent.last_modification_date = {exec_date},
+  ent.last_modification_time = {exec_time}
 ON MATCH SET
+  {if:name_en}
+    ent.name_en     = {name_en},
+  {/if}
+  {if:name_fr}
+    ent.name_fr     = {name_fr},
+  {/if}
+  {if:name_de}
+    ent.name_de     = {name_de},
+  {/if}
   {if:lat}
     ent.lat         = {lat},
   {/if}
@@ -87,8 +107,8 @@ ON MATCH SET
     ent.geocoding_fcl = {geocoding_fcl},
     ent.geocoding_country = {geocoding_country},
   {/if}
-  ent.last_modification_date = {creation_date},
-  ent.last_modification_time = {creation_time}
+  ent.last_modification_date = {exec_date},
+  ent.last_modification_time = {exec_time}
 WITH ent
 LIMIT 1
 MATCH (res:resource)
@@ -105,8 +125,10 @@ WITH ent, res
     {if:services}
       r.services   = {services},
     {/if}
-    r.creation_date = {creation_date},
-    r.creation_time = {creation_time}
+    r.creation_date = {exec_date},
+    r.creation_time = {exec_time},
+    r.last_modification_date = {exec_date},
+    r.last_modification_time = {exec_time}
   ON MATCH SET
     {if:frequency}
       r.frequency   = {frequency},
@@ -117,8 +139,8 @@ WITH ent, res
     {if:services}
       r.services   = {services},
     {/if}
-    r.last_modification_date = {creation_date},
-    r.last_modification_time = {creation_time}
+    r.last_modification_date = {exec_date},
+    r.last_modification_time = {exec_time}
 RETURN {
   id: id(ent),
   props: ent,
@@ -523,6 +545,15 @@ SET
   ent.last_modification_date = {exec_date},
   ent.last_modification_time = {exec_time}
 return ent, u, res, r1 as rel, r2
+
+
+// name: reconcile_entities
+// prepare . Propose as problematic...
+MATCH (from:entity), (to:entity), (u:user)
+WHERE id(from) = {from_entity_id}
+  AND id(to)   = {to_entity_id}
+  AND id(u)    = {user_id}
+
 
 
 // name: remove_entity

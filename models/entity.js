@@ -40,12 +40,14 @@ module.exports = {
   create: function(properties, next) {
     var now   = helpers.now(),
         props = _.assign(properties, {
+          type: properties.type || 'unknown',
+          slug: properties.slug || helpers.text.slugify(properties.name),
           links_wiki: _.isEmpty(properties.links_wiki)? undefined: properties.links_wiki,
-          creation_date: now.date,
-          creation_time: now.time,
+          exec_date: now.date,
+          exec_time: now.time,
           services: properties.services,
           languages: properties.languages,
-          frequency: properties.frequency,
+          frequency: properties.frequency || 1,
           resource_id: properties.resource.id,
           name_search: properties.name_search || properties.name.toLowerCase()
         }),
@@ -252,6 +254,9 @@ module.exports = {
           if(result.rel.properties.downvote && !!~result.rel.properties.downvote.indexOf(user.username)) {
             result.rel.properties.downvote = _.remove(result.rel.properties.downvote, user.username);
           }
+
+          // do upvote the entity itselft!
+          
         }
 
         if(params.action == 'downvote') {
@@ -610,50 +615,14 @@ module.exports = {
     })
   },
   /*
-    Do different entities poinjt to the same data? This function allow to merge them along with their links !! @todo
-    links will contain hidden field about this transaction.
+    Propose merging two entities.
+    (user)-[:suggest]->(merge)-[:mentions]->(from,to)
+    
   */
-  reconcile: function (from, to, next) {
+  reconcile: function (from, to, user, params, next) {
     // mark the entities as mergeable. What is the most complete entity?
     // count the different relationships and check the various fields
-
-    
-
-    neo4j.query(queries.get_relationships, {
-      id: from.id
-    }, function (err, relationships) {
-      if(err)
-        return next(err);
-      
-      var q = async.queue(function (relationship, nextRelationship) {
-        console.log(clc.blackBright('copy:',clc.yellowBright(relationship.start),'-[:', relationship.type,']->',clc.yellowBright(relationship.end)))
-        var query = parser.agentBrown(queries.merge_relationships, {
-          type: relationship.type
-        });
-        // console.log(query)
-        neo4j.query(query, {
-          id_start: to.id,
-          id_end: relationship.end,
-          reconciled_by: _.unique((relationship.reconciled_by||[]).concat(from.id))
-        }, function (err, newRelationship) {
-          if(err)
-            throw err;
-          newRelationship = newRelationship[0]
-          console.log(clc.blackBright('  to:',clc.magentaBright(newRelationship.start),'-[:', newRelationship.type,']->',clc.yellowBright(newRelationship.end)))
-          // delete relationship by id....(beware!!!)
-          
-          nextRelationship(); 
-        })
-      }, 1);
-      q.push(relationships);
-      q.drain = function(err) {
-        if(err)
-          next(err)
-        else
-          next()
-      }
-      // merge relationship, one by one!!
-    })
+    // neo4j.query(queries.)
   },
   
   model: function(item, options) {
