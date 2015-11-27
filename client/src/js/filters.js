@@ -124,10 +124,10 @@ angular.module('histograph')
       
       return [
         '(', 
-          props.birth_place? props.birth_place + ', ': '',
+          // props.birth_place? props.birth_place + ', ': '',
           start_date_a.isValid()? start_date_a.format('ll'): ' ? ',
         ' — ',
-          props.death_place? props.death_place + ', ': '',
+          // props.death_place? props.death_place + ', ': '',
           start_date_b.isValid()? start_date_b.format('ll'): ' ... ',
         ')'
       ].join(''); // count years

@@ -137,12 +137,12 @@ a#header-title {
 }
 
 .related .img-wrapper {
-  height: 200px;
+  height: 240px;
   overflow: hidden;
   background: #383838;
 }
 .related .img {
-  height: 200px;
+  height: 240px;
   background-size: cover;
   opacity: 0;
   
@@ -1194,7 +1194,7 @@ height: 150px;
   background-color: rgba(218, 218, 218, 0.8);
   padding: 10px 17px;
   border-radius: 2px;
-  font-family: 'proxima-nova';
+  font-family: sans-serif;
   font-style: italic;
   display: inline-block;
 }
@@ -2076,7 +2076,7 @@ li.CodeMirror-hint-active {
   margin-right: 20px;
   height: 45px;
   overflow: hidden;
-  font-family: 'proxima-nova';
+  font-family: sans-serif;
   text-shadow: 1px 1px #151515;
 }
 
@@ -2115,9 +2115,11 @@ li.CodeMirror-hint-active {
   width:100%;
 }
 .tooltip .tooltip-inner {
-  line-height: 18px;
-  font-size: 12px;
-  font-family: 'proxima-nova';
+  line-height: 21px;
+  font-size: 11px;
+  font-family: sans-serif;
+  padding: 5px 15px;
+  color: #CFC9C9;
 }
 
 .tooltip.sigma {
@@ -5896,8 +5898,17 @@ Copyright (c) 2015 Daniel Eden
   width: 320px;
 }
 .typeahead-in-dropdown{
-  padding: 20px;
+      padding: 5px 0;
+  font-weight: normal;
+}
 
+.typeahead-in-dropdown input{
+  margin: 5px 0 15px 15px;
+  width: 285px;
+}
+
+.typeahead-in-dropdown label {
+  margin: 0 15px
 }
 
 .typeahead-in-dropdown ul.dropdown-menu {
@@ -5911,6 +5922,8 @@ Copyright (c) 2015 Daniel Eden
   padding: 0;
   margin: 0;
   width: 100%;
+      background: #f8f8f8;
+    border-top: 1px solid #e8e8e7;
 }
 
 .typeahead-in-dropdown ul.dropdown-menu >li.active{
@@ -5923,16 +5936,33 @@ Copyright (c) 2015 Daniel Eden
   margin: 0;
 }
 
+.typeahead-in-dropdown ul.dropdown-menu .with-thumbnail{
+  min-height: 50px;
+  clear: both
+}
+.typeahead-in-dropdown ul.dropdown-menu h4{
+  margin: 5px 0 0 0;
+}
+
+.typeahead-in-dropdown ul.dropdown-menu .with-thumbnail h4{
+  font-weight: bold;
+    
+}
+
+
 .typeahead-in-dropdown ul.dropdown-menu >li a .thumbnail {
-  background-size:cover;
+  background-size: cover;
   background-color: black;
-  background-repeat:no-repeat;
-  background-position:center;
+  background-repeat: no-repeat;
+  background-position: top;
   width: 50px;
   height: 50px;
   float: left;
   margin-right: 10px;
+  border-radius: 50px;
+  border: 2px solid;
 }
+
 /*
   Special btn
 */

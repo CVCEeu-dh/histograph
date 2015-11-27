@@ -1,8 +1,9 @@
 <!-- typeahead template for FILTERING purpose -->
-<div>
+<div class='{{match.model.props.thumbnail?"with-thumbnail":""}}'>
   <a ng-if='match.model.type != "default"' >
     
-       <div class='thumbnail' ng-if='match.model.props.thumbnail' style='background-image:url({{match.model.props.thumbnail}})'></div>{{match.model.props | title: 'en'}}
+       <div class='thumbnail' ng-if='match.model.props.thumbnail' style='background-image:url({{match.model.props.thumbnail}})'></div>
+       <h4>{{match.model.props|lookup:'name':'en'}}</h4>
        <p ng-if='match.model.props.birth_date'>{{match.model.props|datesOfSomeone}}</p>
   </a>
 </div>
