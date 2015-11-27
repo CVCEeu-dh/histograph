@@ -265,8 +265,12 @@ a#header-title {
 .empty {
   background: #FFE660;
 }
-.tag {
+
+.tag-wrap {
   margin: 0 8px 0 0;
+}
+.tag {
+  
   text-decoration: none;
   background:#eee;
   cursor: pointer;
@@ -1822,7 +1826,7 @@ li.CodeMirror-hint-active {
   background: #585858;
   /*border: 1px solid #C5C5C6;*/
   border-radius: 3px;
-  z-index: 11;
+  z-index: 1100;
   box-shadow: 0 5px 10px rgba(0,0,0,.175);
   opacity: .9;
   transition: opacity .22s ease-in-out;
@@ -5631,7 +5635,7 @@ Copyright (c) 2015 Daniel Eden
   box-shadow: 0 0 6px #686868;
 }
 
-.modal-content form {
+.inspect .modal-content form {
   margin-left: 40px;
 }
 .modal-content .profile-pic{
@@ -5834,6 +5838,43 @@ Copyright (c) 2015 Daniel Eden
 
 /**
   
+  Contribute Modal
+  ---
+
+*/
+.contribute .modal-dialog {
+  width: 300px
+}
+
+.contribute .modal-dialog .modal-content{
+  width: 300px;
+  bottom: auto;
+}
+
+.contribute .modal-dialog .modal-content .modal-body {
+  padding:0;
+}
+
+.contribute .modal-content h4{
+    color: #151515;
+    font-weight: normal;
+    padding-top: 0;
+}
+
+.contribute .dropdown-menu{
+  font-size: 12px;
+}
+
+.contribute .typeahead-in-dropdown input{
+  width: 268px;
+}
+
+.contribute .typeahead-in-dropdown ul.dropdown-menu >li{
+  padding: 10px;
+}
+
+/**
+  
   Introfuction
 
 */
@@ -5926,6 +5967,8 @@ Copyright (c) 2015 Daniel Eden
     border-top: 1px solid #e8e8e7;
 }
 
+
+
 .typeahead-in-dropdown ul.dropdown-menu >li.active{
   background: #e8e8e8;
 }
@@ -5935,6 +5978,11 @@ Copyright (c) 2015 Daniel Eden
   font-weight: normal;
   margin: 0;
 }
+
+.typeahead-in-dropdown ul.dropdown-menu >li a:hover{
+  border-bottom: 0px transparent;
+}
+
 
 .typeahead-in-dropdown ul.dropdown-menu .with-thumbnail{
   min-height: 50px;

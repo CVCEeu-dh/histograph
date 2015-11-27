@@ -419,7 +419,7 @@ apiRouter.route('/resource/:id(\\d+)/related/resource/timeline')
   .get(ctrl.resource.getRelatedResourcesTimeline);
 apiRouter.route('/cooccurrences') // @todo move to entity controller.
   .get(ctrl.resource.getCooccurrences)
-
+// apiRouter.route('/resource/related/:entity(person|location|organization|theme)/graph')
 
 /*
 
@@ -430,10 +430,10 @@ apiRouter.route('/cooccurrences') // @todo move to entity controller.
   Cfr Neo4j queries: queries/entity.cyp
   
 */
-apiRouter.route('/entity/:id')
+apiRouter.route('/entity/:id(\\d+)')
   .get(ctrl.entity.getItem)
   
-apiRouter.route('/entity/:id/related/resource')
+apiRouter.route('/entity/:id(\\d+)/related/resource')
   .get(ctrl.entity.getRelatedResources);
   
 apiRouter.route('/entity/:id(\\d+)/related/:entity(person|location|organization)')

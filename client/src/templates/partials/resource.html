@@ -40,7 +40,7 @@
         </div>
           
         <div class="meta">
-          <span ng-if="item.persons.length" class="tags"><i>themes</i>:
+          <span ng-if="item.themes.length" class="tags"><i>themes</i>:
             <span ng-repeat="the in item.themes"><span class="tag theme" data-id='{{the.id}}' gasp-type='theme' gasp-parent='{{item.type}}-{{item.id}}'>{{the.props|lookup:"name":language}}</span>{{$last? '':  ', '}}</span> — 
           </span>
           <span ng-if="item.persons.length" class="tags"><i>persons in the document</i>:
@@ -56,6 +56,8 @@
           <span ng-if="item.props.languages.length"> <i>available in</i>:
             <span class="language {{lang == language? 'active':''}}" ng-repeat="lang in item.props.languages" ng-click='setLanguage(lang)'>{{lang}} </span>
           </span>
+          <span ng-click='contribute(item)'>suggestions?</span>
+
         </div>
         <div class="actions">
           <div class="btn-group">
@@ -86,6 +88,7 @@
           <div class='row'>
             <div class='col-lg-5'>
               <blockquote ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'caption':language"></blockquote>
+              <blockquote ng-if='item.annotations.length' context='item' marked="item.annotations|lookup:'caption':language"></blockquote>
             </div>
           
             <!-- Single button -->

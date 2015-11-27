@@ -109,6 +109,16 @@ module.exports = function(io){
       },
       req.user,
       form.params, function (err, item) {
+
+        io.emit('entity:create-related-resource:done', {
+          user: req.user.username,
+          id: +form.params.entity_id,
+          data: item,
+          resource: {
+            id: +form.params.resource_id
+          }
+        });
+
         if(err)
           return helpers.cypherQueryError(err, res);
         return res.ok({

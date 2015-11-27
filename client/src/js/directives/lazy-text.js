@@ -35,7 +35,7 @@ angular.module('histograph')
     }
   })
 
-  .directive('grammar', function($compile, $log, $http) {
+  .directive('isolateItem', function($compile, $log, $http) {
     return {
       restrict : 'A',
       link : function(scope, element, attrs) {

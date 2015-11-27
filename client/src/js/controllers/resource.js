@@ -54,6 +54,13 @@ angular.module('histograph')
         $log.info('ResourceCtrl socket@resource:create-related-user:done - by:', result.user);
     })
 
+    socket.on('entity:create-related-resource:done', function (result) {
+      console.log(result)
+      if(result.resource.id == $stateParams.id) { // update user notificaation)
+        $log.info('ResourceCtrl socket@entity:create-related-resource:done - by:', result.user);
+        $scope.$parent.$broadcast(EVENTS.API_PARAMS_CHANGED);
+      }
+    });
 
     $scope.switchVersion = function(version) {
       $log.info('resourceCtrl.switchVersion', version)
@@ -62,11 +69,27 @@ angular.module('histograph')
 
     $scope.switchAnnotation = function(annotation) {
       $scope.currentAnnotation = annotation;
-    }
+    };
+
+    /*
+      Enable the entity to resource creation. Close the dropdown by addign a dummy suggest
+    */
+    $scope.suggestEntityFromTypeahead = function($item, $model) {
+      $log.log('ResourceCtrl -> suggestEntityFromTypeahead()', $item, $model)
+      
+    };
+
+
+
+
     /**
       on load
     */
     $scope.item = angular.extend({ type: 'resource'}, resource.result.item);
+    
+
+
+
     // $scope.isFavItem = resource.result.item.filter(function(d) {
     //   return d.curators.length && _.find(d.curators, {}
     // }).length
@@ -96,7 +119,7 @@ angular.module('histograph')
     $scope.graphType = 'monopartite-entity'
     
     
-  
+    
     
     /**
       Annotations

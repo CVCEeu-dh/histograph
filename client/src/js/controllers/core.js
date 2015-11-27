@@ -694,7 +694,7 @@ angular.module('histograph')
         animation: true,
         templateUrl: 'templates/modals/inspect.html',
         controller: 'InspectModalCtrl',
-        windowClass: "modal fade in",
+        windowClass: "modal fade in inspect",
         resolve: {
           items: function(SuggestFactory) {
             return SuggestFactory.getUnknownNodes({ids: items}).$promise
@@ -717,6 +717,41 @@ angular.module('histograph')
       });
     };
 
+    /*
+      Contribute
+      ---
+      Open the contribute modal for the given item
+      It allows users to suggest entities.
+      usage (from everywhere)
+      $scope.contribute({id: 25723, type: 'resource'})
+    */
+    $scope.contribute = function(item) {
+      $log.debug('CoreCtrl -> contribute() - item:', item);
+
+      var language      = $scope.language;
+      var modalInstance = $uibModal.open({
+        animation: true,
+        templateUrl: 'templates/modals/contribute.html',
+        controller: 'ContributeModalCtrl',
+        windowClass: "modal fade in contribute",
+        size: 'sm',
+        resolve: {
+          resource: function(ResourceFactory) {
+            return item
+          },
+          language: function() {
+            return language
+          }
+        }
+        // resolve: {
+        //   items: function () {
+        //     return $scope.items;
+        //   }
+        // }
+      });
+
+    }
+    // $scope.contribute({id: 25723})
     // $scope.inspect([26414])//27329]);
     /*
       Open an issue modal
@@ -770,7 +805,8 @@ angular.module('histograph')
   })
   /*
     Inspect an entity.
-    Items are entity items
+
+    Template: cfr. templates/modals/inspect.html
   */
   .controller('InspectModalCtrl', function ($scope, $log, $uibModalInstance, items, relatedFactory, relatedModel, EntityRelatedExtraFactory, SuggestFactory, language ) {
     $scope.mergeMode = items.length > 1;
@@ -858,6 +894,64 @@ angular.module('histograph')
         })
         break; // only the first item
       }
+  })
+
+  /*
+    Contribute: add an (entity)-[]-(resource) relationship (sort of tagging)
+    Template: cfr. templates/modals/inspect.html
+    Resolve: it requires a (resource) object
+  */
+  .controller('ContributeModalCtrl', function ($scope, $log, $uibModalInstance, resource,SuggestFactory,EntityRelatedExtraFactory) {
+    // the list of suggested entities
+    $scope.persons = [];
+    $log.debug('ContributeModalCtrl -> ready()', resource.id);
+
+    $scope.ok = function () {
+      $uibModalInstance.close();
+      $log.log('ContributeModalCtrl -> ok()', 'saving...', $scope.persons);
+      for(var i in $scope.persons)
+        EntityRelatedExtraFactory.save({
+          id: $scope.persons[i].id,
+          related_id: resource.id,
+          model: 'resource'
+        }, {}, function(res) {
+          $log.log('ContributeModalCtrl -> ok()', 'saved', res)
+        })
+    };
+
+    $scope.cancel = function () {
+      $uibModalInstance.dismiss('cancel');
+    };
+
+    /*
+      typeahead
+    */
+    $scope.typeaheadSuggest = function(q, type) {
+      $log.log('ContributeModalCtrl -> typeahead()', q, type);
+      // suggest only stuff from 2 chars on
+      if(q.trim().length < 2)
+        return;
+      
+      return SuggestFactory.get({
+        m: type,
+        query: q,
+        limit: 10
+      }).$promise.then(function(res) {
+        if(res.status != 'ok')
+          return [];
+        return res.result.items
+      })
+    }
+
+    $scope.typeaheadSelected = function($item) {
+      switch($item.type){
+        case 'person':
+          $scope.persons.push($item);
+          break;
+      }
+        
+      $log.log('ContributeModalCtrl -> typeaheadSelected()', $item);
+    }
   })
   /*
     This controller handle the modal bootstrap that allow users to propose a new content for something.
