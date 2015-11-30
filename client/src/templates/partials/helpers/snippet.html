@@ -17,12 +17,15 @@
           </div>
         </div>
         <div class='content'>
-          <h4><a ng-href='#/e/{{relatedItem.id}}' marked="relatedItem.props|lookup:'name':language"></a></h4>
+          <h4><a ng-href='#/e/{{relatedItem.id}}/g' marked="relatedItem.props|lookup:'name':language"></a></h4>
           <div class='date'>{{relatedItem.props.birth_time | datesOfAPerson : relatedItem.props.death_time}}</div>
         </div>
         <div class="actions">
-          <a class="action" title="filter" uib-tooltip="filter by " uib-tooltip-placement="top" uib-tooltip-append-to-body="true" ng-click="addToFilter(relatedItem)">
-            <span class="fa fa-filter"></span></a>
+          <a class="action" title="visit" uib-tooltip="view details and related documents" uib-tooltip-placement="top" uib-tooltip-append-to-body="true" ng-href='#/e/{{relatedItem.id}}'> <!-- ng-click="addToFilter(relatedItem)"> -->
+            <span class="fa fa-link"></span></a>
+          <a class='action'>
+            <span class="fa fa-target"></span></a>
+          </a>
           <a class="action" title="filter" uib-tooltip="add to your bookmarks" uib-tooltip-placement="top" uib-tooltip-append-to-body="true" ng-click="queue(relatedItem)">
             <span class="fa fa-bookmark-o"></span></a>
         </div>

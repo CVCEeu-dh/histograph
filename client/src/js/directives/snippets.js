@@ -108,6 +108,7 @@ angular.module('histograph')
 
           var itemsIdsToLoad = [];
           if(target.type == 'node') {
+            scope.sharedItems = [];
             if(target.data.node.props) {// if the node has already  been loaded
               scope.fill([target.data.node])
             } else
@@ -216,7 +217,7 @@ angular.module('histograph')
           Watch center item changes. Whenever item is selected
         */
         scope.$watch('center', function(v) {
-          $log.log('::snippets @center');
+          $log.log('::snippets @center', v);
           
         });
 
@@ -245,6 +246,9 @@ angular.module('histograph')
             scope.sync();
         });
 
+        /*
+          Listen to state changes
+        */
       }
     }
   })

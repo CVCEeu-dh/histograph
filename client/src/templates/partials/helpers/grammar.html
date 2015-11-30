@@ -1,5 +1,5 @@
 <!-- global template for grammar based on current state-->
-<div class='grammar' isolate-item>
+<div class='grammar'>
   <!-- change sub state -->
   
   <!-- &nbsp;{{ruler.label}} -->
@@ -57,7 +57,7 @@
         </span>
         
         
-        <div class='grammar-choice' ng-if='grammar.relatedTo'>
+        <div class='grammar-choice' ng-if='grammar.relatedTo'  isolate-item>
           <span ng-if='!filters.with'>
             &nbsp;{{grammar.connector.notRelatedTo}}&nbsp;
           </span>

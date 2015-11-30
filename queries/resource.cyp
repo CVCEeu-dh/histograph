@@ -469,7 +469,7 @@ MATCH (p1:person)-[r:appear_in_same_document]-(p2:person)
 WHERE id(p1) < id(p2)
 WITH p1,p2,r
 ORDER BY r.intersections DESC
-LIMIT 500
+LIMIT {limit}
 WITH p1,p2,r
 RETURN {
   source: {

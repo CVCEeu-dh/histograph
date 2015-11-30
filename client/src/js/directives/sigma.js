@@ -281,6 +281,7 @@ angular.module('histograph')
 
         scope.$on(EVENTS.STATE_CHANGE_SUCCESS, function (e, stateName) {
           $log.log('::sigma @EVENTS.STATE_CHANGE_SUCCESS', stateName);
+          scope.center = null;
           if(stateName.indexOf('graph') != -1)
             scope.setMessage({message: 'loading graph ...'});
         });
