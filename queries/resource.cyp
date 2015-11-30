@@ -29,7 +29,7 @@ WITH res, curators, locations, collect({
       type: 'person',
       props: per,
       rel: r_per
-    })[0..5] as persons
+    })[0..10] as persons
 
 OPTIONAL MATCH (res)-[r_org:appears_in]-(org:`organization`)
 WHERE not(has(r_org.score)) OR r_org.score > 0
@@ -60,6 +60,7 @@ OPTIONAL MATCH (ver)-[:describes]->(res)
 OPTIONAL MATCH (res)-[:belongs_to]->(col)
 OPTIONAL MATCH (com)-[:mentions]->(res)
 OPTIONAL MATCH (inq)-[:questions]->(res)
+OPTIONAL MATCH (liker:user)-[:likes]->(res)
 
 RETURN {
   resource: {
@@ -75,6 +76,7 @@ RETURN {
     //collections: EXTRACT(p in COLLECT(DISTINCT col)|{name: p.name, id:id(p), type: 'collection'}),
     comments: count(distinct com),
     inquiries: count(distinct inq)
+    likes: count(liker)
   }
 } AS result
 
@@ -466,7 +468,7 @@ MATCH (p1:person)-[r:appear_in_same_document]-(p2:person)
 WHERE id(p1) < id(p2)
 WITH p1,p2,r
 ORDER BY r.intersections DESC
-LIMIT {limit}
+LIMIT 500
 WITH p1,p2,r
 RETURN {
   source: {
@@ -805,7 +807,7 @@ RETURN candidate.start_time as t, count(*) as weight
 MATCH (res:resource), (u:user {username:{username}})
 WHERE id(res) = {id}
 WITH res, u
-MERGE (u)-[r:curates]->(res)
+MERGE (u)-[r:likes]->(res)
 ON CREATE SET
   r.creation_date = {creation_date},
   r.creation_time = {creation_time},

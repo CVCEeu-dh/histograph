@@ -165,22 +165,18 @@ module.exports = {
       next(null, results.items, results.count_items);
     });
   },
+
   /*
     Change the relationship status from resource to the entity.
-    status: DISCARD
-    
-    
-    Alternative:
-    Downvote the link from the resource to the entity.
-    If two users downvoted it, the relationship disappear?
+    DOWNVOTE the relationship
   */
   signaleRelatedResource: function(entity, resource, next) {
     
   },
 
   /*
-    Create a manual [appears_in] relationship between the entity and the resource.
-    api
+    Create (or merge) a manual [appears_in] relationship between the entity and the resource.
+    api. The entity will be upvoted; the entity-resoruce relationship will be created, or merged, then upvoted.
     @param entity   - entity.id should be an integer identifier
     @param resource - resource.id should be an integer identifier
     @param user     - user.id and user.username should exist
@@ -193,6 +189,8 @@ module.exports = {
       entity_id: entity.id,
       resource_id: resource.id,
       user_id: user.id,
+      username: user.username,
+      frequence: params.frequence || 1,
       exec_date: now.date,
       exec_time: now.time
     }, function (err, results) {
@@ -203,21 +201,47 @@ module.exports = {
 
       var result = results[0];
       
-      // upvote automatically, since you admitted that the entity exists
-      var upvotes = [],
-          downvotes = [];
-      upvotes = _.unique((result.ent.upvote || []).concat(user.username));
+      // 1. UPVOTE ENTITY upvote automatically, since you admitted that the entity exists ;)
+      // it increases score and celebrity, removes from the downvotes if any
+      result.ent.upvote = _.unique((result.ent.upvote || []).concat(user.username));
       if(result.ent.downvote && !!~result.ent.downvote.indexOf(user.username)) {
-        downvotes = _.remove(result.ent.downvote, user.username);
+        result.ent.downvote = _.remove(result.ent.downvote, user.username);
       }
+      result.ent.celebrity =  result.ent.upvote.length + (result.ent.downvote|| []).length;
+      result.ent.score = result.ent.upvote.length - (result.ent.downvote|| []).length;
+      
 
-      neo4j.save(result.ent, function (err, node) {
+      // 2. UPVOTE RELATIONSHIP
+      result.rel.properties.upvote = _.unique((result.rel.properties.upvote || []).concat(user.username));
+      if(result.rel.properties.downvote && !!~result.rel.properties.downvote.indexOf(user.username)) {
+        result.rel.properties.downvote = _.remove(result.rel.properties.downvote, user.username);
+      }
+      // create issue to track events in global stuff
+
+      // download the updated version for the given resource
+      async.series({
+        entity: function (callback) {
+          neo4j.save(result.ent, callback);
+        },
+        relationship: function (callback) {
+          neo4j.rel.update(result.rel, callback);
+        },
+        resource: function (callback) {
+          Resource.get({
+            id: result.res.id
+          }, callback)
+        }
+      }, function (err, results) {
         if(err)
           next(err);
         else
           next(null, {
             id: result.ent.id,
+            type: result.ent.type,
             props: result.ent,
+            related: {
+              resource: results.resource,
+            },
             rel: result.rel.properties
           });
       });
@@ -255,7 +279,7 @@ module.exports = {
             result.rel.properties.downvote = _.remove(result.rel.properties.downvote, user.username);
           }
 
-          // do upvote the entity itselft!
+          // 1. upvote the entity
           
         }
 
@@ -264,6 +288,8 @@ module.exports = {
           if(result.rel.properties.upvote && !!~result.rel.properties.upvote.indexOf(user.username)) {
             result.rel.properties.upvote =_.remove(result.rel.properties.upvote, user.username);
           }
+
+
         }
         
         result.rel.properties.celebrity =  _.compact(_.unique((result.rel.properties.upvote || []).concat(result.rel.properties.downvote|| []))).length;

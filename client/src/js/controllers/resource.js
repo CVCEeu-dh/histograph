@@ -58,6 +58,8 @@ angular.module('histograph')
       console.log(result)
       if(result.resource.id == $stateParams.id) { // update user notificaation)
         $log.info('ResourceCtrl socket@entity:create-related-resource:done - by:', result.user);
+        // change the tags...
+        $scope.item = result.data.related.resource; 
         $scope.$parent.$broadcast(EVENTS.API_PARAMS_CHANGED);
       }
     });

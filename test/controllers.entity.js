@@ -177,6 +177,7 @@ describe('controller:entity related items', function() {
       .expect(200)
       .end(function (err, res) {
         should.exist(res.body.result.item.rel)
+        console.log(res.body.result.item.rel)
         should.not.exists(err);
         done();
       });

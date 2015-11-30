@@ -154,7 +154,7 @@ a#header-title {
 
 }
 
-.related:hover .img{
+.related .img:hover{
   ;
   -webkit-transform: scale(1.04, 1.04);
    -moz-transform: scale(1.04, 1.04);
@@ -270,11 +270,21 @@ a#header-title {
   margin: 0 8px 0 0;
 }
 .tag {
-  
+  padding: 1px 4px;
   text-decoration: none;
   background:#eee;
   cursor: pointer;
+  border: 1px solid transparent;
+    
   transition: background .3s ease-out;
+}
+
+.tag.yours{
+  color: #151515;
+  /* background-color: #ccc; */
+  border: 1px solid #151515;
+  border-radius: 2px;
+    
 }
 
 .tag:hover{

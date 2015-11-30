@@ -40,23 +40,25 @@
         </div>
           
         <div class="meta">
-          <span ng-if="item.themes.length" class="tags"><i>themes</i>:
+          <p ng-if="item.themes.length" class="tags"><strong>themes</strong>:
             <span ng-repeat="the in item.themes"><span class="tag theme" data-id='{{the.id}}' gasp-type='theme' gasp-parent='{{item.type}}-{{item.id}}'>{{the.props|lookup:"name":language}}</span>{{$last? '':  ', '}}</span> — 
-          </span>
-          <span ng-if="item.persons.length" class="tags"><i>persons in the document</i>:
-            <span ng-repeat="per in item.persons"><span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.props.name}} - {{per.props.description}} ({{per.props.birth_date | date:"yyyy"}} - {{per.props.death_date | date:"yyyy"}}) {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name}}</span>{{$last? '':  ', '}}</span>   — 
-          </span>
-          <span ng-if="item.social_groups.length" class="tags"><i> groups</i>:
-            <span ng-repeat="per in item.social_groups"><span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.props.name}} {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name}}</span>{{$last? '':  ', '}}</span>   — 
-          </span>
-          <span ng-if="item.organizations.length" class="tags"><i>  organizations</i>:
-            <span ng-repeat="per in item.organizations"><span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.props.name}} {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name}}</span>{{$last? '':  ', '}}</span>   — 
-          </span>
-          
-          <span ng-if="item.props.languages.length"> <i>available in</i>:
+          </p>
+          <p ng-if="item.persons.length" class="tags"><strong>persons in the document</strong>:
+            <span ng-repeat="per in item.persons" ng-include='"templates/partials/entity-person-tag.html"'></span>   <!-- — --> 
+          </p>
+          <p ng-if="item.social_groups.length" class="tags"><strong> groups</strong>:
+            <span ng-repeat="per in item.social_groups"><span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.props.name}} {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name}} </span>{{$last? '':  ', '}}</span>    
+          </p>
+          <p ng-if="item.organizations.length" class="tags"><strong>  organizations</strong>:
+            <span ng-repeat="per in item.organizations"><span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.props.name}} {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name}} </span>{{$last? '':  ', '}}</span>    
+          </p>
+          <p ng-if="item.locations.length" class="tags"><strong>location mentioned</strong>:
+            <span ng-repeat="the in item.locations"><span class="tag location" data-id='{{the.id}}' gasp-type='location' gasp-parent='{{item.type}}-{{item.id}}'>{{the.props|lookup:"name":language}}</span>{{$last? '':  ', '}}</span>  
+          </p>
+          <p ng-if="item.props.languages.length"> <strong>available in</strong>:
             <span class="language {{lang == language? 'active':''}}" ng-repeat="lang in item.props.languages" ng-click='setLanguage(lang)'>{{lang}} </span>
-          </span>
-          <span ng-click='contribute(item)'>suggestions?</span>
+          </p>
+          <p ng-click='contribute(item)'>suggest other entities</p>
 
         </div>
         <div class="actions">

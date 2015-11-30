@@ -522,8 +522,11 @@ WHERE id(ent) = {entity_id}
   AND id(res) = {resource_id}
 
 WITH ent, u, res
+
 MERGE (ent)-[r1:appears_in]->(res)
   ON CREATE SET
+    r1.created_by    = {username},
+    r1.frequence     = {frequence},
     r1.creation_date = {exec_date},
     r1.creation_time = {exec_time},
     r1.last_modification_date = {exec_date},
@@ -533,27 +536,45 @@ MERGE (ent)-[r1:appears_in]->(res)
     r1.last_modification_time = {exec_time}
 
 MERGE (u)-[r2:curates]->(ent)
-ON CREATE SET
-  r2.creation_date = {exec_date},
-  r2.creation_time = {exec_time},
-  r2.last_modification_date = {exec_date},
-  r2.last_modification_time = {exec_time}
+  ON CREATE SET
+    r2.creation_date = {exec_date},
+    r2.creation_time = {exec_time},
+    r2.last_modification_date = {exec_date},
+    r2.last_modification_time = {exec_time}
+  ON MATCH SET
+    r2.last_modification_date = {exec_date},
+    r2.last_modification_time = {exec_time}
+
+MERGE (u)-[r3:curates]->(res)
+  ON CREATE SET
+    r3.creation_date = {exec_date},
+    r3.creation_time = {exec_time},
+    r3.last_modification_date = {exec_date},
+    r3.last_modification_time = {exec_time}
+  ON MATCH SET
+    r3.last_modification_date = {exec_date},
+    r3.last_modification_time = {exec_time}
+
+SET
+  ent.last_modification_date = {exec_date},
+  ent.last_modification_time = {exec_time}
+
+return ent, u, res, r1 as rel, r2
+
+
+// name: reconcile_entities
+// scenario:  
+MATCH (from:entity), (to:entity), (u:user)
+WHERE id(from) = {from_entity_id}
+  AND id(to)   = {to_entity_id}
+  AND id(u)    = {user_id}
+
 ON MATCH SET
   r2.last_modification_date = {exec_date},
   r2.last_modification_time = {exec_time}
 SET
   ent.last_modification_date = {exec_date},
   ent.last_modification_time = {exec_time}
-return ent, u, res, r1 as rel, r2
-
-
-// name: reconcile_entities
-// prepare . Propose as problematic...
-MATCH (from:entity), (to:entity), (u:user)
-WHERE id(from) = {from_entity_id}
-  AND id(to)   = {to_entity_id}
-  AND id(u)    = {user_id}
-
 
 
 // name: remove_entity
