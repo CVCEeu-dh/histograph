@@ -234,12 +234,11 @@ module.exports = {
   */
   getByIds: function(params, next) {
     // remove orderby from params
-    // console.log(params)
     if(params.orderby)
       delete params.orderby
     
     var query = parser.agentBrown(rQueries.get_resources, params);
-    // console.log(params.ids)
+    // console.log(query)
     
     neo4j.query(query, _.assign(params, {
       limit: params.limit || params.ids.length,
@@ -253,7 +252,7 @@ module.exports = {
       
       // console.log(params, items.length)
       var itemsAsDict = _.indexBy(module.exports.normalize(items, params),'id');
-      
+      // console.log(itemsAsDict)
       next(null, params.ids.map(function (id) {
         return itemsAsDict[''+id]
       }), {
@@ -565,7 +564,8 @@ module.exports = {
               encoding: 'utf8'
             }) || '';
           } catch(e) {
-            console.log('!warning, resource.getText(), file not found or not valid...', e)
+
+            // console.log('!warning, resource.getText(), file not found or not valid...', e)
             return '';
           }
         }

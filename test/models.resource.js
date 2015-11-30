@@ -138,6 +138,7 @@ describe('model:resource ', function() {
     }, function (err, resource) {
       if(err)
         throw err;
+
       __resourceB = resource;
       done();
     });
@@ -209,8 +210,8 @@ describe('model:resource ', function() {
     Resource.getByIds({
       ids: [__resourceB.id, __resourceA.id]
     }, function (err, items, info) {
-      if(err)
-        throw err;
+      should.not.exist(err);
+      // console.log(items, __resourceB.id, __resourceA.id)
       should.equal(_.map(items, 'id').join(), [__resourceB.id, __resourceA.id].join());
       should.equal(items.length, 2)
       should.exist(info.total_items)
@@ -297,7 +298,7 @@ describe('model:resource ', function() {
   });
   it('should delete the resource B', function (done) {
     Resource.remove({
-      id: __resourceA.id
+      id: __resourceB.id
     }, function (err) {
       should.not.exist(err);
       done();

@@ -83,10 +83,11 @@ RETURN {
 
 // name: get_resources
 // get resources with number of comments, if any
-MATCH (res:resource)<-[:appears_in]-(ent)
+MATCH (res:resource)
 {if:with}
-  WHERE id(ent) IN {with} 
-  
+  WITH res
+  MATCH res<-[:appears_in]-(ent)
+  WHERE id(ent) IN {with}
 {/if}
 WITH DISTINCT res
   {?res:ids__inID} {AND?res:start_time__gt} {AND?res:end_time__lt} {AND?res:mimetype__in} {AND?res:type__in}
