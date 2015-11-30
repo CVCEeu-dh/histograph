@@ -62,19 +62,25 @@ angular.module('histograph')
       Add filter and take care of putting the right args in location.search object.
     */
     $scope.addFilter = function(key, value) {
+      // force string
+      value = '' + value;
       if(!$scope.filters[key])
         $location.search(key, value);
       else {
         $log.log('FiltersCtrl -> addFilter() - key:', key, '- value:', value)
         
-        var list = _.unique(_.compact(_.map(angular.copy($scope.filters[key]), _.trim)));
+        var list = _.compact(_.map(angular.copy($scope.filters[key]), _.trim));
         
         (''+value).split(',').forEach(function(v){
           if(list.indexOf(value) === -1)
             list.push(value);
         })
+        // cleanup duplicates
+        list = _.unique(list);
+        debugger
         if(list.length)
           $location.search(key, list.join(','));
+
       }
       $scope.loadFiltersItems()
       
