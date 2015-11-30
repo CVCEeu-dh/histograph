@@ -430,7 +430,7 @@ apiRouter.route('/cooccurrences') // @todo move to entity controller.
   Cfr Neo4j queries: queries/entity.cyp
   
 */
-apiRouter.route('/entity/:id(\\d+)')
+apiRouter.route('/entity/:id([\\d,]+)')
   .get(ctrl.entity.getItem)
   
 apiRouter.route('/entity/:id(\\d+)/related/resource')

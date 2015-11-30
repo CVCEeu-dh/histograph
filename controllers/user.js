@@ -193,7 +193,7 @@ module.exports = function(io) {
           });
       if(!form.isValid)
         return helpers.formError(form.errors, res);
-      console.log(form)
+      // console.log(form)
       User.getRelatedResources({
         id: form.params.id
       }, form.params, function (err, items, info) {

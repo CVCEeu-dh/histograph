@@ -75,7 +75,7 @@ RETURN {
     themes:  themes,
     //collections: EXTRACT(p in COLLECT(DISTINCT col)|{name: p.name, id:id(p), type: 'collection'}),
     comments: count(distinct com),
-    inquiries: count(distinct inq)
+    inquiries: count(distinct inq),
     likes: count(liker)
   }
 } AS result

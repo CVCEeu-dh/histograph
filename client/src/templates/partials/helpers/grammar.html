@@ -31,7 +31,7 @@
         <div class='grammar-choice' ng-if='grammar.types'>
           <span ng-if='filters.type'>
             <span ng-repeat='filter in filters.type'>
-              <span class="filter "><b>{{filter}}</b><span ng-click='removeFilter("type",filter)'>&nbsp;<i class="fa fa-times-circle"></i></span></span>{{!$last? ', ': ''}}
+              <span class="filter "><b>{{filter}}</b><span ng-click='removeFilter("type",filter)'>&nbsp;<i class="fa fa-times-circle"></i></span></span>{{!$last? ' OR ': ''}}
             </span>
           </span>
           <span ng-if='!filters.type'>

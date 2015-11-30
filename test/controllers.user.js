@@ -102,7 +102,7 @@ describe('controller:user before', function() {
 
 
 describe('controller:user (related users)', function() {
-  it('should create a curates relationship between the resource and the user', function (done) {
+  it('should create a LIKES relationship between the resource and the user', function (done) {
     session
       .post('/api/resource/'+ __resourceA.id +'/related/user')
       .expect('Content-Type', /json/)
@@ -112,7 +112,7 @@ describe('controller:user (related users)', function() {
         should.exist(res.body.result.item);
         should.equal(res.body.result.item.rel.start, __user.id);
         should.equal(res.body.result.item.rel.end, __resourceA.id);
-        should.equal(res.body.result.item.rel.type, 'curates');
+        should.equal(res.body.result.item.rel.type, 'likes');
         
         done();
       });

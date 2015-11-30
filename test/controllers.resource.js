@@ -160,7 +160,7 @@ describe('controller:resource (related users)', function() {
         should.exist(res.body.result.item);
         should.equal(res.body.result.item.rel.start, __user.id);
         should.equal(res.body.result.item.rel.end, __resourceA.id);
-        should.equal(res.body.result.item.rel.type, 'curates');
+        should.equal(res.body.result.item.rel.type, 'likes');
         
         done();
       });
