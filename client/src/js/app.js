@@ -203,29 +203,13 @@ angular
           grammar: {
             label: 'documents',
             connector: {
-              type: 'in documents of type',
+              type: 'of type',
               relatedTo: 'which contains',
               notRelatedTo: 'related to anyone',
               from: 'from',
               to: 'to'
             },
-            types: [
-              {
-                name: 'in any kind of documents',
-              },
-              {
-                name: 'in pictures',
-                filter: 'type=picture'
-              },
-              {
-                name: 'in letters',
-                filter: 'type=letter'
-              },
-              {
-                name: 'in treaty',
-                filter: 'type=treaty'
-              }
-            ],
+            types: GRAMMAR.AS_TYPES,
             relatedTo: {
               typeahead: 'entity'
             }
