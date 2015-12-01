@@ -77,7 +77,7 @@ angular.module('histograph')
         })
         // cleanup duplicates
         list = _.unique(list);
-        debugger
+        
         if(list.length)
           $location.search(key, list.join(','));
 
