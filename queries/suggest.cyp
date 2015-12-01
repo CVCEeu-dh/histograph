@@ -336,6 +336,7 @@ RETURN {
   props: n,
   type: last(labels(n))
 } AS result
+ORDER BY n.score DESC, n.specificity DESC
 SKIP {offset}
 LIMIT {limit}
 

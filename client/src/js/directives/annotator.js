@@ -98,7 +98,8 @@ angular.module('histograph')
       },
       link : function(scope, element, attrs) {
         var entities = [],
-            renderer = new marked.Renderer();
+            renderer = new marked.Renderer(),
+            annotable = false;
         // chenge how marked interpred link for this special directive only
         renderer.link = function(href, title, text) {
           var localEntitiesIds = href.split(','),
@@ -123,6 +124,7 @@ angular.module('histograph')
         };
         
         
+        
         scope.$watch('marked', function(val) {
           if(!val)
             return;
@@ -137,36 +139,76 @@ angular.module('histograph')
           } else {
             element.html(marked(scope.marked));
           }
+          // enable annotations
           
+
+          
+          //   
+
+          // }
+           console.log(attrs)
           // apply tooltip
           $compile(element.contents())(scope);
-        })
+        });
+
+        // add annotation capabilities on marked elements
+
       }
     }
   })
 
   .directive('annotator', function ($log) {
     return {
-      restrict : 'A',
-      scope:{
-        onSelection: '&'
-      },
+      restrict : 'E',
+      
       link : function(scope, element, attrs) {
-        element.bind('mouseup', function(e){
-          var selection;
+        $log.log('::annotator')
+        Annotator.Plugin.HelloWorld = function (element) {
+          return {
+            pluginInit: function () { 
+              console.log('qpifpoqifposdifposfipofdipo', this.annotator)
+              this.annotator.subscribe("annotationCreated", function (annotation) {
+                console.log("The annotation: %o has just been created!", annotation)
+              })
+              .subscribe("annotationUpdated", function (annotation) {
+                console.log("The annotation: %o has just been updated!", annotation)
+              })
+              .subscribe("annotationDeleted", function (annotation) {
+                console.log("The annotation: %o has just been deleted!", annotation)
+              })
+              .subscribe("annotationEditorShown", function (editor, annotation) {
 
-          if (window.getSelection) {
-              selection = window.getSelection();
-          } else if (document.selection) {
-              selection = document.selection.createRange();
-          }
+                console.log("The annotation:  has just been annotationEditorShown!", arguments);
+                scope.contribute(scope.item);
+                scope.$apply();
+              })
+              .subscribe("annotationViewerShown", function (annotation) {
+                console.log("The annotation: %o has just been annotationViewerShown!", annotation)
+              })
 
-          if (selection.toString() !== '') {
-            var s = selection.toString();
-            $log.log('::annotator -> ',selection)  
+            }
+          };
+        }
+
+        var annotator = angular.element(element).annotator().data('annotator');
+        annotator.addPlugin('Unsupported');
+        annotator.addPlugin('HelloWorld');//' /*, any other options */);
+        // element..annotator()bind('mouseup', function(e){
+        //   var selection;
+
+        //   if (window.getSelection) {
+        //       selection = window.getSelection();
+        //   } else if (document.selection) {
+        //       selection = document.selection.createRange();
+        //   }
+
+        //   if (selection.toString() !== '') {
+        //     var s = selection.toString();
+        //     $log.log('::annotator -> ',selection)  
             
-          }
-        });
+        //   }
+        // });
+        
       }
     }
   });

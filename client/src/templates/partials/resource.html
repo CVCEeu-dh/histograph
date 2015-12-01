@@ -52,7 +52,7 @@
           <p ng-if="item.organizations.length" class="tags"><strong>  organizations</strong>:
             <span ng-repeat="per in item.organizations"><span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.props.name}} {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name}} </span>{{$last? '':  ', '}}</span>    
           </p>
-          <p ng-if="item.locations.length" class="tags"><strong>location mentioned</strong>:
+          <p ng-if="item.locations.length" class="tags"><strong annotator>location mentioned</strong>:
             <span ng-repeat="the in item.locations"><span class="tag location" data-id='{{the.id}}' gasp-type='location' gasp-parent='{{item.type}}-{{item.id}}'>{{the.props|lookup:"name":language}}</span>{{$last? '':  ', '}}</span>  
           </p>
           <p ng-if="item.props.languages.length"> <strong>available in</strong>:
@@ -112,8 +112,10 @@
                   <img  ng-src="media/{{item.props.url}}" annotorious w="item.props.width" h="item.props.height" version="currentVersion" />
                 </div>
               </div>
-          
-              <div class='full-text' ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'url':language"></div>
+              
+              <annotator>
+                <div class='full-text' ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'url':language" ></div>
+              </annotator>
             </div>
           </div>
         </div>
