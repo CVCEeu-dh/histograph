@@ -503,7 +503,8 @@ angular.module('histograph')
     */
     socket.on('disconnect', function(){
       // debugger
-      location.reload(true);
+      
+      // location.reload(true);
     })
     
      /*
