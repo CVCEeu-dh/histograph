@@ -110,17 +110,19 @@ html
                   span histograph
 
                 ul.menu
+                  
+
+                  li(class='{{currentState.name == "explore.resources"?"active":""}}')
+                    a(href='#/') gallery
+
+                  li(class='{{currentState.name == "explore.persons"?"active":""}}')
+                    a(ng-href='#/per?{{qs}}')  graph
+                  
                   li
                     a(ng-click='toggleQueue()', uib-tooltip='open bookmark list', tooltip-placement='bottom')
                       i.fa.fa-bookmark-o
                       div.number.animated {{playlist.length}}
 
-                  li(class='{{currentState.name == "explore.resources"?"active":""}}')
-                    a(href='#/') documents
-
-                  li(class='{{currentState.name == "explore.persons"?"active":""}}')
-                    a(href='#/per')  people
-                 
                   li(class='{{currentState.name == "search.resources" || currentState.name == "search.persons" ?"active":""}}')
                     form#search-field(ng-submit='setQuery(query)')
                       input(type='text', name='test', ng-model='__query', typeahead-on-select='setQuery($item, $model, $label)', class='form-control', typeahead-editable='false', placeholder='search', typeahead='item for items in suggest($viewValue)', typeahead-wait-ms='100', typeahead-template-url='templates/partials/helpers/suggest.html')

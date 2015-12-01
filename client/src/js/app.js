@@ -71,7 +71,7 @@ angular
   .constant('GRAMMAR', {
     AS_TYPES: [
       {
-        name: 'of any kind',
+        name: 'of any type',
       },
       {
         name: '(pictures)',
@@ -151,17 +151,17 @@ angular
           name: 'resource',
           label: 'show',
           choices: [
-            {
+            /*{
               name: 'explore.resources',
               label: 'documents'
             }, {
               name: 'explore.persons',
-              label: 'graph of people'
-            }
+              label: 'view graph'
+            }*/
           ],
           connector: {
               type: 'in documents of type',
-              relatedTo: 'which contains',
+              relatedTo: 'which mentions',
               notRelatedTo: 'related to anyone',
               from: 'from',
               to: 'to'
@@ -201,10 +201,10 @@ angular
           templateUrl: 'templates/partials/resources-masonry.html',
           controller: 'ExploreResourcesCtrl',
           grammar: {
-            label: 'documents',
+            label: 'gallery',
             connector: {
-              type: 'of type',
-              relatedTo: 'which contains',
+              type: 'with document type',
+              relatedTo: 'which mentions',
               notRelatedTo: 'related to anyone',
               from: 'from',
               to: 'to'
@@ -220,10 +220,10 @@ angular
           template: '<div></div>',
           controller: 'ExploreEntitiesCtrl',
           grammar: {
-            label: 'graph of people',
+            label: 'view graph',
             connector: {
               type: 'in documents of type',
-              relatedTo: 'which contains',
+              relatedTo: 'which mentions',
               notRelatedTo: 'related to anyone',
               from: 'from',
               to: 'to'
@@ -288,7 +288,7 @@ angular
             label: 'graph of related people',
             connector: {
               type: 'in documents of type',
-              relatedTo: 'which contains',
+              relatedTo: 'which mentions',
               notRelatedTo: 'related to anyone',
               from: 'from',
               to: 'to'
@@ -320,7 +320,7 @@ angular
             label: 'related people',
             connector: {
               type: 'in documents of type',
-              relatedTo: 'which contains',
+              relatedTo: 'which mentions',
               notRelatedTo: 'related to anyone',
               from: 'from',
               to: 'to'
@@ -409,7 +409,7 @@ angular
             label: 'related documents',
             connector: {
               type: 'of type',
-              relatedTo: 'which contains',
+              relatedTo: 'which mentions',
               notRelatedTo: 'related to anyone',
               from: 'from',
               to: 'to'
@@ -480,14 +480,14 @@ angular
             label: 'favourite documents',
             connector: {
               type: 'of type',
-              relatedTo: 'which contains',
+              relatedTo: 'which mentions',
               notRelatedTo: 'related to anyone',
               from: 'from',
               to: 'to'
             },
             types: [
               {
-                name: 'of any kind',
+                name: 'of any type',
               },
               {
                 name: 'pictures',
@@ -589,7 +589,7 @@ angular
             label: 'graph of documents',
             connector: {
               type: 'in documents of type',
-              relatedTo: 'which contains',
+              relatedTo: 'which mentions',
               notRelatedTo: 'related to anyone',
               from: 'from',
               to: 'to'
@@ -621,7 +621,7 @@ angular
             label: 'documents',
             connector: {
               type: 'in documents of type',
-              relatedTo: 'which contains',
+              relatedTo: 'which mentions',
               notRelatedTo: 'related to anyone',
               from: 'from',
               to: 'to'
@@ -666,7 +666,7 @@ angular
             label: 'people',
             connector: {
               type: 'in documents of type',
-              relatedTo: 'which contains',
+              relatedTo: 'which mentions',
               notRelatedTo: 'related to anyone',
               from: 'from',
               to: 'to'
@@ -708,7 +708,7 @@ angular
             label: 'organizations',
             connector: {
               type: 'in documents of type',
-              relatedTo: 'which contains',
+              relatedTo: 'which mentions',
               notRelatedTo: 'related to anyone',
               from: 'from',
               to: 'to'
@@ -767,7 +767,7 @@ angular
             label: 'researchers',
             connector: {
               type: 'in documents of type',
-              relatedTo: 'which contains',
+              relatedTo: 'which mentions',
               notRelatedTo: 'related to anyone',
               from: 'from',
               to: 'to'
@@ -806,7 +806,7 @@ angular
             label: 'inquiries',
             connector: {
               type: 'in documents of type',
-              relatedTo: 'which contains',
+              relatedTo: 'which mentions',
               notRelatedTo: 'related to anyone',
               from: 'from',
               to: 'to'
@@ -905,14 +905,14 @@ angular
             label: 'documents',
             connector: {
               type: 'of type',
-              relatedTo: 'which contains',
+              relatedTo: 'which mentions',
               notRelatedTo: 'between',
               from: 'from',
               to: 'to'
             },
             types: [
               {
-                name: 'of any kind',
+                name: 'of any type',
               },
               {
                 name: 'pictures',
@@ -1014,7 +1014,7 @@ angular
             label: 'documents',
             connector: {
               type: 'of type',
-              relatedTo: 'which contains',
+              relatedTo: 'which mentions',
               notRelatedTo: 'related to anyone',
               from: 'from',
               to: 'to'
@@ -1072,7 +1072,7 @@ angular
             label: 'people',
             connector: {
               type: 'in documents of type',
-              relatedTo: 'which contains',
+              relatedTo: 'which mentions',
               notRelatedTo: 'related to anyone',
               from: 'from',
               to: 'to'
