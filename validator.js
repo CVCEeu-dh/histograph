@@ -90,6 +90,7 @@ module.exports = {
       check: 'includedIn',
       args: [
         [
+          'entity',
           'person',
           'location',
           'organization',

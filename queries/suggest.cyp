@@ -317,7 +317,7 @@ RETURN {
 
 
 // name: get_matching_entities_count
-// get resources by query
+// get resources by query, will suggest other enpoint too
 start n=node:node_auto_index({query})
 WHERE 'entity' in labels(n)
 WITH last(labels(n)) as group, count(n) as count_items
@@ -331,6 +331,9 @@ RETURN {
 // get resources by query
 start n=node:node_auto_index({query})
 WHERE {entity} in labels(n)
+WITH n
+MATCH n-[r:appears_in]->(res:resource)
+WITH DISTINCT n
 RETURN {
   id: id(n),
   props: n,

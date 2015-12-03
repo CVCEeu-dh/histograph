@@ -155,7 +155,7 @@ describe('controller:suggest viaf', function() {
       .expect(200)
       .end(function (err, res) {
         should.not.exist(err) // err on statusCode
-        console.log(res.body.result.items)
+        should.exist(res.body.result.items)
         done();
       })
   })
@@ -165,6 +165,17 @@ describe('controller:suggest ', function() {
   it('should get the entity that match "konr"', function (done) {
     session
       .get('/api/suggest/entity?query=konr')
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exist(err) // err on statusCode
+        should.exist(res.body.result.items)
+        done();
+      })
+  });
+
+  it('should get the person that match "konr"', function (done) {
+    session
+      .get('/api/suggest/person?query=konr')
       .expect(200)
       .end(function (err, res) {
         should.not.exist(err) // err on statusCode
