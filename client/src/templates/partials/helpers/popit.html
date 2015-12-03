@@ -7,5 +7,11 @@
     <span class="fa fa-bookmark-o"></span></a>
   <a class="action inspect" tooltip="analyse and correct" data-action="inspect">
     <span class="fa fa-lightbulb-o"></span></a>
+  <!-- // declassify ... -->
+  <a class="action downvote" ng-click='downvote(item)' tooltip="downvote - the entity is not relevant in this context" data-action="downvote">
+    <span class="fa fa-thumbs-o-down"></span></a>
+
+  <a class="action downvote" ng-click='upvote(item)' tooltip="downvote - the entity is relevant in this context" data-action="upvote">
+    <span class="fa fa-thumbs-o-up"></span></a>
     
 </div>

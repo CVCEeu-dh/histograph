@@ -676,6 +676,19 @@ angular.module('histograph')
       $scope.playlistIds = ids;
       $scope.queueRedirect();
     };
+
+    /*
+      Voting mechanism, on relationships entity resource
+      (the id and the type will suffice)
+
+    */
+    $scope.upvote = function(entity, resource) {
+      debugger
+    }
+
+    $scope.downvote = function(entity, resource) {
+      debugger
+    }
     
     /*
       Inpect
@@ -726,7 +739,7 @@ angular.module('histograph')
       usage (from everywhere)
       $scope.contribute({id: 25723, type: 'resource'})
     */
-    $scope.contribute = function(item) {
+    $scope.contribute = function(item, type, options) {
       $log.debug('CoreCtrl -> contribute() - item:', item);
 
       var language      = $scope.language;
@@ -737,6 +750,12 @@ angular.module('histograph')
         windowClass: "modal fade in contribute",
         size: 'sm',
         resolve: {
+          options: function() {
+            return options
+          },
+          type: function(){
+            return type
+          },
           resource: function(ResourceFactory) {
             return item
           },
@@ -749,6 +768,16 @@ angular.module('histograph')
         //     return $scope.items;
         //   }
         // }
+      });
+
+      modalInstance.result.then(function(){
+        if(options && typeof options.discard == "function") {
+          options.discard();
+        }
+      }, function(){
+        if(options && typeof options.discard == "function") {
+          options.discard();
+        }
       });
 
     }
@@ -788,7 +817,7 @@ angular.module('histograph')
       });
     };
     
-     $scope.cancel = function () {
+    $scope.cancel = function () {
       $modalInstance.dismiss('close');
     };
     
@@ -902,32 +931,47 @@ angular.module('histograph')
     Template: cfr. templates/modals/inspect.html
     Resolve: it requires a (resource) object
   */
-  .controller('ContributeModalCtrl', function ($scope, $log, $uibModalInstance, resource,SuggestFactory,EntityRelatedExtraFactory) {
+  .controller('ContributeModalCtrl', function ($scope, $log, $uibModalInstance, type, resource, language, options, SuggestFactory,EntityRelatedExtraFactory) {
     // the list of suggested entities
-    $scope.persons = [];
+    $scope.persons   = [];
+    $scope.locations = [];
+    $scope.type = type;
     $log.debug('ContributeModalCtrl -> ready()', resource.id);
 
+    // initial value for typeahead
+    if(options && options.query) {
+      $scope.autotypeahead = options.query
+      $scope.q = options.query;
+    }
     $scope.ok = function () {
+      if(options && typeof options.discard == "function") {
+        options.discard();
+      }
       $uibModalInstance.close();
       $log.log('ContributeModalCtrl -> ok()', 'saving...', $scope.persons);
-      for(var i in $scope.persons)
+      var entities = [].concat($scope.persons, $scope.locations)
+      for(var i in entities)
         EntityRelatedExtraFactory.save({
-          id: $scope.persons[i].id,
+          id: entities[i].id,
           related_id: resource.id,
           model: 'resource'
         }, {}, function(res) {
           $log.log('ContributeModalCtrl -> ok()', 'saved', res)
         })
+
     };
 
     $scope.cancel = function () {
+      if(options && typeof options.discard == "function") {
+        options.discard();
+      }
       $uibModalInstance.dismiss('cancel');
     };
 
     /*
       typeahead
     */
-    $scope.typeaheadSuggest = function(q, type) {
+    $scope.typeaheadSuggest = function(q) {
       $log.log('ContributeModalCtrl -> typeahead()', q, type);
       // suggest only stuff from 2 chars on
       if(q.trim().length < 2)
@@ -948,6 +992,9 @@ angular.module('histograph')
       switch($item.type){
         case 'person':
           $scope.persons.push($item);
+          break;
+        case 'location':
+          $scope.locations.push($item);
           break;
       }
         

@@ -146,7 +146,7 @@ angular.module('histograph')
           //   
 
           // }
-           console.log(attrs)
+           // console.log(attrs)
           // apply tooltip
           $compile(element.contents())(scope);
         });
@@ -157,16 +157,36 @@ angular.module('histograph')
     }
   })
 
+  .directive('typeaheadTriggerOnModelChange', function($timeout) {
+    return {
+      require: 'ngModel',
+      link: function (scope, element, attr, ctrl) {
+        scope.$watch(attr.typeaheadTriggerOnModelChange, function(v){
+          if(!v) // and v !=some previous value
+            return;
+          console.log('::typeaheadTriggerOnModelChange @',attr.typeaheadTriggerOnModelChange, v);
+          ctrl.$setViewValue('');
+          $timeout(function() {
+            ctrl.$setViewValue(v);
+          });
+        });
+        
+      } 
+    }
+  })
+
   .directive('annotator', function ($log) {
     return {
       restrict : 'E',
       
       link : function(scope, element, attrs) {
-        $log.log('::annotator')
+        $log.log('::annotator');
+
         Annotator.Plugin.HelloWorld = function (element) {
           return {
             pluginInit: function () { 
-              console.log('qpifpoqifposdifposfipofdipo', this.annotator)
+              var editor;
+
               this.annotator.subscribe("annotationCreated", function (annotation) {
                 console.log("The annotation: %o has just been created!", annotation)
               })
@@ -175,11 +195,19 @@ angular.module('histograph')
               })
               .subscribe("annotationDeleted", function (annotation) {
                 console.log("The annotation: %o has just been deleted!", annotation)
+                if(editor)
+                  editor.hide()
               })
               .subscribe("annotationEditorShown", function (editor, annotation) {
-
+                editor = editor;
                 console.log("The annotation:  has just been annotationEditorShown!", arguments);
-                scope.contribute(scope.item);
+                
+                scope.contribute(scope.item, "entity", {
+                  query: annotation.quote,
+                  discard: function() {
+                    editor.hide()
+                  }
+                });
                 scope.$apply();
               })
               .subscribe("annotationViewerShown", function (annotation) {

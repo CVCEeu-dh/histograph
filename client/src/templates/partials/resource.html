@@ -7,7 +7,7 @@
         
         
         <div class="type">
-          <span><i class="fa fa-circle type resource"></i> {{item.props.type}}<span>
+          <span class='tk-proxima-nova'>{{item.props.type}}<span>
           
           
           
@@ -16,7 +16,7 @@
           <a ng-href='#/r/{{item.id}}/inq' tooltip="view the related {{item.inquiries}} inquiries"><label>{{item.inquiries}}</label> <i class="fa fa-comment"></i></a>
           </span>
         </div>
-        <h3 class="" data-id='{{item.id}}'>
+        <h3 class="tk-adelle" data-id='{{item.id}}'>
          <!--  <span ng-if="currentAnnotation" ng-href="#/r/{{item.id}}" context="item" marked="currentAnnotation.annotated.title"></span>
           <span ng-if="!currentAnnotation" ng-href="#/r/{{item.id}}" ng-bind-html="item.props | title:language"></span> -->
           <span ng-if='!item.annotations || !item.annotations.length' marked="item.props|lookup:'title':language"></span>
@@ -32,33 +32,36 @@
                --><span ng-if="!$last">-</span>
             </span>
           
-          <span ng-click="openIssueModal('date', item)" class="empty" ng-if="!item.props.start_time" tooltip='click to add a date'>no date found</span>
-            <a ng-href="#/r/{{item.id}}/inq/create/date" tooltip='click to propose a different date' ng-if="item.props.start_time">{{item.props|guessInterval}}</a>
+          <span ex-ng-click="openIssueModal('date', item)" class="empty" ng-if="!item.props.start_time" tooltip='click to add a date'>without any date</span>
+            <a class='date' ng-href="#/r/{{item.id}}/inq/create/date" tooltip='click to propose a different date' ng-if="item.props.start_time">{{item.props|guessInterval}}</a>
           <!-- <div class="collections">
             <div class="collection" ng-repeat="collection in item.collections"><a ng-href="#/c/{{collection.id}}">{{collection.name|humanize}}</a></div>
           </div> -->
         </div>
           
         <div class="meta">
-          <p ng-if="item.themes.length" class="tags"><strong>themes</strong>:
+          <p ng-if="item.themes.length" class="tags"><strong class='tk-proxima-nova'>themes</strong>:
             <span ng-repeat="the in item.themes"><span class="tag theme" data-id='{{the.id}}' gasp-type='theme' gasp-parent='{{item.type}}-{{item.id}}'>{{the.props|lookup:"name":language}}</span>{{$last? '':  ', '}}</span> — 
           </p>
-          <p ng-if="item.persons.length" class="tags"><strong>persons in the document</strong>:
+          <p class="tags"><strong class='tk-proxima-nova'>persons mentioned</strong>:
+            <span ng-if="item.persons.length == 0">none.</span>
             <span ng-repeat="per in item.persons" ng-include='"templates/partials/entity-person-tag.html"'></span>   <!-- — --> 
+            <a class='btn btn-contribute' ng-click='contribute(item, "person")'>add</a>
           </p>
-          <p ng-if="item.social_groups.length" class="tags"><strong> groups</strong>:
+          <p ng-if="item.social_groups.length" class="tags"><strong class='tk-proxima-nova'> groups</strong>:
             <span ng-repeat="per in item.social_groups"><span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.props.name}} {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name}} </span>{{$last? '':  ', '}}</span>    
           </p>
           <p ng-if="item.organizations.length" class="tags"><strong>  organizations</strong>:
             <span ng-repeat="per in item.organizations"><span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.props.name}} {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name}} </span>{{$last? '':  ', '}}</span>    
           </p>
-          <p ng-if="item.locations.length" class="tags"><strong annotator>location mentioned</strong>:
+          <p ng-if="item.locations.length" class="tags"><strong class='tk-proxima-nova'>location mentioned</strong>:
             <span ng-repeat="the in item.locations"><span class="tag location" data-id='{{the.id}}' gasp-type='location' gasp-parent='{{item.type}}-{{item.id}}'>{{the.props|lookup:"name":language}}</span>{{$last? '':  ', '}}</span>  
+            <a class='btn btn-contribute' ng-click='contribute(item, "location")'>add</a>
           </p>
           <p ng-if="item.props.languages.length"> <strong>available in</strong>:
             <span class="language {{lang == language? 'active':''}}" ng-repeat="lang in item.props.languages" ng-click='setLanguage(lang)'>{{lang}} </span>
           </p>
-          <p ng-click='contribute(item)'>suggest other entities</p>
+          
 
         </div>
         <div class="actions">
@@ -87,14 +90,14 @@
           </blockquote>
         </div -->
         <div class='fluid-container'>
-          <div class='row'>
-            <div class='col-lg-5'>
+          <div>
+            <div >
               <blockquote ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'caption':language"></blockquote>
-              <blockquote ng-if='item.annotations.length' context='item' marked="item.annotations|lookup:'caption':language"></blockquote>
+              <blockquote ng-if='item.annotations.length == 0' context='item' marked="item.annotations|lookup:'caption':language"></blockquote>
             </div>
           
             <!-- Single button -->
-            <div class='col-lg-7'>
+            <div >
               <div ng-if='item.props.mimetype=="image"'>
                 <div ng-if="versions.length > 1" class="btn-group" dropdown is-open="status.isopen" tooltip="view a different version">
                   <button type="button" class="btn btn-default dropdown-toggle" dropdown-toggle ng-disabled="disabled">
@@ -108,7 +111,7 @@
                     <li><a ng-click="switchVersion(mergedVersion)">merged version</a></li>
                   </ul>
                 </div>
-                <div>
+                <div class="img-wrapper">
                   <img  ng-src="media/{{item.props.url}}" annotorious w="item.props.width" h="item.props.height" version="currentVersion" />
                 </div>
               </div>

@@ -23,7 +23,7 @@ angular.module('histograph')
     };
   })
   /*
-    Jquery Popup.
+    Jquery Popup. One popup for every damn entity
   */
   .directive('gasp', function ($log) {
     return {
@@ -51,12 +51,38 @@ angular.module('histograph')
               top: 0
             };
         
+
+        /*
+          Enable downvoting (do not require a proper '&' in scope)
+        */
+        scope.downvote = function(){
+          console.log(':: gasp -> downvote()', scope.item)
+          scope.$parent.downvote(scope.item.entity, scope.item.resource);
+        }
+
+        scope.upvote = function(){
+          console.log(':: gasp -> upvote()', scope.item)
+          scope.$parent.upvote(scope.item.entity, scope.item.resource);
+        }
         /*
           Show gasp instance
         */
         function show() {
           // build link acording to type.
           $log.log(':: gasp show', type, id, parent.type, parent.id);
+          
+          scope.item = {
+            entity: {
+              type: type,
+              id: id,
+            },
+            resource: {
+              type: parent.type,
+              id: parent.id
+            }
+          };
+
+
           switch(type) {
             case 'date':
               scope.issue  = 'date';
@@ -99,6 +125,7 @@ angular.module('histograph')
         function getGasp() {
           
         }
+
         /*
           Listener: body.click
         */
@@ -107,17 +134,24 @@ angular.module('histograph')
           
           type  = el.attr('gasp-type'); // should be something of date, location, person, etc ...
           id    = el.attr('data-id');
+
+          // modify the scope
+
+
           // $log.log(':: gasper @click', type, id);
           if(!type) {
             hide()
           } else {
+
+
+
             if(el.attr('gasp-parent')){
-            var parent_parts = el.attr('gasp-parent').split('-');
-            parent  = {
-              type: parent_parts[0],
-              id:   parent_parts[1] 
-            };
-          }
+              var parent_parts = el.attr('gasp-parent').split('-');
+              parent  = {
+                type: parent_parts[0],
+                id:   parent_parts[1] 
+              };
+            }
             pos   = { 
               top: e.clientY ,
               left: e.clientX - 40
@@ -183,6 +217,8 @@ angular.module('histograph')
           } else
             $log.error(':: gasper cannot inspect the give item, id is', id);
         })
+
+
         
         
         // $('body').on('mouseleave', '[gasp-type]', function(e) {
