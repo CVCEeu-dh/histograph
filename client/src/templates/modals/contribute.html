@@ -21,12 +21,19 @@
         </span>
       
     </div>
+
+    <div class='results' ng-if="organizations.length">
+      <span class="tags"><i>add organization mentioned in the document</i>:
+            <span ng-repeat="per in organizations"><span tooltip='{{per.props.name}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name}}, {{per.props.country}}</span>{{$last? '':  ', '}}</span>
+        </span>
+      
+    </div>
   </div>
 
 </div>
 <div class='modal-footer'>
   <div class="btn-group btn-group-dual" role="group">
-    <button  class='btn btn-primary btn-line {{persons.length || locations.length? "":"disabled"}}' ng-click='ok()'>confirm</button>
+    <button  class='btn btn-primary btn-line {{persons.length || locations.length || organizations.length? "":"disabled"}}' ng-click='ok()'>confirm</button>
     <button class='btn btn-secondary btn-line' ng-click='cancel()'>discard</button>
   </div>
 </div>

@@ -953,6 +953,8 @@ angular.module('histograph')
     // the list of suggested entities
     $scope.persons   = [];
     $scope.locations = [];
+    $scope.organizations = [];
+
     $scope.type = type;
     $log.debug('ContributeModalCtrl -> ready()', resource.id);
 
@@ -966,8 +968,8 @@ angular.module('histograph')
         options.discard();
       }
       $uibModalInstance.close();
-      $log.log('ContributeModalCtrl -> ok()', 'saving...', $scope.persons);
-      var entities = [].concat($scope.persons, $scope.locations)
+      $log.log('ContributeModalCtrl -> ok()', 'saving...');
+      var entities = [].concat($scope.persons, $scope.locations, $scope.organizations)
       for(var i in entities)
         EntityRelatedExtraFactory.save({
           id: entities[i].id,
@@ -1013,6 +1015,9 @@ angular.module('histograph')
           break;
         case 'location':
           $scope.locations.push($item);
+          break;
+        case 'organization':
+          $scope.organizations.push($item);
           break;
       }
         
