@@ -295,15 +295,26 @@ module.exports = {
         result.rel.properties.celebrity =  _.compact(_.unique((result.rel.properties.upvote || []).concat(result.rel.properties.downvote|| []))).length;
         result.rel.properties.score = _.compact((result.rel.properties.upvote || [])).length - _.compact((result.rel.properties.downvote|| [])).length;
         
-        
-
-        neo4j.rel.update(result.rel, function (err) {
+        async.series({
+          relationship: function (callback) {
+            neo4j.rel.update(result.rel, callback);
+          },
+          resource: function (callback) {
+            Resource.get({
+              id: result.res.id
+            }, callback)
+          }
+        }, function (err, results) {
           if(err)
             next(err);
           else
             next(null, {
               id: result.ent.id,
+              type: result.ent.type,
               props: result.ent,
+              related: {
+                resource: results.resource,
+              },
               rel: result.rel.properties
             });
         });

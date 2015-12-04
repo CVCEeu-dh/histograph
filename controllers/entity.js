@@ -83,6 +83,16 @@ module.exports = function(io){
         form.params, function (err, item) {
           if(err)
             return helpers.cypherQueryError(err, res);
+
+          io.emit('entity:' + form.params.action + '-related-resource:done', {
+            user: req.user.username,
+            id: +form.params.entity_id,
+            data: item,
+            resource: {
+              id: +form.params.resource_id
+            }
+          });
+
           return res.ok({
             item: item
           }, form.params);
