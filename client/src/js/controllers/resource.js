@@ -64,6 +64,23 @@ angular.module('histograph')
       }
     });
 
+    socket.on('entity:upvote-related-resource:done', function (result) {
+      console.log(result)
+      if(result.resource.id == $stateParams.id) {
+        $log.info('ResourceCtrl socket@entity:upvote-related-resource:done - by:', result.user);
+        $scope.item = result.data.related.resource; 
+      } // update user notificaation
+        
+    })
+
+    socket.on('entity:downvote-related-resource:done', function (result) {
+      console.log(result)
+      if(result.resource.id == $stateParams.id) { // update user notificaation
+        $log.info('ResourceCtrl socket@entity:downvote-related-resource:done - by:', result.user);
+        $scope.item = result.data.related.resource; 
+      } 
+    })
+
     $scope.switchVersion = function(version) {
       $log.info('resourceCtrl.switchVersion', version)
       $scope.currentVersion = version;

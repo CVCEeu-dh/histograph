@@ -23,9 +23,9 @@ angular.module('histograph')
     };
   })
   /*
-    Jquery Popup. One popup for every damn entity
+    Jquery Popup. One popup in DOM to handle every damn entity
   */
-  .directive('gasp', function ($log) {
+  .directive('gasp', function ($log, SuggestFactory) {
     return {
       restrict : 'A',
       scope:{
@@ -39,326 +39,159 @@ angular.module('histograph')
       templateUrl: 'templates/partials/helpers/popit.html',
       link : function(scope, element, attrs) {
         var _gasp = $(element[0]), // gasp instance;
-            type,            // element type
-            id,              // element id
-            parent = {
-              type: '',
-              id: ''
-            },              // target parent id (e.g. 'resource-1232324')
-            width = 0,             //target width
-            pos   = {              // target center offset relative to the center-middle positon;
-              left: 0,
-              top: 0
+            _pId  = -1, // previous id
+            __delay   = 500,
+            __timeout = 0;
+
+        /*
+          Show gasp instance, with Javascript event
+        */
+        function toggle(e) {
+          var el      = $(e.target),
+              type    = el.attr('gasp-type'),
+              id      = el.attr('data-id'),
+              pos     = el.offset();
+
+          $log.info('::gasp -> toggle() for type:', type, el)
+          // if there is no type, it is like clicking on stage
+          if(!type) { 
+            hide();
+            return;
+          }
+          // if id is the same of previous Id, ndo not need to recalculate things
+          if(id == _pId) { 
+            showGasp(pos);
+            return;
+          }
+
+          var parent  = el.attr('gasp-parent'),
+              tooltip = el.attr('gasp-tip'),
+              
+              entity,
+              resource;
+
+          // validate id
+          if(!id && isNaN(id)) {
+            $log.error('::gasp html DOM item lacks "data-id" attribute or it is not a number, given id:', id);
+            return;
+          }
+          // rewrite parent, if is present, as an object
+          if(parent) {
+            var parent_parts = parent.split('-');
+            
+            parent  = {
+              type: parent_parts[0],
+              id:   parent_parts[1] 
             };
+
+            if(!parent.id) {
+              $log.error('::gasp html DOM item lacks "gasp-parent" attribute');
+              return;
+            }
+          }
+          // set scope variables
+          scope.tooltip = tooltip;
+          
+          scope.item  = {
+            type: type,
+            id: id,
+          };
+
+          scope.parent = !parent? null: parent;
+
+          scope.link = {
+            label: 'go to ' + type + ' page',
+            href: '/#/e/' + id
+          };
+          // apply scope
+          scope.$apply();
+          // set the id
+          _pId = id;
+
+          // show gasp item
+          showGasp(pos);
+
+          // load item
+          SuggestFactory.getUnknownNodes({ids:[scope.item.id]}, function (res) {
+            
+            scope.item.props = res.result.items[0].props;
+          })
+        };
+        
+        
+        
         
 
         /*
-          Enable downvoting (do not require a proper '&' in scope)
+          Position the gasp and show it
+        */
+        function showGasp(pos) {
+          clearTimeout(__timeout);
+          _gasp.css({
+            top: pos.top,
+            left: pos.left
+          }).show();
+        };
+
+        /*
+          Hide
+        */
+        function hide() {
+          _gasp.hide(); 
+        }
+
+        function hideDelayed() {
+          __timeout = setTimeout(function(){
+            hide();
+          }, __delay);
+        }
+
+
+        
+        /*
+          Listener: body.mouseenter
+        */
+        $('body')
+          .on('click', '[gasp-type]', toggle)
+          // .on('mouseenter', '[gasp-type]', toggle)
+          // .on('mouseleave', '[gasp-type]', hideDelayed)
+          .on('sigma.clickStage', hide)
+          .on('click', toggle)
+          .on('click', '.obscure', function(e) {
+            e.stopImmediatePropagation();
+          })
+        // element.bind('mouseenter', toggle);
+        // element.bind('mouseleave', hideDelayed);
+
+        /*
+          Enable parent scope action (do not require a proper '&' in scope)
         */
         scope.downvote = function(){
           console.log(':: gasp -> downvote()', scope.item)
-          scope.$parent.downvote(scope.item.entity, scope.item.resource);
+          scope.$parent.downvote(scope.item, scope.parent);
         }
 
         scope.upvote = function(){
           console.log(':: gasp -> upvote()', scope.item)
-          scope.$parent.upvote(scope.item.entity, scope.item.resource);
+          scope.$parent.upvote(scope.item, scope.parent);
         }
-        /*
-          Show gasp instance
-        */
-        function show() {
-          // build link acording to type.
-          $log.log(':: gasp show', type, id, parent.type, parent.id);
-          
-          scope.item = {
-            entity: {
-              type: type,
-              id: id,
-            },
-            resource: {
-              type: parent.type,
-              id: parent.id
-            }
-          };
 
+        scope.queue = function(){
+          console.log(':: gasp -> queue()', scope.item)
+          scope.$parent.queue(scope.item.id, true);
+        }
 
-          switch(type) {
-            case 'date':
-              scope.issue  = 'date';
-              break;
-            case 'person':
-            case 'place':
-            case 'location':
-            case 'theme':
-            case 'personKnown':
-              scope.issue  = false;
-              scope.href   = '/#/e/' + id;
-              scope.linkto = 'go to ' + type + ' page';
-              break;
-            case 'resource':
-            case 'resourceKnown':
-              scope.issue  = false;
-              scope.href   = '/#/r/'+id;
-              scope.linkto = 'go to document page';
-              break;
-            default:
-              scope.issue  = false;
-              scope.href   = '';
-              scope.linkto = "";
-              break;
-          }
-          
-          scope.$apply();
-          _gasp.css({
-            top: pos.top - 80,
-            left: pos.left
-          }).show();
-        };
-        
-        function hide() {
-          _gasp.hide(); 
+        scope.addFilter = function(){
+          console.log(':: gasp -> addFilter()', scope.item)
+          scope.$parent.addFilter('with',scope.item.id);
+        }
+
+        scope.inspect = function(){
+          console.log(':: gasp -> inspect()', scope.item)
+          scope.$parent.inspect(scope.item.id);
         }
         
         $log.log(':: gasp init');
-        
-        function getGasp() {
-          
-        }
-
-        /*
-          Listener: body.click
-        */
-        $('body').on('click', function(e) {
-          var el    = $(e.target);
-          
-          type  = el.attr('gasp-type'); // should be something of date, location, person, etc ...
-          id    = el.attr('data-id');
-
-          // modify the scope
-
-
-          // $log.log(':: gasper @click', type, id);
-          if(!type) {
-            hide()
-          } else {
-
-
-
-            if(el.attr('gasp-parent')){
-              var parent_parts = el.attr('gasp-parent').split('-');
-              parent  = {
-                type: parent_parts[0],
-                id:   parent_parts[1] 
-              };
-            }
-            pos   = { 
-              top: e.clientY ,
-              left: e.clientX - 40
-            },
-            width = el.width();
-          
-            $log.log(':: gasper @click', el.attr('gasp-type'));
-            
-            show();
-          }
-        });
-        /*
-          Specific listener for sigma event
-        */
-        $('body').on('sigma.clickNode', function (e, data) {
-          $log.info(':: gasper @sigma.clickNode', data);
-          
-          pos = { 
-            top: data.captor.clientY + 65,
-            left: data.captor.clientX - 100
-          };
-          type = data.type;
-          id   = data.id;
-          show();
-        });
-        
-        $('body').on('sigma.clickStage', function() {
-          hide();
-        })
-        /*
-          listeners for click event
-        */
-        _gasp.find('[data-action=queue]').click(function() {
-          if(id)
-            scope.queue({
-              item: id,
-              inprog: true
-            });
-          else
-            $log.error('cannot queue the give item, id is', id);
-        })
-        
-        _gasp.find('[data-action=filter]').click(function() {
-          if(id) {
-            scope.filter({
-              key: 'with',
-              item: id
-            });
-            hide();
-          } else
-            $log.error('cannot queue the give item, id is', id);
-        })
-        
-        /*
-          listeners for click event
-        */
-        _gasp.find('[data-action=inspect]').click(function() {
-          if(id) {
-            scope.inspect({
-              item: id
-            });
-            scope.$apply();
-          } else
-            $log.error(':: gasper cannot inspect the give item, id is', id);
-        })
-
-
-        
-        
-        // $('body').on('mouseleave', '[gasp-type]', function(e) {
-        //   setTimeout(function(){
-        //     hide();
-        //   }, 2000);
-        // })
-        //  $('body').on('mouseenter', '[gasp-type]', function(e) {
-        //   setTimeout(function(){
-        //     hide();
-        //   }, 2000);
-        // })
-        /*
-          Listener: element click
-        */
-      }
-    }
-  })
-  .directive('popit', function($log, $window) {
-    return {
-      restrict : 'A',
-      scope:{
-        target: '=',
-        comment: '&comment',
-        redirect: '&',
-        queue : '&'
-      },
-      link : function(scope, element, attrs) {
-        var el = $(element[0]),
-            timer,
-            delay= 1500,
-            t,
-            pos,
-            h,
-            w;
-            
-        
-        $log.info('::pop');
-        
-        
-        // make the tooltip disappear if clicked on other pop
-        function hide() {
-          el.hide();
-        }
-        
-        
-        function show() {
-          clearTimeout(timer);
-          
-          el.addClass('disappearing').css({
-            top: pos.top + h + 10,
-            left: pos.left
-          });
-          
-          // timer = setTimeout(hide, delay);
-          
-          el.show(); 
-        };
-        
-        var pt;
-        // on graph change, change the timeline as well
-        scope.$watch('target', function (d) {
-          if(!d)
-            return;
-          if(pt)
-            pt.removeClass('selected');
-          if(!d.event) {
-            hide();
-            return;
-          }
-            
-          if(d.event.target) {
-            t   = $(d.event.target);
-            pos = t.offset();
-            h   = t.height();
-            w   = t.width();
-            pt = t;
-            t.addClass('selected');
-          } else {
-            pos = { 
-              top: d.event.clientY ,
-              left: d.event.clientX - 80
-            };
-            h = -60;
-            
-          }
-          
-          
-          $log.info('::pop @watch ', t , pos, h, w);
-          show(); 
-        });
-        
-        // $(document).off('click', makeDisappear);
-        // $(document).on('click', makeDisappear);
-        // el
-        //   .mouseenter(function(){
-        //     clearTimeout(timer);
-        //   })
-        //   .mouseleave(function() {
-        //     timer = setTimeout(hide, delay);
-        //   })
-        /*
-          Commenting!
-        */
-        el.on('click', '[data-action=comment]', function(){
-          hide();
-          console.log('commenting', scope.target);
-          var args = {
-                item: scope.target.item,
-                tag: scope.target.tag,
-                hashtag: scope.target.hashtag
-              };
-             
-          scope.comment(args);
-          
-        })
-        el.on('click', '[data-action=link]', function(){
-          hide();
-          console.log('link', scope.target);
-          var args = {
-                item: scope.target.item,
-                tag: scope.target.tag,
-                hashtag: scope.target.hashtag
-              };
-          scope.redirect({
-            path: '/e/' +  scope.target.tag.id
-          })
-          
-        })
-        // add current "tag" item to playlist. availabile only if there is a tag item
-        el.on('click', '[data-action=queue]', function(){
-          $log.info('::pop -> queue id', scope.target.tag.id);
-             
-          scope.queue({
-            item: scope.target.tag.id,
-            inprog: true
-          });
-          
-        })
-        
       }
     }
   });

@@ -1,17 +1,52 @@
-<div class="action-group">
-   <a class="action filter" tooltip="filter your selection" data-action="filter">
-    <span class="fa fa-filter"></span></a>
-  <a class="action" href="{{href}}" title="visit" data-action="link" tooltip="{{linkto}}">
-    <span class="fa fa-link"></span></a>
-  <a class="action queue" tooltip="add to your bookmark list" data-action="queue">
-    <span class="fa fa-bookmark-o"></span></a>
-  <a class="action inspect" tooltip="analyse and correct" data-action="inspect">
-    <span class="fa fa-lightbulb-o"></span></a>
-  <!-- // declassify ... -->
-  <a class="action downvote" ng-click='downvote(item)' tooltip="downvote - the entity is not relevant in this context" data-action="downvote">
-    <span class="fa fa-thumbs-o-down"></span></a>
+<div class="inner">
+  <div>
+    <div class='node {{item.type}}'>
+      
+      <div class='thumbnail' ng-if='item.type == "person"'>
+        <div class="thumbnail-wrapper" style='background-image: url({{item.props.thumbnail}})'>
+        </div>
+      </div>
+      <div class='content'>
+        <h4>
+          <a ng-if='item.type == "person"' ng-href='{{link.href}}' marked="item.props|lookup:'name':language"></a>
+          <a ng-if='item.type == "location"' ng-href='{{link.href}}'>{{item.props|lookup:'name':language}}, {{item.props.country}}</a>
+        </h4>
+        
+        <div class='date' ng-if='item.type == "person"'>{{relatedItem.props.birth_time | datesOfAPerson : relatedItem.props.death_time}}</div>
+      </div>
+      <div class="actions">
+        <a class="action" title="add to bookmark" ng-click="queue()">
+          <span class="fa fa-bookmark-o"></span></a>
+        
+      </div>
+      <a class="discard action" title="close" ng-click="close()">
+          <span class="fa fa-times-circle"></span></a>
+    </div>
+  </div>
+  <div class="btn-group-wrapper">
+    <div class="btn-group">
+      <a class="btn btn-line-white" href="{{link.href}}" title="visit" data-action="link">view more</a>
+      <button class='btn btn-line-white' ng-click='addFilter()'>filter</button>
+      <button class='btn btn-line-white obscure' ng-click='downvote()'><i class="fa fa-thumbs-o-down"></i></button>
+      <button class='btn btn-line-white' ng-click='upvote()'> <i class="fa fa-thumbs-o-up"></i></button>
+    </div>
+  </div>
+  <!-- <div class="action-group">
 
-  <a class="action downvote" ng-click='upvote(item)' tooltip="downvote - the entity is relevant in this context" data-action="upvote">
-    <span class="fa fa-thumbs-o-up"></span></a>
     
+     <a class="action filter" ng-click='addFilter()' tooltip="filter your selection" data-action="filter">
+      <span class="fa fa-filter"></span></a>
+    <a class="action" href="{{href}}" title="visit" data-action="link" tooltip="{{linkto}}">
+      <span class="fa fa-link"></span></a>
+
+    <a class="action inspect" ng-click='inspect()' tooltip="analyse and correct" data-action="inspect">
+      <span class="fa fa-lightbulb-o"></span></a>
+
+    <a class="action downvote" ng-click='downvote(item)' tooltip="downvote - the entity is not relevant in this context" data-action="downvote">
+      <span class="fa fa-thumbs-o-down"></span></a>
+
+    <a class="action downvote" ng-click='upvote(item)' tooltip="upvote - the entity is relevant in this context" data-action="upvote">
+      <span class="fa fa-thumbs-o-up"></span></a>
+      
+  </div> -->
 </div>

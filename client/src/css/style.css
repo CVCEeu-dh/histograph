@@ -197,8 +197,8 @@ a#header-title {
 
 .item h3>span{
   font-weight: bold;
-  font-size: 18px;
-  line-height: 24px;
+  font-size: 24px;
+  line-height: 42px;
   color: #151515;
 }
 .item h3 a{
@@ -1428,14 +1428,14 @@ height: 150px;
     transition-delay: .3s;
 }
 
-#sigma-snippets .nodes {
+.nodes {
   position: relative;
   background-color: #383838;
   border-radius: 3px;    border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 }
 
-#sigma-snippets .node h4 a {
+.node h4 a {
   color: #DEDEDE;
   border-bottom: 1px solid;
   display: inline-block;
@@ -1445,7 +1445,7 @@ height: 150px;
           transition: color .3s cubic-bezier(0.65, 0.05, 0.36, 1);
 }
 
-#sigma-snippets .node h4 a:hover{
+.node h4 a:hover{
   color: white;
 } 
 
@@ -1476,7 +1476,7 @@ height: 150px;
   min-height: 30px;
 }
 
-#sigma-snippets .nodes .line {
+.nodes .line {
   position: absolute;
   width: 4px;
   background-color: #ccc;
@@ -1485,7 +1485,7 @@ height: 150px;
   left: 34px;
 } 
 
-#sigma-snippets .nodes .line .weight{
+.nodes .line .weight{
       position: absolute;
     top: 40px;
     background: #575757;
@@ -1499,17 +1499,17 @@ height: 150px;
     padding: 0 10px;
 }
 
-#sigma-snippets .node {
+.node {
   position: relative;
 }
 
-#sigma-snippets .node .actions {
+.node .actions {
   position: absolute;
   top: 10px;
   right: 10px;
 }
 
-#sigma-snippets .node .actions a.action {
+.node .actions a.action {
   color: #A9A2A2;
   border-width: 0;
   width: 30px;
@@ -1524,11 +1524,11 @@ height: 150px;
           transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
 }
 
-#sigma-snippets .node .actions a.action:hover{
+.node .actions a.action:hover{
   color: white;
 }
 
-#sigma-snippets .node .thumbnail {
+.node .thumbnail {
   width: 50px;
   height: 50px;
   position: absolute;
@@ -1540,7 +1540,7 @@ height: 150px;
   padding: 0;
 }
 
-#sigma-snippets .node .thumbnail-wrapper {
+.node .thumbnail-wrapper {
   width: 50px;
   height: 50px;
   background-size:cover;
@@ -1551,16 +1551,16 @@ height: 150px;
   border: 3px solid #4dc3ba;
 }
 
-#sigma-snippets .node.resource .thumbnail-wrapper{
+.node.resource .thumbnail-wrapper{
   border: 3px solid #f6941c;
 }
 
-#sigma-snippets .node .content {
+.node .content {
 margin-left: 50px;
     min-height: 70px;
 }
 
-#sigma-snippets .node .content .date{
+.node .content .date{
   text-align: left;
   margin: 0 10px 0 20px;
   color: #A9A2A2;
@@ -1755,6 +1755,19 @@ li.CodeMirror-hint-active {
   border: 1px solid #ccc;
 }
 
+.btn.btn-line-white{
+  background: transparent;
+  text-transform: uppercase;
+  border-radius: 3px;
+  border: 1px solid #A9A2A2;
+  color: #A9A2A2;
+  transition: color .35s ease-in-out, border-color .35s ease-in-out;
+}
+
+.btn.btn-line-white:hover{
+  color: #fff;
+}
+
 .btn.btn-line.btn-secondary{
   border: 1px solid #838383;
   color: #838383;
@@ -1781,9 +1794,16 @@ li.CodeMirror-hint-active {
   border-color: #151515;
 }
 
+.btn-group-wrapper{
+  padding: 5px 10px 0 10px;
+  text-align: center
+}
+
+
 .btn-group-dual{
   width: 100%;
 }
+
 .btn-group-dual .btn{
   width: 50%;
 }
@@ -1904,17 +1924,94 @@ li.CodeMirror-hint-active {
 
 */
 #pop{
-  position: fixed;
+  position: absolute;
   display: none;
   top: 0;
   left: 0;
   background: #585858;
   /*border: 1px solid #C5C5C6;*/
   border-radius: 3px;
-  z-index: 1100;
+  z-index: 1050;
   box-shadow: 0 5px 10px rgba(0,0,0,.175);
   opacity: .9;
   transition: opacity .22s ease-in-out;
+}
+
+#pop > .inner{
+  position:absolute;
+  bottom: 0;
+  background: #383838;
+  border-radius: 3px;
+  min-width: 200px;
+}
+
+#pop > .inner .node .thumbnail {
+  top:10;
+  left:10;
+}
+
+#pop > .inner .node .content {
+  margin: 0 70px 0 70px;
+  min-width: 120px;
+}
+
+#pop > .inner .node h4{
+  margin-top: 0;
+  margin-bottom: 5px;
+}
+
+#pop > .inner .node h4 a{
+  display: block;
+}
+
+#pop > .inner .node h4 a p{
+    padding: 10px 0 5px 0;
+    margin-bottom: 0;
+    font-weight: bold;
+}
+
+#pop > .inner .node .content .date{
+  margin: 0;
+}
+
+#pop > .inner .node .actions{
+  right: 30px;
+}
+
+#pop > .inner .node .action{
+  height: 30px;
+  width: 30px;
+  border: 1px solid;
+  border-radius: 30px;
+}
+
+#pop > .inner .node .action.discard {
+    position: absolute;
+    top: 0;
+    right: 10px;
+    height: 20px;
+    width: 20px;
+    border-width: 0;
+    text-align: right;
+}
+#pop > .inner .node .action .fa{
+  line-height: 30px
+}
+
+#pop > .inner .node .action.tiny .fa{
+  line-height: 20px
+}
+
+#pop > .inner .btn-group-wrapper{
+  margin-bottom: 10px
+}
+
+#pop > .inner .btn-group .btn {
+  height:30px;
+}
+
+#pop > .inner .btn-group .btn .fa{
+  line-height: 15px
 }
 
 #pop:hover{

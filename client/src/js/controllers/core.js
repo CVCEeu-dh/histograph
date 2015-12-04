@@ -8,7 +8,7 @@
  */
 angular.module('histograph')
   
-  .controller('CoreCtrl', function ($scope, $rootScope, $location, $state, $timeout, $route, $log, $timeout, $http, $routeParams, $modal, $uibModal, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, localStorageService, EVENTS, VIZ, MESSAGES, ORDER_BY) {
+  .controller('CoreCtrl', function ($scope, $rootScope, $location, $state, $timeout, $route, $log, $timeout, $http, $routeParams, $modal, $uibModal, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, EntityRelatedExtraFactory, localStorageService, EVENTS, VIZ, MESSAGES, ORDER_BY) {
     $log.debug('CoreCtrl ready');
     $scope.locationPath = $location.path();
     $scope.locationJson  = JSON.stringify($location.search()); 
@@ -678,16 +678,34 @@ angular.module('histograph')
     };
 
     /*
-      Voting mechanism, on relationships entity resource
+      Voting mechanism: upvote the relationships between an entity and a resource
+      (their id and the type will suffice)
+    
+    */
+    $scope.upvote = function(entity, resource) {
+      EntityRelatedExtraFactory.save({
+        id: entity.id,
+        model: 'resource',
+        related_id: resource.id,
+        extra: 'upvote'
+      }, {}, function (res) {
+        $log.log('CoreCtrl -> upvote()', res.status);
+      });
+    }
+    /*
+      Voting mechanism: downvote(), on relationships entity resource
       (the id and the type will suffice)
 
     */
-    $scope.upvote = function(entity, resource) {
-      debugger
-    }
-
     $scope.downvote = function(entity, resource) {
-      debugger
+      EntityRelatedExtraFactory.save({
+        id: entity.id,
+        model: 'resource',
+        related_id: resource.id,
+        extra: 'downvote'
+      }, {}, function (res) {
+        $log.log('CoreCtrl -> downvote()', res.status);
+      });
     }
     
     /*
