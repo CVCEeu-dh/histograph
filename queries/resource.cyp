@@ -32,21 +32,24 @@ WITH res, curators, locations, collect({
     })[0..10] as persons
 
 OPTIONAL MATCH (res)-[r_org:appears_in]-(org:`organization`)
-WHERE not(has(r_org.score)) OR r_org.score > 0
+WITH res, curators, locations, persons, r_org, org
+ORDER BY r_org.score DESC, r_org.tfidf DESC, r_org.frequency DESC
 WITH res, curators, locations, persons, collect({  
       id: id(org),
       type: 'organization',
       props: org,
       rel: r_org
-    })[0..5] as organizations
+    })[0..10] as organizations
 
 OPTIONAL MATCH (res)-[r_soc:appears_in]-(soc:`social_group`)
+WITH res, curators, locations, persons, organizations, r_soc, soc
+ORDER BY r_soc.score DESC, r_soc.tfidf DESC, r_soc.frequency DESC
 WITH res, curators, locations, persons, organizations, collect({
       id: id(soc),
       type: 'social_group',
       props: soc,
       rel: r_soc
-    })[0..5] as social_groups
+    })[0..10] as social_groups
 
 OPTIONAL MATCH (res)-[r_the:appears_in]-(the:`theme`)
 WITH res, curators, locations, persons, organizations, social_groups, collect({
