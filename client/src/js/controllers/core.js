@@ -709,6 +709,22 @@ angular.module('histograph')
     }
     
     /*
+      Voting mechanism: discard(), delete relationships entity resource
+      (only if the user is the creator of the relationship and there are no other upvotes)
+
+    */
+    $scope.discardvote = function(entity, resource) {
+      EntityRelatedExtraFactory.delete({
+        id: entity.id,
+        model: 'resource',
+        related_id: resource.id,
+        extra: ''
+      }, {}, function (res) {
+        $log.log('CoreCtrl -> discard()', res.status);
+      });
+    }
+
+    /*
       Inpect
       ---
       Open the inspector issue modal

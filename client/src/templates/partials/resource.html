@@ -32,8 +32,10 @@
                --><span ng-if="!$last">-</span>
             </span>
           
-          <span ex-ng-click="openIssueModal('date', item)" class="empty" ng-if="!item.props.start_time" tooltip='click to add a date'>without any date</span>
-            <a class='date' ng-href="#/r/{{item.id}}/inq/create/date" tooltip='click to propose a different date' ng-if="item.props.start_time">{{item.props|guessInterval}}</a>
+          <span class="empty" ng-if="!item.props.start_time" tooltip='click to add a date'>without any date <a class='btn btn-contribute' ng-click=''>add</a></span>
+          <span ng-if='item.props.start_time'>
+            <a class='date' ng-href="#/r/{{item.id}}/inq/create/date" tooltip='click to propose a different date' ng-if="item.props.start_time">{{item.props|guessInterval}}</a><a class='btn btn-contribute' ng-click=''>edit</a>
+          </span>
           <!-- <div class="collections">
             <div class="collection" ng-repeat="collection in item.collections"><a ng-href="#/c/{{collection.id}}">{{collection.name|humanize}}</a></div>
           </div> -->

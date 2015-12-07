@@ -81,6 +81,14 @@ angular.module('histograph')
       } 
     })
 
+    socket.on('entity:remove-related-resource:done', function (result) {
+      console.log(result)
+      if(result.resource.id == $stateParams.id) { // update user notificaation
+        $log.info('ResourceCtrl socket@entity:remove-related-resource:done - by:', result.user);
+        $scope.item = result.data.related.resource; 
+      } 
+    })
+
     $scope.switchVersion = function(version) {
       $log.info('resourceCtrl.switchVersion', version)
       $scope.currentVersion = version;

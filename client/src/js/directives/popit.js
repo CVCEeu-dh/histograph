@@ -66,13 +66,14 @@ angular.module('histograph')
 
           var parent  = el.attr('gasp-parent'),
               tooltip = el.attr('gasp-tip'),
-              
+              removable = el.attr('gasp-removable'),
+              creator   = el.attr('gasp-creator'),
               entity,
               resource;
 
           // validate id
           if(!id && isNaN(id)) {
-            $log.error('::gasp html DOM item lacks "data-id" attribute or it is not a number, given id:', id);
+            $log.error('::gasp -> toggle() html DOM item lacks "data-id" attribute or it is not a number, given id:', id);
             return;
           }
           // rewrite parent, if is present, as an object
@@ -85,7 +86,7 @@ angular.module('histograph')
             };
 
             if(!parent.id) {
-              $log.error('::gasp html DOM item lacks "gasp-parent" attribute');
+              $log.error('::gasp -> toggle()  html DOM item lacks "gasp-parent" attribute');
               return;
             }
           }
@@ -99,10 +100,17 @@ angular.module('histograph')
 
           scope.parent = !parent? null: parent;
 
+          
+
           scope.link = {
             label: 'go to ' + type + ' page',
-            href: '/#/e/' + id
+            href: '/#/e/' + id,
+            creator: creator
           };
+          if(removable === 'true')
+            scope.link.removable = true;
+
+          $log.log('::gasp -> -> toggle() is removable:', scope.link,removable === 'true')
           // apply scope
           scope.$apply();
           // set the id
@@ -113,7 +121,7 @@ angular.module('histograph')
 
           // load item
           SuggestFactory.getUnknownNodes({ids:[scope.item.id]}, function (res) {
-            
+            $log.log('::gasp getUnknownNodes:', scope.item.id)
             scope.item.props = res.result.items[0].props;
           })
         };
@@ -152,7 +160,7 @@ angular.module('histograph')
           Listener: body.mouseenter
         */
         $('body')
-          .on('click', '[gasp-type]', toggle)
+          // .on('click', '[gasp-type]', toggle)
           // .on('mouseenter', '[gasp-type]', toggle)
           // .on('mouseleave', '[gasp-type]', hideDelayed)
           .on('sigma.clickStage', hide)
@@ -167,30 +175,34 @@ angular.module('histograph')
           Enable parent scope action (do not require a proper '&' in scope)
         */
         scope.downvote = function(){
-          console.log(':: gasp -> downvote()', scope.item)
+          $log.info(':: gasp -> downvote()', scope.item)
           scope.$parent.downvote(scope.item, scope.parent);
         }
 
         scope.upvote = function(){
-          console.log(':: gasp -> upvote()', scope.item)
+          $log.info(':: gasp -> upvote()', scope.item)
           scope.$parent.upvote(scope.item, scope.parent);
         }
 
         scope.queue = function(){
-          console.log(':: gasp -> queue()', scope.item)
+          $log.info(':: gasp -> queue()', scope.item)
           scope.$parent.queue(scope.item.id, true);
         }
 
         scope.addFilter = function(){
-          console.log(':: gasp -> addFilter()', scope.item)
+          $log.info(':: gasp -> addFilter()', scope.item)
           scope.$parent.addFilter('with',scope.item.id);
         }
 
         scope.inspect = function(){
-          console.log(':: gasp -> inspect()', scope.item)
+          $log.info(':: gasp -> inspect()', scope.item)
           scope.$parent.inspect(scope.item.id);
         }
         
+        scope.remove = function(){
+          $log.info(':: gasp -> remove()', scope.item)
+          scope.$parent.discardvote(scope.item, scope.parent)
+        }
         $log.log(':: gasp init');
       }
     }
