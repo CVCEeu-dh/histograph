@@ -177,11 +177,26 @@ describe('controller:entity related items', function() {
       .expect(200)
       .end(function (err, res) {
         should.exist(res.body.result.item.rel)
-        console.log(res.body.result.item.rel)
+
+        should.exist(res.body.result.item.rel.created_by)
         should.not.exists(err);
         done();
       });
   })
+
+  it('should delete the manual connection', function(done) {
+    session
+      .delete('/api/entity/' + __entity.id +'/related/resource/'+ __resourceB.id)
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        console.log('DELETE', res.body)
+        should.not.exists(err);
+        done();
+      });
+  })
+
+  
 });
 
 

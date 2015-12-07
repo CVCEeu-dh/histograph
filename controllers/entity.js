@@ -136,6 +136,35 @@ module.exports = function(io){
         }, form.params);
       });
     },
+    /*
+      remove a relationship between an entity and a resource
+    */
+    removeRelatedResource: function(req, res) {
+      var form = validator.request(req);
+
+      Entity.removeRelatedResource({
+        id: +form.params.entity_id
+      },
+      {
+        id: +form.params.resource_id
+      },
+      req.user,
+      form.params, function (err) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+
+        io.emit('entity:remove-related-resource:done', {
+          user: req.user.username,
+          id: +form.params.entity_id,
+          data: {},
+          resource: {
+            id: +form.params.resource_id
+          }
+        });
+
+        return res.ok({}, form.params);
+      });
+    },
 
 
 
