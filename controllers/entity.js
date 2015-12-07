@@ -71,7 +71,8 @@ module.exports = function(io){
       var form = validator.request(req);
       // discard
       if(form.params.action == 'discard') {
-        return res.ok({}, form.params);
+        removeRelatedResource(req,res);
+        return;// res.ok({}, form.params);
       } else if(form.params.action) {
         Entity.updateRelatedResource({
           id: +form.params.entity_id
@@ -149,20 +150,20 @@ module.exports = function(io){
         id: +form.params.resource_id
       },
       req.user,
-      form.params, function (err) {
+      form.params, function (err, item) {
         if(err)
           return helpers.cypherQueryError(err, res);
 
         io.emit('entity:remove-related-resource:done', {
           user: req.user.username,
           id: +form.params.entity_id,
-          data: {},
+          data: item,
           resource: {
             id: +form.params.resource_id
           }
         });
 
-        return res.ok({}, form.params);
+        return res.ok({item: item}, form.params);
       });
     },
 

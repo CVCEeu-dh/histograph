@@ -337,12 +337,31 @@ module.exports = {
     @param params   - used only wioth params.action upvote or downvote
   */
   removeRelatedResource: function (entity, resource, user, params, next) {
-    neo4j.query(queries.remove_entity_related_resource, {
-      entity_id: entity.id,
-      resource_id: resource.id,
-      user_id: user.id,
-      username: user.username,
-    }, next);
+    async.series({
+      relationship: function (callback) {
+         neo4j.query(queries.remove_entity_related_resource, {
+          entity_id: entity.id,
+          resource_id: resource.id,
+          user_id: user.id,
+          username: user.username,
+        }, callback);
+      },
+      resource: function (callback) {
+        Resource.get({
+          id: resource.id
+        }, callback)
+      }
+    }, function (err, results) {
+      if(err)
+        next(err);
+      else
+        next(null, {
+          id: entity.id,
+          related: {
+            resource: results.resource,
+          }
+        });
+    });
   },
 
   /*

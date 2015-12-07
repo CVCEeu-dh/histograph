@@ -190,13 +190,15 @@ describe('controller:entity related items', function() {
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
-        console.log('DELETE', res.body)
+        should.equal(res.body.result.item.id, __entity.id)
+        should.equal(res.body.result.item.related.resource.id, __resourceB.id)
+        // console.log('DELETE', res.body)
         should.not.exists(err);
         done();
       });
   })
 
-  
+
 });
 
 
