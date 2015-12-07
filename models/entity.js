@@ -328,8 +328,22 @@ module.exports = {
       }
     });
   },
-
-
+  /*
+    Remove the appears_in relationship (resource)--(entity)
+    api
+    @param entity   - entity.id should be an integer identifier
+    @param resoruce - resource.id should be an integer identifier
+    @param user     - user.id and user.username should exist
+    @param params   - used only wioth params.action upvote or downvote
+  */
+  removeRelatedResource: function (entity, resource, user, params, next) {
+    neo4j.query(queries.remove_entity_related_resource, {
+      entity_id: entity.id,
+      resource_id: resource.id,
+      user_id: user.id,
+      username: user.username,
+    }, next);
+  },
 
   /*
     Useful api for downvoting/upvoting

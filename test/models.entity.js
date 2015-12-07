@@ -22,7 +22,9 @@ var settings = require('../settings'),
 
 var __user,
     __resource,
-    __entity;
+    __resourceB,
+    __entity,
+    __entityB;
 
 describe('model:entity init', function() {
   
@@ -56,6 +58,17 @@ describe('model:entity init', function() {
       done();
     });
   });
+
+  it('should create a new resource B', function (done){
+    Resource.create(generator.resource.multilanguageB({
+      user: __user,
+    }), function (err, resource) {
+      if(err)
+        throw err;
+      __resourceB = resource;
+      done();
+    });
+  });
 });
 
 
@@ -73,6 +86,21 @@ describe('model:entity ', function() {
       should.equal(entity.rel.type, 'appears_in');
       should.exist(entity.props.name)
       __entity = entity;
+      done();
+    })
+  });
+
+  it('should create a brand new entity, by using links_wiki', function (done) {
+    Entity.create({
+      links_wiki: 'R2',
+      type: 'person',
+      name: 'R2',
+      resource: __resourceB
+    }, function (err, entity) {
+      should.not.exist(err, err);
+      should.equal(entity.rel.type, 'appears_in');
+      should.exist(entity.props.name)
+      __entityB = entity;
       done();
     })
   });
@@ -155,12 +183,12 @@ describe('model:entity ', function() {
     })
   });
   
-  it('should inspect an entity', function (done) {
-    Entity.inspect(__entity.id, {}, function (err, res){
+  // it('should inspect an entity', function (done) {
+  //   Entity.inspect(__entity.id, {}, function (err, res){
       
-      done();
-    })
-  });
+  //     done();
+  //   })
+  // });
   
   it('should return some related persons', function (done) {
     Entity.getRelatedResources({
@@ -176,8 +204,8 @@ describe('model:entity ', function() {
 });
 
 
-describe('model:entity ', function() {
-  it('should return an error since entity does not exist', function (done) {
+describe('model:entity upvote downvote and create relationship', function() {
+  it('should return an error since the USER does not exist', function (done) {
     Entity.updateRelatedResource(__entity, __resource, __entity, {
       action: 'upvote'
     },function (err, results) {
@@ -185,8 +213,8 @@ describe('model:entity ', function() {
       should.equal(err, 'is_empty');
       done();
     }) // we provide the same id for the entity and for the user. Will the neo4j labels work properly?
-
   });
+
   it('should upvote a relationship', function (done) {
     Entity.updateRelatedResource(__entity, __resource, __user, {
       action: 'upvote'
@@ -195,7 +223,6 @@ describe('model:entity ', function() {
       should.equal(result.rel.score, 1);
       done();
     }) // we provide the same id for the entity and for the user. Will the neo4j labels work properly?
-
   });
 
   it('should downvote a relationship', function (done) {
@@ -206,7 +233,33 @@ describe('model:entity ', function() {
       should.equal(result.rel.score, -1);
       done();
     }) // we provide the same id for the entity and for the user. Will the neo4j labels work properly?
+  });
 
+  it('should create a relationship between the entity B and the reosurce A', function (done) {
+    Entity.createRelatedResource(__entityB, __resource, __user, {}, function (err, result) {
+      should.not.exist(err);
+      should.equal(result.related.resource.id, __resource.id)
+      should.equal(result.rel.created_by, __user.username);
+      done();
+    })
+  });
+
+  it('should remove a relationship between the entity B and the reosurce A', function (done) {
+    Entity.removeRelatedResource(__entityB, __resource, __user, {}, function (err, result) {
+      console.log(err)
+      should.not.exist(err);
+      done();
+    })
+  });
+
+  it('should return an error since the relationship does not exist, no more', function (done) {
+    Entity.updateRelatedResource(__entityB, __resource, __entity, {
+      action: 'upvote'
+    },function (err, results) {
+      should.exist(err);
+      should.equal(err, 'is_empty');
+      done();
+    }) // we provide the same id for the entity and for the user. Will the neo4j labels work properly?
   });
 });
 
@@ -214,6 +267,13 @@ describe('model:entity ', function() {
 describe('model:entity after', function() {
   it('should delete the resource', function (done) {
     Resource.remove(__resource, function (err) {
+      if(err)
+        throw err;
+      done();
+    });
+  });
+  it('should delete the resourceB', function (done) {
+    Resource.remove(__resourceB, function (err) {
       if(err)
         throw err;
       done();
@@ -230,6 +290,13 @@ describe('model:entity after', function() {
   
   it('should delete the entity', function (done) {
     Entity.remove(__entity, function (err) {
+      if(err)
+        throw err;
+      done();
+    });
+  });
+   it('should delete the entityB', function (done) {
+    Entity.remove(__entityB, function (err) {
       if(err)
         throw err;
       done();

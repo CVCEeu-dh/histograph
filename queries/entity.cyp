@@ -514,6 +514,20 @@ SET
   ent.last_modification_time = {exec_time}
 return ent, u, res, r1 as rel, r2
 
+
+
+// name: remove_entity_related_resource
+// delete the current relationship if it has been created by a specific user and has not been voted
+MATCH (ent:entity)-[r1:appears_in]-(res:resource), (u:user)
+WHERE id(ent) = {entity_id}
+  AND id(u) = {user_id}
+  AND id(res) = {resource_id}
+  AND r1.created_by = {username}
+  AND length(r1.upvote) = 1
+WITH r1
+DELETE r1
+
+
 // name: merge_entity_related_resource
 //
 MATCH (ent:entity), (res:resource), (u:user)
