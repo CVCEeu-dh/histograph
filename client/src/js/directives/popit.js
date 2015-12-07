@@ -92,10 +92,12 @@ angular.module('histograph')
           }
           // set scope variables
           scope.tooltip = tooltip;
-          
+          scope.question = false;
+
           scope.item  = {
             type: type,
             id: id,
+
           };
 
           scope.parent = !parent? null: parent;
@@ -174,14 +176,16 @@ angular.module('histograph')
         /*
           Enable parent scope action (do not require a proper '&' in scope)
         */
-        scope.downvote = function(){
-          $log.info(':: gasp -> downvote()', scope.item)
-          scope.$parent.downvote(scope.item, scope.parent);
+        scope.downvote = function($event){
+          $log.info(':: gasp -> downvote()', scope.item);
+          $event.stopPropagation();
+          scope.$parent.downvote(scope.item, scope.parent, scope.feedback);
         }
 
-        scope.upvote = function(){
-          $log.info(':: gasp -> upvote()', scope.item)
-          scope.$parent.upvote(scope.item, scope.parent);
+        scope.upvote = function($event){
+          $log.info(':: gasp -> upvote()', scope.item);
+           $event.stopPropagation();
+          scope.$parent.upvote(scope.item, scope.parent, scope.feedback);
         }
 
         scope.queue = function(){
@@ -200,9 +204,42 @@ angular.module('histograph')
         }
         
         scope.remove = function(){
-          $log.info(':: gasp -> remove()', scope.item)
-          scope.$parent.discardvote(scope.item, scope.parent)
+          $log.info(':: gasp -> remove()', scope.item);
+          scope.$parent.discardvote(scope.item, scope.parent);
+          
+          hide();
         }
+
+        scope.signale = function($event){
+          $log.info(':: gasp -> signale()', scope.item);
+          scope.$parent.signale(scope.item, scope.feedback);
+        }
+
+        /*
+          End of the story.
+        */
+        scope.close = function() {
+          scope.question = false;
+          hide();
+        };
+
+        scope.feedback = function(){
+          scope.question = 'feedback'
+        }
+        /*
+          
+        */
+        scope.askQuestion = function(question, $event) {
+          scope.question = question;
+          if($event)
+            $event.stopPropagation();
+        }
+
+        scope.cancelQuestion = function($event) {
+          scope.question = false;
+          $event.stopPropagation();
+        }
+
         $log.log(':: gasp init');
       }
     }

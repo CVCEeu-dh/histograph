@@ -8,7 +8,7 @@
  */
 angular.module('histograph')
   
-  .controller('CoreCtrl', function ($scope, $rootScope, $location, $state, $timeout, $route, $log, $timeout, $http, $routeParams, $modal, $uibModal, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, EntityRelatedExtraFactory, localStorageService, EVENTS, VIZ, MESSAGES, ORDER_BY) {
+  .controller('CoreCtrl', function ($scope, $rootScope, $location, $state, $timeout, $route, $log, $timeout, $http, $routeParams, $modal, $uibModal, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, EntityExtraFactory, EntityRelatedExtraFactory, localStorageService, EVENTS, VIZ, MESSAGES, ORDER_BY) {
     $log.debug('CoreCtrl ready');
     $scope.locationPath = $location.path();
     $scope.locationJson  = JSON.stringify($location.search()); 
@@ -682,7 +682,7 @@ angular.module('histograph')
       (their id and the type will suffice)
     
     */
-    $scope.upvote = function(entity, resource) {
+    $scope.upvote = function(entity, resource, next) {
       EntityRelatedExtraFactory.save({
         id: entity.id,
         model: 'resource',
@@ -690,6 +690,8 @@ angular.module('histograph')
         extra: 'upvote'
       }, {}, function (res) {
         $log.log('CoreCtrl -> upvote()', res.status);
+        if(next)
+          next();
       });
     }
     /*
@@ -697,7 +699,7 @@ angular.module('histograph')
       (the id and the type will suffice)
 
     */
-    $scope.downvote = function(entity, resource) {
+    $scope.downvote = function(entity, resource, next) {
       EntityRelatedExtraFactory.save({
         id: entity.id,
         model: 'resource',
@@ -705,8 +707,10 @@ angular.module('histograph')
         extra: 'downvote'
       }, {}, function (res) {
         $log.log('CoreCtrl -> downvote()', res.status);
+        if(next)
+          next();
       });
-    }
+    };
     
     /*
       Voting mechanism: discard(), delete relationships entity resource
@@ -720,7 +724,22 @@ angular.module('histograph')
         related_id: resource.id,
         extra: ''
       }, {}, function (res) {
-        $log.log('CoreCtrl -> discard()', res.status);
+        $log.log('CoreCtrl -> discardvote()', res.status);
+      });
+    };
+
+    /*
+      Voting mechanism on ENTITY itself: it is a mlispelling or an error.
+    */
+    $scope.signale = function(entity, next) {
+      EntityExtraFactory.save({
+        id: entity.id,
+        model: 'resource',
+        extra: 'downvote'
+      }, {}, function (res) {
+        $log.log('CoreCtrl -> signale()', res.status);
+        if(next)
+          next();
       });
     }
 

@@ -29,11 +29,65 @@
       <button class='btn btn-line-white' ng-click='addFilter()'>filter</button>
 
       
-      <button ng-if='link.removable' class='btn btn-line-white obscure' ng-click='remove()'>REMOVE</button>
+      <button ng-if='link.removable' class='btn btn-line-white obscure' ng-click='askQuestion("remove-relationship")'>REMOVE</button>
 
-      <button ng-if='!link.removable'  class='btn btn-line-white obscure' ng-click='downvote()'><i class="fa fa-thumbs-o-down"></i></button>
-      <button ng-if='!link.removable' class='btn btn-line-white' ng-click='upvote()'> <i class="fa fa-thumbs-o-up"></i></button>
+      <button ng-if='!link.removable'  class='btn btn-line-white obscure' ng-click='askQuestion("downvote")'><i class="fa fa-bug"></i></button>
+      <button ng-if='!link.removable' class='btn btn-line-white' ng-click='upvote($event)'> <i class="fa fa-check"></i></button>
     </div>
+  </div>
+  <div class='questions {{question}} obscure {{question?"enabled":""}}'>
+
+    <div ng-if='question=="remove-relationship"' class='question'>
+      <p class='text'>Removing the relationship does not delete the selected items, just affects the relationship itself.</p>
+      <div class='answers'>
+        <div class='btn-group btn-group-dual'>
+        <button class='btn btn-line-white btn-primary' ng-click='remove()'>remove!</button>
+        <button class='btn btn-line-white obscure' ng-click='cancelQuestion($event)'>back</button>
+        </div>
+      </div>
+    </div>
+
+    <div ng-if='question=="downvote"' class='question'>
+      <div class='answers'>
+        <div class=''>
+          <button class='btn btn-line-white btn-block' ng-click='askQuestion("wrongtype", $event)'>This is not a <strong>{{item.type}}</strong></button>
+          <button class='btn btn-line-white btn-block' ng-click='signale($event)'>this is mispelled / a fragment</button>
+          <button class='btn btn-line-white btn-block' ng-click='downvote($event)'>this <strong>{{item.type}}</strong> is not mentioned here</button>
+          
+          <button class='btn btn-line-white obscure btn-block' ng-click='cancelQuestion($event)'>back</button>
+        </div>
+      </div>
+    </div>
+
+      <div ng-if='question=="wrongtype"' class='question'>
+        <p class='text'>Are you able to spot the correct <strong>type</strong>?</p>
+        <div class='answers'>
+          <div class="btn-group btn-block" uib-dropdown dropdown-append-to-body>
+            <button id="btn-append-to-body" type="button" class="btn btn-primary btn-block btn-line-white btn-primary" uib-dropdown-toggle>
+              {{item.type}} <span class="caret"></span>
+            </button>
+            <ul class="uib-dropdown-menu tk-proxima-nova" style='z-index:1050' role="menu" aria-labelledby="btn-append-to-body">
+              <li role="menuitem"><a ng-click='suggestType("person", $event)'>Person</a></li>
+              <li role="menuitem"><a ng-click='suggestType("location", $event)'>location</a></li>
+              <li role="menuitem"><a ng-click='suggestType("organization", $event)'>organization</a></li>
+              <li role="menuitem"><a ng-click='suggestType("social_group", $event)'>social group</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class='answers'>
+          
+          <button class='btn btn-line-white btn-block' ng-click='askQuestion("downvote", $event)'>back</button>
+          
+        </div>
+      </div>
+
+      <div ng-if='question=="feedback"' class='question'>
+        <p class='text'>thank you for your feedback!</p>
+        <div class='answers'>
+          <button class='btn btn-line-white btn-primary btn-block' ng-click='close()'>close</button>
+        </div>
+      </div>
+
   </div>
   <!-- <div class="action-group">
 

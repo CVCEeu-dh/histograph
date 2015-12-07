@@ -1764,8 +1764,26 @@ li.CodeMirror-hint-active {
   transition: color .35s ease-in-out, border-color .35s ease-in-out;
 }
 
+.btn.btn-line-white.active, .btn.btn-line-white.focus, .btn.btn-line-white:active, .btn.btn-line-white:focus, .btn.btn-line-white:hover, .open>.dropdown-toggle.btn.btn-line-white{
+  background: rgba(200,200,200, .2);
+  outline: none;
+  border: 1px solid #ffffff;
+}
+
+.btn.btn-line-white.btn-primary{
+  color: #f5f5f5;
+  /*border-color: #f5f5f5;*/
+  z-index: 2;
+}
+.btn.btn-line-white.btn-primary:hover{
+  border-color: white;
+  background: none;
+}
+
 .btn.btn-line-white:hover{
   color: #fff;
+  border-color: #f5f5f5;
+
 }
 
 .btn.btn-line.btn-secondary{
@@ -1808,6 +1826,16 @@ li.CodeMirror-hint-active {
   width: 50%;
 }
 
+/*
+  Extended bootstrap ui menu
+*/
+.uib-dropdown-menu a{
+
+}
+
+.uib-dropdown-menu>li>a:focus, .uib-dropdown-menu>li>a:hover{
+  border-bottom: 0px transparent;
+}
 
 #login{
   margin: 100px auto;
@@ -1942,7 +1970,7 @@ li.CodeMirror-hint-active {
   bottom: 0;
   background: #383838;
   border-radius: 3px;
-  min-width: 200px;
+  width: 300px;
 }
 
 #pop > .inner .node .thumbnail {
@@ -2045,10 +2073,36 @@ li.CodeMirror-hint-active {
   line-height: 38px;
 }
 
+#pop > .inner .questions{
+  height: 0;
+  overflow: hidden;
+   -webkit-transition: height .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
+     -moz-transition: height .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+       -o-transition: height .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+          transition: height .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+}
+
+#pop > .inner .questions.enabled{
+  height: 120px;
+}
+#pop > .inner .questions.feedback{
+  height: 80px;
+}
+#pop > .inner .questions.downvote.enabled{
+  height: 155px;
+}
+
+#pop > .inner .questions p.text{
+    color: #A9A2A2;
+    margin: 0px 20px;
+    padding: 10px 0 0 0;
+    border-top: 1px solid #A9A2A2;
+}
 
 
-
-
+#pop > .inner .questions .answers{
+  padding: 5px 15px 5px 15px;
+}
 /*
   
   Playlist, magic playslit
