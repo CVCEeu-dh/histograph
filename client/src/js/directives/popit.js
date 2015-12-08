@@ -44,6 +44,12 @@ angular.module('histograph')
             __timeout = 0;
 
         /*
+          Ignore by default every click that has been generated from the popit template
+        */
+        element.bind('click',function(e){
+          e.stopImmediatePropagation();
+        })
+        /*
           Show gasp instance, with Javascript event
         */
         function toggle(e) {
@@ -68,6 +74,7 @@ angular.module('histograph')
               tooltip = el.attr('gasp-tip'),
               removable = el.attr('gasp-removable'),
               creator   = el.attr('gasp-creator'),
+              upvotes   = el.attr('gasp-upvotes'),
               entity,
               resource;
 
@@ -76,6 +83,10 @@ angular.module('histograph')
             $log.error('::gasp -> toggle() html DOM item lacks "data-id" attribute or it is not a number, given id:', id);
             return;
           }
+
+          // rewrite upvotes
+          if(upvotes)
+            upvotes = angular.fromJson(upvotes)
           // rewrite parent, if is present, as an object
           if(parent) {
             var parent_parts = parent.split('-');
@@ -94,12 +105,13 @@ angular.module('histograph')
           scope.tooltip = tooltip;
           scope.question = false;
 
-          scope.item  = {
+          scope.entity  = {
             type: type,
             id: id,
 
           };
 
+          scope.entity.upvotes = upvotes || [];
           scope.parent = !parent? null: parent;
 
           
@@ -122,9 +134,9 @@ angular.module('histograph')
           showGasp(pos);
 
           // load item
-          SuggestFactory.getUnknownNodes({ids:[scope.item.id]}, function (res) {
-            $log.log('::gasp getUnknownNodes:', scope.item.id)
-            scope.item.props = res.result.items[0].props;
+          SuggestFactory.getUnknownNodes({ids:[scope.entity.id]}, function (res) {
+            $log.log('::gasp getUnknownNodes:', scope.entity.id)
+            scope.entity.props = res.result.items[0].props;
           })
         };
         
@@ -137,9 +149,10 @@ angular.module('histograph')
         */
         function showGasp(pos) {
           clearTimeout(__timeout);
+          // recalculate pos.top and pos.left according to _°_layout
           _gasp.css({
-            top: pos.top,
-            left: pos.left
+            top: Math.max(300, Math.min(__layout.height - 200, pos.top)),
+            left: Math.max(0, Math.min(__layout.width - 400, pos.left))
           }).show();
         };
 
@@ -177,44 +190,67 @@ angular.module('histograph')
           Enable parent scope action (do not require a proper '&' in scope)
         */
         scope.downvote = function($event){
-          $log.info(':: gasp -> downvote()', scope.item);
+          $log.info(':: gasp -> downvote()', scope.entity);
           $event.stopPropagation();
-          scope.$parent.downvote(scope.item, scope.parent, scope.feedback);
+          scope.$parent.downvote(scope.entity, scope.parent, function (result) {
+            scope.entity.upvotes = result.item.rel.upvote;
+            scope.feedback();
+          });
         }
 
         scope.upvote = function($event){
-          $log.info(':: gasp -> upvote()', scope.item);
+          $log.info(':: gasp -> upvote()', scope.entity);
            $event.stopPropagation();
-          scope.$parent.upvote(scope.item, scope.parent, scope.feedback);
+          scope.$parent.upvote(scope.entity, scope.parent, function (result) {
+            scope.entity.upvotes = result.item.rel.upvote;
+            scope.feedback();
+          });
         }
 
         scope.queue = function(){
-          $log.info(':: gasp -> queue()', scope.item)
-          scope.$parent.queue(scope.item.id, true);
+          $log.info(':: gasp -> queue()', scope.entity)
+          scope.$parent.queue(scope.entity.id, true);
         }
 
         scope.addFilter = function(){
-          $log.info(':: gasp -> addFilter()', scope.item)
-          scope.$parent.addFilter('with',scope.item.id);
+          $log.info(':: gasp -> addFilter()', scope.entity)
+          scope.$parent.addFilter('with',scope.entity.id);
         }
 
         scope.inspect = function(){
-          $log.info(':: gasp -> inspect()', scope.item)
-          scope.$parent.inspect(scope.item.id);
+          $log.info(':: gasp -> inspect()', scope.entity)
+          scope.$parent.inspect(scope.entity.id);
         }
         
         scope.remove = function(){
-          $log.info(':: gasp -> remove()', scope.item);
-          scope.$parent.discardvote(scope.item, scope.parent);
+          $log.info(':: gasp -> remove()', scope.entity);
+          scope.$parent.discardvote(scope.entity, scope.parent);
           
           hide();
         }
 
-        scope.signale = function($event){
-          $log.info(':: gasp -> signale()', scope.item);
-          scope.$parent.signale(scope.item, scope.feedback);
+        scope.merge = function(){
+          $log.info(':: gasp -> merge()', scope.entity)
+          // merge two entities: add (or upvote the entity) and downvote the current entity
+          scope.feedback();
         }
 
+        scope.signale = function($event){
+          $log.info(':: gasp -> signale()', scope.entity);
+          scope.$parent.signale(scope.entity, scope.feedback);
+        }
+
+        scope.typeaheadSuggest = function(q, type) {
+          return scope.$parent.typeaheadSuggest(q, type);
+        }
+
+        scope.typeaheadSelected = function($item, $model, $label) {
+          $log.info(':: gasp -> typeaheadSelected()', arguments);
+          if(!$item.id)
+            return;
+          scope.entity.alias = $item;
+          scope.question = 'contribute-confirm';
+        }
         /*
           End of the story.
         */
@@ -231,6 +267,7 @@ angular.module('histograph')
         */
         scope.askQuestion = function(question, $event) {
           scope.question = question;
+          
           if($event)
             $event.stopPropagation();
         }
@@ -240,7 +277,29 @@ angular.module('histograph')
           $event.stopPropagation();
         }
 
-        $log.log(':: gasp init');
+        
+
+        // get the very first window size
+        var __layout;
+        function calculateLayout() {
+          __layout = {
+            height: $(window).height(),
+            width: $(window).width()
+          };
+        }
+        calculateLayout();
+
+        /* DOM liteners */
+        $('body')
+          .on('sigma.clickStage', hide)
+          .on('click', toggle)
+          .on('click', '.obscure', function(e) {
+            e.stopImmediatePropagation();
+          });
+        $(window).on('resize', _.debounce(calculateLayout, 150));
+
+        $log.log(':: gasp init & running, layout:', __layout);
+      
       }
     }
   });

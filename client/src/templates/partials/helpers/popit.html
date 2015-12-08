@@ -1,18 +1,18 @@
 <div class="inner">
   <div>
-    <div class='node {{item.type}}'>
+    <div class='node {{entity.type}}'>
       
-      <div class='thumbnail' ng-if='item.type == "person"'>
-        <div class="thumbnail-wrapper" style='background-image: url({{item.props.thumbnail}})'>
+      <div class='thumbnail' ng-if='entity.type == "person"'>
+        <div class="thumbnail-wrapper" style='background-image: url({{entity.props.thumbnail}})'>
         </div>
       </div>
       <div class='content'>
         <h4>
-          <a ng-if='item.type == "person"' ng-href='{{link.href}}' marked="item.props|lookup:'name':language"></a>
-          <a ng-if='item.type == "location"' ng-href='{{link.href}}'>{{item.props|lookup:'name':language}}, {{item.props.country}}</a>
-          <a ng-if='item.type == "organization"' ng-href='{{link.href}}'>{{item.props|lookup:'name':language}}</a>
+          <a ng-if='entity.type == "person"' ng-href='{{link.href}}' marked="entity.props|lookup:'name':language"></a>
+          <a ng-if='entity.type == "location"' ng-href='{{link.href}}'>{{entity.props|lookup:'name':language}}, {{entity.props.country}}</a>
+          <a ng-if='entity.type == "organization"' ng-href='{{link.href}}'>{{entity.props|lookup:'name':language}}</a>
         </h4>
-        <div class='date' ng-if='item.type == "person"'>{{relatedItem.props.birth_time | datesOfAPerson : relatedItem.props.death_time}}</div>
+        <div class='date' ng-if='entity.type == "person"'>{{entity.props.birth_time | datesOfAPerson : entity.props.death_time}}</div>
       </div>
       <div class="actions">
         <a class="action" title="add to bookmark" ng-click="queue()">
@@ -23,16 +23,16 @@
           <span class="fa fa-times-circle"></span></a>
     </div>
   </div>
-  <div class="btn-group-wrapper">
+  <div class='btn-group-wrapper'>
     <div class="btn-group">
       <a class="btn btn-line-white" href="{{link.href}}" title="visit" data-action="link">view more</a>
-      <button class='btn btn-line-white' ng-click='addFilter()'>filter</button>
-
+      <!-- <button class='btn btn-line-white' ng-click='addFilter()'>filter</button> -->
+      {{entity.rel}}
       
       <button ng-if='link.removable' class='btn btn-line-white obscure' ng-click='askQuestion("remove-relationship")'>REMOVE</button>
 
-      <button ng-if='!link.removable'  class='btn btn-line-white obscure' ng-click='askQuestion("downvote")'><i class="fa fa-bug"></i></button>
-      <button ng-if='!link.removable' class='btn btn-line-white' ng-click='upvote($event)'> <i class="fa fa-check"></i></button>
+      <button ng-if='!link.removable'  class='btn btn-line-white obscure' ng-click='askQuestion("downvote")'><i class="fa fa-bug"></i> fix </button>
+      <button ng-if='!link.removable' class='btn btn-line-white {{entity.upvotes.length? "btn-number":""}}' ng-click='upvote($event)'>CONFIRM <i class="fa fa-check"></i><div class='number' ng-if='entity.upvotes.length'>{{entity.upvotes.length}}</div></button>
     </div>
   </div>
   <div class='questions {{question}} obscure {{question?"enabled":""}}'>
@@ -50,27 +50,55 @@
     <div ng-if='question=="downvote"' class='question'>
       <div class='answers'>
         <div class=''>
-          <button class='btn btn-line-white btn-block' ng-click='askQuestion("wrongtype", $event)'>This is not a <strong>{{item.type}}</strong></button>
-          <button class='btn btn-line-white btn-block' ng-click='signale($event)'>this is mispelled / a fragment</button>
-          <button class='btn btn-line-white btn-block' ng-click='downvote($event)'>this <strong>{{item.type}}</strong> is not mentioned here</button>
+          <button class='btn btn-line-white btn-block' ng-click='askQuestion("wrongtype", $event)'>This is not a <strong>{{entity.type}}</strong></button>
+          <button class='btn btn-line-white btn-block' ng-click='askQuestion("contribute", $event)'>this is mispelled / a fragment</button>
+          <button class='btn btn-line-white btn-block' ng-click='downvote($event)'>this <strong>{{entity.type}}</strong> is not mentioned here</button>
           
           <button class='btn btn-line-white obscure btn-block' ng-click='cancelQuestion($event)'>back</button>
         </div>
       </div>
     </div>
 
+      <div ng-if='question=="contribute"'>
+        <p class='text'>Can you find a better {{entity.type}} between the ones we have in stock?</p>
+        <div class='answers'>
+          <div >
+            <form>
+              <input autofocus type='text' name='test' typeahead-trigger-on-model-change='entity.name' ng-model='q' class='form-control' typeahead-editable='false' placeholder='search person, location, themes...' uib-typeahead='item for items in typeaheadSuggest($viewValue, entity.type)' typeahead-wait-ms='100' typeahead-on-select='typeaheadSelected($item, $model, $label)' typeahead-template-url='templates/partials/helpers/typeahead.html'/>
+            </form>
+          </div>
+        </div>
+        <div class='answers'>
+          <button class='btn btn-line-white obscure btn-block' ng-click='cancelQuestion($event)'>Nope, it is a brand new {{entity.type}}</button>
+          <button class='btn btn-line-white obscure btn-block' ng-click='askQuestion("downvote")'>back</button>
+        </div>
+      </div>
+
+        <div ng-if='question=="contribute-confirm"'>
+          <p class='text'>Suggest <strong class='tk-proxima-nova' style='color: white'>{{entity.alias.props|lookup:'name':language}}</strong> as replacement?</p>
+          <div class='answers'>
+            <div class='btn-group btn-group-dual'>
+              <button class='btn btn-line-white btn-primary' ng-click='merge()'>yes!</button>
+              <button class='btn btn-line-white obscure' ng-click='askQuestion("contribute", $event)'>back</button>
+            </div>
+          </div>
+        </div>
+
       <div ng-if='question=="wrongtype"' class='question'>
         <p class='text'>Are you able to spot the correct <strong>type</strong>?</p>
         <div class='answers'>
-          <div class="btn-group btn-block" uib-dropdown dropdown-append-to-body>
+          <div class="btn-group btn-block" uib-dropdown>
             <button id="btn-append-to-body" type="button" class="btn btn-primary btn-block btn-line-white btn-primary" uib-dropdown-toggle>
-              {{item.type}} <span class="caret"></span>
+              this is a {{entity.type}} <span class="caret"></span>
             </button>
             <ul class="uib-dropdown-menu tk-proxima-nova" style='z-index:1050' role="menu" aria-labelledby="btn-append-to-body">
-              <li role="menuitem"><a ng-click='suggestType("person", $event)'>Person</a></li>
-              <li role="menuitem"><a ng-click='suggestType("location", $event)'>location</a></li>
-              <li role="menuitem"><a ng-click='suggestType("organization", $event)'>organization</a></li>
-              <li role="menuitem"><a ng-click='suggestType("social_group", $event)'>social group</a></li>
+              <li role="menuitem"><a ng-click='suggestType("person", $event)'> this is a <strong>person</strong></a></li>
+              <li role="menuitem"><a ng-click='suggestType("location", $event)'>this is a <strong>location</strong></a></li>
+              <li role="menuitem"><a ng-click='suggestType("organization", $event)'>this is a <strong>organization</strong></a></li>
+              <li role="menuitem"><a ng-click='suggestType("social_group", $event)'>this is a <strong>social group</strong></a></li>
+              <li class="divider"></li>
+              <li role="menuitem"><a ng-click='suggestType("topic", $event)'>(generic keyword)</a></li>
+              <li role="menuitem"><a ng-click='suggestType("topic", $event)'>(garbage ...)</a></li>
             </ul>
           </div>
         </div>

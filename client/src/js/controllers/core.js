@@ -691,7 +691,7 @@ angular.module('histograph')
       }, {}, function (res) {
         $log.log('CoreCtrl -> upvote()', res.status);
         if(next)
-          next();
+          next(res.result);
       });
     }
     /*
@@ -708,7 +708,7 @@ angular.module('histograph')
       }, {}, function (res) {
         $log.log('CoreCtrl -> downvote()', res.status);
         if(next)
-          next();
+          next(res.result);
       });
     };
     

@@ -1738,6 +1738,23 @@ li.CodeMirror-hint-active {
   font-size: 12px;
 }
 
+.btn-number{
+  padding-right: 30px;
+}
+
+.btn-number .number{
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  border: 1px solid;
+  color: white;
+  width: 18px;
+  border-radius: 10px;
+  text-align: center;
+  line-height: 18px;
+  height: 18px;
+}
+
 .btn.expanded {
   font-size: 13px;
   padding: 10px 20px;
@@ -2088,8 +2105,20 @@ li.CodeMirror-hint-active {
 #pop > .inner .questions.feedback{
   height: 80px;
 }
+#pop > .inner .questions.wrongtype{
+  overflow: visible;
+}
+
 #pop > .inner .questions.downvote.enabled{
   height: 155px;
+}
+
+#pop > .inner .questions.contribute.enabled{
+  height: 177px;
+}
+
+#pop > .inner .questions.contribute-confirm.enabled{
+  height: 80px;
 }
 
 #pop > .inner .questions p.text{
@@ -2103,6 +2132,18 @@ li.CodeMirror-hint-active {
 #pop > .inner .questions .answers{
   padding: 5px 15px 5px 15px;
 }
+
+#pop > .inner ul.dropdown-menu{
+  right: 15px;
+      max-height: 270px;
+    overflow-y: scroll;
+
+}
+
+#pop > .inner ul.dropdown-menu li>div {
+  padding: 5px 15px;
+}
+
 /*
   
   Playlist, magic playslit
@@ -6253,38 +6294,40 @@ Copyright (c) 2015 Daniel Eden
     border-top: 1px solid #e8e8e7;
 }
 
+/*
+  dropdown menu replacement
+*/
 
-
-.typeahead-in-dropdown ul.dropdown-menu >li.active{
+ul.dropdown-menu >li.active{
   background: #e8e8e8;
 }
-.typeahead-in-dropdown ul.dropdown-menu >li a{
+ul.dropdown-menu >li a{
   display: block;
   color: #151515;
   font-weight: normal;
   margin: 0;
 }
 
-.typeahead-in-dropdown ul.dropdown-menu >li a:hover{
+ul.dropdown-menu >li a:hover{
   border-bottom: 0px transparent;
 }
 
 
-.typeahead-in-dropdown ul.dropdown-menu .with-thumbnail{
+ul.dropdown-menu .with-thumbnail{
   min-height: 50px;
   clear: both
 }
-.typeahead-in-dropdown ul.dropdown-menu h4{
+ul.dropdown-menu h4{
   margin: 5px 0 0 0;
 }
 
-.typeahead-in-dropdown ul.dropdown-menu .with-thumbnail h4{
+ul.dropdown-menu .with-thumbnail h4{
   font-weight: bold;
     
 }
 
 
-.typeahead-in-dropdown ul.dropdown-menu >li a .thumbnail {
+ul.dropdown-menu >li a .thumbnail {
   background-size: cover;
   background-color: black;
   background-repeat: no-repeat;

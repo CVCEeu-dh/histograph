@@ -54,12 +54,13 @@
             <span ng-repeat="per in item.social_groups"><span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.props.name}} {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name}} </span>{{$last? '':  ', '}}</span>    
           </p>
           <p class="tags"><strong class='tk-proxima-nova'>  organizations</strong>:
-            <span ng-if="item.persons.length == 0">none.</span>
+            <span ng-if="item.organizations.length == 0">none.</span>
             <span ng-repeat="tag in item.organizations" ng-include='"templates/partials/entity-organization-tag.html"'></span>
             <a class='btn btn-contribute' ng-click='contribute(item, "organization")'>add</a>   
           </p>
-          <p ng-if="item.locations.length" class="tags"><strong class='tk-proxima-nova'>location mentioned</strong>:
-            <span ng-repeat="the in item.locations"><span class="tag location" data-id='{{the.id}}' gasp-type='location' gasp-parent='{{item.type}}-{{item.id}}'>{{the.props|lookup:"name":language}}</span>{{$last? '':  ', '}}</span>  
+          <p class="tags"><strong class='tk-proxima-nova'>location mentioned</strong>:
+            <span ng-if="item.locations.length == 0">none.</span>
+            <span ng-repeat="tag in item.locations" ng-include='"templates/partials/entity-location-tag.html"'></span>
             <a class='btn btn-contribute' ng-click='contribute(item, "location")'>add</a>
           </p>
           <p ng-if="item.props.languages.length"> <strong>available in</strong>:
