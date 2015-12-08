@@ -2466,6 +2466,29 @@ li.CodeMirror-hint-active {
 .annotator-outer.annotator-editor{
   display: none;
 }
+
+
+/*
+  
+  Go crowd
+  ~~~~~~~~~~~~~~~~~~~~~~~~
+
+*/
+#crowd{
+  display: none;
+  position: absolute;
+  right: 20px;
+  bottom: 200px;
+  width: 300px;
+  height: auto;
+  background: #151515;
+  box-shadow: 0 5px 10px rgba(0,0,0,.175);
+  color: white;
+  padding: 15px;
+  z-index:30px;
+}
+
+
 /*
   
   Animate.css animations

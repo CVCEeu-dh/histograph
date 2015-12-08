@@ -171,7 +171,9 @@ html
           div(id='timeline', timeline, class='{{currentState.name}} {{queueStatus}}', t='timeline', cxt='contextualTimeline', filters="filters")
             
           div(id='pop', gasp, target="target", redirect='redirect(path)', filter='addFilter(key, item)', comment="startCommenting(item, tag, hashtag)", queue="queue(item, inprog)", inspect='inspect(item)')
-            
+          
+          div(id='crowd',ng-controller='CrowdCtrl')
+            div campaign
           //- div(id='popit', popit, target="target", redirect='redirect(path)', comment="startCommenting(item, tag, hashtag)", queue="queue(item, inprog)")
             div(class='action-group')
               a(class=' action', title='visit', data-action='link', tooltip='visit entity page')

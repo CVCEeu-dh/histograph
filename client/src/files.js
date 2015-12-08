@@ -65,6 +65,7 @@ module.exports = {
       '/js/controllers/all-in-between.js',
       '/js/controllers/all-shortest-paths.js',
       '/js/controllers/collection.js',
+      '/js/controllers/crowd.js',
       '/js/controllers/entity.js',
       '/js/controllers/index.js',
       '/js/controllers/inquiry.js',
