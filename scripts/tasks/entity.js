@@ -4,7 +4,7 @@
 */
 var settings  = require('../../settings'),
     parser    = require('../../parser'),
-    
+    inquirer     = require('inquirer'),
     neo4j     = require('seraph')(settings.neo4j.host),
     async     = require('async'),
     path      = require('path'),
@@ -15,7 +15,197 @@ var settings  = require('../../settings'),
     queries   = require('decypher')('./queries/similarity.cyp');
 
 module.exports = {
-  
+  /*
+    get couples of entities having the same id.
+    Call it before
+  */
+  getClustersByWiki: function(options, callback) {
+    console.log(clc.yellowBright('\n   tasks.entity.getClustersByWiki'));
+    neo4j.query('MATCH (ent:entity) WHERE has(ent.links_wiki) AND ent.links_wiki <> ""  WITH ent.links_wiki as links_wiki, collect({id: id(ent), label: last(labels(ent)), df: ent.df}) as entities WITH links_wiki, entities, length(entities) as c WHERE c > 1 RETURN  links_wiki, entities ORDER by c DESC', function (err, clusters) {
+      if(err) {
+        callback(err)
+        return;
+      }
+      options.clusters = clusters;
+      console.log(_.take(clusters, 2))
+      console.log(_.take(clusters, 2))
+      callback(null, options);
+    })
+  },
+
+  mergeMany: function(options, callback) {
+    console.log(clc.yellowBright('\n   tasks.entity.mergeMany'));
+    
+    var q = async.queue(function (cluster, nextCluster) {
+      console.log(cluster)
+      var ids = _.map(cluster.entities, 'id'),
+          the_id = _.get(_.first(_.sortByOrder(_.filter(cluster.entities, 'df'), ['df'],['desc'])), 'id'),// index with most df will take all
+          labels = _.unique(_.map(cluster.entities, 'label'));
+      console.log(labels, the_id)
+      if(!ids || ids.length == 0) {
+        q.kill()
+        callback('ids should be a valid array of ints') ;
+        return;
+      }
+
+      // for each cluster
+      async.waterfall([
+        /*
+          1) get versions
+        */
+        function getAnnotations(next) {
+
+        },
+
+        /*
+          2) get relationships
+        */
+        function getRelationships(next) {
+          
+
+          console.log(clc.blackBright('\n   get relationships:',  clc.cyanBright(JSON.stringify(ids))));
+            
+          neo4j.query('MATCH (s:entity) WHERE id(s) in {ids} WITH s MATCH (s)-[r]-(t) WHERE NOT id(t)  in {ids} WITH r RETURN r', {
+            ids: ids
+          }, next);
+        },
+
+        function cloneRelationships(rels, next) {
+          console.log(rels.length);
+          
+          var ghosts = rels.map(function (rel) {
+            if(ids.indexOf(rel.start) != -1 && rel.start != the_id) {
+              console.log(clc.blackBright('replace', clc.redBright(rel.start), ' with ', clc.cyanBright(the_id), '-->'), rel.end);
+              rel.new_start  = the_id;
+              rel.new_end = rel.end
+              rel.CHANGE = true; 
+            } else if(ids.indexOf(rel.end) != -1 && rel.end != the_id) {
+              console.log(clc.blackBright('replace', clc.redBright(rel.end), ' with ', clc.cyanBright(the_id), '<--'), rel.start);
+              rel.new_start  =  rel.start;
+              rel.new_end = the_id
+              rel.CHANGE = true; 
+            }
+            return rel;
+          });
+          
+          var clones = _.values(_.groupBy(ghosts, function(d) { // everything except the ID
+            return [d.start, d.end, d.type, JSON.stringify(d.properties)].join();
+          }));
+          
+          var relToBeRemoved = _.flatten(clones.filter(function (d) {
+            return d.length > 1;
+          }).map(function (d) {
+            return _.takeRight(_.map(d, 'id'), d.length -1);
+          }));
+          
+          var relToBeUpdated = _.flatten(clones.map(function(d) {
+            return _.first(d, 1);
+          })).filter(function (d) {
+            return d.CHANGE
+          });
+          
+          console.log(clc.blackBright('   remove relationships:'), relToBeRemoved.length)
+          console.log(clc.blackBright('   update relationships:'), relToBeUpdated.length)
+          console.log(clc.blackBright('   cloned relationships:'), clones.length)
+          if(relToBeUpdated.length + relToBeRemoved.length == 0) {
+            console.log(clc.blackBright('   nothing to do, skipping', clc.cyanBright(JSON.stringify(ids))));
+            next();
+            return;
+          };
+          
+          inquirer.prompt([{
+            type: 'confirm',
+            name: 'YN',
+            message: ' Press enter to MERGE or REMOVE the selected relationships, otherwise SKIP by typing "n"',
+          }], function (answers) {
+            // Use user feedback for... whatever!! 
+            if(answers.YN) {
+              async.series([
+                function removeClonedRelationships(_next) {
+                  var removeQueue = async.queue(function (rel, nextRelationship) {
+                    console.log(clc.blackBright('   relationship to remove'), rel);
+                    // remove cloned relationships
+                    // var queueRemoveRelationship = async.queue
+                    neo4j.query('MATCH (ins)-[r]-(t) WHERE id(ins) in {ids} AND id(r) = {id} DELETE r', {
+                      ids: ids,
+                      id: rel
+                    }, function (err) {
+                      if(err) {
+                        updateQueue.kill();
+                        _next(err);
+                      } else {
+                        console.log(clc.greenBright('   relationship removed'));
+                        nextRelationship();
+                      }
+                    });
+                  }, 1);
+                  removeQueue.push(relToBeRemoved);
+                  removeQueue.drain = _next;
+                },
+
+                function updateChangedRelationships(_next) {
+                  var updateQueue = async.queue(function (rel, nextRelationship) {
+                    console.log(clc.blackBright('   relationship to update'), rel);
+                    
+                    var query = parser.agentBrown(
+                      ' MATCH (s) WHERE id(s)={new_start} ' + 
+                      '   WITH s MATCH (t) WHERE id(t)={new_end} ' +
+                      '   WITH s,t MATCH ()-[r]-() WHERE id(r)={id}'+
+                      ' MERGE (s)-[rc:{:type}]->(t) '+
+                      ' ON CREATE SET rc = r '+
+                      ' ON MATCH SET rc=r WITH r DELETE r', rel
+                    );
+                    console.log(query)
+                   
+                    neo4j.query(query,rel, function (err) {
+                      if(err) {
+                        updateQueue.kill();
+                        _next(err);
+                      } else {
+                        console.log(clc.greenBright('   relationship updated'));
+                        nextRelationship();
+                      }
+                    });
+                  }, 1);
+                  updateQueue.push(relToBeUpdated);
+                  updateQueue.drain = _next;
+                }
+              ], function (err) {
+                if(err) {
+                  q.kill();
+                  next(err);
+                } else {
+                  console.log(clc.greenBright('   merged successfully'));
+                  next();
+                }
+              });
+            } else {
+              console.log(clc.blackBright('   skipped, nothing changed for', clc.cyanBright(JSON.stringify(ids))));
+              next();
+              return;
+            }
+          }); // eof inquirer.prompt
+          
+        }
+      // remove orphelins
+      // function cleanup(next) {
+      //   console.log(clc.blackBright('\n   cleaning orphelins'));
+      //   neo4j.query('MATCH (ins:institution) WHERE NOT (ins)-[]-() DELETE ins', next);
+      // },
+      ], function (err, results) { //eof async.series
+        if(err) {
+          q.kill();
+
+          callback(err)
+        } else
+          nextCluster()
+      });
+    }, 1);
+    q.drain = function(){
+      callback(null, options);
+    }
+    q.push(_.take(options.clusters, 2))
+  },
   /*
     Get the chunks where you can find an entity.
     Based on annotation!

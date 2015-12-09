@@ -39,6 +39,15 @@ var fs          = require('fs'),
       'discover-resources': [
         tasks.resource.discoverMany
       ],
+
+      /*
+        Merge entities given by --ids
+      */
+      'merge-entities': [
+      tasks.entity.cleanSimilarity, 
+        tasks.entity.getClustersByWiki,
+        tasks.entity.mergeMany
+      ],
       /*
         computate (ent:entity:person)--(ent:entity:person) links
         based on similarity
