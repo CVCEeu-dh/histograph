@@ -384,20 +384,22 @@ module.exports = {
         return;
       }
       ent = ent[0];
-       // -> { make: 'Citroen', model: 'DS4', id: 1 }
+      
       if(params.upvoted_by) {
-        ent.props.upvote = _.unique((ent.props.upvote || []).concat(params.upvoted_by));
+        ent.props.upvote = _.unique((ent.props.upvote || []).concat([params.upvoted_by]));
       }
       if(params.downvoted_by) {
-        ent.props.downvote = _.unique((ent.props.downvote || []).concat(params.downvoted_by));
+        ent.props.downvote = _.unique((ent.props.downvote || []).concat([params.downvoted_by]));
       }
       ent.props.celebrity =  _.unique((ent.props.upvote || []).concat(ent.props.downvote|| [])).length;
       ent.props.score = (ent.props.upvote || []).length - (ent.props.downvote|| []).length;
       ent.props.last_modification_date = now.date;
       ent.props.last_modification_time = now.time;
-      // user will follow the inquiry
-      // upvote downvote with user username. (more readable)
-      // score is changed relatively
+      
+      if(params.issue) {
+        ent.props.issues = _.unique((ent.props.issues || []).concat([params.issue]));
+      }
+
       neo4j.save(ent.props, function (err, props) {
         if(err) {
           next(err);

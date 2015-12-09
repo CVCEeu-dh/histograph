@@ -21,6 +21,7 @@ var settings  = require('../settings'),
 
 module.exports = {
   DATE: 'date',
+  TYPE: 'type',
   
   get: function(issue, next) {
     neo4j.query(queries.get_issue, {
@@ -34,6 +35,7 @@ module.exports = {
         next(helpers.IS_EMPTY);
         return;
       }
+      node[0].answers = _.filter(node[0].answers, 'id')
       // select current abstract based on the language chosen, fallback to english
       next(null, node[0]);
     })

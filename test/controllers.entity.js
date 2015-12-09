@@ -201,6 +201,36 @@ describe('controller:entity related items', function() {
 
 });
 
+describe('controller:entity related issues', function() {
+  it('should create a issue on entity type, without a solution of course...' , function (done) {
+    session
+      .post('/api/entity/' + __entity.id +'/related/issue')
+      .send({
+        kind: 'type'
+      })
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exists(err);
+        should.equal(res.body.result.item.questioning.id,__entity.id)
+        should.exist(res.body.result.item.answers)
+        done();
+      });
+  });
+
+  it('should get the entity WITH THE issue', function (done) {
+    session
+      .get('/api/entity/' + __entity.id)
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exists(err);
+        should.exist(res.body.result.item.props.issues);
+        done();
+      });
+  });
+})
+
 
 describe('controller:entity after', function() {
   it('should delete the resource A', function (done) {

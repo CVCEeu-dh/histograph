@@ -167,6 +167,71 @@ module.exports = function(io){
       });
     },
 
+    /*
+      Create an isse, optionally providing a solution.
+      Cfr models.issue
+    */
+    /*
+      create a new issue for this entity
+      use cases.
+
+      1)  with request param
+          ```if req.query.kind == Issue.TYPE```
+          one can raise the issue that the 'label' for that entity is not correct.
+          Then, 
+          ```req.query.solution = 'correct label'```
+      
+      2)  with request param
+          ```if req.query.kind == Issue.IRRELEVANT```
+          one can raise the issue that the entity is a dumb error.
+          No solution should be provided for this issue.
+
+      3)  with request param
+          ```if req.query.kind == Issue.MERGEABLE```
+          one can raise the issue that the entity can be merged with another entity.
+          Then,
+          ```req.query.solution = <merge-to-entity-id>```
+
+      Use case 3 should preload the entity in Issue.get (@todo)
+    */
+    createRelatedIssue: function (req, res) {
+      var Issue   = require('../models/issue'), 
+          form = validator.request(req, {}, {
+            fields: [
+              validator.SPECIALS.issueType
+            ]
+          });
+      // console.log(form.params)
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      // if form.params.kind == Issue.DATE
+      // check that the solution param is an array of valid dates.
+      // if form.params.kind == Issue.TYPE
+      //   check that the solution param is an available label
+      Entity.update(+form.params.id, {
+        issue: form.params.kind
+      }, function (err, entity) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        Issue.create({
+          kind:         form.params.kind,
+          solution:     form.params.solution, 
+          questioning:  form.params.id,
+          user:         req.user
+        }, function (err, issue) {
+          if(err)
+            return helpers.cypherQueryError(err, res);
+          io.emit('entity:create-related-issue:done', {
+            user: req.user.username,
+            id:  +form.params.id, 
+            data: issue
+          });
+          return res.ok({
+            item: issue
+          });
+        });
+      });
+    },
 
 
     /*

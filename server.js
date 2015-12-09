@@ -438,7 +438,10 @@ apiRouter.route('/entity/:id(\\d+)/related/resource')
   
 apiRouter.route('/entity/:id(\\d+)/related/:entity(person|location|organization)')
   .get(ctrl.entity.getRelatedEntities)
-  
+
+apiRouter.route('/entity/:id(\\d+)/related/issue')
+  .post(ctrl.entity.createRelatedIssue)
+
 apiRouter.route('/entity/:id/related/:entity(person|location|organization)/graph')
   .get(ctrl.entity.getRelatedEntitiesGraph);
 

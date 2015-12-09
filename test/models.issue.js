@@ -139,7 +139,7 @@ describe('model:issue', function() {
       limit: 10,
       offset: 0
     }, function (err, issues) {
-      should.not.exist(err);console.log(issues)
+      should.not.exist(err);
       should.exist(issues.length);
       done();
     })
