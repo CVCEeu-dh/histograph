@@ -139,7 +139,7 @@ describe('validator: check mimetype field', function() {
     var form = validator.request({}, {
       type: 'letter,press'
     })
-    console.log(form.params)
+    // console.log(form.params)
     should.not.exist(form.errors);
     should.exist(form.params.type);
     should.equal(form.params.type.length, 2);
@@ -150,7 +150,7 @@ describe('validator: check mimetype field', function() {
     var form = validator.request({}, {
       type: 'letter,press'
     })
-    console.log(form.params)
+    // console.log(form.params)
     should.not.exist(form.errors);
     should.exist(form.params.type);
     should.equal(form.params.type.length, 2);

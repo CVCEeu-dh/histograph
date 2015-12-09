@@ -39,9 +39,9 @@ describe('parser:lucene', function() {
 
 
 describe('parser:lucene real use case', function() {
-  it('understand "jacques delors"', function (done) {
+  it('understand "jacques delors" (@todo use case)', function (done) {
     var q = parser.toLucene('"jacques delors"', 'field_to'); // complete  
-    console.log(q)
+    // console.log(q)
     done();
   });
 })
