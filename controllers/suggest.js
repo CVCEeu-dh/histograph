@@ -309,6 +309,9 @@ module.exports =  function(io){
         });
       })
     },
+
+
+    
     
      /**
       search the query among:resources and entities. Return a list of objects, max. 3 per 'entities and 5 for resources.

@@ -1,97 +1,149 @@
 // name: get_issue
 // get issue by id or slug title
-MATCH (iss:inquiry:issue)-[:answers {first: true}]-(first:comment)
+MATCH (iss:issue)-[r:questions]->(t)
 WHERE id(iss) = {id}
-WITH iss, first
-MATCH (u)-[:proposes]->(iss)-[:questions]-(res)
-WITH u, iss, res, first
-OPTIONAL MATCH (iss)-[:answers {accepted: true}]-(accepted)
-OPTIONAL MATCH (iss)-[:answers]-(com)
-RETURN {
-  id: id(iss),
-  type: 'issue',
-  props: iss,
-  proposed_by: u,
-  questioning: id(res),
-  first : {
-    id: id(first),
-    props: first
-  },
-  accepted : {
-    id: id(accepted),
-    props: accepted
-  },
-  answers: count(com)
-}
+WITH iss, r, {
+    id: id(t),
+    props: t,
+    type: last(labels(t))
+  } as alias_t
+// get followers count
+MATCH (u:user)-[:follows]->iss
+WITH iss, r, alias_t, count(u) as followers
+// are there any solutions?
+OPTIONAL MATCH (u:user)-[:writes]->(com:comment)-[:answers]->iss
+WITH iss, r, alias_t, followers,
+  {
+    id: id(u),
+    username: u.username,
+    picture: u.picture
+  } as alias_u, com
 
+ORDER BY com.last_modification_time DESC
 
-// name: count_issues
-//
-MATCH (inq:inquiry:issue)--(res:resource)
-{?res:resource_id__ID}
-RETURN count(*) as total_Count
+WITH iss, r, alias_t, followers, {
+  id: id(com),
+  type: 'comment',
+  props: com,
+  written_by: alias_u
+} as alias_com
+WITH iss, r, alias_t, followers, collect(alias_com) as answers
 
-// name: get_issues
-//
-MATCH (iss:issue)--(res:resource)
-{?res:resource_id__ID}
-{AND?iss:type__equals}
-WITH iss, res
-ORDER BY iss.creation_date DESC
-SKIP {offset}
-LIMIT {limit}
-WITH iss, res
-MATCH (iss)-[:proposes]-(u:user)
-WITH DISTINCT iss, res, u
 RETURN {
   id: id(iss),
   type: last(labels(iss)),
-  props: iss,
-  proposed_by: u,
-  questioning: id(res)
+  creation_date: r.creation_date,
+  creation_time: r.creation_time,
+  last_modification_date: r.last_modification_date,
+  last_modification_time: r.last_modification_time,
+  created_by: iss.created_by,
+  questioning: alias_t,
+  answers: answers,
+  followers: followers
 }
 
-// name: create_issue
-// create a new issue (safely merge if the issue already exists by slug title.
-MERGE (iss:inquiry:issue {slug: {slug}, questioning: {doi}})
-ON CREATE SET
-  iss.type           = {type}, // that is, date or location or place or person
-  iss.title          = {title}, // the title
-  iss.description    = {description},
-  {if:language}
-  iss.language       = {language},
-  {/if}
-  iss.creation_date  = {creation_date},
-  iss.creation_time  = {creation_time},
-  iss.proposed_by    = {username}
-WITH iss
-MATCH (u:user {username: {username}})
-  MERGE (u)-[r:proposes]->(iss)
-WITH iss, u
-MATCH (res)
-  WHERE id(res) = {doi}
-WITH iss, u, res
-  MERGE (iss)-[r:questions]->(res)
-  ON CREATE SET
-    res.last_modification_date = {creation_date},
-    res.last_modification_time = {creation_time}
-  ON MATCH SET
-    res.last_modification_date = {creation_date},
-    res.last_modification_time = {creation_time}
-WITH iss, u, res
-  OPTIONAL MATCH (iss)-[:answers {accepted: true}]-(accepted)
-  OPTIONAL MATCH (iss)-[:answers]-(com)
+
+
+// name: count_issues
+// get issues by type babe
+MATCH (iss:issue)-[:questions]->(t)
+{if:target_id}
+  WHERE id(t) = {target_id}
+  WITH iss
+{/if}
+
+WITH last(labels(iss)) as group, count(DISTINCT iss) as count_items
+RETURN {
+  group: group, 
+  count_items: count_items
+} AS result
+
+
+// name: get_issues
+//
+MATCH (iss:issue{if:kind}:{:kind}{/if})-[r:questions]->(t)
+{if:target_id}
+  WHERE id(t) = {target_id}
+  WITH iss
+{/if}
+WITH iss, r, t
+  ORDER BY r.last_modification_time DESC
+SKIP {offset}
+LIMIT {limit}
+
+WITH iss, r, {
+    id: id(t),
+    props: t,
+    type: last(labels(t))
+  } as alias_t
+MATCH (u:user)-[:follows]->iss
+WITH iss, r, alias_t, count(u) as followers
+ORDER BY r.last_modification_time DESC
 RETURN {
   id: id(iss),
-  props: iss,
-  proposed_by: u,
-  questioning: id(res),
-  accepted : {
-    id: id(accepted),
-    props: accepted
-  },
-  answers: count(com)
-} as result
+  type: last(labels(iss)),
+  creation_date: r.creation_date,
+  creation_time: r.creation_time,
+  last_modification_date: r.last_modification_date,
+  last_modification_time: r.last_modification_time,
+  created_by: iss.created_by,
+  questioning: alias_t,
+  followers: followers
+}
+
+
+// name:create_issue
+// create a new issue and attach it to a node (entity or resource or other)
+// the user have to provide an answer (it could be 'nope')
+MATCH (u:user {username:{username}}), (t)
+  WHERE id(t) = {target_id}
+WITH u, t
+  MERGE (iss:issue:{:kind})-[r:questions]->t
+    ON CREATE SET
+      // wrong <property> with custom content
+      r.creation_date  = {exec_date},
+      r.creation_time  = {exec_time},
+      r.last_modification_date = {exec_date},
+      r.last_modification_time = {exec_time},
+      iss.created_by     = {username}
+    ON MATCH SET
+      r.last_modification_date = {exec_date},
+      r.last_modification_time = {exec_time}
+WITH u, t, iss
+  MERGE u-[r:curates]->t
+    ON CREATE SET
+      r.creation_date  = {exec_date},
+      r.creation_time  = {exec_time},
+      r.last_modification_date = {exec_date},
+      r.last_modification_time = {exec_time}
+    ON MATCH SET
+      r.last_modification_date = {exec_date},
+      r.last_modification_time = {exec_time}
+WITH iss, u, t
+  MERGE u-[r:follows]->iss
+    ON CREATE SET
+      r.creation_date  = {exec_date},
+      r.creation_time  = {exec_time},
+      r.last_modification_date = {exec_date},
+      r.last_modification_time = {exec_time}
+    ON MATCH SET
+      r.last_modification_date = {exec_date},
+      r.last_modification_time = {exec_time}
+{if:solution}
+  WITH iss, u, t
+    MERGE u-[r:writes]->(com:comment {solution:{solution}})-[:answers]->iss
+      ON CREATE SET
+        com.creation_date  = {exec_date},
+        com.creation_time  = {exec_time},
+        com.last_modification_date = {exec_date},
+        com.last_modification_time = {exec_time}
+      ON MATCH SET
+        com.last_modification_date = {exec_date},
+        com.last_modification_time = {exec_time}
+{/if}
+return {
+  id: id(iss)
+}
 
 
 // name: merge_issue_comment

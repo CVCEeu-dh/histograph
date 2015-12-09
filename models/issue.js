@@ -70,50 +70,22 @@ module.exports = {
   */
   create: function(properties, next) {
     var now = helpers.now();
-    
     neo4j.query(parser.agentBrown(queries.create_issue, properties), {
-      type: properties.type,
-      title: properties.title,
-      slug: helpers.text.slugify(properties.type + ' ' + properties.doi),
-      description: properties.description,
-      language: properties.language,
-      creation_date: now.date,
-      creation_time: now.time,
       username: properties.user.username,
-      doi: properties.doi
-    }, function (err, node) {
-      if(err) {
-        next(err);
+      kind: properties.kind,
+      exec_date: now.date,
+      exec_time: now.time,
+      target_id: properties.questioning,
+      solution:  properties.solution // YAML field
+    }, function (err, nodes) {
+      if(err || !nodes.length) {
+        next(err||helpers.IS_EMPTY);
         return;
       }
-      if(!node.length) {
-        next(helpers.IS_EMPTY);
-        return;
-      }
-      // create a first comment
-      module.exports.createRelatedComment(node[0], {
-        user: properties.user,
-        first: true,
-        language: node.language,
-        content: properties.solution
-      }, function (err, comment) {
-        if(err) {
-          next(err);
-          return;
-        }
-        // add the first comment as first comment
-        if(!node[0].accepted.id)
-          delete node[0].accepted
-        
-        node[0].answers = 1;
-        next(null, _.assign(node[0], {
-          first: {
-            id: comment.id,
-            props: comment.props
-          }
-        }))
-      });
-    })
+      module.exports.get({
+        id: nodes[0].id
+      }, next);
+    });
   },
   /*
     Create and attach a comment on the issue, i.e a solution or an observation

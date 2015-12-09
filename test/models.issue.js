@@ -103,146 +103,140 @@ describe('model:issue init', function() {
 
 
 describe('model:issue', function() {
-  it('should create a new issue on date field (field validation should be done at ctrl level)', function (done) {
+  it('should create a new issue on date field', function (done) {
     Issue.create({
-      type: Issue.DATE,
-      title: 'This date is not correct or is missing',
-      description: '',
-      language: 'en',
+      kind: Issue.DATE,
       solution: ['2011-06-04','2011-06-04'],
       user: __userA,
-      doi: __resource.id
+      questioning: __resource.id
     }, function (err, iss) {
-      if(err)
-        throw err;
-      should.equal(iss.props.title,  'This date is not correct or is missing');
-      should.equal(iss.props.description, '');
-      should.equal(iss.proposed_by.username, __userA.username);
-      
-      should.equal(iss.questioning,__resource.id);
-      should.exist(iss.first.id)
+      should.not.exist(err);
+      should.equal(iss.created_by, __userA.username);
+      should.equal(iss.questioning.id, __resource.id);
+      should.exist(iss.answers[0].id);
+      should.equal(iss.followers, 1);
       
       __issue = iss;
+      done();
+    });
+  });
+  
+
+  it('should return the issue just created', function (done) {
+    Issue.get(__issue, function (err, iss) {
+      should.not.exist(err);
+      should.equal(iss.created_by, __userA.username);
+      should.equal(iss.questioning.id, __resource.id);
+      should.equal(iss.followers, 1)
+      should.exist(iss.answers[0].id);
       done()
     })
   });
-  
-  it('should return the issue just created', function (done) {
-    Issue.get(__issue, function (err, iss) {
-      if(err)
-        throw err;
-      should.equal(iss.props.description, '');
-      should.equal(iss.proposed_by.username, __userA.username);
-      should.equal(iss.questioning, __resource.id);
-      should.exist(iss.first.id)
-      should.exist(iss.answers)
-       done()
-    })
-  });
+
   
   it('should return the list of issue just created', function (done) {
     Issue.getMany({
-      limit: 50,
+      limit: 10,
       offset: 0
     }, function (err, issues) {
-      if(err)
-        throw err;
-     should.exist(issues.length)
-      done()
-    })
-  });
-  
-  it('should return the list of issue just created filtered by type', function (done) {
-    Issue.getMany({
-      limit: 50,
-      offset: 0,
-      type: Issue.DATE
-    }, function (err, iss) {
-      if(err)
-        throw err;
-      done()
-    })
-  });
-  
-  it('should return the list of issue just created related to resource', function (done) {
-    Issue.getMany({
-      limit: 50,
-      offset: 0,
-      type: Issue.DATE,
-      resource_id: __resource.id
-    }, function (err, issues) {
-      if(err)
-        throw err;
-      should.equal(issues.length, 1)
-      done()
-    })
-  });
-  
-  
-  it('should create a comment for the new issue', function (done) {
-    Issue.createRelatedComment(__issue, {
-      content: 'This is a comment for test inquiry',
-      user: __userA
-    }, function (err, com) {
-      if(err)
-        throw err;
-      should.equal(com.props.content, 'This is a comment for test inquiry');
-      __comment = com;
-      done()
-    })
-  });
-  
-  it('__userB should upvote the solution proposed by __userA for the new issue', function (done) {
-    Issue.update(__issue, {
-      upvoted_by: __userB.username
-    }, function (err, iss) {
-      if(err)
-        throw err;
-      //should.equal(iss.props.content, 'This is a issment for test inquiry');
-      should.exist(iss.proposed_by)
-      should.equal(iss.props.score, 1)
-      done()
-    })
-  });
-  it('__userC should upvote the solution proposed by __userA for the new issue', function (done) {
-    Issue.update(__issue, {
-      upvoted_by: __userC.username
-    }, function (err, iss) {
-      if(err)
-        throw err;
-      //should.equal(iss.props.content, 'This is a issment for test inquiry');
-      should.exist(iss.proposed_by)
-      should.equal(iss.props.score, 2)
-      should.equal(iss.props.celebrity, 2)
-      done()
-    })
-  });
-  it('__userB should downvote the solution proposed by __userA for the new issue', function (done) {
-    Issue.update(__issue, {
-      downvoted_by: __userB.username
-    }, function (err, iss) {
-      if(err)
-        throw err;
-      //should.equal(iss.props.content, 'This is a issment for test inquiry');
-      should.exist(iss.proposed_by)
-      should.equal(iss.props.score, 1)
-      should.equal(iss.props.celebrity, 2)
-      done()
-    })
-  });
-  it('should downvote a comment for the new inquiry', function (done) {
-    Comment.update(__comment.id, {
-      downvoted_by: __userA.username
-    }, function (err, com) {
-      if(err)
-        throw err;
-      should.equal(com.props.content, 'This is a comment for test inquiry');
-      should.equal(com.props.celebrity, 1); // only one user modified this.
-      should.equal(com.props.score, -1);
-      
+      should.not.exist(err);console.log(issues)
+      should.exist(issues.length);
       done();
     })
   });
+  
+
+  // it('should return the list of issue just created filtered by type', function (done) {
+  //   Issue.getMany({
+  //     limit: 50,
+  //     offset: 0,
+  //     type: Issue.DATE
+  //   }, function (err, iss) {
+  //     if(err)
+  //       throw err;
+  //     done()
+  //   })
+  // });
+  
+  // it('should return the list of issue just created related to resource', function (done) {
+  //   Issue.getMany({
+  //     limit: 50,
+  //     offset: 0,
+  //     type: Issue.DATE,
+  //     target_id: __resource.id
+  //   }, function (err, issues) {
+  //     if(err)
+  //       throw err;
+  //     should.equal(issues.length, 1)
+  //     done()
+  //   })
+  // });
+  
+  
+  // it('should create a comment for the new issue', function (done) {
+  //   Issue.createRelatedComment(__issue, {
+  //     content: 'This is a comment for test inquiry',
+  //     user: __userA
+  //   }, function (err, com) {
+  //     if(err)
+  //       throw err;
+  //     should.equal(com.props.content, 'This is a comment for test inquiry');
+  //     __comment = com;
+  //     done()
+  //   })
+  // });
+  
+  // it('__userB should upvote the solution proposed by __userA for the new issue', function (done) {
+  //   Issue.update(__issue, {
+  //     upvoted_by: __userB.username
+  //   }, function (err, iss) {
+  //     if(err)
+  //       throw err;
+  //     //should.equal(iss.props.content, 'This is a issment for test inquiry');
+  //     should.exist(iss.proposed_by)
+  //     should.equal(iss.props.score, 1)
+  //     done()
+  //   })
+  // });
+  // it('__userC should upvote the solution proposed by __userA for the new issue', function (done) {
+  //   Issue.update(__issue, {
+  //     upvoted_by: __userC.username
+  //   }, function (err, iss) {
+  //     if(err)
+  //       throw err;
+  //     //should.equal(iss.props.content, 'This is a issment for test inquiry');
+  //     should.exist(iss.proposed_by)
+  //     should.equal(iss.props.score, 2)
+  //     should.equal(iss.props.celebrity, 2)
+  //     done()
+  //   })
+  // });
+  // it('__userB should downvote the solution proposed by __userA for the new issue', function (done) {
+  //   Issue.update(__issue, {
+  //     downvoted_by: __userB.username
+  //   }, function (err, iss) {
+  //     if(err)
+  //       throw err;
+  //     //should.equal(iss.props.content, 'This is a issment for test inquiry');
+  //     should.exist(iss.proposed_by)
+  //     should.equal(iss.props.score, 1)
+  //     should.equal(iss.props.celebrity, 2)
+  //     done()
+  //   })
+  // });
+  // it('should downvote a comment for the new inquiry', function (done) {
+  //   Comment.update(__comment.id, {
+  //     downvoted_by: __userA.username
+  //   }, function (err, com) {
+  //     if(err)
+  //       throw err;
+  //     should.equal(com.props.content, 'This is a comment for test inquiry');
+  //     should.equal(com.props.celebrity, 1); // only one user modified this.
+  //     should.equal(com.props.score, -1);
+      
+  //     done();
+  //   })
+  // });
 });
 
 describe('model:issue finish', function() {  

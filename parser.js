@@ -71,7 +71,7 @@ module.exports = {
         .replace(/\{if:([a-zA-Z_]+)\}((?:(?!\{\/if).)*)\{\/if\}/g, function (m, item, contents) {
           // replace if template.
           // console.log(arguments)
-          if(filters[item])
+          if(typeof filters[item] != 'undefined')
             return module.exports.agentBrown(contents, filters);
           else 
             return '';
@@ -79,7 +79,7 @@ module.exports = {
         .replace(/\{unless:([a-zA-Z_]+)\}((?:(?!\{\/unless).)*)\{\/unless\}/g, function (m, item, contents) {
           // replace unless template.
           // console.log(arguments)
-          if(!filters[item])
+          if(typeof filters[item] == 'undefined')
             return module.exports.agentBrown(contents, filters);
           else 
             return '';
