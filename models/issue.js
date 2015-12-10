@@ -22,6 +22,8 @@ var settings  = require('../settings'),
 module.exports = {
   DATE: 'date',
   TYPE: 'type',
+  MERGEABLE: 'mergeable',
+  IRRELEVANT: 'irrelevant',
   
   get: function(issue, next) {
     neo4j.query(queries.get_issue, {
@@ -78,6 +80,7 @@ module.exports = {
       exec_date: now.date,
       exec_time: now.time,
       target_id: properties.questioning,
+      mentioned_id: properties.mentioning,
       solution:  properties.solution // YAML field
     }, function (err, nodes) {
       if(err || !nodes.length) {

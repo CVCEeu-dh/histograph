@@ -198,10 +198,30 @@ module.exports = function(io){
       var Issue   = require('../models/issue'), 
           form = validator.request(req, {}, {
             fields: [
-              validator.SPECIALS.issueType
+              validator.SPECIALS.issueType,
+              {
+                field: 'mention',
+                check: 'isInt',
+                args: [
+                  0
+                ],
+                error: 'mention id not valid'
+              },
+              {
+                field: 'kind',
+                check: 'includedIn',
+                args: [
+                  [
+                    Issue.TYPE,
+                    Issue.IRRELEVANT,
+                    Issue.MERGEABLE
+                  ]
+                ],
+                error: 'wrong value'
+              }
             ]
           });
-      // console.log(form.params)
+      // console.log(form.params, Issue.KINDS)
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       // if form.params.kind == Issue.DATE

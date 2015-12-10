@@ -218,6 +218,22 @@ describe('controller:entity related issues', function() {
       });
   });
 
+  it('should NOT create a issue on entity type, wrong issue kind' , function (done) {
+    session
+      .post('/api/entity/' + __entity.id +'/related/issue')
+      .send({
+        kind: 'etype'
+      })
+      .expect('Content-Type', /json/)
+      .expect(400)
+      .end(function (err, res) {
+        should.not.exists(err); // it should throw a 400 statusCode
+        should.equal(res.body.error.form[0].field, 'kind');
+        done();
+      });
+  });
+
+
   it('should get the entity WITH THE issue', function (done) {
     session
       .get('/api/entity/' + __entity.id)

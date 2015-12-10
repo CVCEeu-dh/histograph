@@ -21,15 +21,18 @@ var settings  = require('../settings'),
     Issue     = require('../models/issue'),
     Comment   = require('../models/comment'),
     Resource  = require('../models/resource'),
+    Entity    = require('../models/entity'),
     User      = require('../models/user');
     
     
 var __issue, // the local issue object created for fun
+    __issueB,
     __resource, // the local resource object that can be inquiried
     __userA,
     __userB,
     __userC,
-    __comment;
+    __comment,
+    __entity;
     
     
 describe('model:issue init', function() {
@@ -98,12 +101,27 @@ describe('model:issue init', function() {
       done();
     });
   });
+
+  it('should create a brand new entity, by using links_wiki', function (done) {
+    Entity.create({
+      links_wiki: 'TESTESTTESTTTYalta_Conference',
+      type: 'social_group',
+      name: 'TESTESTTESTYalta_Conference',
+      resource: __resource
+    }, function (err, entity) {
+      should.not.exist(err, err);
+      should.equal(entity.rel.type, 'appears_in');
+      should.exist(entity.props.name)
+      __entity = entity;
+      done();
+    })
+  });
 });
 
 
 
 describe('model:issue', function() {
-  it('should create a new issue on date field', function (done) {
+  it('should create a new issue on date field (specific resource)', function (done) {
     Issue.create({
       kind: Issue.DATE,
       solution: ['2011-06-04','2011-06-04'],
@@ -133,6 +151,24 @@ describe('model:issue', function() {
     })
   });
 
+   it('should update the issue on date field for a specific resource', function (done) {
+    Issue.create({
+      kind: Issue.TYPE,
+      solution: ['2011-06-04','2011-06-04'],
+      user: __userA,
+      questioning: __entity.id,
+      mentioning: __resource.id
+    }, function (err, iss) {
+      should.not.exist(err);
+      should.equal(iss.created_by, __userA.username);
+      should.equal(iss.questioning.id, __resource.id);
+      should.exist(iss.answers[0].id);
+      should.equal(iss.followers, 1);
+      
+      __issueB = iss;
+      done();
+    });
+  });
   
   it('should return the list of issue just created', function (done) {
     Issue.getMany({
@@ -271,6 +307,14 @@ describe('model:issue finish', function() {
     })
   });
   
+  it('should delete the entity', function (done) {
+    Entity.remove(__entity, function (err) {
+      if(err)
+        throw err;
+      done();
+    });
+  });
+
   it('should delete the resource', function (done) {
     Resource.remove({
       id: __resource.id

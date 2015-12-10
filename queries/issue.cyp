@@ -7,9 +7,15 @@ WITH iss, r, {
     props: t,
     type: last(labels(t))
   } as alias_t
+OPTIONAL MATCH (iss)-[:mentions]->(m)
+WITH iss, r, alias_t, {
+    id: id(m),
+    props: m,
+    type: last(labels(m))
+  } as alias_m
 // get followers count
 MATCH (u:user)-[:follows]->iss
-WITH iss, r, alias_t, count(u) as followers
+WITH iss, r, alias_t, alias_m, count(u) as followers
 // are there any solutions?
 OPTIONAL MATCH (u:user)-[:writes]->(com:comment)-[:answers]->iss
 WITH iss, r, alias_t, followers,
@@ -97,7 +103,9 @@ RETURN {
 // the user have to provide an answer (it could be 'nope')
 MATCH (u:user {username:{username}}), (t)
   WHERE id(t) = {target_id}
+
 WITH u, t
+
   MERGE (iss:issue:{:kind})-[r:questions]->t
     ON CREATE SET
       // wrong <property> with custom content
@@ -109,6 +117,7 @@ WITH u, t
     ON MATCH SET
       r.last_modification_date = {exec_date},
       r.last_modification_time = {exec_time}
+
 WITH u, t, iss
   MERGE u-[r:curates]->t
     ON CREATE SET
@@ -141,6 +150,25 @@ WITH iss, u, t
         com.last_modification_date = {exec_date},
         com.last_modification_time = {exec_time}
 {/if}
+
+{if:mentioned_id}
+  WITH iss, u, t
+  MATCH (con)
+    WHERE id(con) = {mentioned_id}
+    MERGE iss-[r:mentions]->con
+    ON CREATE SET
+      r.creation_date  = {exec_date},
+      r.creation_time  = {exec_time},
+      r.last_modification_date = {exec_date},
+      r.last_modification_time = {exec_time}
+    ON MATCH SET
+      r.last_modification_date = {exec_date},
+      r.last_modification_time = {exec_time}
+
+  WITH iss
+{/if}
+
+
 return {
   id: id(iss)
 }
