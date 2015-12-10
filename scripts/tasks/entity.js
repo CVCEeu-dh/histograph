@@ -3,6 +3,7 @@
   Resource task collection
 */
 var settings  = require('../../settings'),
+    YAML = require('yamljs'),
     parser    = require('../../parser'),
     inquirer     = require('inquirer'),
     neo4j     = require('seraph')(settings.neo4j.host),
@@ -27,21 +28,27 @@ module.exports = {
         return;
       }
       options.clusters = clusters;
-      console.log(_.take(clusters, 2))
-      console.log(_.take(clusters, 2))
+      console.log(clc.blackBright('    collected', clc.magentaBright(clusters.length), 'clusters'));
       callback(null, options);
     })
   },
-
+  /*
+    Perform a complete merge based on a series of options.clusters
+    Each cluster should display an entitites list where entities ids can be found.
+    
+    The annotation themselves will be changed according to the new data.
+    Handle with care
+  
+  */
   mergeMany: function(options, callback) {
     console.log(clc.yellowBright('\n   tasks.entity.mergeMany'));
     
     var q = async.queue(function (cluster, nextCluster) {
-      console.log(cluster)
+      console.log('    cluster:', clc.cyanBright(cluster.links_wiki));
       var ids = _.map(cluster.entities, 'id'),
           the_id = _.get(_.first(_.sortByOrder(_.filter(cluster.entities, 'df'), ['df'],['desc'])), 'id'),// index with most df will take all
           labels = _.unique(_.map(cluster.entities, 'label'));
-      console.log(labels, the_id)
+      console.log(clc.blackBright('    most important id:', clc.cyanBright(the_id)))
       if(!ids || ids.length == 0) {
         q.kill()
         callback('ids should be a valid array of ints') ;
@@ -51,10 +58,102 @@ module.exports = {
       // for each cluster
       async.waterfall([
         /*
-          1) get versions
+          1) get versions, that is transform annotation to match the new id
         */
         function getAnnotations(next) {
+          neo4j.query('MATCH (s:entity)-[:appears_in]->(r:resource)<-[:describes]-(a:annotation {service:{service}}) WHERE id(s) in {ids} RETURN DISTINCT a as annotation', {
+            ids: ids,
+            service: 'ner'
+          },next);
+        },
 
+        function remapAnnotations(annotations, next) {
+          console.log(clc.blackBright('    annotations:'), clc.magentaBright(annotations.length));
+          
+          var skipped = 0;
+          var _q = async.queue(function(annotation, nextAnnotation) {
+           
+            var hasChanged = false,
+                ann = _.map(parser.yaml(annotation.yaml), function (d) {
+              if(ids.indexOf(d.id) !== -1 && d.id != the_id) {
+                console.log(d.id, 'found', 'in', ids)
+                 console.log(d)
+                  d.id = the_id;
+                hasChanged = true;
+                
+              }
+              return d;
+            });
+
+            if(!hasChanged) {
+              skipped++;
+              setTimeout(nextAnnotation, 10);
+              return
+            } else {
+              
+              // save the committed version, then link the previous vesion to this new object and unlink
+              // clone it
+              // detach resource link
+              async.waterfall([
+                /*
+                  Redeem frequency count based on the given annotation.
+                */
+                function redeemFrequency(_next) {
+                  _next();
+                },
+                function detatch(_next) {
+                  console.log(clc.blackBright('detach previous version...'))
+                  neo4j.query('MATCH (ann:annotation)-[r:describes]->(res:resource) WHERE id(ann) = {annotation_id} AND id(res) = {resource_id} WITH ann, r, res SET ann.service="version" DELETE r', {
+                    annotation_id: annotation.id,
+                    resource_id: annotation.resource
+                  }, _next)
+                },
+
+                function attach(result, _next) {
+                  console.log(clc.blackBright('    attach merged version...'));
+                  Resource.createRelatedVersion({
+                    id: annotation.resource
+                  }, {
+                    language: annotation.language,
+                    service: annotation.service,
+                    yaml: YAML.stringify(ann)
+                  }, _next);
+                },
+                function link(result, _next) {
+                  console.log(clc.blackBright('    create relationship', clc.magentaBright(annotation.id), '-[:is_version_of]->', clc.greenBright(result.id)));
+                  neo4j.query('MATCH (ann:annotation), (ann2:annotation) WHERE id(ann) = {prev_annotation_id} AND id(ann2) = {annotation_id} MERGE (ann)-[:is_version_of]->(ann2) RETURN ann, ann2', {
+                    prev_annotation_id: annotation.id,
+                    annotation_id: result.id
+                  }, _next)
+                }
+              ], function (err) {
+                if(err){
+                  q.kill();
+                  next(err);
+                } else {
+                  console.log(clc.blackBright('    merging annotation', clc.greenBright('completed'), 'remaining', q.length()));
+                  nextAnnotation()
+                }
+              });
+
+              // {
+              //   language: language,
+              //   service: 'ner',
+              //   yaml: YAML.stringify(d, 2)
+              // }
+
+            }
+              
+
+
+          }, 1);
+
+          _q.push(_.filter(annotations, 'yaml'));
+          _q.drain = function(){
+
+              console.log(clc.blackBright('    skipped', clc.yellowBright(skipped), 'annotations, nothing needed to be changed'));
+            next();
+          }
         },
 
         /*
@@ -63,7 +162,7 @@ module.exports = {
         function getRelationships(next) {
           
 
-          console.log(clc.blackBright('\n   get relationships:',  clc.cyanBright(JSON.stringify(ids))));
+          console.log(clc.blackBright('    get [:appears_in] rels from entities:',  clc.cyanBright(JSON.stringify(ids))));
             
           neo4j.query('MATCH (s:entity) WHERE id(s) in {ids} WITH s MATCH (s)-[r]-(t) WHERE NOT id(t)  in {ids} WITH r RETURN r', {
             ids: ids
@@ -71,16 +170,16 @@ module.exports = {
         },
 
         function cloneRelationships(rels, next) {
-          console.log(rels.length);
+          console.log(clc.blackBright('    found', clc.magentaBright(rels.length), 'relationships'));
           
           var ghosts = rels.map(function (rel) {
             if(ids.indexOf(rel.start) != -1 && rel.start != the_id) {
-              console.log(clc.blackBright('replace', clc.redBright(rel.start), ' with ', clc.cyanBright(the_id), '-->'), rel.end);
+              console.log(clc.blackBright('      replace', clc.redBright(rel.start), ' with ', clc.cyanBright(the_id), '-->'), rel.end);
               rel.new_start  = the_id;
               rel.new_end = rel.end
               rel.CHANGE = true; 
             } else if(ids.indexOf(rel.end) != -1 && rel.end != the_id) {
-              console.log(clc.blackBright('replace', clc.redBright(rel.end), ' with ', clc.cyanBright(the_id), '<--'), rel.start);
+              console.log(clc.blackBright('      replace', clc.redBright(rel.end), ' with ', clc.cyanBright(the_id), '<--'), rel.start);
               rel.new_start  =  rel.start;
               rel.new_end = the_id
               rel.CHANGE = true; 
@@ -104,9 +203,8 @@ module.exports = {
             return d.CHANGE
           });
           
-          console.log(clc.blackBright('   remove relationships:'), relToBeRemoved.length)
-          console.log(clc.blackBright('   update relationships:'), relToBeUpdated.length)
-          console.log(clc.blackBright('   cloned relationships:'), clones.length)
+          console.log(clc.blackBright('    remove relationships:'), relToBeRemoved.length)
+          console.log(clc.blackBright('    update relationships:'), relToBeUpdated.length)
           if(relToBeUpdated.length + relToBeRemoved.length == 0) {
             console.log(clc.blackBright('   nothing to do, skipping', clc.cyanBright(JSON.stringify(ids))));
             next();
@@ -155,8 +253,7 @@ module.exports = {
                       ' ON CREATE SET rc = r '+
                       ' ON MATCH SET rc=r WITH r DELETE r', rel
                     );
-                    console.log(query)
-                   
+                    
                     neo4j.query(query,rel, function (err) {
                       if(err) {
                         updateQueue.kill();
@@ -204,7 +301,7 @@ module.exports = {
     q.drain = function(){
       callback(null, options);
     }
-    q.push(_.take(options.clusters, 2))
+    q.push(options.clusters)
   },
   /*
     Get the chunks where you can find an entity.
