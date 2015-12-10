@@ -40,6 +40,11 @@ MERGE (p1)-[r:appear_in_same_document]-(p2)
 SET   r.cosine = xyDotProduct / d
 
 
+// name: count_computate_jaccard_distance
+MATCH (p1: person)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2: person)
+WHERE id(p1) < id(p2)
+RETURN count(*) as total_count
+
 // name: computate_jaccard_distance
 // For the "WHERE id(p1) < id(p2)" part, see:
 // https://stackoverflow.com/questions/33083491/how-to-get-a-unique-set-of-node-pairs-for-undirected-relationships/33084035#33084035
@@ -47,7 +52,9 @@ MATCH (p1: person)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2: person)
 WHERE id(p1) < id(p2)
 // WITH r1, r2, p1, p2, count(*) as intersection
 WITH p1, p2, count(*) as intersection
-
+SKIP {offset}
+LIMIT {limit}
+WITH p1, p2, intersection
 MATCH (p1)-[rel:appears_in]->(res1:resource)
 WITH p1,p2, intersection, collect(res1) as H1
 

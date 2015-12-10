@@ -382,16 +382,32 @@ module.exports = {
   
   jaccard: function(options, callback) {
     console.log(clc.yellowBright('\n   tasks.entity.jaccard'));
-    var query = parser.agentBrown(queries.computate_jaccard_distance, options);
-    neo4j.query(query, function (err) {
-      if(err)
+    async.waterfall([
+      // count expected combinations
+      function countExpected (next) {
+        neo4j.query(queries.count_computate_jaccard_distance, next)
+      },
+      // repeat n time to oid java mem heap space
+      function performJaccard (result, next) {
+        var loops = Math.ceil(result.total_count / 10000);
+        console.log('   loops:', loops);
+        async.timesSeries(loops, function (n, _next) {
+          console.log('    loop:', n ,'- offset:', n*10000)
+          var query = parser.agentBrown(queries.computate_jaccard_distance, options);
+          neo4j.query(query, {
+            offset: n*10000,
+            limit: 10000
+          }, _next);
+        }, next);
+      }
+    ], function (err) {
+      if(err) {
         callback(err)
-      else {
+      } else {
         console.log(clc.cyanBright('   created'),'jaccard indexes');
         callback(null, options);
-    
       }
-    })
+    });
   },
   
   cosine: function(options, callback) {
