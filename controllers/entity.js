@@ -198,14 +198,13 @@ module.exports = function(io){
       var Issue   = require('../models/issue'), 
           form = validator.request(req, {}, {
             fields: [
-              validator.SPECIALS.issueType,
               {
-                field: 'mention',
-                check: 'isInt',
+                field: 'mentioning',
+                check: 'matches',
                 args: [
-                  0
+                  /\d[\d,]+/
                 ],
-                error: 'mention id not valid'
+                error: 'mention should contain only numbers and commas'
               },
               {
                 field: 'kind',
@@ -224,6 +223,11 @@ module.exports = function(io){
       // console.log(form.params, Issue.KINDS)
       if(!form.isValid)
         return helpers.formError(form.errors, res);
+
+      if(form.params.mentioning) {
+        form.params.mentioning = form.params.mentioning.split(',');
+      }
+
       // if form.params.kind == Issue.DATE
       // check that the solution param is an array of valid dates.
       // if form.params.kind == Issue.TYPE
@@ -237,6 +241,7 @@ module.exports = function(io){
           kind:         form.params.kind,
           solution:     form.params.solution, 
           questioning:  form.params.id,
+          mentioning:   form.params.mentioning,
           user:         req.user
         }, function (err, issue) {
           if(err)

@@ -8,17 +8,17 @@ WITH iss, r, {
     type: last(labels(t))
   } as alias_t
 OPTIONAL MATCH (iss)-[:mentions]->(m)
-WITH iss, r, alias_t, {
+WITH iss, r, alias_t, filter(x  in collect({
     id: id(m),
     props: m,
     type: last(labels(m))
-  } as alias_m
+  }) WHERE has(x.id)) as alias_ms
 // get followers count
 MATCH (u:user)-[:follows]->iss
-WITH iss, r, alias_t, alias_m, count(u) as followers
+WITH iss, r, alias_t, alias_ms, count(u) as followers
 // are there any solutions?
 OPTIONAL MATCH (u:user)-[:writes]->(com:comment)-[:answers]->iss
-WITH iss, r, alias_t, followers,
+WITH iss, r, alias_t, alias_ms, followers,
   {
     id: id(u),
     username: u.username,
@@ -27,13 +27,13 @@ WITH iss, r, alias_t, followers,
 
 ORDER BY com.last_modification_time DESC
 
-WITH iss, r, alias_t, followers, {
+WITH iss, r, alias_t, alias_ms, followers, {
   id: id(com),
   type: 'comment',
   props: com,
   written_by: alias_u
 } as alias_com
-WITH iss, r, alias_t, followers, collect(alias_com) as answers
+WITH iss, r, alias_t, alias_ms, followers, collect(alias_com) as answers
 
 RETURN {
   id: id(iss),
@@ -44,6 +44,7 @@ RETURN {
   last_modification_time: r.last_modification_time,
   created_by: iss.created_by,
   questioning: alias_t,
+  mentioning: alias_ms,
   answers: answers,
   followers: followers
 }
@@ -70,7 +71,6 @@ RETURN {
 MATCH (iss:issue{if:kind}:{:kind}{/if})-[r:questions]->(t)
 {if:target_id}
   WHERE id(t) = {target_id}
-  WITH iss
 {/if}
 WITH iss, r, t
   ORDER BY r.last_modification_time DESC
@@ -82,8 +82,16 @@ WITH iss, r, {
     props: t,
     type: last(labels(t))
   } as alias_t
+
 MATCH (u:user)-[:follows]->iss
-WITH iss, r, alias_t, count(u) as followers
+WITH iss, r, alias_t, count(u) as followers 
+OPTIONAL MATCH (iss)-[:mentions]->(m)
+WITH iss, r, followers, alias_t, collect({
+    id: id(m),
+    props: m,
+    type: last(labels(m))
+  }) as alias_ms
+
 ORDER BY r.last_modification_time DESC
 RETURN {
   id: id(iss),
@@ -94,6 +102,7 @@ RETURN {
   last_modification_time: r.last_modification_time,
   created_by: iss.created_by,
   questioning: alias_t,
+  mentioning:  alias_ms,
   followers: followers
 }
 
@@ -102,7 +111,7 @@ RETURN {
 // create a new issue and attach it to a node (entity or resource or other)
 // the user have to provide an answer (it could be 'nope')
 MATCH (u:user {username:{username}}), (t)
-  WHERE id(t) = {target_id}
+  WHERE id(t) = {questioning}
 
 WITH u, t
 
@@ -151,10 +160,11 @@ WITH iss, u, t
         com.last_modification_time = {exec_time}
 {/if}
 
-{if:mentioned_id}
+{if:mentioning}
   WITH iss, u, t
   MATCH (con)
-    WHERE id(con) = {mentioned_id}
+    WHERE id(con) IN {mentioning}
+  WITH iss, u, t, con
     MERGE iss-[r:mentions]->con
     ON CREATE SET
       r.creation_date  = {exec_date},

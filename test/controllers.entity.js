@@ -15,6 +15,7 @@ var settings  = require('../settings'),
     Entity    = require('../models/entity'),
     Resource  = require('../models/resource'),
     User      = require('../models/user'),
+    Issue     = require('../models/issue'),
 
     Session   = require('supertest-session')({
                   app: app
@@ -29,7 +30,9 @@ var session,
     __user,
     __resource,
     __resourceB,
-    __entity;
+    __entity,
+    __issue,
+    __issueB;
 
 before(function () {
   session = new Session();
@@ -212,6 +215,9 @@ describe('controller:entity related issues', function() {
       .expect(200)
       .end(function (err, res) {
         should.not.exists(err);
+        __issue = res.body.result.item;
+        should.exist(res.body.result.item.id)
+        should.equal(res.body.result.item.mentioning.length, 0);
         should.equal(res.body.result.item.questioning.id,__entity.id)
         should.exist(res.body.result.item.answers)
         done();
@@ -233,6 +239,25 @@ describe('controller:entity related issues', function() {
       });
   });
 
+  it('should UPTATE the issue on entity type by poroviding mentioning' , function (done) {
+    session
+      .post('/api/entity/' + __entity.id +'/related/issue')
+      .send({
+        kind: 'type',
+        mentioning: [__resourceB.id, __resource.id].join(',')
+      })
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exists(err);
+        should.equal(res.body.result.item.mentioning.length, 2);
+        should.equal(_.map(res.body.result.item.mentioning,'id').indexOf(__resourceB.id) !== -1, true);
+        should.equal(res.body.result.item.questioning.id,__entity.id)
+        should.exist(res.body.result.item.answers)
+        done();
+      });
+  });
+
 
   it('should get the entity WITH THE issue', function (done) {
     session
@@ -245,6 +270,8 @@ describe('controller:entity related issues', function() {
         done();
       });
   });
+
+
 })
 
 
@@ -265,6 +292,13 @@ describe('controller:entity after', function() {
   });
   it('should delete the entity', function (done) {
     Entity.remove(__entity, function (err) {
+      if(err)
+        throw err;
+      done();
+    });
+  });
+   it('should delete the issue', function (done) {
+    Issue.remove(__issue, function (err) {
       if(err)
         throw err;
       done();

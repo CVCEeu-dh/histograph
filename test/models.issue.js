@@ -151,17 +151,20 @@ describe('model:issue', function() {
     })
   });
 
-   it('should update the issue on date field for a specific resource', function (done) {
+   it('should create the issue on entity TYPE mentioning a specific resource', function (done) {
     Issue.create({
       kind: Issue.TYPE,
-      solution: ['2011-06-04','2011-06-04'],
+      solution: 'location',
       user: __userA,
       questioning: __entity.id,
-      mentioning: __resource.id
+      mentioning: [__resource.id]
     }, function (err, iss) {
       should.not.exist(err);
+      // console.log(iss.answers[0].props.solution)
       should.equal(iss.created_by, __userA.username);
-      should.equal(iss.questioning.id, __resource.id);
+      should.equal(iss.questioning.id, __entity.id);
+      should.equal(iss.mentioning[0].id, __resource.id);
+      should.equal(iss.answers[0].props.solution, 'location');
       should.exist(iss.answers[0].id);
       should.equal(iss.followers, 1);
       
@@ -176,6 +179,7 @@ describe('model:issue', function() {
       offset: 0
     }, function (err, issues) {
       should.not.exist(err);
+      // console.log(issues)
       should.exist(issues.length);
       done();
     })

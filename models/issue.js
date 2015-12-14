@@ -65,22 +65,22 @@ module.exports = {
     Create a new issue and assign it to the properties.user provided (Ctrl: req.user).
     Create the first "solution" as well.
     properties: {
-      title:    'This date is not correct or is missing',
-      description: 'Consider that ...',
-      solution: ['2011-06-04','2011-06-04'], // day range
-      
+      kind: <Issue.KIND>, // cfr. above.
+      questioning: <ID>,  // list of questioning ids
+      mentioning: [<ID>], // list of mentions integer IDS
       user:     { ... }
     }
   */
   create: function(properties, next) {
-    var now = helpers.now();
-    neo4j.query(parser.agentBrown(queries.create_issue, properties), {
+    var now = helpers.now(),
+        q = parser.agentBrown(queries.create_issue, properties);
+    neo4j.query(q, {
       username: properties.user.username,
       kind: properties.kind,
       exec_date: now.date,
       exec_time: now.time,
-      target_id: properties.questioning,
-      mentioned_id: properties.mentioning,
+      questioning: properties.questioning,
+      mentioning: properties.mentioning,
       solution:  properties.solution // YAML field
     }, function (err, nodes) {
       if(err || !nodes.length) {
