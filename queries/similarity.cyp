@@ -7,9 +7,10 @@ DELETE r
 MATCH (res:resource)<-[r:appears_in]-()
   WITH count(DISTINCT res) as num_of_docs
 MATCH (res:resource)<-[r:appears_in]-()
+  SET r.frequency = COALESCE(r.frequency, 1)
   WITH num_of_docs, res, sum(r.frequency) as num_of_ents_per_doc
 MATCH (e:entity)-[r2:appears_in]->(res)
-  WHERE has(r2.frequency)
+  
     SET
       r2.tf  = toFloat(r2.frequency) / num_of_ents_per_doc,
       r2.tdf = num_of_ents_per_doc
