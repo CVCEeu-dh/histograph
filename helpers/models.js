@@ -1,4 +1,3 @@
-'use-strict';
 /*
   Helpers for model scripts. 
   ===
@@ -6,7 +5,8 @@
   They require a options.suffix for some
 */
 var settings = require('../settings'),
-    parsers  = require('../parser'),
+    helpers  = require('../helpers'),
+    parser  = require('../parser'),
     async    = require('async'),
 
     _        = require('lodash'),
@@ -14,7 +14,89 @@ var settings = require('../settings'),
     
     
 module.exports = {
-  
+  /*
+    generate basic model function: getItem, getItems
+    options:{
+      model: 'issue',
+      pluralize: 'issues',
+      queries: <decypher object>
+    }
+  */
+  generate: function(options) {
+    'use-strict';
+
+    var queries = options.queries; 
+    return {
+      /*
+        Get a single item.
+        @param item - object that MUST have a property 'id', neo4j identifier
+      */
+      get: function(item, next) {
+        neo4j.query(queries['get_'+options.model], {
+          id: +item.id
+        }, function (err, node) {
+          if(err) {
+            next(err);
+            return;
+          }
+          if(!node.length) {
+            next(helpers.IS_EMPTY);
+            return;
+          }
+          node[0].answers = _.filter(node[0].answers, 'id')
+          // select current abstract based on the language chosen, fallback to english
+          next(null, node[0]);
+        })
+      },
+      /*
+        Create.
+        Return the object having at least the neo4j identifier and the properties
+      */
+      create: function(item, next) {
+        var now = helpers.now(),
+            query = parser.agentBrown(queries['create_'+options.model], item);
+          
+        neo4j.query(query, _.assign({
+          exec_date: now.date,
+          exec_time: now.time
+        }, item), function (err, nodes) {
+          if(err || !nodes.length) {
+            next(err||helpers.IS_EMPTY);
+            return;
+          }
+          next(null, nodes[0]);
+        })
+      },
+      /*
+        Get a lot of basic item, with sorting orders.
+        Please provide the corresponding query: e.g for model 'issue',
+        the queries get_issues and count_issues should be available.
+
+        @param params - object that must contain limit and offset at least
+      
+      */
+      getMany: function(params, next) {
+        module.exports.getMany({
+          queries: {
+            items: queries['get_'+options.pluralize],
+            total_count: queries['get_'+options.model]
+          },
+          params: params
+        }, next);
+      },
+      /*
+        Remove the selected item according to the DELETE query
+        provided. e.g for model 'issue',
+        the queries remove_issue should be available.
+        @param item - object that MUST have a property 'id', neo4j identifier
+      */
+      remove: function(item, next) {
+        neo4j.query(queries['remove_' + options.model], {
+          id: item.id
+        }, next);
+      }
+    }
+  },
   /*
     Usage in models/*.js scripts:
     var models  = require('../helpers/models'),
@@ -40,7 +122,7 @@ module.exports = {
   getMany: function(options, next) {
     async.parallel({
       count_items: function (callback) {
-        var query = parsers.agentBrown(options.queries.count_items, options.params);
+        var query = parser.agentBrown(options.queries.count_items, options.params);
         neo4j.query(query, options.params, function (err, result) {
           if(err)
             return callback(err);
@@ -57,7 +139,7 @@ module.exports = {
         })
       },
       items: function (callback) {
-        var query = parsers.agentBrown(options.queries.items, options.params);
+        var query = parser.agentBrown(options.queries.items, options.params);
         neo4j.query(query, options.params, function (err, nodes) {
           if(err)
             return callback(err);
