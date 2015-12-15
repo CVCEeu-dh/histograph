@@ -242,6 +242,10 @@ angular.module('histograph')
     return $resource('/api/suggest/:model/:viz');
   })
   
+
+  .factory('IssueFactory', function ($resource) {
+    return $resource('/api/issue');
+  })
   
   
   // .factory('SuggestFactory', function ($http) {

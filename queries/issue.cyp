@@ -92,6 +92,28 @@ WITH iss, r, followers, alias_t, collect({
     type: last(labels(m))
   }) as alias_ms
 
+WITH iss, r, alias_t, alias_ms, followers
+// get last solutions
+OPTIONAL MATCH (u:user)-[:writes]->(com:comment)-[:answers]->iss
+WITH iss, r, alias_t, alias_ms, followers,
+  {
+    id: id(u),
+    username: u.username,
+    picture: u.picture
+  } as alias_u, com
+
+ORDER BY com.last_modification_time DESC
+
+WITH iss, r, alias_t, alias_ms, followers, {
+  id: id(com),
+  type: 'comment',
+  props: com,
+  written_by: alias_u
+} as alias_com
+
+WITH iss, r, alias_t, alias_ms, followers, collect(alias_com) as answers
+
+
 ORDER BY r.last_modification_time DESC
 RETURN {
   id: id(iss),
@@ -103,7 +125,8 @@ RETURN {
   created_by: iss.created_by,
   questioning: alias_t,
   mentioning:  alias_ms,
-  followers: followers
+  followers: followers,
+  answers: answers
 }
 
 

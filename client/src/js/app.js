@@ -234,6 +234,26 @@ angular
             }
           },
         })
+        .state('explore.issues', {
+          url: 'issues',
+          templateUrl: 'templates/partials/issues-masonry.html',
+          controller: 'ExploreIssuesCtrl',
+          grammar: {
+            label: 'issues',
+            connector: {
+              type: 'of documents of type',
+              relatedTo: 'which mentions',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: GRAMMAR.IN_TYPES,
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
+        })
+
       
       .state('entity', {
         abstract: true,

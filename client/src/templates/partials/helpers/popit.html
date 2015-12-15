@@ -92,13 +92,13 @@
               this is a {{entity.type}} <span class="caret"></span>
             </button>
             <ul class="uib-dropdown-menu tk-proxima-nova" style='z-index:1050' role="menu" aria-labelledby="btn-append-to-body">
-              <li role="menuitem"><a ng-click='suggestType("person", $event)'> this is a <strong>person</strong></a></li>
-              <li role="menuitem"><a ng-click='suggestType("location", $event)'>this is a <strong>location</strong></a></li>
-              <li role="menuitem"><a ng-click='suggestType("organization", $event)'>this is a <strong>organization</strong></a></li>
-              <li role="menuitem"><a ng-click='suggestType("social_group", $event)'>this is a <strong>social group</strong></a></li>
+              <li role="menuitem" ng-if='entity.type != "person"'><a ng-click='raiseIssue("type","person")'> this is a <strong>person</strong></a></li>
+              <li role="menuitem" ng-if='entity.type != "location"'><a ng-click='raiseIssue("type", "location")'>this is a <strong>location</strong></a></li>
+              <li role="menuitem"><a ng-click='raiseIssue("type", "organization")'>this is a <strong>organization</strong></a></li>
+              <li role="menuitem"><a ng-click='raiseIssue("type", "social_group")'>this is a <strong>social group</strong></a></li>
               <li class="divider"></li>
-              <li role="menuitem"><a ng-click='suggestType("topic", $event)'>(generic keyword)</a></li>
-              <li role="menuitem"><a ng-click='suggestType("topic", $event)'>(garbage ...)</a></li>
+
+              <li role="menuitem"><a ng-click='raiseIssue("irrelevant")'>(this is irrelevant ...)</a></li>
             </ul>
           </div>
         </div>

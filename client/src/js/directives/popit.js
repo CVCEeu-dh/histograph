@@ -207,6 +207,19 @@ angular.module('histograph')
           });
         }
 
+        scope.raiseIssue = function(kind, solution) {
+          if(kind == 'type')
+            if(solution != scope.entity.type) {
+            // just discard
+              scope.entity.type = solution;
+            }
+
+          scope.$parent.raiseIssue(scope.entity, scope.parent, kind, solution, function (err, result) {
+            scope.feedback();
+          });
+
+        }
+
         scope.queue = function(){
           $log.info(':: gasp -> queue()', scope.entity)
           scope.$parent.queue(scope.entity.id, true);

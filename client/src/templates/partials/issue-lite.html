@@ -1,17 +1,25 @@
-<div class="actions">
-  <div class="btn-group-vertical">
-    <button class="btn btn-link" ng-click="upvote(relatedItem)" tooltip-append-to-body="true" tooltip="vote up solution"><i class="fa fa-angle-up"></i></button>
-    <div>{{relatedItem.props.score || 0}}</div>
-    <button class="btn btn-link" ng-click="downvote(relatedItem)" tooltip-append-to-body="true" tooltip="vote down solution"><i class="fa fa-angle-down"></i></button>
-  </div>
+<div class="related" ng-if='relatedItem.questioning.type=="resource"'>
+  resource
 </div>
-<div class="inner">
+<div class="related" ng-if='relatedItem.questioning.type!="resource"'>
+  <h4>
+    <a ng-href='/#/u/{{relatedItem.created_by}}'>{{relatedItem.created_by}}</a> <span class='date'>{{relatedItem.creation_date | date : 'longDate'}}</span> — wrong {{relatedItem.type}} for <a marked='relatedItem.questioning.props|lookup:"name":language'></a>
+    ({{relatedItem.questioning.type}})
+  </h4>
   
-  
-  <blockquote>{{relatedItem.props.solution}}
+  <!-- <div class="actions">
+    <div class="btn-group-vertical">
+      <button class="btn btn-link" ng-click="upvote(relatedItem)" tooltip-append-to-body="true" tooltip="vote up solution"><i class="fa fa-angle-up"></i></button>
+      <div>{{relatedItem.props.score || 0}}</div>
+      <button class="btn btn-link" ng-click="downvote(relatedItem)" tooltip-append-to-body="true" tooltip="vote down solution"><i class="fa fa-angle-down"></i></button>
+    </div>
+  </div> -->
+  <div class="meta">
+    Context: <span ng-repeat="mention in relatedItem.mentioning">
+    <a ng-href='/#/r/{{mention.id}}' marked='mention.props|lookup:"title":language'></a>
+  </span>
+
+    <a>{{relatedItem.answers.length}} answers</a> written by <span ng-repeat='answer in relatedItem.answers'>{{answer.written_by.username}} </span>
     
-    <span>— {{relatedItem.props.description|| ""}}</span>
-  </blockquote>
-  <!-- score {{relatedItem.props.score || 0}} ({{relatedItem.props.celebrity || 0}})  -->
-  {{relatedItem.proposed_by.username}} — {{relatedItem.props.creation_date | date : 'longDate'}}
+  </div>
 </div>

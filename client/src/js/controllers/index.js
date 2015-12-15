@@ -44,6 +44,35 @@ angular.module('histograph')
   })
   
   /*
+    wall of issues
+    ---
+  */
+  .controller('ExploreIssuesCtrl', function ($scope, $log, IssueFactory, EVENTS) {
+    $log.debug('ExploreIssuesCtrl ready', $scope.params);
+    $scope.limit  = 20;
+    $scope.offset = 0;
+
+    $scope.sync = function() {
+      $scope.loading = true;
+      IssueFactory.get(angular.extend({
+        limit: $scope.limit,
+        offset: $scope.offset
+      }, $scope.params), function (res) {
+        $scope.loading = false;
+        $scope.offset  = res.info.offset;
+        $scope.limit   = res.info.limit;
+        $scope.totalItems = res.info.total_items;
+        if($scope.offset > 0)
+          $scope.addRelatedItems(res.result.items);
+        else
+          $scope.setRelatedItems(res.result.items);
+
+      })
+    };
+    $scope.sync();
+  })
+
+  /*
     wall of resources
   */
   .controller('ExploreResourcesCtrl', function ($scope, $log, ResourceFactory, EVENTS) {
@@ -73,7 +102,7 @@ angular.module('histograph')
       }) 
     }
     
-    
+   
     /*
       listener: EVENTS.API_PARAMS_CHANGED
       some query parameter has changed, reload the list accordingly.

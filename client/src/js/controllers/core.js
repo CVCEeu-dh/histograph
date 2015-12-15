@@ -8,7 +8,7 @@
  */
 angular.module('histograph')
   
-  .controller('CoreCtrl', function ($scope, $rootScope, $location, $state, $timeout, $route, $log, $timeout, $http, $routeParams, $modal, $uibModal, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, EntityExtraFactory, EntityRelatedExtraFactory, localStorageService, EVENTS, VIZ, MESSAGES, ORDER_BY) {
+  .controller('CoreCtrl', function ($scope, $rootScope, $location, $state, $timeout, $route, $log, $timeout, $http, $routeParams, $modal, $uibModal, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, EntityExtraFactory, EntityRelatedExtraFactory, localStorageService, EntityRelatedFactory, EVENTS, VIZ, MESSAGES, ORDER_BY) {
     $log.debug('CoreCtrl ready');
     $scope.locationPath = $location.path();
     $scope.locationJson  = JSON.stringify($location.search()); 
@@ -677,6 +677,31 @@ angular.module('histograph')
       $scope.queueRedirect();
     };
 
+    /*
+      Raise a new Issue
+      for an entity in a specific context.
+    */
+    $scope.raiseIssue = function(entity, resource, kind, solution, next){
+      var params = {
+        kind: kind,
+        mentioning: resource.id
+      };
+
+      if(solution)
+        params.solution = solution;
+
+      $log.log('CoreCtrl -> raiseIssue() on entity:', entity.id, '- mentioning:', resource.id);
+      
+
+      EntityRelatedFactory.save({
+        id: entity.id,
+        model: 'issue'
+      }, params, function (res) {
+        $log.log('CoreCtrl -> raiseIssue()', res.status);
+        if(next)
+          next(null, res);
+      });
+    }
     /*
       Voting mechanism: upvote the relationships between an entity and a resource
       (their id and the type will suffice)
