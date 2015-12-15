@@ -115,7 +115,7 @@ describe('model:action voteup relationship', function() {
       should.equal(node.props.target, Action.CREATE_APPEARS_IN_RELATIONSHIP);
       should.equal(node.type, Action.UPVOTE);
       should.equal(node.mentioning.length, 2);
-      console.log(node)
+      // console.log(node)
       __actionA = node;
       done();
     })

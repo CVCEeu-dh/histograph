@@ -181,6 +181,12 @@ module.exports = function(io) {
         return res.ok({items: items}, info);
       });
     },
+
+    /*
+      User specific random crowdsourcing
+    */
+
+
     /*
       Return a list of last user-touched resources.
 

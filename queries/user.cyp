@@ -25,7 +25,7 @@ RETURN count(DISTINCT n) as count_items
 
 // name: get_pulse
 // get user activity (filter by relationship creation date OR other user relationship on "users's items")
-MATCH (u:user {username: '@danieleguido'})-[r]-(n)
+MATCH (u:user {username: {username}})-[r:curates]-(n)
 OPTIONAL MATCH (n)-[r2]-()
 WITH u, r, r2, n
 
@@ -41,6 +41,18 @@ WITH {
 
 RETURN DISTINCT target
 
+
+// name: get_related_crowdsourcing_actions
+// get crowdsourcing todos... CONFIRM an action performed by someone else
+// or play with someone else issue
+MATCH (u:user {username:{username}}) 
+WITH u
+MATCH (act:action)-[:mentions]->(ent)
+OPTIONAL MATCH (ent)<-[:mentions]-(act2:action)-[:performs]-(u)
+WITH act, ent
+WHERE act2 is NULL
+WITH act, {type: last(labels(ent)), id:id(ent)} as alias_ms
+RETURN id(act), last(labels(act)), collect(alias_ms)
 
 
 // name: count_related_resources

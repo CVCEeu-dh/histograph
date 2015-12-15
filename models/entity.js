@@ -18,6 +18,7 @@ var settings  = require('../settings'),
     async     = require('async'),
     _         = require('lodash'),
     
+    Action  = require('../models/action'),
     Resource  = require('../models/resource');
     
     
@@ -218,6 +219,7 @@ module.exports = {
       }
       // create issue to track events in global stuff
 
+
       // download the updated version for the given resource
       async.series({
         entity: function (callback) {
@@ -225,6 +227,14 @@ module.exports = {
         },
         relationship: function (callback) {
           neo4j.rel.update(result.rel, callback);
+        },
+        action: function(callback) {
+          Action.create({
+            kind: Action.CREATE,
+            target: Action.CREATE_APPEARS_IN_RELATIONSHIP,
+            mentions: [resource.id, entity.id],
+            username: user.username
+          }, callback);
         },
         resource: function (callback) {
           Resource.get({
@@ -241,6 +251,7 @@ module.exports = {
             props: result.ent,
             related: {
               resource: results.resource,
+              action: results.action
             },
             rel: result.rel.properties
           });
@@ -296,8 +307,20 @@ module.exports = {
         result.rel.properties.score = _.compact((result.rel.properties.upvote || [])).length - _.compact((result.rel.properties.downvote|| [])).length;
         
         async.series({
-          relationship: function (callback) {
-            neo4j.rel.update(result.rel, callback);
+          relationships: function (callback) {
+            async.parallel({
+              relationship: function(_callback) {
+                neo4j.rel.update(result.rel, _callback);
+              },
+              action: function (_callback) {
+                Action.create({
+                  kind: params.action,
+                  target: Action.CREATE_APPEARS_IN_RELATIONSHIP,
+                  mentions: [resource.id, entity.id],
+                  username: user.username
+                }, _callback);
+              },
+            }, callback);
           },
           resource: function (callback) {
             Resource.get({
@@ -314,6 +337,7 @@ module.exports = {
               props: result.ent,
               related: {
                 resource: results.resource,
+                action: results.relationships.action
               },
               rel: result.rel.properties
             });
@@ -399,7 +423,15 @@ module.exports = {
       if(params.issue) {
         ent.props.issues = _.unique((ent.props.issues || []).concat([params.issue]));
       }
+      
+      // async.parallel({
+      //   action: function(){
 
+      //   },
+      //   entity: function(){
+
+      //   }
+      // })
       neo4j.save(ent.props, function (err, props) {
         if(err) {
           next(err);

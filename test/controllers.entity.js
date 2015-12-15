@@ -14,6 +14,7 @@ var settings  = require('../settings'),
     
     Entity    = require('../models/entity'),
     Resource  = require('../models/resource'),
+    Action    = require('../models/action'),
     User      = require('../models/user'),
     Issue     = require('../models/issue'),
 
@@ -156,7 +157,12 @@ describe('controller:entity related items', function() {
         should.not.exists(err);
         should.equal(res.body.result.item.id, __entity.id);
         should.exist(res.body.result.item.rel);
-        done();
+        should.exist(res.body.result.item.related.action.id)
+
+        Action.remove(res.body.result.item.related.action, function(err){
+          should.not.exist(err);
+          done();
+        });
       });
   });
 
@@ -180,10 +186,16 @@ describe('controller:entity related items', function() {
       .expect(200)
       .end(function (err, res) {
         should.exist(res.body.result.item.rel)
-
+        should.exist(res.body.result.item.related.action.props)
         should.exist(res.body.result.item.rel.created_by)
         should.not.exists(err);
-        done();
+
+        // should remove the action
+        Action.remove(res.body.result.item.related.action, function(){
+          should.not.exist(err)
+          done();
+        });
+
       });
   })
 
