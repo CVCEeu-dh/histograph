@@ -12,9 +12,12 @@ var settings   = require('../settings'),
      
     YAML       = require('yamljs'),
 
+    async      = require('async'),
     _          = require('lodash'),
 
     neo4j      = require('seraph')(settings.neo4j.host),
+
+    Action     = require('../models/action'),
     Entity     = require('../models/entity');
     
 
@@ -225,36 +228,53 @@ module.exports = function(io){
         return helpers.formError(form.errors, res);
 
       if(form.params.mentioning) {
-        form.params.mentioning = form.params.mentioning.split(',');
+        form.params.mentioning = _.map(form.params.mentioning.split(','),  _.parseInt);
       }
 
       // if form.params.kind == Issue.DATE
       // check that the solution param is an array of valid dates.
       // if form.params.kind == Issue.TYPE
       //   check that the solution param is an available label
-      Entity.update(+form.params.id, {
-        issue: form.params.kind
-      }, function (err, entity) {
-        if(err)
-          return helpers.cypherQueryError(err, res);
-        Issue.create({
-          kind:         form.params.kind,
-          solution:     form.params.solution, 
-          questioning:  form.params.id,
-          mentioning:   form.params.mentioning,
-          user:         req.user
-        }, function (err, issue) {
+      async.series({
+        entity: function(next) {
+          Entity.update(+form.params.id, {
+            issue: form.params.kind
+          }, next);
+        },
+        issue: function(next) {
+          Issue.create({
+            kind:         form.params.kind,
+            solution:     form.params.solution, 
+            questioning:  form.params.id,
+            mentioning:   form.params.mentioning,
+            user:         req.user
+          }, next);
+        }
+      }, function (err, results) {
+        var mentions = _.compact([results.issue.id, +form.params.id].concat(form.params.mentioning));
+
+        Action.create({
+          kind: Action.RAISE_ISSUE,
+          target: Action.ENTITY_LABEL,
+          mentions: mentions,
+          username: req.user.username
+        }, function (err, act) {
+          console.log(err, act)
           if(err)
             return helpers.cypherQueryError(err, res);
+
           io.emit('entity:create-related-issue:done', {
             user: req.user.username,
             id:  +form.params.id, 
-            data: issue
+            data: results.issue
           });
+
           return res.ok({
-            item: issue
+            item: results.issue,
+            action: act
           });
         });
+        
       });
     },
 

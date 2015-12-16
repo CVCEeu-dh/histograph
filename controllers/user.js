@@ -178,7 +178,13 @@ module.exports = function(io) {
       User.pulse(req.user, form.params, function (err, items, info) {
         if(err)
           return helpers.cypherQueryError(err, res);
-        return res.ok({items: items}, info);
+        return res.ok({
+          items: _.map(items, function (d){
+            if(d.props.last_modification_time)
+              d.props.last_modification = helpers.fromNow(d.props.last_modification_time);
+            return d;
+          })
+        }, info);
       });
     },
     /*

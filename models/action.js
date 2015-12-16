@@ -23,6 +23,8 @@ module.exports = _.assign(model.generate({
   CREATE: 'create',
   UPVOTE: 'upvote',
   DOWNVOTE: 'downvote',
+  RAISE_ISSUE: 'issued',
+  ENTITY_LABEL: 'ENTITY_LABEL',
   APPEARS_IN_RELATIONSHIP: 'APPEARS_IN_RELATIONSHIP',
   LIKES_RELATIONSHIP: 'LIKES_RELATIONSHIP'
 });

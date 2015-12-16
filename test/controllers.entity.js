@@ -231,7 +231,8 @@ describe('controller:entity related issues', function() {
         should.exist(res.body.result.item.id)
         should.equal(res.body.result.item.mentioning.length, 0);
         should.equal(res.body.result.item.questioning.id,__entity.id)
-        should.exist(res.body.result.item.answers)
+        should.exist(res.body.result.item.answers);
+        should.exist(res.body.result.action.id)
         done();
       });
   });

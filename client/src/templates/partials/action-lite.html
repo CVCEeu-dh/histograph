@@ -1,11 +1,22 @@
 <div class='notification'>
-  <strong>{{relatedItem.performed_by.username}}</strong>
-  {{relatedItem.props.last_modification_date|date:'longDate'}} 
+  <strong>{{relatedItem.performed_by.username}}</strong> {{relatedItem.props.last_modification}}
+  ({{relatedItem.props.last_modification_date|date:'longDate'}}) 
   
+  <span ng-if='relatedItem.props.target=="ENTITY_LABEL"'>
+    signaled a wrong type for
+    <span>
+      <a ng-href='/#/e/{{entity.id}}' ng-repeat='entity in relatedItem.entities' class='tag {{entity.type}}'>{{entity.props|lookup:'name':langauge}}</a>
+    </span> in <span>
+      <a ng-href='/#/r/{{relatedItem.resource.id}}'>{{relatedItem.resource.props|lookup:'title':language}}</a>
+    </span>
+    <button class='btn btn-line btn-straight'>confirm</button>
+    <button class='btn btn-line btn-straight'>disagree</button>
+  </span>
+
   <span ng-if='relatedItem.props.target=="APPEARS_IN_RELATIONSHIP"'>
     {{relatedItem.type}}
     <span>
-      <a ng-href='/#/e/{{entity.id}}' ng-repeat='entity in relatedItem.entity' class='tag {{entity.type}}'>{{entity.props|lookup:'name':langauge}}</a>
+      <a ng-href='/#/e/{{entity.id}}' ng-repeat='entity in relatedItem.entities' class='tag {{entity.type}}'>{{entity.props|lookup:'name':langauge}}</a>
     </span> in <span>
       <a ng-href='/#/r/{{relatedItem.resource.id}}'>{{relatedItem.resource.props|lookup:'title':language}}</a>
     </span>

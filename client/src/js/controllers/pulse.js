@@ -11,6 +11,7 @@ angular.module('histograph')
     var popper;
 
     $scope.pulsations = 0;
+    $scope.totalItems = 0;
     $scope.notifications = [];
     
 
@@ -45,15 +46,21 @@ angular.module('histograph')
 
       UserFactory.get({
         method: 'pulse',
-        limit: 3
+        limit: 5
       }, function(res) {
         $log.log('PulseController->sync() received:', res);
-        $scope.notifications = res.result.items.map(function(d) {
-          if(['APPEARS_IN_RELATIONSHIP', 'LIKES_RELATIONSHIP'].indexOf(d.props.target) !== -1){
-            d.resource = _.find(d.mentioning, {type: 'resource'});
-            d.entity   = _.reject(d.mentioning, {type: 'resource'});
-          }
+        $scope.totalItems = res.info.groups.total_items;
 
+        $scope.notifications = res.result.items.map(function(d) {
+          if(['APPEARS_IN_RELATIONSHIP', 'LIKES_RELATIONSHIP', 'ENTITY_LABEL'].indexOf(d.props.target) !== -1){
+            d.resource = _.find(d.mentioning, {type: 'resource'});
+            d.entities   = _.filter(d.mentioning, function(d){
+              return ['person', 'location', 'organization'].indexOf(d.type) !== -1;
+            });
+          }
+          if(['ENTITY_LABEL'].indexOf(d.props.target) !== -1){
+            // d.issue    = _.find(d.mentioning, function(d));
+          }
           return d;
         });
         $scope.syncing = false;
@@ -64,7 +71,7 @@ angular.module('histograph')
     socket.on('entity:create-related-resource:done', $scope.ping);
     socket.on('entity:downvote-related-resource:done', $scope.ping);
     socket.on('entity:upvote-related-resource:done', $scope.ping);
-
+    socket.on('entity:create-related-issue:done', $scope.ping);
     // after 5 seconds
     popper = $timeout($scope.ping, 4000);
   })

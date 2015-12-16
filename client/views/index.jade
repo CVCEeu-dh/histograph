@@ -124,9 +124,11 @@ html
                         i.fa.fa-flash
                         div.number.animated(ng-if='pulsations > 0') {{pulsations}}
                       ul.uib-dropdown-menu.dropdown-menu
+                        
                         li
                           a(href="#", ng-if='syncing') loading...
-                          a(href="#", ng-if='!syncing') see all notifications
+                          a(href="#", ng-if='!syncing') see all {{totalItems}} notifications
+                            
                         li(ng-repeat="relatedItem in notifications", ng-include='"templates/partials/action-lite.html"')
                           
                   li
