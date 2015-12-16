@@ -124,11 +124,11 @@ html
                         i.fa.fa-flash
                         div.number.animated(ng-if='pulsations > 0') {{pulsations}}
                       ul.uib-dropdown-menu.dropdown-menu
-                        li(ng-if='syncing')
-                          a(href="#") loading...
+                        li
+                          a(href="#", ng-if='syncing') loading...
+                          a(href="#", ng-if='!syncing') see all notifications
                         li(ng-repeat="relatedItem in notifications", ng-include='"templates/partials/action-lite.html"')
-                        li(ng-if='pulsations > 3')
-                          a(href="#") see all notifications
+                          
                   li
                     a(ng-click='toggleQueue()', uib-tooltip='open bookmark list', tooltip-placement='bottom')
                       i.fa.fa-bookmark
