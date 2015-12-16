@@ -25,7 +25,8 @@ module.exports = {
   */
   create: function(user, next) {
     // enrich user with some field
-    var encrypted,
+    var now = helpers.now(), 
+        encrypted,
         activation;
         
     encrypted = helpers.encrypt(user.password, {
@@ -42,10 +43,12 @@ module.exports = {
     });
       
     _.assign(user, {
-      password   : encrypted.key,
-      salt       : encrypted.salt,
-      status     : user.status || 'disabled',
-      activation : activation.key   
+      last_notification_date:   now.date,
+      last_notification_time:   now.time,
+      password              : encrypted.key,
+      salt                  : encrypted.salt,
+      status                : user.status || 'disabled',
+      activation            : activation.key   
     });
      
     neo4j.save(user, 'user', function (err, node) {

@@ -10,7 +10,9 @@ MERGE (k:user { email:{email} })
     k.about={about},
     k.salt={salt},
     k.password={password},
-    k.gender={gender}
+    k.gender={gender},
+    k.last_notification_time={exec_time},
+    k.last_notification_date={exec_date}
   ON MATCH SET
     k.picture={picture},
     k.gender={gender}
