@@ -814,6 +814,14 @@ module.exports = {
     result.time = +now.format('X');
     return result;
   },
+
+  /*
+    Return fromNow for a specific datetime in X format
+  */
+  fromNow: function(seconds) {
+    return moment.utc(seconds*1000).fromNow()
+
+  },
   
   /*
     Transform a date in the current db format and return a dict of date and time
