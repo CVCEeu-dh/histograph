@@ -106,13 +106,13 @@ describe('model:action voteup relationship', function() {
   it('should voteup resource A and entity relationship', function (done) {
     Action.create({
       kind: Action.UPVOTE,
-      target: Action.CREATE_APPEARS_IN_RELATIONSHIP,
+      target: Action.APPEARS_IN_RELATIONSHIP,
       mentions: [__resourceA.id, __entity.id],
       username: __userA.username
     }, function (err, node) {
       should.not.exist(err);
       should.equal(node.performed_by.id, __userA.id)
-      should.equal(node.props.target, Action.CREATE_APPEARS_IN_RELATIONSHIP);
+      should.equal(node.props.target, Action.APPEARS_IN_RELATIONSHIP);
       should.equal(node.type, Action.UPVOTE);
       should.equal(node.mentioning.length, 2);
       // console.log(node)

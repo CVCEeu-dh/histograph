@@ -21,27 +21,47 @@ MERGE (k:user { email:{email} })
 
 // name: count_pulse
 // get total number of user activities/notifications
-MATCH (u:user {username: '@danieleguido'})-[r]-(n)
-RETURN count(DISTINCT n) as count_items
+MATCH (you:user {username:{username}})
+WITH you 
+MATCH (u:user)-[:performs]->(act:action)
+WHERE id(you) <> id(u) AND act.last_modification_time > you.last_notification_time
+WITH act, you
+MATCH (act)-[:mentions]->(n)<-[r]-(you)
+WITH DISTINCT act
+RETURN count(act) as total_items
 
 
 // name: get_pulse
 // get user activity (filter by relationship creation date OR other user relationship on "users's items")
-MATCH (u:user {username: {username}})-[r:curates]-(n)
-OPTIONAL MATCH (n)-[r2]-()
-WITH u, r, r2, n
-
-ORDER BY n.creation_time DESC, r2.creation_time DESC, r.creation_time DESC
-SKIP {offset}
-LIMIT {limit}
-WITH {
-    id: id(n),
-    type: last(labels(n)),
-    props: n,
-    rel: r
-  } as target
-
-RETURN DISTINCT target
+MATCH (you:user {username:{username}})
+WITH you 
+MATCH (u:user)-[:performs]->(act:action)
+WHERE id(you) <> id(u) AND act.last_modification_time > you.last_notification_time
+WITH act, you, u, {
+    id: id(u),
+    username: u.username,
+    picture: u.picture
+  } as alias_u
+MATCH (act)-[:mentions]->(n)<-[r]-(you)
+WITH DISTINCT act, alias_u
+  ORDER BY act.last_modification_time DESC
+  SKIP {offset}
+  LIMIT {limit}
+WITH act, alias_u
+MATCH (act)-[r2:mentions]->(t)
+WITH act, alias_u, filter(x in collect({
+    id: id(t),
+    props: t,
+    type: last(labels(t))
+  }) WHERE has(x.id)) AS alias_ms
+RETURN {
+  id: id(act),
+  props: act,
+  type: last(labels(act)),
+  performed_by: alias_u,
+  mentioning: alias_ms
+}
+ORDER BY act.last_modification_time DESC
 
 
 // name: get_related_crowdsourcing_actions

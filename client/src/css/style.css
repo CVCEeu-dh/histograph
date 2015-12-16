@@ -65,6 +65,17 @@ header ul.menu li.active a:hover{
   color: #151515;
 }
 
+header ul.dropdown-menu{
+  min-width: 300px
+}
+
+header ul.dropdown-menu li{
+  padding: 0;
+  font-size: 12px;
+  line-height: 18px;
+    padding: 0 15px;
+}
+
 a#header-title {
   color: #151515 ;
   margin-right: 50px;
@@ -413,6 +424,17 @@ a#header-title {
   height: 120px;
   background: #d4d4d4;
   margin: 0px auto;
+}
+
+/*
+  
+  Notification items in header dropdown menus
+  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+*/
+header ul li .notification a {
+  display: inline;
+  line-height: inherit
 }
 
 /*
@@ -1770,6 +1792,10 @@ li.CodeMirror-hint-active {
   text-transform: uppercase;
   border-radius: 3px;
   border: 1px solid #ccc;
+}
+
+.btn.btn-straight{
+  padding:0 5px;
 }
 
 .btn.btn-line-white{

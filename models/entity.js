@@ -231,7 +231,7 @@ module.exports = {
         action: function(callback) {
           Action.create({
             kind: Action.CREATE,
-            target: Action.CREATE_APPEARS_IN_RELATIONSHIP,
+            target: Action.APPEARS_IN_RELATIONSHIP,
             mentions: [resource.id, entity.id],
             username: user.username
           }, callback);
@@ -315,7 +315,7 @@ module.exports = {
               action: function (_callback) {
                 Action.create({
                   kind: params.action,
-                  target: Action.CREATE_APPEARS_IN_RELATIONSHIP,
+                  target: Action.APPEARS_IN_RELATIONSHIP,
                   mentions: [resource.id, entity.id],
                   username: user.username
                 }, _callback);

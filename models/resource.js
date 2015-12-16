@@ -362,7 +362,7 @@ module.exports = {
   },
   
   /*
-    Create a special relationship [:♥] between the resource and the user
+    Create a special relationship (u)-[:♥]->(res) between the resource and the user
     
   */
   createRelatedUser: function(resource, user, next) {

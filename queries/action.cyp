@@ -4,17 +4,26 @@
 // (u:user)-1-[:performs]-1->(a:action:create {target:relationship})-[:mentions]->(t)
 MATCH (u:user {username:{username}})
 WITH u
-  CREATE u-[r:performs]->(a:action{if:kind}:{:kind}{/if})
+  CREATE (u)-[r:performs]->(a:action{if:kind}:{:kind}{/if})
     SET
       a.target = {target},
       a.creation_date  = {exec_date},
       a.creation_time  = {exec_time},
       a.last_modification_date = {exec_date},
-      a.last_modification_time = {exec_time}
+      a.last_modification_time = {exec_time},
+      r.creation_date  = {exec_date},
+      r.creation_time  = {exec_time},
+      r.last_modification_date = {exec_date},
+      r.last_modification_time = {exec_time}
   WITH u,a
   MATCH (t) 
     WHERE id(t) in {mentions}
-  CREATE a-[:mentions]->t
+  CREATE (a)-[r2:mentions]->t
+    SET
+      r2.creation_date  = {exec_date},
+      r2.creation_time  = {exec_time},
+      r2.last_modification_date = {exec_date},
+      r2.last_modification_time = {exec_time}
   WITH DISTINCT a, filter(x in collect({
     id: id(t),
     props: t,

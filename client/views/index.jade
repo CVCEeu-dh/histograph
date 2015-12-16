@@ -118,9 +118,20 @@ html
                   li(class='{{currentState.name == "explore.persons"?"active":""}}')
                     a(ng-href='#/per?{{qs}}')  graph
                   
+                  li(ng-controller='PulseController')
+                    span(uib-dropdown, on-toggle="toggle(open)")
+                      a(href='#/', uib-dropdown-toggle)
+                        i.fa.fa-flash
+                        div.number.animated(ng-if='pulsations > 0') {{pulsations}}
+                      ul.uib-dropdown-menu.dropdown-menu
+                        li(ng-if='syncing')
+                          a(href="#") loading...
+                        li(ng-repeat="relatedItem in notifications", ng-include='"templates/partials/action-lite.html"')
+                        li(ng-if='pulsations > 3')
+                          a(href="#") see all notifications
                   li
                     a(ng-click='toggleQueue()', uib-tooltip='open bookmark list', tooltip-placement='bottom')
-                      i.fa.fa-bookmark-o
+                      i.fa.fa-bookmark
                       div.number.animated {{playlist.length}}
 
                   li(class='{{currentState.name == "search.resources" || currentState.name == "search.persons" ?"active":""}}')

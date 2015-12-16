@@ -15,6 +15,8 @@ var settings   = require('../settings'),
     _          = require('lodash'),
 
     neo4j      = require('seraph')(settings.neo4j.host),
+
+    Action     = require('../models/action'),
     Resource   = require('../models/resource');
     
 
@@ -501,18 +503,30 @@ module.exports = function(io){
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       
-      Resource.createRelatedUser({
-        id: form.params.id
-      }, req.user, function (err, resource) {
+      async.parallel({
+        resource: function(next) {  
+          Resource.createRelatedUser({
+            id: form.params.id
+          }, req.user, next);
+        }, 
+        action: function(next) {
+          Action.create({
+            kind: Action.CREATE,
+            target: Action.LIKES_RELATIONSHIP,
+            mentions: [form.params.id],
+            username: req.user.username
+          }, next);
+        }
+      }, function (err, results) {
         if(err)
           return helpers.cypherQueryError(err, res);
         io.emit('resource:create-related-user:done', {
           user: req.user.username,
           id:   form.params.id, 
-          data: resource
+          data: results.resource
         });
         return res.ok({
-          item: resource
+          item: results.resource
         });
       })
     },

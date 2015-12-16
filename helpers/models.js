@@ -79,7 +79,7 @@ module.exports = {
         module.exports.getMany({
           queries: {
             items: queries['get_'+options.pluralize],
-            total_count: queries['get_'+options.model]
+            total_count: queries['count_'+options.model]
           },
           params: params
         }, next);

@@ -82,7 +82,9 @@ module.exports = {
         count_items: queries.count_pulse,
         items: queries.get_pulse
       },
-      params: params
+      params: _.assign({
+        username: user.username
+      }, params)
     }, function (err, results) {
       if(err) {
         console.log(err)
@@ -93,6 +95,14 @@ module.exports = {
     });
   },
 
+  /*
+    This method return just the amount of notification, to be called on 
+  */
+  pulsations: function(user, next) {
+    neo4j.query(queries.count_pulse, {
+      username: user.username
+    }, next);
+  },
   /*
     Return a list of last touched resources
 

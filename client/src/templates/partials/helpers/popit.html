@@ -50,9 +50,10 @@
     <div ng-if='question=="downvote"' class='question'>
       <div class='answers'>
         <div class=''>
-          <button class='btn btn-line-white btn-block' ng-click='askQuestion("wrongtype", $event)'>This is not a <strong>{{entity.type}}</strong></button>
-          <button class='btn btn-line-white btn-block' ng-click='askQuestion("contribute", $event)'>this is mispelled / a fragment</button>
           <button class='btn btn-line-white btn-block' ng-click='downvote($event)'>this <strong>{{entity.type}}</strong> is not mentioned here</button>
+          <button class='btn btn-line-white btn-block' ng-click='askQuestion("wrongtype", $event)'>This is not a <strong>{{entity.type}}</strong></button>
+          <button class='btn btn-line-white btn-block' ng-click='askQuestion("contribute", $event)'>this is a typo / fragment / duplicate</button>
+          
           
           <button class='btn btn-line-white obscure btn-block' ng-click='cancelQuestion($event)'>back</button>
         </div>

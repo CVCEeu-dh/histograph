@@ -102,7 +102,7 @@ describe('controller:user before', function() {
 
 
 describe('controller:user (related users)', function() {
-  it('should create a LIKES relationship between the resource and the user', function (done) {
+  it('should create a LIKES relationship between the resource and the AUTH user', function (done) {
     session
       .post('/api/resource/'+ __resourceA.id +'/related/user')
       .expect('Content-Type', /json/)
@@ -171,7 +171,6 @@ describe('controller:user (activity)', function() {
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
-        // console.log('pulse', res)
         should.not.exists(err);
         should.exists(res.body.result.items);
         done();
