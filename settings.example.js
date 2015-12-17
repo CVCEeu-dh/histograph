@@ -115,6 +115,19 @@ module.exports = {
     format: 'viaf.xml',
     autosuggest: {
       endpoint: 'http://www.viaf.org/viaf/AutoSuggest'
+    },
+    links:{
+      endpoint: 'http://www.viaf.org/viaf/'
+    }
+  },
+
+  /*
+    service for the endpoint:
+    https://www.wikidata.org/wiki/Special:EntityData/Q789848.json
+  */
+  wikidata: {
+    entity: {
+      endpoint: 'https://www.wikidata.org/wiki/Special:EntityData/'
     }
   },
   

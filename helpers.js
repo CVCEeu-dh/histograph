@@ -235,12 +235,14 @@ module.exports = {
             description: 'http://dbpedia.org/property/shortDescription',
             abstracts:   'http://dbpedia.org/ontology/abstract',
             first_name:  'http://xmlns.com/foaf/0.1/givenName',
-            last_name:   'http://xmlns.com/foaf/0.1/surname'
+            last_name:   'http://xmlns.com/foaf/0.1/surname',
+            links_viaf:  'http://dbpedia.org/property/viaf',
+            sameas:      'http://www.w3.org/2002/07/owl#sameAs'
           };
       // find fields and complete the properties dict
       _.forIn(props, function (v, k, o) {
         o[k] = _.flattenDeep(_.compact(_.pluck(wiki, v)))
-        if(k != 'abstracts')
+        if(k != 'abstracts' && k != 'sameas')
           o[k] =_.first(o[k]);
       });
       // find  abstracts for specific languages
@@ -250,9 +252,18 @@ module.exports = {
           languages.push(d.lang);
         }
       })
+
+      // find wikidata id if any provided in the sameas
+      _.each(_.map(props.sameas, 'value'), function(d) {
+        var m = d.match(/\/wikidata.org\/entity\/(Q.*)$/);
+        if(m)
+          props.links_wikidata = {value: m[1]};//console.log('e',d, m[1])
+
+      });
+
       // delete the big useless abstracts
       delete props.abstracts;
-     
+      delete props.sameas;
       // extract the juice and clean undefined
       _.forIn(props, function (v, k, o) {
         if(o[k] === undefined) {

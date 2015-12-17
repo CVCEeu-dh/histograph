@@ -284,6 +284,36 @@ module.exports = {
         next(null, entities);
       });
   },
+
+  wikidata: {
+    entity: function(options, next) {
+      if(!settings.wikidata) {
+        next('settings.wikidata not found')
+        return;
+      };
+      
+      var url =  settings.wikidata.entity.endpoint + options.link + '.json';
+      console.log(clc.blackBright('   wikidata links:'), url);
+
+      request
+        .get({
+          url: url,//url,
+          json: true,
+          headers: {
+            'Accept':  'application/json'
+          }
+        }, function (err, res, body) {
+          if(err) {
+            next(err);
+            return;
+          }
+          if(!body.entities[options.link])
+            next('IS_EMPTY');
+          else
+            next(null, body.entities[options.link])
+        });
+    }
+  },
   
   geonames: function(options, next) {
     if(!settings.geonames ||_.isEmpty(settings.geonames.username)) {

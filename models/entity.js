@@ -7,6 +7,7 @@
  */
 var settings  = require('../settings'),
     helpers   = require('../helpers'),
+    services  = require('../services'),
     models    = require('../helpers/models'),
     
     neo4j     = require('seraph')(settings.neo4j.host),
@@ -607,116 +608,139 @@ module.exports = {
     })
   },
   /**
+   discover()
+
    Enrich the entity by using dbpedia data (and yago).
    Since entities comes from Resource.discover activities, they're enriched with
    the properties coming with their dbpedia or yago link. It will then be possible
    to exstimqte better the adequancy of the entity to the context and rate the
    link...
    
-   @param id - numeric internal Neo4J node identifier
+   @param entity - object containing id property, the numeric internal Neo4J node identifier
    */
-  discover: function(id, next) {
-    neo4j.read(id, function (err, node) {
-      if(err) {
-        next(err);
-        return;
+  enrich: function(entity, next) {
+    // save point (commit)
+    var savepoint = function (node, addons, callback) {
+      console.log('    savepoint:', _.keys(addons));
+      if(!_.isEmpty(addons)) {
+        neo4j.save(_.assign({}, node, addons), function (err, node) {
+          callback(err, node, {}); // clean addons
+        })
+      } else {
+        console.log('    savepoint skipped, nothing to do');
+        callback(null, node, {});
       }
-      console.log('discover', _.keys(node))
-      var q = async.waterfall([
-        function lookupDBpediaLink (nextTask) { // check if the entity has a proper wiki link
-          if((node.links_wiki && node.links_wiki.length > 0) || node.name.split(' ').length < 2) {
-            nextTask(null, node);
-            return
-          }
-          console.log('lookup person', node.name)
-          helpers.lookupPerson(node.name, function (err, persons) {
-            if(err) {
-              console.log('error', err)
-              nextTask(null, node)
-              return;
-            }
-            if(persons.length > 1) {
-              console.log(persons);
-              throw err
-              return;
-            } 
-            node = _.merge(node, persons[0]);
-            if(node.services && node.services.length)
-              node.services = _.unique(node.services);
-            console.log(node, 'wikipedia')
-            neo4j.save(node, function (err, res) {
-              if(err) {
-                console.log('error')
-                next(err);
-                return;
-              }
-              nextTask(null, node);
-            })
-          });
-        },
-        // download wiki data
-        function (node, nextTask) {
-          console.log(clc.blackBright('check wikipedia link'))
-          
-          if(!node.links_wiki || node.links_wiki.length == 0) {
-            console.log(clc.blackBright('entity does not have a wiki link'),'skipping');
-            nextTask(null, node)
-            return
-          };
-          if(node.links_wiki.match(/[^a-zA-Z_\-'%0-9,\.]/g)) {
-            node.links_wiki = encodeURIComponent(node.links_wiki);
-            console.log('wiki link changed!', node.links_wiki)
-          }
-          console.log(clc.blackBright('following'), node.links_wiki)
+    };
 
-          helpers.dbpediaPerson(node.links_wiki, function (err, res) {
-            if(err) {
-              console.log(clc.red('error'), err)
-              nextTask(null, node)
+    async.waterfall([
+      function getNode(callback) {
+        neo4j.read(entity.id, callback);
+      },
+
+      function prepareAddons(node, callback) {
+        var addons = {};
+        callback(null, node, addons);
+      },
+      /*
+        If the dbpedia id is given, try to find other stuff, like viaf, birth_date and death_date etc..;
+      */
+      function getOtherIdentifiers(node, addons, callback) {
+        if(_.isEmpty(node.links_wiki))
+          callback(null, node, addons);
+        else
+          helpers.dbpediaPerson(node.links_wiki, function (err, wiki) {
+            if(err){
+              callback(err);
               return;
             }
             
-            // in order to avoid the neo4jerror on empty array.
-            if(res.languages.length > 0) {
-              node = _.merge(node, res);
-            }
-            if(res.first_name && res.last_name && res.first_name.trim().length && res.last_name.trim().length) {
-              node.slug = node.slug || helpers.text.slugify(res.first_name + ' ' + res.last_name);
-              console.log(clc.blackBright('slug', clc.yellowBright(node.slug)));
-            }
-            // console.log(node)
-            // cleaning services
-            // if(node.services && node.services.length)
-            //   node.services = _.unique(node.services);
-            neo4j.save(node, function(err, res) {
-              if(err) {
-                console.log(clc.red('error'), err.neo4jError.message)
-                next(err);
-                return;
-              }
-              nextTask(null, node);
-            })
+            _.each(wiki, function(d,k) {
+              if(_.isEmpty(node[k]))
+                addons[k] = d
+            });
             
-          });
-        },
-        // dbpedia lookup ... ? If it is more than 2 words.
-        
-        function (node, nextTask) {
-          // console.log('viaf check', node.links_viaf)
-          if(!node.links_viaf) {
-            nextTask(null, node)
-            return
-          };
-          
-          helpers.viafPerson(node.links_viaf, function (err, res) {
-            //console.log(res);
-            nextTask(null, node)
-          });
+            callback(null, node, addons);
+          })
+      },
+
+      savepoint,
+
+      function getLinks(node, addons, callback) {
+        if(_.isEmpty(node.links_viaf)) {
+          callback(null, node, addons);
+          return;
         }
-      ], function(err) {
-        next(null, node);
-      });
-    })
+        services.viaf.links({
+          link: node.links_viaf
+        }, function (err, viaf) {
+          if(err) {
+            callback(err);
+            return;
+          }
+          if(viaf.WKP && _.isEmpty(node.links_wikidata))
+            addons.links_wikidata = _.first(viaf.WKP)
+          if(viaf.LC && _.isEmpty(node.links_lc))
+            addons.links_lc = _.first(viaf.LC) // library of congress authority list
+          if(viaf.ISNI && _.isEmpty(node.links_isni))
+            addons.links_isni = _.first(viaf.ISNI)
+          console.log(addons)
+          callback(null, node, addons);
+        })
+      },
+
+      // save if addons
+      savepoint,
+      /*
+        Extract useful information from wikidata
+      */
+      function getWikidata(node, addons, callback) {
+        if(_.isEmpty(node.links_wikidata)) {
+          callback(null, node, addons);
+          return;
+        }
+        // add language specific description from wikidata
+        services.wikidata.entity({
+          link: node.links_wikidata
+        }, function (err, wiki) {
+          // take short description per dedicated languages 
+          settings.languages.forEach(function(language) {
+            
+            if(wiki.descriptions[language] && !_.isEmpty(wiki.descriptions[language].value)) {
+              
+              if(_.isEmpty(node['wikidata_description_'+language]))
+                addons['wikidata_description_'+language] = wiki.descriptions[language].value;
+              
+              if(_.isEmpty(node['description_'+language]))
+                addons['description_'+language] =  wiki.descriptions[language].value;
+            }
+          });
+
+          // get aliases (alternate variations)
+          // automatic name_search
+          if(wiki.aliases)
+            addons.name_search = _.unique(
+              _.map(node.name_search
+                .split(' || ')
+                .concat(
+                  _.map(
+                    _.flatten(
+                      _.values(wiki.aliases)
+                    ),
+                    'value'
+                  )
+                ), function(d){
+                  return d.toLowerCase()
+              })
+            ).join(' || ')
+
+          
+          callback(null, node, addons);
+        });        
+      },
+
+      savepoint
+
+    ], next);
   },
   /*
     Propose merging two entities.

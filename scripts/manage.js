@@ -48,6 +48,20 @@ var fs          = require('fs'),
         tasks.entity.getClustersByWiki,
         tasks.entity.mergeMany
       ],
+
+      /*
+        Enrich entities with wikidata, viaf and co
+        based on their wikilinks
+      */
+      'enrich-person':[
+        tasks.entity.getOne,
+        tasks.entity.enrich
+      ],
+
+      'enrich-people': [
+        tasks.entity.getMany,
+        tasks.entity.enrich
+      ],
       /*
         computate (ent:entity:person)--(ent:entity:person) links
         based on similarity
