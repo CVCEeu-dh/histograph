@@ -623,7 +623,7 @@ module.exports = {
         }));
         
         if(!content.length)
-          return callback('no language has been specified for the resource');
+          return callback('no content provided for the resource ' + resource.id );
         
         // automatic language detection
         var Langdetect = require('languagedetect'),
