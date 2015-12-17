@@ -19,6 +19,7 @@
         <div class='content'>
           <h4><a ng-href='#/e/{{relatedItem.id}}/g' marked="relatedItem.props|lookup:'name':language"></a></h4>
           <div class='date'>{{relatedItem.props.birth_time | datesOfAPerson : relatedItem.props.death_time}}</div>
+          <div ng-if="relatedItem.props.links_viaf">VIAF: {{relatedItem.props.links_viaf}}</div>
         </div>
         <div class="actions">
           <a class="action" title="visit" uib-tooltip="view details and related documents" uib-tooltip-placement="top" uib-tooltip-append-to-body="true" ng-href='#/e/{{relatedItem.id}}'> <!-- ng-click="addToFilter(relatedItem)"> -->
