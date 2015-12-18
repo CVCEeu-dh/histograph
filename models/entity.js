@@ -745,7 +745,7 @@ module.exports = {
           // automatic name_search
           if(wiki.aliases)
             addons.name_search = _.unique(
-              _.map(node.name_search
+              _.map((node.name_search || '')
                 .split(' || ')
                 .concat(
                   _.map(

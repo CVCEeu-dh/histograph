@@ -427,8 +427,8 @@ module.exports = {
   getMany: function(options, callback) {
     console.log(clc.yellowBright('\n   tasks.entity.getMany'), options);
     var query = parser.agentBrown(
-      ' MATCH (ent:entity{if:entity}:{:entity}{/if})\n'+
-      ' RETURN ent SKIP {offset} LIMIT {limit}', options);
+      ' MATCH (ent:entity{if:entity}:{:entity}{/if})-[:appears_in]->(r:resource) WITH DISTINCT ent\n'+
+      ' SKIP {offset} LIMIT {limit} RETURN ent', options);
     console.log(query);
     neo4j.query(query, {
       limit: +options.limit || 100000,
