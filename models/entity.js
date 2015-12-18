@@ -623,8 +623,15 @@ module.exports = {
     // save point (commit)
     var savepoint = function (node, addons, callback) {
       console.log('    savepoint:', _.keys(addons));
+      var now = helpers.now();
+
       if(!_.isEmpty(addons)) {
-        neo4j.save(_.assign({}, node, addons), function (err, node) {
+        neo4j.save(_.assign({
+
+        }, node, {
+          last_modification_time: now.time, 
+          last_modification_date: now.date
+        }, addons), function (err, node) {
           callback(err, node, {}); // clean addons
         })
       } else {
@@ -759,8 +766,9 @@ module.exports = {
               })
             ).join(' || ')
 
-          
-          callback(null, node, addons);
+          setTimeout(function() {
+            callback(null, node, addons);
+          }, 25)
         });        
       },
 
