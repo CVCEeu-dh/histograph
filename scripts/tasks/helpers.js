@@ -228,7 +228,7 @@ module.exports = {
       }, function (err, user) {
         if(err)
           callback(null, _.assign(options, {
-            username: '@MARVIN',
+            username: 'MARVIN-staff',
           }));
         else {
           console.log(clc.blackBright('   user', clc.magentaBright('MARVIN'), 'generated'));
