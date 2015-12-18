@@ -661,7 +661,7 @@ module.exports = {
               Issue.create({
                 kind: Issue.TYPE,
                 questioning: entity.id,
-                user: {username: '@MARVIN'}
+                user: {username: 'MARVIN-staff'}
               }, function(err, issue) {
                 if(err)
                   callback(err);

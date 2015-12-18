@@ -216,7 +216,7 @@ module.exports = {
       console.log(clc.yellowBright('\n   tasks.helpers.staffpick.create'));
       console.log(clc.blackBright('    generating user'), clc.magentaBright('MARVIN (staffpick)'));
       User.create({
-          username    : '@MARVIN',
+          username    : 'MARVIN-staff',
           password    : 'marvin',
           email       : 'marvin staffpick',
           firstname   : 'MARVIN',

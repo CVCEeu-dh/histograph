@@ -60,6 +60,7 @@ var fs          = require('fs'),
       ],
 
       'enrich-people': [
+        tasks.helpers.staffpick.create,
         tasks.entity.getMany,
         tasks.entity.enrich
       ],
