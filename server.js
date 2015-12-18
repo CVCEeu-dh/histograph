@@ -69,6 +69,8 @@ if ('production' == env) {
 } else {
   app.use(express.static('./client/src'));
 }
+// serve docco documentation
+// app.use('/docs', express.static('./docs'));
 
 
 // configure static files and jade templates
@@ -325,7 +327,8 @@ apiRouter.route('/user/pulsations') // return just the number
   .get(ctrl.user.pulsations)
 apiRouter.route('/user/pulse') // return just the number
   .get(ctrl.user.pulse)
-
+apiRouter.route('/user/task/:what(unknownpeople)') // return the task to be performed number
+  .get(ctrl.user.task)
 
 
 apiRouter.route('/user/:id(\\d+)/related/resource') // api session info

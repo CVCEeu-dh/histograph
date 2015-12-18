@@ -185,7 +185,7 @@ html
             
           div(id='pop', gasp, target="target", redirect='redirect(path)', filter='addFilter(key, item)', comment="startCommenting(item, tag, hashtag)", queue="queue(item, inprog)", inspect='inspect(item)')
           
-          div(id='crowd',ng-controller='CrowdCtrl')
+          div(id='crowd',ng-controller='CrowdCtrl', ng-include='"templates/partials/crowd.html"', class='tk-proxima-nova {{isVisible? "animated fadeIn":"animated fadeOut"}}')
             div campaign
           //- div(id='popit', popit, target="target", redirect='redirect(path)', comment="startCommenting(item, tag, hashtag)", queue="queue(item, inprog)")
             div(class='action-group')

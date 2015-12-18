@@ -1,0 +1,28 @@
+<div ng-if='task.type == "unknown_people"'>
+  <div class="question">
+    Do you know who is <a class='tag person' ng-href='/#/e/{{task.person.id}}'>{{task.person.props|lookup:"name":language}}</a>?
+    <p>We miss some information about him/her and we're not sure about his/her identity</p>
+  </div>
+  <div class='context {{isChallengeAccepted? "enabled": "disabled"}}'>
+    Apparently he/she was found in:
+    <div class="related">
+      <div class='type'>{{task.resource.props.type}}</div>
+    <h4><a ng-href='/#/r/{{task.resource.id}}' marked='task.resource.props|lookup:"title":language'></a></h4>
+    <blockquote marked='task.resource.props|lookup:"caption":language'></blockquote>
+    </div>
+  </div>
+
+  <div class='question' ng-if='question=="challenge_accepted"'>
+    <div class='answers'>
+      <div class='btn-group btn-group-dual'>
+        <button class='btn btn-line btn-block' ng-click=''>I can fix it(+100pt)</button>
+        <button class='btn btn-line btn-block' ng-click='nextChallenge()'>next</button>
+      </div>
+    </div>
+  </div>
+
+
+  <button style='margin:10px 0' class='btn btn-line btn-block' ng-if='!isChallengeAccepted' ng-click='challengeAccepted()'>Let me see if I can help</button>
+
+  <button class='btn btn-line btn-straight' ng-click='pause()'>ask me later</button>
+</div>

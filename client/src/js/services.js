@@ -148,7 +148,7 @@ angular.module('histograph')
     Get a list of resource
   */
   .factory('UserFactory', function ($resource) {
-    return $resource('/api/user/:method');
+    return $resource('/api/user/:method/:extra');
   })
   /*
     Add / get :model related to user related

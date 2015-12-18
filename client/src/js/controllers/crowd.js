@@ -7,17 +7,14 @@
  * 
  */
 angular.module('histograph')
-  .controller('CrowdCtrl', function($scope, $log, $timeout) {
-    $scope.short_delay = 10000;
-    $scope.long_delay = 10000;
-    
-    $scope.challenge = {
-      question: '', // 'does {:x} appear in {:y}?'
-      type: 'first_type', 
-      resource: {},
-      entity: { },// the entity and its parent,
-      entities: [] // or the list of entities...
-    };
+  .controller('CrowdCtrl', function($scope, $log, $timeout, UserFactory) {
+    $scope.short_delay = 500;
+    $scope.long_delay = 2500;
+
+    $scope.isVisible = false;
+    $scope.isChallengeAccepted = false;
+
+    $scope.question = 'none';
 
     /*
       Get the first avaialbe challenge for the user, addressing user
@@ -25,14 +22,58 @@ angular.module('histograph')
     */
     $scope.challenge = function() {
       $log.debug('CrowdCtrl -> challenge()');
+      // it can be opened from a btn
+      if(popper)
+        $timeout.cancel(popper);
+      //
+      UserFactory.get({
+        method: 'task',
+        extra: 'unknownpeople'
+      }, function(res) {
+        $log.log('CrowdCtrl -> challenge() --> ', res);
+        $scope.isVisible = true;
+        $scope.isChallengeAccepted = false;
+        $scope.task = res.result.item;
+
+      });
     };
 
+    $scope.nextChallenge = function() {
+      // it can be opened from a btn
+      if(popper)
+        $timeout.cancel(popper);
+
+      $scope.isChallengeAccepted = true;
+      $scope.isVisible = true;
+      //
+      UserFactory.get({
+        method: 'task',
+        extra: 'unknownpeople'
+      }, function(res) {
+        $log.log('CrowdCtrl -> challenge() --> ', res);
+        
+        $scope.isChallengeAccepted = true;
+        $scope.task = res.result.item;
+
+      });
+
+    }
+
+
+    $scope.challengeAccepted = function() {
+      $log.log('CrowdCtrl -> challengeAccepted()');
+      $scope.isChallengeAccepted = true;
+      $scope.question = 'challenge_accepted';
+    };
 
     /*
       Ask me later (5 min)
       @todo save a cookie, to be parsed on ctrl init
     */
     $scope.pause = function() {
+      $scope.isVisible = false;
+      $scope.isChallengeAccepted = false;
+      $scope.question='none';
       $log.debug('CrowdCtrl -> pause()');
       if(popper)
         $timeout.cancel(popper);

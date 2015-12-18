@@ -59,7 +59,7 @@ module.exports = {
         next(null, node);
     });
   },
-  
+
   /*
     This method MUST NOT HAVE an API access.
     user can contain just the email field.
@@ -102,6 +102,27 @@ module.exports = {
     neo4j.query(queries.count_pulse, {
       username: user.username
     }, next);
+  },
+
+  /*
+    Return a crowdsourcing task 
+    @param params - object containing the 'what' property describing the task to be performed: count_crowdsourcing_unknown_people
+  */
+  task: function(user, params, next) {
+    async.waterfall([
+      function getSeeds(callback) {
+        neo4j.query(queries['count_crowdsourcing_'+params.what], callback);
+      },
+      function getTask(result, callback) {
+        if(result.count_items == 0)
+          callback(helpers.IS_EMPTY);
+        else
+          neo4j.query(queries['get_crowdsourcing_'+params.what], {
+            offset: Math.round(Math.random()*(result.count_items-1)),
+            limit: 1
+          }, callback);
+      }
+    ], next);
   },
   /*
     Return a list of last touched resources

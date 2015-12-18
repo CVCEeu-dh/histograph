@@ -205,7 +205,15 @@ module.exports = function(io) {
     /*
       User specific random crowdsourcing
     */
-
+    task: function(req, res) {
+      User.task(req.user, {
+        what: req.params.what
+      }, function (err, items) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({item: items[0]}, req.params);
+      })
+    },
 
     /*
       Return a list of last user-touched resources.
