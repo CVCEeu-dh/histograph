@@ -54,6 +54,7 @@ var fs          = require('fs'),
         based on their wikilinks
       */
       'enrich-person':[
+        tasks.helpers.staffpick.create,
         tasks.entity.getOne,
         tasks.entity.enrich
       ],

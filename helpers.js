@@ -16,6 +16,7 @@ var fs       = require('fs'),
     IS_EMPTY = 'is_empty',
     LIMIT_REACHED = 'LIMIT_REACHED', // when limit of request for free /pauid webservices has been reached.
     IS_IOERROR  = 'IOError',
+    IS_WRONG_TYPE = 'is_wrong_type',
 
     reconcile  = require('decypher')('./queries/migration.resolve.cyp'),
     neo4j      = require('seraph')(settings.neo4j.host);
@@ -24,6 +25,7 @@ module.exports = {
   IS_EMPTY: IS_EMPTY,
   IS_IOERROR: IS_IOERROR,
   IS_LIMIT_REACHED: LIMIT_REACHED,
+  IS_WRONG_TYPE: IS_WRONG_TYPE,
   /*
     Handlers for express response (cfr. models/)
     @param err
@@ -239,6 +241,20 @@ module.exports = {
             links_viaf:  'http://dbpedia.org/property/viaf',
             sameas:      'http://www.w3.org/2002/07/owl#sameAs'
           };
+      // get the ontology type: if it is a person, should have one of them. otherwise throw an error (WRONG TYPE)
+      var lazywiki = JSON.stringify(wiki);
+      var isPerson = lazywiki.indexOf("http://xmlns.com/foaf/0.1/Person") != -1 || lazywiki.indexOf("http://schema.org/Person") != -1
+      ;
+
+      var isPlace = lazywiki.indexOf("http://schema.org/Place") != -1;
+
+      if(!isPerson && (isPlace)) {
+        next(IS_WRONG_TYPE)
+        return;
+      }
+
+  
+
       // find fields and complete the properties dict
       _.forIn(props, function (v, k, o) {
         o[k] = _.flattenDeep(_.compact(_.pluck(wiki, v)))

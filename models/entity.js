@@ -20,6 +20,7 @@ var settings  = require('../settings'),
     _         = require('lodash'),
     
     Action  = require('../models/action'),
+    Issue   = require('../models/issue'),
     Resource  = require('../models/resource');
     
     
@@ -654,6 +655,20 @@ module.exports = {
             if(err == helpers.IS_EMPTY){
               callback(null, node, addons);
               return
+            }
+            if(err == helpers.IS_WRONG_TYPE) {
+              console.log('    SIGNALED WRONG TYPE: it is wrong man');
+              Issue.create({
+                kind: Issue.TYPE,
+                questioning: entity.id,
+                user: {username: '@MARVIN'}
+              }, function(err, issue) {
+                if(err)
+                  callback(err);
+                else
+                  callback(null, node, addons);
+              })
+              return;
             }
             if(err){
               callback(err);

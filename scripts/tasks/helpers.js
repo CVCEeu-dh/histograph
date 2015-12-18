@@ -209,6 +209,35 @@ module.exports = {
     }
   },
   
+  staffpick: {
+    create: function(options, callback) {
+      var User = require('../../models/user');
+
+      console.log(clc.yellowBright('\n   tasks.helpers.staffpick.create'));
+      console.log(clc.blackBright('    generating user'), clc.magentaBright('MARVIN (staffpick)'));
+      User.create({
+          username    : '@MARVIN',
+          password    : 'marvin',
+          email       : 'marvin staffpick',
+          firstname   : 'MARVIN',
+          lastame     : 'marvin',
+          strategy    : 'local', // the strategy passport who creates his account, like local or google or twitter
+          about       : '',
+          status      : 'enabled',
+          picture     : 'https://upload.wikimedia.org/wikipedia/en/c/cb/Marvin_%28HHGG%29.jpg'
+      }, function (err, user) {
+        if(err)
+          callback(null, _.assign(options, {
+            username: '@MARVIN',
+          }));
+        else {
+          console.log(clc.blackBright('   user', clc.magentaBright('MARVIN'), 'generated'));
+          callback(null, _.assign(options, user));
+        }
+      });
+    },
+  },
+
   marvin: {
     create: function(options, callback) {
       console.log(clc.yellowBright('\n   tasks.helpers.marvin.create'));
