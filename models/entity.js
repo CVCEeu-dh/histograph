@@ -638,7 +638,7 @@ module.exports = {
       },
 
       function prepareAddons(node, callback) {
-        console.log('    entity:', entity.name, entity.id);
+        console.log('    entity:', node.name, node.id);
         
         var addons = {};
         callback(null, node, addons);
@@ -661,9 +661,10 @@ module.exports = {
             }
             
             _.each(wiki, function(d,k) {
-              if(_.isEmpty(node[k]))
+              if(_.isEmpty(node[k]) && !_.isEmpty(d))
                 addons[k] = d
             });
+            console.log(addons)
             
             callback(null, node, addons);
           })
