@@ -638,6 +638,8 @@ module.exports = {
       },
 
       function prepareAddons(node, callback) {
+        console.log('    entity:', entity.name, entity.id);
+        
         var addons = {};
         callback(null, node, addons);
       },
@@ -706,6 +708,10 @@ module.exports = {
         services.wikidata.entity({
           link: node.links_wikidata
         }, function (err, wiki) {
+          if(err) {
+            callback(err);
+            return;
+          }
           // take short description per dedicated languages 
           settings.languages.forEach(function(language) {
             

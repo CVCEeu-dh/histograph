@@ -303,14 +303,14 @@ module.exports = {
             'Accept':  'application/json'
           }
         }, function (err, res, body) {
-          if(err) {
+          if(err)
             next(err);
-            return;
-          }
-          if(!body.entities[options.link])
+          else if(_.isEmpty(body.entities))
             next('IS_EMPTY');
-          else
+          else if(body.entities[options.link])
             next(null, body.entities[options.link])
+          else
+            next(null, _.first(_.values(body.entities)))
         });
     }
   },
