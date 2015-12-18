@@ -469,7 +469,7 @@ module.exports = {
     var q;
 
     q = async.queue(function (node, nextNode) {
-      console.log(clc.blackBright('    entities remaining'), clc.white.bgMagenta(q.length()));
+      console.log(clc.blackBright('    entities remaining:', clc.white.bgMagenta(q.length()), '- done:'), clc.white.bgMagenta(options.records.length - q.length() ) );
           
       Entity.enrich({
         id: node.id
