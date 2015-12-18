@@ -649,6 +649,10 @@ module.exports = {
           callback(null, node, addons);
         else
           helpers.dbpediaPerson(node.links_wiki, function (err, wiki) {
+            if(err == helpers.IS_EMPTY){
+              callback(null, node, addons);
+              return
+            }
             if(err){
               callback(err);
               return;
