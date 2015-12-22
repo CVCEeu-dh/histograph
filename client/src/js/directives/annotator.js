@@ -120,7 +120,8 @@ angular.module('histograph')
             }).join(',') +'" data-id="' +href +'" tooltip="' +
             localEntities.map(function (d) {
               return d.name || d.props.name
-            }).join(' - ') + '">' + text + '</a>';
+            }).join(' - ') + '" gasp-parent="resource-'+ 
+            scope.context.id + '">' + text + '</a>';
         };
         
         
