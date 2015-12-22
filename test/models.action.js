@@ -111,9 +111,8 @@ describe('model:action voteup relationship', function() {
       username: __userA.username
     }, function (err, node) {
       should.not.exist(err);
-      should.equal(node.performed_by.id, __userA.id)
+      should.equal(node.performed_by.id, __userA.id);
       should.equal(node.props.target, Action.APPEARS_IN_RELATIONSHIP);
-      should.equal(node.type, Action.UPVOTE);
       should.equal(node.mentioning.length, 2);
       // console.log(node)
       __actionA = node;

@@ -157,7 +157,9 @@ WITH ent, u
 MERGE (u)-[r:curates]->(ent)
 ON CREATE SET
   r.creation_date = {creation_date},
-  r.creation_time = {creation_time}
+  r.creation_time = {creation_time},
+  r.last_modification_date = {creation_date},
+  r.last_modification_time = {creation_time}
 ON MATCH SET
   r.last_modification_date = {creation_date},
   r.last_modification_time = {creation_time}
@@ -505,7 +507,9 @@ WITH ent, u, res, r1
 MERGE (u)-[r2:curates]->(ent)
 ON CREATE SET
   r2.creation_date = {exec_date},
-  r2.creation_time = {exec_time}
+  r2.creation_time = {exec_time},
+  r2.last_modification_date = {exec_date},
+  r2.last_modification_time = {exec_time}
 ON MATCH SET
   r2.last_modification_date = {exec_date},
   r2.last_modification_time = {exec_time}

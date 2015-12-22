@@ -766,10 +766,27 @@ module.exports = {
               })
             ).join(' || ')
 
-          setTimeout(function() {
-            callback(null, node, addons);
-          }, 25)
+          callback(null, node, addons);
         });        
+      },
+
+
+      function voteupByMarvin(node, addons, callback) {
+        var conditions = _.compact([
+          node.links_wiki,
+          node.links_viaf,
+          node.links_wikidata,
+          node.birth_date,
+          node.last_name
+        ]);
+
+        console.log('    Verdict?', (conditions.length > 2? 'Voteup': 'Nothing to say'));
+        if(conditions.length > 2)
+          addons.starred = conditions.length; // automatic star
+
+        setTimeout(function() {
+          callback(null, node, addons);
+        }, 25)
       },
 
       savepoint
