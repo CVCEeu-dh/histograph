@@ -207,13 +207,19 @@ angular.module('histograph')
           });
         }
 
-        scope.raiseIssue = function(kind, solution) {
-          if(kind == 'type')
+        scope.raiseIssueSelected = function(kind, solution) {
+          if(kind == 'type') {
             if(solution != scope.entity.type) {
-            // just discard
-              scope.entity.type = solution;
+            // just discard IF IT IS NOT THE CASE
+              scope.entity._type = solution;
+              scope.question = 'wrongtype-confirm';
             }
+          } else if(kind == 'irrelevant') {
+            scope.question = 'irrelevant-confirm';
+          }
+        }
 
+        scope.raiseIssue = function(kind, solution) {
           scope.$parent.raiseIssue(scope.entity, scope.parent, kind, solution, function (err, result) {
             scope.feedback();
           });

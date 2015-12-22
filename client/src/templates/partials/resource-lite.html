@@ -1,22 +1,25 @@
-<div class="related">
-  <div class="type"><i class="fa fa-circle type resource"></i> {{relatedItem.props.ecmd|ecmd}} | {{$index + 1}} out of {{totalItems}}</div>
+
+<div class="related {{relatedItem.users.length? 'with-users':''}}">
+  <!-- {{relatedItem.users}} -->
+  <div class='user tk-proxima-nova' ng-repeat='user in relatedItem.users' ng-if='$index == 0'>
+    {{user.username}} <strong>{{user.type}}</strong> {{user.last_modification_time*1000|date:'longDate'}}
+  </div>
+  <div class='actions-wrapper'>
+    <div class='actions '>
+      <div class="btn-group">
+        <button class='btn btn-default action' uib-tooltip='add to bookmark list' tooltip-append-to-body="true" ng-click='queue(relatedItem.id, true)'>
+          <i class='fa fa-bookmark-o'></i>
+        </button>
+      </div>
+    </div>
+  </div>   
+  <div class="type"> {{relatedItem.props.ecmd|ecmd}} {{$index + 1}} out of {{totalItems}}</div>
   <h4>
     <a href='#/r/{{relatedItem.id}}' ng-if='!relatedItem.annotations || !relatedItem.annotations.length' marked="relatedItem.props|lookup:'title':language"></a>
     <a href='#/r/{{relatedItem.id}}' ng-if='relatedItem.annotations && relatedItem.annotations.length' context='relatedItem' marked="relatedItem.annotations|annotate:'title':language"></a>
   
   </h4>
-
-  <div class='actions'>
-    <div class="btn-group">
-      <!-- <button class='btn btn-default action' uib-tooltip="view in graph (if it's visible)" data-id='{{relatedItem.id}}'>
-        <i class='fa fa-eye'></i>
-      </button> -->
-      <button class='btn btn-default action' uib-tooltip='add to bookmark list' tooltip-append-to-body="true" ng-click='queue(relatedItem.id, true)'>
-        <i class='fa fa-bookmark-o'></i>
-      </button>
-    </div>
-  </div>
-                
+        
   <div class="meta">
     <span gasp-type="date" class="empty" gasp-parent="{{item.type}}-{{item.id}}" ng-if="!relatedItem.props.start_time">no date found</span>
     <span class='date' ng-if="relatedItem.props.start_time"> {{relatedItem.props|guessInterval}}</span>

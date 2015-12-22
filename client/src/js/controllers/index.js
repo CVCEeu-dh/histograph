@@ -73,6 +73,50 @@ angular.module('histograph')
   })
 
   /*
+    wall of noise
+    ---
+  */
+  .controller('ExploreNoiseCtrl', function ($scope, $log, UserFactory, EVENTS) {
+    $log.debug('ExploreNoiseCtrl ready', $scope.params);
+    $scope.limit  = 20;
+    $scope.offset = 0;
+
+    $scope.sync = function() {
+      $scope.loading = true;
+      UserFactory.get(angular.extend({
+        method: 'noise',
+        limit: $scope.limit,
+        offset: $scope.offset
+      }, $scope.params), function (res) {
+        $scope.loading = false;
+        $scope.offset  = res.info.offset;
+        $scope.limit   = res.info.limit;
+        $scope.totalItems = res.info.total_items;
+        if($scope.offset > 0)
+          $scope.addRelatedItems(res.result.items);
+        else
+          $scope.setRelatedItems(res.result.items);
+
+      })
+    };
+
+    $scope.$on(EVENTS.API_PARAMS_CHANGED, function() {
+      $scope.offset = 0;
+      $log.debug('ExploreNoiseCtrl @API_PARAMS_CHANGED', $scope.params);
+      $scope.sync();
+      // $scope.syncGraph();
+    });
+
+    $scope.$on(EVENTS.INFINITE_SCROLL, function (e) {
+      $scope.offset = $scope.offset + $scope.limit;
+      $log.debug('ExploreCtrl @INFINITE_SCROLL', '- skip:',$scope.offset,'- limit:', $scope.limit);
+      $scope.sync();
+    });
+
+    $scope.sync();
+  })
+
+  /*
     wall of resources
   */
   .controller('ExploreResourcesCtrl', function ($scope, $log, ResourceFactory, EVENTS) {

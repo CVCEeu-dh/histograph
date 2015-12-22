@@ -31,13 +31,15 @@
   </div>
   <div class='btn-group-wrapper'>
     <div class="btn-group">
-      <a class="btn btn-line-white" href="{{link.href}}" title="visit" data-action="link">view more</a>
+      <a class="btn btn-line-white" href="{{link.href}}" title="visit" data-action="link">more</a>
       <!-- <button class='btn btn-line-white' ng-click='addFilter()'>filter</button> -->
-      {{entity.rel}}
       
       <button ng-if='link.removable' class='btn btn-line-white obscure' ng-click='askQuestion("remove-relationship")'>REMOVE</button>
+      
 
-      <button ng-if='!link.removable'  class='btn btn-line-white obscure' ng-click='askQuestion("downvote")'><i class="fa fa-bug"></i> fix </button>
+
+      <button ng-if='!link.removable'  class='btn btn-line-white obscure' ng-click='askQuestion("downvote")'><i class="fa fa-bug"></i> fix / edit </button>
+     
       <button ng-if='!link.removable' class='btn btn-line-white {{entity.upvotes.length? "btn-number":""}}' ng-click='upvote($event)'>CONFIRM <i class="fa fa-check"></i><div class='number' ng-if='entity.upvotes.length'>{{entity.upvotes.length}}</div></button>
     </div>
   </div>
@@ -49,6 +51,20 @@
         <div class='btn-group btn-group-dual'>
         <button class='btn btn-line-white btn-primary' ng-click='remove()'>remove!</button>
         <button class='btn btn-line-white obscure' ng-click='cancelQuestion($event)'>back</button>
+        </div>
+      </div>
+    </div>
+
+    <div ng-if='question=="edit"' class='question'>
+       <p class='text'>search in VIAF for identities</p>
+      <div class='answers'>
+        <div class=''>
+          <button class='btn btn-line-white btn-block' ng-click='downvote($event)'>this <strong>{{entity.type}}</strong> is not mentioned here</button>
+          <button class='btn btn-line-white btn-block' ng-click='askQuestion("wrongtype", $event)'>This is not a <strong>{{entity.type}}</strong></button>
+          <button class='btn btn-line-white btn-block' ng-click='askQuestion("contribute", $event)'>this is a typo / fragment / duplicate</button>
+          
+          
+          <button class='btn btn-line-white obscure btn-block' ng-click='cancelQuestion($event)'>back</button>
         </div>
       </div>
     </div>
@@ -67,7 +83,7 @@
     </div>
 
       <div ng-if='question=="contribute"'>
-        <p class='text'>Can you find a better {{entity.type}} between the ones we have in stock?</p>
+        <p class='text'>Can you find a better {{entity.type}} between the ones collected?</p>
         <div class='answers'>
           <div >
             <form>
@@ -96,16 +112,16 @@
         <div class='answers'>
           <div class="btn-group btn-block" uib-dropdown>
             <button id="btn-append-to-body" type="button" class="btn btn-primary btn-block btn-line-white btn-primary" uib-dropdown-toggle>
-              this is a {{entity.type}} <span class="caret"></span>
+              this is ... ? <span class="caret"></span>
             </button>
             <ul class="uib-dropdown-menu tk-proxima-nova" style='z-index:1050' role="menu" aria-labelledby="btn-append-to-body">
-              <li role="menuitem" ng-if='entity.type != "person"'><a ng-click='raiseIssue("type","person")'> this is a <strong>person</strong></a></li>
-              <li role="menuitem" ng-if='entity.type != "location"'><a ng-click='raiseIssue("type", "location")'>this is a <strong>location</strong></a></li>
-              <li role="menuitem"><a ng-click='raiseIssue("type", "organization")'>this is a <strong>organization</strong></a></li>
-              <li role="menuitem"><a ng-click='raiseIssue("type", "social_group")'>this is a <strong>social group</strong></a></li>
+              <li role="menuitem" ng-if='entity.type != "person"'><a ng-click='raiseIssueSelected("type","person")'> this is a <strong>person</strong></a></li>
+              <li role="menuitem" ng-if='entity.type != "location"'><a ng-click='raiseIssueSelected("type", "location")'>this is a <strong>location</strong></a></li>
+              <li role="menuitem"><a ng-click='raiseIssueSelected("type", "organization")'>this is a <strong>organization</strong></a></li>
+              <li role="menuitem"><a ng-click='raiseIssueSelected("type", "social_group")'>this is a <strong>social group</strong></a></li>
               <li class="divider"></li>
 
-              <li role="menuitem"><a ng-click='raiseIssue("irrelevant")'>(this is irrelevant ...)</a></li>
+              <li role="menuitem"><a ng-click='raiseIssueSelected("irrelevant")'>(this is merely irrelevant ...)</a></li>
             </ul>
           </div>
         </div>
@@ -115,6 +131,26 @@
           
         </div>
       </div>
+
+        <div ng-if='question=="irrelevant-confirm"'>
+          <p class='text'>Is this entity not relevant? The changes will have effect once your answer is downvoted by some other user.</p>
+          <div class='answers'>
+            <div class='btn-group btn-group-dual'>
+              <button class='btn btn-line-white btn-primary' ng-click='raiseIssue("irrelevant")'>yes!</button>
+              <button class='btn btn-line-white obscure' ng-click='askQuestion("wrongtype")'>back</button>
+            </div>
+          </div>
+        </div>
+
+        <div ng-if='question=="wrongtype-confirm"'>
+          <p class='text'>Suggest <strong class='tk-proxima-nova' style='color: white'>{{entity._type}}</strong> as replacement for <strong class='tk-proxima-nova' style='color: white'>{{entity.type}}</strong>? The changes will have effect once your answer is upvoted</p>
+          <div class='answers'>
+            <div class='btn-group btn-group-dual'>
+              <button class='btn btn-line-white btn-primary' ng-click='raiseIssue("type", entity._type)'>yes!</button>
+              <button class='btn btn-line-white obscure' ng-click='askQuestion("wrongtype")'>back</button>
+            </div>
+          </div>
+        </div>
 
       <div ng-if='question=="feedback"' class='question'>
         <p class='text'>thank you for your feedback!</p>

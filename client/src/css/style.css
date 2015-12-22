@@ -179,6 +179,15 @@ a#header-title {
   opacity: .9;
 }
 
+.related.with-users{
+  padding-top: 15px;
+}
+
+.related .user{
+  border-bottom: 1px solid #E1E1E0;
+  margin: 0px 0 10px 0;
+  padding: 0 15px 10px 15px;
+}
 /*
 .explore .masonry-brick .related .meta, .explore .masonry-brick .related h4, .explore .masonry-brick .related .type{
   margin: 0;
@@ -313,6 +322,18 @@ a#header-title {
 .tag.validated{
   color: #151515;
   background:#eee;
+}
+
+.tag.with-issues{
+  border-color: gold;
+}
+
+.tag.starred{
+  color: #6C6A6C;
+}
+
+.tag.starred.validated{
+  color: #151515;
 }
 
 .tag.validated .to-be-fixed{
@@ -939,7 +960,7 @@ header ul li .notification a {
 }
 
 .related h4{
-  margin: 0 15px 0 15px;
+      margin: 0 45px 0 15px;
 }
 
 .related .meta{
@@ -953,9 +974,13 @@ header ul li .notification a {
   line-height: 21px;
 }
 
+.related .actions-wrapper{
+  position: relative;
+}
+
 .related .actions {
   position: absolute;
-  top: 10px;
+  top: 0px;
   right: 10px;
 }
 

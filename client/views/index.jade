@@ -110,14 +110,15 @@ html
                   span histograph
 
                 ul.menu
-                  
-
                   li(class='{{currentState.name == "explore.resources"?"active":""}}')
                     a(href='#/') gallery
 
                   li(class='{{currentState.name == "explore.persons"?"active":""}}')
                     a(ng-href='#/per?{{qs}}')  graph
-                  
+
+                  li(class='{{currentState.name == "explore.noise"?"active":""}}')
+                    a(href='#/noise') activity
+
                   li(ng-controller='PulseController')
                     span(uib-dropdown, on-toggle="toggle(open)")
                       a(href='#/', uib-dropdown-toggle)

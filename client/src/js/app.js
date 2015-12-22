@@ -215,6 +215,25 @@ angular
             }
           },
         })
+        .state('explore.noise', {
+          url: 'noise',
+          templateUrl: 'templates/partials/resources-masonry.html',
+          controller: 'ExploreNoiseCtrl',
+          grammar: {
+            label: 'gallery',
+            connector: {
+              type: 'with document type',
+              relatedTo: 'which mentions',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: GRAMMAR.AS_TYPES,
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
+        })
         .state('explore.persons', {
           url: 'per',
           template: '<div></div>',
