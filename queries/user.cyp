@@ -64,17 +64,47 @@ RETURN {
 ORDER BY act.last_modification_time DESC
 
 
-// name: get_related_crowdsourcing_actions
-// get crowdsourcing todos... CONFIRM an action performed by someone else
-// or play with someone else issue
-MATCH (u:user {username:{username}}) 
-WITH u
-MATCH (act:action)-[:mentions]->(ent)
-OPTIONAL MATCH (ent)<-[:mentions]-(act2:action)-[:performs]-(u)
-WITH act, ent
-WHERE act2 is NULL
-WITH act, {type: last(labels(ent)), id:id(ent)} as alias_ms
-RETURN id(act), last(labels(act)), collect(alias_ms)
+// name: get_challenges
+// help unresolved issue
+MATCH (you:user {username:'@danieleguido'})
+WITH you 
+MATCH (u:user)-[:performs]->(act:action)
+WHERE id(you) <> id(u) AND act.last_modification_time > you.last_notification_time
+RETURN act
+
+// name: count_crowdsourcing_unknownpeople
+// is ... a Person?
+MATCH (per:person)-[r:appears_in]->(res:resource)
+WHERE NOT(has(per.last_name))
+  AND per.celebrity = 0
+WITH DISTINCT per
+RETURN count(per) as count_items
+
+
+// name: get_crowdsourcing_unknownpeople
+// is ... a Person? It should also give you a simple context (that probably you may know... @todo)
+MATCH (per:person)-[r:appears_in]->(res:resource)
+WHERE NOT(has(per.last_name))
+  AND per.celebrity = 0
+WITH per, collect(res) as resources, count(res) as df
+ORDER BY df DESC
+SKIP {offset}
+LIMIT {limit}
+WITH {
+    id: id(per),
+    type: 'person',
+    props: per
+  } as alias_per, last(resources) as res
+WITH {
+    id: id(res),
+    type: 'resource',
+    props: res
+  } as alias_res, alias_per
+RETURN {
+  type: 'unknown_people',
+  person: alias_per, 
+  resource: alias_res
+} as t
 
 
 // name: count_related_resources
@@ -237,3 +267,96 @@ return{
   },
   weight: r.frequency
 }
+
+
+// name: count_noise
+// get love or curation noise, see below get_noise query.
+MATCH (res:resource)<-[r:likes|curates]-(u:user)
+WHERE has(r.last_modification_time)
+WITH res, r ORDER BY r.last_modification_time DESC
+WITH collect(DISTINCT res) as resources
+WITH resources, length(resources) as total_items
+UNWIND resources as res
+RETURN {
+  group: {if:group}res.{:group}{/if}{unless:group}res.type{/unless}, 
+  count_items: count(res),
+  total_items: total_items
+}
+
+// name: get_noise
+// get love or curation noise (something that just happened).
+// test with 
+// > node scripts/manage.js --task=query --cypher=user/get_noise --offset=0 --limit=10
+// @todo: add filters...
+MATCH (res:resource)<-[r:likes|curates]-(u:user)
+WHERE has(r.last_modification_time)
+WITH res, r ORDER BY r.last_modification_time DESC
+WITH DISTINCT res
+SKIP {offset}
+LIMIT {limit}
+WITH res
+MATCH (res:resource)<-[r:likes|curates]-(u)
+WITH res, max(r.last_modification_time) as last_modification_time, collect({
+  id: id(u),
+  username: u.username,
+  last_modification_time: r.last_modification_time,
+  last_modification_date: r.last_modification_date,
+  type: type(r)
+}) as users
+  OPTIONAL MATCH (res)-[r_loc:appears_in]->(loc:`location`)
+
+WITH res, last_modification_time, users, r_loc, loc
+  ORDER BY r_loc.tfidf DESC, r_loc.frequency DESC
+
+WITH res, last_modification_time, users, collect({  
+      id: id(loc),
+      type: 'location',
+      props: loc,
+      rel: r_loc
+    })[0..5] as locations   
+OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
+
+WITH res, last_modification_time, users, locations, r_per, per
+  ORDER BY r_per.tfidf DESC, r_per.frequency DESC
+
+WITH res, last_modification_time, users, locations, collect({
+      id: id(per),
+      type: 'person',
+      props: per,
+      rel: r_per
+    })[0..5] as persons
+OPTIONAL MATCH (res)-[r_org:appears_in]-(org:`organization`)
+
+WITH res, last_modification_time, users, locations, persons, r_org, org
+  ORDER BY r_org.tfidf DESC, r_org.frequency DESC
+
+WITH res, last_modification_time, users, locations, persons, collect({  
+      id: id(org),
+      type: 'organization',
+      props: org,
+      rel: r_org
+    })[0..5] as organizations
+OPTIONAL MATCH (res)-[r_soc:appears_in]-(soc:`social_group`)
+
+WITH res, last_modification_time, users, locations, persons, organizations, r_soc, soc
+  ORDER BY r_soc.tfidf DESC, r_soc.frequency DESC
+
+WITH res, last_modification_time, users, locations, persons, organizations, collect({
+      id: id(soc),
+      type: 'social_group',
+      props: soc,
+      rel: r_soc
+    })[0..5] as social_groups
+
+
+RETURN {
+  id:id(res),
+  type: 'resource',
+  props:   res,
+  persons: persons,
+  organizations: organizations,
+  locations:    locations,
+  social_groups:   social_groups,
+  users: users
+}
+ORDER BY last_modification_time DESC

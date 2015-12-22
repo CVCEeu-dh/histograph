@@ -176,6 +176,19 @@ describe('controller:user (activity)', function() {
         done();
       });
   });
+
+  it('should get the noise activity for the latest likes', function (done) {
+    session
+      .get('/api/user/noise')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exists(err);
+        should.exists(res.body.result.items);
+        should.exists(res.body.info.total_items);       
+        done();
+      });
+  });
 });
 
 

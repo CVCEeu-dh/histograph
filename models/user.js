@@ -96,6 +96,28 @@ module.exports = {
   },
 
   /*
+    This method return a list of least curated/liked resources
+  */
+  noise: function(user, params, next) {
+    models.getMany({
+      queries: {
+        count_items: queries.count_noise,
+        items: queries.get_noise
+      },
+      params: _.assign({
+        username: user.username
+      }, params)
+    }, function (err, results) {
+      if(err) {
+        console.log(err)
+        next(err);
+        return;
+      }
+      next(null, results.items, results.count_items);
+    });
+  },
+
+  /*
     This method return just the amount of notification, to be called on 
   */
   pulsations: function(user, next) {

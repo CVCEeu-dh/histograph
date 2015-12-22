@@ -216,6 +216,22 @@ module.exports = function(io) {
     },
 
     /*
+      Return the list of last things happened in your network
+    */
+    noise: function(req, res) {
+      var form = validator.request(req, {
+            limit: 10,
+            offset: 0,
+            id: req.user.id // default the single user
+          });
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      User.noise(req.user, form.params, function (err, items, info) {
+        helpers.models.getMany(err, res, items, info, form.params);
+      });
+    },
+
+    /*
       Return a list of last user-touched resources.
 
     */
