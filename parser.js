@@ -232,6 +232,9 @@ module.exports = {
     return YAML.parse(yaml)
   },
   
+  toYaml: function(item) {
+    return YAML.stringify(item, 2)
+  },
   /*
     get the chunks from a YAML content for the specific ids only,
     then annotate them.

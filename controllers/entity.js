@@ -114,6 +114,9 @@ module.exports = function(io){
 
     createRelatedResource: function(req, res) {
       var form = validator.request(req);
+      // check if it contains a silly annotation....
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
 
       Entity.createRelatedResource({
         id: +form.params.entity_id

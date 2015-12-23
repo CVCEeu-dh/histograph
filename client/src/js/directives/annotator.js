@@ -186,10 +186,12 @@ angular.module('histograph')
         Annotator.Plugin.HelloWorld = function (element) {
           return {
             pluginInit: function () { 
-              var editor;
+              var editor,
+                  annotator = this.annotator,
+                  link;
 
               this.annotator.subscribe("annotationCreated", function (annotation) {
-                console.log("The annotation: %o has just been created!", annotation)
+                console.log("The annotation: %o has just been created!", annotation, link)
               })
               .subscribe("annotationUpdated", function (annotation) {
                 console.log("The annotation: %o has just been updated!", annotation)
@@ -201,12 +203,17 @@ angular.module('histograph')
               })
               .subscribe("annotationEditorShown", function (editor, annotation) {
                 editor = editor;
-                console.log("The annotation:  has just been annotationEditorShown!", arguments);
+                console.log("The annotation:  has just been annotationEditorShown!", arguments, annotator);
                 
                 scope.contribute(scope.item, "entity", {
                   query: annotation.quote,
-                  discard: function() {
-                    editor.hide()
+                  annotator: annotator,
+                  submit: function(annotator, result) {
+                    link = result;
+                    annotator.editor.submit();
+                  },
+                  discard: function(annotator) {
+                    annotator.editor.hide();
                   }
                 });
                 scope.$apply();
@@ -220,24 +227,19 @@ angular.module('histograph')
         }
 
         var annotator = angular.element(element).annotator().data('annotator');
-        annotator.addPlugin('Unsupported');
-        annotator.addPlugin('HelloWorld');//' /*, any other options */);
-        // element..annotator()bind('mouseup', function(e){
-        //   var selection;
 
-        //   if (window.getSelection) {
-        //       selection = window.getSelection();
-        //   } else if (document.selection) {
-        //       selection = document.selection.createRange();
-        //   }
-
-        //   if (selection.toString() !== '') {
-        //     var s = selection.toString();
-        //     $log.log('::annotator -> ',selection)  
-            
-        //   }
-        // });
         
+        annotator.addPlugin('Unsupported');
+        annotator.addPlugin('HelloWorld');
+        
+        // lazyload annotation for this specific goddamn element
+      //   setTimeout(function(){
+      //   attrs.target && scope.loadAnnotations({
+      //     id: attrs.target
+      //   }, function (annotations) {debugger
+      //     annotator.loadAnnotations(annotations);
+      //   });
+      // }, 20)
       }
     }
   });

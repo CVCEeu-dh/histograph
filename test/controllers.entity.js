@@ -213,7 +213,53 @@ describe('controller:entity related items', function() {
       });
   })
 
+  it('should create a manual connection with ANNOTATION!, with frequence = 1 resource B', function(done) {
+    var parser = require('../parser');
+    session
+      .post('/api/entity/' + __entity.id +'/related/resource/'+ __resourceB.id)
+      .send({
+        annotation: parser.toYaml([{
+          text: "A note I wrote",                  // content of annotation
+          quote: "the text that was annotated",    // the annotated text (added by frontend)
+          ranges: [{
+              end: "/blockquote[1]/p[1]",
+              endOffset: 222,
+              start: "/blockquote[1]/p[1]",
+              startOffset: 208,
+            }
+          ]
+        }])
+      })
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.exist(res.body.result.item.rel)
+        should.exist(res.body.result.item.related.action.props)
+        should.exist(res.body.result.item.rel.created_by)
+        should.not.exists(err);
 
+        // should remove the action
+        Action.remove(res.body.result.item.related.action, function(){
+          should.not.exist(err)
+          done();
+        });
+
+      });
+  });
+
+  it('should delete the manual connection', function(done) {
+    session
+      .delete('/api/entity/' + __entity.id +'/related/resource/'+ __resourceB.id)
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.equal(res.body.result.item.id, __entity.id)
+        should.equal(res.body.result.item.related.resource.id, __resourceB.id)
+        // console.log('DELETE', res.body)
+        should.not.exists(err);
+        done();
+      });
+  })
 });
 
 describe('controller:entity related issues', function() {

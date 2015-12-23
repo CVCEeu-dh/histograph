@@ -37,6 +37,24 @@ describe('parser:lucene', function() {
   })
 });
 
+describe('parser:annotation', function(){
+  it('should correctly parse a annotatrjs annotation', function (done) {
+    var q = parser.toYaml({
+          text: "A note I wrote",                  // content of annotation
+          quote: "the text that was annotated",    // the annotated text (added by frontend)
+          ranges: [{
+              end: "/blockquote[1]/p[1]",
+              endOffset: 222,
+              start: "/blockquote[1]/p[1]",
+              startOffset: 208,
+            }
+          ]
+        });
+    var _q = parser.yaml(q);
+    should.equal(_q.ranges[0].endOffset, 222);
+    done();
+  })
+})
 
 describe('parser:lucene real use case', function() {
   it('understand "jacques delors" (@todo use case)', function (done) {

@@ -21,6 +21,16 @@ validator.extend('includedIn', function (str, choices) {
   return _.difference(str.split(','), choices).length === 0;
 });
 
+validator.extend('isAnnotatorjs', function (str) {
+  var q = {};
+  try{
+    q = YAML.parse(str);
+    return true;
+  } catch(e) {
+    return false;
+  }
+})
+
 /*
   Verify that for each field in form, everything looks good.
   @params form    - req.body and/or req.params
@@ -141,6 +151,14 @@ module.exports = {
         0
       ],
       error: 'id not valid'
+    },
+    {
+      field: 'annotation',
+      check: 'isAnnotatorjs',
+      args: [
+        0
+      ],
+      error: 'annotation not valid, should be annotatorjs compatible.'
     },
     {
       field: 'center',
