@@ -2070,6 +2070,10 @@ li.CodeMirror-hint-active {
   margin: 0;
 }
 
+#pop > .inner .node.location .content {
+  margin-left: 15px;
+}
+
 #pop > .inner .node .actions{
   right: 30px;
 }
@@ -2518,7 +2522,38 @@ li.CodeMirror-hint-active {
   display: none;
 }
 
+.annotator-widget{
+      background: #383838;
+    border-radius: 2px;
+    border: 0px solid transparent;
+    color: #a9a0a0;
+}
 
+.annotator-widget li > div{
+  display: none
+}
+
+.annotator-widget li > div.custom{
+  display: block
+}
+
+.annotator-widget div:first-of-type{
+  border-top:3px solid;
+}
+
+.annotator-viewer .content, .annotator-viewer .content h4 a{
+  font-size: 12px;
+  font-style: normal;
+  line-height: 20px;
+}
+
+.annotator-viewer div{
+  padding:0;
+}
+
+.annotator-viewer .content{
+  margin-left: 70px
+}
 /*
   
   Go crowd

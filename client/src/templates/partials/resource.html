@@ -97,9 +97,9 @@
         <div class='fluid-container'>
           <div>
             <div >
-              <annotator target="{{item.id}}">
-              <blockquote ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'caption':language"></blockquote>
-              <blockquote ng-if='item.annotations.length == 0' context='item' marked="item.annotations|lookup:'caption':language"></blockquote>
+              <annotator target="{{item.id}}" context="caption" annotations='{{notes}}'>
+              <blockquote id='caption' ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'caption':language"></blockquote>
+              <blockquote id='caption' ng-if='item.annotations.length == 0' context='item' marked="item.annotations|lookup:'caption':language"></blockquote>
               </annotator>
             </div>
           

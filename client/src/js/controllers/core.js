@@ -834,7 +834,7 @@ angular.module('histograph')
           type: function(){
             return type
           },
-          resource: function(ResourceFactory) {
+          resource: function() {
             return item
           },
           language: function() {
@@ -860,32 +860,7 @@ angular.module('histograph')
 
     };
 
-    /*
-      loadAnnotations
-      ---
-
-      Load notes attached to the target id
-    */
-    $scope.loadAnnotations = function(item, next) {
-      next([
-        {
-          "id": "39fc339cf058bd22176771b3e3187329",  // unique id (added by backend)
-    "annotator_schema_version": "v1.0",        // schema version: default v1.0
-    "created": "2011-05-24T18:52:08.036814",   // created datetime in iso8601 format (added by backend)
-    "updated": "2011-05-26T12:17:05.012544",   // updated datetime in iso8601 format (added by backend)
-          "text": "A note I wrote",                  // content of annotation
-          "quote": "the text that was annotated",    // the annotated text (added by frontend)
-          "uri": "http://example.com",          
-          "ranges": [{
-              end: "/blockquote[1]/p[1]",
-              endOffset: 222,
-              start: "/blockquote[1]/p[1]",
-              startOffset: 208,
-            }
-          ]
-        }
-      ]);
-    };
+    
     // $scope.contribute({id: 25723})
     // $scope.inspect([26414])//27329]);
     /*
@@ -1043,15 +1018,29 @@ angular.module('histograph')
     $scope.organizations = [];
 
     $scope.type = type;
-    $log.debug('ContributeModalCtrl -> ready()', resource.id);
+    $log.debug('ContributeModalCtrl -> ready()', resource.id, options);
 
     // initial value for typeahead
     if(options && options.query) {
       $scope.autotypeahead = options.query
       $scope.q = options.query;
     }
+    
+
     $scope.ok = function () {
-      
+      // get the annotation, if any
+      var params = {};
+
+      if(options && options.query) {
+        params.annotation = JSON.stringify({
+          context: options.context,
+          ranges: options.annotator.editor.annotation.ranges,
+          quote: options.annotator.editor.annotation.quote
+        });
+
+      }
+
+
       $log.log('ContributeModalCtrl -> ok()', 'saving...');
       var entities = [].concat($scope.persons, $scope.locations, $scope.organizations)
       for(var i in entities)
@@ -1059,7 +1048,7 @@ angular.module('histograph')
           id: entities[i].id,
           related_id: resource.id,
           model: 'resource'
-        }, {}, function(res) {
+        }, params, function(res) {
           $log.log('ContributeModalCtrl -> ok()', 'saved', res)
           $uibModalInstance.close(res.result.item);
           

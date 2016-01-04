@@ -58,12 +58,13 @@ angular.module('histograph')
               id      = el.attr('data-id'),
               pos     = el.offset();
 
-          $log.info('::gasp -> toggle() for type:', type, el)
           // if there is no type, it is like clicking on stage
           if(!type) { 
             hide();
             return;
           }
+          $log.info('::gasp -> toggle() for type:', type, el)
+          
           // if id is the same of previous Id, ndo not need to recalculate things
           if(id == _pId) { 
             showGasp(pos);

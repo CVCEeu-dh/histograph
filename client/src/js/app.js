@@ -586,7 +586,13 @@ angular
               id: $stateParams.id
             }).$promise;
           },
-          
+          // user annotations, if any
+          annotations: function(ResourceRelatedFactory, $stateParams) {
+            return ResourceRelatedFactory.get({
+              model: 'annotate',
+              id: $stateParams.id
+            }).$promise;
+          }
         },
         grammar: {
           name: 'resource',

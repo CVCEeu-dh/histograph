@@ -5,10 +5,10 @@
  * # IndexCtrl
  */
 angular.module('histograph')
-  .controller('ResourceCtrl', function ($scope, $log, $stateParams, $filter, resource, ResourceRelatedVizFactory, ResourceRelatedFactory, socket, EVENTS) {
-    $log.debug('ResourceCtrl ready');
+  .controller('ResourceCtrl', function ($scope, $log, $stateParams, $filter, resource, annotations, ResourceRelatedVizFactory, ResourceRelatedFactory, socket, EVENTS) {
+    $log.debug('ResourceCtrl ready', annotations);
     
-    
+    $scope.notes = annotations.result.items;
     /*
       set see also title
     */
@@ -43,6 +43,48 @@ angular.module('histograph')
       });
     }
     
+    /*
+      loadAnnotations
+      ---
+
+      Load notes attached to the current id
+    */
+    $scope.loadAnnotations = function(options, next) {
+
+      next(
+        $scope.notes.map(function (d) {
+
+          return _.assign({}, d.props.annotation, {
+            "annotator_schema_version": "v1.0",        // schema version: default v1.0
+     "created": "2011-05-24T18:52:08.036814",   // created datetime in iso8601 format (added by backend)
+     "updated": "2011-05-26T12:17:05.012544",   // updated datetime in iso8601 format (added by backend)
+           "text": "eh",
+           "author": d.performed_by,
+           "mentions": d.mentioning,       
+          });
+
+        })
+      );
+    //     [
+    //     {
+    //       "id": "39fc339cf058bd22176771b3e3187329",  // unique id (added by backend)
+    // "annotator_schema_version": "v1.0",        // schema version: default v1.0
+    // "created": "2011-05-24T18:52:08.036814",   // created datetime in iso8601 format (added by backend)
+    // "updated": "2011-05-26T12:17:05.012544",   // updated datetime in iso8601 format (added by backend)
+    //       "text": "A note I wrote",                  // content of annotation
+    //       "quote": "the text that was annotated",    // the annotated text (added by frontend)
+    //       "uri": "http://example.com",          
+    //       "ranges": [{
+    //           end: "/blockquote[1]/p[1]",
+    //           endOffset: 222,
+    //           start: "/blockquote[1]/p[1]",
+    //           startOffset: 208,
+    //         }
+    //       ]
+    //     }
+    //   ]);
+    };
+
     /*
     
       Sockets

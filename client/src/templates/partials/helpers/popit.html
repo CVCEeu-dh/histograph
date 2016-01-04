@@ -6,16 +6,23 @@
         <div class="thumbnail-wrapper" style='background-image: url({{entity.props.thumbnail}})'>
         </div>
       </div>
-      <div class='content'>
+      <div class='content tk-proxima-nova'>
         <h4>
           <a ng-if='entity.type == "person"' ng-href='{{link.href}}' marked="entity.props|lookup:'name':language"></a>
-          <a ng-if='entity.type == "location"' ng-href='{{link.href}}'>{{entity.props|lookup:'name':language}}, {{entity.props.country}}</a>
+          <a ng-if='entity.type == "location"' ng-href='{{link.href}}'><p>{{entity.props|lookup:'name':language}}, {{entity.props.country}}</p></a>
           <a ng-if='entity.type == "organization"' ng-href='{{link.href}}'>{{entity.props|lookup:'name':language}}</a>
         </h4>
         <div ng-if='entity.type == "person"'>
           <div class='date' >{{entity.props.birth_time | datesOfAPerson : entity.props.death_time}}</div>
           <div ng-if="entity.props.links_viaf">
             <a target='_blank' ng-href='http://viaf.org/viaf/{{entity.props.links_viaf}}'>VIAF: {{entity.props.links_viaf}}
+            </a>
+          </div>
+        </div>
+        <div ng-if='entity.type == "location"'>
+          <div class='date' >{{entity.type}}</div>
+          <div ng-if="entity.props.links_wiki">
+            <a target='_blank' ng-href='http://dbpedia.org/resource/{{entity.props.links_wiki}}'>dbpedia: {{entity.props.links_wiki}}
             </a>
           </div>
         </div>

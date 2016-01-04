@@ -114,13 +114,10 @@ angular.module('histograph')
             return text
           }
           // rewrite localentities better.
-          return '<a tooltip-append-to-body="true" gasp-type="'+ 
+          return '<a  gasp-type="'+ 
             localEntities.map(function (d){
               return d.type
-            }).join(',') +'" data-id="' +href +'" tooltip="' +
-            localEntities.map(function (d) {
-              return d.name || d.props.name
-            }).join(' - ') + '" gasp-parent="resource-'+ 
+            }).join(',') +'" data-id="' +href +'"  gasp-parent="resource-'+ 
             scope.context.id + '">' + text + '</a>';
         };
         
@@ -176,71 +173,131 @@ angular.module('histograph')
     }
   })
 
+  /*
+    
+  */
   .directive('annotator', function ($log) {
     return {
       restrict : 'E',
-      
       link : function(scope, element, attrs) {
         $log.log('::annotator');
 
-        Annotator.Plugin.HelloWorld = function (element) {
-          return {
-            pluginInit: function () { 
-              var editor,
-                  annotator = this.annotator,
-                  link;
 
-              this.annotator.subscribe("annotationCreated", function (annotation) {
-                console.log("The annotation: %o has just been created!", annotation, link)
-              })
-              .subscribe("annotationUpdated", function (annotation) {
-                console.log("The annotation: %o has just been updated!", annotation)
-              })
-              .subscribe("annotationDeleted", function (annotation) {
-                console.log("The annotation: %o has just been deleted!", annotation)
-                if(editor)
-                  editor.hide()
-              })
-              .subscribe("annotationEditorShown", function (editor, annotation) {
-                editor = editor;
-                console.log("The annotation:  has just been annotationEditorShown!", arguments, annotator);
-                
-                scope.contribute(scope.item, "entity", {
-                  query: annotation.quote,
-                  annotator: annotator,
-                  submit: function(annotator, result) {
-                    link = result;
-                    annotator.editor.submit();
-                  },
-                  discard: function(annotator) {
-                    annotator.editor.hide();
-                  }
-                });
-                scope.$apply();
-              })
-              .subscribe("annotationViewerShown", function (annotation) {
-                console.log("The annotation: %o has just been annotationViewerShown!", annotation)
-              })
-
-            }
-          };
-        }
 
         var annotator = angular.element(element).annotator().data('annotator');
 
         
         annotator.addPlugin('Unsupported');
-        annotator.addPlugin('HelloWorld');
-        
-        // lazyload annotation for this specific goddamn element
-      //   setTimeout(function(){
-      //   attrs.target && scope.loadAnnotations({
-      //     id: attrs.target
-      //   }, function (annotations) {debugger
-      //     annotator.loadAnnotations(annotations);
-      //   });
-      // }, 20)
+        annotator.addPlugin('HelloWorld', {
+          annotationEditorShown: function(annotation, annotator) {
+            scope.contribute(scope.item, "entity", {
+              context: attrs.context,
+              query: annotation.quote,
+              annotator: annotator,
+              submit: function(annotator, result) {
+                annotator.editor.submit();
+              },
+              discard: function(annotator) {
+                annotator.editor.hide();
+              }
+            });
+            scope.$apply();
+          }
+        });
+        annotator.publish('resize')
+        // lazyload annotation for this specific  element
+        setTimeout(function(){
+          scope.loadAnnotations({
+            context: attrs.context
+          }, function (annotations) {
+            annotator.loadAnnotations(annotations);
+          });
+        }, 20);
       }
     }
   });
   
+Annotator.Plugin.HelloWorld = function (element, options) {
+  return {
+    pluginInit: function () { 
+      var editor,
+          annotator = this.annotator,
+          link;
+      console.log('HelloWorld', options);
+
+      this.annotator.viewer.addField({
+        load: function (field, annotation) {
+          // console.log(annotation);
+
+          field.innerHTML = annotation.mentions.map(function(d){
+            console.log(d)
+            field.className = 'custom';
+            var html = '';
+
+            if(d.type == 'person')
+              html = '' +
+              '<div class="node '+ d.type + '">' + 
+                '<div class="thumbnail"><div class="thumbnail-wrapper" style="background-image: url(' + d.props.thumbnail + ')"></div></div>' +
+                '<div class="content tk-proxima-nova"><h4><a class="tk-proxima-nova">' + d.props.name + '</a></h4> ' + d.props.description + '</div>' + 
+              '</div>';
+
+             if(d.type == 'location')
+              html = '' + 
+              '<div class="node '+ d.type + '">' + 
+                '<div class="content tk-proxima-nova"><h4><a class="tk-proxima-nova">' + d.props.name + (d.props.country?'('+d.props.country + ')':'')+'</a></h4> ' + d.props.type + '</div>' + 
+              '</div>';
+
+            return html;
+
+
+          }).join('-') 
+        }
+      });
+
+      this.annotator.viewer.addField({
+        load: function (field, annotation) {
+          // console.log(annotation)
+          field.className = 'author custom';
+          field.innerHTML = annotation.author.username;
+        }
+      })
+
+      this.annotator.subscribe('resize', function() {
+        
+      });
+
+      this.annotator.subscribe("annotationCreated", function (annotation) {
+        console.log("The annotation: %o has just been created!", annotation, link)
+      })
+      .subscribe("annotationUpdated", function (annotation) {
+        console.log("The annotation: %o has just been updated!", annotation)
+      })
+      .subscribe("annotationDeleted", function (annotation) {
+        console.log("The annotation: %o has just been deleted!", annotation)
+        if(editor)
+          editor.hide()
+      })
+      .subscribe("annotationEditorShown", function (editor, annotation) {
+        editor = editor;
+        console.log("The annotation:  has just been annotationEditorShown!", arguments, annotator);
+        
+        if(typeof options.annotationEditorShown == 'function')
+          options.annotationEditorShown(annotation, annotator)
+      })
+      .subscribe("annotationViewerShown", function (viewer) {
+        //console.log("The annotation: %o has just been annotationViewerShown!", annotation, annotator.wrapper.width());
+        var w = annotator.wrapper.width(),
+            l = parseInt((viewer.element[0].style.left || 0).replace(/[^0-9-]/g,'')),
+            d = w - l;
+        // console.log('annotationViewerShown', d, viewer.element[0].style.left)
+        if(d < 280){
+          viewer.element[0].style.left =  (l - 280 + d) + 'px';
+        }
+          // console.log('d is ', d, (l - 280 + d))
+        // viewer.element[0].style.left = d < 280? (viewer.element[0].style.left - 280 + d) +'px': viewer.element[0].style.left;
+        // console.log(w,d,viewer.element[0].offsetLeft, annotator)
+      })
+
+    }
+  };
+};
