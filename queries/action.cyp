@@ -7,6 +7,9 @@ WITH u
   CREATE (u)-[r:performs]->(a:action{if:kind}:{:kind}{/if})
     SET
       a.target = {target},
+      {if:annotation}
+        a.annotation = {annotation},
+      {/if}
       a.creation_date  = {exec_date},
       a.creation_time  = {exec_time},
       a.last_modification_date = {exec_date},

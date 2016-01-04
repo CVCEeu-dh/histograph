@@ -183,7 +183,7 @@ module.exports = {
     @param entity   - entity.id should be an integer identifier
     @param resource - resource.id should be an integer identifier
     @param user     - user.id and user.username should exist
-    @param params   - used only wioth params.action upvote or downvote
+    @param params   - used only wioth params.action upvote or downvote or annotate
   */
   createRelatedResource: function(entity, resource, user, params, next) {
     var now = helpers.now();
@@ -219,9 +219,8 @@ module.exports = {
       if(result.rel.properties.downvote && !!~result.rel.properties.downvote.indexOf(user.username)) {
         result.rel.properties.downvote = _.remove(result.rel.properties.downvote, user.username);
       }
-      // create issue to track events in global stuff
-
-
+      
+      // 3.  
       // download the updated version for the given resource
       async.series({
         entity: function (callback) {
@@ -232,10 +231,11 @@ module.exports = {
         },
         action: function(callback) {
           Action.create({
-            kind: Action.CREATE,
+            kind: params.annotation? Action.ANNOTATE: Action.CREATE,
             target: Action.APPEARS_IN_RELATIONSHIP,
             mentions: [resource.id, entity.id],
-            username: user.username
+            username: user.username,
+            annotation: params.annotation
           }, callback);
         },
         resource: function (callback) {

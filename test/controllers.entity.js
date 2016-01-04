@@ -218,7 +218,8 @@ describe('controller:entity related items', function() {
     session
       .post('/api/entity/' + __entity.id +'/related/resource/'+ __resourceB.id)
       .send({
-        annotation: parser.toYaml([{
+        annotation: JSON.stringify({
+          context: "caption", 
           text: "A note I wrote",                  // content of annotation
           quote: "the text that was annotated",    // the annotated text (added by frontend)
           ranges: [{
@@ -228,7 +229,7 @@ describe('controller:entity related items', function() {
               startOffset: 208,
             }
           ]
-        }])
+        })
       })
       .expect('Content-Type', /json/)
       .expect(200)
@@ -236,13 +237,24 @@ describe('controller:entity related items', function() {
         should.exist(res.body.result.item.rel)
         should.exist(res.body.result.item.related.action.props)
         should.exist(res.body.result.item.rel.created_by)
+        should.equal(res.body.result.item.related.action.type, Action.ANNOTATE);
         should.not.exists(err);
+        done();
 
-        // should remove the action
-        Action.remove(res.body.result.item.related.action, function(){
-          should.not.exist(err)
-          done();
-        });
+      });
+  });
+
+  it('should verify the manual connection with ANNOTATION!, with frequence = 1 resource B', function(done) {
+    var parser = require('../parser');
+    session
+      .get('/api/resource/' + __resourceB.id + '/related/annotate')
+      
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        console.log(res.body.result.items[0]
+          );
+        done();
 
       });
   });
@@ -298,7 +310,7 @@ describe('controller:entity related issues', function() {
       });
   });
 
-  it('should UPTATE the issue on entity type by poroviding mentioning' , function (done) {
+  it('should UPTATE the issue on entity type, by adding mentioning' , function (done) {
     session
       .post('/api/entity/' + __entity.id +'/related/issue')
       .send({

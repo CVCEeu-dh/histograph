@@ -407,7 +407,37 @@ module.exports = {
       });
     }); 
   },
-  
+  /*
+    Return the list of actions mentioning the requested resource.
+    The params.action param should be a valid action 'kind', cfr server.js
+  */
+  getRelatedActions: function(resource, params, next) {
+    models.getMany({
+      queries: {
+        count_items: rQueries.count_related_actions,
+        items: rQueries.get_related_actions
+      },
+      params: {
+        id:     +resource.id,
+        kind:   params.action,
+        limit:  params.limit,
+        offset: params.offset
+      }
+    }, function (err, results) {
+      if(err) {
+        console.log(err)
+        next(err);
+        return;
+      }
+
+      next(null, _.map(results.items, function (d) {
+        d.props.annotation = parser.yaml(d.props.annotation);
+        return d
+      }), {
+        total_items: results.count_items
+      });
+    }); 
+  },
   
   update: function(id, properties, next) {
 

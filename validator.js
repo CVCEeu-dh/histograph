@@ -24,9 +24,10 @@ validator.extend('includedIn', function (str, choices) {
 validator.extend('isAnnotatorjs', function (str) {
   var q = {};
   try{
-    q = YAML.parse(str);
-    return true;
+    q = JSON.parse(str);
+    return q.quote && q.ranges && q.ranges.length;
   } catch(e) {
+    console.log('OUCH', e)
     return false;
   }
 })
@@ -345,7 +346,7 @@ module.exports = {
         safeParams.end_time = +safeParams.end_date.format('X');
      
     };
-    
+
     if(safeParams.start_time != undefined && safeParams.end_time != undefined && safeParams.start_time > safeParams.end_time) {
       warnings.end_date = 'check that params.to';
     }
@@ -429,6 +430,12 @@ module.exports = {
     if(typeof safeParams.type == 'string')
       safeParams.type = safeParams.type.split(',');
     
+    if(safeParams.annotation) {
+      // console.log('HELLO', YAML.stringifyJSON.parse(safeParams.annotation));
+
+      safeParams.annotation = YAML.stringify(JSON.parse(safeParams.annotation), 2);
+    }
+
     if(next)
       next(null, safeParams);
       return {

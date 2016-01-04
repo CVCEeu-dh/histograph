@@ -151,6 +151,38 @@ module.exports = function(io){
     },
     
     /*
+      get all actions related to a resource, with count.
+      LIMIT 500
+    */
+    getRelatedActions: function(req, res) {
+      var form = validator.request(req, {
+            limit: 150,
+            offset: 0
+          }, {
+            // increment the max limit allowed
+            fields: [
+              {
+                field: 'limit',
+                check: 'isInt',
+                args: [
+                  {min: 1, max: 1000}
+                ],
+                error: 'should be a number in range 1 to max 1000'
+              }
+            ],
+          });
+
+      // validate orderby
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      Resource.getRelatedActions({
+        id: form.params.id,
+      },form.params, function (err, items, info) {
+        helpers.models.getMany(err, res, items, info, form.params);
+      });
+    },
+    /*
       Get top related persons
       get the most important entities per type
     */

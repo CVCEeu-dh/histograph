@@ -117,7 +117,7 @@ module.exports = function(io){
       // check if it contains a silly annotation....
       if(!form.isValid)
         return helpers.formError(form.errors, res);
-
+      
       Entity.createRelatedResource({
         id: +form.params.entity_id
       },
@@ -262,7 +262,7 @@ module.exports = function(io){
           mentions: mentions,
           username: req.user.username
         }, function (err, act) {
-          console.log(err, act)
+          // console.log(err, act)
           if(err)
             return helpers.cypherQueryError(err, res);
 

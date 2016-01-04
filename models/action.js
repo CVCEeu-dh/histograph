@@ -22,6 +22,7 @@ module.exports = _.assign(model.generate({
 }), {
   CREATE: 'create',
   UPVOTE: 'upvote',
+  ANNOTATE: 'annotate',
   DOWNVOTE: 'downvote',
   RAISE_ISSUE: 'issued',
   ENTITY_LABEL: 'ENTITY_LABEL',

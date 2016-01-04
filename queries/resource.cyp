@@ -58,7 +58,6 @@ WITH res, curators, locations, persons, organizations, social_groups, collect({
       props: the,
       rel: r_the
     })[0..5] as themes
-
 OPTIONAL MATCH (ver)-[:describes]->(res)
 OPTIONAL MATCH (res)-[:belongs_to]->(col)
 OPTIONAL MATCH (com)-[:mentions]->(res)
@@ -912,3 +911,50 @@ WITH res
   WHERE ent1.score > -1
 WITH ent1
 RETURN COUNT(DISTINCT ent1) as count_items
+
+
+// name:count_related_actions
+// count related actions
+MATCH (res:resource)
+  WHERE id(res) = {id}
+WITH res
+  MATCH (act:action{if:kind}:{:kind}{/if})-[r]->(res)
+WITH last(labels(act)) as group, count(DISTINCT act) as count_items
+RETURN {
+  group: group,
+  count_items: count_items
+} AS result
+
+
+// name:get_related_actions
+// get actions getMany()
+MATCH (res:resource)
+  WHERE id(res) = {id}
+WITH res
+  MATCH (act:action{if:kind}:{:kind}{/if})-[r]->(res)
+
+WITH act
+ORDER BY act.last_modification_time DESC
+SKIP {offset}
+LIMIT {limit}
+
+WITH act
+MATCH (u:user)-[r:performs]->act
+
+WITH act, r, {
+    id: id(u),
+    username: u.username,
+    picture: u.picture
+  } as alias_u
+MATCH (act)-[r_men:mentions]->(t:entity)
+WITH act, alias_u, collect({
+  id: id(t),
+  type: last(labels(t)),
+  props:t}) as mentioning
+RETURN {
+  id: id(act),
+  type: last(labels(act)),
+  props: act,
+  performed_by: alias_u,
+  mentioning: mentioning
+}
