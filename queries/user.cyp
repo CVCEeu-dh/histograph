@@ -222,7 +222,8 @@ ORDER BY u_rel.creation_time DESC
 // WARNING!!!! destroy everything related to the user, as if it never existed.
 MATCH (n:user {email:{email}})
 OPTIONAL MATCH (n)-[r]-()
-DELETE n, r
+OPTIONAL MATCH (n)-[r2]-(act:action)
+DELETE n, r, act
 
 
 // name: get_related_resources_graph
