@@ -144,14 +144,21 @@ module.exports = {
         form: form
       }, function (err, res, body) {
         if(err) {
+          console.log('ERROR.',err)
           next(err);
           return;
+        }
+        if(body.error) { // lanugage etc... just ignore, but print it
+          console.log('IGNORE ERROR', body)
+          next(null, []);
+          return
         }
         if(!body.response) {
           console.log(body)
           next(body.error);
           return
         }
+        
         // console.log(form, 'body', body.response)
         next(null, body.response.entities || []);
       })

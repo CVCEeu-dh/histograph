@@ -646,6 +646,7 @@ module.exports = {
         1. load the resource from neo4j db ... :D
       */
       function loadResourceFromNeo4j (callback) {
+        console.log(clc.whiteBright('   loading'), 'resource:', resource.id);
         neo4j.read(resource.id, function (err, node) {
           if(err)
             callback(err);
