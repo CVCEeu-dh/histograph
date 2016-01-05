@@ -91,9 +91,13 @@ angular.module('histograph')
       ---
     */
     socket.on('resource:create-related-user:done', function (result) {
-      console.log(result)
-      if(result.id == $stateParams.id) // update user notificaation
+      if(result.id == $stateParams.id) { // update user notificaation
         $log.info('ResourceCtrl socket@resource:create-related-user:done - by:', result.user);
+        if(result.user.id == $scope.user.id) {
+          $scope.isFavItem = true;
+        }
+        $scope.item.lovers = $scope.item.lovers+1
+      }
     })
 
     socket.on('entity:create-related-resource:done', function (result) {
@@ -162,7 +166,7 @@ angular.module('histograph')
     // $scope.isFavItem = resource.result.item.filter(function(d) {
     //   return d.curators.length && _.find(d.curators, {}
     // }).length
-    $scope.isFavItem = typeof _.find(resource.result.item.curators, {id: $scope.user.id}) == 'object'
+    $scope.isFavItem = resource.result.item.loved_by_user;
     
     $log.info('ResourceCtrl', resource);
     

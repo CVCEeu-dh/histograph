@@ -1,15 +1,16 @@
 // name: get_resource
 // get resource with its version and comments
 MATCH (res) WHERE id(res) = {id}
+
 WITH res
 OPTIONAL MATCH (res)<-[r_cur:curates]-(u:user {username:{username}})
+WITH res, count(r_cur) as curated_by_user
 OPTIONAL MATCH (res)<-[r_lik:likes]-(u:user {username:{username}})
-
-WITH res, count(r_cur) > 0 as curated_by_user, count(r_lik)> 0 as loved_by_user
+WITH res, curated_by_user, count(r_lik)> 0 as loved_by_user
 OPTIONAL MATCH (lover:user)-[:likes]->(res)
+WITH res, curated_by_user, loved_by_user, count(lover) as lovers
 OPTIONAL MATCH (curator:user)-[:curates]->(res)
-
-WITH res, curated_by_user, loved_by_user, count(lover) as lovers, count(curator) as curators
+WITH res, curated_by_user, loved_by_user, lovers, count(curator) as curators
 
 OPTIONAL MATCH (res)-[r_loc:appears_in]-(loc:`location`)
 WITH res, curated_by_user, loved_by_user, curators, lovers, r_loc, loc
