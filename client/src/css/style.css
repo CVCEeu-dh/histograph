@@ -96,7 +96,7 @@ a#header-title {
 
 .view{
   position: absolute;
-  top: 60px;
+  top: 50px;
   bottom: 50px;
   left:0;
   width: 100%;
@@ -222,16 +222,27 @@ a#header-title {
   color: #151515;
 }
 .item h3 a{
-  color: #353535;
+  color: #535353;
+  background-color: #f5f5f5;
+  cursor: pointer;
+  transition: background-color .3s ease-out;;
 }
-.item .caption a[gasp-type='person'], .item h3 a[gasp-type='person'] {
+
+.item h3 a:hover{
+  background-color: #eee;
+  text-decoration: none;
+  border: 0;
+}
+
+/*.item .caption a[gasp-type='person'], .item h3 a[gasp-type='person'] {
   border-bottom: 2px solid #4dc3ba
+  
 }
 
 .item .caption a[gasp-type='location'], .item h3 a[gasp-type='location'] {
   border-bottom: 2px solid #0093a6
 }
-
+*/
 .item blockquote {
   font-size: 13px;
   line-height: 21px;
@@ -311,7 +322,7 @@ a#header-title {
 .tag {
   padding: 0px 4px;
   text-decoration: none;
-  background:#eee;
+  background:#f5f5f5;
   color: #ACABAC;
   cursor: pointer;
   border: 1px solid transparent;
@@ -469,9 +480,9 @@ header ul li .notification a {
   position: absolute;
     top: 0px;
     height: 40px;
-    left: 10px;
-    right: 10px;
-    background: #f5f5f5;
+    left: 0px;
+    right: 0px;
+    /*background: #f5f5f5;*/
     z-index: 11;
     /*border-top: 1px solid #ccc;*/
 
@@ -483,7 +494,7 @@ header ul li .notification a {
   display: block;
   border-bottom: 1px solid #d8d8d8;
   height: 40px;
-  box-shadow: 0px 0px 6px #ccc;
+  /*box-shadow: 0px 6px 6px #ccc;*/
 }
 
 .header-menu > ul> li{
@@ -1903,21 +1914,6 @@ li.CodeMirror-hint-active {
 
 .uib-dropdown-menu>li>a:focus, .uib-dropdown-menu>li>a:hover{
   border-bottom: 0px transparent;
-}
-
-#login{
-  margin: 100px auto;
-  width: 300px;
-  text-align: center;
-}
-
-#login h5{
-  margin-bottom: 50px;
-}
-
-#logo{
-  font-size: 28px;
-  line-height: 56px;
 }
 
 
@@ -6375,7 +6371,7 @@ Copyright (c) 2015 Daniel Eden
   display: inline-block;
   font-weight: bold;
   line-height: 24px;
-  border: 1px solid #b8b8b8;
+  /*border: 1px solid #b8b8b8;*/
   border-radius: 5px;
   padding: 0 5px;
 }
