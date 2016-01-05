@@ -668,8 +668,10 @@ module.exports = {
           return resource[field];
         }));
         
-        if(!content.length)
-          return callback('no content provided for the resource ' + resource.id );
+        if(!content.length) {
+          // signale issue
+          return callback(helpers.IS_EMPTY);
+        };
         
         // automatic language detection
         var Langdetect = require('languagedetect'),

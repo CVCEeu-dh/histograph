@@ -363,11 +363,22 @@ module.exports = {
           Resource.discover({
             id: node.id
           }, function (err, res) {
-            if(err) {
+            if(err == helpers.IS_EMPTY) {
+              console.log('    node', node.id, clc.magentaBright('is empty'))
+              neo4j.save(node, 'warnings', 'is_empty', function (e, n) {
+                if(e) {
+                  q.kill();
+                  next(e);
+                } else {
+                  nextNode()
+                }
+              });
+            } else if(err) {
               q.kill();
               next(err);
-              return; 
+              return
             }
+
             res.discovered = true;
             neo4j.save(res, function (err, n) {
               if(err)
@@ -433,10 +444,20 @@ module.exports = {
         Resource.discover({
           id: node.id
         }, function (err, res) {
-          if(err) {
+          if(err == helpers.IS_EMPTY) {
+            console.log('    node', node.id, clc.magentaBright('is empty'))
+            neo4j.save(node, 'warnings', 'is_empty', function (e, n) {
+              if(e)
+                next(e);
+              else
+                next(err);
+            });
+            return;
+          } else if(err) {
             next(err);
             return
           }
+          res.discovered = true;
           neo4j.save(res, function (err, n) {
             if(err)
               throw err;
