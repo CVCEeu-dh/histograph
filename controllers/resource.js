@@ -563,6 +563,23 @@ module.exports = function(io){
       })
     },
     
+    removeRelatedUser:function (req, res) {
+      var form = validator.request(req);
+      
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+
+      Resource.removeRelatedUser({
+        id: form.params.id
+      }, req.user, function (err, resource) {
+        io.emit('resource:remove-related-user:done', {
+          user: req.user.username,
+          id:   form.params.id, 
+          data: resource
+        });
+        return res.ok({}); // nothing more...
+      });
+    },
     /*
       Get the users related to the resource (relationship: [:curates])
     */

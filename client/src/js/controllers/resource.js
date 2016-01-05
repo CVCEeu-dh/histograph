@@ -31,7 +31,7 @@ angular.module('histograph')
     }
     
     /*
-      Favourite the current resource :D  
+      Favourite the current resource ♥
     */
     $scope.favourite = function() {
       ResourceRelatedFactory.save({
@@ -43,6 +43,15 @@ angular.module('histograph')
       });
     }
     
+    $scope.unfavourite = function() {
+      ResourceRelatedFactory.delete({
+        id: $stateParams.id,
+        model: 'user',  
+      }, {}, function (res) {
+        console.log('ResourceCtrl -> unfavourite() - result:', res.status);
+        $scope.isFavItem = false;
+      });
+    };
     /*
       loadAnnotations
       ---
@@ -97,6 +106,16 @@ angular.module('histograph')
           $scope.isFavItem = true;
         }
         $scope.item.lovers = $scope.item.lovers+1
+      }
+    })
+
+    socket.on('resource:remove-related-user:done', function (result) {
+      if(result.id == $stateParams.id) { // update user notificaation
+        $log.info('ResourceCtrl socket@resource:remove-related-user:done - by:', result.user);
+        if(result.user.id == $scope.user.id) {
+          $scope.isFavItem = false;
+        }
+        $scope.item.lovers = $scope.item.lovers-1
       }
     })
 

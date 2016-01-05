@@ -70,16 +70,16 @@
 
         </div>
         <div class="actions">
-          <div class="btn-group">
+          <div >
             
-            <a class="btn btn-default action" tooltip="create a new inquiry" ng-href="#/r/{{item.id}}/inq/create">
+            <!-- <a class="btn btn-default action" tooltip="create a new inquiry" ng-href="#/r/{{item.id}}/inq/create">
               <i class="fa fa-comment-o"></i>
-            </a>
+            </a> -->
             <button ng-if='!isFavItem' class="btn btn-default action" ng-click='favourite()' tooltip="add to favourite items">
-              <i class="fa fa-heart-o"></i> {{item.curators.length}}
+              <i class="fa fa-heart-o"></i><span class='number'>{{item.lovers}}</span>
             </button>
             <button ng-if='isFavItem' class="btn btn-default action" ng-click='unfavourite()' tooltip="this resource belongs to your favourite collection">
-              <i class="fa fa-heart animated pulse"></i> {{item.curators.length}}
+              <i class="fa fa-heart animated pulse"></i><span class='number'>{{item.lovers}}</span>
             </button>
             
             <button class="btn btn-default action" tooltip="add to bookmark list" ng-click="queue(item.id, true)">

@@ -809,7 +809,7 @@ WHERE candidate.start_time IS NOT NULL AND candidate.shared_persons > 0 OR candi
 RETURN candidate.start_time as t, count(*) as weight
 
 
-// name: merge_user_resource_relationship
+// name: create_related_user
 // create or merge the cureted by relationship on a specific entity
 // create related user
 MATCH (res:resource), (u:user {username:{username}})
@@ -830,6 +830,13 @@ RETURN {
   type: last(labels(res)),
   rel: r
 } as result
+
+// name: remove_related_user
+// remove the relationship, if any
+MATCH (u:user {username:{username}})-[r:likes]->(res:resource)
+WHERE id(res) = {id}
+WITH res, u, r
+DELETE r RETURN count(r)
 
 
 // name:count_related_users

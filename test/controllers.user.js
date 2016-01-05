@@ -129,6 +129,7 @@ describe('controller:user (related users)', function() {
       });
   });
 
+
   it('should get the list of curated resources', function (done) {
     session
       .get('/api/user/'+ __user.id +'/related/resource')
@@ -140,6 +141,33 @@ describe('controller:user (related users)', function() {
         should.exist(res.body.info.limit);
         should.exist(res.body.info.offset);
         should.exist(res.body.info.id);
+        should.not.exists(err);
+        done();
+      });
+  });
+
+
+  it('should remove the LIKES relationship between the resource and the AUTH user', function (done) {
+    session
+      .delete('/api/resource/'+ __resourceA.id +'/related/user')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        console.log(res.body)
+        should.not.exists(err);
+        
+        
+        done();
+      });
+  });
+
+  it('should get the list of curated resources, now less than before', function (done) {
+    session
+      .get('/api/user/'+ __user.id +'/related/resource')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.equal(res.body.result.items.length, 0);
         should.not.exists(err);
         done();
       });

@@ -368,11 +368,27 @@ module.exports = {
   createRelatedUser: function(resource, user, next) {
     var now   = helpers.now();
         
-    neo4j.query(rQueries.merge_user_resource_relationship, { 
+    neo4j.query(rQueries.create_related_user, { 
       id: resource.id,
       username: user.username,
       creation_date: now.date,
       creation_time: now.time
+    }, function (err, nodes) {
+      if(err) {
+        next(err);
+        return;
+      }
+      next(null, nodes[0]);
+    });
+  },
+  /*
+    Remove a rlikes relationship, only if the current authentified user
+    is the owner of the relationship.
+  */
+  removeRelatedUser: function(resource, user, next) {
+    neo4j.query(rQueries.remove_related_user, { 
+      id: resource.id,
+      username: user.username
     }, function (err, nodes) {
       if(err) {
         next(err);
