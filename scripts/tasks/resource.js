@@ -373,6 +373,7 @@ module.exports = {
                   nextNode()
                 }
               });
+              return;
             } else if(err) {
               q.kill();
               next(err);
