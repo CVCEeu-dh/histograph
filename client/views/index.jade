@@ -14,8 +14,12 @@ html
     style(type='text/css').
 
       html{
-        height: 100%
+        height: 100%;
+        margin: 0;
+        padding: 0
       }
+
+
       body{
         font-size: 12px;
         line-height: 20px;
@@ -23,6 +27,16 @@ html
         height: 100%;
         overflow: hidden;
         background-color: #f0f0f0;
+        margin: 0;
+        padding: 0
+      }
+
+      body.login-page{
+        background: #383838; 
+        background: -moz-linear-gradient(top,  #383838 0%, #151515 100%); 
+        background: -webkit-linear-gradient(top,  #383838 0%,#151515 100%);
+        background: linear-gradient(to bottom,  #383838 0%,#151515 100%); 
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#383838', endColorstr='#151515',GradientType=0 );
       }
 
       h1,h2,h3,h4{
@@ -82,6 +96,33 @@ html
         text-decoration: none;
       }
 
+      #login{
+        margin: 100px auto;
+        width: 300px;
+        text-align: center;
+      }
+
+      #login .btn{
+        font-size: 12px;
+        border: 1px solid #3B3B3B;
+      }
+      #login h5{
+        margin-bottom: 50px;
+        color: #fff;
+        font-size:36px;
+      }
+
+      #login p {
+        color: #a9a2a2;
+        font-size: 15px;
+        margin-bottom: 50px;
+      }
+
+      #logo{
+        font-size: 28px;
+        line-height: 56px;
+      }
+
     link(href='/css/style.css', rel='stylesheet')
   
     script(src='/socket.io/socket.io.js')
@@ -92,7 +133,7 @@ html
 
 
 
-  body(ng-app='histograph')
+  body(ng-app='histograph', class=!user.username? 'login-page':'')
     script(type='text/javascript').
       var socket = io(); 
 
@@ -167,14 +208,16 @@ html
             
         if !user.username
             div(id='login')
-              div(id='logo')
-                img(src='images/hg_v.png')
-              h5 welcome to histograph
+              //- div(id='logo')
+              //-   img(src='images/hg_v.png')
+              h5 histograph
               form
-                div(class="btn-group-vertical", role="group")
-                  a(ng-href='/auth/twitter?next={{locationPath}}&jsonparams={{locationJson}}', class='btn btn-default expanded') login with twitter 
+                p.tk-proxima-nova login
+
+                div(class="btn-group btn-group-dual", role="group")
+                  a(ng-href='/auth/twitter?next={{locationPath}}&jsonparams={{locationJson}}', class='btn btn-default btn-line-white expanded') with twitter 
                     i(class='fa fa-twitter')
-                  a(ng-href='/auth/google?next={{locationPath}}&jsonparams={{locationJson}}', class='btn btn-default expanded') login with google 
+                  a(ng-href='/auth/google?next={{locationPath}}&jsonparams={{locationJson}}', class='btn btn-default btn-line-white expanded') with google 
                     i(class='fa fa-google-plus')
         else
           div(class='view {{currentCtrl}} {{currentState.name|humanizeState}} {{queueStatus}} viewpoint-{{viewpoint.selected.name}}', infinite-scroll='addMoreItems()', infinite-scroll-collection='relatedItems')
