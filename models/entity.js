@@ -241,7 +241,7 @@ module.exports = {
         resource: function (callback) {
           Resource.get({
             id: result.res.id
-          }, callback)
+          }, user, callback)
         }
       }, function (err, results) {
         if(err)
@@ -327,7 +327,7 @@ module.exports = {
           resource: function (callback) {
             Resource.get({
               id: result.res.id
-            }, callback)
+            }, user, callback)
           }
         }, function (err, results) {
           if(err)
@@ -375,7 +375,7 @@ module.exports = {
       resource: function (callback) {
         Resource.get({
           id: resource.id
-        }, callback)
+        }, user, callback)
       }
     }, function (err, results) {
       if(err)

@@ -100,7 +100,7 @@ describe('model:resource ', function() {
   
   
   it('should get resource A plus social_group entity', function (done) {
-    Resource.get(__resourceA, function (err, res) {
+    Resource.get(__resourceA, __userB, function (err, res) {
       if(err)
         throw err;
       should.equal(res.id, __resourceA.id)
@@ -184,7 +184,7 @@ describe('model:resource ', function() {
   // });
   
   it('should get a correct representation of a resource', function (done) {
-    Resource.get(__resourceB, function (err, res) {
+    Resource.get(__resourceB, __userB, function (err, res) {
       if(err)
         throw err;
       should.equal(res.id, __resourceB.id)
@@ -282,7 +282,7 @@ describe('model:resource ', function() {
   })
   
   it('should get a NOT found error', function (done) {
-    Resource.get(111600000000, function (err, res) {
+    Resource.get(111600000000, __userB, function (err, res) {
       should.exist(err)
       done()
     })

@@ -70,9 +70,10 @@ module.exports = {
 
   /**
     get a complete resource object (with versions, comments etc...).
-    @param id - numeric identifier only
+    @param resource.id - numeric identifier only
+    @param user - the current user
    */
-  get: function(resource, next) {
+  get: function(resource, user, next) {
     if(typeof resource != 'object') {
       resource = {
         id: +resource
@@ -80,7 +81,8 @@ module.exports = {
     }
     var query = parser.agentBrown(rQueries.get_resource)
     neo4j.query(rQueries.get_resource, {
-      id: resource.id
+      id: resource.id,
+      username: user.username
     }, function (err, items) {
       
       if(err) {
@@ -209,9 +211,7 @@ module.exports = {
         return module.exports.getAnnotatedText(node.props, ann, params);
       });
     }
-    node.curators = _.values(node.curators || []).filter(function (n) {
-      return n.id
-    });
+    
     node.themes = _.values(node.themes || []).filter(function (n) {
       return n.id
     });

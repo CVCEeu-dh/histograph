@@ -104,12 +104,12 @@ describe('controller:resource before', function() {
 describe('controller:resource', function() {
   it('should get a specific resource', function (done) {
     session
-      .get('/api/resource/51690')
+      .get('/api/resource/' + __resourceA.id)
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
-        if(err)
-          console.log(err)
+        if(res.body.status == 'error')
+          console.log(res.body)
         should.not.exists(err);
         done();
       });

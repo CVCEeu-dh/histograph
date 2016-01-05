@@ -2,19 +2,19 @@
 // get resource with its version and comments
 MATCH (res) WHERE id(res) = {id}
 WITH res
-OPTIONAL MATCH (res)<-[r_cur:curates]-(u:`user`)
-WITH res, r_cur, u
-ORDER BY r_cur.creation_time DESC
-WITH res, collect({  
-      id: id(u),
-      username: u.username,
-      rel: r_cur
-    })[0..10] as curators // safety limits, to be improved with time
-    
+OPTIONAL MATCH (res)<-[r_cur:curates]-(u:user {username:{username}})
+OPTIONAL MATCH (res)<-[r_lik:likes]-(u:user {username:{username}})
+
+WITH res, count(r_cur) > 0 as curated_by_user, count(r_lik)> 0 as loved_by_user
+OPTIONAL MATCH (lover:user)-[:likes]->(res)
+OPTIONAL MATCH (curator:user)-[:curates]->(res)
+
+WITH res, curated_by_user, loved_by_user, count(lover) as lovers, count(curator) as curators
+
 OPTIONAL MATCH (res)-[r_loc:appears_in]-(loc:`location`)
-WITH res, curators, r_loc, loc
+WITH res, curated_by_user, loved_by_user, curators, lovers, r_loc, loc
 ORDER BY r_loc.tfidf DESC, r_loc.frequency DESC
-WITH res, curators, collect({  
+WITH res, curated_by_user, loved_by_user, curators, lovers, collect({  
       id: id(loc),
       type: 'location',
       props: loc,
@@ -22,9 +22,9 @@ WITH res, curators, collect({
     })[0..5] as locations
 
 OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
-WITH res, curators, locations, r_per, per
+WITH res, curated_by_user, loved_by_user, curators, lovers, locations, r_per, per
 ORDER BY r_per.tfidf DESC, r_per.frequency DESC
-WITH res, curators, locations, collect({
+WITH res, curated_by_user, loved_by_user, curators, lovers, locations, collect({
       id: id(per),
       type: 'person',
       props: per,
@@ -32,9 +32,9 @@ WITH res, curators, locations, collect({
     })[0..10] as persons
 
 OPTIONAL MATCH (res)-[r_org:appears_in]-(org:`organization`)
-WITH res, curators, locations, persons, r_org, org
+WITH res, curated_by_user, loved_by_user, curators, lovers, locations, persons, r_org, org
 ORDER BY r_org.score DESC, r_org.tfidf DESC, r_org.frequency DESC
-WITH res, curators, locations, persons, collect({  
+WITH res, curated_by_user, loved_by_user, curators, lovers, locations, persons, collect({  
       id: id(org),
       type: 'organization',
       props: org,
@@ -42,9 +42,9 @@ WITH res, curators, locations, persons, collect({
     })[0..10] as organizations
 
 OPTIONAL MATCH (res)-[r_soc:appears_in]-(soc:`social_group`)
-WITH res, curators, locations, persons, organizations, r_soc, soc
+WITH res, curated_by_user, loved_by_user, curators, lovers, locations, persons, organizations, r_soc, soc
 ORDER BY r_soc.score DESC, r_soc.tfidf DESC, r_soc.frequency DESC
-WITH res, curators, locations, persons, organizations, collect({
+WITH res, curated_by_user, loved_by_user, curators, lovers, locations, persons, organizations, collect({
       id: id(soc),
       type: 'social_group',
       props: soc,
@@ -52,23 +52,25 @@ WITH res, curators, locations, persons, organizations, collect({
     })[0..10] as social_groups
 
 OPTIONAL MATCH (res)-[r_the:appears_in]-(the:`theme`)
-WITH res, curators, locations, persons, organizations, social_groups, collect({
+WITH res, curated_by_user, loved_by_user, curators, lovers, locations, persons, organizations, social_groups, collect({
       id: id(the),
       type: 'theme',
       props: the,
       rel: r_the
     })[0..5] as themes
+
 OPTIONAL MATCH (ver)-[:describes]->(res)
 OPTIONAL MATCH (res)-[:belongs_to]->(col)
 OPTIONAL MATCH (com)-[:mentions]->(res)
 OPTIONAL MATCH (inq)-[:questions]->(res)
-OPTIONAL MATCH (liker:user)-[:likes]->(res)
+
 
 RETURN {
   resource: {
     id: id(res),
     props: res,
-    curators: curators,
+    curated_by_user: curated_by_user,
+    loved_by_user: loved_by_user,
     versions: EXTRACT(p in COLLECT(DISTINCT ver)|{name: p.name, id:id(p), yaml:p.yaml, language:p.language, type: last(labels(p))}),
     locations: locations,
     persons:   persons,
@@ -78,7 +80,8 @@ RETURN {
     //collections: EXTRACT(p in COLLECT(DISTINCT col)|{name: p.name, id:id(p), type: 'collection'}),
     comments: count(distinct com),
     inquiries: count(distinct inq),
-    likes: count(liker)
+    lovers: lovers,
+    curators: curators
   }
 } AS result
 
