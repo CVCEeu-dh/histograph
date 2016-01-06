@@ -46,6 +46,8 @@ module.exports = {
 
       '/js/lib/ui-codemirror.min.js',
 
+      '/js/lib/openlayers.min.js',
+
       //-   '/js/lib/angular-strap.min.js',
       //-   '/js/lib/angular-strap.tpl.min.js',
       // '/js/lib/ui-bootstrap-tpls.min.js',

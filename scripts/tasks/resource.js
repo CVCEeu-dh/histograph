@@ -473,5 +473,75 @@ module.exports = {
       else
         callback(null, options);
     });
+  },
+
+  /*
+    Prepare tile for .jpg extension of url properties.
+    The result will be put under settings.paths.media.tiles folder and renamled according to the
+    neo4j identifier.
+    a property named tiles_url will then be created directly below the 
+    Note You should install mapslice manually if you want to enable it.
+
+  */
+  tiles: function(options, callback) {
+    console.log(clc.yellowBright('\n   tasks.resource.tiles'));
+    var mapslice = require("mapslice");
+    var q = async.queue(function (node, nextNode) {
+      console.log('   resource:', clc.cyanBright(node.id))
+              
+      console.log(clc.blackBright('   resource remaining'), clc.white.bgMagenta(q.length()));
+      var basedir  = path.join(path.isAbsolute(settings.paths.media)?'':__dirname,settings.paths.media),
+          filename = path.join(basedir, node.url),
+          output   = path.join(basedir, 'tiles', node.id + '/{z}/{y}/{x}.jpg');
+      console.log('   input: ',filename);
+      console.log('   output:', output);
+
+
+      var mapSlicer = mapslice({
+          file: filename,               // (required) Huge image to slice
+          output: output, // Output file pattern
+          // outputFolder: path.join(path.isAbsolute(settings.paths.media)?'':__dirname, settings.paths.media, 'tiles'),
+          tileSize: 512,                     // (default: 256) Tile-size to be used
+          imageMagick: true,                 // (default: false) If (true) then use ImageMagick instead of GraphicsMagick
+          background: "#00000000",            // (default: '#FFFFFFFF') Background color to be used for the tiles. More: http://ow.ly/rsluD
+          tmp: "./temp",                     // (default: '.tmp') Temporary directory to be used to store helper files
+          parallelLimit: 3,                  // (default: 5) Maximum parallel tasks to be run at the same time (warning: processes can consume a lot of memory!)
+          minWidth: 200                      // See explanation about Size detection below
+      });
+
+      mapSlicer.on("start", function(files, options) {
+          console.log(clc.blackBright("    Starting to process", files, "files..."));
+      });
+
+      mapSlicer.on("error", function(err) {
+          console.error(err);
+      });
+
+      mapSlicer.on("progress", function(progress, total, current, file) {
+          console.info("    completion"+Math.round(progress*100)+"%");
+
+      });
+
+      mapSlicer.on("end", function() {
+          console.log("    Finished processing slices.", arguments);
+      });
+
+      mapSlicer.start();
+
+    }, 1);
+
+    q.drain = function() {
+      callback(null, options);
+    }
+    q.push(options.records.filter(function (d){
+      if(!d.url)
+        return false
+      // console.log(d.id, d.url, d.url.match(/\.(png|jpg)$/))
+      return d.url && d.url.match(/\.(png|jpg)$/)
+    }));
+
+    
+ 
+
   }
 }

@@ -22,43 +22,63 @@ header.active{
   transform: translateX(200px);
 }
 
+header ul.menu li {
+  margin:0;
+}
+
 header ul.menu li a {
-  color: #757575;
+  color: #B5B5B5;
   /* text-transform: uppercase; */
   /* font-weight: bold; */
   font-size: 12px;
   display: block;
   line-height: 44px;
-
+      border-width: 0;
   position:relative;
+  padding:0 20px;
+   -webkit-transition: color .3s ease-out; /* Changed here */ 
+     -moz-transition: color .3s ease-out;
+       -o-transition: color .3s ease-out;
+          transition: color .3s ease-out;
 }
 
-header ul.menu .number {
-      position: absolute;
-    /* width: 20px; */
-    padding: 0 5px 0 5px;
-    height: 20px;
-    color: white;
-    text-align: center;
-    line-height: 20px;
-    top: 5px;
-    right: -25px;
-    background: #333333;
-    border-radius: 10px;
-    font-weight: bold;
-    margin-left: 5px;
-    font-size: 10px;
+header ul.menu li a.with-number {
+  position: relative;
+}
+
+header ul.menu li a.with-number .number {
+  /*position: absolute;*/
+  display: inline-block;
+  min-width: 20px; 
+  padding: 0 5px 0 5px;
+  height: 20px;
+  color: white;
+  text-align: center;
+  line-height: 20px;
+  top: 5px;
+  right: 10px;
+  background: crimson;
+  border-radius: 10px;
+  margin-left: 5px;
+  font-size: 10px;
+  
+}
+
+header ul.menu a.with-number .number.lite {
+  background: transparent;
+  color: #C2C2C2;
+  border: 1px solid #C2C2C2;
 }
 
 header ul.menu li.active a {
-  color: #151515;
-  font-weight:bold;
+  color: white;
   border-bottom: 0px transparent;
 }
 
 header ul.menu li a:hover{
-  color: #f74917;
+  color: white;
   border-bottom: 0px transparent;
+  background: transparent
 }
 
 header ul.menu li.active a:hover{
@@ -1906,7 +1926,15 @@ li.CodeMirror-hint-active {
 }
 
 /*
-  Extended bootstrap ui menu
+  Override bootstrap nav
+*/
+.nav .open>a, .nav .open>a:focus, .nav .open>a:hover{
+  background: transparent;
+  border-color: inherit;
+}
+
+/*
+  Override bootstrap ui menu
 */
 .uib-dropdown-menu a{
 
@@ -1926,10 +1954,15 @@ li.CodeMirror-hint-active {
 #search-field{
   padding-top: 10px;
 }
+
 #search-field input{
-  height: 30px;
+  height: 27px;
   font-size: 12px;
-  line-height: 30px;
+  line-height: 27px;
+  background: transparent;
+  border-color: #B5B5B5;
+  color: white;
+  background: #555;
 }
 
 #search-field button{
@@ -2209,6 +2242,7 @@ li.CodeMirror-hint-active {
   width: 200px;
   z-index: 0;
   height: 100%;
+  z-index: 101;
   background:#191c1d;
   -webkit-transform: translateX(-200px); /* Safari */
       -ms-transform: translateX(-200px); /* IE 9 */
@@ -2426,6 +2460,26 @@ li.CodeMirror-hint-active {
   border-bottom: 0px transparent;
 }
 
+#playlist-shadow{
+  background: rgba(38,38,38,.38);
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  opacity: 0;
+  pointer-events: none;
+      -webkit-transition: opacity .2s cubic-bezier(0.65, 0.05, 0.36, 1);  
+     -moz-transition: opacity .2s cubic-bezier(0.65, 0.05, 0.36, 1);
+       -o-transition: opacity .2s cubic-bezier(0.65, 0.05, 0.36, 1);
+          transition: opacity .2s cubic-bezier(0.65, 0.05, 0.36, 1);
+}
+
+#playlist-shadow.active{
+  opacity: 1;
+  pointer-events:auto;
+}
 
 /*
   
@@ -6594,12 +6648,17 @@ font-size:12px;
   media improvements
   cf.http://getbootstrap.com/css/#responsive-utilities
 */
+
 @media screen and (min-width: 768px) {
   .modal-dialog {
     width: 700px;
   }
   .explore .masonry-brick{
     width: 33%;
+  }
+  .navbar-right .dropdown-menu {
+    left: 0px;
+    right: auto;
   }
 }
 

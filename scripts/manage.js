@@ -37,7 +37,22 @@ var fs          = require('fs'),
         tasks.resource.discoverOne
       ],
       'discover-resources': [
-        tasks.resource.discoverMany
+        tasks.resource.discoverMany,
+        tasks.entity.tfidf,
+        tasks.entity.cleanSimilarity,   
+        tasks.entity.jaccard,
+        tasks.entity.cosine
+      ],
+      /*
+        Only for resources having url ending with .jpg or .png
+      */
+      'tiles-resource': [
+        tasks.resource.getOne,
+        tasks.resource.tiles,
+      ],
+      'tiles-resources': [
+        tasks.resource.getMany,
+        tasks.resource.tiles,
       ],
 
       /*

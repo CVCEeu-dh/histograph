@@ -118,8 +118,12 @@
                     <li><a ng-click="switchVersion(mergedVersion)">merged version</a></li>
                   </ul>
                 </div>
+                <!-- <div class='img-wrapper' ng-if='item.props.tiles_url'>
+                  <div annotoriousol tiles='item.props.tiles_url'></div>
+                </div> -->
                 <div class="img-wrapper">
-                  <img  ng-src="media/{{item.props.url}}" annotorious w="item.props.width" h="item.props.height" version="currentVersion" />
+
+                  <img  ng-src="media/{{item.props.url}}" annotorious contribute='contribute(item, type, options)' w="item.props.width" h="item.props.height" version="currentVersion" item='item' />
                 </div>
               </div>
               

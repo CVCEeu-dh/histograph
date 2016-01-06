@@ -10,6 +10,7 @@ html
     link(href='/css/annotator.css', rel='stylesheet')
     link(href='/css/annotorious.css', rel='stylesheet')
     link(href='/css/codemirror.css', rel='stylesheet')
+    link(rel="stylesheet", href="http://openlayers.org/en/v3.12.1/css/ol.css")
     
     style(type='text/css').
 
@@ -51,7 +52,8 @@ html
         left:0px;
         right:0px;
         top: 0px;
-        background: transparent;
+        background: #383838;
+        border-top: 1px solid white;
         border-bottom: 1px solid #C2C2C2;
         z-index: 15;
         line-height: 50px;
@@ -60,16 +62,11 @@ html
       }
 
       header ul{
-        float: right;
         display: inline-block;
         list-style-type: none;
       }
 
-      header ul li{
-        display: inline-block;
-        padding: 0 0px 0 40px;
-      }
-
+     
       
 
       header img {
@@ -92,8 +89,20 @@ html
       }
       a:focus, a:hover{
         color: #151515;
-        border-bottom: 1px solid #151515;
         text-decoration: none;
+      }
+
+      .navbar-header a{
+        color: #f0f0f0;
+        font-size: 21px;
+        -webkit-transition: color .3s ease-out; /* Changed here */ 
+         -moz-transition: color .3s ease-out;
+           -o-transition: color .3s ease-out;
+              transition: color .3s ease-out;
+      }
+
+      .navbar-header a:hover{
+        color: white;
       }
 
       #login{
@@ -141,16 +150,17 @@ html
       div(ng-controller='FiltersCtrl')
         if user.username
           header(class='{{queueStatus}}') 
-            a(id='header-logo', href='#/')
-              img(src='images/hg_v.png')
+            //- a(id='header-logo', href='#/')
+            //-   img(src='images/hg_v.png')
              
             
             div(class='row', ng-cloak)
               div(class='col-sm-12')
-                a(id='header-title', href='#/')
-                  span histograph
+                div.navbar-header
+                  a.serif(href='/#/')
+                    span histograph
 
-                ul.menu
+                ul.menu.nav.navbar-nav.navbar-right
                   li(class='{{currentState.name == "explore.resources"?"active":""}}')
                     a(href='#/') gallery
 
@@ -162,7 +172,7 @@ html
 
                   li(ng-controller='PulseController')
                     span(uib-dropdown, on-toggle="toggle(open)")
-                      a(href='#/', uib-dropdown-toggle)
+                      a.with-number(href='#/', uib-dropdown-toggle)
                         i.fa.fa-flash
                         div.number.animated(ng-if='pulsations > 0') {{pulsations}}
                       ul.uib-dropdown-menu.dropdown-menu
@@ -174,13 +184,14 @@ html
                         li(ng-repeat="relatedItem in notifications", ng-include='"templates/partials/action-lite.html"')
                           
                   li
-                    a(ng-click='toggleQueue()', uib-tooltip='open bookmark list', tooltip-placement='bottom')
+                    a.with-number(ng-click='toggleQueue()', uib-tooltip='open bookmark list', tooltip-placement='bottom')
                       i.fa.fa-bookmark
-                      div.number.animated {{playlist.length}}
+                      div.number.animated.lite {{playlist.length}}
 
                   li(class='{{currentState.name == "search.resources" || currentState.name == "search.persons" ?"active":""}}')
-                    form#search-field(ng-submit='setQuery(query)')
-                      input(type='text', name='test', ng-model='__query', typeahead-on-select='setQuery($item, $model, $label)', class='form-control', typeahead-editable='false', placeholder='search', typeahead='item for items in suggest($viewValue)', typeahead-wait-ms='100', typeahead-template-url='templates/partials/helpers/suggest.html')
+                    div
+                      form#search-field(ng-submit='setQuery(query)')
+                        input(type='text', name='test', ng-model='__query', typeahead-on-select='setQuery($item, $model, $label)', class='form-control', typeahead-editable='false', placeholder='search', typeahead='item for items in suggest($viewValue)', typeahead-wait-ms='100', typeahead-template-url='templates/partials/helpers/suggest.html')
                   //- input(type='text', ng-model='query', class='form-control', placeholder='Search for...', bs-typeahead, bs-options='item for items in suggest($viewValue)', data-container='body',data-delay='{ show: 500, hide: 1000000 }')
                   //- span(class='input-group-btn')
                   //-  a(class='btn btn-default', type='button', ng-href='/#/search/{{query}}') search
@@ -285,6 +296,7 @@ html
               //- a(ng-href='/#/neighbors/{{playlist | map:"id"}}', tooltip-append-to-body='true', tooltip='save your readlist', class='btn btn-primary')
               //-   i(class='fa fa-save')
           
+          div#playlist-shadow(ng-class='queueStatus', ng-click='toggleQueue()')
           div#fullsize(fullsize)
 
       div(id="messenger", class="tk-proxima-nova {{messaging? 'active': ''}}")

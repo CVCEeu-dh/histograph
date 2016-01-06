@@ -241,6 +241,22 @@ clientRouter.route('/media/:file')
       }
     });
   })
+/*
+  serving Tiles for the specified path
+  Note that settings.path.media should have a tile folder
+  tiles/{file}/{z}/{y}/{x}.jpg"
+
+*/
+clientRouter.route('/tiles/:file/:z(\\d+)/:y(\\d+)/:x(\\d+\.jpg)')
+  .get(function (req, res, next) {
+    var filename = path.join(settings.paths.media, 'tiles', req.params.file, req.params.z, req.params.y, req.params.x);
+    console.log('requesting:', filename)
+    res.sendFile(filename, {root: path.isAbsolute(settings.paths.media)?'':__dirname}, function (err) {
+      if(err) {
+        res.status(err.status).end();
+      }
+    });
+  })
 
 clientRouter.route('/txt/:file')
   .get(function (req, res, next) {
