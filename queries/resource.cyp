@@ -14,7 +14,7 @@ WITH res, curated_by_user, loved_by_user, lovers, count(curator) as curators
 
 OPTIONAL MATCH (res)-[r_loc:appears_in]-(loc:`location`)
 WITH res, curated_by_user, loved_by_user, curators, lovers, r_loc, loc
-ORDER BY r_loc.tfidf DESC, r_loc.frequency DESC
+ORDER BY r_loc.score DESC, r_loc.tfidf DESC, r_loc.frequency DESC
 WITH res, curated_by_user, loved_by_user, curators, lovers, collect({  
       id: id(loc),
       type: 'location',
@@ -24,7 +24,7 @@ WITH res, curated_by_user, loved_by_user, curators, lovers, collect({
 
 OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
 WITH res, curated_by_user, loved_by_user, curators, lovers, locations, r_per, per
-ORDER BY r_per.tfidf DESC, r_per.frequency DESC
+ORDER BY r_per.score DESC, r_per.tfidf DESC, r_per.frequency DESC
 WITH res, curated_by_user, loved_by_user, curators, lovers, locations, collect({
       id: id(per),
       type: 'person',
