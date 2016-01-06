@@ -331,12 +331,13 @@ RETURN {
 // get resources by query
 start n=node:node_auto_index({query})
 WHERE {entity} in labels(n)
-WITH n
-MATCH n-[r:appears_in]->(res:resource)
-WITH DISTINCT n
+WITH (n)
+MATCH (n)-[r:appears_in]->(res:resource)
+WITH n, last(collect(res)) as last_resource
 RETURN {
   id: id(n),
   props: n,
+  appearing: last_resource,
   type: last(labels(n))
 } AS result
 ORDER BY n.score DESC, n.specificity DESC
