@@ -137,6 +137,11 @@ angular.module('histograph')
           // load item
           SuggestFactory.getUnknownNodes({ids:[scope.entity.id]}, function (res) {
             $log.log('::gasp getUnknownNodes:', scope.entity.id)
+            scope.entity.isIncomplete = !_.compact([
+              res.result.items[0].props.links_wiki,
+              res.result.items[0].props.links_viaf
+            ]).length;
+
             scope.entity.props = res.result.items[0].props;
           })
         };
