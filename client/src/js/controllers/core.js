@@ -810,6 +810,16 @@ angular.module('histograph')
     };
 
     /*
+      MetadataInspect
+      ---
+      Open the inspector for document metadata ...
+      Require the resource id
+    */
+    $scope.inspectMetadata = function(resource) {
+
+    };
+
+    /*
       Contribute
       ---
       Open the contribute modal for the given item

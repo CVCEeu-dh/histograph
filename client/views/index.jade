@@ -27,17 +27,13 @@ html
         color: #1d1d1d;
         height: 100%;
         overflow: hidden;
-        background-color: #f0f0f0;
+        background-color: #e9e9e9;
         margin: 0;
         padding: 0
       }
 
       body.login-page{
-        background: #383838; 
-        background: -moz-linear-gradient(top,  #383838 0%, #151515 100%); 
-        background: -webkit-linear-gradient(top,  #383838 0%,#151515 100%);
-        background: linear-gradient(to bottom,  #383838 0%,#151515 100%); 
-        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#383838', endColorstr='#151515',GradientType=0 );
+        background: #f0f0f0; 
       }
 
       h1,h2,h3,h4{
@@ -53,8 +49,6 @@ html
         right:0px;
         top: 0px;
         background: #383838;
-        border-top: 1px solid white;
-        border-bottom: 1px solid #C2C2C2;
         z-index: 15;
         line-height: 50px;
         font-size:13px;
@@ -131,6 +125,30 @@ html
         font-size: 28px;
         line-height: 56px;
       }
+
+      /*
+        Flickr API experiment
+      */
+      #flickr{
+        position: absolute;
+        z-index: -1;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #636363 
+      }
+
+      .halftone-overlay{
+        position: absolute;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAADCAYAAABWKLW/AAAAF0lEQVQIW2NkYGD4z8DAwMgAI0AMDA4AI3EBBCKrOnQAAAAASUVORK5CYII=) repeat;
+
+      }
+
+
 
     link(href='/css/style.css', rel='stylesheet')
   
@@ -218,6 +236,10 @@ html
             //-   div(history='', trails='trails')
             
         if !user.username
+            div#flickr
+              div(flickr='')
+              div.halftone-overlay
+              
             div(id='login')
               //- div(id='logo')
               //-   img(src='images/hg_v.png')
@@ -230,6 +252,8 @@ html
                     i(class='fa fa-twitter')
                   a(ng-href='/auth/google?next={{locationPath}}&jsonparams={{locationJson}}', class='btn btn-default btn-line-white expanded') with google 
                     i(class='fa fa-google-plus')
+
+            
         else
           div(class='view {{currentCtrl}} {{currentState.name|humanizeState}} {{queueStatus}} viewpoint-{{viewpoint.selected.name}}', infinite-scroll='addMoreItems()', infinite-scroll-collection='relatedItems')
             div(ui-view='')

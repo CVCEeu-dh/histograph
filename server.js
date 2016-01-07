@@ -345,7 +345,7 @@ apiRouter.route('/user/pulse') // return just the number
   .get(ctrl.user.pulse)
 apiRouter.route('/user/noise') // return just the number
   .get(ctrl.user.noise)
-apiRouter.route('/user/task/:what(unknownpeople)') // return the task to be performed number
+apiRouter.route('/user/task/:what(unknownpeople|resourcelackingdate)') // return the task to be performed number
   .get(ctrl.user.task)
 
 

@@ -9,6 +9,26 @@
  * show various trails
  */
 angular.module('histograph')
+  
+
+  .directive('flickr', function() {
+    return {
+      link: function(scope, element) {
+        // get random palette to be used as background
+        // element.css({
+        //   position: 'absolute',
+        //   top: 0,
+        //   left:0,
+        //   width: '100%',
+        //   height: '100%',
+        //   'background-size':'cover',
+        //   'background-repeat':'no-repeat',
+        //   'background-image': "url('http://www.colourlovers.com/paletteImg/98E9C4/A89B18/CC5539/DC2A44/5A2340/clap_your_hands.png')"
+        // })
+
+      }
+    }
+  })
   .directive('history', function($log) {
     return {
       restrict : 'A',

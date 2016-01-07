@@ -174,10 +174,6 @@ angular.module('histograph')
 
 
 
-    /**
-      on load
-    */
-    $scope.item = angular.extend({ type: 'resource'}, resource.result.item);
     
 
 
@@ -197,10 +193,13 @@ angular.module('histograph')
          yamls = yamls.concat(v.yaml);
     });
 
+
     $scope.mergedVersion = {
       service: 'merged',
       yaml: yamls
     };
+
+    $scope.positions = yamls;
     
     $scope.currentVersion =  resource.result.item.positionings[0];//$scope.mergedVersion;
     
@@ -210,25 +209,11 @@ angular.module('histograph')
     
     $scope.graphType = 'monopartite-entity'
     
-    
-    
-    
     /**
-      Annotations
-      watch language - moved to a proper template, language driven
+      on load
     */
-    // $scope.$watch('language', function (language) {
-    //   if($scope.item.annotations.length) {
-    //     // evaluate according to language ...
-    //     for( var i in $scope.item.annotations) {
-    //       if($scope.item.annotations[i].language == $scope.language) {
-    //         $scope.currentAnnotation = $scope.item.annotations[i];
-    //         break;
-    //       }
-    //     }
-        
-    //   }
-    // });
+    $scope.item = angular.extend({ type: 'resource'}, resource.result.item);
+    
     
     
   });

@@ -80,7 +80,6 @@ WHERE NOT(has(per.last_name))
 WITH DISTINCT per
 RETURN count(per) as count_items
 
-
 // name: get_crowdsourcing_unknownpeople
 // is ... a Person? It should also give you a simple context (that probably you may know... @todo)
 MATCH (per:person)-[r:appears_in]->(res:resource)
@@ -105,6 +104,31 @@ RETURN {
   person: alias_per, 
   resource: alias_res
 } as t
+
+
+
+// name: count_crowdsourcing_resourcelackingdate
+// how many (connected) resources are ... lacking starttime
+MATCH ()-[r:appears_in]->(res:resource)
+WHERE NOT(has(res.start_time))
+RETURN count(DISTINCT res) as count_items
+
+// name: get_crowdsourcing_resourcelackingdate
+// is ... a Person? It should also give you a simple context (that probably you may know... @todo)
+MATCH ()-[r:appears_in]->(res:resource)
+WHERE NOT(has(res.start_time))
+WITH res, count(r) as df
+SKIP {offset}
+LIMIT {limit}
+WITH {
+  id: id(res),
+  type: 'resource',
+  props: res
+} as alias_res
+RETURN {
+  type: 'resourcelackingdate',
+  resource: alias_res
+}
 
 
 // name: count_related_resources

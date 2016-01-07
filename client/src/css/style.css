@@ -30,9 +30,9 @@ header ul.menu li a {
   color: #B5B5B5;
   /* text-transform: uppercase; */
   /* font-weight: bold; */
-  font-size: 12px;
+  font-size: 13px;
   display: block;
-  line-height: 44px;
+  line-height: 49px;
       border-width: 0;
   position:relative;
   padding:0 20px;
@@ -287,9 +287,11 @@ a#header-title {
 }
 
 .item img{
-  width: 100%;
+  max-width: 100%;
   max-height: 600px;
-  object-fit: contain;
+  min-width: 600px;
+  /*object-fit: contain;*/
+  margin: 0 auto;
 }
 
 .item .abstract{
@@ -976,9 +978,11 @@ header ul li .notification a {
   background-color: white;
   padding: 20px 0px 0px 0px;
   border: 1px solid #E1E1E0;
-  border-bottom-width: 3px;
+  /*border-bottom-width: 3px;*/
   background-clip: padding-box;
-  border-radius: 2px;
+  border-radius: 3px;
+  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.22);
+
 }
 
 
@@ -1728,7 +1732,7 @@ margin-left: 50px;
 
 
 .fa{
-  font-size: 15px;
+  font-size: 17px;
   line-height: inherit
 }
 
@@ -1848,6 +1852,14 @@ li.CodeMirror-hint-active {
   text-transform: uppercase;
   border-radius: 3px;
   border: 1px solid #ccc;
+      box-shadow: 0 1px 1px 0 rgba(0,0,0,0.16);
+}
+
+.btn.btn-line.active, .btn.btn-line.focus, .btn.btn-line:active, .btn.btn-line:focus, .btn.btn-line:hover, .open>.dropdown-toggle.btn.btn-line{
+  background: rgba(200,200,200, .2);
+  outline: none;
+  border: 1px solid #151515;
+  color: #151515
 }
 
 .btn.btn-straight{

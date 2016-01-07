@@ -8,7 +8,7 @@
  */
 angular.module('histograph')
   .controller('CrowdCtrl', function($scope, $log, $timeout, UserFactory) {
-    $scope.short_delay = 60000;
+    $scope.short_delay = 100;
     $scope.long_delay = 180000;
 
     $scope.isVisible = false;
@@ -16,6 +16,7 @@ angular.module('histograph')
 
     $scope.question = 'none';
 
+    var availableTasks = ['unknownpeople', 'resourcelackingdate'];
     /*
       Get the first avaialbe challenge for the user, addressing user
       favourite element first. Cfr server
@@ -28,7 +29,7 @@ angular.module('histograph')
       //
       UserFactory.get({
         method: 'task',
-        extra: 'unknownpeople'
+        extra: _.first(_.shuffle(availableTasks))
       }, function(res) {
         $log.log('CrowdCtrl -> challenge() --> ', res);
         $scope.isVisible = true;
@@ -48,7 +49,7 @@ angular.module('histograph')
       //
       UserFactory.get({
         method: 'task',
-        extra: 'unknownpeople'
+        extra: _.first(_.shuffle(availableTasks))
       }, function(res) {
         $log.log('CrowdCtrl -> challenge() --> ', res);
         
@@ -64,6 +65,8 @@ angular.module('histograph')
       $log.log('CrowdCtrl -> challengeAccepted()');
       $scope.isChallengeAccepted = true;
       $scope.question = 'challenge_accepted';
+      // according to task type, decide what to do next
+      $scope.inspect([ $scope.task.person.id]);
     };
 
     /*

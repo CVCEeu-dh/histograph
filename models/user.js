@@ -128,7 +128,8 @@ module.exports = {
 
   /*
     Return a crowdsourcing task 
-    @param params - object containing the 'what' property describing the task to be performed: count_crowdsourcing_unknown_people
+    @param params - object containing the 'what' property describing the task to be performed:
+                    count_crowdsourcing_unknown_people 
   */
   task: function(user, params, next) {
     async.waterfall([
