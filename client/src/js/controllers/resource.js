@@ -128,14 +128,15 @@ angular.module('histograph')
         // change the tags...
         $scope.item = result.data.related.resource; 
 
-        if(result.data.related.action.type == 'annotate') {debugger
+        if(result.data.related.action.type == 'annotate') {
           // add region to annota directive in the page
           if(result.data.related.action.props.annotation.context == 'picture')
             $scope.positions.push(_.assign({
               id: _.first(_.filter(result.data.related.action.mentioning, {type: 'person'})).id,
               performed_by: result.data.related.action.performed_by,
               creation_date: result.data.related.action.props.creation_date,
-              region: result.data.related.action.props.annotation.ranges[0]
+              region: result.data.related.action.props.annotation.ranges[0],
+              removable: $scope.user.id == result.data.related.action.performed_by.id
             }, result.data.related.action.props.annotation))
         }
 
@@ -227,7 +228,9 @@ angular.module('histograph')
             id: _.first(d.mentioning).id,
             performed_by: d.performed_by,
             creation_date: d.props.creation_date,
-            region: d.props.annotation.ranges[0]
+            region: d.props.annotation.ranges[0],
+            removable: $scope.user.id == d.performed_by.id
+
           }, d.props.annotation);
         }), {context: 'picture'})
     );

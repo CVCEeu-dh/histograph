@@ -6657,6 +6657,17 @@ font-size:12px;
 }
 
 /*
+  Annotation svg
+*/
+g.note .note-borders{
+  stroke: #fff;
+} 
+
+g.note.manual .note-borders{
+  stroke: gold;
+} 
+
+/*
   media improvements
   cf.http://getbootstrap.com/css/#responsive-utilities
 */

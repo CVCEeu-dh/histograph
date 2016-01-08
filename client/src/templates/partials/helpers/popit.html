@@ -24,12 +24,13 @@
           <div class='date' >{{entity.type}}</div>
         </div>
         <div ng-if="entity.props.links_viaf">
-            <a target='_blank' ng-href='http://viaf.org/viaf/{{entity.props.links_viaf}}'>VIAF: {{entity.props.links_viaf}}
-            </a>
-          </div>
-          <div ng-if="entity.props.links_wiki">
-            <a target='_blank' ng-href='http://dbpedia.org/resource/{{entity.props.links_wiki}}'>dbpedia: {{entity.props.links_wiki}}</a>
-          </div>
+          <a target='_blank' ng-href='http://viaf.org/viaf/{{entity.props.links_viaf}}'>VIAF: {{entity.props.links_viaf}}
+          </a>
+        </div>
+        <div ng-if="entity.props.links_wiki">
+          <a target='_blank' ng-href='http://dbpedia.org/resource/{{entity.props.links_wiki}}'>dbpedia: {{entity.props.links_wiki}}</a>
+        </div>
+        <div ng-if='scope.link.creator'>created by: {{scope.link.creator}}</div>
       </div>
       <div class="actions">
         <a class="action" title="add to bookmark" ng-click="queue()">

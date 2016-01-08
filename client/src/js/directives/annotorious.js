@@ -136,7 +136,7 @@ angular.module('histograph')
     
 
     return {
-      restrict : 'E', // only element name in order to avoid errors
+      restrict : 'A', // only element name in order to avoid errors
       scope: {
         src: '=',
         contribute: '&',
@@ -145,6 +145,7 @@ angular.module('histograph')
       },
       template: '<div style="position:relative; "></div>',
       link: function(scope, element, attrs) {
+
         // start everything once the loading has been done
         var img = new Image(),
 
@@ -307,7 +308,9 @@ angular.module('histograph')
 
           var newbies = selection.enter()
             .append('g')
-              .attr('class', 'note')
+              .attr('class', function(d) {
+                return ['note', (d.performed_by? 'manual': '')].join(' ')
+              })
               
 
           newbies
@@ -340,22 +343,28 @@ angular.module('histograph')
             })
             .attr('gasp-type', 'person')
             .attr('gasp-parent', [scope.item.type, scope.item.id].join('-'))
+            .attr('gasp-removable', function(d) {
+              return d.removable
+            })
+            .attr('gasp-creator', function(d) {
+              return d.performed_by? d.performed_by.username: null
+            })
             
 
           selection.selectAll('.note-shadow').attr({
-            'stroke-width': 2,
-            stroke: 'rgba(255,255,255,0.87)',
+            'stroke-width': 1,
+            stroke: 'black',
             x: function(d) {
-              return d.bounds.x + 1
+              return d.bounds.x - 1
             },
             y: function(d) {
-              return d.bounds.y + 1
+              return d.bounds.y - 1
             },
             width: function(d) {
-              return d.bounds.width
+              return d.bounds.width + 2
             },
             height: function(d) {
-              return d.bounds.height
+              return d.bounds.height + 2
             }
 
           })
@@ -411,7 +420,11 @@ angular.module('histograph')
 
         img.addEventListener( 'load', function(e){
           console.log(e)
-          
+          element.css({
+            'position':'relative',
+            width: e.target.offsetWidth,
+            margin: '0px auto'
+          })
           scope.realHeight = this.naturalHeight;
           scope.realWidth = this.naturalWidth;
           scope.ready = true;
