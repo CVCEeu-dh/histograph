@@ -1040,19 +1040,18 @@ angular.module('histograph')
     $scope.ok = function () {
       // get the annotation, if any
       var params = {};
-
-      if(options && options.query) {
+      var entities = [].concat($scope.persons, $scope.locations, $scope.organizations)
+      if(options && options.context) {
         params.annotation = JSON.stringify({
           context: options.context,
-          ranges: options.annotator.editor.annotation.ranges,
-          quote: options.annotator.editor.annotation.quote
+          ranges: options.annotator? options.annotator.editor.annotation.ranges: options.ranges,
+          quote:  options.annotator?  options.annotator.editor.annotation.quote: _.map(entities, 'props.name').join(', ')
         });
 
       }
 
-
       $log.log('ContributeModalCtrl -> ok()', 'saving...');
-      var entities = [].concat($scope.persons, $scope.locations, $scope.organizations)
+      
       for(var i in entities)
         EntityRelatedExtraFactory.save({
           id: entities[i].id,

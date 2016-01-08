@@ -171,20 +171,43 @@ angular.module('histograph')
             .on('mouseup', function() {
               mouseIsDown = false;
               anchor=null;
+              var w = parseInt(note.attr('width')),
+                  h = parseInt(note.attr('height'));
 
-              if(parseInt(note.attr('width')) < 20 || parseInt(note.attr('height')) < 20) {
+              if((isNaN(w) || isNaN(h)) || (w < 20 || h < 20)) {
                 console.log('width or height not valid')
                 return
               }
-              console.log('translateToRegion', translateToRegion({
-                x: parseInt(note.attr('x')),
-                y: parseInt(note.attr('y')),
-                width: parseInt(note.attr('width')),
-                height: parseInt(note.attr('height')),
-              }))
+              // froze annotation till the process is either submitted or discarded
+              var region = translateToRegion({
+                    x: parseInt(note.attr('x')),
+                    y: parseInt(note.attr('y')),
+                    width: parseInt(note.attr('width')),
+                    height: parseInt(note.attr('height')),
+                  });
+
               scope.contribute({
                 item: scope.item,
-                type: 'person'
+                type: 'person',
+                options: {
+                  query: '',
+                  context: 'picture',
+                  ranges: [region],
+                  quote: '', 
+                  discard: function(){
+                    note.attr({
+                      width: 0,
+                      height: 0
+                    })
+                  },
+                  submit: function(){
+                    
+                    note.attr({
+                      width: 0,
+                      height: 0
+                    })
+                  }
+                }
               });
               scope.$apply();
             })
@@ -244,7 +267,7 @@ angular.module('histograph')
             x: scope.realWidth/scope.width,
             y: scope.realHeight/scope.height,
           };
-          console.log(bounds)
+          
           return {
             left: bounds.x * coeff.x,
             top: bounds.y * coeff.y,
@@ -258,11 +281,12 @@ angular.module('histograph')
             x: scope.realWidth/scope.width,
             y: scope.realHeight/scope.height,
           };
+          console.log('translateFromRegion', region, 'w', scope.width, scope.height)
           return {
             x: parseInt(region.left) / coeff.x,
             y: parseInt(region.top) / coeff.y,
-            width: ( parseInt(region.right) -  parseInt(region.left)) * coeff.x,
-            height: ( parseInt(region.bottom) -  parseInt(region.top)) * coeff.y
+            width: ( parseInt(region.right) -  parseInt(region.left)) / coeff.x,
+            height: ( parseInt(region.bottom) -  parseInt(region.top)) / coeff.y
           }
         };
 
@@ -275,16 +299,16 @@ angular.module('histograph')
           // scope.notes
           var selection = svg.selectAll('.note')
             .data(scope.notes.map(function(d) {
-              console.log(d)
               d.bounds = translateFromRegion(d.region);
               return d;
-            }), function (d, i){
+            }), function (d, i) {
               return i
             });
 
           var newbies = selection.enter()
             .append('g')
               .attr('class', 'note')
+              
 
           newbies
             .append('rect')
@@ -295,8 +319,8 @@ angular.module('histograph')
               .attr('class', 'note-borders')
           // update
           selection.selectAll('.note-borders').attr({
-            'stroke-width': 2,
-            
+            'stroke-width': 1,
+            'fill': 'rgba(255,255,255,0)',
             x: function(d) {
               return d.bounds.x
             },
@@ -311,15 +335,21 @@ angular.module('histograph')
             }
 
           })
+            .attr('data-id', function(d) {
+              return d.id
+            })
+            .attr('gasp-type', 'person')
+            .attr('gasp-parent', [scope.item.type, scope.item.id].join('-'))
+            
 
           selection.selectAll('.note-shadow').attr({
-            'stroke-width': 4,
+            'stroke-width': 2,
             stroke: 'rgba(255,255,255,0.87)',
             x: function(d) {
-              return d.bounds.x
+              return d.bounds.x + 1
             },
             y: function(d) {
-              return d.bounds.y
+              return d.bounds.y + 1
             },
             width: function(d) {
               return d.bounds.width
@@ -374,13 +404,18 @@ angular.module('histograph')
         //       fill: 'rgba(124,240,10,0.5)'
         //     }).call(drag);
         
-
+        scope.$watch('notes', function(n) {
+          if(n && scope.ready)
+            loadAnnotations();
+        }, true)
 
         img.addEventListener( 'load', function(e){
+          console.log(e)
+          
           scope.realHeight = this.naturalHeight;
           scope.realWidth = this.naturalWidth;
-          debugger
-          resize(e.srcElement.offsetWidth, e.srcElement.offsetHeight)
+          scope.ready = true;
+          resize(e.target.offsetWidth, e.target.offsetHeight);
           start();
           loadAnnotations();
         });

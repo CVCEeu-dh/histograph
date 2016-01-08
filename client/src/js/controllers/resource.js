@@ -61,7 +61,9 @@ angular.module('histograph')
     $scope.loadAnnotations = function(options, next) {
 
       next(
-        $scope.notes.map(function (d) {
+        $scope.notes.filter(function(d) {
+          d.props.annotation.context != 'picture'
+        }).map(function (d) {
 
           return _.assign({}, d.props.annotation, {
             "annotator_schema_version": "v1.0",        // schema version: default v1.0
@@ -125,7 +127,20 @@ angular.module('histograph')
         $log.info('ResourceCtrl socket@entity:create-related-resource:done - by:', result.user);
         // change the tags...
         $scope.item = result.data.related.resource; 
-        $scope.$parent.$broadcast(EVENTS.API_PARAMS_CHANGED);
+
+        if(result.data.related.action.type == 'annotate') {debugger
+          // add region to annota directive in the page
+          if(result.data.related.action.props.annotation.context == 'picture')
+            $scope.positions.push(_.assign({
+              id: _.first(_.filter(result.data.related.action.mentioning, {type: 'person'})).id,
+              performed_by: result.data.related.action.performed_by,
+              creation_date: result.data.related.action.props.creation_date,
+              region: result.data.related.action.props.annotation.ranges[0]
+            }, result.data.related.action.props.annotation))
+        }
+
+
+        $scope.$broadcast(EVENTS.API_PARAMS_CHANGED);
       }
     });
 
@@ -134,7 +149,12 @@ angular.module('histograph')
       if(result.resource.id == $stateParams.id) {
         $log.info('ResourceCtrl socket@entity:upvote-related-resource:done - by:', result.user);
         $scope.item = result.data.related.resource; 
-      } // update user notificaation
+
+        // update annotations
+        if(result.data.related.action.type == 'annotate') {
+
+        }
+      }
         
     })
 
@@ -199,11 +219,21 @@ angular.module('histograph')
       yaml: yamls
     };
 
-    $scope.positions = yamls;
+    // add user annotation from annotations promise
+
+    $scope.positions = yamls.concat(
+      _.filter(_.map(annotations.result.items, function (d) {
+          return _.assign({
+            id: _.first(d.mentioning).id,
+            performed_by: d.performed_by,
+            creation_date: d.props.creation_date,
+            region: d.props.annotation.ranges[0]
+          }, d.props.annotation);
+        }), {context: 'picture'})
+    );
     
     $scope.currentVersion =  resource.result.item.positionings[0];//$scope.mergedVersion;
-    
-    
+
       // get theaccepted version
     //
     
