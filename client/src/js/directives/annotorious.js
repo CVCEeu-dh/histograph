@@ -172,7 +172,7 @@ angular.module('histograph')
               mouseIsDown = false;
               anchor=null;
 
-              if(parseInt(note.attr('width')) < 20 || parseInt(note.attr('height')) < 20)) {
+              if(parseInt(note.attr('width')) < 20 || parseInt(note.attr('height')) < 20) {
                 console.log('width or height not valid')
                 return
               }
