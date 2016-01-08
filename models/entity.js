@@ -246,7 +246,10 @@ module.exports = {
       }, function (err, results) {
         if(err)
           next(err);
-        else
+        else {
+          if(results.action.type == Action.ANNOTATE)
+            results.action.props.annotation = parser.yaml(results.action.props.annotation);
+
           next(null, {
             id: result.ent.id,
             type: result.ent.type,
@@ -257,6 +260,7 @@ module.exports = {
             },
             rel: result.rel.properties
           });
+        }
       });
     });
   },
