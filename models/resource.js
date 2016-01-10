@@ -617,6 +617,17 @@ module.exports = {
         }
         return '';
       }
+      if(settings.disambiguation.regexp && settings.disambiguation.regexp[d]) {
+        // apply recursively
+        
+        var content = (resource[d + '_' + options.language] || '')
+        _.each(settings.disambiguation.regexp[d], function (rule) {
+          content = content.replace(rule.pattern, rule.replace);
+        })
+        console.log('content', content)
+        
+        return content
+      }
       // console.log(options, d, d + '_' + options.language)
       return resource[d + '_' + options.language] || '';
     })).join('. ');
@@ -827,7 +838,7 @@ module.exports = {
             language: language,
             fields: settings.disambiguation.fields
           });
-          console.log(settings.disambiguation.fields)
+          console.log(settings.disambiguation.fields, content, language)
           // launch the extraction chain, cfr settings.disambiguation.services
           async.parallel(_.map(settings.disambiguation.services, function (supportedLanguages, service) {
             return function (_callback) {
