@@ -170,8 +170,10 @@ ORDER BY resource.props.start_time ASC
 
 // name: count_resources
 // count resources having a version, with current filters
-MATCH (res:resource)<-[:appears_in]-(ent)
+MATCH (res:resource)
 {if:with}
+  WITH res
+  MATCH (res)<-[:appears_in]-(ent)
   WHERE id(ent) IN {with}
 {/if}
 WITH DISTINCT res
@@ -373,6 +375,9 @@ RETURN col
     {/if}
     {if:url_de}
       res.url_de = {url_de},
+    {/if}
+    {if:title_it}
+      res.title_it = {title_it},
     {/if}
     {if:title_en}
       res.title_en = {title_en},
