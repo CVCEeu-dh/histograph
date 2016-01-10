@@ -1,0 +1,62 @@
+/*
+  Patch
+*/
+header{
+  height: 70px;
+  line-height: 70px;
+  background: #f0f0f0;
+  padding: 0 50px 0 70px;
+}
+
+.navbar-header a {
+    color: black;
+    font-size: 17px;
+}
+
+.view {
+  top: 30px;
+  background: #fff;
+}
+
+header ul.menu li a{
+  line-height: 70px
+}
+
+header ul.menu li.active a{
+  color: #FF5742;
+}
+
+header ul.menu li a:hover{
+  color: black
+}
+
+#search-field {
+    padding-top: 23px;
+}
+#search-field input{
+  background: transparent;
+  font-size: 13px;
+  color: black;
+}
+
+#milkyway {
+  position: fixed;
+  top: 70px;
+  left: 0;
+  right: 0;
+  bottom: 50px;
+}
+
+#milkyway.explore.persons{
+  left:0;
+}
+
+#milkyway.graph{
+  left:0;
+}
+
+.explore #see-also {
+    width: auto;
+    margin-left: 0;
+    left: 35px;
+}

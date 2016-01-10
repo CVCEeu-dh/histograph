@@ -222,18 +222,24 @@ a#header-title {
 
 .item{
   position: relative;
-  border: 1px solid #E1E1E0;
-  border-bottom-width: 3px;
+  
   background: white;
-  margin: 10px 0;
-  background-clip: padding-box;
-  border-radius: 2px;
-  max-width: 460px;
+  
+  margin: 20px;
+
   /*margin: 0 auto 100px auto;*/
   font-size: 13px;
     line-height: 21px;
+  max-width: 460px;
 }
 
+.item.shadow{
+   background-clip: padding-box;
+  margin: 10px 0;
+    border-radius: 2px;
+  border: 1px solid #E1E1E0;
+  border-bottom-width: 3px;
+}
 
 .item h3>span{
   font-weight: bold;
@@ -977,14 +983,17 @@ header ul li .notification a {
   margin: 20px 0px;
   background-color: white;
   padding: 20px 0px 0px 0px;
+  
+
+}
+
+.related.shadow{
   border: 1px solid #E1E1E0;
   /*border-bottom-width: 3px;*/
   background-clip: padding-box;
   border-radius: 3px;
   box-shadow: 0 1px 2px 0 rgba(0,0,0,0.22);
-
 }
-
 
 .related.user {
   padding-bottom: 20px;
