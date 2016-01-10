@@ -37,6 +37,22 @@ describe('helpers: text & geo filters', function() {
     done();
   });
 });
+
+describe('helpers: socialtags', function() {
+  it('should return the expected hashtags as entities for a given tweet', function (done) {
+    var parser = require('../parser.js');
+    var tweet = 'Siamo pronti per metterci in cammino sulla #Francigena, verso il #Giubileo da #Siena a #Roma! @radiofrancigena  #ciccio';
+    helpers.socialtags({
+      text: tweet
+    }, function (err, entities) {
+      var annotated = parser.annotate(tweet, entities);
+      console.log(annotated)
+      should.equal(annotated, 'Siamo pronti per metterci in cammino sulla [#Francigena](), verso il [#Giubileo]() da [#Siena]() a [#Roma]()! [@radiofrancigena]()  [#ciccio]()')
+      done();
+    });
+  });
+
+});
 // describe('alchemyapi entity extraction service', function() {
 //   it('should merge by wikipedia link', function (done) {
 //     // body...
