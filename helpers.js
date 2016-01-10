@@ -879,8 +879,10 @@ module.exports = {
     
     if(!options.strict) {
       //if(!options.end_date) {
+        start.startOf('day');
+        end = start.clone();
         end.add(24, 'hours').subtract(1, 'minutes');
-        start.set('hour', 0);
+        
       //}
     }
     
