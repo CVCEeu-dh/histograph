@@ -215,19 +215,72 @@ module.exports = {
     });
   },    
   
+  importTwitter: function(options, callback) {
+    console.log(clc.yellowBright('\n   tasks.resource.importTwitter'));
+    console.log(options.data[0])
+     // check integrioty, @todo
+    var q = async.queue(function (tweet, nextTweet) {
+      var resource = {
+        type: 'tweet',
+        slug: tweet.id,
+        mimetype: 'text/plain',
+        name: tweet.from_user_name + ' - ' + tweet.text,
+        user: options.marvin
+      }
+
+      // add time
+      _.assign(resource, helpers.reconcileIntervals({
+        start_date: tweet.time, 
+        format: 'X'
+      }))
+
+      // language
+      resource.languages = [ tweet.lang ];
+
+      // title and caption
+      resource['title_'+tweet.lang] = tweet.from_user_name + ' - ' + tweet.text;
+
+      // console.log(resource)
+
+
+      
+      console.log(clc.blackBright('   creating ...', clc.whiteBright(resource.slug)))
+      
+      console.log(resource);
+      Resource.create(resource, function (err, res) {
+        if(err) {
+          q.kill();
+          callback(err)
+        } else {
+          console.log(clc.blackBright('   resource: ', clc.whiteBright(res.id), 'saved,', q.length(), 'resources remaining'));
+      
+          nextTweet();
+          
+        }
+      })
+
+    }, 1);
+    q.push(options.data)
+    q.drain = function(){
+      callback(null, options);
+    };
+  },
+
   importData: function(options, callback) {
     console.log(clc.yellowBright('\n   tasks.resource.importData'));
     // check that data model is correct enough. 
     // Cfr. queries/resource.cyp --> merge_resource query
     var COLUMNS    = [ // mandatory column names
         'slug',
+        'type', // according to settings.types.resources
         'languages',
         'title_en',
         'caption_en',
         'url_en',
         'start_date',
         'end_date',
-        'viaf_id'
+        'viaf_id', // optional
+        'doi'      // optional
       ],
       
       languages,
