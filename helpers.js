@@ -360,7 +360,56 @@ module.exports = {
       
     })
   },
- 
+  
+  /**
+    Call a custom service for twitter /inbstagram/facebook user/hashtag, served as custom entities..
+    If there are no entities, res will contain an empty array but no error will be thrown.
+    Test with mocha:
+    mocha -g 'helpers: socialtags'
+
+    @param options - MUST contain options.text
+    @return err, res
+   */
+  socialtags: function(options, next) {
+
+    
+    
+    var hashtags = /(^|\s)(#[A-Za-z0-9-_]+)/g,
+        users    = /(^|\s)(@[A-Za-z0-9-_]+)/g,
+        entities = [];
+
+    while (match = hashtags.exec(options.text)) {
+      entities.push({
+        name: match[2],
+        type: 'hashtag',
+        context: {
+          left:  match[1].length + match.index,
+          right: match[1].length + match.index + match[2].length,
+          matched_text: match[2]
+        }
+      })
+    }
+
+    while (match = users.exec(options.text)) {
+      entities.push({
+        name: match[2],
+        type: 'person',
+        links_tweet:  match[2],
+        context: {
+          left:  match[1].length + match.index,
+          right: match[1].length + match.index + match[2].length,
+          matched_text: match[2]
+        }
+      })
+    }
+
+    console.log(entities)
+    if(!next)
+      return entities;
+
+    next(null, entities);
+  },
+
   /**
     Call textrazor service for people/place reconciliation.
     When daily limit has been reached, the IS_EMPTY error message will be given to next()
