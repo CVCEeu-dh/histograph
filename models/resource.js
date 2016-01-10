@@ -625,7 +625,7 @@ module.exports = {
           content = content.replace(rule.pattern, rule.replace);
         })
         console.log('content', content)
-        
+
         return content
       }
       // console.log(options, d, d + '_' + options.language)
@@ -838,7 +838,7 @@ module.exports = {
             language: language,
             fields: settings.disambiguation.fields
           });
-          console.log(settings.disambiguation.fields, content, language)
+          console.log(settings.disambiguation.fields, language)
           // launch the extraction chain, cfr settings.disambiguation.services
           async.parallel(_.map(settings.disambiguation.services, function (supportedLanguages, service) {
             return function (_callback) {
@@ -846,9 +846,14 @@ module.exports = {
                 _callback(null, []);
                 return;
               };
+              var contentToAnalyze = ''+content;
+              if(settings.disambiguation.regexp && settings.disambiguation.regexp[service])
+                _.each(settings.disambiguation.regexp[service], function (rule) {
+                  contentToAnalyze = contentToAnalyze.replace(rule.pattern, rule.replace);
+                })
               console.log(service,'calling for', language);
               helpers[service]({
-                text: content
+                text: contentToAnalyze
               }, function (err, _entities) {
                 console.log(service,'success for language', language);
                 if(err)
