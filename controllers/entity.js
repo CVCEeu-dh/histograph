@@ -18,7 +18,8 @@ var settings   = require('../settings'),
     neo4j      = require('seraph')(settings.neo4j.host),
 
     Action     = require('../models/action'),
-    Entity     = require('../models/entity');
+    Entity     = require('../models/entity'),
+    Resource   = require('../models/resource');
     
 
 module.exports = function(io){
@@ -365,11 +366,19 @@ module.exports = function(io){
       
       if(!form.isValid)
         return helpers.formError(form.errors, res);
-      // get the total available
+     
       Entity.getRelatedResources(form.params, function (err, items, info) {
-        helpers.models.getMany(err, res, items, info, form.params);
+        
+        if(form.params.limit == 1 && items.length)
+          Resource.get({
+            id: +items[0].id
+          }, req.user, function (err, item) {
+            helpers.models.getMany(err, res, [item], info, form.params);
+          });
+        else
+          helpers.models.getMany(err, res, items, info, form.params);
       });
-    }, // get graph of resources and other stugff, a graph object of nodes and edges
+    },
     
     getRelatedEntities: function (req, res) {
       var form = validator.request(req, {

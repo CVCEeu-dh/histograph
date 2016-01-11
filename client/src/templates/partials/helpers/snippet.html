@@ -23,13 +23,16 @@
           <div ng-if="relatedItem.props.links_wiki">DBPEDIA: {{relatedItem.props.links_wiki}}</div>
         </div>
         <div class="actions">
-          <a class="action" title="visit" uib-tooltip="view details and related documents" uib-tooltip-placement="top" uib-tooltip-append-to-body="true" ng-href='#/e/{{relatedItem.id}}'> <!-- ng-click="addToFilter(relatedItem)"> -->
-            <span class="fa fa-link"></span></a>
+          
           <!-- <a class='action'>
             <span class="fa fa-target"></span></a>
           </a> -->
-          <a class="action" title="filter" uib-tooltip="add to your bookmarks" uib-tooltip-placement="top" uib-tooltip-append-to-body="true" ng-click="queue(relatedItem)">
-            <span class="fa fa-bookmark-o"></span></a>
+          <!-- <a class="action" title="filter" uib-tooltip="add to your bookmarks" uib-tooltip-placement="top" uib-tooltip-append-to-body="true" ng-click="queue(relatedItem)">
+            <span class="fa fa-bookmark-o"></span></a> -->
+        </div>
+        <div class='btn-group btn-group dual'>
+          <a class='btn btn-default btn-line-white' ng-href='/#/e/{{relatedItem.id}}'>more</a>
+           <button class='btn btn-default btn-line-white' ng-click="queue(relatedItem)"> <span class="fa fa-bookmark-o"></span></button>
         </div>
         <div class='clear'></div>
       </div>
@@ -45,8 +48,13 @@
         <div class='content'>
           <h4 marked="relatedItem.props|lookup:'title':language"></h4>
           <div class='date'>{{relatedItem.props | guessInterval}} {{language}}</div>
-          
+
         </div>
+        <div class='btn-group btn-group dual'>
+          <a class='btn btn-default btn-line-white' ng-href='/#/r/{{relatedItem.id}}'>more</a>
+           <button class='btn btn-default btn-line-white' ng-click="queue(relatedItem)"> <span class="fa fa-bookmark-o"></span></button>
+        </div>
+        
         <div class='clear'></div>
       </div>
     </div>

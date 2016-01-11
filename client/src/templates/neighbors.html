@@ -1,4 +1,52 @@
-<div id='perspective-menu' class="tk-proxima-nova header-menu" ng-include src="'templates/partials/helpers/menu.html'">
+<div id='perspective-menu' class="tk-proxima-nova header-menu">
+  <ul>
+    <li class='path'>
+      Find possible connections between bookmarked elements
+
+    </li>
+    <li>
+      <div class='grammar'>
+        <span ng-if='filters.type'>
+            &nbsp;{{grammar.connector.type}}&nbsp;
+        </span>
+        <div class='grammar-choice' ng-if='grammar.types'>
+          <span ng-if='filters.type'>
+            <span ng-repeat='filter in filters.type'>
+              <span class="filter "><b>{{filter}}</b><span ng-click='removeFilter("type",filter)'>&nbsp;<i class="fa fa-times-circle"></i></span></span>{{!$last? ' OR ': ''}}
+            </span>
+          </span>
+          <span ng-if='!filters.type'>
+            {{grammar.types[0].name}}
+          </span>
+          <div class="btn-group" uib-dropdown is-open="false">
+            <button id="single-button" type="button" class="btn btn-default" uib-dropdown-toggle>
+              <i class='fa fa-angle-down'></i>
+            </button>
+            <ul class="uib-dropdown-menu dropdown-menu" role="menu" aria-labelledby="single-button">
+              <li ng-repeat="item in grammar.types">
+                <a ng-click='setType(grammar, item)'>
+                  {{item.name}}
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+        
+        <!-- typeahead -->
+        <span ng-if='filters.with'>
+          &nbsp;{{grammar.connector.relatedTo}}&nbsp;
+        </span>
+        
+        <!-- filters -->
+        <span ng-repeat='item in filterItems.with'>
+          <div class="grammar-choice">
+            <span class="filter {{item.type}}"><b data-id='{{item.id}}' gasp-type='{{item.type}}'>{{item.props|lookup:'name':language:24}}</b><span tooltip-append-to-body="true" tooltip='remove {{item.type}} {{item.props|lookup:"name":language:24}} from filters' ng-click='removeFilter("with",item.id)'>&nbsp;<i class="fa fa-times-circle"></i></span></span>
+          </div>
+          {{!$last? ' OR ': ''}}
+        </span>
+      </div>
+    </li>
+  </ul>
 </div>
 
 

@@ -163,7 +163,7 @@ a#header-title {
   overflow: hidden;
 }
 
-.explore .masonry-brick .related{
+.masonry-brick .related{
   margin: 10px
 }
 
@@ -6695,12 +6695,14 @@ g.note.manual .note-borders{
 }
 
 @media screen and (min-width: 1200px) {
-  .entity #see-also, .resource #see-also{
-    width: 480px;
+  .resource #see-also{
+    left: 680px;
+    margin-left: 0;
+        width: auto;
   }
 
   .resource #perspective, .entity #perspective{
-    right: 500px;
+    width: 680px;
   }
 
   .modal-dialog {

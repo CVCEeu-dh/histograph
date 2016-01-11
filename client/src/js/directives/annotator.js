@@ -206,6 +206,8 @@ angular.module('histograph')
         });
         annotator.publish('resize')
         // lazyload annotation for this specific  element
+        if(!scope.loadAnnotations)
+          return;
         setTimeout(function(){
           scope.loadAnnotations({
             context: attrs.context

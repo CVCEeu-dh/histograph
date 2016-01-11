@@ -19,7 +19,8 @@ header{
 }
 
 header ul.menu li a{
-  line-height: 70px
+  line-height: 70px;
+  color: #8A8A8A;
 }
 
 header ul.menu li.active a{
@@ -37,6 +38,8 @@ header ul.menu li a:hover{
   background: transparent;
   font-size: 13px;
   color: black;
+  width: 110px;
+
 }
 
 #milkyway {
@@ -59,4 +62,183 @@ header ul.menu li a:hover{
     width: auto;
     margin-left: 0;
     left: 35px;
+}
+header ul.dropdown-menu li .notification a {
+    display: inline;
+    line-height: inherit;
+    padding: 0;
+}
+#see-also{
+  right: 0;
+  top: 80px;
+}
+
+#perspective-menu{
+  
+
+  background: white;
+  height: auto;
+  border-bottom: 1px solid #d8d8d8;
+}
+
+#perspective-menu ul{
+  border-bottom: none;
+}
+/*
+  View specific perspective menu
+*/
+.explore #perspective-menu {
+  top:40px;
+}
+
+.resource #perspective-menu {
+  position: relative;
+  width: 100%;
+  height: auto;
+  top: 0;
+  left: 0;
+}
+.resource #perspective-menu > ul{
+  height: auto
+}
+.resource #perspective-menu > ul> li {
+  float: none;
+  display: inline-block;
+  height: auto
+}
+
+.search #perspective-menu {
+  top: 40px;
+  left: 190px;
+}
+
+.search #perspective-menu > ul, .resource #perspective-menu > ul{
+  padding-left: 20px;
+}
+
+.explore #perspective-menu > ul{
+  padding-left: 70px;
+}
+
+.user #perspective-menu, .neighbors #perspective-menu{
+      top: 40px;
+}
+
+.explore #see-also{
+  top: 80px;
+}
+.search #see-also {
+  left: 190px;
+  top: 80px;
+}
+.user #see-also,.neighbors #see-also{
+  left:10px;
+}
+
+#milkyway.explore{
+  top: 110px;
+}
+#milkyway.search  {
+  top: 110px;
+  left: 540px
+}
+#milkyway.user, #milkyway.neighbors{
+  top: 110px;
+}
+
+#pop{
+  z-index: 1052;
+ }
+/*
+  Modals
+*/
+.modal.in .modal-dialog{
+  pointer-events: none;
+}
+.modal-content{
+  pointer-events:auto;
+}
+.modal.inspect-metadata .modal-dialog{
+  width: 360px;
+  height: 500px
+}
+
+.modal.inspect .modal-body.with-sidebar{
+  padding: 0;
+}
+
+.modal.inspect .modal-body.with-sidebar .item{
+  padding:0;
+}
+
+.modal.inspect .modal-body.with-sidebar .item .type, .modal.inspect .modal-body.with-sidebar .item h3{
+  margin:0;
+}
+.modal.inspect .modal-body.with-sidebar .item .meta{
+  margin: 20px 0;
+}
+.modal.inspect .modal-body.with-sidebar .item img{
+  min-width: auto;
+  max-height: none;
+}
+.modal.inspect .modal-body.with-sidebar .item blockquote{
+    padding: 20px 0;
+}
+.modal.inspect .modal-body.with-sidebar .item .doi{
+    padding: 10px 20px;
+}
+
+/*
+  Playlist
+*/
+#playlist-shadow.neighbors{
+  opacity: 0
+}
+#playlist-queue{
+  bottom:0;
+}
+/*
+
+*/
+#sigma-snippets .btn-line-white .fa{
+      font-size: 13px;
+    line-height: 15px;
+
+}
+/*
+  MEDIA PATCH
+*/
+@media screen and (min-width: 992px) {
+  .resource #perspective-menu{
+    top: 40px;
+    left: 690px;
+    width: auto;
+    right: 0;
+    position: absolute;
+  }
+
+  .resource #perspective, .entity #perspective{
+    width: 680px;
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  
+
+  .resource #perspective-menu{
+    top: 40px;
+    left: 690px;
+  }
+  
+  
+
+  .resource .masonry-brick{
+    width: 50%;
+  }
+}
+
+@media screen and (min-width: 1440px) {
+  .resource .masonry-brick{
+    width: 33%;
+  }
 }

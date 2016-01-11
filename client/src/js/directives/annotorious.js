@@ -295,6 +295,8 @@ angular.module('histograph')
           load only babe. (eventually add)
         */
         function loadAnnotations() {
+          if(!scope.notes || !scope.notes.length)
+            return;
           console.log(scope.notes)
           // draw freely
           // scope.notes

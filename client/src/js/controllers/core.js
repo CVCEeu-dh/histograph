@@ -813,10 +813,36 @@ angular.module('histograph')
       MetadataInspect
       ---
       Open the inspector for document metadata ...
-      Require the resource id
-    */
-    $scope.inspectMetadata = function(resource) {
+      Require the item.id and the item.type properties
 
+      @param item   - object having a item id
+      @param type     - type of metadata
+    */
+    $scope.inspectMetadata = function(item, type, options) {
+      $log.debug('CoreCtrl -> inspectMetadata() - item:', item);
+
+      var language      = $scope.language;
+      var modalInstance = $uibModal.open({
+        animation: true,
+        templateUrl: 'templates/modals/inspect-metadata.html',
+        controller: 'InspectMetadataModelCtrl',
+        windowClass: "modal fade in inspect-metadata",
+        size: 'sm',
+        resolve: {
+          options: function() {
+            return options || {}
+          },
+          type: function(){
+            return type
+          },
+          item: function() {
+            return item
+          },
+          language: function() {
+            return language
+          }
+        }
+      });
     };
 
     /*
@@ -839,7 +865,7 @@ angular.module('histograph')
         size: 'sm',
         resolve: {
           options: function() {
-            return options
+            return options || {}
           },
           type: function(){
             return type
@@ -1133,6 +1159,44 @@ angular.module('histograph')
         });
     };
 
+   
+  })
+  /*
+    This controller handle the modal bootstrap that allow users to propose a new content for something.
+    Base controller for metadata issues.
+  */
+  .controller('InspectMetadataModelCtrl', function ($scope, $log, $uibModalInstance, type, item, options, language) {
+    $log.log('InspectMetadataModelCtrl ready', type, item)
+    
+    $scope.type = type;
+    $scope.item = item;
+
+    $scope.date = {
+      from: $scope.item.start_date? (new Date()):null,
+      to: $scope.item.end_date? (new Date()):null,
+    }
+    // $scope.ok = function () {
+    //   if(type == 'date')
+    //     ResourceRelatedFactory.save({
+    //       model: 'issue',
+    //       id: target.id
+    //     }, {
+    //       type: 'date',
+    //       solution: [$scope.start_date, $scope.end_date],
+    //       description: $scope.description || ''
+    //     }, function(res) {
+    //       console.log(res)
+    //       //$modalInstance.close();
+    //     });
+    // };
+
+    $scope.ok = function () {
+      $uibModalInstance.close();
+    };
+
+    $scope.cancel = function () {
+      $uibModalInstance.dismiss('cancel');
+    };
    
   })
   /*

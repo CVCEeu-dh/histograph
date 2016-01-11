@@ -2,11 +2,7 @@
   <div class="question">
     Do you recognize a valid <strong>date</strong> for <a class='tag' ng-click='challengeAccepted()'>{{task.resource.props|lookup:"name":language}}</a>?
   </div>
-  <div class="related">
-      <div class='type'>{{task.resource.props.type}}</div>
-    <h4><a ng-href='/#/r/{{task.resource.id}}' marked='task.resource.props|lookup:"title":language'></a></h4>
-    <blockquote marked='task.resource.props|lookup:"caption":language'></blockquote>
-  </div>
+  
 </div>
 <div ng-if='task.type == "unknown_people"'>
   <div class="question">

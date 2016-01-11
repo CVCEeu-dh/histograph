@@ -239,7 +239,7 @@ angular
           template: '<div></div>',
           controller: 'ExploreEntitiesCtrl',
           grammar: {
-            label: 'view graph',
+            label: 'view people mentions',
             connector: {
               type: 'in documents of type',
               relatedTo: 'which mentions',
@@ -660,12 +660,13 @@ angular
         })
         .state('resource.resources', {
           url: '',
-          templateUrl: 'templates/partials/resources.html',
+          //templateUrl: 'templates/partials/resources.html',
+          templateUrl: 'templates/partials/resources-masonry.html',
           controller: 'RelatedItemsCtrl',
           grammar: {
-            label: 'documents',
+            label: 'Related documents',
             connector: {
-              type: 'in documents of type',
+              type: 'of type',
               relatedTo: 'which mentions',
               notRelatedTo: 'related to anyone',
               from: 'from',
@@ -955,23 +956,7 @@ angular
               from: 'from',
               to: 'to'
             },
-            types: [
-              {
-                name: 'of any type',
-              },
-              {
-                name: 'pictures',
-                filter: 'type=picture'
-              },
-              {
-                name: 'letters',
-                filter: 'type=letter'
-              },
-              {
-                name: 'treaty',
-                filter: 'type=treaty'
-              }
-            ],
+            types: GRAMMAR.AS_TYPES,
             relatedTo: {
               typeahead: 'entity'
             }
