@@ -14,7 +14,7 @@ header{
 }
 
 .view {
-  top: 30px;
+  top: 70px;
   background: #fff;
 }
 
@@ -70,7 +70,7 @@ header ul.dropdown-menu li .notification a {
 }
 #see-also{
   right: 0;
-  top: 80px;
+  top: 40px;
 }
 
 #perspective-menu{
@@ -87,9 +87,7 @@ header ul.dropdown-menu li .notification a {
 /*
   View specific perspective menu
 */
-.explore #perspective-menu {
-  top:40px;
-}
+
 
 .resource #perspective-menu {
   position: relative;
@@ -120,16 +118,13 @@ header ul.dropdown-menu li .notification a {
   padding-left: 70px;
 }
 
-.user #perspective-menu, .neighbors #perspective-menu{
-      top: 40px;
-}
 
 .explore #see-also{
-  top: 80px;
+  top: 40px;
 }
 .search #see-also {
   left: 190px;
-  top: 80px;
+  top: 40px;
 }
 .user #see-also,.neighbors #see-also{
   left:10px;
@@ -191,11 +186,44 @@ header ul.dropdown-menu li .notification a {
 /*
   Playlist
 */
+#playlist{
+  width:230px;
+  -webkit-transform: translateX(-230px);
+    -ms-transform: translateX(-230px);
+    transform: translateX(-230px);
+}
+#playlist-close{
+  z-index: 100;
+}
+#playlist-actions {
+  width: 100%;
+}
+#playlist-actions h5{
+    padding: 0 20px 0px 0;
+    border-bottom: 1px solid #383838;
+    color: #a9a9a9;
+    height: 70px;
+    line-height: 70px;
+    margin: 0 20px 0 20px;
+}
+#playlist-actions .contents{
+  color:#b0b0b0;
+  margin: 20px;
+    border-bottom: 1px solid #383838;
+    padding-bottom: 20px;
+
+}
 #playlist-shadow.neighbors{
   opacity: 0
 }
 #playlist-queue{
   bottom:0;
+}
+.playlist-item{
+  width: 210px
+}
+#playlist-queue{
+  top: 240px;
 }
 /*
 
@@ -217,8 +245,12 @@ header ul.dropdown-menu li .notification a {
     position: absolute;
   }
 
-  .resource #perspective, .entity #perspective{
+  .resource #perspective {
     width: 680px;
+  }
+
+  .entity #perspective{
+    width: 360px;
   }
 }
 

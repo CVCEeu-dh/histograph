@@ -177,8 +177,11 @@ html
                       i(class='fa fa-times-circle')
                   
             div(id='playlist-actions', class='btn-group')
-              a(ng-href='/#/neighbors/{{playlist | map:"id"}}', tooltip-append-to-body='true', tooltip='explore connections between your readlist', class='btn btn-primary')
-                i(class='fa fa-diamond')
+              h5 your bookmarks
+              div.contents
+                p find interesting resources and entites thanks to your bokmarked element
+                a(ng-href='/#/neighbors/{{playlist | map:"id"}}', tooltip-append-to-body='true', tooltip='explore connections between your readlist', class='btn btn-block btn-default btn-line-white') explore connections 
+                  i(class='fa fa-diamond')
               //- a(ng-href='/#/neighbors/{{playlist | map:"id"}}', tooltip-append-to-body='true', tooltip='explore neighborhood of your readlist', class='btn btn-primary')
               //-   i(class='fa fa-rocket')
               //- a(ng-href='/#/neighbors/{{playlist | map:"id"}}', tooltip-append-to-body='true', tooltip='save your readlist', class='btn btn-primary')
