@@ -32,6 +32,8 @@ angular.module('histograph')
         extra: _.first(_.shuffle(availableTasks))
       }, function(res) {
         $log.log('CrowdCtrl -> challenge() --> ', res);
+        if(res.status == 'empty')
+          return;
         $scope.isVisible = true;
         $scope.isChallengeAccepted = false;
         $scope.task = res.result.item;

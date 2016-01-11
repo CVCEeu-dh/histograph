@@ -89,29 +89,19 @@ header ul.dropdown-menu li .notification a {
 */
 
 
-.resource #perspective-menu {
-  position: relative;
-  width: 100%;
-  height: auto;
-  top: 0;
-  left: 0;
-}
-.resource #perspective-menu > ul{
-  height: auto
-}
-.resource #perspective-menu > ul> li {
-  float: none;
-  display: inline-block;
-  height: auto
-}
+
 
 .search #perspective-menu {
   top: 40px;
   left: 190px;
 }
 
-.search #perspective-menu > ul, .resource #perspective-menu > ul{
+.search #perspective-menu > ul{
   padding-left: 20px;
+}
+
+.resource #perspective-menu > ul{
+  padding-left: 70px
 }
 
 .explore #perspective-menu > ul{
@@ -233,17 +223,34 @@ header ul.dropdown-menu li .notification a {
     line-height: 15px;
 
 }
+
+
+
+#sigma-snippets .content .links{
+  margin-left:20px;
+  text-align: left
+}
+
+#sigma-snippets .content .links a:hover{
+  color: #fff;
+}
 /*
   MEDIA PATCH
 */
-@media screen and (min-width: 992px) {
-  .resource #perspective-menu{
-    top: 40px;
-    left: 690px;
-    width: auto;
-    right: 0;
-    position: absolute;
+@media screen and (min-width : 768px) {
+  .resource #see-also {
+    width: 320px
   }
+  .resource #perspective {
+    right: 320px;
+  }
+  header ul.menu li a{
+    padding: 0 10px;
+  }
+}
+
+@media screen and (min-width: 992px) {
+  /**/
 
   .resource #perspective {
     width: 680px;
@@ -252,14 +259,27 @@ header ul.dropdown-menu li .notification a {
   .entity #perspective{
     width: 360px;
   }
+
+  header ul.menu li a{
+    padding: 0 20px;
+  }
+  .resource #see-also {
+    left: 680px;
+    margin-left: 0;
+    width: auto ;
+}
 }
 
 @media screen and (min-width: 1200px) {
   
+  .resource #see-also {
+    left: 680px;
+    margin-left: 0;
+    width: auto ;
+}
 
   .resource #perspective-menu{
-    top: 40px;
-    left: 690px;
+    
   }
   
   
