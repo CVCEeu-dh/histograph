@@ -176,15 +176,15 @@ angular.module('histograph')
   /*
     
   */
-  .directive('annotator', function ($log) {
+  .directive('annotator', function ($log, $timeout) {
     return {
       restrict : 'E',
       link : function(scope, element, attrs) {
-        $log.log('::annotator');
+        $log.log('::annotator', attrs.context);
 
 
-
-        var annotator = angular.element(element).annotator().data('annotator');
+        var annotator = angular.element(element).annotator().data('annotator'),
+            _timer;
 
         
         annotator.addPlugin('Unsupported');
@@ -208,18 +208,37 @@ angular.module('histograph')
         });
         annotator.publish('resize')
         
-        // lazyload annotation for this specific  element
-        if(!scope.loadAnnotations)
+        scope.$watch('notes', function(notes) {
+          // ask for
+          if(notes && scope.language)
+            scope.sync();
+        }, true);
+
+        scope.$watch('language', function(language) {
+          // ask for
+          if(scope.notes.length && language)
+            scope.sync();
+        });
+
+
+        scope.sync = function(){
+          if(!scope.loadAnnotations)
           return;
-        setTimeout(function(){
-          scope.loadAnnotations({
-            context: attrs.context,
-            language: scope.language
-          }, function (annotations) {
-            debugger
-            annotator.loadAnnotations(annotations);
-          });
-        }, 20);
+
+          if(_timer)
+            $timeout.cancel(_timer);
+          _timer = $timeout(function(){
+            scope.loadAnnotations({
+              context: attrs.context,
+              language: scope.language
+            }, function (annotations) {
+              console.log(annotations)
+              annotator.loadAnnotations(annotations);
+            });
+          }, 10);
+        }
+        // lazyload annotation for this specific  element
+        
       }
     }
   });

@@ -97,7 +97,7 @@
         <div class='fluid-container'>
           <div>
             <div >
-              <annotator target="{{item.id}}" context="caption" annotations='{{notes}}'>
+              <annotator target="{{item.id}}" context="caption">
               <blockquote id='caption' ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'caption':language"></blockquote>
               <blockquote id='caption' ng-if='item.annotations.length == 0' context='item' marked="item.annotations|lookup:'caption':language"></blockquote>
               </annotator>
@@ -127,7 +127,7 @@
                 </div>
               </div>
               
-              <annotator>
+              <annotator ng-if='item.props.mimetype!="image"' context="full-text">
                 <div class='full-text' ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'url':language" ></div>
               </annotator>
             </div>
@@ -135,13 +135,6 @@
         </div>
           
         
-        <!-- <div annotator>
-        <div class="full-text" ng-if='item.props.mimetype!="image"' lazytext url='item.props|url:language'></div>
-        </div -->
-        <!-- 
-        <blockquote ng-if="item.props.stakeholders||item.props.caption">
-         {{item.props.stakeholders||item.props.caption}}
-        </blockquote> -->
         
         <div class="doi">
           <span marked="item.props|lookup:'ipr':language"></span>
