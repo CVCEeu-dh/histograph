@@ -25,7 +25,7 @@ validator.extend('isAnnotatorjs', function (str) {
   var q = {};
   try{
     q = JSON.parse(str);
-    return q.quote && q.ranges && q.ranges.length;
+    return q.quote && q.language && q.language.length == 2 && q.ranges && q.ranges.length;
   } catch(e) {
     console.log('OUCH', e)
     return false;

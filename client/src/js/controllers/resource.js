@@ -59,10 +59,10 @@ angular.module('histograph')
       Load notes attached to the current id
     */
     $scope.loadAnnotations = function(options, next) {
-
+      
       next(
         $scope.notes.filter(function(d) {
-          d.props.annotation.context != 'picture'
+          return d.props.annotation.context != 'picture' && d.props.annotation.language == $scope.language
         }).map(function (d) {
 
           return _.assign({}, d.props.annotation, {

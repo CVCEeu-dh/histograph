@@ -190,8 +190,10 @@ angular.module('histograph')
         annotator.addPlugin('Unsupported');
         annotator.addPlugin('HelloWorld', {
           annotationEditorShown: function(annotation, annotator) {
+            
             scope.contribute(scope.item, "entity", {
               context: attrs.context,
+              language: scope.language,
               query: annotation.quote,
               annotator: annotator,
               submit: function(annotator, result) {
@@ -205,13 +207,16 @@ angular.module('histograph')
           }
         });
         annotator.publish('resize')
+        
         // lazyload annotation for this specific  element
         if(!scope.loadAnnotations)
           return;
         setTimeout(function(){
           scope.loadAnnotations({
-            context: attrs.context
+            context: attrs.context,
+            language: scope.language
           }, function (annotations) {
+            debugger
             annotator.loadAnnotations(annotations);
           });
         }, 20);
