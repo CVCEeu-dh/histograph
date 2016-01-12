@@ -442,7 +442,9 @@ angular
         })
         .state('entity.resources', {
           url: '',
-          templateUrl: 'templates/partials/resources.html',
+          // templateUrl: 'templates/partials/resources.html',
+          templateUrl: 'templates/partials/resources-masonry.html',
+          
           controller: 'RelatedItemsCtrl',
           grammar: {
             label: 'related documents',

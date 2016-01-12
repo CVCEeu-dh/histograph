@@ -1578,7 +1578,7 @@ height: 150px;
 
 .nodes .line .weight{
       position: absolute;
-    top: 40px;
+    top: 40%;
     background: #575757;
     line-height: 20px;
     /* width: 20px; */

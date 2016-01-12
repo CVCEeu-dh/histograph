@@ -48,8 +48,13 @@ html
                   li(class='{{currentState.name == "explore.persons"?"active":""}}')
                     a(ng-href='#/per?{{qs}}')  graph
 
+                  li
+                    a.with-number(ng-click='toggleQueue()', uib-tooltip='your selection', tooltip-placement='bottom') my selection 
+                      //- i.fa.fa-bookmark
+                      div.number.animated.lite {{playlist.length}}
+
                   li(class='{{currentState.name == "explore.noise"?"active":""}}')
-                    a(href='#/noise') activity
+                    a(href='#/noise') activities
 
                   li(ng-controller='PulseController')
                     span(uib-dropdown, on-toggle="toggle(open)")
@@ -64,10 +69,7 @@ html
                             
                         li(ng-repeat="relatedItem in notifications", ng-include='"templates/partials/action-lite.html"')
                           
-                  li
-                    a.with-number(ng-click='toggleQueue()', uib-tooltip='open bookmark list', tooltip-placement='bottom')
-                      i.fa.fa-bookmark
-                      div.number.animated.lite {{playlist.length}}
+                 
 
                   li(class='{{currentState.name == "search.resources" || currentState.name == "search.persons" ?"active":""}}')
                     div
@@ -177,9 +179,9 @@ html
                       i(class='fa fa-times-circle')
                   
             div(id='playlist-actions', class='btn-group')
-              h5 your bookmarks
+              h5 your selection
               div.contents
-                p find interesting resources and entites thanks to your bokmarked element
+                p find interesting resources and entities in your selection
                 a(ng-href='/#/neighbors/{{playlist | map:"id"}}', tooltip-append-to-body='true', tooltip='explore connections between your readlist', class='btn btn-block btn-default btn-line-white') explore connections 
                   i(class='fa fa-diamond')
               //- a(ng-href='/#/neighbors/{{playlist | map:"id"}}', tooltip-append-to-body='true', tooltip='explore neighborhood of your readlist', class='btn btn-primary')

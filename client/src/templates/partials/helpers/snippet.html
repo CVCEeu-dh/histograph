@@ -1,11 +1,11 @@
-<div class='snip {{status}} {{center.type}}' data-id='{{center.id}}' ng-if='center' ng-click='setTarget(center)' style='background-image: url({{center.props.thumbnail}})' uib-tooltip="{{center.props|lookup:'name':language}}" tooltip-placement='right'>
+<div class='snip {{status}} {{center.type}}'  ng-if='center' ng-click='setTarget(center)' style='background-image: url({{center.props.thumbnail}})' uib-tooltip="{{center.props|lookup:'name':language}}" tooltip-placement='right'>
   <!-- <h2>{{center.props|lookup:'name':language}}</h2> -->
 </div>
 <div class="inner {{center?'wait':''}} {{status}}">
   
   <div class='nodes'>
     <div ng-if='items.length > 1' class="line">
-        <div class='weight'>{{totalItems}}</div>
+        <div class='weight'>{{totalItems || weight}}</div>
     </div>
     
     <div ng-repeat='relatedItem in items'>
@@ -36,7 +36,8 @@
         </div>
         <div class='btn-group btn-group dual' style='margin: 10px 0'>
           <a class='btn btn-default btn-line-white' ng-href='/#/e/{{relatedItem.id}}'>more</a>
-           <button class='btn btn-default btn-line-white' ng-click="queue(relatedItem)"> <span class="fa fa-bookmark-o"></span></button>
+          <button class='btn btn-default btn-line-white' ng-click="queue(relatedItem)"> <span class="fa fa-bookmark-o"></span></button>
+          <button class='btn btn-default btn-line-white' data-id='{{center.id}}'> <span class="fa fa-dot-circle-o"></span></button>
         </div>
         <div class='clear'></div>
       </div>
@@ -51,12 +52,13 @@
         </div>
         <div class='content'>
           <h4 marked="relatedItem.props|lookup:'title':language"></h4>
-          <div class='date'>{{relatedItem.props | guessInterval}} {{language}}</div>
+          <div class='date'>{{relatedItem.props | guessInterval}}</div>
 
         </div>
         <div class='btn-group btn-group dual'>
           <a class='btn btn-default btn-line-white' ng-href='/#/r/{{relatedItem.id}}'>more</a>
            <button class='btn btn-default btn-line-white' ng-click="queue(relatedItem)"> <span class="fa fa-bookmark-o"></span></button>
+           <button class='btn btn-default btn-line-white' data-id='{{center.id}}'> <span class="fa fa-dot-circle-o"></span></button>
         </div>
         
         <div class='clear'></div>

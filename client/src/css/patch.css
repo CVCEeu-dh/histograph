@@ -18,6 +18,10 @@ header{
   background: #fff;
 }
 
+a.with-number{
+  cursor:pointer;
+}
+
 header ul.menu li a{
   line-height: 70px;
   color: #8A8A8A;
@@ -42,9 +46,13 @@ header ul.menu li a:hover{
 
 }
 
+#search-field .dropdown-menu li a{
+  padding: 0;
+}
+
 #milkyway {
   position: fixed;
-  top: 70px;
+  top: 110px;
   left: 0;
   right: 0;
   bottom: 50px;
@@ -91,13 +99,10 @@ header ul.dropdown-menu li .notification a {
 
 
 
-.search #perspective-menu {
-  top: 40px;
-  left: 190px;
-}
+
 
 .search #perspective-menu > ul{
-  padding-left: 20px;
+  padding-left: 70px;
 }
 
 .resource #perspective-menu > ul{
@@ -120,16 +125,11 @@ header ul.dropdown-menu li .notification a {
   left:10px;
 }
 
-#milkyway.explore{
-  top: 110px;
-}
+
 #milkyway.search  {
-  top: 110px;
   left: 540px
 }
-#milkyway.user, #milkyway.neighbors{
-  top: 110px;
-}
+
 
 #pop{
   z-index: 1052;
@@ -234,10 +234,21 @@ header ul.dropdown-menu li .notification a {
 #sigma-snippets .content .links a:hover{
   color: #fff;
 }
+
+.entity #see-also{
+  margin-left: auto;
+  width: auto;
+  margin-right: 0px;
+  left: 360px;
+}
 /*
   MEDIA PATCH
 */
 @media screen and (min-width : 768px) {
+  .masonry-brick{
+    width: 100%;
+  }
+
   .resource #see-also {
     width: 320px
   }
@@ -251,13 +262,15 @@ header ul.dropdown-menu li .notification a {
 
 @media screen and (min-width: 992px) {
   /**/
-
+  .masonry-brick{
+    width: 50%;
+  }
   .resource #perspective {
     width: 680px;
   }
 
   .entity #perspective{
-    width: 360px;
+    width: 350px;
   }
 
   header ul.menu li a{
@@ -267,7 +280,7 @@ header ul.dropdown-menu li .notification a {
     left: 680px;
     margin-left: 0;
     width: auto ;
-}
+  }
 }
 
 @media screen and (min-width: 1200px) {
@@ -282,15 +295,20 @@ header ul.dropdown-menu li .notification a {
     
   }
   
-  
+  .entity .masonry-brick{
+    width: 33%;
+  }
 
-  .resource .masonry-brick{
+  .masonry-brick{
     width: 50%;
   }
 }
 
 @media screen and (min-width: 1440px) {
-  .resource .masonry-brick{
+  .masonry-brick{
     width: 33%;
+  }
+  .entity .masonry-brick{
+    width: 25%;
   }
 }
