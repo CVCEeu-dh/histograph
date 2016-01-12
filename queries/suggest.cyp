@@ -11,6 +11,9 @@ RETURN {
 UNION
 start n=node:node_auto_index({entity_query})
 WITH n
+MATCH (n)-[r:appears_in]->()
+WITH n, count(r) as distribution
+ORDER BY n.celebrity DESC, distribution DESC
 LIMIT {limit}
 RETURN {
   id: id(n),
@@ -398,7 +401,8 @@ RETURN {
     id: id(ent),
     type: LAST(labels(ent)),
     label: COALESCE(ent.name, ent.title_en, ent.title_fr, ent.title_de)
-  }
+  },
+  weight: r.frequency
 } as result
 ORDER BY length(ms) DESC, r.tfidf DESC
 LIMIT {limit}
