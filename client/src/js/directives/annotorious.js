@@ -96,36 +96,7 @@ angular.module('histograph')
       }
     };
   })
-  /*
-    Annotorious with openlayers.
-  */
-  .directive('annotoriousol', function() {
-    return {
-      restrict : 'A',
-      scope: {
-        tiles : '=' // has it openlayers tiles?
-      },
-      link : function(scope, element) {
-        element.height(500);
-        // var options =
-        //   { maxExtent: new OpenLayers.Bounds(0, 0, 1475, 1184),
-        //     maxResolution: 8,
-        //     numZoomLevels: 2,
-        //     units: 'pixels' };
-
-        // var map = new OpenLayers.Map(element[0], options);
-        // var baseLayer = new OpenLayers.Layer.TMS("Baselayer", scope.tiles + '/',
-        //   { layername: ".",
-        //     serviceVersion: ".",
-        //     transitionEffect: "resize",
-        //     type:"jpg" });
-
-        // map.addLayer(baseLayer);
-        // map.zoomToMaxExtent();
-        // anno.makeAnnotatable(map);
-      }
-    };
-  })
+  
   /*
     Test annotator
     cfr.
@@ -445,12 +416,3 @@ angular.module('histograph')
   })
     
 
-annotorious.plugin.AnnotoriousBridge = function(options) { 
-  this.initPlugin = function(anno) {
-    // Add initialization code here, if needed (or just skip this method if not)
-    ['onEditorShown'].forEach(function (d) {
-      if(typeof options[d] == 'function')
-        anno.addHandler(d, options[d])
-    });
-  }
-};

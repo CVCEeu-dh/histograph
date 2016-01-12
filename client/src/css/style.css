@@ -6259,11 +6259,12 @@ Copyright (c) 2015 Daniel Eden
 */
 .modal-content .nodes {
   position: absolute;
-    background-color: #383838;
-    left: 0px;
-    top: 0;
-    bottom: 0;
-    width: 320px;
+  background-color: #383838;
+  left: 0px;
+  top: 0;
+  bottom: 0;
+    width: 250px;
+  border-top-right-radius: 0;
 }
 
 .modal-content .nodes .node h4 a {
@@ -6393,7 +6394,7 @@ Copyright (c) 2015 Daniel Eden
 }
 
 .modal-content .modal-header.with-sidebar{
-  margin-left: 320px;
+  margin-left: 250px;
   height: 100px;
 }
 
@@ -6402,7 +6403,7 @@ Copyright (c) 2015 Daniel Eden
   position: absolute;
   top: 100px;
   bottom: 0px;
-  left:320px;
+  left:250px;
   right: 0;
 }
 
