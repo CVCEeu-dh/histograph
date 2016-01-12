@@ -2,25 +2,26 @@
   <div>
     <div class='node {{entity.type}}'>
       
-      <div class='thumbnail' ng-if='entity.type == "person"'>
+      <div class='thumbnail' ng-if='entity.props.thumbnail'>
         <div class="thumbnail-wrapper" style='background-image: url({{entity.props.thumbnail}})'>
         </div>
       </div>
-      <div class='content tk-proxima-nova'>
+      <div class='content sans-serif {{entity.props.thumbnail?"":"without-thumbnail"}}'>
         <h4>
           <a ng-if='entity.type == "person"' ng-href='{{link.href}}' marked="entity.props|lookup:'name':language"></a>
           <a ng-if='entity.type == "location"' ng-href='{{link.href}}'><p>{{entity.props|lookup:'name':language}}, {{entity.props.country}}</p></a>
           <a ng-if='entity.type == "organization"' ng-href='{{link.href}}'>{{entity.props|lookup:'name':language}}</a>
+           <a ng-if='entity.type == "theme"' ng-href='{{link.href}}'>{{entity.props|lookup:'name':language}}</a>
 
         </h4>
-        <div ng-if='entity.isIncomplete' class='date'>
+        <div ng-if='entity.isIncomplete && entity == "person"' class='date'>
           We couldn't find any information about this person automatically.. would you help us?
         </div>
         <div ng-if='!entity.isIncomplete && entity.type == "person"'>
           <div class='date' >{{entity.props.birth_time | datesOfAPerson : entity.props.death_time}}</div>
           
         </div>
-        <div ng-if='entity.type == "location"'>
+        <div ng-if='entity.type == "location" || entity.type=="theme"'>
           <div class='date' >{{entity.type}}</div>
         </div>
         <div ng-if="entity.props.links_viaf">
@@ -43,14 +44,15 @@
   </div>
   <div class='btn-group-wrapper'>
     <div class="btn-group">
-      <a class="btn btn-line-white" ng-click='inspect()' title="visit" data-action="link">more</a>
+      <a class="btn btn-line-white" ng-if='entity.type != "theme"' ng-click='inspect()' title="visit" data-action="link">more</a>
       <!-- <button class='btn btn-line-white' ng-click='addFilter()'>filter</button> -->
+      <a class="btn btn-line-white" ng-href='/#/e/{{entity.id}}' ng-if='entity.type == "theme"' title="visit" data-action="link">more</a>
       
       <button ng-if='link.removable' class='btn btn-line-white obscure' ng-click='askQuestion("remove-relationship")'>REMOVE</button>
       
 
 
-      <button ng-if='!link.removable'  class='btn btn-line-white obscure' ng-click='askQuestion("downvote")'><i class="fa fa-bug"></i> fix / edit </button>
+      <button ng-if='!link.removable && entity.type != "theme"'  class='btn btn-line-white obscure' ng-click='askQuestion("downvote")'><i class="fa fa-bug"></i> fix / edit </button>
      
       <button ng-if='!link.removable && !entity.isIncomplete' class='btn btn-line-white {{entity.upvotes.length? "btn-number":""}}' ng-click='upvote($event)'>CONFIRM <i class="fa fa-check"></i><div class='number' ng-if='entity.upvotes.length'>{{entity.upvotes.length}}</div></button>
 

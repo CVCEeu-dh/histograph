@@ -260,6 +260,8 @@ a#header-title {
   border: 0;
 }
 
+
+
 /*.item .caption a[gasp-type='person'], .item h3 a[gasp-type='person'] {
   border-bottom: 2px solid #4dc3ba
   
@@ -456,11 +458,62 @@ a#header-title {
   color: #757575;
 }
 
-.item.entity h3, .item.entity .description{
-  text-align: center;
-  max-width: 210px;
-  margin: 0 auto;
+.item.entity {
+  margin: 0;
+  padding: 20px;
 }
+
+.item.entity h3, .item.entity .description{
+  text-align: left;
+}
+
+.item.entity h3{
+  margin: 0;
+  border-bottom: 1px solid #383838;
+  font-weight: bold;
+  font-size: 15px;
+  line-height: 24px;
+  padding-bottom: 0px;
+  color: #151515;
+}
+
+.item.entity .meta{
+  margin: 10px 0;
+}
+
+.item.entity .meta-label{
+  display: inline;
+  border: 1px solid #151515;
+  color: #151515;
+  font-style: normal;
+  padding: 2px 4px;
+  margin: 0;
+  border-radius: 2px;
+  text-transform: uppercase;
+  font-size: 12px
+}
+
+
+.item.entity.node .thumbnail{
+  top: 20px;
+  left: 20px;
+}
+.item.entity.node .thumbnail-wrapper{
+  height: 80px;
+  width: 80px;
+}
+
+.item.entity.node .content{
+  margin-left:90px;
+  min-height: 90px;
+}
+
+.item.entity.node .content.without-thumbnail{
+  margin:0;
+  min-height: auto;
+  margin-bottom: 20px;
+}
+
 
 .item.entity .description{
   font-style: italic
@@ -468,10 +521,15 @@ a#header-title {
 
 .item.entity .abstract{
   margin-top: 20px;
+  padding:0;
 }
 
 .item.entity .tags{
   margin-top: 20px;
+}
+
+.item.entity .tags .tag{
+  
 }
 
 .item.entity .profile-pic{
@@ -1336,6 +1394,13 @@ height: 150px;
   display: inline-block;
 }
 
+#milkyway #sigma-actions{
+  position: absolute;
+  top:20px;
+  right:20px;
+  z-index: 2;
+}
+
 #milkyway .gasp{
   opacity: 0;
   position: absolute;
@@ -1650,6 +1715,7 @@ height: 150px;
 margin-left: 50px;
     min-height: 70px;
 }
+
 
 .node .content .date{
   text-align: left;
@@ -2099,6 +2165,10 @@ li.CodeMirror-hint-active {
 #pop > .inner .node .content {
   margin: 0 70px 0 70px;
   min-width: 120px;
+}
+
+#pop > .inner .node .content.without-thumbnail{
+  margin: 10px 70px 0 20px;
 }
 
 #pop > .inner .node h4{

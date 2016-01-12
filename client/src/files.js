@@ -24,13 +24,14 @@ module.exports = {
       '/js/lib/imagesloaded.pkgd.min.js',
 
       '/js/lib/annotator.min.js',
-      '/js/lib/annotorious.min.js',
-      '/js/lib/annotorious-merge.js',   
+      // '/js/lib/annotorious.min.js',
+      // '/js/lib/annotorious-merge.js',   
       
       '/js/lib/moment.min.js',
       '/js/lib/sigma.min.js',
       '/js/lib/sigma.layout.forceAtlas2.min.js',
       '/js/lib/sigma.plugins.dragNodes.js',
+      '/js/lib/sigma.exporters.svg.js',
       //-   '/js/lib/sigma.statistics.HITS.js',
       '/js/lib/perfect-scrollbar.min.js',
       '/js/lib/perfect-scrollbar.with-mousewheel.min.js',
@@ -46,7 +47,7 @@ module.exports = {
 
       '/js/lib/ui-codemirror.min.js',
 
-      '/js/lib/openlayers.min.js',
+      // '/js/lib/openlayers.min.js',
 
       //-   '/js/lib/angular-strap.min.js',
       //-   '/js/lib/angular-strap.tpl.min.js',

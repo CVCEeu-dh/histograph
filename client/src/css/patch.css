@@ -241,6 +241,10 @@ header ul.dropdown-menu li .notification a {
   margin-right: 0px;
   left: 360px;
 }
+
+.entity #perspective{
+  left: 0;
+}
 /*
   MEDIA PATCH
 */
@@ -266,25 +270,28 @@ header ul.dropdown-menu li .notification a {
     width: 50%;
   }
   .resource #perspective {
-    width: 680px;
+    width: 540px;
   }
 
   .entity #perspective{
-    width: 350px;
+    width: 360px;
   }
 
-  header ul.menu li a{
-    padding: 0 20px;
-  }
+  
   .resource #see-also {
-    left: 680px;
+    left: 550px;
     margin-left: 0;
     width: auto ;
   }
 }
 
 @media screen and (min-width: 1200px) {
-  
+  header ul.menu li a{
+    padding: 0 20px;
+  }
+  .resource #perspective {
+    width: 670px;
+  }
   .resource #see-also {
     left: 680px;
     margin-left: 0;

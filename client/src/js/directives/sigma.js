@@ -13,19 +13,7 @@ angular.module('histograph')
 
     return {
       restrict : 'A',
-      template: ''+
-        '<div id="playground"></div>' +
-        // '<div gmasp target="target"></div>' +
-        //'<div id="tips" ng-if="tips.length > 0"><div>{{tips}}</div></div>' +
-        '<div snippets id="sigma-snippets" target="target" center="center"></div>' +
-        '<div id="sigma-messenger" ng-if="message.text.length" class="animated {{message.visible? \'fadeIn\': \'fadeOut\'}}"><div class="inner">{{message.text}}</div></div>' +
-        '<div id="commands" class="{{lookup?\'lookup\':\'\'}}">' +
-          '<div tooltip="view all nodes" tooltip-append-to-body="true" class="action {{lookup? \'bounceIn animated\': \'hidden\'}}" ng-click="toggleLookup()"><i class="fa fa-eye"></i></div>' +
-          '<div class="action {{status==\'RUNNING\'? \'bounceIn animated\': \'\'}}" ng-click="togglePlay()"><i class="fa fa-{{status==\'RUNNING\' ? \'stop\': \'play\'}}"></i></div>' +
-          '<div class="action" ng-click="rescale()"><i class="fa fa-dot-circle-o"></i></div>' +
-          '<div class="action" ng-click="zoomin()"><i class="fa fa-plus"></i></div>' +
-          '<div class="action" ng-click="zoomout()"><i class="fa fa-minus"></i></div>' +
-        '</div>',
+      templateUrl: 'templates/partials/helpers/sigma.html',
         
       scope:{
         graph: '=',
@@ -695,7 +683,19 @@ angular.module('histograph')
             {duration: 150}
           );
         };
-        scope.rescale      = rescale; 
+
+        function download() {
+          si.toSVG({
+            labels: true,
+            classes: false,
+            data: true,
+            download: true,
+            filename: 'histograph.svg'
+          });
+        };
+
+        scope.rescale      = rescale;
+        scope.download     = download;
         scope.zoomin       = zoomin; 
         scope.zoomout      = zoomout;
         scope.toggleLookup = toggleLookup;
