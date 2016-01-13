@@ -1070,7 +1070,7 @@ angular.module('histograph')
       if(options && options.context) {
         params.annotation = JSON.stringify({
           context: options.context,
-          language: options.language,
+          language: options.language || language,
           ranges: options.annotator? options.annotator.editor.annotation.ranges: options.ranges,
           quote:  options.annotator?  options.annotator.editor.annotation.quote: _.map(entities, 'props.name').join(', ')
         });
