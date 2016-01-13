@@ -1171,6 +1171,7 @@ angular.module('histograph')
     
     $scope.type = type;
     $scope.item = item;
+    $scope.language = language;
 
     $scope.date = {
       from: $scope.item.start_date? (new Date()):null,

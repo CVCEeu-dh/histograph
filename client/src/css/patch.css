@@ -144,10 +144,13 @@ header ul.dropdown-menu li .notification a {
   pointer-events:auto;
 }
 .modal.inspect-metadata .modal-dialog{
-  width: 360px;
-  height: 500px
+  width: 400px;
+  height: 400px;
 }
-
+.modal.inspect-metadata .modal-dialog .modal-content{
+  bottom: auto;
+  height: auto;
+}
 .modal.inspect .modal-body.with-sidebar{
   padding: 0;
 }
@@ -173,6 +176,9 @@ header ul.dropdown-menu li .notification a {
     padding: 10px 20px;
 }
 
+.flatten > p{
+  display: inline
+}
 /*
   Playlist
 */
