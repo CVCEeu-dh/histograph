@@ -98,8 +98,8 @@
           <div>
             <div >
               <annotator target="{{item.id}}" context="caption">
-              <blockquote id='caption' ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'caption':language"></blockquote>
-              <blockquote id='caption' ng-if='item.annotations.length == 0' context='item' marked="item.annotations|lookup:'caption':language"></blockquote>
+                <blockquote id='caption' ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'caption':language"></blockquote>
+                <blockquote id='caption' ng-if='!item.annotations.length' context='item' marked="item.props|lookup:'caption':language"></blockquote>
               </annotator>
             </div>
           
