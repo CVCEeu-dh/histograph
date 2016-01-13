@@ -242,6 +242,25 @@ angular.module('histograph')
         */
         scope.$watch('controller', function (ctrl) {
           $log.log('::sigma @controller changed');
+
+          if(tooltip.edge.timer)
+            clearTimeout(tooltip.edge.timer);
+          
+          tooltip.edge.tip.css({
+            opacity: 0
+          });
+          
+          tooltip.edge.isVisible = false;
+          
+          
+          if(tooltip.timer)
+            clearTimeout(tooltip.timer);
+
+          tooltip.isVisible = false;
+          tooltip.tip.css({
+            opacity: 0
+          });
+
           setTimeout(function() {
             $log.log('::sigma @controller changed -> rescale()');
             rescale();

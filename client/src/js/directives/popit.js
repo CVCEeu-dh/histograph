@@ -169,6 +169,8 @@ angular.module('histograph')
           _gasp.hide(); 
         }
 
+        scope.hide = hide;
+
         function hideDelayed() {
           __timeout = setTimeout(function(){
             hide();
@@ -234,6 +236,7 @@ angular.module('histograph')
 
         scope.queue = function(){
           $log.info(':: gasp -> queue()', scope.entity)
+          scope.close();
           scope.$parent.queue(scope.entity.id, true);
         }
 
@@ -244,6 +247,7 @@ angular.module('histograph')
 
         scope.inspect = function(){
           $log.info(':: gasp -> inspect()', scope.entity)
+          scope.close();
           scope.$parent.inspect(scope.entity.id);
         }
         

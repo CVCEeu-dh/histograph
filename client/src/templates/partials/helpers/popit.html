@@ -8,10 +8,10 @@
       </div>
       <div class='content sans-serif {{entity.props.thumbnail?"":"without-thumbnail"}}'>
         <h4>
-          <a ng-if='entity.type == "person"' ng-href='{{link.href}}' marked="entity.props|lookup:'name':language"></a>
-          <a ng-if='entity.type == "location"' ng-href='{{link.href}}'><p>{{entity.props|lookup:'name':language}}, {{entity.props.country}}</p></a>
-          <a ng-if='entity.type == "organization"' ng-href='{{link.href}}'>{{entity.props|lookup:'name':language}}</a>
-           <a ng-if='entity.type == "theme"' ng-href='{{link.href}}'>{{entity.props|lookup:'name':language}}</a>
+          <a ng-if='entity.type == "person"' ng-href='{{link.href}}' marked="entity.props|lookup:'name':language" ng-click='close()'></a>
+          <a ng-if='entity.type == "location"' ng-click='close()' ng-href='{{link.href}}'><p>{{entity.props|lookup:'name':language}}, {{entity.props.country}}</p></a>
+          <a ng-if='entity.type == "organization"' ng-click='close()' ng-href='{{link.href}}'>{{entity.props|lookup:'name':language}}</a>
+           <a ng-if='entity.type == "theme"' ng-click='close()' ng-href='{{link.href}}'>{{entity.props|lookup:'name':language}}</a>
 
         </h4>
         <div ng-if='entity.isIncomplete && entity == "person"' class='date'>
@@ -46,7 +46,7 @@
     <div class="btn-group">
       <a class="btn btn-line-white" ng-if='entity.type != "theme"' ng-click='inspect()' title="visit" data-action="link">more</a>
       <!-- <button class='btn btn-line-white' ng-click='addFilter()'>filter</button> -->
-      <a class="btn btn-line-white" ng-href='/#/e/{{entity.id}}' ng-if='entity.type == "theme"' title="visit" data-action="link">more</a>
+      <a class="btn btn-line-white" ng-click='close()' ng-href='/#/e/{{entity.id}}'  ng-if='entity.type == "theme"' title="visit" data-action="link">more</a>
       
       <button ng-if='link.removable' class='btn btn-line-white obscure' ng-click='askQuestion("remove-relationship")'>REMOVE</button>
       

@@ -216,7 +216,7 @@ angular.module('histograph')
 
         scope.$watch('language', function(language) {
           // ask for
-          if(scope.notes.length && language)
+          if(scope.notes && scope.notes.length && language)
             scope.sync();
         });
 
