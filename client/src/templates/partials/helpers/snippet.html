@@ -10,7 +10,7 @@
     
     <div ng-repeat='relatedItem in items'>
       <!-- person node -->
-      <div ng-if='relatedItem.type!="resource"' class='node person' data-id="{{relatedItem.id}}">
+      <div ng-if='relatedItem.type!="resource"' class='node person' >
         <div class='thumbnail'>
           <div class="thumbnail-wrapper" style='background-image: url({{relatedItem.props.thumbnail}})'>    
             
@@ -37,7 +37,7 @@
         <div class='btn-group btn-group dual' style='margin: 10px 0'>
           <a class='btn btn-default btn-line-white' ng-href='/#/e/{{relatedItem.id}}'>more</a>
           <button class='btn btn-default btn-line-white' ng-click="queue(relatedItem)"> <span class="fa fa-bookmark-o"></span></button>
-          <button class='btn btn-default btn-line-white' data-id='{{center.id}}'> <span class="fa fa-dot-circle-o"></span></button>
+          <button class='btn btn-default btn-line-white' data-id="{{relatedItem.id}}"> <span class="fa fa-dot-circle-o"></span></button>
         </div>
         <div class='clear'></div>
       </div>
