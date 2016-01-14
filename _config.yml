@@ -7,11 +7,12 @@ baseurl: /histograph
 
 # Color settings (hex-codes without the leading hash-tag)
 color:
+  primary-white: '#fff'
   primary-dark: '#151515'
   links: '#219ab3'
 
 # Footer settings
-footer: Your Website
+footer: CVCE
 
 # Social networks usernames (many more available: google-plus, flickr, dribbble, pinterest, instagram, tumblr, linkedin, etc.)
 social:
@@ -25,6 +26,7 @@ social:
     url: http://bitbucket.org/jekyll
   - title: github
     url: https://github.com/IronSummitMedia/startbootstrap
+
 
 # Build settings
 markdown: kramdown

@@ -7,9 +7,10 @@
 body {
     width: 100%;
     height: 100%;
-    font-family: Lora,"Helvetica Neue",Helvetica,Arial,sans-serif;
-    color: #fff;
-    background-color: {{ site.color.primary-dark }};
+    font-size: 13px;
+    /*font-family: Lora,"Helvetica Neue",Helvetica,Arial,sans-serif;*/
+    color: {{ site.color.primary-dark }};
+    background-color: {{ site.color.primary-white }};
 }
 
 html {
@@ -24,23 +25,24 @@ h4,
 h5,
 h6 {
     margin: 0 0 35px;
-    text-transform: uppercase;
-    font-family: Montserrat,"Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size: 15px;
+    /*text-transform: uppercase;*/
+    /*font-family: Montserrat,"Helvetica Neue",Helvetica,Arial,sans-serif;*/
     font-weight: 700;
-    letter-spacing: 1px;
+    /*letter-spacing: 1px;*/
 }
 
 p {
     margin: 0 0 25px;
-    font-size: 18px;
-    line-height: 1.5;
+    font-size: 15px;
+    line-height: 1.7em;
 }
 
 @media(min-width:767px) {
     p {
         margin: 0 0 35px;
-        font-size: 20px;
-        line-height: 1.6;
+        font-size: 16px;
+        line-height: 1.7;
     }
 }
 
@@ -62,15 +64,17 @@ a:focus {
 }
 
 .navbar-custom {
+    min-height: 70px;
     margin-bottom: 0;
     border-bottom: 1px solid rgba(255,255,255,.3);
-    text-transform: uppercase;
-    font-family: Montserrat,"Helvetica Neue",Helvetica,Arial,sans-serif;
-    background-color: {{ site.color.primary-dark }};
+    text-transform: lowercase;
+    /*font-family: Montserrat,"Helvetica Neue",Helvetica,Arial,sans-serif;*/
+    background-color: #f0f0f0;
 }
 
 .navbar-custom .navbar-brand {
     font-weight: 700;
+    line-height: 40px;
 }
 
 .navbar-custom .navbar-brand:focus {
@@ -80,7 +84,7 @@ a:focus {
 .navbar-custom .navbar-brand .navbar-toggle {
     padding: 4px 6px;
     font-size: 16px;
-    color: #fff;
+    color: {{ site.color.primary-dark }};
 }
 
 .navbar-custom .navbar-brand .navbar-toggle:focus,
@@ -89,33 +93,41 @@ a:focus {
 }
 
 .navbar-custom a {
-    color: #fff;
+    color: {{ site.color.primary-dark }};
+
 }
 
 .navbar-custom .nav li.active {
     outline: none;
-    background-color: rgba(255,255,255,.3);
+    /*background-color: rgba(255,255,255,.3);*/
+}
+
+.navbar-custom .nav li.active a{
+    color: black;
 }
 
 .navbar-custom .nav li a {
-    -webkit-transition: background .3s ease-in-out;
-    -moz-transition: background .3s ease-in-out;
-    transition: background .3s ease-in-out;
+    color: #8A8A8A;
+    line-height: 40px;
+    -webkit-transition: color .3s ease-in-out;
+    -moz-transition: color .3s ease-in-out;
+    transition: color .3s ease-in-out;
 }
 
 .navbar-custom .nav li a:hover,
 .navbar-custom .nav li a:focus,
 .navbar-custom .nav li a.active {
     outline: 0;
-    background-color: rgba(255,255,255,.3);
+    color: #FF5742;
+    background: transparent
 }
 
 @media(min-width:767px) {
     .navbar {
         padding: 20px 0;
         border-bottom: 0;
-        letter-spacing: 1px;
-        background: 0 0;
+        
+        background: #fff;
         -webkit-transition: background .5s ease-in-out,padding .5s ease-in-out;
         -moz-transition: background .5s ease-in-out,padding .5s ease-in-out;
         transition: background .5s ease-in-out,padding .5s ease-in-out;
@@ -123,7 +135,7 @@ a:focus {
 
     .top-nav-collapse {
         padding: 0;
-        background-color: {{ site.color.primary-dark }};
+        background-color: #f0f0f0;
     }
 
     .navbar-custom.top-nav-collapse {
@@ -137,9 +149,9 @@ a:focus {
     height: auto;
     padding: 100px 0;
     text-align: center;
-    color: #fff;
+    color: {{ site.color.primary-dark }};
     background: url(/img/intro-bg.jpg) no-repeat bottom center scroll;
-    background-color: {{ site.color.primary-dark }};
+    background-color: {{ site.color.primary-white }};
     -webkit-background-size: cover;
     -moz-background-size: cover;
     background-size: cover;
@@ -152,11 +164,13 @@ a:focus {
 }
 
 .intro .intro-body .brand-heading {
-    font-size: 40px;
+    font-size: 45px;
+    text-align: left;
 }
 
 .intro .intro-body .intro-text {
     font-size: 18px;
+    text-align: left;
 }
 
 @media(min-width:767px) {
@@ -164,14 +178,18 @@ a:focus {
         height: 100%;
         padding: 0;
     }
-
+/*
     .intro .intro-body .brand-heading {
         font-size: 100px;
     }
 
     .intro .intro-body .intro-text {
         font-size: 25px;
-    }
+    }*/
+}
+
+.intro .btn-circle{
+    color: crimson;
 }
 
 .btn-circle {
@@ -192,7 +210,7 @@ a:focus {
 .btn-circle:hover,
 .btn-circle:focus {
     outline: 0;
-    color: #fff;
+    color: crimson;
     background: rgba(255,255,255,.1);
 }
 
@@ -249,7 +267,15 @@ a:focus {
 }
 
 .content-section {
+
     padding-top: 100px;
+    padding-bottom: 50px;
+}
+
+.content-section:nth-child(even) {background: #d8d8d8}
+.content-section:nth-child(odd)  {background: #e8e8e8}
+.content-section h2{
+    font-size: 23px;
 }
 
 .download-section {
@@ -272,7 +298,7 @@ a:focus {
 
 @media(min-width:767px) {
     .content-section {
-        padding-top: 200px;
+         padding-top: 200px;
     }
 
     .download-section {
