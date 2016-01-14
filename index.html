@@ -6,7 +6,8 @@ layout: default
   <div class="container">
     <div class="row">
       <div class="col-sm-6 ">
-        {% markdown pages/intro.md %}
+        {% capture my_include %}{% include pages/intro.md %}{% endcapture %}
+        {{ my_include | markdownify }}
       </div>
       <div class="col-sm-6">
         image
@@ -20,7 +21,8 @@ layout: default
   <div class="container">
     <div class="row">
       <div class="col-sm-6 ">
-        {% markdown pages/crowdsourcing.md %}
+        {% capture my_include %}{% include pages/crowdsourcing.md %}{% endcapture %}
+        {{ my_include | markdownify }}
       </div>
       <div class="col-sm-6">
         image
@@ -33,7 +35,8 @@ layout: default
   <div class="container">
     <div class="row">
       <div class="col-sm-6">
-        {% markdown pages/institutions.md %}
+        {% capture my_include %}{% include pages/institutions.md %}{% endcapture %}
+        {{ my_include | markdownify }}
       </div>
       <div class="col-sm-6">
         image
@@ -47,7 +50,8 @@ layout: default
     <div class="row">
       
       <div class="col-sm-6">
-        {% markdown pages/get-the-code.md %}
+        {% capture my_include %}{% include pages/get-the-code.md %}{% endcapture %}
+        {{ my_include | markdownify }}
       </div>
       <div class="col-sm-6">
         image
