@@ -59,6 +59,11 @@ a:focus {
     color: #11505d;
 }
 
+.container {
+    padding-right: 50px;
+    padding-left: 50px;
+}
+
 .light {
     font-weight: 400;
 }
@@ -271,6 +276,14 @@ a:focus {
     padding-top: 100px;
     padding-bottom: 50px;
 }
+
+body ::selection {
+  background: coral; /* WebKit/Blink Browsers */
+}
+body ::-moz-selection {
+  background: coral; /* Gecko Browsers */
+}
+
 
 .content-section:nth-child(even) {background: #d8d8d8}
 .content-section:nth-child(odd)  {background: #e8e8e8}
