@@ -124,7 +124,7 @@ module.exports = function(io){
             item.related.action = action;
 
             // creata a proper 'merge' action
-            console.log('MERGE RESULTS', item.related.merged)
+            // console.log('MERGE RESULTS', item.related.merged)
 
             io.emit('entity:merge-entity:done', {
               user: req.user.username,

@@ -8,6 +8,7 @@
  * directive to show a grapgh of nodes and edges thanks to @Yomguithereal!!! 
  */
 angular.module('histograph')
+
   .directive('sigma', function ($log, $location, $timeout, EVENTS) {
     'use strict';
 
@@ -96,6 +97,7 @@ angular.module('histograph')
         /*
           Build slopwly but surely the graph
           Calculate the differences between pg and g: nodes to delete, nodes to add. 
+          usage
         */
         sigma.classes.graph.addMethod('build', function (g, pg) {
           'use strict';
@@ -112,9 +114,11 @@ angular.module('histograph')
               l,
               k,
               nt,
-              c;
+              c,
+              n1,
+              n2;
           
-          // calculate differences in nodes
+          // calculate differences in nodeset
           
           
           // the overall node indexes
@@ -123,30 +127,58 @@ angular.module('histograph')
           // console.log('rererererere', ns,g.nodes)
           a = g.edges || [];
           c = a.length;
-          nt = setInterval(function() {
+          var addn = function(n, id) {
+            n.color = n.type?
+              (colors[n.type] || "#353535"):
+              "#353535";
+            n.x = n.x || Math.random()*50;
+            n.y = n.y || Math.random()*50;
+            if(g.centers && g.centers.indexOf(n.id) !== -1) {
+              n.center = true;
+            }
+            n.size = 5;//Math.sqrt(si.graph.degree(n.id));
+            self.addNode(n);
+          }
+
+          function addNextNode(){
             si.killForceAtlas2();
+            // console.log('add', c)
             c--;
-            if(!an[a[c].source])
-              self.addNode(ns[a[c].source]);
-            if(!an[a[c].target])
-              self.addNode(ns[a[c].target]);
-            
+
+
+
+            if(!an[a[c].source]) {
+              n1 = ns[a[c].source];
+              addn(n1);
+            } else {
+              self.nodes([n1.id]).size +=1
+            }
+            if(!an[a[c].target]) {
+              n2 = ns[a[c].target];
+              addn(n2);
+            } else {
+              self.nodes([n2.id]).size +=1
+            }
+
+
             an[a[c].source] = true;
             an[a[c].target] = true;
             
             self.addEdge(a[c]);
-            
+            si.refresh();
             si.startForceAtlas2({
               adjustSizes :true,
               linLogMode: true,
-              startingIterations : 10,
+              startingIterations : 0,
               gravity : 1,
-              edgeWeightInfluence : 1
+              edgeWeightInfluence : 1,
+              slowDown: 100,
             });
-            if(c == 0 || !a[c])
-              clearTimeout(nt);
-            //si.refresh();//self.draw()
-          }, 200);
+            if(c > 0 && a[c])
+              nt = setTimeout(addNextNode, 20);
+          }
+
+          nt = setTimeout(addNextNode, 20);
           return this;
         });
         
@@ -262,7 +294,6 @@ angular.module('histograph')
           });
 
           setTimeout(function() {
-            $log.log('::sigma @controller changed -> rescale()');
             rescale();
             si.refresh();
           }, 300);
@@ -330,18 +361,31 @@ angular.module('histograph')
           scale.domain(d3.extent(graph.edges, function(d) {return d.weight || 1}));
           
           // Reading new graph
-          si.graph.clear();
-          si.refresh();
           
+          
+          // play();
+          // si.graph.build(graph)
+          // return;
+
           // timout the layout
           timers.play = setTimeout(function() {
+            si.graph.clear();
+          // si.refresh();
+            // previous nodes
+            var pns = previousGraph? _.indexBy(previousGraph.nodes, 'id'): {};
             // set size, and fixes what need to be fixed. If there are fixed nodes, the camera should center on it
             graph.nodes = graph.nodes.map(function (n) {
-              n.color = n.type?
+              if(pns[n.id]) {
+                n = pns[n.id];
+                n.center = false;
+              } else {
+                n.color = n.type?
                 (colors[n.type] || "#353535"):
                 "#353535";
-              n.x = n.x || Math.random()*50;
-              n.y = n.y || Math.random()*50;
+                n.x = n.x || Math.random()*50;
+                n.y = n.y || Math.random()*50;
+              }
+
               if(graph.centers && graph.centers.indexOf(n.id) !== -1) {
                 n.center = true;
               }
@@ -372,7 +416,7 @@ angular.module('histograph')
             
             
             
-            rescale();
+            // rescale();
             si.refresh();
             play(); 
           }, 100);
@@ -620,10 +664,11 @@ angular.module('histograph')
         */
         // once the container has benn added, add the commands. Rescale functions, with easing.
         function rescale() {
+          $log.log('::sigma @controller -> rescale()');
           sigma.misc.animation.camera(
             si.cameras.main,
             {x: 0, y: 0, angle: 0, ratio: 1.0618},
-            {duration: 150}
+            {duration: 550}
           );
         };
         
@@ -647,7 +692,7 @@ angular.module('histograph')
             e.discard = false
           });
           // refresh the view
-          // rescale()
+          rescale()
           si.refresh();
         }
         /*
@@ -666,8 +711,8 @@ angular.module('histograph')
           si.startForceAtlas2({
             adjustSizes :true,
             linLogMode: false,
-            startingIterations : 20,
-            gravity : 20,
+            startingIterations : 0,
+            gravity : 0,
             slowDown: 10,
             edgeWeightInfluence : 1
           });

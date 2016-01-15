@@ -261,7 +261,9 @@ angular.module('histograph')
         scope.merge = function(){
           $log.info(':: gasp -> merge()', scope.entity)
           // merge two entities: add (or upvote the entity) and downvote the current entity
-          scope.feedback();
+          scope.$parent.mergeEntities(scope.entity, scope.entity.alias, scope.parent, function (err, result) {
+            scope.feedback();
+          });
         }
 
         scope.signale = function($event){

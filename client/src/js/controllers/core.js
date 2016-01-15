@@ -754,6 +754,26 @@ angular.module('histograph')
     };
 
     /*
+      Merge two entities together in a specific resource
+
+    */
+    $scope.mergeEntities = function(wrong, trusted, resource, next) {
+      debugger
+      EntityRelatedExtraFactory.save({
+        id: wrong.id,
+        model: 'resource',
+        related_id: resource.id,
+        extra: 'merge'
+      }, {
+        with: trusted.id
+      }, function (res) {
+        $log.log('CoreCtrl -> mergeEntities()', res.status);
+        if(next)
+          next(res.result);
+      });
+    };
+
+    /*
       Voting mechanism on ENTITY itself: it is a mlispelling or an error.
     */
     $scope.signale = function(entity, next) {
