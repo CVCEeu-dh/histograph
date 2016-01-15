@@ -927,11 +927,13 @@ module.exports = {
         end    = options.end_date? moment.utc(options.end_date, options.format, options.strict): start.clone();
     
     if(!options.strict) {
-      //if(!options.end_date) {
-        start.startOf('day');
+      start.startOf('day');
+      if(!options.end_date) {  
         end = start.clone();
         end.add(24, 'hours').subtract(1, 'minutes');
-        
+      } else {
+        end.endOf('day');
+      }
       //}
     }
     

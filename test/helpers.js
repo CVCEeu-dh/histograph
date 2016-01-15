@@ -224,7 +224,7 @@ describe('helpers: human date service', function() {
     });
     
     should.equal(d_END.start_date, '2015-06-07T00:00:00+00:00')
-    should.equal(d_END.end_date, '2015-06-10T23:59:00+00:00')
+    should.equal(d_END.end_date, '2015-06-10T23:59:59+00:00')
     
     var d_STRICT = helpers.reconcileIntervals({
       start_date: '2015-06-07',
