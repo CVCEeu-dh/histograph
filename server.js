@@ -487,7 +487,7 @@ apiRouter.route('/entity/:entity_id(\\d+)/related/resource/:resource_id(\\d+)')
   .post(ctrl.entity.createRelatedResource) // create or merge the relationship. The authentified user will become a curator
   .delete(ctrl.entity.removeRelatedResource); // delete the relationship whether possible
 
-apiRouter.route('/entity/:entity_id(\\d+)/related/resource/:resource_id(\\d+)/:action(upvote|downvote)')
+apiRouter.route('/entity/:entity_id(\\d+)/related/resource/:resource_id(\\d+)/:action(upvote|downvote|merge)')
   .post(ctrl.entity.updateRelatedResource);
 
   

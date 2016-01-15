@@ -402,9 +402,9 @@ module.exports = {
       safeParams.ids = _.compact(safeParams.ids.split(',')).map(function(d) {
         return +d;
       });
-    
+
     if(safeParams.with)
-      safeParams.with = _.compact(safeParams.with.split(',')).map(function(d) {
+      safeParams.with = _.compact(String(safeParams.with).split(',')).map(function(d) {
         return +d;
       });
     

@@ -229,15 +229,6 @@ module.exports = {
         relationship: function (callback) {
           neo4j.rel.update(result.rel, callback);
         },
-        action: function(callback) {
-          Action.create({
-            kind: params.annotation? Action.ANNOTATE: Action.CREATE,
-            target: Action.APPEARS_IN_RELATIONSHIP,
-            mentions: [resource.id, entity.id],
-            username: user.username,
-            annotation: params.annotation
-          }, callback);
-        },
         resource: function (callback) {
           Resource.get({
             id: result.res.id
@@ -247,16 +238,13 @@ module.exports = {
         if(err)
           next(err);
         else {
-          if(results.action.type == Action.ANNOTATE)
-            results.action.props.annotation = parser.yaml(results.action.props.annotation);
-
+          
           next(null, {
             id: result.ent.id,
             type: result.ent.type,
             props: result.ent,
             related: {
-              resource: results.resource,
-              action: results.action
+              resource: results.resource
             },
             rel: result.rel.properties
           });
@@ -312,28 +300,16 @@ module.exports = {
         result.rel.properties.celebrity =  _.compact(_.unique((result.rel.properties.upvote || []).concat(result.rel.properties.downvote|| []))).length;
         result.rel.properties.score = _.compact((result.rel.properties.upvote || [])).length - _.compact((result.rel.properties.downvote|| [])).length;
         
-        async.series({
-          relationships: function (callback) {
-            async.parallel({
-              relationship: function(_callback) {
-                neo4j.rel.update(result.rel, _callback);
-              },
-              action: function (_callback) {
-                Action.create({
-                  kind: params.action,
-                  target: Action.APPEARS_IN_RELATIONSHIP,
-                  mentions: [resource.id, entity.id],
-                  username: user.username
-                }, _callback);
-              },
-            }, callback);
+        async.series([
+          function relationships(callback) {
+            neo4j.rel.update(result.rel, callback);
           },
-          resource: function (callback) {
+          function resource (callback) {
             Resource.get({
               id: result.res.id
             }, user, callback)
           }
-        }, function (err, results) {
+        ], function (err, results) {
           if(err)
             next(err);
           else
@@ -342,8 +318,7 @@ module.exports = {
               type: result.ent.type,
               props: result.ent,
               related: {
-                resource: results.resource,
-                action: results.relationships.action
+                resource: results[1]
               },
               rel: result.rel.properties
             });
