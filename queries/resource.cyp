@@ -388,6 +388,9 @@ RETURN col
     {if:title_de}
       res.title_de = {title_de},
     {/if}
+    {if:title_und}
+      res.title_und = {title_und},
+    {/if}
     {if:caption_en}
       res.caption_en = {caption_en},
     {/if}
@@ -396,6 +399,12 @@ RETURN col
     {/if}
     {if:caption_de}
       res.caption_de = {caption_de},
+    {/if}
+    {if:caption_und} 
+      res.caption_und = {caption_und},
+    {/if}
+    {if:type}
+      res.type = {type},
     {/if}
     res.creation_date = {creation_date},
     res.creation_time = {creation_time}
@@ -428,6 +437,9 @@ RETURN col
     {if:url_de}
       res.url_de = {url_de},
     {/if}
+    {if:title_und}
+      res.title_und = {title_und},
+    {/if}
     {if:title_en}
       res.title_en = {title_en},
     {/if}
@@ -445,6 +457,12 @@ RETURN col
     {/if}
     {if:caption_de}
       res.caption_de = {caption_de},
+    {/if}
+    {if:caption_und} 
+      res.caption_und = {caption_und},
+    {/if}
+    {if:type}
+      res.type = {type},
     {/if}
     res.last_modification_date = {creation_date},
     res.last_modification_time = {creation_time}

@@ -853,7 +853,8 @@ module.exports = {
                 })
               console.log(service,'calling for', language);
               helpers[service]({
-                text: contentToAnalyze
+                text: contentToAnalyze,
+                prefix: service
               }, function (err, _entities) {
                 console.log(service,'success for language', language);
                 if(err)

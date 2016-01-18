@@ -362,7 +362,7 @@ module.exports = {
   },
   
   /**
-    Call a custom service for twitter /inbstagram/facebook user/hashtag, served as custom entities..
+    Call a custom service for twitter /inbstagram/facebook user/hashtag, served as themes entities..
     If there are no entities, res will contain an empty array but no error will be thrown.
     Test with mocha:
     mocha -g 'helpers: socialtags'
@@ -381,7 +381,7 @@ module.exports = {
     while (match = hashtags.exec(options.text)) {
       entities.push({
         name: match[2],
-        type: 'hashtag',
+        type: 'theme:hashtag',
         context: {
           left:  match[1].length + match.index,
           right: match[1].length + match.index + match[2].length,
@@ -392,7 +392,7 @@ module.exports = {
 
     while (match = users.exec(options.text)) {
       entities.push({
-        name: match[2],
+        name: (options.prefix || '') + match[2],
         type: 'person',
         links_tweet:  match[2],
         context: {
@@ -514,6 +514,20 @@ module.exports = {
       }).map(function (d) {
         return +d;
       });
+    },
+
+    /*
+      Excerpt
+    */
+    excerpt: function(text, cutAt) {
+      if(isNaN(cutAt))
+        cutAt = 64;
+      //trim the string to the maximum length
+      var t = text.substr(0, cutAt);
+      //re-trim if we are in the middle of a word
+      if(text.length > cutAt)
+        t = t.substr(0, Math.min(t.length, t.lastIndexOf(' '))) + ' ...';
+      return t;
     }
   },
   /**

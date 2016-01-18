@@ -275,18 +275,27 @@ module.exports = {
       console.log(item.user_username)
       var resource = {
         type: 'instagram',
-        slug: item.id,
+        slug: 'instagram-' +item.id,
         mimetype: _.isEmpty(item.images)?'video':'image', 
         
-        name:  (item.user_username ) + ' - ' + item.caption_text,
+        name:  (item.user_username ) + ' - ' + helpers.text.excerpt(item.caption_text, 32),
         user: options.marvin
       }
 
+      console.log(clc.blackBright('    creating ...', clc.whiteBright(resource.slug)))
+      
       // get the right url
-      resource.url = resource.mimetype == 'image'? item.images_name:item.videos_name
+      resource.url = path.join('instagram', (resource.mimetype == 'image'? item.images_name:item.videos_name))
 
       // test resource url
+      var filename = path.join(settings.paths.media, resource.url);
 
+      if(!fs.existsSync(filename)) {
+        console.log(clc.magentaBright('    file does not exist:'),filename);
+      } else {
+          console.log(clc.greenBright('    file found'), resource.url);
+      
+      }
 
       // add time
       _.assign(resource, helpers.reconcileIntervals({
@@ -307,28 +316,27 @@ module.exports = {
       resource.languages = [ language ];
 
       // title and caption
-      resource['title_'+language] = item.user_username + ' - ' + item.caption_text;
+      resource['title_'+language] = item.user_username + ' - ' + helpers.text.excerpt(item.caption_text, 32);
 
       // console.log(resource)
-      resource['caption_'+language] = item.caption_text;
+      resource['caption_'+language] = '@' + item.user_username + ' - ' + item.caption_text + ' - ' + _.compact(item.tags.split(/\s?,\s?/)).map(function(d){return '#'+d;}).join(', ');
 
-      
-      console.log(clc.blackBright('   creating ...', clc.whiteBright(resource.slug)))
-      
       console.log(resource);
-      // Resource.create(resource, function (err, res) {
-      //   if(err) {
-      //     q.kill();
-      //     callback(err)
-      //   } else {
-      //     console.log(clc.blackBright('   resource: ', clc.whiteBright(res.id), 'saved,', q.length(), 'resources remaining'));
       
-      //     nextItem();
+      
+      Resource.create(resource, function (err, res) {
+        if(err) {
+          q.kill();
+          callback(err)
+        } else {
+          console.log(clc.blackBright('   resource: ', clc.whiteBright(res.id), 'saved,', q.length(), 'resources remaining'));
+      
+          // nextItem();
           
-      //   }
-      // })
+        }
+      })
 
-    }, 1);
+    }, 5);
     q.push(options.data)
     q.drain = function(){
       callback(null, options);
