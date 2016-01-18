@@ -1,0 +1,17 @@
+---
+layout: default
+---
+
+{% assign sections = site.narrative | sort:'ordering'  %}
+{% for section in sections  %}
+<section class="content-section">
+ 
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-6">
+         {{section.content}}
+      </div>
+    </div>
+  </div>
+</section>
+{% endfor %}
