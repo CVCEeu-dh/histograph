@@ -1,7 +1,7 @@
-Crowd-sourced indexation
----
+## Crowd-sourced indexation
 
-HistoGraph combines tools like [YAGO-AIDA](link) for the automatic detection and disambiguation of **named entities** - people, places, institutions and dates - with crowd-based annotations. Thanks to the enrichment with [DBPedia](link) and [VIAF](link) links, histoGraph can handle multilanguage documents flawlessly. By default, every automatically detected entity is pending validation by a human user.
+
+HistoGraph combines tools like [YAGO-AIDA](link) for *the* automatic detection and disambiguation of **named entities** - people, places, institutions and dates - with crowd-based annotations. Thanks to the enrichment with [DBPedia](link) and [VIAF](link) links, histoGraph can handle multilanguage documents flawlessly. By default, every automatically detected entity is pending validation by a human user.
 
 Automatic entity detection works very well overall but will always remain imperfect in places. To address this, HistoGraph depends on human validation and error correction. 
 
