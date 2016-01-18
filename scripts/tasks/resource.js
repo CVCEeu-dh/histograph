@@ -266,6 +266,75 @@ module.exports = {
     };
   },
 
+
+  importInstagram: function(options, callback) {
+    console.log(clc.yellowBright('\n   tasks.resource.importInstagram'));
+    console.log(options.data[0]);
+
+    var q = async.queue(function (item, nextItem) {
+      console.log(item.user_username)
+      var resource = {
+        type: 'instagram',
+        slug: item.id,
+        mimetype: _.isEmpty(item.images)?'video':'image', 
+        
+        name:  (item.user_username ) + ' - ' + item.caption_text,
+        user: options.marvin
+      }
+
+      // get the right url
+      resource.url = resource.mimetype == 'image'? item.images_name:item.videos_name
+
+      // test resource url
+
+
+      // add time
+      _.assign(resource, helpers.reconcileIntervals({
+        start_date: item.created_time, 
+        format: 'YYYY-MM-DD hh:mm:ss'
+      }));
+
+      var language = 'und'; // that is, impossible to guess, a special identifier is provided by ISO 639-2
+
+      // var Langdetect = require('languagedetect'),
+      //     langdetect = new Langdetect('iso2'),
+      //     languages  = langdetect.detect(item.caption_text),
+      //     language   = languages.length? _.first(_.first(languages)) : 'en';
+      
+      // console.log(languages)
+
+      // language
+      resource.languages = [ language ];
+
+      // title and caption
+      resource['title_'+language] = item.user_username + ' - ' + item.caption_text;
+
+      // console.log(resource)
+      resource['caption_'+language] = item.caption_text;
+
+      
+      console.log(clc.blackBright('   creating ...', clc.whiteBright(resource.slug)))
+      
+      console.log(resource);
+      // Resource.create(resource, function (err, res) {
+      //   if(err) {
+      //     q.kill();
+      //     callback(err)
+      //   } else {
+      //     console.log(clc.blackBright('   resource: ', clc.whiteBright(res.id), 'saved,', q.length(), 'resources remaining'));
+      
+      //     nextItem();
+          
+      //   }
+      // })
+
+    }, 1);
+    q.push(options.data)
+    q.drain = function(){
+      callback(null, options);
+    };
+  },
+
   importData: function(options, callback) {
     console.log(clc.yellowBright('\n   tasks.resource.importData'));
     // check that data model is correct enough. 

@@ -321,7 +321,16 @@ module.exports = {
         });
     }
   },
-  
+  /*
+    Geonames as family of services.
+    Todo: services refactory required
+  */
+  _geonames: {
+    findNearestAddress: function(options, next) {
+      
+      
+    }
+  },
   geonames: function(options, next) {
     if(!settings.geonames ||_.isEmpty(settings.geonames.username)) {
       next(null, []);
