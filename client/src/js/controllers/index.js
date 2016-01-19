@@ -168,7 +168,7 @@ angular.module('histograph')
   })
 
 
-.controller('ExploreEntitiesCtrl', function ($scope, $log, CooccurrencesFactory, EVENTS) {
+.controller('ExploreEntitiesCtrl', function ($scope, $log, CooccurrencesFactory, relatedModel, projectedModel, EVENTS) {
     $log.debug('ExploreEntitiesCtrl ready', $scope.params);
     $scope.limit  = 20;
     $scope.offset = 0;
@@ -176,7 +176,9 @@ angular.module('histograph')
       Reload related items, with filters.
     */
     $scope.syncGraph = function() {
-      CooccurrencesFactory.get($scope.params, function (res){
+      CooccurrencesFactory.get(angular.extend({}, $scope.params, {
+          model: relatedModel
+        }), function (res){
         $log.log('ExploreEntitiesCtrl CooccurrencesFactory returned a graph of',res.result.graph.nodes.length, 'nodes');
         if($scope.filters.with)
           $scope.setGraph(res.result.graph, {

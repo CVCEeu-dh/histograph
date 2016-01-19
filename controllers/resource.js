@@ -262,7 +262,7 @@ module.exports = function(io){
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       
-      if(!form.params.from && !form.params.to && !form.params.with && !form.params.type) {
+      if(form.params.entity == 'person' && !form.params.from && !form.params.to && !form.params.with && !form.params.type) {
         query = parser.agentBrown(queries.get_precomputated_cooccurrences, form.params);
         form.params.precomputated = true;
       } else {

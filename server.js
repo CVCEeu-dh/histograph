@@ -456,7 +456,7 @@ apiRouter.route('/resource/:id(\\d+)/related/resource/graph')
   .get(ctrl.resource.getRelatedResourcesGraph);
 apiRouter.route('/resource/:id(\\d+)/related/resource/timeline')
   .get(ctrl.resource.getRelatedResourcesTimeline);
-apiRouter.route('/cooccurrences') // @todo move to entity controller.
+apiRouter.route('/cooccurrences/:entity(person|theme|location)/:toentity(person|theme|location)') // @todo move to entity controller.
   .get(ctrl.resource.getCooccurrences)
 // apiRouter.route('/resource/related/:entity(person|location|organization|theme)/graph')
 

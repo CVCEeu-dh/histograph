@@ -252,6 +252,90 @@ angular
               typeahead: 'entity'
             }
           },
+          resolve: {
+            relatedModel: function() {
+              return 'person'
+            },
+            projectedModel: function() {
+              return 'person'
+            },
+          }
+        })
+        .state('explore.projection', {
+          url: 'projection/:modelA/:modelB',
+          template: '<div></div>',
+          controller: 'ExploreEntitiesCtrl',
+          grammar: {
+            label: 'view combination',
+            connector: {
+              type: 'in documents of type',
+              relatedTo: 'which mentions',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: GRAMMAR.IN_TYPES,
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
+          resolve: {
+            relatedModel: function($stateParams) {
+              debugger
+              return 'person'
+            },
+            projectedModel: function($stateParams) {
+              return 'person'
+            },
+          }
+        })
+        .state('explore.themes', {
+          url: 'themes',
+          template: '<div></div>',
+          controller: 'ExploreEntitiesCtrl',
+          grammar: {
+            label: 'view theme cooccurrence',
+            connector: {
+              type: 'in documents of type',
+              relatedTo: 'which mentions',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: GRAMMAR.IN_TYPES,
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
+          resolve: {
+            relatedModel: function() {
+              return 'theme'
+            },
+          }
+        })
+        .state('explore.locations', {
+          url: 'locations',
+          template: '<div></div>',
+          controller: 'ExploreEntitiesCtrl',
+          grammar: {
+            label: 'view theme cooccurrence',
+            connector: {
+              type: 'in documents of type',
+              relatedTo: 'which mentions',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: GRAMMAR.IN_TYPES,
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
+          resolve: {
+            relatedModel: function() {
+              return 'location'
+            },
+          }
         })
         .state('explore.issues', {
           url: 'issues',
@@ -290,6 +374,9 @@ angular
             },  {
               name: 'entity.graph',
               label: 'graph of related people'
+            },  {
+              name: 'entity.graph.themes',
+              label: 'graph of related themes'
             }, {
               name: 'entity.persons',
               label: 'related people'
@@ -345,6 +432,38 @@ angular
             },
             relatedModel: function() {
               return 'person'
+            },
+            relatedVizFactory: function(EntityRelatedVizFactory) {
+              return EntityRelatedVizFactory
+            }
+          }
+        })
+        .state('entity.graph.theme', {
+          url: '/theme',
+          template: '<div></div>',
+          controller: 'GraphCtrl',
+          grammar: {
+            label: 'graph of related themes',
+            connector: {
+              type: 'in documents of type',
+              relatedTo: 'which mentions',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: GRAMMAR.IN_TYPES,
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
+          resolve:{
+            specials: function() {
+              return [
+
+              ]
+            },
+            relatedModel: function() {
+              return 'theme'
             },
             relatedVizFactory: function(EntityRelatedVizFactory) {
               return EntityRelatedVizFactory

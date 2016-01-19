@@ -113,7 +113,7 @@ angular.module('histograph')
     return function(input) {
       if(!input)
         return '';
-      return input.replace('.', ' ');
+      return input.replace(/\./g, ' ');
     };
   })
   .filter('datesOfSomeone', function() {
