@@ -135,7 +135,7 @@ module.exports = {
     };
     var form = _.merge({
           apiKey: settings.textrazor.key,
-          extractors: 'entities'
+          extractors: settings.textrazor.extractors? settings.textrazor.extractors.join(','): 'entities'
         }, options);
     request
       .post({
@@ -159,8 +159,13 @@ module.exports = {
           return
         }
         
-        // console.log(form, 'body', body.response)
-        next(null, body.response.entities || []);
+        console.log(form, 'body', _.keys(body.response));
+        if(settings.textrazor.extractors)
+          next(null, _.flatten(settings.textrazor.extractors.map(function (d) {
+            return body.response[d] || [];
+          })));
+        else
+          next(null, body.response.entities || []);
       })
   },
   /*

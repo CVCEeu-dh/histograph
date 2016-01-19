@@ -297,6 +297,8 @@ module.exports = {
       
       }
 
+      resource.url = resource.url.replace("\\","/");
+
       // add time
       _.assign(resource, helpers.reconcileIntervals({
         start_date: item.created_time, 
@@ -321,7 +323,7 @@ module.exports = {
       // console.log(resource)
       resource['caption_'+language] = '@' + item.user_username + ' - ' + item.caption_text + ' - ' + _.compact(item.tags.split(/\s?,\s?/)).map(function(d){return '#'+d;}).join(', ');
 
-      console.log(resource);
+      // console.log(resource);
       
       
       Resource.create(resource, function (err, res) {
@@ -331,12 +333,12 @@ module.exports = {
         } else {
           console.log(clc.blackBright('   resource: ', clc.whiteBright(res.id), 'saved,', q.length(), 'resources remaining'));
       
-          // nextItem();
+          nextItem();
           
         }
       })
 
-    }, 5);
+    }, 3);
     q.push(options.data)
     q.drain = function(){
       callback(null, options);

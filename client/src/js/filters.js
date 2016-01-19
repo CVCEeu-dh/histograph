@@ -272,19 +272,23 @@ angular.module('histograph')
     Return the correct field for annotation purposes.
   */
   .filter('annotate', function($sce) {
-    return function(annotations, field, language) {
+    return function(annotations, field, language, props) {
       var annotation = _.get(_.find(annotations, {language:language}), 'annotation'),
-          extra = '';
-          
+          extra = '',
+          result = '';
+      
       if(!annotation) {
         annotation = _.get(_.first(annotations), 'annotation');
         extra = ''; // something like not available in english
       }
       
-      if(annotation[field])
-       return extra + annotation[field];
-      
-      return ''
+      if(annotation[field]){
+        result = extra + annotation[field];
+      }
+      if(!result.length && props) {
+        result = props[field + '_' + _.first(props.languages)]
+      }
+      return result
     }
   })
   

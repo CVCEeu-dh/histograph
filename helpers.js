@@ -360,6 +360,23 @@ module.exports = {
       
     })
   },
+
+  /*
+    Instagram Wrapper for socialtags extractor
+  */
+  instagram: function(options, next) {
+    module.exports.socialtags(_.assign({
+      prefix: 'instagram'
+    }, options), next);
+  },
+  /*
+    Instagram Wrapper for socialtags extractor
+  */
+  tweet: function(options, next) {
+    module.exports.socialtags(_.assign({
+      prefix: 'twitter'
+    }, options), next);
+  },
   
   /**
     Call a custom service for twitter /inbstagram/facebook user/hashtag, served as themes entities..
@@ -376,11 +393,12 @@ module.exports = {
     
     var hashtags = /(^|\s)(#[A-Za-z0-9-_]+)/g,
         users    = /(^|\s)(@[A-Za-z0-9-_]+)/g,
-        entities = [];
+        entities = [],
+        ent = {};
 
     while (match = hashtags.exec(options.text)) {
       entities.push({
-        name: match[2],
+        name: match[2].toLowerCase(),
         type: 'theme:hashtag',
         context: {
           left:  match[1].length + match.index,
@@ -391,16 +409,18 @@ module.exports = {
     }
 
     while (match = users.exec(options.text)) {
-      entities.push({
+      ent = {
         name: (options.prefix || '') + match[2],
         type: 'person',
-        links_tweet:  match[2],
         context: {
           left:  match[1].length + match.index,
           right: match[1].length + match.index + match[2].length,
           matched_text: match[2]
         }
-      })
+      };
+      ent['links_' + options.profile] =  match[2];
+        
+      entities.push(ent);
     }
 
     console.log(entities)
@@ -425,6 +445,7 @@ module.exports = {
       
       var entitiesPrefixesToKeep = {
             PopulatedPlace: 'location',
+            WorldHeritageSite: 'location',
             Person: 'person',
             Organisation: 'organization',
           };
@@ -450,7 +471,8 @@ module.exports = {
           })));
           
         }
-        else
+         else
+
           _d.type = [];
         return _d;
       });
@@ -791,6 +813,7 @@ module.exports = {
         if(err == IS_EMPTY)
           next(null, [])
         else {
+          console.log(results)
           var results = results.map(function (location) {
             // add prefixes...
             return {
