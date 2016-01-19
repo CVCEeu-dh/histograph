@@ -1,6 +1,10 @@
 ---
 ordering: 2
+title: indexing
+ranking: 1
+image: missing-picture
 ---
+
 ## Crowd-sourced indexation
 
 ###User input

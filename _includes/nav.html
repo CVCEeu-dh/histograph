@@ -1,40 +1,85 @@
- <!-- Navigation -->
-    <nav class="navbar navbar-custom navbar-fixed-top sans-serif" role="navigation">
-        <div class="container">
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-main-collapse">
-                    <i class="fa fa-bars"></i>
-                </button>
-                <a class="navbar-brand page-scroll" href="http://histograph.cvce.eu">
-                    <i class="fa fa-play-circle"></i>  <span class="light">our</span> <span class='serif'>histograph</span>
-                </a>
-            </div>
+{% assign primarySections = site.narrative | where:"ranking",1 %}
+{% assign secondarySections = site.narrative | where:"ranking",2 %}
+{% assign sections = primarySections | sort:'ordering' %}
+{% assign secondarySection = secondarySections | sort:'ordering' %}
+<!-- Top Navigation -->
+  <nav class="navbar navbar-custom navbar-fixed-top sans-serif" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-main-collapse">
+          <i class="fa fa-bars"></i>
+        </button>
+        <a class="navbar-brand page-scroll" href="#page-top">
+          <span class="light">cvce</span> <span class='serif'>histograph</span>
+        </a>
+      </div>
 
-            <!-- Collect the nav links, forms, and other content for toggling -->
-            <div class="collapse navbar-collapse navbar-right navbar-main-collapse">
-                <ul class="nav navbar-nav">
-                    <!-- Hidden li included to remove active class from about link when scrolled up past about section -->
-                    <li class="hidden">
-                        <a href="#page-top"></a>
-                    </li>
-                    <li>
-                        <a class="page-scroll" href="#intro">discover & explore</a>
-                    </li>
-                    <!-- <li>
-                        <a class="page-scroll" href="#legacy">legacy</a>
-                    </li> -->
-                    <li>
-                        <a class="page-scroll" href="#crowdsourcing">crowdsourcing</a>
-                    </li>
-                    <li>
-                        <a class="page-scroll" href="#get-the-code">get the code!</a>
-                    </li>
-                    <li>
-                        <a class="page-scroll" href="#about">about us</a>
-                    </li>
-                </ul>
-            </div>
-            <!-- /.navbar-collapse -->
-        </div>
-        <!-- /.container -->
-    </nav>
+      
+      
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse navbar-collapse navbar-right navbar-main-collapse">
+        <ul class="nav navbar-nav">
+          <!-- Hidden li included to remove active class from about link when scrolled up past about section -->
+          <li class="hidden">
+            <a href="#page-top"></a>
+          </li>
+
+          {% for section in sections  %}
+          <li>
+            <a class="page-scroll" href="#{{section.title | slugify}}">{{section.title}}</a>
+          </li>
+          {% endfor %}
+          <!-- <li>
+            <a class="page-scroll" href="#intro">discover & explore {{sections}}</a>
+          </li>
+          
+          <li>
+            <a class="page-scroll" href="#crowdsourcing">crowdsourcing</a>
+          </li>
+          <li>
+            <a class="page-scroll" href="#get-the-code">get the code!</a>
+          </li>
+          <li>
+            <a class="page-scroll" href="#about">about us</a>
+          </li> -->
+        </ul>
+      </div>
+      <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+  </nav>
+
+<!-- Bottom Navigation -->
+<nav class="navbar navbar-custom navbar-custom-bottom navbar-fixed-bottom sans-serif" role="navigation">
+  <div class="container">
+      
+      
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse navbar-collapse navbar-center navbar-main-collapse">
+        <ul class="nav navbar-nav">
+          
+
+          {% for section in secondarySection  %}
+          <li>
+            <a class="page-scroll" href="#{{section.title | slugify}}">{{section.title}}</a>
+          </li>
+          {% endfor %}
+          <!-- <li>
+            <a class="page-scroll" href="#intro">discover & explore {{sections}}</a>
+          </li>
+          
+          <li>
+            <a class="page-scroll" href="#crowdsourcing">crowdsourcing</a>
+          </li>
+          <li>
+            <a class="page-scroll" href="#get-the-code">get the code!</a>
+          </li>
+          <li>
+            <a class="page-scroll" href="#about">about us</a>
+          </li> -->
+        </ul>
+      </div>
+      <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+  </nav>

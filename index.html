@@ -3,61 +3,25 @@ layout: default
 ---
 {% include header.html %}
 
-<section id="intro" class="content-section">
-  <div class="container">
-    <div class="row">
-      <div class="col-sm-6 ">
-        {% capture my_include %}{% include pages/intro.md %}{% endcapture %}
-        {{ my_include | markdownify }}
+{% assign sections = site.narrative | sort:'ordering'  %}
+{% for section in sections  %}
+<section id='{{section.title | slugify}}' class='content-section'>
+ 
+  <div class='container'>
+    <div class='row'>
+      {% if section.image %}
+      <div class='col-sm-6'>
+         {{section.content}}
       </div>
-      <div class="col-sm-6">
-        image
+      <div class='col-sm-6'>
+          {{section.image}}
       </div>
+      {% else %}
+      <div class='col-sm-6 col-md-8 col-md-offset-2'>
+        {{section.content}}
+      </div>
+      {% endif %}
     </div>
   </div>
 </section>
-
-
-<section id="crowdsourcing" class="content-section">
-  <div class="container">
-    <div class="row">
-      <div class="col-sm-6 ">
-        {% capture my_include %}{% include pages/crowdsourcing.md %}{% endcapture %}
-        {{ my_include | markdownify }}
-      </div>
-      <div class="col-sm-6">
-        image
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="institutions" class="content-section">
-  <div class="container">
-    <div class="row">
-      <div class="col-sm-6">
-        {% capture my_include %}{% include pages/institutions.md %}{% endcapture %}
-        {{ my_include | markdownify }}
-      </div>
-      <div class="col-sm-6">
-        image
-      </div>
-    </div>
-  </div>
-</section>
-
-<section id="get-the-code" class="content-section">
-  <div class="container">
-    <div class="row">
-      
-      <div class="col-sm-6">
-        {% capture my_include %}{% include pages/get-the-code.md %}{% endcapture %}
-        {{ my_include | markdownify }}
-      </div>
-      <div class="col-sm-6">
-        image
-      </div>
-    </div>
-  </div>
-</section>
-
+{% endfor %}

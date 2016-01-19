@@ -1,5 +1,8 @@
 ---
 ordering: 1
+title: exploration
+ranking: 1
+image: missing-picture
 ---
 
 ##Graph-based exploration
