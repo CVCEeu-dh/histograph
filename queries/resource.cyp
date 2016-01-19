@@ -519,7 +519,7 @@ RETURN {
 
 
 // name: get_cooccurrences
-//
+// 
 {if:with}
 MATCH (res:resource)<-[:appears_in]-(ent2:entity)
   WHERE id(ent2) IN {with}
@@ -568,7 +568,7 @@ ORDER BY w DESC
 LIMIT {limit}
 
 
-// name: get_dual_cooccurrences
+// name: get_bipartite_cooccurrences
 //
 {if:with}
 MATCH (res:resource)<-[:appears_in]-(ent2:entity)
@@ -579,7 +579,7 @@ WITH res
 {unless:with}
 MATCH (p1:{:entityA})-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:{:entityB})
 {/unless}
-  WHERE p1.score > -1
+  WHERE p1.score > -1 AND p2.score > -1
   {if:start_time}
     AND res.start_time >= {start_time}
   {/if}
@@ -593,7 +593,7 @@ MATCH (p1:{:entityA})-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:{:ent
     AND res.type in {type}
   {/if}
   
-  AND p2.score > -1
+  
 WITH p1, p2, res
 ORDER BY r1.tfidf DESC, r2.tfidf DESC
 // limit here?
@@ -602,13 +602,13 @@ RETURN {
     source: {
       id: id(p1),
       type: {entityA},
-      label: COALESCE(p1.name, p1.title_en, p1.title_fr),
+      label: p1.name,
       url: p1.thumbnail
     },
     target: {
       id: id(p2),
       type: {entityB},
-      label: COALESCE(p2.name, p2.title_en, p2.title_fr),
+      label: p2.name,
       url: p2.thumbnail
     },
     weight: w

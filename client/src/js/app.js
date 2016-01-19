@@ -281,11 +281,10 @@ angular
           },
           resolve: {
             relatedModel: function($stateParams) {
-              debugger
-              return 'person'
+              return $stateParams.modelA
             },
             projectedModel: function($stateParams) {
-              return 'person'
+              return $stateParams.modelB
             },
           }
         })

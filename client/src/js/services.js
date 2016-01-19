@@ -127,7 +127,7 @@ angular.module('histograph')
     GET cooccurrences
   */
   .factory('CooccurrencesFactory', function ($resource) {
-    return $resource('/api/cooccurrences/:model', {}, {
+    return $resource('/api/cooccurrences/:model/related/:projected_model', {}, {
         query: {method: 'GET' },
     });
   })

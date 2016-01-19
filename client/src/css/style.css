@@ -1312,7 +1312,7 @@ header ul li .notification a {
   display: none;left: 50%;
 }
 
-#milkyway.explore.persons, #milkyway.explore.themes, #milkyway.explore.locations{
+#milkyway.explore.persons, #milkyway.explore.projection, #milkyway.explore.locations{
   left: 10px;
   display: block
 }

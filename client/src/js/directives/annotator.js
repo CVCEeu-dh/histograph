@@ -117,7 +117,7 @@ angular.module('histograph')
           return '<a  gasp-type="'+ 
             localEntities.map(function (d){
               return d.type
-            }).join(',') +'" data-id="' +href +'"  gasp-parent="resource-'+ 
+            }).join(',') +'" data-id="' + href.split(',').pop() +'"  gasp-parent="resource-'+ 
             scope.context.id + '">' + text + '</a>';
         };
         

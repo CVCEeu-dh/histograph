@@ -262,11 +262,11 @@ module.exports = function(io){
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       
-      if(form.params.entity == 'person' && !form.params.from && !form.params.to && !form.params.with && !form.params.type) {
+      if(form.params.entityA == 'person' && form.params.entityA == form.params.entityB && !form.params.from && !form.params.to && !form.params.with && !form.params.type) {
         query = parser.agentBrown(queries.get_precomputated_cooccurrences, form.params);
         form.params.precomputated = true;
       } else {
-        query = parser.agentBrown(queries.get_cooccurrences, form.params);
+        query = parser.agentBrown(form.params.entityA == form.params.entityB? queries.get_cooccurrences: queries.get_bipartite_cooccurrences, form.params);
       }
       helpers.cypherGraph(query, form.params, function (err, graph) {
         if(err) {
