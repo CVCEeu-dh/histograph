@@ -212,21 +212,24 @@ module.exports = {
       });
     }
     
-    node.themes = _.values(node.themes || []).filter(function (n) {
-      return n.id
-    });
-    node.persons = _.values(node.persons).filter(function (n) {
-      return n.id
-    });
-    node.locations = _.values(node.locations).filter(function (n) {
-      return n.id
-    });
-    node.organizations = _.values(node.organizations).filter(function (n) {
-      return n.id
-    });
-    node.social_groups = _.values(node.social_groups).filter(function (n) {
-      return n.id
-    });
+    // node.themes = _.values(node.themes || []).filter(function (n) {
+    //   return n.id
+    // });
+    // node.places = _.values(node.places || []).filter(function (n) {
+    //   return n.id
+    // });
+    // node.persons = _.values(node.persons).filter(function (n) {
+    //   return n.id
+    // });
+    // node.locations = _.values(node.locations).filter(function (n) {
+    //   return n.id
+    // });
+    // node.organizations = _.values(node.organizations).filter(function (n) {
+    //   return n.id
+    // });
+    // node.social_groups = _.values(node.social_groups).filter(function (n) {
+    //   return n.id
+    // });
     return node;
   },
   /*

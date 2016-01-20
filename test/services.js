@@ -45,7 +45,7 @@ describe('services: geocoding', function() {
       done();
     } else
       services.reverse_geocoding({
-        latlng: '40.714224,-73.961452'
+        latlng: '43.036010285,11.60942724'
       }, function (err, results){
         
         if(err)

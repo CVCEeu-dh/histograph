@@ -12,53 +12,63 @@ WITH res, curated_by_user, loved_by_user, count(lover) as lovers
 OPTIONAL MATCH (curator:user)-[:curates]->(res)
 WITH res, curated_by_user, loved_by_user, lovers, count(curator) as curators
 
+OPTIONAL MATCH (res)-[r_pla:appears_in]-(pla:`place`)
+WITH res, curated_by_user, loved_by_user, curators, lovers, r_pla, pla
+ORDER BY r_pla.score DESC, r_pla.tfidf DESC, r_pla.frequency DESC
+WITH res, curated_by_user, loved_by_user, curators, lovers, filter(x in collect({  
+      id: id(pla),
+      type: 'place',
+      props: pla,
+      rel: r_pla
+    }) WHERE has(x.id))[0..5] as places
+
 OPTIONAL MATCH (res)-[r_loc:appears_in]-(loc:`location`)
-WITH res, curated_by_user, loved_by_user, curators, lovers, r_loc, loc
+WITH res, curated_by_user, loved_by_user, curators, lovers, places, r_loc, loc
 ORDER BY r_loc.score DESC, r_loc.tfidf DESC, r_loc.frequency DESC
-WITH res, curated_by_user, loved_by_user, curators, lovers, collect({  
+WITH res, curated_by_user, loved_by_user, curators, lovers, places, filter(x in collect({  
       id: id(loc),
       type: 'location',
       props: loc,
       rel: r_loc
-    })[0..5] as locations
+    }) WHERE has(x.id))[0..5] as locations
 
 OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
-WITH res, curated_by_user, loved_by_user, curators, lovers, locations, r_per, per
+WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, r_per, per
 ORDER BY r_per.score DESC, r_per.tfidf DESC, r_per.frequency DESC
-WITH res, curated_by_user, loved_by_user, curators, lovers, locations, collect({
+WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, filter(x in collect({
       id: id(per),
       type: 'person',
       props: per,
       rel: r_per
-    })[0..10] as persons
+    }) WHERE has(x.id))[0..10] as persons
 
 OPTIONAL MATCH (res)-[r_org:appears_in]-(org:`organization`)
-WITH res, curated_by_user, loved_by_user, curators, lovers, locations, persons, r_org, org
+WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, persons, r_org, org
 ORDER BY r_org.score DESC, r_org.tfidf DESC, r_org.frequency DESC
-WITH res, curated_by_user, loved_by_user, curators, lovers, locations, persons, collect({  
+WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, persons, filter(x in collect({  
       id: id(org),
       type: 'organization',
       props: org,
       rel: r_org
-    })[0..10] as organizations
+    }) WHERE has(x.id))[0..10] as organizations
 
 OPTIONAL MATCH (res)-[r_soc:appears_in]-(soc:`social_group`)
-WITH res, curated_by_user, loved_by_user, curators, lovers, locations, persons, organizations, r_soc, soc
+WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, persons, organizations, r_soc, soc
 ORDER BY r_soc.score DESC, r_soc.tfidf DESC, r_soc.frequency DESC
-WITH res, curated_by_user, loved_by_user, curators, lovers, locations, persons, organizations, collect({
+WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, persons, organizations, filter(x in collect({
       id: id(soc),
       type: 'social_group',
       props: soc,
       rel: r_soc
-    })[0..10] as social_groups
+    }) WHERE has(x.id))[0..10] as social_groups
 
 OPTIONAL MATCH (res)-[r_the:appears_in]-(the:`theme`)
-WITH res, curated_by_user, loved_by_user, curators, lovers, locations, persons, organizations, social_groups, collect({
+WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, persons, organizations, social_groups, filter(x in collect({
       id: id(the),
       type: 'theme',
       props: the,
       rel: r_the
-    })[0..5] as themes
+    }) WHERE has(x.id))[0..5] as themes
 
 OPTIONAL MATCH (ver)-[:describes]->(res)
 OPTIONAL MATCH (res)-[:belongs_to]->(col)
@@ -74,6 +84,7 @@ RETURN {
     loved_by_user: loved_by_user,
     versions: EXTRACT(p in COLLECT(DISTINCT ver)|{name: p.name, id:id(p), yaml:p.yaml, language:p.language, type: last(labels(p))}),
     locations: locations,
+    places: places,
     persons:   persons,
     organizations: organizations,
     social_groups:  social_groups,

@@ -42,9 +42,10 @@ module.exports = {
   */
   create: function(properties, next) {
     var now   = helpers.now(),
-        props = _.assign(properties, {
+        slug  = properties.slug? properties.slug : helpers.text.slugify(properties.name),
+        props = _.assign({}, properties, {
           type: properties.type || 'unknown',
-          slug: properties.slug || helpers.text.slugify(properties.name),
+          slug: slug,
           links_wiki: _.isEmpty(properties.links_wiki)? undefined: properties.links_wiki,
           exec_date: now.date,
           exec_time: now.time,
@@ -55,7 +56,7 @@ module.exports = {
           name_search: properties.name_search || properties.name.toLowerCase()
         }),
         query = parser.agentBrown(queries.merge_entity, props);
-        
+    
     neo4j.query(query, props, function (err, nodes) {
       if(err) {
         next(err);

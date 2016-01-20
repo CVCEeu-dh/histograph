@@ -458,7 +458,7 @@ apiRouter.route('/resource/:id(\\d+)/related/resource/timeline')
   .get(ctrl.resource.getRelatedResourcesTimeline);
 
 
-apiRouter.route('/cooccurrences/:entityA(person|theme|location)/related/:entityB(person|theme|location)') // @todo move to entity controller.
+apiRouter.route('/cooccurrences/:entityA(person|theme|location|place|organization)/related/:entityB(person|theme|location|place|organization)') // @todo move to entity controller.
   .get(ctrl.resource.getCooccurrences)
 // apiRouter.route('/resource/related/:entity(person|location|organization|theme)/graph')
 
@@ -477,13 +477,13 @@ apiRouter.route('/entity/:id([\\d,]+)')
 apiRouter.route('/entity/:id(\\d+)/related/resource')
   .get(ctrl.entity.getRelatedResources);
   
-apiRouter.route('/entity/:id(\\d+)/related/:entity(person|location|organization)')
+apiRouter.route('/entity/:id(\\d+)/related/:entity(person|location|theme|organization)')
   .get(ctrl.entity.getRelatedEntities)
 
 apiRouter.route('/entity/:id(\\d+)/related/issue')
   .post(ctrl.entity.createRelatedIssue)
 
-apiRouter.route('/entity/:id/related/:entity(person|location|organization)/graph')
+apiRouter.route('/entity/:id/related/:entity(person|location|theme|organization)/graph')
   .get(ctrl.entity.getRelatedEntitiesGraph);
 
 apiRouter.route('/entity/:id(\\d+)/related/resource/graph')

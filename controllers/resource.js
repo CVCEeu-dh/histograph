@@ -252,7 +252,7 @@ module.exports = function(io){
                 field: 'limit',
                 check: 'isInt',
                 args: [
-                  {min: 1, max: 200}
+                  {min: 1, max: 500}
                 ],
                 error: 'should be a number in range 1 to max 200'
               }
@@ -262,10 +262,14 @@ module.exports = function(io){
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       
+      form.params.entity = form.params.entityA; // if it is necessary,e.g. for precomputated routes
+
+      
       if(form.params.entityA == 'person' && form.params.entityA == form.params.entityB && !form.params.from && !form.params.to && !form.params.with && !form.params.type) {
         query = parser.agentBrown(queries.get_precomputated_cooccurrences, form.params);
         form.params.precomputated = true;
       } else {
+
         query = parser.agentBrown(form.params.entityA == form.params.entityB? queries.get_cooccurrences: queries.get_bipartite_cooccurrences, form.params);
       }
       helpers.cypherGraph(query, form.params, function (err, graph) {

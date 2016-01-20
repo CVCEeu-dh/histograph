@@ -435,9 +435,12 @@ module.exports = {
         // console.log(result.address_components)
         
         // down to locality
-        name = _.get(_.find(result.address_components, function (d){
-          return d.types.indexOf('locality') != -1
-        }), 'long_name'); 
+        // name = _.get(_.find(result.address_components, function (d){
+        //   return d.types.indexOf('locality') != -1
+        // }), 'long_name'); 
+        name = _.map(result.address_components.filter(function(d) {
+          return d.types.indexOf('political') !== -1;
+        }),'long_name').join(', ')
 
         country = _.find(result.address_components, function (d){
           return d.types.indexOf('country') != -1

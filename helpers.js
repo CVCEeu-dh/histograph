@@ -894,6 +894,55 @@ module.exports = {
       }); 
     });
   },
+  reverse_geocoding: function(options, next) {
+    var params = {
+      latlng: options.latlng
+    };
+    // if(options.language)
+    //   params.language = options.language
+    module.exports.cache.read({
+      namespace: 'services',
+      ref: 'reverse_geocoding:n' + options.latlng
+    }, function (err, contents) {
+      if(contents) {
+        next(null, contents);
+        return;
+      }
+      services.reverse_geocoding(params, function (err, results) {
+        if(err == IS_EMPTY)
+          next(null, [])
+        else if(err)
+          next(err)
+        else {
+          var results = results.map(function (location) {
+            
+            return {
+              fcl:           location._fcl,
+              lat:             +location.geometry.location.lat,
+              lng:             +location.geometry.location.lng,
+              country:         location._country,
+              geocoding_fcl:     location._fcl,
+              geocoding_lat:     +location.geometry.location.lat,
+              geocoding_lng:     +location.geometry.location.lng,
+              
+              geocoding_id:      location._id,
+              geocoding_q:       location._query,
+              geocoding_name:    location._name,
+              geocoding_country: location._country,
+              name:            location._name,
+              
+            };
+          });
+          module.exports.cache.write(JSON.stringify(results), {
+            namespace: 'services',
+            ref: 'reverse_geocoding:n' + options.latlng
+          }, function(err) {
+            next(null, results);
+          });
+        }  
+      }); 
+    });
+  },
   /**
     Create a relationship @relationship from two nodes resource and entity.
     The Neo4J MERGE result will be returned as arg for the next function next(null, result)
@@ -1506,9 +1555,10 @@ module.exports = {
     */
     naming: function(options) {
       var md5 = require('md5');
-      return path.join(settings.paths.cache[options.namespace], md5(options.ref) + '.json')
+      return path.join(settings.paths.cache[options.namespace], options.ref = md5(options.ref) + '.json')
     },
     write: function(contents, options, next) {
+      console.log('writing', contents)
       if(_.isEmpty(settings.paths.cache[options.namespace]))
         next(IS_EMPTY)
       else
@@ -1525,6 +1575,7 @@ module.exports = {
             try {
               next(null, JSON.parse(contents))
             } catch(e) {
+              console.log(e)
               next(null, contents);
             }
           }
