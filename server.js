@@ -132,6 +132,7 @@ clientRouter.route('/').
     res.render('index', {
       user: req.user || 'anonymous',
       message: 'hooray! welcome to our api!',
+      types: settings.types,
       scripts: clientFiles.scripts
     });
   });

@@ -46,7 +46,7 @@ html
                     a(href='#/') gallery
 
                   li(class='{{currentState.name == "explore.persons"?"active":""}}')
-                    a(ng-href='#/per?{{qs}}')  graph
+                    a(ng-href='#/projection/person/person?{{qs}}')  graph
 
                   li
                     a.with-number(ng-click='toggleQueue()', uib-tooltip='your selection', tooltip-placement='bottom') my selection 
@@ -199,6 +199,41 @@ html
         
       each val in scripts
         script(src=val)
-    
+      script.
+        var types = !{JSON.stringify(types)};
+
+
+        /*
+          Build config according to express settings
+        */
+        angular.module('histograph')
+          .constant("SETTINGS", {
+            types: types
+          })
+        .constant('GRAMMAR', {
+          AS_TYPES: [
+            {
+              name: 'of any type',
+            }
+          ].concat(types.resources.map(function (type) {
+            return {
+              name: type, // todo: add translations
+              filter: 'type=' + type
+            }
+          })),
+          IN_TYPES: [
+            {
+              name: 'in any kind of documents',
+            },
+          ].concat(types.resources.map(function (type) {
+            return {
+              name: 'in ' + type, // todo: add translations / pluralize
+              filter: 'type=' + type    
+            }
+          }))
+        });
+
+        console.log('--- HISTOGRAPH ---')
+
     
     
