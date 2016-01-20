@@ -26,6 +26,18 @@ angular.module('histograph')
     };
   })
   /*
+    Add UIROuter current state stateParams to GRAMMAR labels.
+    Cfr currentState listeners in FiltersCtrl controller (js/controllers/filters.js)
+  */
+  .filter('enrichWithStateParams', function() {
+    return function(input, stateParams) {
+      _.each(stateParams, function(d, k){
+        input = input.replace(':'+k, d);  
+      })
+      return input
+    } 
+  })
+  /*
     Transform ECMD categories into human readable ones (if any) _PRESS 
   */
   .filter('ecmd', function() {

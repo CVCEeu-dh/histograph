@@ -25,7 +25,7 @@
   
   <div ng-if='ruler' class='grammar-choice ruler' ng-if='grammar'>
     <!-- <b ng-if='item' class='grammar-item'>{{item.props|lookup:'name':language:36}}</b> --> 
-    {{grammar.label}} <span ng-if='totalItems'>(
+    {{grammar.label|enrichWithStateParams:stateParams}} <span ng-if='totalItems'>(
         {{totalItems}})
         </span>
     <div class="btn-group" uib-dropdown is-open="false">

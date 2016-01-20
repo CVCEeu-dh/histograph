@@ -7,7 +7,7 @@
  * it was written in order to simplify CoreCtrl debugging
  */
 angular.module('histograph')
-  .controller('FiltersCtrl', function ($scope, $log, $http, $location, SuggestFactory,EVENTS) {
+  .controller('FiltersCtrl', function ($scope, $log, $http, $location, $stateParams, SuggestFactory,EVENTS) {
     $log.debug('FiltersCtrl ready, filters active:', $location.search());
     
     $scope.filters = {};
@@ -165,7 +165,7 @@ angular.module('histograph')
       (i.e. the root grammar)
     */
     $scope.setChoice = function(choice) {
-      var path = $scope.getState().href(choice.name).replace(/^#/,'').replace('%20', ' ');
+      var path = $scope.getState().href(choice.name, choice.params).replace(/^#/,'').replace('%20', ' ');
       $log.log('FilterCtrl -> setChoice', choice.name, '- path:', path );
       $location.path(path).search($location.search())
     }
@@ -190,12 +190,13 @@ angular.module('histograph')
     $scope.$watch('currentState', function(state) {
       if(!state)
         return;
-      $log.log('FiltersCtrl @currentState', state);
+      $log.log('FiltersCtrl @currentState', state, '- params:', $stateParams);
       var $state = $scope.getState(),
           parentState = $state.get(state.name.split('.')[0]);
       
       // set (or unset) search query if any
       $scope.query = $state.params.query;
+      $scope.stateParams = $stateParams;
         
       
       // ruler is the parentstate grammar
