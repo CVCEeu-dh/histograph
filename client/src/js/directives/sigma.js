@@ -342,12 +342,17 @@ angular.module('histograph')
         */
         scope.$watch('graph', function (graph, previousGraph) {
           clearTimeout(timers.play);
-          $log.log('::sigma @graph changed');
+          
           
           stop();
+          if(!graph && !previousGraph) {
+            // first instantiation
+            return;
+          }
+          $log.log('::sigma @graph changed');
           // clean graph if there are no nodes, then exit
           if(!graph || !graph.nodes || !graph.nodes.length) {
-            $log.log('::sigma @graph empty, clear...');
+            $log.log('::sigma @graph empty, clear...', graph);
             scope.setMessage({message: 'there are no connected elements'});
             si.graph.clear();
             si.refresh();
