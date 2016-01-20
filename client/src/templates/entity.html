@@ -37,12 +37,19 @@
         <div class="tags" ng-if="relatedPersons.length > 0"><span class='meta-label sans-serif'>People mentioned</span>
         <span ng-repeat="person in relatedPersons"><span class="person tag" data-id='{{person.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{person.props.name}} - {{person.props.description}} ({{person.props.birth_date | date:"yyyy"}} - {{person.props.death_date | date:"yyyy"}})' gasp-type='person'  >
           {{person.props.name}} ({{person.weight}})</span>{{$last?'':', '}}</span>
-        </div><span ng-if="item.props.languages.length">  —  <i>available in</i>:
+        </div>
+
+        <div class="tags" ng-if="relatedLocations.length > 0"><span class='meta-label sans-serif'>Locations mentioned</span>
+        <span ng-repeat="location in relatedLocations"><span class="location tag" data-id='{{location.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{location.props.name}} - {{location.props.country}} ' gasp-type='location'  >
+          {{location.props.name}} - {{location.props.country}} ({{location.weight}})</span>{{$last?'':', '}}</span>
+        </div>
+
+        <span ng-if="item.props.languages.length">  —  <i>available in</i>:
           <span ng-repeat="lang in item.props.languages" ng-click='setLanguage(lang)'>{{lang}} </span>
         </span>
         
         <blockquote ng-if='item.props.links_wiki' class="abstract">
-          <p><span class='meta-label sans-serif'>dbpedia: {{item.props.links_wiki}}</span> — {{item.props | abstract : language }}</p>
+          <p><span class='meta-label sans-serif'>dbpedia: <a ng-href='http://dbpedia.org/resource/{{item.props.links_wiki}}'>{{item.props.links_wiki}}</a></span> — {{item.props | abstract : language }}</p>
         </blockquote>
         <!-- 
         <blockquote ng-if="item.abstract">

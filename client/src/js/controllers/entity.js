@@ -5,13 +5,14 @@
  * # IndexCtrl
  */
 angular.module('histograph')
-  .controller('EntityCtrl', function ($scope, $log, $stateParams, socket, $filter, entity, persons, EntityExtraFactory,EntityRelatedFactory, EVENTS) {
+  .controller('EntityCtrl', function ($scope, $log, $stateParams, socket, $filter, entity, persons, locations, EntityExtraFactory,EntityRelatedFactory, EVENTS) {
     $log.debug('EntityCtrl ready', +$stateParams.id);
     
     $scope.item = entity.result.item;
     
     $scope.relatedPersons    = persons.result.items;
     
+    $scope.relatedLocations  = locations.result.items;
     
      /*
       Set graph title
