@@ -44,9 +44,7 @@
   </div>
   <div class='btn-group-wrapper'>
     <div class="btn-group">
-      <a class="btn btn-line-white" ng-if='entity.type != "theme"' ng-click='inspect()' title="visit" data-action="link">more</a>
-      <!-- <button class='btn btn-line-white' ng-click='addFilter()'>filter</button> -->
-      <a class="btn btn-line-white" ng-click='close()' ng-href='/#/e/{{entity.id}}'  ng-if='entity.type == "theme"' title="visit" data-action="link">more</a>
+      <a class="btn btn-line-white" ng-click='close()' ng-href='/#/e/{{entity.id}}' title="visit" data-action="link">more</a>
       
       <button ng-if='link.removable' class='btn btn-line-white obscure' ng-click='askQuestion("remove-relationship")'>REMOVE</button>
       
