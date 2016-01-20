@@ -178,7 +178,8 @@ angular.module('histograph')
     $scope.syncGraph = function() {
       CooccurrencesFactory.get(angular.extend({}, $scope.params, {
           model: relatedModel,
-          projected_model: projectedModel
+          projected_model: projectedModel,
+          limit: 400
         }), function (res){
         $log.log('ExploreEntitiesCtrl CooccurrencesFactory returned a graph of',res.result.graph.nodes.length, 'nodes');
         if($scope.filters.with)
