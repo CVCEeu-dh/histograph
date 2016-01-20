@@ -48,12 +48,24 @@ module.exports = {
     geoservices: {
       'geonames': ['en', 'fr', 'de', 'nl'],
       'geocoding': ['en', 'fr', 'de', 'nl']
+    },
+    typeRelatedServices: [
+      'instagram',
+      'tweet'
+    ],
+    regexp: {
+      'textrazor':[
+        {
+          pattern: /[@#❤️📷]/g,
+          replace: ' '
+        }
+      ]
     }
   },
   
   /*
     Grouping on (node).type properties
-    (facets)
+    (facets, loaded on view index.jade page load)
   */
   types: {
     resources: [
@@ -74,6 +86,17 @@ module.exports = {
       'graphical-table',
       'scientific-contribution',
       'passport'
+    ],
+    entity: [
+      'theme',
+      'location',
+      'place',
+      'person'
+    ],
+    // precomputate jaccard distance for these entities only (create appear_in_same_document neo4j links)
+    jaccard: [
+      'theme',
+      'person'
     ]
   },
   
@@ -147,11 +170,13 @@ module.exports = {
   },
   /*
     Textrazor service 
-    uncomment to abilitate textrazor with your textrazor account
+    uncomment to abilitate textrazor with your textrazor account.
+    Extractors: a list of extractors given as array, cfr textrazor documentation.
   */
   // textrazor: {
   //   key: 'xyzxxxxxxxxxxxxxxxxx',
-  //   endpoint: 'https://api.textrazor.com'
+  //   endpoint: 'https://api.textrazor.com',
+  //   extractors: ['entities']
   // },
   
   /*
