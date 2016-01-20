@@ -6,18 +6,22 @@
           <h4>{{match.model.props | lookup:'title': 'en'}} — {{match.model.props.type}}</h4>
         </a>
 
-        <a ng-if='match.model.type=="person"'>
+        <a ng-if='match.model.type=="person"' ng-href='/#/e/{{match.model.id}}'>
           <div class='thumbnail' ng-if='match.model.props.thumbnail' style='background-image:url({{match.model.props.thumbnail}})'></div>
           <h4>{{match.model.props|lookup:'name':'en'}} — {{match.model.type}}</h4>
           <p ng-if='match.model.props.birth_date'>{{match.model.props|datesOfSomeone}} {{match.model.props|lookup:'description':language}}</p>
         </a>
-
-        <a ng-if='match.model.type=="location"'>
+        <a ng-if='match.model.type=="place"' ng-href='/#/e/{{match.model.id}}'>
           <div class='thumbnail' ng-if='match.model.props.thumbnail' style='background-image:url({{match.model.props.thumbnail}})'></div>
           <h4>{{match.model.props|lookup:'name':'en'}} ({{match.model.props.country}}) — location</h4>
         </a>
 
-        <a ng-if='match.model.type=="theme"'>
+        <a ng-if='match.model.type=="location"' ng-href='/#/e/{{match.model.id}}'>
+          <div class='thumbnail' ng-if='match.model.props.thumbnail' style='background-image:url({{match.model.props.thumbnail}})'></div>
+          <h4>{{match.model.props|lookup:'name':'en'}} ({{match.model.props.country}}) — location</h4>
+        </a>
+
+        <a ng-if='match.model.type=="theme"' ng-href='/#/e/{{match.model.id}}'>
           <div class='thumbnail' ng-if='match.model.props.thumbnail' style='background-image:url({{match.model.props.thumbnail}})'></div>
           <h4>{{match.model.props|lookup:'name':'en'}} — theme</h4>
         </a>
