@@ -25,12 +25,9 @@
         </h3>
         
         <div class='context'>
-          <span ng-repeat="location in item.places">
-              <a class="tag location" ng-click="toggleMenu($event, item, location, 'place')">{{location.name}}</a><!-- 
-              <a ng-if="location.geocode_id" ng-click="toggleInquirer(location)" class="tag location" >{{location.geocode_formatted_address}}</a>
-              <a ng-if="location.geonames_id" class="tag location" >{{location.geonames_toponymName}}, {{location.geonames_countryName}}</a>
-               --><span ng-if="!$last">-</span>
-            </span>
+          <span ng-if='item.places.length'>At 
+            <span ng-repeat="place in item.places"><span class="tag place" data-id='{{place.id}}' gasp-type='place' gasp-parent='{{item.type}}-{{item.id}}'>{{place.props.name}}</span>{{$last? '':  ', '}}</span> — 
+          </span>
           
           <span class="empty" ng-if="!item.props.start_time" tooltip='click to add a date'>without any date <a class='btn btn-contribute' ng-click='inspectMetadata(item, "date")'>add</a></span>
           <span ng-if='item.props.start_time'>
