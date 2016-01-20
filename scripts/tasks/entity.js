@@ -385,14 +385,14 @@ module.exports = {
     async.waterfall([
       // count expected combinations
       function countExpected (next) {
-        neo4j.query(queries.count_computate_jaccard_distance, next)
+        neo4j.query(parser.agentBrown(queries.count_computate_jaccard_distance, options), next)
       },
       // repeat n time to oid java mem heap space
       function performJaccard (result, next) {
         var loops = Math.ceil(result.total_count / 10000);
         console.log('   loops:', loops);
         async.timesSeries(loops, function (n, _next) {
-          console.log('    loop:', n ,'- offset:', n*10000)
+          console.log('    loop:', n ,'- offset:', n*10000, '- limit:', 10000, '- total:', result.total_count)
           var query = parser.agentBrown(queries.computate_jaccard_distance, options);
           neo4j.query(query, {
             offset: n*10000,

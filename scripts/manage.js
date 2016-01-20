@@ -85,7 +85,17 @@ var fs          = require('fs'),
       */
       'calculate-similarity': [
         tasks.entity.tfidf,
-        tasks.entity.cleanSimilarity,   
+        
+        tasks.entity.cleanSimilarity, 
+        function(options, callback) {
+          options.entity = 'person';
+          callback(null, options);
+        },  
+        tasks.entity.jaccard,
+        function(options, callback) {
+          options.entity = 'theme';
+          callback(null, options);
+        },
         tasks.entity.jaccard,
         tasks.entity.cosine
       ],
@@ -114,7 +124,15 @@ var fs          = require('fs'),
       'text-of-resource': [
         tasks.resource.getOne,
         tasks.resource.getText
-      ]
+      ],
+
+      /*
+        custom csv export
+      */
+      'cartoDB': [
+        'tasks.resource.cartoDB',
+        'tasks.helpers.csv.stringify'
+      ],
     }, settings.availableTasks || {});
 
 console.log(clc.whiteBright( "\n\n +-+-+ "));
