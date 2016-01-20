@@ -265,7 +265,7 @@ module.exports = function(io){
       form.params.entity = form.params.entityA; // if it is necessary,e.g. for precomputated routes
 
       
-      if(form.params.entityA == 'person' && form.params.entityA == form.params.entityB && !form.params.from && !form.params.to && !form.params.with && !form.params.type) {
+      if((form.params.entityA == 'person' || form.params.entityA == 'theme') && form.params.entityA == form.params.entityB && !form.params.from && !form.params.to && !form.params.with && !form.params.type) {
         query = parser.agentBrown(queries.get_precomputated_cooccurrences, form.params);
         form.params.precomputated = true;
       } else {
