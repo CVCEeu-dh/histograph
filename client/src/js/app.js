@@ -68,50 +68,7 @@ angular
     }
     
   })
-  .constant('GRAMMAR', {
-    AS_TYPES: [
-      {
-        name: 'of any type',
-      },
-      {
-        name: '(pictures)',
-        filter: 'type=picture'
-      },
-      {
-        name: '(cartoons)',
-        filter: 'type=cartoon'
-      },
-      {
-        name: '(letters)',
-        filter: 'type=letter'
-      },
-      {
-        name: '(treaty)',
-        filter: 'type=treaty'
-      }
-    ],
-    IN_TYPES: [
-      {
-        name: 'in any kind of documents',
-      },
-      {
-        name: 'in pictures',
-        filter: 'type=picture'
-      },
-      {
-        name: 'in cartoons',
-        filter: 'type=cartoon'
-      },
-      {
-        name: 'in letters',
-        filter: 'type=letter'
-      },
-      {
-        name: 'in treaty',
-        filter: 'type=treaty'
-      }
-    ]
-  })
+  
   /*
     Local-storage module config. cfr
     https://github.com/grevory/angular-local-storage
@@ -133,6 +90,10 @@ angular
   .config(function ($stateProvider, $urlRouterProvider, GRAMMAR) {
     $urlRouterProvider
       .otherwise("/");
+
+    /*
+      set up states and rules to be used as grammar for the filters controller, cfr js/controllers/filters.js
+    */  
     $stateProvider
       .state('index', {
         url: '/in',
@@ -151,50 +112,56 @@ angular
           name: 'resource',
           label: 'show',
           choices: [
-            /*{
+            {
               name: 'explore.resources',
-              label: 'documents'
-            }, {
-              name: 'explore.persons',
-              label: 'view graph'
-            }*/
+              label: 'gallery of resources',
+
+            }, 
+            {
+              name: 'explore.projection',
+              label: 'graph of person - person cooccurrences',
+              params: {
+                modelA: 'person',
+                modelB: 'person'
+              }
+            },
+            {
+              name: 'explore.projection',
+              label: 'graph of location cooccurrences',
+              params: {
+                modelA: 'location',
+                modelB: 'location'
+              }
+            },
+            {
+              name: 'explore.projection',
+              label: 'graph of theme cooccurrences',
+              params: {
+                modelA: 'theme',
+                modelB: 'theme'
+              }
+            },
+            {
+              name: 'explore.projection',
+              label: 'graph of theme - location cooccurrences',
+              params: {
+                modelA: 'theme',
+                modelB: 'location'
+              }
+            }
           ],
           connector: {
-              type: 'in documents of type',
-              relatedTo: 'which mentions',
-              notRelatedTo: 'related to anyone',
-              from: 'from',
-              to: 'to'
-            },
-            types: [
-              {
-                name: 'in any kind of documents',
-              },
-              {
-                name: 'in pictures',
-                filter: 'type=picture'
-              },
-              {
-                name: 'in letters',
-                filter: 'type=letter'
-              },
-              {
-                name: 'in treaty',
-                filter: 'type=treaty'
-              }
-            ],
-            relatedTo: {
-              typeahead: 'entity'
-            }
+            type: 'in documents of type',
+            relatedTo: 'which mentions',
+            notRelatedTo: 'related to anyone',
+            from: 'from',
+            to: 'to'
+          },
+          types: GRAMMAR.IN_TYPES,
+          relatedTo: {
+            typeahead: 'entity'
+          }
         },
-        // resolve: {
-        //   resources: function(ResourcesFactory, $location) {
-            
-        //     return ResourcesFactory.get(angular.extend({
-        //       limit: 10
-        //     }, $location.search())).$promise;
-        //   },
-        // }
       })
         .state('explore.resources', {
           url: '',
@@ -234,39 +201,12 @@ angular
             }
           },
         })
-        .state('explore.persons', {
-          url: 'per',
-          template: '<div></div>',
-          controller: 'ExploreEntitiesCtrl',
-          grammar: {
-            label: 'view people mentions',
-            connector: {
-              type: 'in documents of type',
-              relatedTo: 'which mentions',
-              notRelatedTo: 'related to anyone',
-              from: 'from',
-              to: 'to'
-            },
-            types: GRAMMAR.IN_TYPES,
-            relatedTo: {
-              typeahead: 'entity'
-            }
-          },
-          resolve: {
-            relatedModel: function() {
-              return 'person'
-            },
-            projectedModel: function() {
-              return 'person'
-            },
-          }
-        })
         .state('explore.projection', {
           url: 'projection/:modelA/:modelB',
           template: '<div></div>',
           controller: 'ExploreEntitiesCtrl',
           grammar: {
-            label: 'view combination',
+            label: 'graph of :modelA - :modelB cooccurrences',
             connector: {
               type: 'in documents of type',
               relatedTo: 'which mentions',
@@ -393,6 +333,14 @@ angular
             return EntityRelatedFactory.get({
               id: $stateParams.id,
               model: 'person',
+              limit: 10
+            }, {}).$promise;
+          },
+          // lcoation cooccurrences (appearing with)
+          locations: function(EntityRelatedFactory, $stateParams) {
+            return EntityRelatedFactory.get({
+              id: $stateParams.id,
+              model: 'location',
               limit: 10
             }, {}).$promise;
           },
