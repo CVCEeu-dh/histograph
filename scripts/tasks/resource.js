@@ -5,11 +5,13 @@
 var settings  = require('../../settings'),
     helpers   = require('../../helpers'),
 
+
     neo4j     = require('seraph')(settings.neo4j.host),
     async     = require('async'),
     path      = require('path'),
     fs        = require('fs'),
-    Resource  = require('../../models/resource');
+    Resource  = require('../../models/resource'),
+    Entity    = require('../../models/entity');
 
 module.exports = {
   
@@ -189,14 +191,15 @@ module.exports = {
       return callback(' Please specify the file path to write in with --target=path/to/source.tsv');
     }
 
-    neo4j.query('Match (loc:location)-[:appears_in]->(r:resource) WHERE has(loc.geocode_lat) RETURN {name: loc.name, lat: loc.geocode_lat, lng: loc.geocode_lng,start_time: r.start_time, start_date: r.start_date, end_time: r.end_time, end_date:r.end_date, title:COALESCE(r.name, r.title_en, r.title_fr), id:id(r)} skip {offset} LIMIT {limit} ', {
-        limit: +options.limit || 1000,
+    neo4j.query('MATCH (loc:location)-[rel:appears_in]->(res:resource) WHERE has(loc.lat) WITH loc, rel, res ORDER BY rel.frequency ASC WITH loc, last(collect(res)) as r, COUNT(res) as distribution, MIN(res.start_time) as start_time, MAX(res.end_time) as end_time RETURN {name: loc.name, lat: loc.lat, lng: loc.lng,start_time: start_time, distribution: distribution, end_time: end_time, example_title:COALESCE(r.name, r.title_en, r.title_fr), example_id:id(r), example_slug:r.slug} skip {offset} LIMIT {limit} ', {
+        limit: +options.limit || 100000,
         offset: +options.offset || 0
     }, function(err, rows) {
       if(err) {
         callback(err);
         return
       }
+      console.log('    cartodb: found', rows.length, 'rows')
       options.records = rows;
       options.fields = [
         'name',
@@ -206,8 +209,10 @@ module.exports = {
         'start_date',
         'end_time',
         'end_date',
-        'title',
-        'id'
+        'example_title',
+        'example_id',
+        'example_slug',
+        'distribution'
       ];
       options.filepath=options.target;
       
@@ -217,14 +222,16 @@ module.exports = {
   
   importTwitter: function(options, callback) {
     console.log(clc.yellowBright('\n   tasks.resource.importTwitter'));
-    console.log(options.data[0])
+    console.log(options.data[0]);
+    
      // check integrioty, @todo
     var q = async.queue(function (tweet, nextTweet) {
       var resource = {
         type: 'tweet',
-        slug: tweet.id,
+        slug: 'tweet-' + tweet.id,
         mimetype: 'text/plain',
-        name: tweet.from_user_name + ' - ' + tweet.text,
+        name: tweet.from_user_name + ' - ' + helpers.text.excerpt(tweet.text, 32),
+        
         user: options.marvin
       }
 
@@ -238,15 +245,18 @@ module.exports = {
       resource.languages = [ tweet.lang ];
 
       // title and caption
-      resource['title_'+tweet.lang] = tweet.from_user_name + ' - ' + tweet.text;
+      resource['title_'+tweet.lang] = resource.name;
+      // console.log(resource)
+      resource['caption_'+tweet.lang] = '@' + tweet.from_user_name + ' - ' + tweet.text;
 
       // console.log(resource)
-
+      resource.full_search = resource['caption_'+tweet.lang];
 
       
       console.log(clc.blackBright('   creating ...', clc.whiteBright(resource.slug)))
       
       console.log(resource);
+      
       Resource.create(resource, function (err, res) {
         if(err) {
           q.kill();
@@ -324,7 +334,11 @@ module.exports = {
       resource['caption_'+language] = '@' + item.user_username + ' - ' + item.caption_text + ' - ' + _.compact(item.tags.split(/\s?,\s?/)).map(function(d){return '#'+d;}).join(', ');
 
       // console.log(resource);
+      // add full text ;)
+      resource.full_search = resource['caption_'+language];
+
       
+
       
       Resource.create(resource, function (err, res) {
         if(err) {
@@ -332,13 +346,36 @@ module.exports = {
           callback(err)
         } else {
           console.log(clc.blackBright('   resource: ', clc.whiteBright(res.id), 'saved,', q.length(), 'resources remaining'));
-      
-          nextItem();
+        
+          if(!_.isEmpty(item.location)){
+            var latlng = item.location.split(/\s?,\s?/).join(',');
+            console.log(latlng)
+            // create entity from place (the first result is the good one)
+            helpers.reverse_geocoding({latlng: latlng}, function (err, results) {
+              console.log(err,results)
+              if(err || !results.length)
+                 nextItem();
+              else
+                Entity.create(_.assign(results[0], {
+                  type: 'place',
+                  resource: {
+                    id: res.id
+                  },
+                  services: ['reverse_geocoding'],
+                }), function(err, node) {
+                  if(err) {
+                    q.kill();
+                    callback(err)
+                  } else nextItem();
+                })
+            });
+          } else
+            nextItem();
           
         }
       })
 
-    }, 3);
+    }, 1);
     q.push(options.data)
     q.drain = function(){
       callback(null, options);
