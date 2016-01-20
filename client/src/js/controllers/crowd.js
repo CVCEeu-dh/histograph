@@ -8,7 +8,7 @@
  */
 angular.module('histograph')
   .controller('CrowdCtrl', function($scope, $log, $state, $timeout, UserFactory) {
-    $scope.short_delay = 100;
+    $scope.short_delay = 60000;
     $scope.long_delay = 180000;
 
     $scope.isVisible = false;
@@ -69,7 +69,10 @@ angular.module('histograph')
       $scope.question = 'challenge_accepted';
       // according to task type, decide what to do next
       if($scope.taskName == 'unknownpeople')
-        $scope.inspect([ $scope.task.person.id]);
+        $state.go('entity.resources', {
+          id: $scope.task.person.id
+        })
+        // $scope.inspect([ $scope.task.person.id]);
       if($scope.taskName == 'resourcelackingdate')
         $state.go('resource.resources', {
           id: $scope.task.resource.id
