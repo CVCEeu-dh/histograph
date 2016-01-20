@@ -390,6 +390,78 @@ module.exports = {
     })
   },
   /*
+    Call the reverse geocoding api according to your current settings.
+    Please make sure you use the proper `settings.geocoding.key`.
+    A successful request should return an array of entity candidates.
+    
+    @param options  - dict of options, options.latlng should exist in the format `lat,lng` e.g `latlng:"40.714224,-73.961452"`;
+    @param next     - your callback(err, res). 
+  */
+  reverse_geocoding: function(options, next) {
+    if(!settings.geocoding ||_.isEmpty(settings.geocoding.key)) {
+      next(null, []);
+      return;
+    }
+    request.get({
+      url: settings.geocoding.endpoint,
+      qs: _.assign({
+        key: settings.geocoding.key
+      }, options, {
+        q: options.address
+      }),
+      json: true
+    }, function (err, res, body) {
+      if(err) {
+        console.log('service geocoding failed')
+        next(err);
+        return;
+      }
+      
+      // console.log(url)
+      if(!body.results.length) {
+        if(body.error_message) {
+          console.log('service geocoding failed')
+          next(body.error_message)
+          return;
+        } 
+        next(null, []);
+        return;
+      };
+      // adding name, fcl and country code as well: it depends on the level.
+      next(null, _.take(_.filter(body.results.map(function (result) {
+        var name = result.formatted_address,
+            fcl  = 'L', 
+            country;
+        // console.log(result.address_components)
+        
+        // down to locality
+        name = _.get(_.find(result.address_components, function (d){
+          return d.types.indexOf('locality') != -1
+        }), 'long_name'); 
+
+        country = _.find(result.address_components, function (d){
+          return d.types.indexOf('country') != -1
+        });   
+        
+        if(!country){
+          country = result.address_components[0]
+        }
+        if(!country){
+          console.log(result)
+          throw 'stop'
+        }
+        
+        return _.assign(result, {
+          _id:      result.place_id,
+          _name:    name,
+          _fcl:     fcl,
+          _country: country.short_name,
+          _query:   options.latlng,
+        });
+      }), '_name'), 2));
+    })
+  },
+  /*
     Call the google geocoding api according to your current settings.
     Please make sure you use the proper `settings.geocoding.key`.
     A successful request should return an array of entity candidates.
