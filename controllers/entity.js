@@ -438,11 +438,23 @@ module.exports = function(io){
     getRelatedResources: function (req, res) {
        var form = validator.request(req, {
             limit: 10,
-            offset: 0
+            offset: 0,
+            orderby: 'relevance'
+          }, {
+            fields: [
+              validator.SPECIALS.orderby
+            ]
           });
       
       if(!form.isValid)
         return helpers.formError(form.errors, res);
+
+      var _t = {
+          'date': 'res.start_time ASC',
+          '-date': 'res.start_time DESC',
+          'relevance': undefined // use default value
+        },
+        orderby = form.params.orderby = _t[''+form.params.orderby]; 
      
       Entity.getRelatedResources(form.params, function (err, items, info) {
         

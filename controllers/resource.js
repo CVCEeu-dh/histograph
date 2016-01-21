@@ -134,7 +134,7 @@ module.exports = function(io){
      
       // if any, rewrite the order by according to this specific context
       var _t = {
-          'date': 'result.dst DESC, result.det DESC',
+          'date': 'res2.start_time ASC',
           '-date': 'result.dst ASC, result.det ASC',
           'relevance': undefined // use default value
         },

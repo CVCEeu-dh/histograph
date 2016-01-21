@@ -212,7 +212,13 @@ WHERE id(ent) = {id}
     AND res.type in {type}
   {/if}
 WITH DISTINCT res, r, ent
+{if:orderby}
+ORDER BY {:orderby}
+{/if}
+{unless:orderby}
 ORDER BY r.tfidf DESC, res.start_time DESC
+{/unless}
+
 SKIP {offset}
 LIMIT {limit}
 

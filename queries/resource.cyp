@@ -393,6 +393,9 @@ RETURN col
     {if:title_en}
       res.title_en = {title_en},
     {/if}
+    {if:title_es}
+      res.title_es = {title_es},
+    {/if}
     {if:title_fr}
       res.title_fr = {title_fr},
     {/if}
@@ -407,6 +410,12 @@ RETURN col
     {/if}
     {if:caption_fr}
       res.caption_fr = {caption_fr},
+    {/if}
+    {if:caption_it}
+      res.caption_it = {caption_it},
+    {/if}
+    {if:caption_es}
+      res.caption_es = {caption_es},
     {/if}
     {if:caption_de}
       res.caption_de = {caption_de},
@@ -454,6 +463,12 @@ RETURN col
     {if:title_en}
       res.title_en = {title_en},
     {/if}
+    {if:title_es}
+      res.title_es = {title_es},
+    {/if}
+    {if:title_it}
+      res.title_it = {title_it},
+    {/if}
     {if:title_fr}
       res.title_fr = {title_fr},
     {/if}
@@ -465,6 +480,12 @@ RETURN col
     {/if}
     {if:caption_fr}
       res.caption_fr = {caption_fr},
+    {/if}
+    {if:caption_it}
+      res.caption_it = {caption_it},
+    {/if}
+    {if:caption_es}
+      res.caption_es = {caption_es},
     {/if}
     {if:caption_de}
       res.caption_de = {caption_de},

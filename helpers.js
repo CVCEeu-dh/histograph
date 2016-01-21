@@ -71,30 +71,46 @@ module.exports = {
         nodes: [],
         edges: []
       };
-      var index = {};
-      
+      var index = {},
+          edgeIndex = {};
+      /*
+        Create the graph object of nodes and edges.
+        calculate the degree as well
+      */
       for(var i = 0; i < items.length; i++) {
         if(!index[items[i].source.id]) {
-          index[items[i].source.id] = 1;//items[i].source;
-          graph.nodes.push(items[i].source);
+          index[items[i].source.id] = items[i].source;//items[i].source;
+          // add the weight as a measure of the node importance among the others
+          index[items[i].source.id].importance = items[i].weight;
+          index[items[i].source.id].degree = 1;
+        } else {
+          // rescale the importance if the weight is higher
+          index[items[i].source.id].importance = Math.max(items[i].weight, index[items[i].source.id].importance);
+          index[items[i].source.id].degree++;
         }
         if(!index[items[i].target.id]) {
-          index[items[i].target.id] = 1;//items[i].target;
-          graph.nodes.push(items[i].target);
+          index[items[i].target.id] = items[i].target;
+          index[items[i].target.id].importance = items[i].weight;
+          index[items[i].target.id].degree = 1;
+        }else {
+          // rescale the importance if the weight is higher
+          index[items[i].target.id].importance = Math.max(items[i].weight, index[items[i].target.id].importance);
+          index[items[i].target.id].degree++;
         }
         
         var edgeId = _.sortBy([items[i].target.id, items[i].source.id]).join('.');
-        
-        if(!index[edgeId]) {
-          index[edgeId] = 1;
+        if(!edgeIndex[edgeId]) {
+          // in some case we have useless symmetric links. @todo cypher query to be improved
+          edgeIndex[edgeId] = 1;
           graph.edges.push({
             id: edgeId,
             source: items[i].source.id,
             target: items[i].target.id,
             weight: items[i].weight
-          });
+        });
         }
       }
+      graph.nodes= _.values(index);
       next(null, graph);
     })
   },

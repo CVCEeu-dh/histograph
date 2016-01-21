@@ -90,6 +90,10 @@ module.exports =  function(io){
           for(var j = 0; j < results.items[i].paths.length; j++) {
             if(!graph.nodes[results.items[i].paths[j].id]) {
               graph.nodes[results.items[i].paths[j].id] = results.items[i].paths[j];
+              graph.nodes[results.items[i].paths[j].id].importance =1
+              graph.nodes[results.items[i].paths[j].id].degree = 1
+            } else {
+              graph.nodes[results.items[i].paths[j].id].degree++;
             }
           }
           for(var j = 0; j < results.items[i].rels.length; j++) {
@@ -578,8 +582,12 @@ module.exports =  function(io){
         for(var i=0, lp=paths.length; i < lp; i++){
           //for each nodes
           for(var j=0, ln=paths[i].ns.length; j < ln; j++)
-            if(!nodes[paths[i].ns[j].id])
+            if(!nodes[paths[i].ns[j].id]) {
               nodes[paths[i].ns[j].id] = paths[i].ns[j]
+              nodes[paths[i].ns[j].id].degree=1
+            } else {
+              nodes[paths[i].ns[j].id].degree++;
+            }
           // for each relationship
           for(var j=0, lr=paths[i].rels.length; j < lr; j++) {
             // console.log(paths[i].rels[j])
