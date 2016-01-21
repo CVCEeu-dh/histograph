@@ -269,7 +269,7 @@ module.exports = {
         }
       })
 
-    }, 1);
+    }, 3);
     q.push(options.data)
     q.drain = function(){
       callback(null, options);

@@ -39,7 +39,16 @@ var fs          = require('fs'),
       'discover-resources': [
         tasks.resource.discoverMany,
         tasks.entity.tfidf,
-        tasks.entity.cleanSimilarity,   
+        tasks.entity.cleanSimilarity, 
+        function(options, callback) {
+          options.entity = 'person';
+          callback(null, options);
+        },  
+        tasks.entity.jaccard,
+        function(options, callback) {
+          options.entity = 'theme';
+          callback(null, options);
+        },
         tasks.entity.jaccard,
         tasks.entity.cosine
       ],
