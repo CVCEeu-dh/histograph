@@ -10,7 +10,7 @@
     
     <div ng-repeat='relatedItem in items'>
       <!-- person node -->
-      <div ng-if='relatedItem.type!="resource"' class='node person' >
+      <div ng-if='relatedItem.type!="resource"' class='node {{relatedItem.type}}' >
         <div class='thumbnail'>
           <div class="thumbnail-wrapper" style='background-image: url({{relatedItem.props.thumbnail}})'>    
             

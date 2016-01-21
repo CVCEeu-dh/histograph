@@ -165,7 +165,8 @@ angular.module('histograph')
     
     $scope.availableSortings = [
       ORDER_BY.RELEVANCE,
-      ORDER_BY.CLOSEST_DATE
+      ORDER_BY.CLOSEST_DATE,
+      ORDER_BY.ASC_DATE
     ];
     
     $scope.sorting = ORDER_BY.RELEVANCE;

@@ -5,7 +5,7 @@
  * # IndexCtrl
  */
 angular.module('histograph')
-  .controller('EntityCtrl', function ($scope, $log, $stateParams, socket, $filter, entity, persons, locations, EntityExtraFactory,EntityRelatedFactory, EVENTS) {
+  .controller('EntityCtrl', function ($scope, $log, $stateParams, socket, $filter, entity, persons, locations, EntityExtraFactory,EntityRelatedFactory, EVENTS, ORDER_BY) {
     $log.debug('EntityCtrl ready', +$stateParams.id);
     
     $scope.item = entity.result.item;
@@ -19,7 +19,7 @@ angular.module('histograph')
     */
     $scope.setHeader('graph', 'cooccurring entities for '+ $filter('title')(entity.result.item.props, $scope.language, 24) + '"');
     
-    
+   
     // cooccurrences
     $scope.graphType = 'monopartite-entity'
     // sync graph

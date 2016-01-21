@@ -65,6 +65,16 @@ angular
     CLOSEST_DATE: {
       label: 'date (closest)',
       value: '-date'
+    },
+
+    ASC_DATE: {
+      label: 'date (oldest first)',
+      value: 'date'
+    },
+
+    DESC_DATE: {
+      label: 'date (closest first)',
+      value: '-date'
     }
     
   })

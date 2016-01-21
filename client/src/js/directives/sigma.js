@@ -223,18 +223,20 @@ angular.module('histograph')
             camera = si.addCamera('main'),
             
             colors = {
-              person: "#4dc3ba", //rgba(33, 33, 33, 0.7)",
-              collection: '#16cc00',
-              location: '#0093a6',
-              resource: '#f6941c',
-              resourceKnown: '#f6941c'
+              person: d3.scale.sqrt().range(['#94d9f8', '#1a75bb']),
+              location: d3.scale.sqrt().range(['#e16666', '#7e213c']),
+              place: d3.scale.sqrt().range(['#7de366', '#3ba220']),
+              theme: d3.scale.sqrt().range(['#ffe46d','#ff9b01']),
+              hashtag: d3.scale.sqrt().range(['#ffe46d','#ff9b01']),
+              resource: d3.scale.sqrt().range(['#f6941c', '#f6941c']),
+              resourceKnown: d3.scale.sqrt().range(['#f6941c', '#f6941c']),
             },
             
             timers = {
                 play: 0
               },
             
-            scale = d3.scale.linear()
+            scale = d3.scale.sqrt()
               .domain([0,100])
               .range(['#d4d4d4', '#000000']);
         
@@ -365,9 +367,12 @@ angular.module('histograph')
           // refresh the scale for edge color, calculated the extent weights of the edges
           scale.domain(d3.extent(graph.edges, function(d) {return d.weight || 1}));
           
-          // Reading new graph
-          
-          
+          // refresh the colors domain according to the type, per each group
+          _.forEach(_.groupBy(graph.nodes, 'type'), function (group, type) {
+            console.log(arguments)
+            colors[type].domain(d3.extent(group, function(d) { return d.importance || 1}));
+          });
+                    
           // play();
           // si.graph.build(graph)
           // return;
@@ -384,17 +389,17 @@ angular.module('histograph')
                 n = pns[n.id];
                 n.center = false;
               } else {
-                n.color = n.type?
-                (colors[n.type] || "#353535"):
-                "#353535";
+                n.color = n.type? colors[n.type](n.importance): "#353535";
                 n.x = n.x || Math.random()*50;
                 n.y = n.y || Math.random()*50;
               }
 
+              n.size = n.degree || 5;
+
               if(graph.centers && graph.centers.indexOf(n.id) !== -1) {
                 n.center = true;
               }
-              n.size = 5;//Math.sqrt(si.graph.degree(n.id));
+              // n.size = 5;//Math.sqrt(si.graph.degree(n.id));
               return n;
             });
             // console.log(graph.nodes)
@@ -415,9 +420,9 @@ angular.module('histograph')
             }
             $log.log('::sigma @graph add', graph.edges.length, 'edges,', graph.nodes.length, 'nodes');
             si.graph.clear().read(graph);
-            si.graph.nodes().forEach(function (n) {
-              n.size =si.graph.degree(n.id);
-            });
+            // si.graph.nodes().forEach(function (n) {
+            //   n.size =si.graph.degree(n.id);
+            // });
             
             
             
@@ -697,7 +702,7 @@ angular.module('histograph')
             e.discard = false
           });
           // refresh the view
-          rescale()
+          // rescale()
           si.refresh();
         }
         /*
@@ -898,9 +903,9 @@ angular.module('histograph')
         sigma.canvas.edgehovers.def = function(edge, source, target, context, settings) {
           if(!edge || !source || !target)
             return;
-          var color = colors[source.type],
+          var color = '#151515',
             prefix = settings('prefix') || '',
-            size = edge[prefix + 'size'] || 1;
+            size = 5;
             
           size *= settings('edgeHoverSizeRatio');
 
