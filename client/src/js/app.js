@@ -158,6 +158,14 @@ angular
                 modelA: 'theme',
                 modelB: 'location'
               }
+            },
+            {
+              name: 'explore.projection',
+              label: 'graph of theme - place cooccurrences',
+              params: {
+                modelA: 'theme',
+                modelB: 'place'
+              }
             }
           ],
           connector: {
