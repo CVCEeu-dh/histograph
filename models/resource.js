@@ -539,8 +539,8 @@ module.exports = {
   /*
     Return the timeline of document related resource.
   */
-  getRelatedResourcesTimeline: function(resource, next) {
-    helpers.cypherTimeline(rQueries.get_related_resources_timeline, resource, function (err, timeline) {
+  getRelatedResourcesTimeline: function(resource, properties, next) {
+    helpers.cypherTimeline(rQueries.get_related_resources_timeline, _.assign({}, properties, resource), function (err, timeline) {
       if(err)
         next(err);
       else

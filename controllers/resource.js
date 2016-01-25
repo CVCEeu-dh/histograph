@@ -519,7 +519,7 @@ module.exports = function(io){
       
       Resource.getRelatedResourcesTimeline({
         id: form.params.id
-      }, function (err, timeline) {
+      }, form.params, function (err, timeline) {
         if(err)
           return helpers.cypherQueryError(err, res);
         return res.ok({

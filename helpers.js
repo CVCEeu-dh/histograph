@@ -18,7 +18,6 @@ var fs       = require('fs'),
     IS_IOERROR  = 'IOError',
     IS_WRONG_TYPE = 'is_wrong_type',
 
-    reconcile  = require('decypher')('./queries/migration.resolve.cyp'),
     neo4j      = require('seraph')(settings.neo4j.host);
 
 module.exports = {
@@ -646,124 +645,7 @@ module.exports = {
       next(null, candidates);
     })
   },
-  /**
-    Call alchemyapi service for people/places reconciliation.
-    Whenever possible, reconciliate with existing entitites in neo4j db.
-   */
-  alchemyapi: function(text, service, next) {
-    if(settings.alchemyapi.services.indexOf(service) == -1){
-      next(IS_IOERROR);
-      return
-    };
-    console.log('  ', service, text);
-    
-    request
-      .post({
-        url: settings.alchemyapi.endpoint.text + service,
-        json: true,
-        form: {
-          text: text,
-          apikey: settings.alchemyapi.key,
-          outputMode: 'json',
-          knowledgeGraph: 1
-        }
-      }, function (err, res, body) {
-        console.log(body.status, body.statusInfo);
-        if(body.status == 'ERROR' && body.statusInfo == "unsupported-text-language") {
-          next(null, []); // unsupported latnguage should be a warning, not an error
-          return;
-        }
-
-        if(body.status == 'ERROR') {
-          next(IS_EMPTY);
-          return;
-        } 
-        console.log(body.entities)
-        // get persons
-        // console.log('all persons ', _.filter(body.entities, {type: 'Person'}));
-
-        var persons =  _.filter(body.entities, {type: 'Person'}),
-            locations =  body.entities.filter(function (d){
-              return d.disambiguated && (d.type == 'Country' || d.type == 'City')
-            }),
-            entities = [],
-            queue;
-        console.log(_.map(locations, function(d){return d.text}))
-        var queue = async.waterfall([
-          // person reconciliation (merge by)
-          function (nextReconciliation) {
-            var q = async.queue(function (person, nextPerson) {
-              if(person.disambiguated && (person.disambiguated.dbpedia || person.disambiguated.yago)) {
-                neo4j.query(reconcile.merge_person_entity_by_links_wiki, {
-                  name: person.disambiguated.name,
-                  links_wiki: path.basename(person.disambiguated.dbpedia) || '',
-                  links_yago: path.basename(person.disambiguated.yago) || '',
-                  service: 'alchamyapi'
-                }, function (err, nodes) {
-                  if(err)
-                    throw err;
-                  entities = entities.concat(nodes);
-                  nextPerson();
-                })
-              } else {
-                neo4j.query(reconcile.merge_person_entity_by_name, {
-                  name: person.disambiguated? person.disambiguated.name : person.text,
-                  service: 'alchemyapi'
-                }, function (err, nodes) {
-                  if(err)
-                    throw err;
-                  entities = entities.concat(nodes);
-                  nextPerson();
-                })
-              };   
-            }, 1);
-
-            q.push(persons);
-            q.drain = nextReconciliation
-          },
-          // places entity (locations and cities) by using geonames services
-          function (nextReconciliation) {
-            var q = async.queue(function (location, nextLocation) {
-              module.exports.geonames(location.disambiguated.name, function (err, nodes){
-                if(err == IS_EMPTY) {
-                  nextLocation();
-                  return;
-                } else if(err)
-                  throw err
-                entities = entities.concat(nodes);
-                nextLocation();
-              })
-            }, 1);
-            q.push(locations);
-            q.drain = nextReconciliation;
-          },
-          
-          // places entities (countries and cities) by using geocoding services
-          function (nextReconciliation) {
-            var q = async.queue(function (location, nextLocation) {
-              // read file
-              // if(settings.cache.services)
-              //   fs.readFile(path.join(settings.cache.services, )
-              module.exports.geocoding(location.disambiguated.name, function (err, nodes){
-                if(err == IS_EMPTY) {
-                  nextLocation();
-                  return;
-                } else if(err)
-                  throw err
-                entities = entities.concat(nodes);
-                nextLocation();
-              })
-            }, 1);
-            q.push(locations);
-            q.drain = nextReconciliation;
-          }
-          // geonames/geocode reconciliation via 
-        ], function() {
-          next(null, entities);
-        });
-      }); // end request.post for alchemyapi service
-    
-  },
+  
 
   /**
     Create a Viaf entity:person node for you
@@ -960,26 +842,26 @@ module.exports = {
     });
   },
   /**
+  DEPRECATED 
     Create a relationship @relationship from two nodes resource and entity.
     The Neo4J MERGE result will be returned as arg for the next function next(null, result)
     @resource - Neo4J node:resource as js object
     @entity   - Neo4J node:entity as js object
     @next     - your callback with(err, res)
   */
-  enrichResource: function(resource, entity, next) {
+  // enrichResource: function(resource, entity, next) {
     
-
-    neo4j.query(reconcile.merge_relationship_entity_resource, {
-      entity_id: entity.id,
-      resource_id: resource.id
-      }, function (err, relationships) {
-        if(err) {
-          next(err)
-          return
-        }
-        next(null, relationships);
-    });
-  },
+  //   neo4j.query(reconcile.merge_relationship_entity_resource, {
+  //     entity_id: entity.id,
+  //     resource_id: resource.id
+  //     }, function (err, relationships) {
+  //       if(err) {
+  //         next(err)
+  //         return
+  //       }
+  //       next(null, relationships);
+  //   });
+  // },
 
   /*
     Return this moment ISO timestamp and this moment EPOCH ms timestamp

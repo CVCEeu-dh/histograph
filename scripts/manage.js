@@ -88,6 +88,13 @@ var fs          = require('fs'),
         tasks.entity.getMany,
         tasks.entity.enrich
       ],
+
+      'gexf-entity-cooccurrences': [
+        tasks.gexf.init,
+        tasks.gexf.entity.cooccurrences,
+        tasks.gexf.stringify
+      ],
+
       /*
         computate (ent:entity:person)--(ent:entity:person) links
         based on similarity

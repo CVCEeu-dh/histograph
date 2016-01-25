@@ -527,7 +527,7 @@ RETURN col, res
 // name: get_precomputated_cooccurrences
 //
 MATCH (p1:{:entity})-[r:appear_in_same_document]-(p2:{:entity})
-WHERE id(p1) < id(p2)
+WHERE id(p1) < id(p2) AND p1.score > -1 AND p2.score > -1
 WITH p1,p2,r
 ORDER BY r.intersections DESC
 LIMIT {limit}
@@ -855,26 +855,26 @@ RETURN t, weight
 // name: get_related_resources_timeline
 //
 MATCH (res:resource)<-[:appears_in]-(ent:entity)
-WHERE id(res) = {id}
+WHERE id(res) = {id} AND ent.score > -1
   
 WITH ent
 MATCH (res:resource)<-[:appears_in]-(ent)
-WHERE has(res.start_month)
+WHERE id(res) <> {id} AND has(res.start_month)
   {if:mimetype}
   AND res.mimetype = {mimetype}
   {/if}
-  {if:ecmd}
-  AND res.ecmd = {ecmd}
+  {if:type}
+  AND res.type IN {type}
   {/if}
   {if:start_time}
   AND res.start_time >= {start_time}
   {/if}
   {if:end_time}
-  AND res.end_time >= {end_time}
+  AND res.end_time <= {end_time}
   {/if}
-
+WITH DISTINCT res
   
-WITH  res.start_month as tm, min(res.start_time) as t, count(res) as weight
+WITH  res.start_month as tm, min(res.start_time) as t,  count(res) as weight
 RETURN tm, t, weight
 ORDER BY tm ASC
 

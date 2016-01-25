@@ -130,18 +130,18 @@ angular.module('histograph')
           tim.fn.y = d3.scale.sqrt()
             .range([
               30,
-              0
+              5
             ]);
           
-          tim.fn.area = d3.svg.area()
-              //.interpolate("monotone")
-              .x(function (d) {
-                return tim.fn.x(d.t);
-              })
-              .y0(function (d) {
-                return tim.fn.y(d.weight);
-              })
-              .y1(30);
+          // tim.fn.area = d3.svg.area()
+          //     //.interpolate("monotone")
+          //     .x(function (d) {
+          //       return tim.fn.x(d.t);
+          //     })
+          //     .y0(function (d) {
+          //       return tim.fn.y(d.weight);
+          //     })
+          //     .y1(30);
         }
         
         tim.drawDates = function (extent) {
@@ -312,52 +312,36 @@ angular.module('histograph')
           var dataset,    // the current dataset, sorted
               weigthExtent,
               timeExtent; // [minT, maxT] array of max and min timestamps
-          
-          tim.timeExtent = d3.extent(scope.timeline, function (d) {
-            return d.t*1000
+
+
+          dataset = angular.copy(_.flatten([scope.timeline])).map(function (d) {
+            d.t*=1000; // different level of aggregation
+            return d;
+          });
+
+          $log.log('::timeline -> draw() - w:', tim.width(), '- n. values:', dataset.length)
+
+          // time extent
+          tim.timeExtent = d3.extent(dataset, function (d) {
+            return d.t
           });
           
-          // if(scope.timeline.length < 1000)
-            dataset = angular.copy(scope.timeline).map(function (d) {
-              d.t*=1000; // different level of aggregation
-              return d;
-            });
-          // else {
-          //   dataset = angular.copy(scope.timeline).map(function (d) {
-          //     d.t*=1000; // different level of aggregation
-          //     d.m = tim.fn.asYear(new Date(d.t));
-          //     return d;
-          //   });
-          //   dataset = _.map(_.groupBy(dataset, 'm'), function (values, k) {
-          //     return {
-          //       weight: _.sum(values, 'weight'),
-          //       k: k,
-          //       t: _.min(values, 't').t,
-          //       t1: _.max(values, 't').t
-          //     };
-          //   });
-          //   console.log('::timeline -> draw() - sample:',_.take(dataset, 5))
-          // }
-           
+          // weight extent
           weigthExtent = d3.extent(dataset, function (d) {
             return d.weight
           });
           
-          
+          // sort by time label
           dataset.sort(function (a, b) {
             return a.t < b.t ? -1 : 1
           });
           
-          // loop throug data
-          $log.log('::timeline -> draw() - w:', tim.width(), '- n. values:', dataset.length)
-          
           // set date from extent
-          // console.log(timeExtent)
           tim.ui.dateLeft
               .text(tim.fn.asDay(new Date(tim.timeExtent[0])));
           tim.ui.dateRight
               .text(tim.fn.asDay(new Date(tim.timeExtent[1])));
-          
+                    
           
           //, d3.time.format("%Y-%m-%d").parse(scope.filters.from));
           
@@ -367,8 +351,8 @@ angular.module('histograph')
             scope.filters.to? d3.time.format("%Y-%m-%d").parse(scope.filters.to): tim.timeExtent[1]
           ]
           
-          //
-          tim.svg.attr("width", tim.width())
+          // reset ranges according to width
+          // tim.svg.attr("width", tim.width())
           tim.fn.x = d3.time.scale()
             .range([0, tim.width() - tim.padding.h * 2]);
           
@@ -393,7 +377,9 @@ angular.module('histograph')
           var _histograms = histogram.enter()
             .append('rect')
               .attr('class', 't');
-          
+          histogram.exit()
+            .remove();
+
           histogram.
             attr({
               x: function(d) {
@@ -416,30 +402,29 @@ angular.module('histograph')
         */
         // on graph change, change the timeline as well
         scope.$watch('timeline', function (timeline) {
-          if(!timeline)
+          if(!timeline || timeline.length == undefined)
             return;
-          $log.log('::timeline n. nodes ', timeline.length);
+          $log.log('::timeline @timeline n. nodes ', timeline.length);
           
-          tim.init();
+          
           tim.draw();
           // computate min and max
         });
+
+        tim.init();
         
-        scope.$watch('filters', function (filters) {
-          if(filters) {
-            $log.log('::timeline filters:',filters);
-            if(tim.evaluate())
-              tim.draw();
-          }
-        })
+        // scope.$watch('filters', function (filters) {
+        //   if(filters) {
+        //     $log.log('::timeline @filters:',filters);
+        //     if(tim.evaluate())
+        //       tim.draw();
+        //   }
+        // })
         
         angular.element($window).bind('resize', function() {
-          
           clearTimeout(tim.resizeTimer);
           tim.resizeTimer = setTimeout(tim.draw, 200);
         });
-        
-        
       }
     }
   });

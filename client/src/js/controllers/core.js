@@ -144,6 +144,12 @@ angular.module('histograph')
     }
     
     /*
+      timeline handlers
+    */
+    $scope.setTimeline = function(items) {
+      $scope.timeline = items;
+    }
+    /*
       language handlers
     */
     $scope.language = 'en';
@@ -456,11 +462,11 @@ angular.module('histograph')
           or to be updated whenever a
           CHANGES in resource set occurs
         */
-        VisualizationFactory.resource(VIZ.TIMELINE).then(function (res) {
-          $log.info('CoreCtrl @EVENTS.USE_USER VisualizationFactory', res);
-          $scope.timeline = res.data.result.timeline;
-          
-        });
+        // VisualizationFactory.resource(VIZ.TIMELINE).then(function (res) {
+        //   $log.info('CoreCtrl @EVENTS.USE_USER VisualizationFactory', res);
+        //   $scope.timeline = res.data.result.timeline;
+        //   // $scope.initialTimeline
+        // });
       }
     });
     

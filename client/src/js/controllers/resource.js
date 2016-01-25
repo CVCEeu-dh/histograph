@@ -52,6 +52,23 @@ angular.module('histograph')
         $scope.isFavItem = false;
       });
     };
+
+    /*
+      LoadTimeline
+      ---
+
+      load the timeline of related resources
+    */
+    $scope.syncTimeline = function() {
+      ResourceRelatedVizFactory.get(angular.extend({
+        model:'resource',
+        id: $stateParams.id,
+        viz: 'timeline'
+      },  $stateParams, $scope.params), function (res) {
+        // if(res.result.titmeline)
+        $scope.setTimeline(res.result.timeline)
+      });
+    };
     /*
       loadAnnotations
       ---
@@ -193,6 +210,16 @@ angular.module('histograph')
       } 
     })
 
+    /*
+      
+      Events listeners
+
+    */
+    $scope.$on(EVENTS.API_PARAMS_CHANGED, function() {
+      $log.debug('ResourceCtrl @API_PARAMS_CHANGED', $scope.params);
+      $scope.syncTimeline();
+    })
+
     $scope.switchVersion = function(version) {
       $log.info('resourceCtrl.switchVersion', version)
       $scope.currentVersion = version;
@@ -265,6 +292,8 @@ angular.module('histograph')
     */
     $scope.item = angular.extend({ type: 'resource'}, resource.result.item);
     
-    
+    // load timeline
+    $scope.syncTimeline();
+
     
   });
