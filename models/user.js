@@ -141,7 +141,7 @@ module.exports = {
           callback(helpers.IS_EMPTY);
         else
           neo4j.query(queries['get_crowdsourcing_'+params.what], {
-            offset: Math.round(Math.random()*(result.count_items-1)),
+            offset: Math.round(Math.random()*((result.count_items/4)-1)),
             limit: 1
           }, callback);
       }
