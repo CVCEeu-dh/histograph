@@ -54,8 +54,10 @@ var sessionMiddleware = session({
   saveUninitialized: true
 })
 
-console.log('logs:', settings.paths.accesslog);
-console.log('env: ', env);
+console.log('logs: ', settings.paths.accesslog);
+console.log('env:  ', env);
+console.log('port: ', settings.port);
+console.log('url:  ', settings.baseurl)
 
 app.use(compress());
 
