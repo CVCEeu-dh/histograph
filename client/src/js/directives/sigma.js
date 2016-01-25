@@ -369,8 +369,8 @@ angular.module('histograph')
           
           // refresh the colors domain according to the type, per each group
           _.forEach(_.groupBy(graph.nodes, 'type'), function (group, type) {
-            console.log(arguments)
-            colors[type].domain(d3.extent(group, function(d) { return d.importance || 1}));
+            if(colors[type])
+              colors[type].domain(d3.extent(group, function(d) { return d.importance || 1}));
           });
                     
           // play();
