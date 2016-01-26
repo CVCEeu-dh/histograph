@@ -9,6 +9,46 @@
  * Main module of the application. require marked
  */
 angular.module('histograph')
+  
+  .directive('lookup', function(){
+    return {
+      restrict : 'A',
+      scope:{
+        marked: '=',
+        context: '=',
+        language: '='
+      },
+      template: '<span marked="text" context="context"></span>',
+      link : function(scope, element, attrs) {
+        scope.text= 'CIO'
+
+        var render = function(text) {// cutat
+          if(typeof text != 'string')
+            return text;
+          if(isNaN(attrs.cutAt))
+            return text;//$sce.trustAsHtml(text);
+          //trim the string to the maximum length
+          var t = text.substr(0, cutAt);
+          //re-trim if we are in the middle of a word
+          if(text.length > cutAt)
+            t = t.substr(0, Math.min(t.length, t.lastIndexOf(' '))) + ' ...';
+          // if there is a cut at, we will strip the html
+          return t;
+        };
+
+        var content = scope.context.props[attrs.field + '_' + scope.language]
+
+        if(content)
+          scope.text = render(content);
+        else
+          for(var i in scope.context.props.languages) {
+            content = scope.context.props[attrs.field + '_' + scope.context.props.languages[i]];
+            if(content)
+              scope.text = render(content);
+          }
+      }
+    }
+  })
   /*
     Basic wrapper for ui-codemirror providing it with special hints, thanks to github.com/amarnus cfr.
     https://github.com/amarnus/ng-codemirror-dictionary-hint/blob/master/lib/ng-codemirror-dictionary-hint.js
@@ -126,6 +166,7 @@ angular.module('histograph')
         scope.$watch('marked', function(val) {
           if(!val)
             return;
+
           // organise(merge) entitites
           $log.log('::marked @marked changed');
           if(scope.context) {

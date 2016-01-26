@@ -78,6 +78,11 @@ module.exports = {
       '/js/controllers/resource.js',
       '/js/controllers/search.js',
       '/js/controllers/user.js',
+
+      // modal controllers. templates in templates/modal
+      '/js/controllers/modals/contribute.js',
+
+
       '/js/directives/annotator.js', 
       '/js/directives/annotorious.js', 
       '/js/directives/sigma.js',  

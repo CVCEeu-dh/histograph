@@ -1,9 +1,13 @@
-<!-- typeahead template for FILTERING purpose -->
+<!-- typeahead template for FILTERING purpose; used in contribute modal -->
 <div class='{{match.model.props.thumbnail?"with-thumbnail":""}}'>
   <a ng-if='match.model.type != "default"' >
+    <div class='thumbnail' ng-if='match.model.props.thumbnail' style='background-image:url({{match.model.props.thumbnail}})'></div>
     
-       <div class='thumbnail' ng-if='match.model.props.thumbnail' style='background-image:url({{match.model.props.thumbnail}})'></div>
-       <h4>{{match.model.props|lookup:'name':'en'}}</h4>
-       <p ng-if='match.model.props.birth_date'>{{match.model.props|datesOfSomeone}}</p>
+    <h4 marked="match.model.props|lookup:'name':'en'"></h4>
+    <p>
+      <span ng-if='match.model.type=="person"'>{{match.model.props|datesOfSomeone}}</span>
+      <span ng-if='match.model.type=="location"'>{{match.model.props.country}}</span>
+      — {{match.model.type}} ({{match.model.props.df}} documents)
+    </p>
   </a>
 </div>

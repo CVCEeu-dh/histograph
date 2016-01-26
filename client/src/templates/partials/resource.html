@@ -16,13 +16,19 @@
           <a ng-href='#/r/{{item.id}}/inq' tooltip="view the related {{item.inquiries}} inquiries"><label>{{item.inquiries}}</label> <i class="fa fa-comment"></i></a>
           </span>
         </div>
-        <h3 class="tk-adelle" data-id='{{item.id}}'>
+        <h3 class="sans-serif" data-id='{{item.id}}'>
          <!--  <span ng-if="currentAnnotation" ng-href="#/r/{{item.id}}" context="item" marked="currentAnnotation.annotated.title"></span>
           <span ng-if="!currentAnnotation" ng-href="#/r/{{item.id}}" ng-bind-html="item.props | title:language"></span> -->
-          <annotator ng-if='item.props.mimetype!="image"' context="title"> 
+         <!--  <annotator ng-if='item.props.mimetype!="image"' context="title"> 
             <span ng-if='!item.annotations || !item.annotations.length' marked="item.props|lookup:'title':language"></span>
-            <span ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'title':language:item.props"></span>
-          </annotator>
+            <span ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'title':language"></span>
+          </annotator> -->
+<!-- 
+          <span ng-if='!item.annotations || !item.annotations.length' marked="item.props|lookup:'title':language"></span>
+          <span ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'title':language"></span>
+           -->
+          <span lookup context='item' field='title' language='language'></span>
+
         </h3>
         
         <div class='context'>
@@ -116,11 +122,9 @@
                     <li><a ng-click="switchVersion(mergedVersion)">merged version</a></li>
                   </ul>
                 </div>
-                <!-- <div class='img-wrapper' ng-if='item.props.tiles_url'>
-                  <div annotoriousol tiles='item.props.tiles_url'></div>
-                </div> -->
+                
                 <div class="img-wrapper">
-                  <div annota src="item.props.url" item='item' notes='positions' contribute='contribute(item, type, options)' prefix="media/"></div>
+                  <div annotorious src="item.props.url" item='item' notes='positions' contribute='contribute(item, type, options)' prefix="media/"></div>
                   <!-- <img  ng-src="media/{{item.props.url}}" annotorious contribute='contribute(item, type, options)' w="item.props.width" h="item.props.height" version="currentVersion" item='item' /> -->
                 </div>
               </div>

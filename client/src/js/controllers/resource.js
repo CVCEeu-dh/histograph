@@ -295,5 +295,4 @@ angular.module('histograph')
     // load timeline
     $scope.syncTimeline();
 
-    
   });

@@ -297,9 +297,9 @@ a#header-title {
 }
 
 .item img{
-  max-width: 100%;
+  /*max-width: 100%;
   max-height: 600px;
-  min-width: 600px;
+  min-width: 600px;*/
   /*object-fit: contain;*/
   margin: 0 auto;
 }
@@ -6473,6 +6473,7 @@ Copyright (c) 2015 Daniel Eden
 
 .contribute .dropdown-menu{
   font-size: 12px;
+  border-radius: 0;
 }
 
 .contribute .typeahead-in-dropdown h2{
