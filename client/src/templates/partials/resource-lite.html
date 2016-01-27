@@ -29,7 +29,7 @@
     </span>
   </div>
            
-  <div class='img-wrapper' ng-if='relatedItem.props.mimetype=="image" && relatedItem.props.url'><a ng-href='/#/r/{{relatedItem.id}}'><div class="img"  style='background-image: url({{relatedItem.props.url}})'></div></a></div>
+  <div class='img-wrapper' ng-if='relatedItem.props.mimetype=="image" && relatedItem.props.url'><a ng-href='/#/r/{{relatedItem.id}}'><div class="img"  style='background-image: url(/media/{{relatedItem.props.url}})'></div></a></div>
   
   <blockquote lookup context='relatedItem' field='caption' language='language'></blockquote>
   
