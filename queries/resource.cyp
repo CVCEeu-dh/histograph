@@ -122,37 +122,37 @@ WITH res
 OPTIONAL MATCH (res)-[r_loc:appears_in]->(loc:`location`)
 WITH res, r_loc, loc
 ORDER BY r_loc.tfidf DESC, r_loc.frequency DESC
-WITH res, collect({  
+WITH res,  filter(x in collect({  
       id: id(loc),
       type: 'location',
       props: loc,
       rel: r_loc
-    })[0..5] as locations   
+    }) WHERE has(x.id))[0..5] as locations   
 OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
 WITH res, locations, r_per, per
 ORDER BY r_per.tfidf DESC, r_per.frequency DESC
-WITH res, locations, collect({
+WITH res, locations,  filter(x in collect({  
       id: id(per),
       type: 'person',
       props: per,
       rel: r_per
-    })[0..5] as persons
+    }) WHERE has(x.id))[0..5] as persons
 OPTIONAL MATCH (res)-[r_org:appears_in]-(org:`organization`)
 
-WITH res, locations, persons, collect({  
+WITH res, locations, persons,  filter(x in collect({    
       id: id(org),
       type: 'organization',
       props: org,
       rel: r_org
-    })[0..5] as organizations
+    }) WHERE has(x.id))[0..5] as organizations
 OPTIONAL MATCH (res)-[r_soc:appears_in]-(soc:`social_group`)
 
-WITH res, locations, persons, organizations, collect({
+WITH res, locations, persons, organizations,  filter(x in collect({  
       id: id(soc),
       type: 'social_group',
       props: soc,
       rel: r_soc
-    })[0..5] as social_groups
+    }) WHERE has(x.id))[0..5] as social_groups
 
 {if:with}
   OPTIONAL MATCH (res)--(ann:annotation) 
