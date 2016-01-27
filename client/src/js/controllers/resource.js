@@ -76,14 +76,16 @@ angular.module('histograph')
       Load notes attached to the current id
     */
     $scope.loadAnnotations = function(options, next) {
+      $log.info('ResourceCtrl > loadAnnotations', options)
+
       var annotations = $scope.notes.filter(function(d) {
         if(d.context)
           return d.context == options.context && d.language == $scope.language;
         else
           return d.props.annotation.context == options.context && d.props.annotation.language == $scope.language;
         }).map(function (d) {
-
           return _.assign({}, d.props.annotation, {
+            id: d.id,
             "annotator_schema_version": "v1.0",        // schema version: default v1.0
      "created": "2011-05-24T18:52:08.036814",   // created datetime in iso8601 format (added by backend)
      "updated": "2011-05-26T12:17:05.012544",   // updated datetime in iso8601 format (added by backend)
@@ -160,7 +162,10 @@ angular.module('histograph')
             }, result.data.related.action.props.annotation))
           else if(result.data.related.action.props.annotation.context)
             $scope.notes.push(_.assign({
-              id: _.first(_.filter(result.data.related.action.mentioning, {type: 'person'})).id,
+              id: _.first(_.filter(result.data.related.action.mentioning, function(d){
+                return ['person', 'location', 'organization', 'theme', 'topic'].indexOf(d.type) !== -1 
+              })).id,
+              props: result.data.related.action.props,
               performed_by: result.data.related.action.performed_by,
               creation_date: result.data.related.action.props.creation_date,
               removable: $scope.user.id == result.data.related.action.performed_by.id

@@ -15,9 +15,10 @@
   </div>   
   <div class="type"> {{relatedItem.props.ecmd|ecmd}} {{$index + 1}} out of {{totalItems}}</div>
   <h4>
-    <a href='#/r/{{relatedItem.id}}' ng-if='!relatedItem.annotations || !relatedItem.annotations.length' marked="relatedItem.props|lookup:'title':language"></a>
-    <a href='#/r/{{relatedItem.id}}' ng-if='relatedItem.annotations && relatedItem.annotations.length' context='relatedItem' marked="relatedItem.annotations|annotate:'title':language"></a>
-  
+    <a href='#/r/{{relatedItem.id}}'>
+      <span lookup context='relatedItem' field='title' language='language'></span>
+    </a>
+   
   </h4>
         
   <div class="meta">
@@ -28,9 +29,8 @@
     </span>
   </div>
            
-  <div class='img-wrapper' ng-if='relatedItem.props.mimetype=="image" && relatedItem.props.url'><a ng-href='/#/r/{{relatedItem.id}}'><div class="img"  style='background-image: url({{relatedItem.props|url:language}})'></div></a></div>
-  <blockquote ng-if='!relatedItem.annotations || !relatedItem.annotations.length' marked="relatedItem.props|lookup:'caption':language"></blockquote>
-  <blockquote ng-if='relatedItem.annotations && relatedItem.annotations.length' context='relatedItem' marked="relatedItem.annotations|annotate:'caption':language"></blockquote>
+  <div class='img-wrapper' ng-if='relatedItem.props.mimetype=="image" && relatedItem.props.url'><a ng-href='/#/r/{{relatedItem.id}}'><div class="img"  style='background-image: url({{relatedItem.props.url}})'></div></a></div>
   
-  <!-- div class='matches' ng-if='relatedItem.annotations' context='relatedItem' marked="relatedItem.annotations|annotate:'url':language"></div -->
+  <blockquote lookup context='relatedItem' field='caption' language='language'></blockquote>
+  
 </div>

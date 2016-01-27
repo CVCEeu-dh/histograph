@@ -12,23 +12,14 @@
           
           
         
-          <span  ng-if="item.inquiries">—
-          <a ng-href='#/r/{{item.id}}/inq' tooltip="view the related {{item.inquiries}} inquiries"><label>{{item.inquiries}}</label> <i class="fa fa-comment"></i></a>
+          <!-- <span  ng-if="item.inquiries">—
+          <a ng-href='#/r/{{item.id}}/inq' tooltip="view the related {{item.inquiries}} inquiries"><label>{{item.inquiries}}</label> <i class="fa fa-comment"></i></a> -->
           </span>
         </div>
-        <h3 class="sans-serif" data-id='{{item.id}}'>
-         <!--  <span ng-if="currentAnnotation" ng-href="#/r/{{item.id}}" context="item" marked="currentAnnotation.annotated.title"></span>
-          <span ng-if="!currentAnnotation" ng-href="#/r/{{item.id}}" ng-bind-html="item.props | title:language"></span> -->
-         <!--  <annotator ng-if='item.props.mimetype!="image"' context="title"> 
-            <span ng-if='!item.annotations || !item.annotations.length' marked="item.props|lookup:'title':language"></span>
-            <span ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'title':language"></span>
-          </annotator> -->
-<!-- 
-          <span ng-if='!item.annotations || !item.annotations.length' marked="item.props|lookup:'title':language"></span>
-          <span ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'title':language"></span>
-           -->
-          <span lookup context='item' field='title' language='language'></span>
-
+        <h3 class="sans-serif" >
+          <annotator context="title" notes="notes" item='item' language="language">
+            <span lookup context='item' field='title' language='language'></span>
+          </annotator>
         </h3>
         
         <div class='context'>
@@ -101,9 +92,9 @@
         <div class='fluid-container'>
           <div>
             <div >
-              <annotator target="{{item.id}}" context="caption">
-                <blockquote id='caption' ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'caption':language"></blockquote>
-                <blockquote id='caption' ng-if='!item.annotations.length' context='item' marked="item.props|lookup:'caption':language"></blockquote>
+              <annotator context="caption" item='item' notes="notes" language="language">
+                <blockquote lookup context='item' field='caption' language='language'></blockquote>
+                
               </annotator>
             </div>
           
@@ -128,10 +119,11 @@
                   <!-- <img  ng-src="media/{{item.props.url}}" annotorious contribute='contribute(item, type, options)' w="item.props.width" h="item.props.height" version="currentVersion" item='item' /> -->
                 </div>
               </div>
-              
-              <annotator ng-if='item.props.mimetype!="image"' context="full-text">
-                <div class='full-text' ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'url':language" ></div>
-              </annotator>
+              <div ng-if='item.props.mimetype!="image"' >
+                <annotator context="full-text" item='item' notes="notes" language="language">
+                  <div class='full-text' ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'url':language" ></div>
+                </annotator>
+              </div>
             </div>
           </div>
         </div>
