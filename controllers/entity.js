@@ -319,9 +319,13 @@ module.exports = function(io){
       //   check that the solution param is an available label
       async.series({
         entity: function(next) {
-          Entity.update(+form.params.id, {
+          var params = {
             issue: form.params.kind
-          }, next);
+          };
+          if(form.params.kind == Issue.WRONG)
+            params.downvoted_by = req.user.username;
+          
+          Entity.update(+form.params.id, params, next);
         },
         issue: function(next) {
           Issue.create({
