@@ -24,6 +24,7 @@ module.exports = {
   TYPE: 'type',
   MERGEABLE: 'mergeable',
   IRRELEVANT: 'irrelevant',
+  WRONG: 'wrong',
   
   get: function(issue, next) {
     neo4j.query(queries.get_issue, {

@@ -297,6 +297,7 @@ module.exports = function(io){
                   [
                     Issue.TYPE,
                     Issue.IRRELEVANT,
+                    Issue.WRONG,
                     Issue.MERGEABLE
                   ]
                 ],
@@ -336,7 +337,7 @@ module.exports = function(io){
 
         Action.create({
           kind: Action.RAISE_ISSUE,
-          target: Action.ENTITY_LABEL,
+          target: form.params.kind == Issue.WRONG? Action.ENTITY_WRONG :Action.ENTITY_LABEL,
           mentions: mentions,
           username: req.user.username
         }, function (err, act) {

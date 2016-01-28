@@ -142,6 +142,8 @@ angular.module('histograph')
               res.result.items[0].props.links_viaf
             ]).length;
 
+            scope.entity.isWrong = res.result.items[0].props.issues? res.result.items[0].props.issues.indexOf('wrong') != -1: false;
+
             scope.entity.props = res.result.items[0].props;
           })
         };

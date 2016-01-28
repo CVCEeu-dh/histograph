@@ -14,7 +14,10 @@
            <a ng-if='entity.type == "theme"' ng-click='close()' ng-href='{{link.href}}'>{{entity.props|lookup:'name':language}}</a>
 
         </h4>
-        <div ng-if='entity.isIncomplete && entity == "person"' class='date'>
+        <div ng-if='entity.isWrong'>
+          {{entity.props.issues}}
+        </div>
+        <div ng-if='!entity.issues && entity.isIncomplete && entity == "person"' class='date'>
           We couldn't find any information about this person automatically.. would you help us?
         </div>
         <div ng-if='!entity.isIncomplete && entity.type == "person"'>
@@ -42,13 +45,11 @@
           <span class="fa fa-times-circle"></span></a>
     </div>
   </div>
-  <div class='btn-group-wrapper'>
+  <div class='btn-group-wrapper {{question?"disabled":""}}'>
     <div class="btn-group">
       <a class="btn btn-line-white" ng-click='close()' ng-href='/#/e/{{entity.id}}' title="visit" data-action="link">more</a>
       
       <button ng-if='link.removable' class='btn btn-line-white obscure' ng-click='askQuestion("remove-relationship")'>REMOVE</button>
-      
-
 
       <button ng-if='!link.removable && entity.type != "theme"'  class='btn btn-line-white obscure' ng-click='askQuestion("downvote")'><i class="fa fa-bug"></i> fix / edit </button>
      
@@ -75,7 +76,7 @@
           <button class='btn btn-line-white btn-block' ng-click='downvote($event)'>this <strong>{{entity.type}}</strong> is not mentioned here</button>
           <button class='btn btn-line-white btn-block' ng-click='askQuestion("wrongtype", $event)'>This is not a <strong>{{entity.type}}</strong></button>
           <button class='btn btn-line-white btn-block' ng-click='askQuestion("contribute", $event)'>this is a typo / fragment / duplicate</button>
-          
+           <button class='btn btn-line-white btn-block' ng-click='askQuestion("wrong", $event)'> remove this</button>
           
           <button class='btn btn-line-white obscure btn-block' ng-click='cancelQuestion($event)'>back</button>
         </div>
@@ -88,12 +89,22 @@
           <button class='btn btn-line-white btn-block' ng-click='downvote($event)'>this <strong>{{entity.type}}</strong> is not mentioned here</button>
           <button class='btn btn-line-white btn-block' ng-click='askQuestion("wrongtype", $event)'>This is not a <strong>{{entity.type}}</strong></button>
           <button class='btn btn-line-white btn-block' ng-click='askQuestion("contribute", $event)'>this is a typo / fragment / duplicate</button>
-          
+           <button class='btn btn-line-white btn-block' ng-click='askQuestion("wrong", $event)'> remove this</button>
           
           <button class='btn btn-line-white obscure btn-block' ng-click='cancelQuestion($event)'>back</button>
         </div>
       </div>
     </div>
+
+      <div ng-if='question=="wrong"'>
+        <p class='text'>Is this entity wrong?</p>
+        <div class='answers'>
+          <div class='btn-group btn-group-dual'>
+            <button class='btn btn-line-white btn-primary' ng-click='raiseIssue("wrong")'>yes!</button>
+            <button class='btn btn-line-white obscure' ng-click='askQuestion("downvote")'>back</button>
+          </div>
+        </div>
+      </div>
 
       <div ng-if='question=="contribute"'>
         <p class='text'>Can you find a better {{entity.type}} between the ones collected?</p>
