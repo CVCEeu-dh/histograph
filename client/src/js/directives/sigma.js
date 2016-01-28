@@ -389,7 +389,7 @@ angular.module('histograph')
                 n = pns[n.id];
                 n.center = false;
               } else {
-                n.color = n.type? colors[n.type](n.importance): "#353535";
+                n.color = n.type && colors[n.type]? colors[n.type](n.importance): "#353535";
                 n.x = n.x || Math.random()*50;
                 n.y = n.y || Math.random()*50;
               }
