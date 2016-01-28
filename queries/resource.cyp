@@ -13,6 +13,7 @@ OPTIONAL MATCH (curator:user)-[:curates]->(res)
 WITH res, curated_by_user, loved_by_user, lovers, count(curator) as curators
 
 OPTIONAL MATCH (res)-[r_pla:appears_in]-(pla:`place`)
+WHERE pla.score > -2
 WITH res, curated_by_user, loved_by_user, curators, lovers, r_pla, pla
 ORDER BY r_pla.score DESC, r_pla.tfidf DESC, r_pla.frequency DESC
 WITH res, curated_by_user, loved_by_user, curators, lovers, filter(x in collect({  
@@ -23,6 +24,7 @@ WITH res, curated_by_user, loved_by_user, curators, lovers, filter(x in collect(
     }) WHERE has(x.id))[0..5] as places
 
 OPTIONAL MATCH (res)-[r_loc:appears_in]-(loc:`location`)
+WHERE loc.score > -2
 WITH res, curated_by_user, loved_by_user, curators, lovers, places, r_loc, loc
 ORDER BY r_loc.score DESC, r_loc.tfidf DESC, r_loc.frequency DESC
 WITH res, curated_by_user, loved_by_user, curators, lovers, places, filter(x in collect({  
@@ -33,6 +35,7 @@ WITH res, curated_by_user, loved_by_user, curators, lovers, places, filter(x in 
     }) WHERE has(x.id))[0..5] as locations
 
 OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
+WHERE per.score > -2
 WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, r_per, per
 ORDER BY r_per.score DESC, r_per.tfidf DESC, r_per.frequency DESC
 WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, filter(x in collect({
@@ -43,6 +46,7 @@ WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, f
     }) WHERE has(x.id))[0..10] as persons
 
 OPTIONAL MATCH (res)-[r_org:appears_in]-(org:`organization`)
+WHERE org.score > -2
 WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, persons, r_org, org
 ORDER BY r_org.score DESC, r_org.tfidf DESC, r_org.frequency DESC
 WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, persons, filter(x in collect({  
@@ -53,6 +57,7 @@ WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, p
     }) WHERE has(x.id))[0..10] as organizations
 
 OPTIONAL MATCH (res)-[r_soc:appears_in]-(soc:`social_group`)
+WHERE soc.score > -2
 WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, persons, organizations, r_soc, soc
 ORDER BY r_soc.score DESC, r_soc.tfidf DESC, r_soc.frequency DESC
 WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, persons, organizations, filter(x in collect({
@@ -63,6 +68,7 @@ WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, p
     }) WHERE has(x.id))[0..10] as social_groups
 
 OPTIONAL MATCH (res)-[r_the:appears_in]-(the:`theme`)
+WHERE the.score > -2
 WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, persons, organizations, social_groups, filter(x in collect({
       id: id(the),
       type: 'theme',
@@ -120,6 +126,7 @@ SKIP {offset}
 LIMIT {limit}
 WITH res
 OPTIONAL MATCH (res)-[r_loc:appears_in]->(loc:`location`)
+WHERE loc.score > -2
 WITH res, r_loc, loc
 ORDER BY r_loc.tfidf DESC, r_loc.frequency DESC
 WITH res,  filter(x in collect({  
@@ -128,7 +135,8 @@ WITH res,  filter(x in collect({
       props: loc,
       rel: r_loc
     }) WHERE has(x.id))[0..5] as locations   
-OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
+OPTIONAL MATCH (res)<-[r_per:appears_in]-(per:`person`)
+WHERE per.score > -2
 WITH res, locations, r_per, per
 ORDER BY r_per.tfidf DESC, r_per.frequency DESC
 WITH res, locations,  filter(x in collect({  
@@ -137,26 +145,34 @@ WITH res, locations,  filter(x in collect({
       props: per,
       rel: r_per
     }) WHERE has(x.id))[0..5] as persons
-OPTIONAL MATCH (res)-[r_org:appears_in]-(org:`organization`)
-
+OPTIONAL MATCH (res)<-[r_org:appears_in]-(org:`organization`)
+WHERE org.score > -2
 WITH res, locations, persons,  filter(x in collect({    
       id: id(org),
       type: 'organization',
       props: org,
       rel: r_org
     }) WHERE has(x.id))[0..5] as organizations
-OPTIONAL MATCH (res)-[r_soc:appears_in]-(soc:`social_group`)
-
+OPTIONAL MATCH (res)<-[r_soc:appears_in]-(soc:`social_group`)
+WHERE soc.score > -2
 WITH res, locations, persons, organizations,  filter(x in collect({  
       id: id(soc),
       type: 'social_group',
       props: soc,
       rel: r_soc
     }) WHERE has(x.id))[0..5] as social_groups
+OPTIONAL MATCH (res)<-[r_the:appears_in]-(the:`theme`)
+WHERE the.score > -2
+WITH res, locations, persons, organizations, social_groups, filter(x in collect({    
+      id: id(the),
+      type: 'theme',
+      props: the,
+      rel: r_the
+    }) WHERE has(x.id))[0..5] as themes
 
 {if:with}
   OPTIONAL MATCH (res)--(ann:annotation) 
-  WITH res, ann, locations, persons, organizations, social_groups
+  WITH res, ann, locations, persons, organizations, themes, social_groups
 {/if}
 
 RETURN {
@@ -167,6 +183,7 @@ RETURN {
     annotations: collect(ann),
   {/if}
   persons:     persons,
+  themes:     themes,
   organizations: organizations,
   locations:    locations,
   social_groups:   social_groups
