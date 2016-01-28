@@ -9,20 +9,27 @@
  * Main module of the application. require marked
  */
 angular.module('histograph')
-  
+  /*
+    usage
+    <span lookup language="<$scope.language>language" context="<$scope.item>item"></span>
+  */
   .directive('lookup', function(){
     return {
       restrict : 'A',
       scope:{
-        marked: '=',
+        // marked: '=',
         context: '=',
         language: '='
       },
       template: '<span marked="text" context="context"></span>',
       link : function(scope, element, attrs) {
         // scope.text = ''
-
+        // console.log('::lookup', scope.context.type)
+        
         var render = function(text) {// cutat
+          if(scope.context.type == 'theme') {
+            console.log('::lookup', 'theme', text, typeof text)
+          }
           if(typeof text != 'string')
             return text;
           if(isNaN(attrs.cutAt))
@@ -33,10 +40,14 @@ angular.module('histograph')
           if(text.length > cutAt)
             t = t.substr(0, Math.min(t.length, t.lastIndexOf(' '))) + ' ...';
           // if there is a cut at, we will strip the html
+          if(scope.context.type == 'theme') {
+            console.log('::lookup final', t)
+          }
           return t;
         };
 
         scope.textify = function() {
+
           var content;
 
           // look for annotations
@@ -63,6 +74,10 @@ angular.module('histograph')
                   break;
               }
             }
+          }
+
+          if(!content) {
+            content = scope.context.props[attrs.field]
           }
 
           if(content)

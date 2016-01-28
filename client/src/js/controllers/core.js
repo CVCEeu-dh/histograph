@@ -462,11 +462,11 @@ angular.module('histograph')
           or to be updated whenever a
           CHANGES in resource set occurs
         */
-        // VisualizationFactory.resource(VIZ.TIMELINE).then(function (res) {
-        //   $log.info('CoreCtrl @EVENTS.USE_USER VisualizationFactory', res);
-        //   $scope.timeline = res.data.result.timeline;
-        //   // $scope.initialTimeline
-        // });
+        VisualizationFactory.resource(VIZ.TIMELINE).then(function (res) {
+          $log.info('CoreCtrl @EVENTS.USE_USER VisualizationFactory', res);
+          $scope.contextualTimeline = res.data.result.timeline;
+          // $scope.initialTimeline
+        });
       }
     });
     
@@ -790,6 +790,9 @@ angular.module('histograph')
         extra: 'downvote'
       }, {}, function (res) {
         $log.log('CoreCtrl -> signale()', res.status);
+        // feedback
+        if(res.status == 'ok')
+          $scope.setMessage('thanks for your feedback')
         if(next)
           next();
       });

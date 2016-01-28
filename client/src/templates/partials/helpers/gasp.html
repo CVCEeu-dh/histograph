@@ -1,62 +1,84 @@
 <div class="inner">
-  <div>
-    <div class='node {{entity.type}}'>
-      
-      <div class='thumbnail' ng-if='entity.props.thumbnail'>
-        <div class="thumbnail-wrapper" style='background-image: url({{entity.props.thumbnail}})'>
+  <div ng-if='isUnknown'>
+    <div>
+      <div class='node'>
+        <div class='content'>
+          <h4>
+            <a><p>unknown entity</p></a>
+          </h4>
         </div>
       </div>
-      <div class='content sans-serif {{entity.props.thumbnail?"":"without-thumbnail"}}'>
-        <h4>
-          <a ng-if='entity.type == "person"' ng-href='{{link.href}}' marked="entity.props|lookup:'name':language" ng-click='close()'></a>
-          <a ng-if='entity.type == "location"' ng-click='close()' ng-href='{{link.href}}'><p>{{entity.props|lookup:'name':language}}, {{entity.props.country}}</p></a>
-          <a ng-if='entity.type == "organization"' ng-click='close()' ng-href='{{link.href}}'>{{entity.props|lookup:'name':language}}</a>
-           <a ng-if='entity.type == "theme"' ng-click='close()' ng-href='{{link.href}}'>{{entity.props|lookup:'name':language}}</a>
+    </div>
+    <div class='btn-group-wrapper {{question?"disabled":""}}'>
+      <div class="btn-group">
+        <button class='btn btn-line-white obscure' ng-click='askQuestion("remove-relationship")'>REMOVE</button>
+        <button class='btn btn-line-white obscure' ng-click='askQuestion("unknown")'>
+          <i class="fa fa-bug"></i> ADD IDENTITY 
+        </button>
+      </div>
+    </div>
+  </div>
+  <div  ng-if='!isUnknown'>
+    <div>
+      <div class='node {{entity.type}}'>
+        
+        <div class='thumbnail' ng-if='entity.props.thumbnail'>
+          <div class="thumbnail-wrapper" style='background-image: url({{entity.props.thumbnail}})'>
+          </div>
+        </div>
+        <div class='content sans-serif {{entity.props.thumbnail?"":"without-thumbnail"}}'>
+          <h4>
+            <a ng-if='entity.type == "person"' ng-href='{{link.href}}' marked="entity.props|lookup:'name':language" ng-click='close()'></a>
+            <a ng-if='entity.type == "location"' ng-click='close()' ng-href='{{link.href}}'><p>{{entity.props|lookup:'name':language}}, {{entity.props.country}}</p></a>
+            <a ng-if='entity.type == "organization"' ng-click='close()' ng-href='{{link.href}}'>{{entity.props|lookup:'name':language}}</a>
+             <a ng-if='entity.type == "theme"' ng-click='close()' ng-href='{{link.href}}'>{{entity.props|lookup:'name':language}}</a>
 
-        </h4>
-        <div ng-if='entity.isWrong'>
-          {{entity.props.issues}}
+          </h4>
+          <div ng-if='entity.isWrong'>
+            {{entity.props.issues}}
+          </div>
+          <div ng-if='!entity.issues && entity.isIncomplete && entity.type == "person"' class='date'>
+            We couldn't find any information about this <strong>person</strong> automatically.. can you help us?
+          </div>
+          <div ng-if='!entity.isIncomplete && entity.type == "person"'>
+            <div class='date' >{{entity.props.birth_time | datesOfAPerson : entity.props.death_time}}</div>
+            
+          </div>
+          <div ng-if='entity.type == "location" || entity.type=="theme"'>
+            <div class='date' >{{entity.type}}</div>
+          </div>
+          <div ng-if="entity.props.links_viaf">
+            <a target='_blank' ng-href='http://viaf.org/viaf/{{entity.props.links_viaf}}'>VIAF: {{entity.props.links_viaf}}
+            </a>
+          </div>
+          <div ng-if="entity.props.links_wiki">
+            <a target='_blank' ng-href='http://dbpedia.org/resource/{{entity.props.links_wiki}}'>dbpedia: {{entity.props.links_wiki}}</a>
+          </div>
+          <div ng-if='scope.link.creator'>created by: {{scope.link.creator}}</div>
         </div>
-        <div ng-if='!entity.issues && entity.isIncomplete && entity == "person"' class='date'>
-          We couldn't find any information about this person automatically.. would you help us?
-        </div>
-        <div ng-if='!entity.isIncomplete && entity.type == "person"'>
-          <div class='date' >{{entity.props.birth_time | datesOfAPerson : entity.props.death_time}}</div>
+        <div class="actions">
+          <a class="action" title="add to bookmark" ng-click="queue()">
+            <span class="fa fa-bookmark-o"></span></a>
           
         </div>
-        <div ng-if='entity.type == "location" || entity.type=="theme"'>
-          <div class='date' >{{entity.type}}</div>
-        </div>
-        <div ng-if="entity.props.links_viaf">
-          <a target='_blank' ng-href='http://viaf.org/viaf/{{entity.props.links_viaf}}'>VIAF: {{entity.props.links_viaf}}
-          </a>
-        </div>
-        <div ng-if="entity.props.links_wiki">
-          <a target='_blank' ng-href='http://dbpedia.org/resource/{{entity.props.links_wiki}}'>dbpedia: {{entity.props.links_wiki}}</a>
-        </div>
-        <div ng-if='scope.link.creator'>created by: {{scope.link.creator}}</div>
+        <a class="discard action" title="close" ng-click="close()">
+            <span class="fa fa-times-circle"></span></a>
       </div>
-      <div class="actions">
-        <a class="action" title="add to bookmark" ng-click="queue()">
-          <span class="fa fa-bookmark-o"></span></a>
+    </div>
+    <div class='btn-group-wrapper {{question?"disabled":""}}'>
+      <div class="btn-group">
+        <a class="btn btn-line-white" ng-click='close()' ng-href='/#/e/{{entity.id}}' title="visit" data-action="link">more</a>
         
+        <button ng-if='link.removable' class='btn btn-line-white obscure' ng-click='askQuestion("remove-relationship")'>REMOVE</button>
+
+        <button ng-if='!link.removable && entity.type != "theme"'  class='btn btn-line-white obscure' ng-click='askQuestion("downvote")'><i class="fa fa-bug"></i> fix / edit </button>
+       
+        <button ng-if='!link.removable && !entity.isIncomplete' class='btn btn-line-white {{entity.upvotes.length? "btn-number":""}}' ng-click='upvote($event)'>CONFIRM <i class="fa fa-check"></i><div class='number' ng-if='entity.upvotes.length'>{{entity.upvotes.length}}</div></button>
+
       </div>
-      <a class="discard action" title="close" ng-click="close()">
-          <span class="fa fa-times-circle"></span></a>
     </div>
   </div>
-  <div class='btn-group-wrapper {{question?"disabled":""}}'>
-    <div class="btn-group">
-      <a class="btn btn-line-white" ng-click='close()' ng-href='/#/e/{{entity.id}}' title="visit" data-action="link">more</a>
-      
-      <button ng-if='link.removable' class='btn btn-line-white obscure' ng-click='askQuestion("remove-relationship")'>REMOVE</button>
-
-      <button ng-if='!link.removable && entity.type != "theme"'  class='btn btn-line-white obscure' ng-click='askQuestion("downvote")'><i class="fa fa-bug"></i> fix / edit </button>
-     
-      <button ng-if='!link.removable && !entity.isIncomplete' class='btn btn-line-white {{entity.upvotes.length? "btn-number":""}}' ng-click='upvote($event)'>CONFIRM <i class="fa fa-check"></i><div class='number' ng-if='entity.upvotes.length'>{{entity.upvotes.length}}</div></button>
-
-    </div>
-  </div>
+    
   <div class='questions {{question}} obscure {{question?"enabled":""}}'>
 
     <div ng-if='question=="remove-relationship"' class='question'>
@@ -69,14 +91,37 @@
       </div>
     </div>
 
-    <div ng-if='question=="edit"' class='question'>
-       <p class='text'>search in VIAF for identities</p>
+    <div ng-if='question=="unknown"'>
+      <p class='text'>Is this entity in this collection?</p>
+      <div class='answers'>
+        <div >
+          <form>
+            <input autofocus type='text' name='test' typeahead-trigger-on-model-change='entity.name' ng-model='q' class='form-control' typeahead-editable='false' placeholder='search person, location, themes...' uib-typeahead='item for items in typeaheadSuggest($viewValue, entity.type)' typeahead-wait-ms='100' typeahead-on-select='typeaheadSelected($item, $model, $label, "unknown-confirm")' typeahead-template-url='templates/partials/helpers/typeahead.html'/>
+          </form>
+        </div>
+      </div>
+      <div class='answers'>
+        <button class='btn btn-line-white obscure btn-block' ng-click='askQuestion("new")'>Nope, it is a brand new</button>
+        <button class='btn btn-line-white obscure btn-block' ng-click='cancelQuestion()'>back</button>
+      </div>
+    </div>
+      <div ng-if='question=="unknown-confirm"'>
+          <p class='text'>confirm <strong class='tk-proxima-nova' style='color: white'>{{entity.alias.props|lookup:'name':language}}</strong>({{entity.alias.type}})?</p>
+          <div class='answers'>
+            <div class='btn-group btn-group-dual'>
+              <button class='btn btn-line-white btn-primary' ng-click='merge()'>yes!</button>
+              <button class='btn btn-line-white obscure' ng-click='askQuestion("contribute", $event)'>back</button>
+            </div>
+          </div>
+        </div>
+
+
+    <div ng-if='question=="new"' class='question'>
+
+       <p class='text'>Does these viaf ids applies to the person or the institution selected</p>
       <div class='answers'>
         <div class=''>
-          <button class='btn btn-line-white btn-block' ng-click='downvote($event)'>this <strong>{{entity.type}}</strong> is not mentioned here</button>
-          <button class='btn btn-line-white btn-block' ng-click='askQuestion("wrongtype", $event)'>This is not a <strong>{{entity.type}}</strong></button>
-          <button class='btn btn-line-white btn-block' ng-click='askQuestion("contribute", $event)'>this is a typo / fragment / duplicate</button>
-           <button class='btn btn-line-white btn-block' ng-click='askQuestion("wrong", $event)'> remove this</button>
+          
           
           <button class='btn btn-line-white obscure btn-block' ng-click='cancelQuestion($event)'>back</button>
         </div>
@@ -116,7 +161,7 @@
           </div>
         </div>
         <div class='answers'>
-          <button class='btn btn-line-white obscure btn-block' ng-click='cancelQuestion($event)'>Nope, it is a brand new {{entity.type}}</button>
+          <button class='btn btn-line-white obscure btn-block' ng-click='askQuestion("new")'>Nope, it is a brand new {{entity.type}}</button>
           <button class='btn btn-line-white obscure btn-block' ng-click='askQuestion("downvote")'>back</button>
         </div>
       </div>
@@ -184,22 +229,23 @@
       </div>
 
   </div>
-  <!-- <div class="action-group">
+    <!-- <div class="action-group">
 
-    
-     <a class="action filter" ng-click='addFilter()' tooltip="filter your selection" data-action="filter">
-      <span class="fa fa-filter"></span></a>
-    <a class="action" href="{{href}}" title="visit" data-action="link" tooltip="{{linkto}}">
-      <span class="fa fa-link"></span></a>
-
-    <a class="action inspect" ng-click='inspect()' tooltip="analyse and correct" data-action="inspect">
-      <span class="fa fa-lightbulb-o"></span></a>
-
-    <a class="action downvote" ng-click='downvote(item)' tooltip="downvote - the entity is not relevant in this context" data-action="downvote">
-      <span class="fa fa-thumbs-o-down"></span></a>
-
-    <a class="action downvote" ng-click='upvote(item)' tooltip="upvote - the entity is relevant in this context" data-action="upvote">
-      <span class="fa fa-thumbs-o-up"></span></a>
       
-  </div> -->
+       <a class="action filter" ng-click='addFilter()' tooltip="filter your selection" data-action="filter">
+        <span class="fa fa-filter"></span></a>
+      <a class="action" href="{{href}}" title="visit" data-action="link" tooltip="{{linkto}}">
+        <span class="fa fa-link"></span></a>
+
+      <a class="action inspect" ng-click='inspect()' tooltip="analyse and correct" data-action="inspect">
+        <span class="fa fa-lightbulb-o"></span></a>
+
+      <a class="action downvote" ng-click='downvote(item)' tooltip="downvote - the entity is not relevant in this context" data-action="downvote">
+        <span class="fa fa-thumbs-o-down"></span></a>
+
+      <a class="action downvote" ng-click='upvote(item)' tooltip="upvote - the entity is relevant in this context" data-action="upvote">
+        <span class="fa fa-thumbs-o-up"></span></a>
+        
+    </div> -->
+  </div>
 </div>

@@ -305,7 +305,7 @@ angular.module('histograph')
         
         tim.draw = function() {
           clearTimeout(tim.resizeTimer);
-          if(!tim.ui.viewer)
+          if(!tim.ui.viewer || !scope.timeline)
             return;
           tim.width(tim.ui.viewer[0][0].clientWidth);
           

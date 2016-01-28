@@ -296,6 +296,7 @@ angular.module('histograph')
       on load
     */
     $scope.item = angular.extend({ type: 'resource'}, resource.result.item);
+    $scope.resource = angular.extend({ type: 'resource'}, resource.result.item);
     
     // load timeline
     $scope.syncTimeline();

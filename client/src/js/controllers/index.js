@@ -119,7 +119,7 @@ angular.module('histograph')
   /*
     wall of resources
   */
-  .controller('ExploreResourcesCtrl', function ($scope, $log, ResourceFactory, EVENTS) {
+  .controller('ExploreResourcesCtrl', function ($scope, $log, VisualizationFactory, VIZ, ResourceFactory, EVENTS) {
     $log.debug('ExploreResourcesCtrl ready', $scope.params);
     $scope.limit  = 20;
     $scope.offset = 0;
@@ -162,6 +162,12 @@ angular.module('histograph')
       $scope.offset = $scope.offset + $scope.limit;
       $log.debug('ExploreCtrl @INFINITE_SCROLL', '- skip:',$scope.offset,'- limit:', $scope.limit);
       $scope.sync();
+    });
+
+    VisualizationFactory.resource(VIZ.TIMELINE).then(function (res) {
+      $log.info('ExploreCtrl init timeline', res);
+      $scope.timeline = res.data.result.timeline;
+      // $scope.initialTimeline
     });
 
     $scope.sync();

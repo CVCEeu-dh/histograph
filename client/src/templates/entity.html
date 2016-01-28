@@ -10,7 +10,7 @@
         <div class="content  {{item.props.thumbnail?'':'without-thumbnail'}}">
           <h3 marked="item.props|lookup:'name':language"></h3>
           <div class='meta' ng-if='item.type=="person"'>{{item.props|datesOfSomeone}}</div>
-          <div class='meta' ng-if='item.type=="location"'>{{item.props.country}} <a ng-href='https://www.google.com/maps/place/{{item.props.lat}},{{item.props.lng}}/@{{item.props.lat}},{{item.props.lng}},8z' target='_blank'>(view on google maps)</div>
+          <div class='meta' ng-if='item.type=="location"'>{{item.props.country}} <a ng-href='https://www.google.com/maps/place/{{item.props.lat}},{{item.props.lng}}/@{{item.props.lat}},{{item.props.lng}},8z' target='_blank'>(view on google maps)</a></div>
           
           <div class="mistake" ng-if="item.props.score && item.props.score < 0">
             signaled as <b>mistake</b> by <span ng-repeat='u in item.props.downvote'><a>{{u}}</a>{{$last?'':', '}}</span>
