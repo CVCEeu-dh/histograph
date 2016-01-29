@@ -129,7 +129,7 @@ angular.module('histograph')
               scope.itemsIds = itemsIdsToLoad;
               scope.sharedItemsModel = t.type == 'resource'? 'person' : 'resource';
               scope.sync();
-            } else if(['theme', 'location', 'person'].indexOf(t.type) !== -1) {
+            } else if(['theme', 'location', 'person', 'place', 'organization', 'topic'].indexOf(t.type) !== -1) {
               scope.itemsIds = itemsIdsToLoad;
               scope.sharedItemsModel = 'resource';
               scope.sync();

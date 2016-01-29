@@ -210,8 +210,8 @@ angular.module('histograph')
 
           // organise(merge) entitites
           // $log.log('::marked @marked changed', val);
-          if(scope.context) {
-            entities = scope.context.locations.concat(scope.context.persons)//, scope.context.organizations, scope.context.social_groups)
+          if(scope.context && scope.context.locations && scope.context.persons) {
+            entities = scope.context.locations.concat(scope.context.persons )//, scope.context.organizations, scope.context.social_groups)
             
             element.html(marked(scope.marked, {
               renderer: renderer
