@@ -156,10 +156,10 @@ a:focus {
     padding: 20px 0;
     border-bottom: 0;
     
-    background: #fff;
-    -webkit-transition: background .5s ease-in-out,padding .5s ease-in-out;
-    -moz-transition: background .5s ease-in-out,padding .5s ease-in-out;
-    transition: background .5s ease-in-out,padding .5s ease-in-out;
+    background: rgba(255,255,255,0);
+    -webkit-transition: background .35s ease-in-out,padding .35s ease-in-out;
+    -moz-transition: background .35s ease-in-out,padding .35s ease-in-out;
+    transition: background .35s ease-in-out,padding .35s ease-in-out;
   }
 
   .top-nav-collapse {
@@ -179,7 +179,7 @@ a:focus {
   padding: 100px 0;
   text-align: center;
   color: {{ site.color.primary-dark }};
-  background: url(/img/intro-bg.jpg) no-repeat bottom center scroll;
+  background: url(assets/img/graph.png) no-repeat bottom center scroll;
   background-color: {{ site.color.primary-white }};
   -webkit-background-size: cover;
   -moz-background-size: cover;
@@ -190,6 +190,7 @@ a:focus {
 .intro .intro-body {
   display: table-cell;
   vertical-align: middle;
+  background: rgba(255,255,255,.6);
 }
 
 .intro .intro-body .brand-heading {
@@ -218,7 +219,9 @@ a:focus {
 }
 
 .intro .btn-circle{
-  color: crimson;
+  color: white;
+    background: #383838;
+    border: 0px;
 }
 
 .btn-circle {
@@ -239,7 +242,7 @@ a:focus {
 .btn-circle:hover,
 .btn-circle:focus {
   outline: 0;
-  color: crimson;
+  color: #151515;
   background: rgba(255,255,255,.1);
 }
 
@@ -253,8 +256,8 @@ a:focus {
 .btn-circle:hover i.animated {
   -webkit-animation-name: pulse;
   -moz-animation-name: pulse;
-  -webkit-animation-duration: 1.5s;
-  -moz-animation-duration: 1.5s;
+  -webkit-animation-duration: 1.35s;
+  -moz-animation-duration: 1.35s;
   -webkit-animation-iteration-count: infinite;
   -moz-animation-iteration-count: infinite;
   -webkit-animation-timing-function: linear;
