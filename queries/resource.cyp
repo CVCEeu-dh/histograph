@@ -873,9 +873,16 @@ RETURN t, weight
 //
 MATCH (res:resource)<-[:appears_in]-(ent:entity)
 WHERE id(res) = {id} AND ent.score > -1
-  
 WITH ent
-MATCH (res:resource)<-[:appears_in]-(ent)
+{if:with}
+  MATCH (ent2)-[:appears_in]->(res:resource)<-[r:appears_in]-(ent)
+  WHERE id(ent2) IN {with}
+  WITH DISTINCT res
+{/if}
+{unless:with}
+  MATCH (res:resource)<-[r:appears_in]-(ent)
+{/unless}
+
 WHERE id(res) <> {id} AND has(res.start_month)
   {if:mimetype}
   AND res.mimetype = {mimetype}

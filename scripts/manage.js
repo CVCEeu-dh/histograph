@@ -88,7 +88,9 @@ var fs          = require('fs'),
         tasks.entity.getMany,
         tasks.entity.enrich
       ],
-
+      /*
+        export gexf file for entity cooccurrences
+      */
       'gexf-entity-cooccurrences': [
         tasks.gexf.init,
         tasks.gexf.entity.cooccurrences,

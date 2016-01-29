@@ -132,6 +132,16 @@ angular.module('histograph')
               30,
               5
             ]);
+
+          tim.fn.color = d3.scale.sqrt()
+            .range([
+              '#ccc', '#151515'
+            ]);
+
+          tim.fn.fcolor = d3.scale.sqrt()
+            .range([
+              '#f6941c', '#FA8900'
+            ]);
           
           // tim.fn.area = d3.svg.area()
           //     //.interpolate("monotone")
@@ -307,7 +317,7 @@ angular.module('histograph')
           clearTimeout(tim.resizeTimer);
           if(!tim.ui.viewer || !scope.timeline)
             return;
-          tim.width(tim.ui.viewer[0][0].clientWidth);
+          // tim.width(tim.ui.viewer[0][0].clientWidth);
           
           var dataset,    // the current dataset, sorted
               weigthExtent,
@@ -320,6 +330,85 @@ angular.module('histograph')
           });
 
           $log.log('::timeline -> draw() - w:', tim.width(), '- n. values:', dataset.length)
+
+          // // time extent
+          // tim.timeExtent = d3.extent(dataset, function (d) {
+          //   return d.t
+          // });
+          
+          // weight extent and update related function
+          weigthExtent = d3.extent(dataset, function (d) {
+            return d.weight
+          });
+          tim.fn.fcolor.domain(weigthExtent);
+
+           console.log('    weightext: ', weigthExtent, tim.fn.fcolor(5), tim.fn.fcolor(100))
+          
+          // sort by time label
+          dataset.sort(function (a, b) {
+            return a.t < b.t ? -1 : 1
+          });
+          
+         
+
+
+          
+          // if(tim.extension[0] || tim.extension[1]) {
+          //   tim.brush.x(tim.fn.x).extent(tim.timeExtent);
+          //   tim.gBrush.call(tim.brush.extent(tim.extension));
+          //   tim.gBrush.call(tim.brush.event);
+          //   tim.gBrush.selectAll('.resize rect').attr({
+          //     height: 60,
+          //     width: 12
+          //   })
+          // }
+          // let's draw !!!
+          var histogram = tim.histograms.selectAll('.tn')
+            .data(dataset, function (d){
+              return d.k || d.t
+            });
+          var _histograms = histogram.enter()
+            .append('rect')
+              .attr('class', 'tn');
+          histogram.exit()
+            .remove()
+
+          histogram.
+            attr({
+              x: function(d) {
+                return tim.fn.x(d.t)
+              },
+              y: 20,
+              width: 2,
+              height: 5,
+              fill: function(d) {
+                return tim.fn.fcolor(d.weight)
+              }
+            })
+          
+          
+        };
+
+        var contextualDataset,
+            contextualweigthExtent;
+
+        tim.drawCtx = function() {
+          clearTimeout(tim.resizeTimer);
+          if(!tim.ui.viewer || !scope.contextualTimeline)
+            return;
+          tim.width(tim.ui.viewer[0][0].clientWidth);
+          
+          var dataset,    // the current dataset, sorted
+              weigthExtent,
+              timeExtent; // [minT, maxT] array of max and min timestamps
+
+
+          dataset = angular.copy(_.flatten([scope.contextualTimeline])).map(function (d) {
+            d.t*=1000; // different level of aggregation
+            return d;
+          });
+
+          $log.log('::timeline -> drawCtx() - w:', tim.width(), '- n. values:', dataset.length)
 
           // time extent
           tim.timeExtent = d3.extent(dataset, function (d) {
@@ -358,7 +447,9 @@ angular.module('histograph')
           
           tim.fn.x.domain(tim.timeExtent);
           tim.fn.y.domain(weigthExtent);
-           
+          tim.fn.color.domain(weigthExtent);
+          
+          console.log('::timeline weightext: ', weigthExtent, tim.fn.color(5), tim.fn.color(100))
           
           if(tim.extension[0] || tim.extension[1]) {
             tim.brush.x(tim.fn.x).extent(tim.timeExtent);
@@ -385,12 +476,17 @@ angular.module('histograph')
               x: function(d) {
                 return tim.fn.x(d.t)
               },
-              y: function(d) {
-                return tim.fn.y(d.weight)
-              },
-              width: 3,
-              height: function(d) {
-                return 30 - tim.fn.y(d.weight)
+              // y: function(d) {
+              //   return tim.fn.y(d.weight) -5
+              // },
+              y: 10,
+              width: 2,
+              height: 10,
+              // height: function(d) {
+              //   return 30 - tim.fn.y(d.weight)
+              // },
+              fill: function(d) {
+                return tim.fn.color(d.weight)
               }
             })
           
@@ -406,10 +502,24 @@ angular.module('histograph')
             return;
           $log.log('::timeline @timeline n. nodes ', timeline.length);
           
-          
           tim.draw();
           // computate min and max
         });
+
+        scope.$watch('contextualTimeline', function (contextualTimeline) {
+          if(!contextualTimeline || contextualTimeline.length == undefined)
+            return;
+          $log.log('::timeline @contextualTimeline n. nodes ', contextualTimeline.length);
+          
+          
+          tim.drawCtx();
+
+          if(scope.timeline)
+            tim.draw();
+        });
+
+
+
 
         tim.init();
         
@@ -423,7 +533,8 @@ angular.module('histograph')
         
         angular.element($window).bind('resize', function() {
           clearTimeout(tim.resizeTimer);
-          tim.resizeTimer = setTimeout(tim.draw, 200);
+           $log.log('::timeline @resize');
+          tim.resizeTimer = setTimeout(tim.drawCtx, 200);
         });
       }
     }

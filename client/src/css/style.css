@@ -338,10 +338,17 @@ a#header-title {
 
 .item .type {
   color: #acabac;
-  margin: 20px 40px 0px 40px;
+  margin: 20px 40px 10px 40px;
   font-size: 12px;
   text-transform: uppercase;
 }
+/*
+.item .type span {
+  border: 1px solid #f6941c;
+    color: #f6941c;
+    padding: 2px 5px;
+    border-radius: 3px;
+}*/
 
 .item .context {
   margin: 40px 40px 0px 40px;
@@ -6196,7 +6203,11 @@ Copyright (c) 2015 Daniel Eden
   stroke: #555;
 }
 #timeline rect{
-  fill: #555;
+  /*fill: #888;*/
+}
+
+#timeline rect.tn{
+  fill: #151515;
 }
 
 #timeline .brush .extent {
