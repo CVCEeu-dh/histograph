@@ -2,7 +2,7 @@
 ordering: 1
 title: exploration
 ranking: 1
-image: missing-picture
+image: graph-based-exploration
 ---
 
 ##Graph-based exploration

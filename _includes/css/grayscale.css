@@ -203,6 +203,13 @@ a:focus {
   text-align: left;
 }
 
+
+.img-wrapper img{
+  box-shadow: 2px 2px 12px #aaa;
+  max-width: 100%;
+}
+
+
 @media(min-width:767px) {
   .intro {
     height: 100%;
@@ -385,6 +392,14 @@ ul.banner-social-buttons li {
 @media(max-width:1199px) {
   ul.banner-social-buttons {
     margin-top: 15px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .container {
+    width: 100%;
+    padding-right: 100px;
+      padding-left: 100px;
   }
 }
 

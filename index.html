@@ -10,11 +10,13 @@ layout: default
   <div class='container'>
     <div class='row'>
       {% if section.image %}
-      <div class='col-sm-6'>
+      <div class='col-sm-6 col-lg-5'>
          {{section.content}}
       </div>
-      <div class='col-sm-6'>
-          {{section.image}}
+      <div class='col-sm-6 col-lg-7'>
+        <div class='img-wrapper'>
+          <img src='assets/img/{{section.image}}.png'>
+        </div>
       </div>
       {% else %}
       <div class='col-sm-6 col-md-8 col-md-offset-2'>
