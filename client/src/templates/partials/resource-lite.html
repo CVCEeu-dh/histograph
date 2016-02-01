@@ -28,7 +28,9 @@
     <span ng-repeat="the in relatedItem.themes"><span class="tag theme" data-id='{{the.id}}' gasp-type='theme' gasp-parent='{{relatedItem.type}}-{{relatedItem.id}}'>{{the.props.name}}</span>{{$last? '':  ', '}}</span></span>
 
     <span ng-if='relatedItem.persons.length' class='tags'> — <i>persons in the document</i>:
-      <span ng-repeat='per in relatedItem.persons' data-id='{{per.id}}' gasp-type='person' gasp-parent='{{relatedItem.type}}-{{relatedItem.id}}' tooltip='{{per.props.name}} - {{per.props.description}} ({{per.props.birth_date | date:"yyyy"}} - {{per.props.death_date | date:"yyyy"}})' tooltip-append-to-body='true' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name||per.name}}</span>
+      <span ng-repeat="per in relatedItem.persons" ng-include='"templates/partials/entity-person-tag.html"' ng-init='item=relatedItem'></span>
+
+      
     </span>
   </div>
            

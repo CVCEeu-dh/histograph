@@ -1230,6 +1230,22 @@ angular.module('histograph')
       
       $scope.sync();
     });
+    
+    function onSocket(result) {
+      console.log('RelatedItemsCtrl @socket')
+      for(var i=0, l=$scope.relatedItems.length; i < l; i++){
+        if($scope.relatedItems[i].id == result.resource.id) {
+          $scope.relatedItems[i] = result.data.related.resource
+          break;
+        }
+      }
+    };
+
+    /*
+      on socket events, 
+    */
+    socket.on('entity:upvote-related-resource:done', onSocket);
+    socket.on('entity:downvote-related-resource:done', onSocket);
 
     // $scope.syncGraph();
     $log.log('RelatedItemsCtrl -> setRelatedItems - items', relatedItems.result.items);
