@@ -205,6 +205,7 @@ module.exports = function(io){
           if(action.type == Action.ANNOTATE) {
             action.props.annotation = parser.yaml(action.props.annotation);
           }
+          console.log(item)
           // add action to response result item
           item.related.action = action;
 
