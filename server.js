@@ -492,6 +492,9 @@ apiRouter.route('/entity/:id/related/:entity(person|location|theme|organization)
 apiRouter.route('/entity/:id(\\d+)/related/resource/graph')
   .get(ctrl.entity.getRelatedResourcesGraph);
   
+apiRouter.route('/entity/:id(\\d+)/related/resource/timeline')
+  .get(ctrl.entity.getRelatedResourcesTimeline);
+
 apiRouter.route('/entity/:id(\\d+)/upvote')
   .post(ctrl.entity.upvote)
   

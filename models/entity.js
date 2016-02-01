@@ -456,6 +456,22 @@ module.exports = {
       next(null, graph);
     });
   },
+
+  /*
+    get timeline of related resources (for filtering purposes)
+
+    @params entity - object containing at least the entity id
+    @params params - other filters ofr cypher query params to be assigned to the query
+    @params next   - callback function
+  */
+  getRelatedResourcesTimeline: function(entity, params, next) {
+    helpers.cypherTimeline(queries.get_related_resources_timeline, _.assign({}, params, entity), function (err, timeline) {
+      if(err)
+        next(err);
+      else
+        next(null, timeline);
+    });
+  },
   /**
     Bipartite graph of entity and resources
   */

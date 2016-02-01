@@ -108,7 +108,7 @@ angular.module('histograph')
     return $resource('/api/entity/:id', {}, {});
   })
   .factory('EntityRelatedFactory', function ($resource) {
-    return $resource('/api/entity/:id/related/:model');
+    return $resource('/api/entity/:id/related/:model/:viz');
   })
   .factory('EntityExtraFactory', function ($resource) {
     return $resource('/api/entity/:id/:extra', {}, {});

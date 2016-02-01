@@ -205,7 +205,7 @@ module.exports = function(io){
           if(action.type == Action.ANNOTATE) {
             action.props.annotation = parser.yaml(action.props.annotation);
           }
-          console.log(item)
+          // console.log(item)
           // add action to response result item
           item.related.action = action;
 
@@ -566,6 +566,29 @@ module.exports = function(io){
           type: 'monopartite'
         });
       });
+    },
+
+
+    getRelatedResourcesTimeline: function(req, res) {
+      var form = validator.request(req, {
+            limit: 100,
+            offset: 0
+          });
+      
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      Entity.getRelatedResourcesTimeline({
+        id: form.params.id
+      }, form.params, function (err, timeline) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({
+          timeline: timeline
+        }, {
+          params: form.params
+        });
+      })
     },
     
   }

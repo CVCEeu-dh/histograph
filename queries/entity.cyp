@@ -279,6 +279,33 @@ WHERE id(ent) = {id}
 RETURN count(res) as count_items
 
 
+
+// name:get_related_resources_timeline
+MATCH (ent)-[:appears_in]->(res:resource){if:with}<-[:appears_in]-(ent2){/if}
+WHERE id(ent) = {id} AND has(res.start_month)
+  {if:with}
+    AND id(ent2) in {with}
+  {/if}
+  {if:mimetype}
+  AND res.mimetype = {mimetype}
+  {/if}
+  {if:type}
+  AND res.type IN {type}
+  {/if}
+  {if:start_time}
+  AND res.start_time >= {start_time}
+  {/if}
+  {if:end_time}
+  AND res.end_time <= {end_time}
+  {/if}
+WITH DISTINCT res
+  
+WITH  res.start_month as tm, min(res.start_time) as t,  count(res) as weight
+RETURN tm, t, weight
+ORDER BY tm ASC
+
+
+
 // name:get_graph
 // get lighter version for graph purposes, max 500 resources sorted by number of persons
 MATCH (ent)-[:appears_in]->(res:resource)

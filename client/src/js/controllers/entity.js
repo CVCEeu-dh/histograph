@@ -21,32 +21,31 @@ angular.module('histograph')
     
    
     // cooccurrences
-    $scope.graphType = 'monopartite-entity'
-    // sync graph
-    // $scope.drawGraph = function() {
-    //   EntityExtraFactory.get({
-    //     id: $stateParams.id,
-    //     extra: 'graph',
-    //     type: $scope.graphType,
-    //     limit: 2000
-    //   }, function(res) {
-    //     $log.log('res', res)
-    //     res.result.graph.nodes.map(function (d) {
-    //       d.color  = d.type == 'person'? "#D44A33": "#6891A2";
-    //       d.type   = d.type || 'res';
-    //       d.x = Math.random()*50;
-    //       d.y = Math.random()*50;
-    //       //d.label = d.name;
-    //       return d;
-    //     })
-    //     $log.debug('EntityCtrl set graph',res.result.graph.nodes);
-        
-    //     // once done, load the other viz
-    //     $scope.setGraph(res.result.graph)
-    //   });
-    // };
-    
-    // $scope.$watch('graphType', $scope.drawGraph)
+    $scope.graphType = 'monopartite-entity';
+
+    /*
+      LoadTimeline
+      ---
+
+      load the timeline of entity related resources
+    */
+    $scope.syncTimeline = function() {
+      EntityRelatedFactory.get(angular.extend({
+        model:'resource',
+        id: $stateParams.id,
+        viz: 'timeline'
+      },  $stateParams, $scope.params), function (res) {
+        // if(res.result.titmeline)
+        $scope.setTimeline(res.result.timeline)
+      });
+    };
+
+    $scope.$on(EVENTS.API_PARAMS_CHANGED, function() {
+      // reset offset
+      $scope.offset = 0;
+      $log.debug('entity @API_PARAMS_CHANGED', $scope.params);
+      $scope.syncTimeline();
+    });
     
     $scope.downvote = function() {
       // downvote current entity
@@ -61,7 +60,7 @@ angular.module('histograph')
       })
     };
     
-    
+    $scope.syncTimeline();
   })
   .controller('EntitiesCtrl', function ($scope, $log, $stateParams, entities, model, relatedFactory, relatedVizFactory, EVENTS){
     $log.log('EntitiesCtrl ready - model:', model);
