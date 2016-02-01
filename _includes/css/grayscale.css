@@ -47,7 +47,7 @@ p {
 }
 
 a {
-  color: {{ site.color.links }};
+  color:  #35C5FF;
   -webkit-transition: all .2s ease-in-out;
   -moz-transition: all .2s ease-in-out;
   transition: all .2s ease-in-out;
@@ -56,7 +56,7 @@ a {
 a:hover,
 a:focus {
   text-decoration: none;
-  color: #11505d;
+  color: #FF5742;
 }
 
 .container {
@@ -156,7 +156,7 @@ a:focus {
     padding: 20px 0;
     border-bottom: 0;
     
-    background: rgba(255,255,255,0);
+    background: #f0f0f0;
     -webkit-transition: background .35s ease-in-out,padding .35s ease-in-out;
     -moz-transition: background .35s ease-in-out,padding .35s ease-in-out;
     transition: background .35s ease-in-out,padding .35s ease-in-out;
@@ -179,7 +179,7 @@ a:focus {
   padding: 100px 0;
   text-align: center;
   color: {{ site.color.primary-dark }};
-  background: url(assets/img/graph.png) no-repeat bottom center scroll;
+  background: url(assets/img/screencast-loop.gif) no-repeat bottom center scroll;
   background-color: {{ site.color.primary-white }};
   -webkit-background-size: cover;
   -moz-background-size: cover;
@@ -190,17 +190,29 @@ a:focus {
 .intro .intro-body {
   display: table-cell;
   vertical-align: middle;
-  background: rgba(255,255,255,.6);
+  background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAGUlEQVQIW2MUERGpf/36tQnj////NzMAAQBGXQdjlQ749QAAAABJRU5ErkJggg==);
+  /* blue background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAGUlEQVQIW2OUnv1/85MUBgbG////b2YAAgBNEQdjOK1sAwAAAABJRU5ErkJggg==);*/
+
+    /*red data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAGUlEQVQIW2P8H+ZUz7Byrwnj////NzMAAQBLyQdj9LjqDAAAAABJRU5ErkJggg==);*/
 }
 
 .intro .intro-body .brand-heading {
   font-size: 45px;
-  text-align: left;
+  text-align: center;
+}
+
+.intro .intro-body .brand-heading span{
+  background-color: rgba(255,87,66,.8);
 }
 
 .intro .intro-body .intro-text {
   font-size: 18px;
-  text-align: left;
+  text-align: center;
+}
+
+.intro .intro-body .intro-text > span{
+  background: #f0f0f0;
+    padding: 5px 10px;
 }
 
 
@@ -227,7 +239,7 @@ a:focus {
 
 .intro .btn-circle{
   color: white;
-    background: #383838;
+    background: #FF5742;
     border: 0px;
 }
 
@@ -250,7 +262,7 @@ a:focus {
 .btn-circle:focus {
   outline: 0;
   color: #151515;
-  background: rgba(255,255,255,.1);
+  background: #fff;
 }
 
 .btn-circle i.animated {
@@ -319,7 +331,8 @@ body ::-moz-selection {
 }
 
 
-.content-section:nth-child(even) {background: #d8d8d8}
+.content-section:nth-child(even) {background: #151515;
+    color: white;}
 .content-section:nth-child(odd)  {background: #e8e8e8}
 .content-section h2{
   font-size: 23px;
