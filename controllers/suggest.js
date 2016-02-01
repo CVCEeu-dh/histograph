@@ -498,7 +498,7 @@ module.exports =  function(io){
           });
       if(!form.isValid)
         return helpers.formError(form.errors, res);
-      console.log(form.params)
+      
       var q = parser.toLucene(form.params.query, 'name_search');
 
       // build a nodes edges graph
