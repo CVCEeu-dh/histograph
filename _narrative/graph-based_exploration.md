@@ -3,7 +3,8 @@ ordering: 1
 title: exploration
 ranking: 1
 image: 
-- graph-based-exploration.png
+- screencast-graph-exploration.gif
+- screencast-gallery.gif
 ---
 
 ##Graph-based exploration
