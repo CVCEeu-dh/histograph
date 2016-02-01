@@ -300,8 +300,9 @@ describe('controllers: get resource items available to the user', function() {
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
+        console.log(res.body)
         should.not.exists(err);
-
+        
         should.exists(res.body.result.items);
         should.equal(res.body.status, 'ok', res.body);
         done();
@@ -357,12 +358,12 @@ describe('controllers: get resource items available to the user', function() {
   
   it('should return the graph of cooccurrences, filtered', function (done) {
     session
-      .get('/api/cooccurrences?from=1988-01-01&to=1988-01-02')
+      .get('/api/cooccurrences/person/related/person?from=1988-01-01&to=1988-01-02')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
         if(err)
-          console.log(err)
+          console.log(res.body)
         should.not.exists(err);
         //console.log(' resoucre ', res.body)
         done();
