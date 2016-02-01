@@ -293,11 +293,7 @@ angular.module('histograph')
         tim.evaluate = function() {
           if(!tim.timeExtent)
             return false
-          if(!scope.filters.from && !scope.filters.to) {
-            tim.fn.clear();
-            return false
-            
-          }
+          
           // evaluate scope .filters agains the current timeExtension and decide if thiere is the need for updating
           var left = scope.filters.from && scope.filters.from.length? d3.time.format("%Y-%m-%d").parse(scope.filters.from[0]): tim.timeExtent[0],
               right = scope.filters.to && scope.filters.to.length? d3.time.format("%Y-%m-%d").parse(scope.filters.to[0]): tim.timeExtent[1],
@@ -310,10 +306,22 @@ angular.module('histograph')
         }
         
         tim.fn.clear = function() {
+          $log.log('::timeline -> clear()');
            tim.gBrush.call(tim.brush.clear());
            tim.drawDates()
         }
         
+        tim.resize = function() {
+          clearTimeout(tim.resizeTimer);
+          var isResizeNeeded = tim.width() != tim.ui.viewer[0][0].clientWidth;
+          $log.log('::timeline @resize: ', isResizeNeeded? 'resize!': 'do not rezize');
+          if(isResizeNeeded) {
+            // reset ranges according to width
+            tim.svg.attr("width", tim.width())
+            tim.resizeTimer = setTimeout(tim.drawCtx, 200);
+          }
+        }
+
         tim.draw = function() {
           clearTimeout(tim.resizeTimer);
           if(!tim.ui.viewer || !scope.timeline)
@@ -434,13 +442,6 @@ angular.module('histograph')
               .text(tim.fn.asDay(new Date(tim.timeExtent[1])));
                     
           
-          //, d3.time.format("%Y-%m-%d").parse(scope.filters.from));
-          
-          // transform filters in other filters.
-          ;
-          
-          // reset ranges according to width
-          tim.svg.attr("width", tim.width())
           tim.fn.x = d3.time.scale()
             .range([0, tim.width() - tim.padding.h * 2]);
           
@@ -501,40 +502,49 @@ angular.module('histograph')
         /*
           Listeners, watchers
         */
-        // on graph change, change the timeline as well
+        /*
+          @timeline
+          if timeline values has changed, for some reason
+        */
         scope.$watch('timeline', function (timeline) {
           if(!timeline || timeline.length == undefined)
             return;
           $log.log('::timeline @timeline n. nodes ', timeline.length);
-          
           tim.draw();
-          // computate min and max
         });
 
+        /*
+          @contextualTimeline
+          Draw the background timeline (context)
+          normally called once
+        */
         scope.$watch('contextualTimeline', function (contextualTimeline) {
           if(!contextualTimeline || contextualTimeline.length == undefined)
             return;
           $log.log('::timeline @contextualTimeline n. nodes ', contextualTimeline.length);
-          
-          
           tim.drawCtx();
-
         });
 
-
-
+        /*
+          @filters
+        */
+        scope.$watch('filters', function(filters) {
+          if(tim.evaluate()) {
+            tim.brush.x(tim.fn.x).extent(tim.timeExtent);
+            tim.gBrush.call(tim.brush.extent([+tim.left, +tim.right]));
+            tim.gBrush.call(tim.brush.event);
+            tim.gBrush.selectAll('.resize rect').attr({
+              height: 60,
+              width: 12
+            })
+          }
+        })
+        /*
+          listen to resize window event
+        */
+        angular.element($window).bind('resize', tim.resize);
 
         tim.init();
-        
-        
-        
-        angular.element($window).bind('resize', function() {
-          clearTimeout(tim.resizeTimer);
-          var isResizeNeeded = tim.width() != tim.ui.viewer[0][0].clientWidth;
-          $log.log('::timeline @resize: ', isResizeNeeded? 'resize!': 'do not rezize');
-          if(isResizeNeeded)
-            tim.resizeTimer = setTimeout(tim.drawCtx, 200);
-        });
       }
     }
   });
