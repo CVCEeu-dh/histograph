@@ -316,8 +316,9 @@ angular.module('histograph')
           var isResizeNeeded = tim.width() != tim.ui.viewer[0][0].clientWidth;
           $log.log('::timeline @resize: ', isResizeNeeded? 'resize!': 'do not rezize');
           if(isResizeNeeded) {
+            tim.width(tim.ui.viewer[0][0].clientWidth);
             // reset ranges according to width
-            tim.svg.attr("width", tim.width())
+            tim.svg.attr("width", tim.width());
             tim.resizeTimer = setTimeout(tim.drawCtx, 200);
           }
         }
