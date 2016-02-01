@@ -2,6 +2,8 @@
 ordering: 3
 title: disambiguate
 ranking: 1
+image:
+- screencast-text-annotation.gif
 ---
 ##Named Entity Recognition & Disambiguation
 
