@@ -26,10 +26,10 @@ describe('services: geonames', function() {
       services.geonames({
         address: 'Roma'
       }, function (err, results){
-        
-        if(err)
-            throw err;
-        // console.log(results)
+        should.not.exist(err);
+        if(!results.length) {
+          console.log(results);
+        }
         should.equal(results[0].toponymName, 'Rome')
         should.exist(results.length);
         done()

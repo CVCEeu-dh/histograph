@@ -623,7 +623,7 @@ module.exports =  function(io){
           offset: 0,
           query: ''
         });
-        console.log(form)
+        // console.log(form)
         if(!form.isValid)
           return helpers.models.formError(form.errors, res);
         services.viaf.autosuggest({

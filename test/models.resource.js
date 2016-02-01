@@ -275,8 +275,9 @@ describe('model:resource ', function() {
   it('should return the timeline of related resources', function (done) {
     Resource.getRelatedResourcesTimeline({
        id: __resourceA.id
-    }, function (err, res) {
+    }, {}, function (err, items) {
       should.not.exist(err);
+      should.exist(items.length)
       done()
     })
   })

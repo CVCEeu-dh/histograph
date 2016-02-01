@@ -128,7 +128,7 @@ WITH res
 OPTIONAL MATCH (res)-[r_loc:appears_in]->(loc:`location`)
 WHERE loc.score > -2
 WITH res, r_loc, loc
-ORDER BY r_loc.tfidf DESC, r_loc.frequency DESC
+ORDER BY r_loc.score DESC, r_loc.tfidf DESC, r_loc.frequency DESC
 WITH res,  filter(x in collect({  
       id: id(loc),
       type: 'location',
@@ -138,7 +138,7 @@ WITH res,  filter(x in collect({
 OPTIONAL MATCH (res)<-[r_per:appears_in]-(per:`person`)
 WHERE per.score > -2
 WITH res, locations, r_per, per
-ORDER BY r_per.tfidf DESC, r_per.frequency DESC
+ORDER BY  r_per.score DESC, r_per.tfidf DESC, r_per.frequency DESC
 WITH res, locations,  filter(x in collect({  
       id: id(per),
       type: 'person',
