@@ -2,7 +2,6 @@
 ordering: 3
 title: disambiguate
 ranking: 1
-image: missing-picture
 ---
 ##Named Entity Recognition & Disambiguation
 

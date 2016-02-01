@@ -2,7 +2,6 @@
 ordering: 5
 title: for developers
 ranking: 1
-image: missing-picture
 ---
 
 ##For developers

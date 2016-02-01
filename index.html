@@ -14,9 +14,11 @@ layout: default
          {{section.content}}
       </div>
       <div class='col-sm-6 col-lg-7'>
+        {% for image in section.image %}
         <div class='img-wrapper'>
-          <img src='assets/img/{{section.image}}.png'>
+          <img src='assets/img/{{image}}'>
         </div>
+        {% endfor %}
       </div>
       {% else %}
       <div class='col-sm-6 col-md-8 col-md-offset-2'>

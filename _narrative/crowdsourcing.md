@@ -2,7 +2,9 @@
 ordering: 2
 title: indexing
 ranking: 1
-image: missing-picture
+image: 
+- screencast-indexation.gif
+- screencast-image-annotation.gif
 ---
 
 ## Crowd-sourced indexation

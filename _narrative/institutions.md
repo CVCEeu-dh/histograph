@@ -2,7 +2,6 @@
 ordering: 4
 title: for institutions
 ranking: 1
-image: missing-picture
 ---
 ##For institutions
 

@@ -215,7 +215,9 @@ a:focus {
     padding: 5px 10px;
 }
 
-
+.img-wrapper{
+  margin-bottom: 50px;
+}
 .img-wrapper img{
   box-shadow: 2px 2px 12px #aaa;
   max-width: 100%;

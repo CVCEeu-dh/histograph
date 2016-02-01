@@ -2,7 +2,8 @@
 ordering: 1
 title: exploration
 ranking: 1
-image: graph-based-exploration
+image: 
+- graph-based-exploration.png
 ---
 
 ##Graph-based exploration
