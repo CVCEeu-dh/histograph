@@ -17,6 +17,7 @@ angular.module('histograph')
       templateUrl: 'templates/partials/helpers/sigma.html',
         
       scope:{
+        user: '=',
         graph: '=',
         tips: '=',
         controller: '=',

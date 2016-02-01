@@ -1330,7 +1330,7 @@ header ul li .notification a {
 }
 
 #milkyway.explore.persons, #milkyway.explore.projection, #milkyway.explore.locations{
-  left: 10px;
+  left: 0px;
   display: block
 }
 
@@ -1721,11 +1721,23 @@ height: 150px;
   background-repeat:no-repeat;
   background-position:center;
   border-radius: 50px;
+  
+}
+
+.node.person .thumbnail-wrapper{
   border: 3px solid #4dc3ba;
 }
 
 .node.resource .thumbnail-wrapper{
   border: 3px solid #f6941c;
+}
+
+.node.location .thumbnail-wrapper{
+  border: 3px solid #7e213c;
+}
+
+.node.theme .thumbnail-wrapper{
+  border: 3px solid #ff9b01;
 }
 
 .node .content {

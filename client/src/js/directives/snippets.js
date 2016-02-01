@@ -16,8 +16,8 @@ angular.module('histograph')
       templateUrl: 'templates/partials/helpers/snippet.html',
       scope:{
         center: '=',
-        target: '='
-        
+        target: '=',
+        user: '='
       },
       link: function(scope, elem){
         $log.log('::snippets ------------');
