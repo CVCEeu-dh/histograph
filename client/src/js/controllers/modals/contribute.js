@@ -96,4 +96,4 @@ angular.module('histograph')
       $scope.entities.push($item);
       $log.log('ContributeModalCtrl -> typeaheadSelected()', $item);
     }
-  })
+  });

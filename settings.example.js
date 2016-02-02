@@ -111,6 +111,17 @@ module.exports = {
     'de',
   ],
   
+
+  /*
+    Imagemagick support
+
+    Enable image magick support only if imagemagick CLI are available.
+    Test that everything works smoothly with
+
+      mocha -g 'helpers: images'
+  
+  */
+  imagemagick: false,
   /*
 
     Reference values for some variable
