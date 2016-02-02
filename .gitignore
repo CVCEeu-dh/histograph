@@ -8,6 +8,8 @@ settings.js
 *.log
 *.csv
 
+!locale-*.json
+
 contents
 dist
 temp

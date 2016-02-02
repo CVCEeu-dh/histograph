@@ -7,8 +7,8 @@
   </div>
   <div ng-if='task.type == "unknown_people"'>
     <div class="question">
-      Do you know who is <a class='tag person' ng-click='challengeAccepted()'>{{task.person.props|lookup:"name":language}}</a>?
-      <p>We miss some information about him/her and we're not sure about his/her identity</p>
+      <span translate>crowd.whois</span> <a class='tag person' ng-click='challengeAccepted()'>{{task.person.props|lookup:"name":language}}</a>?
+      <p translate>crowd.whois.description</p>
     </div>
     <div class='context {{isChallengeAccepted? "disabled": "disabled"}}'>
       Apparently he/she was found in:
@@ -25,8 +25,8 @@
           <span class="fa fa-times-circle"></span></a>
 </div>
 <div style='margin:10px 0' class='btn-group btn-group-dual'>
-    <button  class='btn btn-line ' ng-click='challengeAccepted()'>I can fix this</button>
-    <button class='btn btn-line ' ng-click='nextChallenge()'>next</button>
+    <button  class='btn btn-line ' ng-click='challengeAccepted()' translate>button.crowd.canfixthis</button>
+    <button class='btn btn-line ' ng-click='nextChallenge()' translate>button.next</button>
 </div>
 
-<button class='btn btn-line btn-straight' ng-click='pause()'>ask me later</button>
+<button class='btn btn-line btn-straight' ng-click='pause()' translate>button.crowd.askmelater</button>

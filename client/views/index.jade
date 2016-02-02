@@ -115,10 +115,10 @@ html
 
                 div(class="", role="group")
                   a(ng-href='/auth/twitter?next={{locationPath}}&jsonparams={{locationJson}}', class='btn btn-block btn-default btn-line expanded')
-                    span(translate='login.with.twitter') 
+                    span(translate='button.login.with.twitter') 
                     i(class='fa fa-twitter')
                   a(ng-href='/auth/google?next={{locationPath}}&jsonparams={{locationJson}}', class='btn btn-block  btn-default btn-line expanded')
-                    span(translate='login.with.google') 
+                    span(translate='button.login.with.google') 
                     i(class='fa fa-google-plus')
 
 
@@ -196,7 +196,8 @@ html
           div#fullsize(fullsize)
 
       div(id="messenger", class="tk-proxima-nova {{messaging? 'active': ''}}")
-        div.inner {{ message }}
+        div.inner
+          span {{message}}
       
       
         

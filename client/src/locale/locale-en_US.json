@@ -1,0 +1,74 @@
+{
+  "button.add": "add",
+  "button.annotate": "tag",
+  "button.agree": "agree",
+  "button.back": "back",
+  "button.close": "close",
+  "button.confirm": "confirm",
+  "button.crowd.canfixthis": "Yes, I can fix this",
+  "button.crowd.askmelater": "ask me later",
+  "button.disagree": "I disagree",
+  "button.edit": "edit",
+  "button.login.with.twitter": "log in with your twitter account",
+  "button.login.with.google": "log in with your google account",
+  "button.more": "more",
+  "button.next": "next",
+  "button.myselection.explore": "explore connections",
+
+  "crowd.whois": "Do you know who is",
+  "crowd.whois.description": "We miss some basic information about him/her and we're not sure about his/her identity",
+
+  "crowd.identify": "Can you identify a valid %s",
+
+  "annotation.image.title": "What would you like to tag?", 
+  "annotation.image.description": "This will improve the quality of your recommended resources", 
+  "annotation.image.search.person": "add name",
+  "annotation.image.tag.person": "tag",
+
+  "grammar.filters.type": "any type",
+  "grammar.filters.relatedto": "related to ...",
+  "grammar.filters.relatedto.search.title": "add entity",
+  "grammar.filters.relatedto.search.placeholder": "search person, location, theme ...",
+  "grammar.sorting.date.desc": "by date (most recent first)",
+  "grammar.sorting.date.asc": "by date (oldest first)",
+
+  "header.logout" : "log out",
+  "header.myselection": "my selection",
+
+  "loading": "loading ...",
+
+  "login.welcome" : "Welcome to the HistoGraph collaborative platform. Sign up or log in to start",
+
+  "myselection.item.added": "... added to your selection",
+  "myselection.title": "your selection",
+  "myselection.description": "find interesting resources and entities in your selection",
+
+  "button.popit.more": "more",
+  "tooltip.popit.more": "visit the page about %s",
+  "popit.missinginfo": "We couldn't find any information about this %s automatically... can you help us?",
+  "popit.fix.not.mentioned": "this %s is not mentioned here",
+  "popit.fix.wrong.type": "this is not a %s",
+  "popit.fix.typo": "this is a typo / fragment / duplicate",
+  "popit.fix.typo.description": "Does %s correspond to someone else in histograph?",
+  "popit.fix.remove": "remove this",
+  "popit.fix.feedback": "thank you for your feedback",
+
+  "resource.people.mentioned": "people mentioned",
+  "resource.themes.mentioned": "themes mentioned",
+  "resource.organizations.mentioned": "organizations",
+  "resource.locations.mentioned": "locations",
+  "resource.language.availability": "available in",
+  "resource.seealso.title": "recommended resources",
+
+  "tooltip.resource.add.to.favourites": "add to favourite items",
+  "tooltip.resource.add.to.myselection": "add to your selection",
+  "tooltip.visit.entity.page": "visit %s page",
+
+  "entity.type.facts": "cvce articles" ,
+  "entity.type.external-text": "miscellaneous texts" ,
+  "entity.type.picture": "images",
+  "entity.type.sound": "audio",
+  "entity.type.facts": "cvce articles" ,
+  "entity.type.scientific-contribution": "academic articles"
+}
+

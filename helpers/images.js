@@ -32,6 +32,6 @@ module.exports = {
       '.jpg'
     ].join('');
     
-    imk.convert([options.src, '-crop', dims, dst], next);
+    imk.convert([options.src, '-crop', dims, '+repage', dst], next);
   }
 }
