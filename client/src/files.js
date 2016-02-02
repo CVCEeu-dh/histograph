@@ -16,9 +16,9 @@ module.exports = {
       '/js/lib/d3.min.js',
       '/js/lib/lodash.min.js', 
       '/js/lib/marked.min.js',
-      '/js/lib/codemirror.js',
-      '/js/lib/codemirror-addon-simple.js',
-      '/js/lib/codemirror-addon-show-hint.js',
+      // '/js/lib/codemirror.js',
+      // '/js/lib/codemirror-addon-simple.js',
+      // '/js/lib/codemirror-addon-show-hint.js',
 
       '/js/lib/masonry.pkgd.min.js',
       '/js/lib/imagesloaded.pkgd.min.js',
@@ -42,10 +42,13 @@ module.exports = {
       '/js/lib/angular-cookies.min.js',
       '/js/lib/angular-local-storage.min.js',
 
+      // translation mechanism
+      '/js/lib/angular-translate.min.js',
+      '/js/lib/angular-translate-loader-static-files.min.js',
 
       '/js/lib/angular-masonry.min.js',  
 
-      '/js/lib/ui-codemirror.min.js',
+      // '/js/lib/ui-codemirror.min.js',
 
       // '/js/lib/openlayers.min.js',
 

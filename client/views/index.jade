@@ -110,12 +110,15 @@ html
               //-   img(src='images/hg_v.png')
               h5 histograph
               form
-                p.tk-proxima-nova Welcome to histograph collaborative platform. Signup or login to start
+                p.tk-proxima-nova
+                  span(translate='login.welcome')
 
                 div(class="", role="group")
-                  a(ng-href='/auth/twitter?next={{locationPath}}&jsonparams={{locationJson}}', class='btn btn-block btn-default btn-line expanded') with your twitter account
+                  a(ng-href='/auth/twitter?next={{locationPath}}&jsonparams={{locationJson}}', class='btn btn-block btn-default btn-line expanded')
+                    span(translate='login.with.twitter') 
                     i(class='fa fa-twitter')
-                  a(ng-href='/auth/google?next={{locationPath}}&jsonparams={{locationJson}}', class='btn btn-block  btn-default btn-line expanded') via google plus account
+                  a(ng-href='/auth/google?next={{locationPath}}&jsonparams={{locationJson}}', class='btn btn-block  btn-default btn-line expanded')
+                    span(translate='login.with.google') 
                     i(class='fa fa-google-plus')
 
 

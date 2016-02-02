@@ -6,20 +6,20 @@
  *
  * Main module of the application.
  */
-CodeMirror.defineSimpleMode("hg", {
-  start: [
-    { regex: /#/,    push: "tag", token: "tag" },
-    { regex: /@/,    push: "user", token: "comment" }
-  ],
-  tag: [
-    { regex: /\s/, pop: true, token: "tag" },
-    { regex: /./, token: "tag" }
-  ],
-  user: [
-    { regex: /\s/, pop: true, token: "comment" },
-    { regex: /./, token: "comment" }
-  ]
-});
+// CodeMirror.defineSimpleMode("hg", {
+//   start: [
+//     { regex: /#/,    push: "tag", token: "tag" },
+//     { regex: /@/,    push: "user", token: "comment" }
+//   ],
+//   tag: [
+//     { regex: /\s/, pop: true, token: "tag" },
+//     { regex: /./, token: "tag" }
+//   ],
+//   user: [
+//     { regex: /\s/, pop: true, token: "comment" },
+//     { regex: /./, token: "comment" }
+//   ]
+// });
 
 angular
   .module('histograph', [
@@ -28,12 +28,19 @@ angular
     'ngResource',
     'ngCookies',
     'ui.bootstrap',
-    'ui.codemirror',
+    'pascalprecht.translate',// angular-translate
+    // 'ui.codemirror',
     // 'mgcrea.ngStrap'
     'perfect_scrollbar',
     'LocalStorageModule',
     'masonry'
   ])
+  .constant('LOCALES', {
+    'locales': {
+      'en_US': 'English'
+    },
+    'preferredLocale': 'en_US'
+  })
   .constant("EVENTS", {
     USE_USER: 'use_user',
     USER_NOT_AUTHENTIFIED: 'user_not_authentified',
@@ -78,7 +85,18 @@ angular
     }
     
   })
-  
+  /*
+    Angular-translate configs
+    Cfr. https://scotch.io/tutorials/internationalization-of-angularjs-applications
+  */
+  .config(function ($translateProvider) {
+    $translateProvider.useMissingTranslationHandlerLog();
+    $translateProvider.useStaticFilesLoader({
+        prefix: 'locale/locale-',// path to translations files
+        suffix: '.json'// suffix, currently- extension of the translations
+    });
+    $translateProvider.preferredLanguage('en_US');// is applied on first load
+  })
   /*
     Local-storage module config. cfr
     https://github.com/grevory/angular-local-storage
