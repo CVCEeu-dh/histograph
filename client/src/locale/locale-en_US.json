@@ -64,11 +64,15 @@
   "tooltip.resource.add.to.myselection": "add to your selection",
   "tooltip.visit.entity.page": "visit %s page",
 
-  "entity.type.facts": "cvce articles" ,
+  "entity.type.cartoon": "cartoon",
   "entity.type.external-text": "miscellaneous texts" ,
-  "entity.type.picture": "images",
-  "entity.type.sound": "audio",
+  "entity.type.facsimile": "facsimile",
   "entity.type.facts": "cvce articles" ,
-  "entity.type.scientific-contribution": "academic articles"
+  "entity.type.picture": "images",
+  "entity.type.press": "press",
+  "entity.type.scientific-contribution": "academic articles",
+  "entity.type.sound": "audio",
+  "entity.type.treaty": "treaty",
+  "entity.type.video": "video"
 }
 
