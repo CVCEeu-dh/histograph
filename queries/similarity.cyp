@@ -48,7 +48,7 @@ SET   r.cosine = xyDotProduct / d
 
 // name: count_computate_jaccard_distance
 MATCH (p1:{:entity})-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:{:entity})
-WHERE id(p1) < id(p2)
+WHERE id(p1) < id(p2) AND p1.score > -1 AND p2.score > -1
 RETURN count(*) as total_count
 
 // name: computate_jaccard_distance
@@ -58,9 +58,11 @@ MATCH (p1:{:entity})-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:{:enti
 WHERE id(p1) < id(p2) AND p1.score > -1 AND p2.score > -1
 // WITH r1, r2, p1, p2, count(*) as intersection
 WITH p1, p2, count(*) as intersection
+WHERE intersection > 1
+WITH p1, p2, intersection
 SKIP {offset}
 LIMIT {limit}
-WITH p1, p2, intersection
+
 MATCH (p1)-[rel:appears_in]->(res1:resource)
 WITH p1,p2, intersection, collect(res1) as H1
 

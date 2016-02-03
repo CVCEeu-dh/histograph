@@ -360,7 +360,7 @@ module.exports = {
       Count relationships to be cleaned
     */
     var loops = 0,
-        limit= isNaN(options.limit)? 10000: options.limit;
+        limit= isNaN(options.limit)? 5000: options.limit;
 
     neo4j.query(queries.count_appear_in_the_same_document, function (err, results){
       if(err) {
@@ -369,11 +369,11 @@ module.exports = {
       }
       
       loops = Math.ceil(results.total_count / limit);
-
+      console.log('    loops needed:', loops,'- total:',results.total_count);
       async.timesSeries(loops, function (n, _next) {
-        console.log('    loop:', n ,'- offset:', n*10000, '- limit:', 10000, '- total:', results.total_count)
+        console.log('    loop:', n ,'- offset:', n*limit, '- limit:', limit, '- total:', results.total_count)
         neo4j.query(queries.clear_appear_in_same_document, {
-          limit: 10000
+          limit: limit
         }, _next);
       }, function (err) {
         if(err)
@@ -425,14 +425,15 @@ module.exports = {
       },
       // repeat n time to oid java mem heap space
       function performJaccard (result, next) {
-        var loops = Math.ceil(result.total_count / 10000);
+        var limit = 5000,
+            loops = Math.ceil(result.total_count / limit);
         console.log('   loops:', loops);
         async.timesSeries(loops, function (n, _next) {
-          console.log('    loop:', n ,'- offset:', n*10000, '- limit:', 10000, '- total:', result.total_count)
+          console.log('    loop:', n ,'- offset:', n*limit, '- limit:', limit, '- total:', result.total_count)
           var query = parser.agentBrown(queries.computate_jaccard_distance, options);
           neo4j.query(query, {
-            offset: n*10000,
-            limit: 10000
+            offset: n*limit,
+            limit: limit
           }, _next);
         }, next);
       }
