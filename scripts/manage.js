@@ -151,6 +151,14 @@ var fs          = require('fs'),
         'tasks.resource.cartoDB',
         'tasks.helpers.csv.stringify'
       ],
+
+      /*
+        For test purpose, test with a name
+
+      */
+      'one-shot': [
+        options.name
+      ]
     }, settings.availableTasks || {});
 
 console.log(clc.whiteBright( "\n\n +-+-+ "));

@@ -1,5 +1,10 @@
+// name: count_appear_in_the_same_document
+MATCH ()-[r:appear_in_same_document]-()
+RETURN count(r) as total_count
+
 // name: clear_appear_in_same_document
 MATCH ()-[r:appear_in_same_document]-()
+WITH r LIMIT {limit}
 DELETE r
 
 // name: computate_tfidf
@@ -50,7 +55,7 @@ RETURN count(*) as total_count
 // For the "WHERE id(p1) < id(p2)" part, see:
 // https://stackoverflow.com/questions/33083491/how-to-get-a-unique-set-of-node-pairs-for-undirected-relationships/33084035#33084035
 MATCH (p1:{:entity})-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:{:entity})
-WHERE id(p1) < id(p2)
+WHERE id(p1) < id(p2) AND p1.score > -1 AND p2.score > -1
 // WITH r1, r2, p1, p2, count(*) as intersection
 WITH p1, p2, count(*) as intersection
 SKIP {offset}

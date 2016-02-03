@@ -355,15 +355,51 @@ module.exports = {
   
   cleanSimilarity: function(options, callback) {
     console.log(clc.yellowBright('\n   tasks.entity.cleanSimilarity'));
-    neo4j.query(queries.clear_appear_in_same_document, function (err) {
-      if(err)
-        callback(err)
-      else {
-        console.log(clc.cyanBright('   cleaned'),'every similarity relationship');
-        callback(null, options);
     
+    /*
+      Count relationships to be cleaned
+    */
+    var loops = 0,
+        limit= isNaN(options.limit)? 10000: options.limit;
+
+    neo4j.query(queries.count_appear_in_the_same_document, function (err, results){
+      if(err) {
+        callback(err);
+        return;
       }
-    })
+      
+      loops = Math.ceil(results.total_count / limit);
+
+      async.timesSeries(loops, function (n, _next) {
+        console.log('    loop:', n ,'- offset:', n*10000, '- limit:', 10000, '- total:', results.total_count)
+        neo4j.query(queries.clear_appear_in_same_document, {
+          limit: 10000
+        }, _next);
+      }, function (err) {
+        if(err)
+          callback(err);
+        else
+          callback(null, options)
+      });
+
+    });
+
+
+    // async.series([
+    //   function (next) {
+        
+    //   },
+
+    // ])
+    // neo4j.query(queries.clear_appear_in_same_document, function (err) {
+    //   if(err)
+    //     callback(err)
+    //   else {
+    //     console.log(clc.cyanBright('   cleaned'),'every similarity relationship');
+    //     callback(null, options);
+    
+    //   }
+    // })
   },
   
   tfidf: function(options, callback) {
