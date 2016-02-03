@@ -861,6 +861,12 @@ header ul li .notification a {
         transition: margin-left .3s cubic-bezier(0.65, 0.05, 0.36, 1);*/
 }
 
+#see-also .see-also-header{
+  border-bottom: 1px solid;
+  text-align: center;
+  padding: 0px 0 10px;
+}
+
 #see-also-menu {
   left: 0px;
   right: 0px;
@@ -1074,8 +1080,9 @@ header ul li .notification a {
   padding-bottom: 20px;
 }
 .related .type{
-  color: #a5a5a5;
-  margin: 0px 15px 10px 15px;
+  color: #FF5742;
+  text-transform: uppercase;
+  margin: 0px 15px 10px 0px;
 }
 
 .related h4{
@@ -6219,7 +6226,7 @@ Copyright (c) 2015 Daniel Eden
 }
 
 #timeline rect.tn{
-  fill: #151515;
+  /*fill: #151515;*/
 }
 
 #timeline .brush .extent {

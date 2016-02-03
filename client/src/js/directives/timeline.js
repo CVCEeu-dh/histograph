@@ -129,8 +129,8 @@ angular.module('histograph')
           
           tim.fn.y = d3.scale.sqrt()
             .range([
-              30,
-              5
+              10,
+              50
             ]);
 
           tim.fn.color = d3.scale.sqrt()
@@ -140,7 +140,7 @@ angular.module('histograph')
 
           tim.fn.fcolor = d3.scale.sqrt()
             .range([
-              '#f6941c', '#FA8900'
+              '#AB2211', '#FF5742'
             ]);
           
           // tim.fn.area = d3.svg.area()
@@ -333,7 +333,6 @@ angular.module('histograph')
               weigthExtent,
               timeExtent; // [minT, maxT] array of max and min timestamps
 
-
           dataset = angular.copy(_.flatten([scope.timeline])).map(function (d) {
             d.t*=1000; // different level of aggregation
             return d;
@@ -341,12 +340,6 @@ angular.module('histograph')
 
           $log.log('::timeline -> draw() - w:', tim.width(), '- n. values:', dataset.length)
 
-          // // time extent
-          // tim.timeExtent = d3.extent(dataset, function (d) {
-          //   return d.t
-          // });
-          
-          // weight extent and update related function
           weigthExtent = d3.extent(dataset, function (d) {
             return d.weight
           });
@@ -359,20 +352,6 @@ angular.module('histograph')
             return a.t < b.t ? -1 : 1
           });
           
-         
-
-
-          
-          // if(tim.extension[0] || tim.extension[1]) {
-          //   tim.brush.x(tim.fn.x).extent(tim.timeExtent);
-          //   tim.gBrush.call(tim.brush.extent(tim.extension));
-          //   tim.gBrush.call(tim.brush.event);
-          //   tim.gBrush.selectAll('.resize rect').attr({
-          //     height: 60,
-          //     width: 12
-          //   })
-          // }
-          // let's draw !!!
           var histogram = tim.histograms.selectAll('.tn')
             .data(dataset, function (d){
               return d.k || d.t
@@ -388,9 +367,14 @@ angular.module('histograph')
               x: function(d) {
                 return tim.fn.x(d.t)
               },
-              y: 20,
+              y: function(d) {
+                return 15 - (tim.fn.y(d.weight)/2)
+              },
               width: 2,
-              height: 5,
+              height: function(d) {
+                return tim.fn.y(d.weight)
+              },
+              // height: 20,
               fill: function(d) {
                 return tim.fn.fcolor(d.weight)
               }

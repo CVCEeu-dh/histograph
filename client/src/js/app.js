@@ -90,7 +90,7 @@ angular
     Cfr. https://scotch.io/tutorials/internationalization-of-angularjs-applications
   */
   .config(function ($translateProvider) {
-    $translateProvider.useMissingTranslationHandlerLog();
+    // $translateProvider.useMissingTranslationHandlerLog();
     $translateProvider.useStaticFilesLoader({
         prefix: 'locale/locale-',// path to translations files
         suffix: '.json'// suffix, currently- extension of the translations

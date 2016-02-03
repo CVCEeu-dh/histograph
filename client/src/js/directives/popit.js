@@ -312,7 +312,8 @@ angular.module('histograph')
 
         scope.cancelQuestion = function($event) {
           scope.question = false;
-          $event.stopPropagation();
+          if($event)
+            $event.stopPropagation();
         }
 
         
