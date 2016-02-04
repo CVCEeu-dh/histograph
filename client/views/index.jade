@@ -43,18 +43,22 @@ html
 
                 ul.menu.nav.navbar-nav.navbar-right
                   li(class='{{currentState.name == "explore.resources"?"active":""}}')
-                    a(href='#/') gallery
+                    a(href='#/?{{qs}}')
+                      span#tip1 gallery
 
                   li(class='{{currentState.name == "explore.persons"?"active":""}}')
-                    a(ng-href='#/projection/person/person?{{qs}}')  graph
+                    a(ng-href='#/projection/person/person?{{qs}}')
+                      span#tip2 graph
 
                   li
                     a.with-number(ng-click='toggleQueue()', uib-tooltip='your selection', tooltip-placement='bottom') my selection 
                       //- i.fa.fa-bookmark
                       div.number.animated.lite {{playlist.length}}
 
-                  li(class='{{currentState.name == "explore.noise"?"active":""}}')
-                    a(href='#/noise') activities
+                  li  
+                    a(href='#/u/'+user.id) my favourites
+                  //- li(class='{{currentState.name == "explore.noise"?"active":""}}')
+                  //-   a(href='#/noise') activities
 
                   li(ng-controller='PulseController')
                     span(uib-dropdown, on-toggle="toggle(open)")
@@ -65,10 +69,12 @@ html
                         
                         li
                           a(href="#", ng-if='syncing') loading...
-                          a(href="#", ng-if='!syncing') see all {{totalItems}} notifications
-                            
-                        li(ng-repeat="relatedItem in notifications", ng-include='"templates/partials/action-lite.html"')
+                          //- a(href="#", ng-if='!syncing') see all {{totalItems}} notifications
                           
+                        li(ng-repeat="relatedItem in notifications", ng-include='"templates/partials/action-lite.html"')
+                        
+                        li
+                          a(href="#/noise", ng-if='!syncing') see global activites
                  
 
                   li(class='{{currentState.name == "search.resources" || currentState.name == "search.persons" ?"active":""}}')
@@ -194,6 +200,23 @@ html
           
           div#playlist-shadow(class='{{queueStatus}} {{currentState.name|humanizeState}} ', ng-click='toggleQueue()')
           div#fullsize(fullsize)
+
+          div(ng-controller='GuidedTourCtrl')
+            tour#guided-tour(step="currentStep")
+              virtual-step(tourtip="{{'guided-tour.step.view.gallery' | translate}}", tourtip-element="#tip1", tourtip-placement="bottom")
+              virtual-step(tourtip="{{'guided-tour.step.filters.type' | translate}}" tourtip-element=".grammar-choice", tourtip-placement="bottom")
+              virtual-step(tourtip="{{'guided-tour.step.filters.related-to' | translate}}" tourtip-element=".grammar-choice.related-to", tourtip-placement="bottom")
+              virtual-step(tourtip="this is a person" tourtip-element=".tag.person", tourtip-placement="bottom")
+
+
+              virtual-step(tourtip="{{'guided-tour.step.filters.timeline' | translate}}" tourtip-element="#timeline", tourtip-offset-horizontal="200", tourtip-placement="top")
+
+              //- resource view steps
+              virtual-step(tourtip="{{'guided-tour.step.view.resource' | translate}}" tourtip-element=".resource.item .action", tourtip-offset-horizontal="0", tourtip-placement="bottom")
+              virtual-step(tourtip="{{'guided-tour.step.view.resource.seealso' | translate}}" tourtip-element="#see-also", tourtip-offset-horizontal="0", tourtip-placement="left")
+              virtual-step(tourtip="{{'guided-tour.step.view.resource.seealso.filters' | translate}}" tourtip-element=".grammar-choice.related-to", tourtip-offset-horizontal="0", tourtip-placement="bottom")
+              virtual-step(tourtip="{{'guided-tour.step.view.resource.add' | translate}}" tourtip-element=".resource.item .btn-contribute", tourtip-offset-horizontal="0", tourtip-placement="top")
+              virtual-step(tourtip="{{'guided-tour.step.view.resource.annotate' | translate}}" tourtip-element=".resource.item h3", tourtip-offset-horizontal="0", tourtip-placement="bottom")
 
       div(id="messenger", class="tk-proxima-nova {{messaging? 'active': ''}}")
         div.inner

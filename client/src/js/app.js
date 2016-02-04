@@ -33,7 +33,8 @@ angular
     // 'mgcrea.ngStrap'
     'perfect_scrollbar',
     'LocalStorageModule',
-    'masonry'
+    'masonry',
+    'angular-tour'
   ])
   .constant('LOCALES', {
     'locales': {
@@ -52,6 +53,8 @@ angular
     // proper angular events (directives needs to be alerted)
     LOCATION_CHANGE_START: 'LOCATION_CHANGE_START',
     STATE_CHANGE_SUCCESS: 'STATE_CHANGE_SUCCESS',
+
+    STATE_VIEW_CONTENT_LOADED: 'STATE_VIEW_CONTENT_LOADED',
     // sigma spefcific events
     SIGMA_SET_ITEM: 'sigma_set_item'
   })

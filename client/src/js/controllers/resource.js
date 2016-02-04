@@ -5,7 +5,7 @@
  * # IndexCtrl
  */
 angular.module('histograph')
-  .controller('ResourceCtrl', function ($scope, $log, $stateParams, $filter, resource, annotations, ResourceRelatedVizFactory, ResourceRelatedFactory, socket, EVENTS) {
+  .controller('ResourceCtrl', function ($rootScope, $scope, $log, $stateParams, $filter, resource, annotations, ResourceRelatedVizFactory, ResourceRelatedFactory, socket, EVENTS) {
     $log.debug('ResourceCtrl ready', annotations);
     
     $scope.notes = annotations.result.items;
@@ -301,4 +301,5 @@ angular.module('histograph')
     // load timeline
     $scope.syncTimeline();
 
+    
   });

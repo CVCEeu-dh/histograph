@@ -16,7 +16,6 @@ angular.module('histograph')
     
     
     
-    
     /*
       Set graph title
     */

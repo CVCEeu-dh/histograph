@@ -47,7 +47,10 @@ angular.module('histograph')
         };
 
         scope.textify = function() {
-
+          if(!scope.context) {
+            console.warn('directive lookup without any context')
+            return ''
+          }
           var content;
 
           // look for annotations

@@ -46,7 +46,10 @@ module.exports = {
       '/js/lib/angular-translate.min.js',
       '/js/lib/angular-translate-loader-static-files.min.js',
 
-      '/js/lib/angular-masonry.min.js',  
+      '/js/lib/angular-masonry.min.js',
+      
+      // angular guided tour, by daft-monk
+      '/js/lib/angular-tour-tpls.min.js',  
 
       // '/js/lib/ui-codemirror.min.js',
 
@@ -73,6 +76,7 @@ module.exports = {
       '/js/controllers/collection.js',
       '/js/controllers/crowd.js',
       '/js/controllers/entity.js',
+      '/js/controllers/guided-tour.js',
       '/js/controllers/index.js',
       '/js/controllers/inquiry.js',
       '/js/controllers/issue.js',

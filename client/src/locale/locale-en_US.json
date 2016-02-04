@@ -32,6 +32,21 @@
   "grammar.sorting.date.desc": "by date (most recent first)",
   "grammar.sorting.date.asc": "by date (oldest first)",
 
+  "guided-tour.step.view.gallery": "You can choose between a gallery and a graph view",
+  "guided-tour.step.filters.timeline": "You can highlight a specific period on the timeline. Drag this selection to observe change over time.",
+  "guided-tour.step.filters.type": "Both views can be **filtered** according to the type of document, its creation or publication date...",
+  "guided-tour.step.filters.related-to":  "... or you can filter the view by  *people*, *locations*, *institutions*, or *themes* you are interested in",
+
+  "guided-tour.step.view.graph": "You can select graph views with different types of nodes (e.g. people or locations). A tie between two nodes indicates that they are mentioned together in a document. More frequent co-occurrences are represented by thicker ties. A click on a tie shows the documents which contain the two nodes.",
+
+  "guided-tour.step.view.resource": "you can add this resources to your favourite list or to your current selection",
+
+  "guided-tour.step.view.resource.seealso": "This is the recommended resource list, based on the tag of this document.",
+
+  "guided-tour.step.view.resource.seealso.filters": "you can use the filter above to reduce the results in the recommended list",
+  "guided-tour.step.view.resource.add": "you can add relevant people, location etc.. this will improve the results in the recommended section...",
+  "guided-tour.step.view.resource.annotate": "select a text in the title and in the caption of the resource in order to ",
+
   "header.logout" : "log out",
   "header.myselection": "my selection",
 
@@ -57,6 +72,7 @@
   "resource.themes.mentioned": "themes mentioned",
   "resource.organizations.mentioned": "organizations",
   "resource.locations.mentioned": "locations",
+
   "resource.language.availability": "available in",
   "resource.seealso.title": "recommended resources",
 

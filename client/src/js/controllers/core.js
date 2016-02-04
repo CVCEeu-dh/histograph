@@ -13,6 +13,8 @@ angular.module('histograph')
     $scope.locationPath = $location.path();
     $scope.locationJson  = JSON.stringify($location.search()); 
     
+    
+
     var suggestionTimeout = 0;
     
     $scope.params = {}; //  this would contain limit, offset, from, to and other API params. Cfr. EVENT.API_PARAMS_CHANGED
@@ -435,21 +437,14 @@ angular.module('histograph')
       _resizeTimer = setTimeout(function() {
         $(window).trigger('resize');
       }, 300)
-      // DEPRECATED
-      switch($scope.currentCtrl) { // move to translation engine
-        case 'SearchCtrl':
-          $scope.query = $routeParams.query || '';
-          $scope.headers.seealso = 'search results';
-          break;
-        default: 
-          $scope.headers.seealso = 'related documents'
-          break;
-      }
-      // set header andccording to the controllers
       
     });
     
-    
+    // fire event when DOM is ready
+    $scope.$on('$viewContentLoaded', function(event){
+      // $rootScope.$emit
+      $rootScope.$emit(EVENTS.STATE_VIEW_CONTENT_LOADED, $scope.currentState);
+    });
     /*
       change the given user, programmatically. Cfr httpProvider config in app.js
     */
@@ -462,6 +457,8 @@ angular.module('histograph')
           or to be updated whenever a
           CHANGES in resource set occurs
         */
+        
+
         VisualizationFactory.resource(VIZ.TIMELINE).then(function (res) {
           $log.info('CoreCtrl @EVENTS.USE_USER VisualizationFactory', res);
           $scope.contextualTimeline = res.data.result.timeline;
