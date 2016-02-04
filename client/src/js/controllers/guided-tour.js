@@ -12,11 +12,12 @@ angular.module('histograph')
     
     $scope.currentStep = -1;
     $scope.currentView; 
-    $scope.enable = false;
+    $scope.enable = true; // load from settings
     $scope.steps = {
       'explore.resources': {
+        title: 'The gallery',
         steps: [
-          0,1
+          0,1, 11
         ]
       }, 
       'resource.resources': {
@@ -34,36 +35,63 @@ angular.module('histograph')
     var currentState,
         __promise;
 
-    $scope.showNext = false;
-    $scope.showPrevious = false;
     /*
       According to the view we are in
     */
     $scope.nextStep = function(){
-      $scope.currentStep ++;
+      $scope.moveTo($scope.steps[currentState].cursor + 1);
     }
 
+
     $scope.previousStep = function() {
-      $scope.currentStep--;
+      $scope.moveTo($scope.steps[currentState].cursor - 1);
+    }
+
+
+    $scope.moveTo = function(index) {
+      
+      $scope.hasPrevious = index > 0;
+      $scope.hasNext = index < $scope.steps[currentState].steps.length - 1;
+      $scope.currentStep = $scope.steps[currentState].steps[index];
+      $scope.steps[currentState].cursor = index;
+      $log.log('GuidedTourCtrl -> moveTo() cursor:', index, '/', $scope.steps[currentState].steps.length, '- aka touring step n:',  $scope.steps[currentState].steps[index], '- has next:', $scope.hasNext, '- has previous:', $scope.hasPrevious );
+
+      $scope.ttTitle= [
+            $scope.steps[currentState].title || '',
+            ' (',
+            (+$scope.steps[currentState].cursor + 1),
+             ' of ',
+            $scope.steps[currentState].steps.length,
+            ')'
+          ].join('');
     }
 
     /*
       Set the current step to the correct number according to the view we are in
     
     */
+    $scope.$on(EVENTS.STATE_CHANGE_SUCCESS, function(){
+      $scope.currentStep = -1
+    });
+
     $rootScope.$on(EVENTS.STATE_VIEW_CONTENT_LOADED, function(e, state) {
       currentState = state.name;
 
       if(__promise)
         $timeout.cancel(__promise);
-      
+
       if(!$scope.enable)
         return;
       __promise = $timeout(function(){
         if($scope.steps[state.name] && !$scope.steps[state.name].consumed) {
-          $scope.currentStep = $scope.steps[state.name].steps[$scope.steps[state.name].current || 0]
-          $scope.steps[state.name].current = +$scope.currentStep; // clone;
+
+          if(typeof $scope.steps[state.name].cursor == 'undefined')
+            $scope.steps[state.name].cursor = 0; // clone;
+
+          
+
+          $scope.moveTo($scope.steps[state.name].cursor);
         }
-      }, 3500)
+      }, 3500);
     });
   });

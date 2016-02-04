@@ -34,6 +34,8 @@
   "grammar.sorting.date.asc": "by date (oldest first)",
 
   "guided-tour.step.view.gallery": "You can choose between a gallery and a graph view",
+  "guided-tour.step.view.gallery.resource":"click on a resource",
+
   "guided-tour.step.filters.timeline": "You can highlight a specific period on the timeline. Drag this selection to observe change over time.",
   "guided-tour.step.filters.type": "Both views can be **filtered** according to the type of document, its creation or publication date...",
   "guided-tour.step.filters.related-to":  "... or you can filter the view by  *people*, *locations*, *institutions*, or *themes* you are interested in",
