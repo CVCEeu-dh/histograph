@@ -12,34 +12,39 @@ angular.module('histograph')
     
     $scope.currentStep = -1;
     $scope.currentView; 
-
+    $scope.enable = false;
     $scope.steps = {
-      // 'explore.resources': {
-      //   current: 0,
-      //   steps: [
-      //     0,1
-      //   ]
-      // }, 
-      // 'resource.resources': {
-      //   current: 0,
-      //   steps: [
-      //     5,6
-      //   ]
-      // }
+      'explore.resources': {
+        steps: [
+          0,1
+        ]
+      }, 
+      'resource.resources': {
+        steps: [
+          5,6
+        ]
+      },
+      'explore.projection': {
+        steps: [
+          10
+        ]
+      }
     };
 
     var currentState,
         __promise;
 
+    $scope.showNext = false;
+    $scope.showPrevious = false;
     /*
       According to the view we are in
     */
     $scope.nextStep = function(){
-
+      $scope.currentStep ++;
     }
 
     $scope.previousStep = function() {
-
+      $scope.currentStep--;
     }
 
     /*
@@ -48,10 +53,12 @@ angular.module('histograph')
     */
     $rootScope.$on(EVENTS.STATE_VIEW_CONTENT_LOADED, function(e, state) {
       currentState = state.name;
-      
+
       if(__promise)
         $timeout.cancel(__promise);
-
+      
+      if(!$scope.enable)
+        return;
       __promise = $timeout(function(){
         if($scope.steps[state.name] && !$scope.steps[state.name].consumed) {
           $scope.currentStep = $scope.steps[state.name].steps[$scope.steps[state.name].current || 0]
