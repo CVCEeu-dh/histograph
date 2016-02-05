@@ -9,12 +9,15 @@
   "button.crowd.askmelater": "ask me later",
   "button.disagree": "I disagree",
   "button.edit": "edit",
+  "button.end": "ok, close",
+  "button.finish": "tour completed!",
   "button.login.with.twitter": "log in with your twitter account",
   "button.login.with.google": "log in with your google account",
   "button.more": "more",
   "button.next": "next",
   "button.previous": "previous",
   "button.myselection.explore": "explore connections",
+  "button.skip": "skip tour",
 
   "crowd.whois": "Do you know who is",
   "crowd.whois.description": "We miss some basic information about him/her and we're not sure about his/her identity",
@@ -33,22 +36,23 @@
   "grammar.sorting.date.desc": "by date (most recent first)",
   "grammar.sorting.date.asc": "by date (oldest first)",
 
-  "guided-tour.step.view.gallery": "You can choose between a gallery and a graph view",
-  "guided-tour.step.view.gallery.resource":"click on a resource",
-
-  "guided-tour.step.filters.timeline": "You can highlight a specific period on the timeline. Drag this selection to observe change over time.",
-  "guided-tour.step.filters.type": "Both views can be **filtered** according to the type of document, its creation or publication date...",
-  "guided-tour.step.filters.related-to":  "... or you can filter the view by  *people*, *locations*, *institutions*, or *themes* you are interested in",
-
+  "guided-tour.welcome": "Welcome to <strong>Histograph! </strong><br/> </br>We use cookies to track your usage and preferences",
+  "guided-tour.skip": "You can access the guided tour from your personal space",
+  "guided-tour.step.view.gallery": "You can choose between a <strong>gallery</strong> and a <strong>graph</strong> view. You are now in the <strong>gallery</strong> view",
+  "guided-tour.step.view.gallery.resource":"click on a resource to continue the guided tour",
+  "guided-tour.step.filters.timeline": "You can highlight a specific period on the timeline. Drag your selection to observe change over time.",
+  "guided-tour.step.filters.type": "Both views can be <strong>filtered</strong> according to the type of document, its creation or publication date...",
+  "guided-tour.step.filters.related-to":  "You can also filter by  *people*, *locations*, *institutions*, or *themes*",
   "guided-tour.step.view.graph": "You can select graph views with different types of nodes (e.g. people or locations). A tie between two nodes indicates that they are mentioned together in a document. More frequent co-occurrences are represented by thicker ties. A click on a tie shows the documents which contain the two nodes.",
-
-  "guided-tour.step.view.resource": "you can add this resources to your favourite list or to your current selection",
-
+  
+  "guided-tour.step.view.resource": "this is a bla bla",
+  "guided-tour.step.view.resource.favourites": "you can add this resources to your favourite list or to your current selection",
   "guided-tour.step.view.resource.seealso": "This is the recommended resource list, based on the tag of this document.",
-
   "guided-tour.step.view.resource.seealso.filters": "you can use the filter above to reduce the results in the recommended list",
   "guided-tour.step.view.resource.add": "you can add relevant people, location etc.. this will improve the results in the recommended section...",
   "guided-tour.step.view.resource.annotate": "select a text in the title and in the caption of the resource in order to ",
+  "guided-tour.step.view.resource.click.entity": "guided-tour.step.view.resource.click.entity",
+
 
   "header.logout" : "log out",
   "header.myselection": "my selection",

@@ -26,6 +26,7 @@ angular
     'ui.router',
     'ngRoute',
     'ngResource',
+    'ngSanitize',
     'ngCookies',
     'ui.bootstrap',
     'pascalprecht.translate',// angular-translate
@@ -51,12 +52,14 @@ angular
     ANNOTATOR_HIDDEN: 'annotationEditorHidden',
     INFINITE_SCROLL: 'infinite_scroll',
     // proper angular events (directives needs to be alerted)
-    LOCATION_CHANGE_START: 'LOCATION_CHANGE_START',
-    STATE_CHANGE_SUCCESS: 'STATE_CHANGE_SUCCESS',
+    LOCATION_CHANGE_START: 'location_change_start',
+    STATE_CHANGE_SUCCESS: 'state_change_success',
 
-    STATE_VIEW_CONTENT_LOADED: 'STATE_VIEW_CONTENT_LOADED',
+    STATE_VIEW_CONTENT_LOADED: 'state_view_content_loaded',
     // sigma spefcific events
-    SIGMA_SET_ITEM: 'sigma_set_item'
+    SIGMA_SET_ITEM: 'sigma_set_item',
+    // start tour
+    START_GUIDED_TOUR: 'start_guided_tour',
   })
   .constant("VIZ", {
     TIMELINE: 'timeline'
@@ -94,11 +97,13 @@ angular
   */
   .config(function ($translateProvider) {
     // $translateProvider.useMissingTranslationHandlerLog();
+    $translateProvider.useSanitizeValueStrategy('sanitize');
     $translateProvider.useStaticFilesLoader({
         prefix: 'locale/locale-',// path to translations files
         suffix: '.json'// suffix, currently- extension of the translations
     });
     $translateProvider.preferredLanguage('en_US');// is applied on first load
+    
   })
   /*
     Local-storage module config. cfr

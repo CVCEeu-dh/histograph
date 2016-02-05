@@ -93,12 +93,19 @@ html
                   //-     ul(class='dropdown-menu', role='menu', )
                   //-       li(ng-repeat='lang in availableLanguages', ng-click='setLanguage(lang)') {{lang}}
                   
-                  li  
-                    a(href='#/u/'+user.id)
-                      img(src=user.picture)
-                      span {{user.username}} 
-                  li
-                    a(href='/logout') logout
+                  li#tip-user
+                    span(uib-dropdown='')
+                      a(uib-dropdown-toggle)
+                        img(src=user.picture)
+                        span {{user.username}} 
+                      ul.uib-dropdown-menu.dropdown-menu
+                        li
+                          a(style='cursor:pointer', ng-click='startGuidedTour()') start guided tour!
+                        li
+                          a(href='#/u/'+user.id) favourites
+                        li
+                          a(href='/logout') logout
+                  
                   
                   
                   
@@ -203,25 +210,37 @@ html
 
           div(ng-controller='GuidedTourCtrl')
             tour#guided-tour(step="currentStep")
-              virtual-step(tourtip="{{'guided-tour.step.view.gallery' | translate}}", tourtip-element="#tip1", tourtip-placement="bottom")
-              virtual-step(tourtip="{{'guided-tour.step.filters.type' | translate}}" tourtip-element=".grammar-choice", tourtip-placement="bottom")
-              virtual-step(tourtip="{{'guided-tour.step.filters.related-to' | translate}}" tourtip-element=".grammar-choice.related-to", tourtip-placement="bottom")
+              //- explore.resources state
+              virtual-step(tourtip="guided-tour.welcome", tourtip-element=".view", tourtip-placement="center-top")
+
+              virtual-step(tourtip="guided-tour.step.view.gallery", tourtip-element="#tip1", tourtip-placement="bottom")
+              virtual-step(tourtip="guided-tour.step.filters.type" tourtip-element=".grammar-choice", tourtip-placement="bottom")
+              virtual-step(tourtip="guided-tour.step.filters.related-to" tourtip-element=".grammar-choice.related-to", tourtip-placement="bottom")
+              
+              virtual-step(tourtip="guided-tour.step.filters.timeline" tourtip-element="#timeline", tourtip-offset-horizontal="200", tourtip-placement="top")
+
+              virtual-step(tourtip="guided-tour.step.view.gallery.resource" tourtip-element=".related  h4 a", tourtip-offset-horizontal="0", tourtip-placement="bottom")
+
               virtual-step(tourtip="this is a person" tourtip-element=".tag.person", tourtip-placement="bottom")
-
-
-              virtual-step(tourtip="{{'guided-tour.step.filters.timeline' | translate}}" tourtip-element="#timeline", tourtip-offset-horizontal="200", tourtip-placement="top")
-
+              
               //- resource view steps
-              virtual-step(tourtip="{{'guided-tour.step.view.resource' | translate}}" tourtip-element=".resource.item .action", tourtip-offset-horizontal="0", tourtip-placement="bottom")
-              virtual-step(tourtip="{{'guided-tour.step.view.resource.seealso' | translate}}" tourtip-element="#see-also", tourtip-offset-horizontal="0", tourtip-placement="left")
-              virtual-step(tourtip="{{'guided-tour.step.view.resource.seealso.filters' | translate}}" tourtip-element=".grammar-choice.related-to", tourtip-offset-horizontal="0", tourtip-placement="bottom")
-              virtual-step(tourtip="{{'guided-tour.step.view.resource.add' | translate}}" tourtip-element=".resource.item .btn-contribute", tourtip-offset-horizontal="0", tourtip-placement="top")
-              virtual-step(tourtip="{{'guided-tour.step.view.resource.annotate' | translate}}" tourtip-element=".resource.item h3", tourtip-offset-horizontal="0", tourtip-placement="bottom")
+              virtual-step(tourtip="guided-tour.step.view.resource" tourtip-element=".resource.item", tourtip-offset-horizontal="0", tourtip-placement="center-top")
+              virtual-step(tourtip="guided-tour.step.view.resource.seealso" tourtip-element="#see-also", tourtip-offset-horizontal="0", tourtip-placement="center-top")
+              virtual-step(tourtip="guided-tour.step.view.resource.seealso.filters" tourtip-element=".grammar-choice.related-to", tourtip-offset-horizontal="0", tourtip-placement="bottom")
+              virtual-step(tourtip="guided-tour.step.view.resource.add" tourtip-element=".resource.item .btn-contribute", tourtip-offset-horizontal="0", tourtip-placement="top")
+              virtual-step(tourtip="guided-tour.step.view.resource.annotate" tourtip-element=".resource.item h3", tourtip-offset-horizontal="0", tourtip-placement="bottom")
 
               //- milkyway
-              virtual-step(tourtip="{{'guided-tour.step.view.graph' | translate}}" tourtip-element="#milkyway", tourtip-offset-horizontal="0", tourtip-placement="center-top")
+              virtual-step(tourtip="guided-tour.step.view.graph" tourtip-element="#milkyway", tourtip-offset-horizontal="0", tourtip-placement="center-top")
 
-              virtual-step(tourtip="{{'guided-tour.step.view.gallery.resource' | translate}}" tourtip-element=".related  h4 a", tourtip-offset-horizontal="0", tourtip-placement="bottom")
+              //- guided tour, hidden
+              virtual-step(tourtip="guided-tour.skip" tourtip-element="#tip-user", tourtip-offset-horizontal="0", tourtip-placement="bottom")
+
+              virtual-step(tourtip="guided-tour.step.view.resource.favourites" tourtip-element=".resource.item .actions", tourtip-offset-horizontal="0", tourtip-placement="bottom")
+
+
+
+              
 
 
       div(id="messenger", class="tk-proxima-nova {{messaging? 'active': ''}}")

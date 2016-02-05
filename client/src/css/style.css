@@ -96,6 +96,10 @@ header ul.dropdown-menu li{
     padding: 0 15px;
 }
 
+header ul.dropdown-menu li a{
+  line-height: 20px
+}
+
 a#header-title {
   color: #151515 ;
   margin-right: 50px;
@@ -1946,6 +1950,11 @@ li.CodeMirror-hint-active {
   text-align: center;
   line-height: 18px;
   height: 18px;
+}
+
+.btn.with-fa .fa{
+  line-height: 17px;
+      font-size: 12px;
 }
 
 .btn.expanded {
@@ -6821,10 +6830,15 @@ g.note.manual .note-borders{
   max-width: 400px;
   border-radius: 3px;
   background: #383838;
+  box-shadow: 0 5px 10px rgba(0,0,0,.175);
 }
 
 .tour-tip p {
   color: #A9A2A2;
+}
+
+.tour-tip p strong{
+  color: white;
 }
 
 

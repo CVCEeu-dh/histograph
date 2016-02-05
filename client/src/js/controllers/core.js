@@ -83,6 +83,12 @@ angular.module('histograph')
       return $state;
     }
     
+    /*
+      force start the guided tour
+    */
+    $scope.startGuidedTour = function() {
+      $rootScope.$emit(EVENTS.START_GUIDED_TOUR);
+    }
     
     // the current search query, if any
     // $scope.query =  $routeParams.query || '';

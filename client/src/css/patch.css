@@ -22,6 +22,12 @@ a.with-number{
   cursor:pointer;
 }
 
+header ul.menu ul.dropdown-menu li a{
+  line-height: 20px;
+      line-height: 2em;
+    padding: 5px 0;
+}
+
 header ul.menu li a{
   line-height: 70px;
   color: #8A8A8A;

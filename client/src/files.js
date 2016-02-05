@@ -40,6 +40,7 @@ module.exports = {
       '/js/lib/angular-route.min.js',
       '/js/lib/angular-resource.min.js',
       '/js/lib/angular-cookies.min.js',
+      '/js/lib/angular-sanitize.min.js',
       '/js/lib/angular-local-storage.min.js',
 
       // translation mechanism
