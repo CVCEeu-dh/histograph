@@ -158,11 +158,12 @@ clientRouter.route('/login')
 clientRouter.route('/logout')
   .get(function(req, res){
     req.logout();
-    res.render('index', {
-      user: req.user || 'anonymous',
-      message: 'hooray! welcome to our api!',
-      scripts: clientFiles.scripts
-    });
+    res.redirect('/')
+    // res.render('index', {
+    //   user: req.user || 'anonymous',
+    //   message: 'hooray! welcome to our api!',
+    //   scripts: clientFiles.scripts
+    // });
   });
 
 clientRouter.route('/signup')

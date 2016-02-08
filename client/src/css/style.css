@@ -1100,8 +1100,9 @@ header ul li .notification a {
 .related h4 a, .item h4 a{
   color: #151515;
   font-weight: bold;
-  font-size: 13px;
-  line-height: 21px;
+  font-size: 15px;
+  line-height: 24px;
+
 }
 
 .related .actions-wrapper{
