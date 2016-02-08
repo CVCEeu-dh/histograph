@@ -39,7 +39,7 @@ html
               div(class='col-sm-12')
                 div.navbar-header
                   a.serif(href='/#/')
-                    span histograph
+                    span #{title}
 
                 ul.menu.nav.navbar-nav.navbar-right
                   li(class='{{currentState.name == "explore.resources"?"active":""}}')
@@ -51,12 +51,12 @@ html
                       span#tip2 graph
 
                   li
-                    a.with-number(ng-click='toggleQueue()', uib-tooltip='your selection', tooltip-placement='bottom') my selection 
-                      //- i.fa.fa-bookmark
+                    a.with-number(ng-click='toggleQueue()', uib-tooltip='pinboard', tooltip-placement='bottom') my pinboard 
                       div.number.animated.lite {{playlist.length}}
 
                   li  
-                    a(href='#/u/'+user.id) my favourites
+                    a(href='#/u/'+user.id) my bookmarks
+                      
                   //- li(class='{{currentState.name == "explore.noise"?"active":""}}')
                   //-   a(href='#/noise') activities
 
@@ -121,7 +121,7 @@ html
             div(id='login')
               //- div(id='logo')
               //-   img(src='images/hg_v.png')
-              h5 histograph
+              h5 #{title}
               form
                 p.tk-proxima-nova
                   span(translate='login.welcome')
@@ -238,7 +238,7 @@ html
 
               virtual-step(tourtip="guided-tour.step.view.resource.favourites" tourtip-element=".resource.item .actions", tourtip-offset-horizontal="0", tourtip-placement="bottom")
 
-
+              virtual-step(tourtip="guided-tour.step.view.resource.annotate.bis" tourtip-element=".resource.item blockquote", tourtip-offset-horizontal="0", tourtip-placement="top")
 
               
 
@@ -253,6 +253,7 @@ html
         script(src=val)
       script.
         var types = !{JSON.stringify(types)};
+        var analytics = !{JSON.stringify(analytics)};
 
 
         /*
@@ -260,7 +261,8 @@ html
         */
         angular.module('histograph')
           .constant("SETTINGS", {
-            types: types
+            types: types,
+            analytics: analytics
           })
         .constant('GRAMMAR', {
           AS_TYPES: [
@@ -275,7 +277,7 @@ html
           })),
           IN_TYPES: [
             {
-              name: 'in any kind of documents',
+              name: 'in any resource type',
             },
           ].concat(types.resources.map(function (type) {
             return {

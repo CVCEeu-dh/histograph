@@ -54,10 +54,11 @@ var sessionMiddleware = session({
   saveUninitialized: true
 })
 
+console.log('title:', settings.title);
 console.log('logs: ', settings.paths.accesslog);
 console.log('env:  ', env);
 console.log('port: ', settings.port);
-console.log('url:  ', settings.baseurl)
+console.log('url:  ', settings.baseurl);
 
 app.use(compress());
 
@@ -135,6 +136,8 @@ clientRouter.route('/').
       user: req.user || 'anonymous',
       message: 'hooray! welcome to our api!',
       types: settings.types,
+      title: settings.title,
+      analytics: settings.analytics,
       scripts: clientFiles.scripts
     });
   });
