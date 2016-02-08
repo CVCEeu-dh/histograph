@@ -68,10 +68,17 @@ gulp.task('fonts', function() {
     .pipe($.size({title: 'fonts'}));
 });
 
+// copy (compress) locale to dist
+gulp.task('locale', function() {
+  return gulp.src(['./client/src/locale/*.json'])
+    .pipe($.jsonminify())
+    .pipe(gulp.dest('./client/dist/locale'))
+    .pipe($.size({title: 'locale'}));
+});
 // Build
 gulp.task('build', function() {
   
 });
 
 // Default
-gulp.task('default', ['templates', 'scripts', 'styles', 'images', 'fonts']);
+gulp.task('default', ['templates', 'scripts', 'styles', 'images', 'fonts', 'locale']);

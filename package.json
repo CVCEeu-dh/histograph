@@ -57,6 +57,7 @@
     "gulp-dest": "^0.2.2",
     "gulp-if": "^2.0.0",
     "gulp-jshint": "^1.11.2",
+    "gulp-jsonminify": "^1.0.0",
     "gulp-load-plugins": "^1.0.0-rc.1",
     "gulp-minify-css": "^1.2.1",
     "gulp-size": "^2.0.0",
