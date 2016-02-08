@@ -93,6 +93,7 @@ module.exports = {
 
       // modal controllers. templates in templates/modal
       '/js/controllers/modals/contribute.js',
+      '/js/controllers/modals/create-entity.js',
 
 
       '/js/directives/annotator.js', 

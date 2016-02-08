@@ -26,7 +26,15 @@ angular.module('histograph')
       $scope.q = options.query;
     }
     
-
+    $scope.createEntity = function(){
+      // pu it invisible...
+      options.createEntity(resource, $scope.type, {
+        query: $scope.q,
+        submit: function() {
+          // add the current saved entity
+        }
+      })
+    }
     $scope.ok = function () {
       // get the annotation, if any
       var params = {};
@@ -81,6 +89,8 @@ angular.module('histograph')
       if(q.trim().length < 2)
         return;
       
+      $scope.query = q.trim();
+
       return SuggestFactory.get({
         m: type,
         query: q,

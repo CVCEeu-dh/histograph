@@ -889,7 +889,11 @@ angular.module('histograph')
     $scope.contribute = function(item, type, options) {
       $log.debug('CoreCtrl -> contribute() - item:', item);
 
-      var language      = $scope.language;
+      var language      = $scope.language,
+          options       =  options || {};
+
+      options.createEntity = $scope.createEntity;
+
       var modalInstance = $uibModal.open({
         animation: true,
         templateUrl: 'templates/modals/contribute.html',
@@ -898,7 +902,7 @@ angular.module('histograph')
         size: 'sm',
         resolve: {
           options: function() {
-            return options || {}
+            return options
           },
           type: function(){
             return type
@@ -928,6 +932,42 @@ angular.module('histograph')
       });
 
     };
+
+    /*
+      Create New
+      ---
+      Open the create new modal for the given item
+      It allows users to suggest entities.
+      usage (from everywhere)
+      $scope.contribute({id: 25723, type: 'resource'})
+    */
+    $scope.createEntity = function(item, type, options) {
+      $log.debug('CoreCtrl -> createEntity() - item:', item);
+
+      var language      = $scope.language;
+      var modalInstance = $uibModal.open({
+        animation: true,
+        templateUrl: 'templates/modals/create-entity.html',
+        controller: 'CreateEntityModalCtrl',
+        windowClass: "modal fade in contribute",
+        size: 'sm',
+        resolve: {
+          options: function() {
+            return options || {}
+          },
+          type: function(){
+            return type
+          },
+          resource: function() {
+            return item
+          },
+          language: function() {
+            return language
+          }
+        }
+      })
+    }
+
 
     
     // $scope.contribute({id: 25723})

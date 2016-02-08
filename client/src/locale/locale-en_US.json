@@ -8,8 +8,10 @@
   "button.crowd.canfixthis": "Yes, I can fix this",
   "button.crowd.askmelater": "ask me later",
   "button.disagree": "I disagree",
+  "button.discard": "discard",
   "button.edit": "edit",
   "button.end": "ok, close",
+  "button.entity.create": "Create a {{type}}",
   "button.finish": "end of part {{number}}",
   "button.login.with.twitter": "log in with your twitter account",
   "button.login.with.google": "log in with your google account",
@@ -18,6 +20,17 @@
   "button.previous": "previous",
   "button.myselection.explore": "explore connections",
   "button.skip": "skip",
+  
+
+  "contribute.title": "which {{type}} did you identify?",
+  "contribute.description": "Tagging resources improves the quality of the recommended results",
+
+  "create-entity.title": "create a {{type}}",
+  "create-entity.description": "Create a person.",
+  "create-entity.person.firstname": "first name",
+  "create-entity.person.lastname": "first name",
+  "create-entity.person.reference": "reference",
+
 
   "crowd.whois": "Do you know who <strong class='tag person'>{{name}}</strong> is?",
   "crowd.whois.description": "We are missing some basic information about him/her and we're not sure about his/her identity",
@@ -119,7 +132,10 @@
   "resource.type.schema": "diagram",
   "resource.type.table": "table",
 
+  "placeholder.search": "search ...",
   "placeholder.search.entity": "search {{type}}",
-  "placeholder.search.everything": "search person, location ..."
+  "placeholder.search.everything": "search person, location ...",
+
+  "typeahead.noresults.alt": "Can't find what your looking for?"
 }
 

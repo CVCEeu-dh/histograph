@@ -1,0 +1,34 @@
+<div class='modal-body'>
+  <div class='typeahead-in-dropdown'>
+  <h2 translate="create-entity.title" translate-values='{type: type}'></h2>
+  <p translate>create-entity.description</p>
+  
+  <form name='ghost.form' ng-if='type == "person"'>
+    <div class="form-group">
+      <label translate>create-entity.person.firstname</label>
+      <input class="form-control" type='text' ng-model='ghost.first_name' required>
+    </div>
+    <div class="form-group">
+      <label translate>create-entity.person.lastname</label>
+      <input class="form-control" type='text' ng-model='ghost.last_name' required>
+    </div>
+    
+   <!--  <input type='text' ng-model='ghost.links_viaf'>
+    <input type='text' ng-model='ghost.links_dbpedia'> -->
+    <div class="form-group">
+      <label translate>create-entity.person.reference</label>
+      <div style='margin: 0 15px'>
+        <textarea class="form-control"  ng-model='ghost.reference'></textarea>
+      </div>
+    </div>
+  </form>  
+
+  </div>
+</div>
+
+<div class='modal-footer'>
+  <div class="btn-group btn-group-dual" role="group">
+    <button  class='btn btn-primary btn-line {{ghost.form.$invalid? "disabled": ""}}' ng-click='ok()' ng-disabled="ghost.form.$invalid" translate>button.confirm</button>
+    <button class='btn btn-secondary btn-line' ng-click='cancel()' translate>button.discard</button>
+  </div>
+</div>
