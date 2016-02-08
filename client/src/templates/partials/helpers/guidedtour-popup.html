@@ -1,0 +1,33 @@
+<div class="tour-tip">
+  <span class="tour-arrow tt-{{ ttPlacement }}" ng-hide="centered"></span>
+  <div class="tour-content-wrapper">
+    <h3 ng-bind="ttTitle"></h3>
+    <p class="sans-serif" translate="{{ttContent}}"></p>
+    <div class="">
+      <div class="btn-group" style="float:right">
+        
+        <a ng-if="!byebye && !consumed" ng-click="skip()" class="small btn-line-white btn tour-next-tip" translate>button.skip</a>
+        
+        
+      </div>
+
+      <div class="btn-group">
+        <a ng-if="hasPrevious" ng-click="previousStep()" class="small btn-line-white btn tour-next-tip with-fa " >
+          <i class='fa fa-angle-left'></i>&nbsp;&nbsp;&nbsp;<span translate>button.previous</span>
+        </a>
+        <a ng-if="hasNext" ng-click="nextStep()" class="small btn-line-white btn tour-next-tip with-fa ">
+          <span translate>button.next</span>&nbsp;&nbsp;&nbsp;<i class='fa fa-angle-right'></i>
+        </a>
+        <a ng-if="!byebye && consumed" ng-click="finish()" class="small btn-line-white btn tour-next-tip" translate>button.finish</a>
+        <a ng-if="byebye" ng-click="previousStep()" class="small btn-line-white btn tour-next-tip with-fa " >
+          <i class='fa fa-angle-left'></i>&nbsp;&nbsp;&nbsp;<span translate>button.back</span>
+        </a>
+        <a ng-if="byebye" ng-click="confirmSkip()" class="small btn-line-white btn tour-next-tip" translate>button.end</a>
+      </div>
+      
+    </div>
+    <a ng-if='!byebye' ng-click="skip()" class="tour-close-tip">
+      <span class="fa fa-times-circle">
+    </a>
+  </div>
+</div>

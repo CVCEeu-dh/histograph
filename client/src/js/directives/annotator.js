@@ -10,6 +10,90 @@
  */
 angular.module('histograph')
   /*
+    usage
+    <span lookup language="<$scope.language>language" context="<$scope.item>item"></span>
+  */
+  .directive('lookup', function(){
+    return {
+      restrict : 'A',
+      scope:{
+        // marked: '=',
+        context: '=',
+        language: '='
+      },
+      template: '<span marked="text" context="context"></span>',
+      link : function(scope, element, attrs) {
+        // scope.text = ''
+        // console.log('::lookup', scope.context.type)
+        
+        var render = function(text) {// cutat
+          if(scope.context.type == 'theme') {
+            console.log('::lookup', 'theme', text, typeof text)
+          }
+          if(typeof text != 'string')
+            return text;
+          if(isNaN(attrs.cutAt))
+            return text;//$sce.trustAsHtml(text);
+          //trim the string to the maximum length
+          var t = text.substr(0, cutAt);
+          //re-trim if we are in the middle of a word
+          if(text.length > cutAt)
+            t = t.substr(0, Math.min(t.length, t.lastIndexOf(' '))) + ' ...';
+          // if there is a cut at, we will strip the html
+          if(scope.context.type == 'theme') {
+            console.log('::lookup final', t)
+          }
+          return t;
+        };
+
+        scope.textify = function() {
+          if(!scope.context) {
+            console.warn('directive lookup without any context')
+            return ''
+          }
+          var content;
+
+          // look for annotations
+          if(scope.context.annotations && scope.context.annotations.length) {
+            // get the correct annotation based on field and language
+            var annotation = _.get(_.find(scope.context.annotations, {
+              language:scope.language
+            }), 'annotation');
+
+            if(!annotation) {
+              annotation = _.get(_.first(scope.context.annotations), 'annotation');
+            }
+            // annotation has to be there, otherwise an exception is thrown
+            content = annotation[attrs.field];
+          }
+
+          if(!content) {
+            content = scope.context.props[attrs.field + '_' + scope.language]
+
+            if(!content) {
+              for(var i in scope.context.props.languages) {
+                content = scope.context.props[attrs.field + '_' + scope.context.props.languages[i]];
+                if(content)
+                  break;
+              }
+            }
+          }
+
+          if(!content) {
+            content = scope.context.props[attrs.field]
+          }
+
+          if(content)
+            scope.text= render(content);
+        }
+
+        scope.$watch('language', function(language) {
+          scope.textify();
+        });
+      }
+    }
+  })
+  /*
     Basic wrapper for ui-codemirror providing it with special hints, thanks to github.com/amarnus cfr.
     https://github.com/amarnus/ng-codemirror-dictionary-hint/blob/master/lib/ng-codemirror-dictionary-hint.js
   */
@@ -117,7 +201,7 @@ angular.module('histograph')
           return '<a  gasp-type="'+ 
             localEntities.map(function (d){
               return d.type
-            }).join(',') +'" data-id="' +href +'"  gasp-parent="resource-'+ 
+            }).join(',') +'" data-id="' + href.split(',').pop() +'"  gasp-parent="resource-'+ 
             scope.context.id + '">' + text + '</a>';
         };
         
@@ -126,10 +210,11 @@ angular.module('histograph')
         scope.$watch('marked', function(val) {
           if(!val)
             return;
+
           // organise(merge) entitites
-          $log.log('::marked @marked changed');
-          if(scope.context) {
-            entities = scope.context.locations.concat(scope.context.persons)//, scope.context.organizations, scope.context.social_groups)
+          // $log.log('::marked @marked changed', val);
+          if(scope.context && scope.context.locations && scope.context.persons) {
+            entities = scope.context.locations.concat(scope.context.persons )//, scope.context.organizations, scope.context.social_groups)
             
             element.html(marked(scope.marked, {
               renderer: renderer
@@ -176,22 +261,31 @@ angular.module('histograph')
   /*
     
   */
-  .directive('annotator', function ($log) {
+  .directive('annotator', function ($log, $timeout) {
     return {
       restrict : 'E',
+      scope: {
+        language: '=',
+        notes: '=',
+        item: '='
+      },
       link : function(scope, element, attrs) {
-        $log.log('::annotator');
+        $log.log('::annotator for:', attrs.context, '- language:', scope.language);
 
 
-
-        var annotator = angular.element(element).annotator().data('annotator');
+        var annotator = angular.element(element).annotator().data('annotator'),
+            _timer,
+            ctx = '' + attrs.context;
 
         
         annotator.addPlugin('Unsupported');
         annotator.addPlugin('HelloWorld', {
+          context: attrs.context,
           annotationEditorShown: function(annotation, annotator) {
-            scope.contribute(scope.item, "entity", {
+            
+            scope.$parent.contribute(scope.item, "entity", {
               context: attrs.context,
+              language: scope.language,
               query: annotation.quote,
               annotator: annotator,
               submit: function(annotator, result) {
@@ -205,14 +299,51 @@ angular.module('histograph')
           }
         });
         annotator.publish('resize')
+        
+        scope.$watch('notes', function(notes) {
+          console.log('::annotator > sync()', ctx, scope.language, (notes && notes.length && scope.language? 'go on': 'stop'))
+          // ask for
+          if(notes && notes.length && scope.language)
+            scope.sync();
+        }, true);
+
+        scope.$watch('language', function(language) {
+          // ask for
+          console.log('::annotator > sync()', ctx, scope.language, (!!scope.notes && scope.language? 'go on': 'stop'))
+          
+          if(scope.notes && scope.notes.length && language)
+            scope.sync();
+        });
+
+
+        scope.sync = function(){
+          console.log('::annotator > sync()', ctx, '- annotation load: ', typeof scope.$parent.loadAnnotations == "function")
+              
+          if(!scope.$parent.loadAnnotations) {
+            return;
+          }
+
+          if(_timer)
+            $timeout.cancel(_timer);
+          _timer = $timeout(function(){
+            scope.$parent.loadAnnotations({
+              context: ctx,
+              language: scope.language
+            }, function (annotations) {
+              console.log('::annotator', ctx, 'annotation to load: ',annotations)
+              // horrible
+              $(annotator.element.find('[data-annotation-id]'))
+                .each(function() {
+                  debugger
+                  annotator.deleteAnnotation($(this).data().annotation)
+                })
+              // remove annotations
+              annotator.loadAnnotations(annotations);
+            });
+          }, 10);
+        }
         // lazyload annotation for this specific  element
-        setTimeout(function(){
-          scope.loadAnnotations({
-            context: attrs.context
-          }, function (annotations) {
-            annotator.loadAnnotations(annotations);
-          });
-        }, 20);
+        
       }
     }
   });
@@ -223,7 +354,7 @@ Annotator.Plugin.HelloWorld = function (element, options) {
       var editor,
           annotator = this.annotator,
           link;
-      console.log('HelloWorld', options);
+      console.log('::annotator instanciate plugin', options.context);
 
       this.annotator.viewer.addField({
         load: function (field, annotation) {

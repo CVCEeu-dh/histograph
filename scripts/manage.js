@@ -39,7 +39,16 @@ var fs          = require('fs'),
       'discover-resources': [
         tasks.resource.discoverMany,
         tasks.entity.tfidf,
-        tasks.entity.cleanSimilarity,   
+        tasks.entity.cleanSimilarity, 
+        function(options, callback) {
+          options.entity = 'person';
+          callback(null, options);
+        },  
+        tasks.entity.jaccard,
+        function(options, callback) {
+          options.entity = 'theme';
+          callback(null, options);
+        },
         tasks.entity.jaccard,
         tasks.entity.cosine
       ],
@@ -80,12 +89,31 @@ var fs          = require('fs'),
         tasks.entity.enrich
       ],
       /*
+        export gexf file for entity cooccurrences
+      */
+      'gexf-entity-cooccurrences': [
+        tasks.gexf.init,
+        tasks.gexf.entity.cooccurrences,
+        tasks.gexf.stringify
+      ],
+
+      /*
         computate (ent:entity:person)--(ent:entity:person) links
         based on similarity
       */
       'calculate-similarity': [
         tasks.entity.tfidf,
-        tasks.entity.cleanSimilarity,   
+        
+        tasks.entity.cleanSimilarity, 
+        function(options, callback) {
+          options.entity = 'person';
+          callback(null, options);
+        },  
+        tasks.entity.jaccard,
+        function(options, callback) {
+          options.entity = 'theme';
+          callback(null, options);
+        },
         tasks.entity.jaccard,
         tasks.entity.cosine
       ],
@@ -114,6 +142,22 @@ var fs          = require('fs'),
       'text-of-resource': [
         tasks.resource.getOne,
         tasks.resource.getText
+      ],
+
+      /*
+        custom csv export
+      */
+      'cartoDB': [
+        'tasks.resource.cartoDB',
+        'tasks.helpers.csv.stringify'
+      ],
+
+      /*
+        For test purpose, test with a name
+
+      */
+      'one-shot': [
+        options.name
       ]
     }, settings.availableTasks || {});
 

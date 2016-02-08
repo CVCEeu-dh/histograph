@@ -2,13 +2,15 @@
   
   Test entity ctrl via REST API
   ===
+ 
 
 */
 'use strict';
-
-var settings  = require('../settings'),
-    should    = require('should'),
-    neo4j     = require('seraph')(settings.neo4j.host),
+/*global it*/
+/*global describe*/
+/*global before*/
+/*global after*/
+var should    = require('should'),
     app       = require('../server').app,
     _         = require('lodash'),
     
@@ -32,8 +34,8 @@ var session,
     __resource,
     __resourceB,
     __entity,
-    __issue,
-    __issueB;
+    __entityB,
+    __issue;
 
 before(function () {
   session = new Session();
@@ -110,10 +112,25 @@ describe('controller:entity before', function() {
     }, function (err, entity) {
       should.not.exist(err, err);
       should.equal(entity.rel.type, 'appears_in');
-      should.exist(entity.props.name)
+      should.exist(entity.props.name);
       __entity = entity;
       done();
-    })
+    });
+  });
+
+   it('should create a secondary new entity, by using links_wiki, in the other resource', function (done) {
+    Entity.create({
+      links_wiki: 'Test_Test_TestTest_Test_Test',
+      type: 'person',
+      name: 'Test_Test_TestTest_Test_Test',
+      resource: __resourceB
+    }, function (err, entity) {
+      should.not.exist(err, err);
+      should.equal(entity.rel.type, 'appears_in');
+      should.exist(entity.props.name);
+      __entityB = entity;
+      done();
+    });
   });
 
   it('should authenticate the user', function (done) {
@@ -121,13 +138,13 @@ describe('controller:entity before', function() {
       .post('/login')
       .send({
         username   : __user.username,
-        password   : generator.user.researcher().password,
+        password   : generator.user.researcher().password
       })
       .expect(302)
       .end(function (err, res) {
-        should.equal(res.headers.location, '/api')
+        should.equal(res.headers.location, '/api');
         done();
-      })
+      });
   });
 });
   
@@ -147,6 +164,29 @@ describe('controller:entity basics', function() {
 });
 
 describe('controller:entity related items', function() {
+  it('should get ONE COMPLETE related item' , function (done) {
+    session
+      .get('/api/entity/' + __entity.id +'/related/resource?limit=1')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exists(err);
+        should.exist(res.body.result.items[0].lovers);
+        done();
+      });
+  });
+
+  it('should get the timeline with the related item' , function (done) {
+    session
+      .get('/api/entity/' + __entity.id +'/related/resource/timeline')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exists(err);
+        should.exist(res.body.result.timeline);
+        done();
+      });
+  });
 
   it('should upvote the relationship' , function (done) {
     session
@@ -157,9 +197,9 @@ describe('controller:entity related items', function() {
         should.not.exists(err);
         should.equal(res.body.result.item.id, __entity.id);
         should.exist(res.body.result.item.rel);
-        should.exist(res.body.result.item.related.action.id)
+        should.exist(res.body.result.item.related.action.id);
 
-        Action.remove(res.body.result.item.related.action, function(err){
+        Action.remove(res.body.result.item.related.action, function (err){
           should.not.exist(err);
           done();
         });
@@ -173,11 +213,10 @@ describe('controller:entity related items', function() {
       .expect(200)
       .end(function (err, res) {
         should.not.exists(err);
-
         should.equal(res.body.status, 'empty');
         done();
       });
-  })
+  });
 
   it('should create a manual connection, with frequence = 1 resource B', function(done) {
     session
@@ -185,48 +224,93 @@ describe('controller:entity related items', function() {
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
-        should.exist(res.body.result.item.rel)
-        should.exist(res.body.result.item.related.action.props)
-        should.exist(res.body.result.item.rel.created_by)
+        should.exist(res.body.result.item.rel);
+        should.exist(res.body.result.item.related.action.props);
+        should.exist(res.body.result.item.rel.created_by);
         should.not.exists(err);
 
         // should remove the action
         Action.remove(res.body.result.item.related.action, function(){
-          should.not.exist(err)
+          should.not.exist(err);
           done();
         });
 
       });
-  })
+  });
 
+  it('should merge the two entities (with param)', function(done) {
+    session
+      .post('/api/entity/' + __entity.id +'/related/resource/'+ __resourceB.id + '/merge')
+      .send({
+        'with': __entityB.id
+      })
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        console.log(res.body)
+        should.not.exists(err);
+        // should.equal(res.body.status, 'empty');
+        done();
+      });
+  });
+  
   it('should delete the manual connection', function(done) {
     session
       .delete('/api/entity/' + __entity.id +'/related/resource/'+ __resourceB.id)
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
-        should.equal(res.body.result.item.id, __entity.id)
-        should.equal(res.body.result.item.related.resource.id, __resourceB.id)
+        should.equal(res.body.result.item.id, __entity.id);
+        should.equal(res.body.result.item.related.resource.id, __resourceB.id);
         // console.log('DELETE', res.body)
         should.not.exists(err);
         done();
       });
-  })
+  });
 
-  it('should create a manual connection with ANNOTATION!, with frequence = 1 resource B', function(done) {
-    var parser = require('../parser');
+
+
+  it('should fail creating a manual connection', function(done) {
     session
       .post('/api/entity/' + __entity.id +'/related/resource/'+ __resourceB.id)
       .send({
         annotation: JSON.stringify({
-          context: "caption", 
-          text: "A note I wrote",                  // content of annotation
-          quote: "the text that was annotated",    // the annotated text (added by frontend)
+          context: 'caption', 
+          text: 'A note I wrote',                  // content of annotation
+          quote: 'the text that was annotated',    // the annotated text (added by frontend)
           ranges: [{
-              end: "/blockquote[1]/p[1]",
+            end: '/blockquote[1]/p[1]',
+            endOffset: 222,
+            start: '/blockquote[1]/p[1]',
+            startOffset: 208
+          }]
+        })
+      })
+      .expect('Content-Type', /json/)
+      .expect(400)
+      .end(function (err, res) {
+        should.not.exists(err);
+        should.equal(res.body.status, 'error');
+        should.equal(res.body.error.form[0].field, 'annotation');
+        done();
+
+      });
+  });
+  it('should create a manual connection with ANNOTATION!, with frequence = 1 resource B', function(done) {
+    session
+      .post('/api/entity/' + __entity.id +'/related/resource/'+ __resourceB.id)
+      .send({
+        annotation: JSON.stringify({
+          language: 'en',
+          context: 'caption', 
+          text: 'A note I wrote',                  // content of annotation
+          quote: 'the text that was annotated',    // the annotated text (added by frontend)
+          ranges: [
+            {
+              end: '/blockquote[1]/p[1]',
               endOffset: 222,
-              start: "/blockquote[1]/p[1]",
-              startOffset: 208,
+              start: '/blockquote[1]/p[1]',
+              startOffset: 208
             }
           ]
         })
@@ -234,9 +318,9 @@ describe('controller:entity related items', function() {
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
-        should.exist(res.body.result.item.rel)
-        should.exist(res.body.result.item.related.action.props)
-        should.exist(res.body.result.item.rel.created_by)
+        should.exist(res.body.result.item.rel);
+        should.exist(res.body.result.item.related.action.props);
+        should.exist(res.body.result.item.rel.created_by);
         should.equal(res.body.result.item.related.action.type, Action.ANNOTATE);
         should.not.exists(err);
         done();
@@ -244,16 +328,19 @@ describe('controller:entity related items', function() {
       });
   });
 
+
+
   it('should verify the manual connection with ANNOTATION!, with frequence = 1 resource B', function(done) {
-    var parser = require('../parser');
     session
       .get('/api/resource/' + __resourceB.id + '/related/annotate')
       
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
-        console.log(res.body.result.items[0]
-          );
+        should.not.exist(err);
+        should.exist(res);
+        // console.log(res.body.result.items[0]
+        //   );
         done();
 
       });
@@ -265,13 +352,13 @@ describe('controller:entity related items', function() {
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
-        should.equal(res.body.result.item.id, __entity.id)
-        should.equal(res.body.result.item.related.resource.id, __resourceB.id)
+        should.equal(res.body.result.item.id, __entity.id);
+        should.equal(res.body.result.item.related.resource.id, __resourceB.id);
         // console.log('DELETE', res.body)
         should.not.exists(err);
         done();
       });
-  })
+  });
 });
 
 describe('controller:entity related issues', function() {
@@ -286,11 +373,11 @@ describe('controller:entity related issues', function() {
       .end(function (err, res) {
         should.not.exists(err);
         __issue = res.body.result.item;
-        should.exist(res.body.result.item.id)
+        should.exist(res.body.result.item.id);
         should.equal(res.body.result.item.mentioning.length, 0);
-        should.equal(res.body.result.item.questioning.id,__entity.id)
+        should.equal(res.body.result.item.questioning.id,__entity.id);
         should.exist(res.body.result.item.answers);
-        should.exist(res.body.result.action.id)
+        should.exist(res.body.result.action.id);
         done();
       });
   });
@@ -323,8 +410,8 @@ describe('controller:entity related issues', function() {
         should.not.exists(err);
         should.equal(res.body.result.item.mentioning.length, 2);
         should.equal(_.map(res.body.result.item.mentioning,'id').indexOf(__resourceB.id) !== -1, true);
-        should.equal(res.body.result.item.questioning.id,__entity.id)
-        should.exist(res.body.result.item.answers)
+        should.equal(res.body.result.item.questioning.id,__entity.id);
+        should.exist(res.body.result.item.answers);
         done();
       });
   });
@@ -341,9 +428,7 @@ describe('controller:entity related issues', function() {
         done();
       });
   });
-
-
-})
+});
 
 
 describe('controller:entity after', function() {
@@ -354,7 +439,7 @@ describe('controller:entity after', function() {
       done();
     });
   });
-   it('should delete the resource B', function (done) {
+  it('should delete the resource B', function (done) {
     Resource.remove(__resourceB, function (err) {
       if(err)
         throw err;
@@ -368,7 +453,14 @@ describe('controller:entity after', function() {
       done();
     });
   });
-   it('should delete the issue', function (done) {
+  it('should delete the entity B', function (done) {
+    Entity.remove(__entityB, function (err) {
+      if(err)
+        throw err;
+      done();
+    });
+  });
+  it('should delete the issue', function (done) {
     Issue.remove(__issue, function (err) {
       if(err)
         throw err;

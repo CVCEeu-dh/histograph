@@ -134,7 +134,7 @@ module.exports = function(io){
      
       // if any, rewrite the order by according to this specific context
       var _t = {
-          'date': 'result.dst DESC, result.det DESC',
+          'date': 'res2.start_time ASC',
           '-date': 'result.dst ASC, result.det ASC',
           'relevance': undefined // use default value
         },
@@ -252,7 +252,7 @@ module.exports = function(io){
                 field: 'limit',
                 check: 'isInt',
                 args: [
-                  {min: 1, max: 200}
+                  {min: 1, max: 500}
                 ],
                 error: 'should be a number in range 1 to max 200'
               }
@@ -262,11 +262,15 @@ module.exports = function(io){
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       
-      if(!form.params.from && !form.params.to && !form.params.with && !form.params.type) {
+      form.params.entity = form.params.entityA; // if it is necessary,e.g. for precomputated routes
+
+      
+      if((form.params.entityA == 'person' || form.params.entityA == 'theme') && form.params.entityA == form.params.entityB && !form.params.from && !form.params.to && !form.params.with && !form.params.type) {
         query = parser.agentBrown(queries.get_precomputated_cooccurrences, form.params);
         form.params.precomputated = true;
       } else {
-        query = parser.agentBrown(queries.get_cooccurrences, form.params);
+
+        query = parser.agentBrown(form.params.entityA == form.params.entityB? queries.get_cooccurrences: queries.get_bipartite_cooccurrences, form.params);
       }
       helpers.cypherGraph(query, form.params, function (err, graph) {
         if(err) {
@@ -515,7 +519,7 @@ module.exports = function(io){
       
       Resource.getRelatedResourcesTimeline({
         id: form.params.id
-      }, function (err, timeline) {
+      }, form.params, function (err, timeline) {
         if(err)
           return helpers.cypherQueryError(err, res);
         return res.ok({

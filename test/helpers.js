@@ -53,21 +53,6 @@ describe('helpers: socialtags', function() {
   });
 
 });
-// describe('alchemyapi entity extraction service', function() {
-//   it('should merge by wikipedia link', function (done) {
-//     // body...
-//     helpers.alchemyapi(
-//         'Portugal\'s application for accession to the European Economic Community '
-//       + '(Lisbon, 28 March 1977). On 28 March 1977, Mário Soares, Prime Minister of Portugal, '
-//       + 'formally submits his country’s application for accession to the European '
-//       + 'Communities to David Owen, currently President-in-Office of the Council.', 'TextGetRankedNamedEntities', function (err, entities) {
-//       console.log('entities', entities);
-      
-//       done();
-//     })
-    
-//   });
-// });
 
 
 // describe('textrazor api', function() {
@@ -224,7 +209,7 @@ describe('helpers: human date service', function() {
     });
     
     should.equal(d_END.start_date, '2015-06-07T00:00:00+00:00')
-    should.equal(d_END.end_date, '2015-06-10T23:59:00+00:00')
+    should.equal(d_END.end_date, '2015-06-10T23:59:59+00:00')
     
     var d_STRICT = helpers.reconcileIntervals({
       start_date: '2015-06-07',

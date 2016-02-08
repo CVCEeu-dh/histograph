@@ -76,7 +76,7 @@ RETURN act
 // is ... a Person?
 MATCH (per:person)-[r:appears_in]->(res:resource)
 WHERE NOT(has(per.last_name))
-  AND per.celebrity = 0
+  AND per.celebrity = 0 AND per.df > 1
 WITH DISTINCT per
 RETURN count(per) as count_items
 
@@ -86,6 +86,8 @@ MATCH (per:person)-[r:appears_in]->(res:resource)
 WHERE NOT(has(per.last_name))
   AND per.celebrity = 0
 WITH per, collect(res) as resources, count(res) as df
+WHERE df > 1
+WITH per, resources, df
 ORDER BY df DESC
 SKIP {offset}
 LIMIT {limit}

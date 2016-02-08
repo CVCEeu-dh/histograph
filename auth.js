@@ -58,6 +58,7 @@ passport.use(new TwitterStrategy({
     callbackURL: settings.baseurl + "/auth/twitter/callback"
   },
   function(token, tokenSecret, profile, done) {
+    var now = helpers.now();
     neo4j.query('MERGE (k:user { email:{email} }) ON CREATE SET k.status={status}, k.picture={picture}, k.username={username}, k.firstname={firstname}, k.strategy={strategy}, k.about={about}, k.salt={salt}, k.password={password} RETURN k', {
       email: '@' + profile.displayName,
       username: '@' + profile.displayName,
@@ -68,10 +69,15 @@ passport.use(new TwitterStrategy({
       strategy: 'twitter',
       about: '' + profile.description,
       picture: profile.photos? profile.photos.pop().value: '',
+      exec_time: now.time,
+      exec_date: now.date
     },  function(err, res) {
-      console.log(err, res);
-      if(err)
+      console.log('twitter:', err?'error':'ok');
+
+      if(err) {
         return done(err);
+        console.log(err)
+      }
       var user = res[0];
       return done(null, user);
     });
@@ -88,6 +94,7 @@ passport.use(new GoogleStrategy({
     callbackURL:  settings.baseurl + "/auth/google/callback"
   },
   function(accessToken, refreshToken, profile, done) {
+    var now = helpers.now();
     neo4j.query(queries.merge_user, {
       email: 'g@' + profile.id,
       username: profile.displayName + profile.id,
@@ -99,6 +106,8 @@ passport.use(new GoogleStrategy({
       strategy: 'google',
       about: '' + profile.description || '',
       picture: profile.photos? profile.photos.pop().value: '',
+      exec_time: now.time,
+      exec_date: now.date
     },  function(err, res) {
       console.log(err, res);
       if(err)

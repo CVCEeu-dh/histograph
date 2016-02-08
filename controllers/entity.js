@@ -18,7 +18,8 @@ var settings   = require('../settings'),
     neo4j      = require('seraph')(settings.neo4j.host),
 
     Action     = require('../models/action'),
-    Entity     = require('../models/entity');
+    Entity     = require('../models/entity'),
+    Resource   = require('../models/resource');
     
 
 module.exports = function(io){
@@ -69,37 +70,105 @@ module.exports = function(io){
       According to `:action` param, modify or create the relationship between an entity and a resource. If there is no action, an upvoted relationship will be created.
       Anyway, the authentified user becomes a "curator" of the entity (he/she knows a lot about it).
 
+      The special action 'merge' requires a with param to be present. 
+      It upvotes or create a relationship with the TRUSTED entity given by params 'with' and
+      downvotes the UNTRUSTED entity, given by the entity_id param.
+      
+      That is, 
     */
     updateRelatedResource: function (req, res) {
       var form = validator.request(req);
-      // discard
-      if(form.params.action == 'discard') {
-        removeRelatedResource(req,res);
-        return;// res.ok({}, form.params);
-      } else if(form.params.action) {
-        Entity.updateRelatedResource({
-          id: +form.params.entity_id
-        },
-        {
-          id: +form.params.resource_id
-        },
-        req.user,
-        form.params, function (err, item) {
+
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+
+      var entity = {id: +form.params.entity_id},
+          resource = {id: +form.params.resource_id};
+      
+      if(form.params.action == 'merge') {// upvote /create the first and downvote the second
+        async.series([
+          function discarded(next) {
+            Entity.updateRelatedResource(entity, resource, req.user, {
+              action: 'downvote'
+            }, next);
+          },
+          function trusted(next) {
+            Entity.createRelatedResource({
+              id: +form.params.with.pop()
+            }, resource, req.user, {}, next);
+          }
+
+          
+        ], function(err, results) {
           if(err)
             return helpers.cypherQueryError(err, res);
 
-          io.emit('entity:' + form.params.action + '-related-resource:done', {
-            user: req.user.username,
-            id: +form.params.entity_id,
-            data: item,
-            resource: {
-              id: +form.params.resource_id
-            }
-          });
+          var item = results[0];
 
-          return res.ok({
-            item: item
-          }, form.params);
+          item.related.merged = results[1];
+
+          Action.create({
+            kind: Action.MERGE,
+            target: Action.APPEARS_IN_RELATIONSHIP,
+            mentions: [resource.id, results[0].id],
+            username: req.user.username,
+            annotation: form.params.annotation
+          }, function (err, action) {
+            if(err)
+              return helpers.cypherQueryError(err, res);
+            // enrich outputted action with YAML parsed annotation
+            if(action.type == Action.ANNOTATE) {
+              action.props.annotation = parser.yaml(action.props.annotation);
+            }
+            // add action to response result item
+            item.related.action = action;
+
+            // creata a proper 'merge' action
+            // console.log('MERGE RESULTS', item.related.merged)
+
+            io.emit('entity:merge-entity:done', {
+              user: req.user.username,
+              id: +form.params.entity_id,
+              data: item,
+              resource: resource
+            });
+
+            res.ok({
+              item: item
+            }, form.params);
+          });
+        });
+
+      } else if(form.params.action) {
+        Entity.updateRelatedResource(entity, resource, req.user, form.params, function (err, item) {
+          if(err)
+            return helpers.cypherQueryError(err, res);
+
+          Action.create({
+            kind: form.params.action,
+            target: Action.APPEARS_IN_RELATIONSHIP,
+            mentions: [resource.id, entity.id],
+            username: req.user.username
+          }, function (err, action) {
+            if(err)
+              return helpers.cypherQueryError(err, res);
+
+            // add action to response result item
+            item.related.action = action;
+
+            io.emit('entity:' + form.params.action + '-related-resource:done', {
+              user: req.user.username,
+              id: +form.params.entity_id,
+              data: item,
+              resource: {
+                id: +form.params.resource_id
+              }
+            });
+
+            res.ok({
+              item: item
+            }, form.params);
+          });
         })
       } else {
         return res.ok({}, form.params);
@@ -114,33 +183,43 @@ module.exports = function(io){
 
     createRelatedResource: function(req, res) {
       var form = validator.request(req);
+
       // check if it contains a silly annotation....
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       
-      Entity.createRelatedResource({
-        id: +form.params.entity_id
-      },
-      {
-        id: +form.params.resource_id
-      },
-      req.user,
-      form.params, function (err, item) {
+      var entity = {id: +form.params.entity_id},
+          resource = {id: +form.params.resource_id};
 
-        io.emit('entity:create-related-resource:done', {
-          user: req.user.username,
-          id: +form.params.entity_id,
-          data: item,
-          resource: {
-            id: +form.params.resource_id
+      Entity.createRelatedResource(entity, resource, req.user, form.params, function (err, item) {
+        Action.create({
+          kind: form.params.annotation? Action.ANNOTATE: Action.CREATE,
+          target: Action.APPEARS_IN_RELATIONSHIP,
+          mentions: [resource.id, entity.id],
+          username: req.user.username,
+          annotation: form.params.annotation
+        }, function (err, action) {
+          if(err)
+            return helpers.cypherQueryError(err, res);
+          // enrich outputted action with YAML parsed annotation
+          if(action.type == Action.ANNOTATE) {
+            action.props.annotation = parser.yaml(action.props.annotation);
           }
-        });
+          // console.log(item)
+          // add action to response result item
+          item.related.action = action;
 
-        if(err)
-          return helpers.cypherQueryError(err, res);
-        return res.ok({
-          item: item
-        }, form.params);
+          io.emit('entity:create-related-resource:done', {
+            user: req.user.username,
+            id: +form.params.entity_id,
+            data: item,
+            resource: resource
+          });
+
+          res.ok({
+            item: item
+          }, form.params);
+        });
       });
     },
     /*
@@ -219,6 +298,7 @@ module.exports = function(io){
                   [
                     Issue.TYPE,
                     Issue.IRRELEVANT,
+                    Issue.WRONG,
                     Issue.MERGEABLE
                   ]
                 ],
@@ -240,9 +320,13 @@ module.exports = function(io){
       //   check that the solution param is an available label
       async.series({
         entity: function(next) {
-          Entity.update(+form.params.id, {
+          var params = {
             issue: form.params.kind
-          }, next);
+          };
+          if(form.params.kind == Issue.WRONG)
+            params.downvoted_by = req.user.username;
+          
+          Entity.update(+form.params.id, params, next);
         },
         issue: function(next) {
           Issue.create({
@@ -258,7 +342,7 @@ module.exports = function(io){
 
         Action.create({
           kind: Action.RAISE_ISSUE,
-          target: Action.ENTITY_LABEL,
+          target: form.params.kind == Issue.WRONG? Action.ENTITY_WRONG :Action.ENTITY_LABEL,
           mentions: mentions,
           username: req.user.username
         }, function (err, act) {
@@ -360,16 +444,36 @@ module.exports = function(io){
     getRelatedResources: function (req, res) {
        var form = validator.request(req, {
             limit: 10,
-            offset: 0
+            offset: 0,
+            orderby: 'relevance'
+          }, {
+            fields: [
+              validator.SPECIALS.orderby
+            ]
           });
       
       if(!form.isValid)
         return helpers.formError(form.errors, res);
-      // get the total available
+
+      var _t = {
+          'date': 'res.start_time ASC',
+          '-date': 'res.start_time DESC',
+          'relevance': undefined // use default value
+        },
+        orderby = form.params.orderby = _t[''+form.params.orderby]; 
+     
       Entity.getRelatedResources(form.params, function (err, items, info) {
-        helpers.models.getMany(err, res, items, info, form.params);
+        
+        if(form.params.limit == 1 && items.length)
+          Resource.get({
+            id: +items[0].id
+          }, req.user, function (err, item) {
+            helpers.models.getMany(err, res, [item], info, form.params);
+          });
+        else
+          helpers.models.getMany(err, res, items, info, form.params);
       });
-    }, // get graph of resources and other stugff, a graph object of nodes and edges
+    },
     
     getRelatedEntities: function (req, res) {
       var form = validator.request(req, {
@@ -462,6 +566,29 @@ module.exports = function(io){
           type: 'monopartite'
         });
       });
+    },
+
+
+    getRelatedResourcesTimeline: function(req, res) {
+      var form = validator.request(req, {
+            limit: 100,
+            offset: 0
+          });
+      
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      Entity.getRelatedResourcesTimeline({
+        id: form.params.id
+      }, form.params, function (err, timeline) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({
+          timeline: timeline
+        }, {
+          params: form.params
+        });
+      })
     },
     
   }

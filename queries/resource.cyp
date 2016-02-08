@@ -12,53 +12,69 @@ WITH res, curated_by_user, loved_by_user, count(lover) as lovers
 OPTIONAL MATCH (curator:user)-[:curates]->(res)
 WITH res, curated_by_user, loved_by_user, lovers, count(curator) as curators
 
+OPTIONAL MATCH (res)-[r_pla:appears_in]-(pla:`place`)
+WHERE pla.score > -2
+WITH res, curated_by_user, loved_by_user, curators, lovers, r_pla, pla
+ORDER BY r_pla.score DESC, r_pla.tfidf DESC, r_pla.frequency DESC
+WITH res, curated_by_user, loved_by_user, curators, lovers, filter(x in collect({  
+      id: id(pla),
+      type: 'place',
+      props: pla,
+      rel: r_pla
+    }) WHERE has(x.id))[0..5] as places
+
 OPTIONAL MATCH (res)-[r_loc:appears_in]-(loc:`location`)
-WITH res, curated_by_user, loved_by_user, curators, lovers, r_loc, loc
+WHERE loc.score > -2
+WITH res, curated_by_user, loved_by_user, curators, lovers, places, r_loc, loc
 ORDER BY r_loc.score DESC, r_loc.tfidf DESC, r_loc.frequency DESC
-WITH res, curated_by_user, loved_by_user, curators, lovers, collect({  
+WITH res, curated_by_user, loved_by_user, curators, lovers, places, filter(x in collect({  
       id: id(loc),
       type: 'location',
       props: loc,
       rel: r_loc
-    })[0..5] as locations
+    }) WHERE has(x.id))[0..5] as locations
 
 OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
-WITH res, curated_by_user, loved_by_user, curators, lovers, locations, r_per, per
+WHERE per.score > -2
+WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, r_per, per
 ORDER BY r_per.score DESC, r_per.tfidf DESC, r_per.frequency DESC
-WITH res, curated_by_user, loved_by_user, curators, lovers, locations, collect({
+WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, filter(x in collect({
       id: id(per),
       type: 'person',
       props: per,
       rel: r_per
-    })[0..10] as persons
+    }) WHERE has(x.id))[0..10] as persons
 
 OPTIONAL MATCH (res)-[r_org:appears_in]-(org:`organization`)
-WITH res, curated_by_user, loved_by_user, curators, lovers, locations, persons, r_org, org
+WHERE org.score > -2
+WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, persons, r_org, org
 ORDER BY r_org.score DESC, r_org.tfidf DESC, r_org.frequency DESC
-WITH res, curated_by_user, loved_by_user, curators, lovers, locations, persons, collect({  
+WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, persons, filter(x in collect({  
       id: id(org),
       type: 'organization',
       props: org,
       rel: r_org
-    })[0..10] as organizations
+    }) WHERE has(x.id))[0..10] as organizations
 
 OPTIONAL MATCH (res)-[r_soc:appears_in]-(soc:`social_group`)
-WITH res, curated_by_user, loved_by_user, curators, lovers, locations, persons, organizations, r_soc, soc
+WHERE soc.score > -2
+WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, persons, organizations, r_soc, soc
 ORDER BY r_soc.score DESC, r_soc.tfidf DESC, r_soc.frequency DESC
-WITH res, curated_by_user, loved_by_user, curators, lovers, locations, persons, organizations, collect({
+WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, persons, organizations, filter(x in collect({
       id: id(soc),
       type: 'social_group',
       props: soc,
       rel: r_soc
-    })[0..10] as social_groups
+    }) WHERE has(x.id))[0..10] as social_groups
 
 OPTIONAL MATCH (res)-[r_the:appears_in]-(the:`theme`)
-WITH res, curated_by_user, loved_by_user, curators, lovers, locations, persons, organizations, social_groups, collect({
+WHERE the.score > -2
+WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, persons, organizations, social_groups, filter(x in collect({
       id: id(the),
       type: 'theme',
       props: the,
       rel: r_the
-    })[0..5] as themes
+    }) WHERE has(x.id))[0..5] as themes
 
 OPTIONAL MATCH (ver)-[:describes]->(res)
 OPTIONAL MATCH (res)-[:belongs_to]->(col)
@@ -74,6 +90,7 @@ RETURN {
     loved_by_user: loved_by_user,
     versions: EXTRACT(p in COLLECT(DISTINCT ver)|{name: p.name, id:id(p), yaml:p.yaml, language:p.language, type: last(labels(p))}),
     locations: locations,
+    places: places,
     persons:   persons,
     organizations: organizations,
     social_groups:  social_groups,
@@ -109,43 +126,53 @@ SKIP {offset}
 LIMIT {limit}
 WITH res
 OPTIONAL MATCH (res)-[r_loc:appears_in]->(loc:`location`)
+WHERE loc.score > -2
 WITH res, r_loc, loc
-ORDER BY r_loc.tfidf DESC, r_loc.frequency DESC
-WITH res, collect({  
+ORDER BY r_loc.score DESC, r_loc.tfidf DESC, r_loc.frequency DESC
+WITH res,  filter(x in collect({  
       id: id(loc),
       type: 'location',
       props: loc,
       rel: r_loc
-    })[0..5] as locations   
-OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
+    }) WHERE has(x.id))[0..5] as locations   
+OPTIONAL MATCH (res)<-[r_per:appears_in]-(per:`person`)
+WHERE per.score > -2
 WITH res, locations, r_per, per
-ORDER BY r_per.tfidf DESC, r_per.frequency DESC
-WITH res, locations, collect({
+ORDER BY  r_per.score DESC, r_per.tfidf DESC, r_per.frequency DESC
+WITH res, locations,  filter(x in collect({  
       id: id(per),
       type: 'person',
       props: per,
       rel: r_per
-    })[0..5] as persons
-OPTIONAL MATCH (res)-[r_org:appears_in]-(org:`organization`)
-
-WITH res, locations, persons, collect({  
+    }) WHERE has(x.id))[0..5] as persons
+OPTIONAL MATCH (res)<-[r_org:appears_in]-(org:`organization`)
+WHERE org.score > -2
+WITH res, locations, persons,  filter(x in collect({    
       id: id(org),
       type: 'organization',
       props: org,
       rel: r_org
-    })[0..5] as organizations
-OPTIONAL MATCH (res)-[r_soc:appears_in]-(soc:`social_group`)
-
-WITH res, locations, persons, organizations, collect({
+    }) WHERE has(x.id))[0..5] as organizations
+OPTIONAL MATCH (res)<-[r_soc:appears_in]-(soc:`social_group`)
+WHERE soc.score > -2
+WITH res, locations, persons, organizations,  filter(x in collect({  
       id: id(soc),
       type: 'social_group',
       props: soc,
       rel: r_soc
-    })[0..5] as social_groups
+    }) WHERE has(x.id))[0..5] as social_groups
+OPTIONAL MATCH (res)<-[r_the:appears_in]-(the:`theme`)
+WHERE the.score > -2
+WITH res, locations, persons, organizations, social_groups, filter(x in collect({    
+      id: id(the),
+      type: 'theme',
+      props: the,
+      rel: r_the
+    }) WHERE has(x.id))[0..5] as themes
 
 {if:with}
   OPTIONAL MATCH (res)--(ann:annotation) 
-  WITH res, ann, locations, persons, organizations, social_groups
+  WITH res, ann, locations, persons, organizations, themes, social_groups
 {/if}
 
 RETURN {
@@ -156,6 +183,7 @@ RETURN {
     annotations: collect(ann),
   {/if}
   persons:     persons,
+  themes:     themes,
   organizations: organizations,
   locations:    locations,
   social_groups:   social_groups
@@ -382,11 +410,17 @@ RETURN col
     {if:title_en}
       res.title_en = {title_en},
     {/if}
+    {if:title_es}
+      res.title_es = {title_es},
+    {/if}
     {if:title_fr}
       res.title_fr = {title_fr},
     {/if}
     {if:title_de}
       res.title_de = {title_de},
+    {/if}
+    {if:title_und}
+      res.title_und = {title_und},
     {/if}
     {if:caption_en}
       res.caption_en = {caption_en},
@@ -394,8 +428,20 @@ RETURN col
     {if:caption_fr}
       res.caption_fr = {caption_fr},
     {/if}
+    {if:caption_it}
+      res.caption_it = {caption_it},
+    {/if}
+    {if:caption_es}
+      res.caption_es = {caption_es},
+    {/if}
     {if:caption_de}
       res.caption_de = {caption_de},
+    {/if}
+    {if:caption_und} 
+      res.caption_und = {caption_und},
+    {/if}
+    {if:type}
+      res.type = {type},
     {/if}
     res.creation_date = {creation_date},
     res.creation_time = {creation_time}
@@ -428,8 +474,17 @@ RETURN col
     {if:url_de}
       res.url_de = {url_de},
     {/if}
+    {if:title_und}
+      res.title_und = {title_und},
+    {/if}
     {if:title_en}
       res.title_en = {title_en},
+    {/if}
+    {if:title_es}
+      res.title_es = {title_es},
+    {/if}
+    {if:title_it}
+      res.title_it = {title_it},
     {/if}
     {if:title_fr}
       res.title_fr = {title_fr},
@@ -443,8 +498,20 @@ RETURN col
     {if:caption_fr}
       res.caption_fr = {caption_fr},
     {/if}
+    {if:caption_it}
+      res.caption_it = {caption_it},
+    {/if}
+    {if:caption_es}
+      res.caption_es = {caption_es},
+    {/if}
     {if:caption_de}
       res.caption_de = {caption_de},
+    {/if}
+    {if:caption_und} 
+      res.caption_und = {caption_und},
+    {/if}
+    {if:type}
+      res.type = {type},
     {/if}
     res.last_modification_date = {creation_date},
     res.last_modification_time = {creation_time}
@@ -476,8 +543,8 @@ RETURN col, res
 
 // name: get_precomputated_cooccurrences
 //
-MATCH (p1:person)-[r:appear_in_same_document]-(p2:person)
-WHERE id(p1) < id(p2)
+MATCH (p1:{:entity})-[r:appear_in_same_document]-(p2:{:entity})
+WHERE id(p1) < id(p2) AND p1.score > -1 AND p2.score > -1
 WITH p1,p2,r
 ORDER BY r.intersections DESC
 LIMIT {limit}
@@ -485,13 +552,13 @@ WITH p1,p2,r
 RETURN {
   source: {
     id: id(p1),
-    type: 'person',
+    type: {entity},
     label: COALESCE(p1.name, p1.title_en, p1.title_fr),
     url: p1.thumbnail
   },
   target: {
     id: id(p2),
-    type: 'person',
+    type: {entity},
     label: COALESCE(p2.name, p2.title_en, p2.title_fr),
     url: p2.thumbnail
   },
@@ -501,15 +568,15 @@ RETURN {
 
 
 // name: get_cooccurrences
-//
+// 
 {if:with}
 MATCH (res:resource)<-[:appears_in]-(ent2:entity)
   WHERE id(ent2) IN {with}
 WITH res
-  MATCH (p1:person)-[r1:appears_in]->(res)<-[r2:appears_in]-(p2:person)
+  MATCH (p1:{:entity})-[r1:appears_in]->(res)<-[r2:appears_in]-(p2:{:entity})
 {/if}
 {unless:with}
-MATCH (p1:person)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:person)
+MATCH (p1:{:entity})-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:{:entity})
 {/unless}
   WHERE id(p1) < id(p2)
   {if:start_time}
@@ -534,14 +601,63 @@ WITH p1, p2, count(DISTINCT res) as w
 RETURN {
     source: {
       id: id(p1),
-      type: 'person',
+      type: {entity},
       label: COALESCE(p1.name, p1.title_en, p1.title_fr),
       url: p1.thumbnail
     },
     target: {
       id: id(p2),
-      type: 'person',
+      type: {entity},
       label: COALESCE(p2.name, p2.title_en, p2.title_fr),
+      url: p2.thumbnail
+    },
+    weight: w
+  } as result
+ORDER BY w DESC
+LIMIT {limit}
+
+
+// name: get_bipartite_cooccurrences
+//
+{if:with}
+MATCH (res:resource)<-[:appears_in]-(ent2:entity)
+  WHERE id(ent2) IN {with}
+WITH res
+  MATCH (p1:{:entityA})-[r1:appears_in]->(res)<-[r2:appears_in]-(p2:{:entityB})
+{/if}
+{unless:with}
+MATCH (p1:{:entityA})-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:{:entityB})
+{/unless}
+  WHERE p1.score > -1 AND p2.score > -1
+  {if:start_time}
+    AND res.start_time >= {start_time}
+  {/if}
+  {if:end_time}
+    AND res.end_time <= {end_time}
+  {/if}
+  {if:mimetype}
+    AND res.mimetype in {mimetype}
+  {/if}
+  {if:type}
+    AND res.type in {type}
+  {/if}
+  
+  
+WITH p1, p2, res
+ORDER BY r1.tfidf DESC, r2.tfidf DESC
+// limit here?
+WITH p1, p2, count(DISTINCT res) as w
+RETURN {
+    source: {
+      id: id(p1),
+      type: {entityA},
+      label: p1.name,
+      url: p1.thumbnail
+    },
+    target: {
+      id: id(p2),
+      type: {entityB},
+      label: p2.name,
       url: p2.thumbnail
     },
     weight: w
@@ -756,26 +872,33 @@ RETURN t, weight
 // name: get_related_resources_timeline
 //
 MATCH (res:resource)<-[:appears_in]-(ent:entity)
-WHERE id(res) = {id}
-  
+WHERE id(res) = {id} AND ent.score > -1
 WITH ent
-MATCH (res:resource)<-[:appears_in]-(ent)
-WHERE has(res.start_month)
+{if:with}
+  MATCH (ent2)-[:appears_in]->(res:resource)<-[r:appears_in]-(ent)
+  WHERE id(ent2) IN {with}
+  WITH DISTINCT res
+{/if}
+{unless:with}
+  MATCH (res:resource)<-[r:appears_in]-(ent)
+{/unless}
+
+WHERE id(res) <> {id} AND has(res.start_month)
   {if:mimetype}
   AND res.mimetype = {mimetype}
   {/if}
-  {if:ecmd}
-  AND res.ecmd = {ecmd}
+  {if:type}
+  AND res.type IN {type}
   {/if}
   {if:start_time}
   AND res.start_time >= {start_time}
   {/if}
   {if:end_time}
-  AND res.end_time >= {end_time}
+  AND res.end_time <= {end_time}
   {/if}
-
+WITH DISTINCT res
   
-WITH  res.start_month as tm, min(res.start_time) as t, count(res) as weight
+WITH  res.start_month as tm, min(res.start_time) as t,  count(res) as weight
 RETURN tm, t, weight
 ORDER BY tm ASC
 

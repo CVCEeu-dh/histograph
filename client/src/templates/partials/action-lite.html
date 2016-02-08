@@ -2,6 +2,15 @@
   <strong>{{relatedItem.performed_by.username}}</strong> {{relatedItem.props.last_modification}}
   ({{relatedItem.props.last_modification_date|date:'longDate'}}) 
   
+  <span ng-if='relatedItem.props.target=="ENTITY_WRONG"'>
+    reported that
+    <span>
+      <a ng-href='/#/e/{{entity.id}}' ng-repeat='entity in relatedItem.entities' class='tag {{entity.type}}'>{{entity.props.name}}</a>
+    </span> present in {{entity.props.df||1}} document(s) should be <strong>removed</strong>
+    <button class='btn btn-line btn-straight' ng-click='agreeEntityWrongIssue(relatedItem)'>I agree</button>
+    <button class='btn btn-line btn-straight' ng-click='disagreeEntityWrongIssue(entity, relatedItem)'>I disagree</button>
+
+  </span>
   <span ng-if='relatedItem.props.target=="ENTITY_LABEL"'>
     signaled a wrong type for
     <span>

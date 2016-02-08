@@ -20,12 +20,15 @@ module.exports = _.assign(model.generate({
   pluralize: 'actions',
   queries:   queries
 }), {
-  CREATE: 'create',
-  UPVOTE: 'upvote',
-  ANNOTATE: 'annotate',
-  DOWNVOTE: 'downvote',
+  ANNOTATE:    'annotate',
+  CREATE:      'create',
+  DOWNVOTE:    'downvote',
+  MERGE:       'merge',
   RAISE_ISSUE: 'issued',
+  UPVOTE:      'upvote',
+
   ENTITY_LABEL: 'ENTITY_LABEL',
+  ENTITY_WRONG: 'ENTITY_WRONG',
   APPEARS_IN_RELATIONSHIP: 'APPEARS_IN_RELATIONSHIP',
   LIKES_RELATIONSHIP: 'LIKES_RELATIONSHIP'
 });

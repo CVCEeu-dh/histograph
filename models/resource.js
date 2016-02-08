@@ -212,21 +212,24 @@ module.exports = {
       });
     }
     
-    node.themes = _.values(node.themes || []).filter(function (n) {
-      return n.id
-    });
-    node.persons = _.values(node.persons).filter(function (n) {
-      return n.id
-    });
-    node.locations = _.values(node.locations).filter(function (n) {
-      return n.id
-    });
-    node.organizations = _.values(node.organizations).filter(function (n) {
-      return n.id
-    });
-    node.social_groups = _.values(node.social_groups).filter(function (n) {
-      return n.id
-    });
+    // node.themes = _.values(node.themes || []).filter(function (n) {
+    //   return n.id
+    // });
+    // node.places = _.values(node.places || []).filter(function (n) {
+    //   return n.id
+    // });
+    // node.persons = _.values(node.persons).filter(function (n) {
+    //   return n.id
+    // });
+    // node.locations = _.values(node.locations).filter(function (n) {
+    //   return n.id
+    // });
+    // node.organizations = _.values(node.organizations).filter(function (n) {
+    //   return n.id
+    // });
+    // node.social_groups = _.values(node.social_groups).filter(function (n) {
+    //   return n.id
+    // });
     return node;
   },
   /*
@@ -536,8 +539,8 @@ module.exports = {
   /*
     Return the timeline of document related resource.
   */
-  getRelatedResourcesTimeline: function(resource, next) {
-    helpers.cypherTimeline(rQueries.get_related_resources_timeline, resource, function (err, timeline) {
+  getRelatedResourcesTimeline: function(resource, properties, next) {
+    helpers.cypherTimeline(rQueries.get_related_resources_timeline, _.assign({}, properties, resource), function (err, timeline) {
       if(err)
         next(err);
       else
@@ -817,7 +820,7 @@ module.exports = {
                   cached_candidates = JSON.parse(contents);
                   
               candidates = candidates.concat(cached_candidates);
-              console.log(clc.blackBright('  found', clc.whiteBright(candidates.length), 'candidates (cache)'))
+              console.log(clc.blackBright('   found', clc.whiteBright(candidates.length), 'candidates (cache)'))
               nextLanguage();
               return;
             } catch (e) {
@@ -846,16 +849,23 @@ module.exports = {
                 _callback(null, []);
                 return;
               };
+              if(settings.disambiguation.typeRelatedServices && settings.disambiguation.typeRelatedServices.indexOf(service) != -1 && settings.disambiguation.typeRelatedServices.indexOf(resource.type) != -1 && resource.type != service) {
+                // ignore service because it is related to a specific type
+                console.log('   ',service,'ignored for type:', resource.type, '- language:',language);
+                _callback(null, []);
+                return;
+              };
               var contentToAnalyze = ''+content;
               if(settings.disambiguation.regexp && settings.disambiguation.regexp[service])
                 _.each(settings.disambiguation.regexp[service], function (rule) {
                   contentToAnalyze = contentToAnalyze.replace(rule.pattern, rule.replace);
+                  console.log(contentToAnalyze)
                 })
-              console.log(service,'calling for', language);
+              console.log('   ',service,'calling... - language:', language);
               helpers[service]({
                 text: contentToAnalyze
               }, function (err, _entities) {
-                console.log(service,'success for language', language);
+                console.log('   ',service,'success - language:', language);
                 if(err)
                   _callback(err);
                 else
@@ -888,7 +898,7 @@ module.exports = {
           var valid_candidates = candidates.filter(function (d) {
             return d.type.length > 0
           });
-          console.log(clc.blackBright('  cleaning entities: keeping',clc.whiteBright(valid_candidates.length), 'out of', clc.whiteBright(candidates.length)))
+          console.log(clc.blackBright('   cleaning entities: keeping',clc.whiteBright(valid_candidates.length), 'out of', clc.whiteBright(candidates.length)))
           callback(null, resource,valid_candidates );
         }
       },
@@ -900,7 +910,7 @@ module.exports = {
         and evaluate trustworthiness
       */
       function clusterEntities(resource, candidates, callback) { console.log(clc.whiteBright('   cluster entities'))
-      console.log(clc.blackBright('  considering',clc.magentaBright(candidates.length),'candidates for clustering...'));
+      console.log(clc.blackBright('   considering',clc.magentaBright(candidates.length),'candidates for clustering...'));
         helpers.cluster(candidates, function (err, entities) {
           if(err)
             callback(err)
@@ -929,7 +939,7 @@ module.exports = {
             _cached  = {},
             _locations = [];
             
-        console.log(clc.blackBright('  considering', clc.whiteBright(candidates.length), 'candidates; among them,', clc.magentaBright(withGeo.length), 'of type', clc.whiteBright('location')))
+        console.log(clc.blackBright('   considering', clc.whiteBright(candidates.length), 'candidates; among them,', clc.magentaBright(withGeo.length), 'of type', clc.whiteBright('location')))
 
         //console.log('geodis', settings.disambiguation.geoservices)
         var q = async.queue(function (candidate, nextCandidate) {
@@ -944,14 +954,14 @@ module.exports = {
                 _callback(null, _cached[_key]);
                 return;
               }
-              console.log(clc.blackBright(' ',service,'for query', candidate.name));
+              console.log(clc.blackBright('  ',service,'for query', candidate.name));
               
               // call the DESIRED service, in parallel.
               helpers[service]({
                 text: candidate.name,
                 language: 'en' //, language: candidate.context.language // since geonames and geocoding do not care about language
               }, function (err, _entities) {
-                console.log(clc.blackBright(' ',service,clc.cyanBright('success'),'for query', candidate.name));
+                console.log(clc.blackBright('  ',service,clc.cyanBright('success'),'for query', candidate.name));
                 if(err)
                   return _callback(err);
                 console.log('  ...', _entities.length,'results', _.map(_entities, 'fcl'));
@@ -1007,7 +1017,7 @@ module.exports = {
 
         q.push(withGeo);
         q.drain = function() {
-          console.log(clc.blackBright('  found',clc.magentaBright(_locations.length),'locations while looping over', clc.whiteBright(withGeo.length),'locations'));
+          console.log(clc.blackBright('   found',clc.magentaBright(_locations.length),'locations while looping over', clc.whiteBright(withGeo.length),'locations'));
           // console.log(_locations)
           
           callback(null, resource, _locations.concat(withoutGeo));
@@ -1029,7 +1039,7 @@ module.exports = {
           //   nextEntity()
           //   return
           // }
-          console.log(clc.blackBright('  saving', clc.yellowBright(ent.name),'as', clc.whiteBright(ent.type[0]), ent.trustworthiness,'remaining', q.length()));
+          console.log(clc.blackBright('   saving', clc.yellowBright(ent.name),'as', clc.whiteBright(ent.type[0]), ent.trustworthiness,'remaining', q.length()));
           var additionalProperties = {};
           if(_.first(ent.type) == 'location') {
             additionalProperties = {
@@ -1081,7 +1091,7 @@ module.exports = {
             //     }
             //   }]);
             // });
-            console.log(yaml['en'])
+            console.log('    language:', ent.languages[0], '- n. splitpoints:',yaml[ent.languages[0]].length)
             nextEntity();
           })
         }, 1);

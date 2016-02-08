@@ -1,36 +1,41 @@
 
 <div class="related {{relatedItem.users.length? 'with-users':''}}">
   <!-- {{relatedItem.users}} -->
-  <div class='user tk-proxima-nova' ng-repeat='user in relatedItem.users' ng-if='$index == 0'>
+  <div class='user sans-serif' ng-repeat='user in relatedItem.users' ng-if='$index == 0'>
     {{user.username}} <strong>{{user.type}}</strong> {{user.last_modification_time*1000|date:'longDate'}}
   </div>
   <div class='actions-wrapper'>
     <div class='actions '>
       <div class="btn-group">
-        <button class='btn btn-default action' uib-tooltip='add to bookmark list' tooltip-append-to-body="true" ng-click='queue(relatedItem.id, true)'>
+        <button class='btn btn-default action' uib-tooltip='{{tooltip.resource.add.to.myselection|translate}}' tooltip-append-to-body="true" ng-click='queue(relatedItem.id, true)'>
           <i class='fa fa-bookmark-o'></i>
         </button>
       </div>
     </div>
   </div>   
-  <div class="type"> {{relatedItem.props.ecmd|ecmd}} {{$index + 1}} out of {{totalItems}}</div>
+  <div class="meta"><span class='type sans-serif' translate='resource.type.{{relatedItem.props.type}}'></span> {{$index + 1}} out of {{totalItems}}</div>
   <h4>
-    <a href='#/r/{{relatedItem.id}}' ng-if='!relatedItem.annotations || !relatedItem.annotations.length' marked="relatedItem.props|lookup:'title':language"></a>
-    <a href='#/r/{{relatedItem.id}}' ng-if='relatedItem.annotations && relatedItem.annotations.length' context='relatedItem' marked="relatedItem.annotations|annotate:'title':language"></a>
-  
+    <a href='#/r/{{relatedItem.id}}'>
+      <span lookup context='relatedItem' field='title' language='language'></span>
+    </a>
+   
   </h4>
         
   <div class="meta">
     <span gasp-type="date" class="empty" gasp-parent="{{item.type}}-{{item.id}}" ng-if="!relatedItem.props.start_time">no date found</span>
     <span class='date' ng-if="relatedItem.props.start_time"> {{relatedItem.props|guessInterval}}</span>
-    <span ng-if='relatedItem.persons.length' class='tags'> — <i>persons in the document</i>:
-      <span ng-repeat='per in relatedItem.persons' data-id='{{per.id}}' gasp-type='person' gasp-parent='{{relatedItem.type}}-{{relatedItem.id}}' tooltip='{{per.props.name}} - {{per.props.description}} ({{per.props.birth_date | date:"yyyy"}} - {{per.props.death_date | date:"yyyy"}})' tooltip-append-to-body='true' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name||per.name}}</span>
+    <span ng-if='relatedItem.themes.length' class='tags'> — <i translate>resource.themes.mentioned</i>:
+    <span ng-repeat="the in relatedItem.themes"><span class="tag theme" data-id='{{the.id}}' gasp-type='theme' gasp-parent='{{relatedItem.type}}-{{relatedItem.id}}'>{{the.props.name}}</span>{{$last? '':  ', '}}</span></span>
+
+    <span ng-if='relatedItem.persons.length' class='tags'> — <i translate>resource.people.mentioned</i>:
+      <span ng-repeat="per in relatedItem.persons" ng-include='"templates/partials/entity-person-tag.html"' ng-init='item=relatedItem'></span>
+
+      
     </span>
   </div>
            
-  <div class='img-wrapper' ng-if='relatedItem.props.mimetype=="image" && relatedItem.props.url'><a ng-href='/#/r/{{relatedItem.id}}'><div class="img"  style='background-image: url({{relatedItem.props|url:language}})'></div></a></div>
-  <blockquote ng-if='!relatedItem.annotations || !relatedItem.annotations.length' marked="relatedItem.props|lookup:'caption':language"></blockquote>
-  <blockquote ng-if='relatedItem.annotations && relatedItem.annotations.length' context='relatedItem' marked="relatedItem.annotations|annotate:'caption':language"></blockquote>
+  <div class='img-wrapper' ng-if='relatedItem.props.mimetype=="image" && relatedItem.props.url'><a ng-href='/#/r/{{relatedItem.id}}'><div class="img"  style='background-image: url(/media/{{relatedItem.props.url}})'></div></a></div>
   
-  <!-- div class='matches' ng-if='relatedItem.annotations' context='relatedItem' marked="relatedItem.annotations|annotate:'url':language"></div -->
+  <blockquote lookup context='relatedItem' field='caption' language='language'></blockquote>
+  <blockquote style='font-style:normal' lookup context='relatedItem' field='ipr' language='language'></blockquote>
 </div>

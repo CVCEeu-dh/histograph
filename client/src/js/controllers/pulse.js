@@ -33,6 +33,16 @@ angular.module('histograph')
       //if(message.user != $scope.user.username)
     };
     
+    $scope.agreeEntityWrongIssue = function(relatedItem) {
+      for(var i in relatedItem.entities)
+        $scope.signale(relatedItem.entities[i])
+
+    }
+
+    $scope.disagreeEntityWrongIssue = function(elementToUpvote, action) {
+      
+    }
+
     $scope.toggle = function(open){
       if(!open)
         return;
@@ -52,7 +62,7 @@ angular.module('histograph')
         $scope.totalItems = res.info.groups.total_items;
 
         $scope.notifications = res.result.items.map(function(d) {
-          if(['APPEARS_IN_RELATIONSHIP', 'LIKES_RELATIONSHIP', 'ENTITY_LABEL'].indexOf(d.props.target) !== -1){
+          if(['APPEARS_IN_RELATIONSHIP', 'LIKES_RELATIONSHIP', 'ENTITY_LABEL', 'ENTITY_WRONG'].indexOf(d.props.target) !== -1){
             d.resource = _.find(d.mentioning, {type: 'resource'});
             d.entities   = _.filter(d.mentioning, function(d){
               return ['person', 'location', 'organization'].indexOf(d.type) !== -1;

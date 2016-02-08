@@ -13,6 +13,8 @@ angular.module('histograph')
     $scope.locationPath = $location.path();
     $scope.locationJson  = JSON.stringify($location.search()); 
     
+    
+
     var suggestionTimeout = 0;
     
     $scope.params = {}; //  this would contain limit, offset, from, to and other API params. Cfr. EVENT.API_PARAMS_CHANGED
@@ -81,6 +83,12 @@ angular.module('histograph')
       return $state;
     }
     
+    /*
+      force start the guided tour
+    */
+    $scope.startGuidedTour = function() {
+      $rootScope.$emit(EVENTS.START_GUIDED_TOUR);
+    }
     
     // the current search query, if any
     // $scope.query =  $routeParams.query || '';
@@ -144,6 +152,12 @@ angular.module('histograph')
     }
     
     /*
+      timeline handlers
+    */
+    $scope.setTimeline = function(items) {
+      $scope.timeline = items;
+    }
+    /*
       language handlers
     */
     $scope.language = 'en';
@@ -165,7 +179,8 @@ angular.module('histograph')
     
     $scope.availableSortings = [
       ORDER_BY.RELEVANCE,
-      ORDER_BY.CLOSEST_DATE
+      ORDER_BY.CLOSEST_DATE,
+      ORDER_BY.ASC_DATE
     ];
     
     $scope.sorting = ORDER_BY.RELEVANCE;
@@ -428,21 +443,14 @@ angular.module('histograph')
       _resizeTimer = setTimeout(function() {
         $(window).trigger('resize');
       }, 300)
-      // DEPRECATED
-      switch($scope.currentCtrl) { // move to translation engine
-        case 'SearchCtrl':
-          $scope.query = $routeParams.query || '';
-          $scope.headers.seealso = 'search results';
-          break;
-        default: 
-          $scope.headers.seealso = 'related documents'
-          break;
-      }
-      // set header andccording to the controllers
       
     });
     
-    
+    // fire event when DOM is ready
+    $scope.$on('$viewContentLoaded', function(event){
+      // $rootScope.$emit
+      $rootScope.$emit(EVENTS.STATE_VIEW_CONTENT_LOADED, $scope.currentState);
+    });
     /*
       change the given user, programmatically. Cfr httpProvider config in app.js
     */
@@ -455,10 +463,12 @@ angular.module('histograph')
           or to be updated whenever a
           CHANGES in resource set occurs
         */
+        
+
         VisualizationFactory.resource(VIZ.TIMELINE).then(function (res) {
           $log.info('CoreCtrl @EVENTS.USE_USER VisualizationFactory', res);
-          $scope.timeline = res.data.result.timeline;
-          
+          $scope.contextualTimeline = res.data.result.timeline;
+          // $scope.initialTimeline
         });
       }
     });
@@ -754,6 +764,26 @@ angular.module('histograph')
     };
 
     /*
+      Merge two entities together in a specific resource
+
+    */
+    $scope.mergeEntities = function(wrong, trusted, resource, next) {
+      debugger
+      EntityRelatedExtraFactory.save({
+        id: wrong.id,
+        model: 'resource',
+        related_id: resource.id,
+        extra: 'merge'
+      }, {
+        with: trusted.id
+      }, function (res) {
+        $log.log('CoreCtrl -> mergeEntities()', res.status);
+        if(next)
+          next(res.result);
+      });
+    };
+
+    /*
       Voting mechanism on ENTITY itself: it is a mlispelling or an error.
     */
     $scope.signale = function(entity, next) {
@@ -763,6 +793,9 @@ angular.module('histograph')
         extra: 'downvote'
       }, {}, function (res) {
         $log.log('CoreCtrl -> signale()', res.status);
+        // feedback
+        if(res.status == 'ok')
+          $scope.setMessage('thanks for your feedback')
         if(next)
           next();
       });
@@ -813,10 +846,36 @@ angular.module('histograph')
       MetadataInspect
       ---
       Open the inspector for document metadata ...
-      Require the resource id
-    */
-    $scope.inspectMetadata = function(resource) {
+      Require the item.id and the item.type properties
 
+      @param item   - object having a item id
+      @param type     - type of metadata
+    */
+    $scope.inspectMetadata = function(item, type, options) {
+      $log.debug('CoreCtrl -> inspectMetadata() - item:', item);
+
+      var language      = $scope.language;
+      var modalInstance = $uibModal.open({
+        animation: true,
+        templateUrl: 'templates/modals/inspect-metadata.html',
+        controller: 'InspectMetadataModelCtrl',
+        windowClass: "modal fade in inspect-metadata",
+        size: 'sm',
+        resolve: {
+          options: function() {
+            return options || {}
+          },
+          type: function(){
+            return type
+          },
+          item: function() {
+            return item
+          },
+          language: function() {
+            return language
+          }
+        }
+      });
     };
 
     /*
@@ -839,7 +898,7 @@ angular.module('histograph')
         size: 'sm',
         resolve: {
           options: function() {
-            return options
+            return options || {}
           },
           type: function(){
             return type
@@ -1016,98 +1075,7 @@ angular.module('histograph')
       }
   })
 
-  /*
-    Contribute: add an (entity)-[]-(resource) relationship (sort of tagging)
-    Template: cfr. templates/modals/inspect.html
-    Resolve: it requires a (resource) object
-  */
-  .controller('ContributeModalCtrl', function ($scope, $log, $uibModalInstance, type, resource, language, options, SuggestFactory,EntityRelatedExtraFactory) {
-    // the list of suggested entities
-    $scope.persons   = [];
-    $scope.locations = [];
-    $scope.organizations = [];
-
-    $scope.type = type;
-    $log.debug('ContributeModalCtrl -> ready()', resource.id, options);
-
-    // initial value for typeahead
-    if(options && options.query) {
-      $scope.autotypeahead = options.query
-      $scope.q = options.query;
-    }
-    
-
-    $scope.ok = function () {
-      // get the annotation, if any
-      var params = {};
-      var entities = [].concat($scope.persons, $scope.locations, $scope.organizations)
-      if(options && options.context) {
-        params.annotation = JSON.stringify({
-          context: options.context,
-          ranges: options.annotator? options.annotator.editor.annotation.ranges: options.ranges,
-          quote:  options.annotator?  options.annotator.editor.annotation.quote: _.map(entities, 'props.name').join(', ')
-        });
-
-      }
-
-      $log.log('ContributeModalCtrl -> ok()', 'saving...');
-      
-      for(var i in entities)
-        EntityRelatedExtraFactory.save({
-          id: entities[i].id,
-          related_id: resource.id,
-          model: 'resource'
-        }, params, function(res) {
-          $log.log('ContributeModalCtrl -> ok()', 'saved', res)
-          $uibModalInstance.close(res.result.item);
-          
-        })
-
-    };
-
-    $scope.cancel = function () {
-      // if(options && typeof options.discard == "function") {
-      //   options.discard();
-      // }
-      $uibModalInstance.dismiss('cancel');
-    };
-
-    /*
-      typeahead
-    */
-    $scope.typeaheadSuggest = function(q) {
-      $log.log('ContributeModalCtrl -> typeahead()', q, type);
-      // suggest only stuff from 2 chars on
-      if(q.trim().length < 2)
-        return;
-      
-      return SuggestFactory.get({
-        m: type,
-        query: q,
-        limit: 10
-      }).$promise.then(function(res) {
-        if(res.status != 'ok')
-          return [];
-        return res.result.items
-      })
-    }
-
-    $scope.typeaheadSelected = function($item) {
-      switch($item.type){
-        case 'person':
-          $scope.persons.push($item);
-          break;
-        case 'location':
-          $scope.locations.push($item);
-          break;
-        case 'organization':
-          $scope.organizations.push($item);
-          break;
-      }
-        
-      $log.log('ContributeModalCtrl -> typeaheadSelected()', $item);
-    }
-  })
+  
   /*
     This controller handle the modal bootstrap that allow users to propose a new content for something.
   */
@@ -1133,6 +1101,45 @@ angular.module('histograph')
         });
     };
 
+   
+  })
+  /*
+    This controller handle the modal bootstrap that allow users to propose a new content for something.
+    Base controller for metadata issues.
+  */
+  .controller('InspectMetadataModelCtrl', function ($scope, $log, $uibModalInstance, type, item, options, language) {
+    $log.log('InspectMetadataModelCtrl ready', type, item)
+    
+    $scope.type = type;
+    $scope.item = item;
+    $scope.language = language;
+
+    $scope.date = {
+      from: $scope.item.start_date? (new Date()):null,
+      to: $scope.item.end_date? (new Date()):null,
+    }
+    // $scope.ok = function () {
+    //   if(type == 'date')
+    //     ResourceRelatedFactory.save({
+    //       model: 'issue',
+    //       id: target.id
+    //     }, {
+    //       type: 'date',
+    //       solution: [$scope.start_date, $scope.end_date],
+    //       description: $scope.description || ''
+    //     }, function(res) {
+    //       console.log(res)
+    //       //$modalInstance.close();
+    //     });
+    // };
+
+    $scope.ok = function () {
+      $uibModalInstance.close();
+    };
+
+    $scope.cancel = function () {
+      $uibModalInstance.dismiss('cancel');
+    };
    
   })
   /*
@@ -1226,6 +1233,22 @@ angular.module('histograph')
       
       $scope.sync();
     });
+    
+    function onSocket(result) {
+      console.log('RelatedItemsCtrl @socket')
+      for(var i=0, l=$scope.relatedItems.length; i < l; i++){
+        if($scope.relatedItems[i].id == result.resource.id) {
+          $scope.relatedItems[i] = result.data.related.resource
+          break;
+        }
+      }
+    };
+
+    /*
+      on socket events, 
+    */
+    socket.on('entity:upvote-related-resource:done', onSocket);
+    socket.on('entity:downvote-related-resource:done', onSocket);
 
     // $scope.syncGraph();
     $log.log('RelatedItemsCtrl -> setRelatedItems - items', relatedItems.result.items);

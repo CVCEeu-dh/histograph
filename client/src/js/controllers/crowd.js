@@ -7,8 +7,8 @@
  * 
  */
 angular.module('histograph')
-  .controller('CrowdCtrl', function($scope, $log, $timeout, UserFactory) {
-    $scope.short_delay = 100;
+  .controller('CrowdCtrl', function($scope, $log, $state, $timeout, UserFactory) {
+    $scope.short_delay = 60000;
     $scope.long_delay = 180000;
 
     $scope.isVisible = false;
@@ -32,10 +32,12 @@ angular.module('histograph')
         extra: _.first(_.shuffle(availableTasks))
       }, function(res) {
         $log.log('CrowdCtrl -> challenge() --> ', res);
+        if(res.status == 'empty')
+          return;
         $scope.isVisible = true;
         $scope.isChallengeAccepted = false;
         $scope.task = res.result.item;
-
+        $scope.taskName = res.info.what;
       });
     };
 
@@ -55,7 +57,7 @@ angular.module('histograph')
         
         $scope.isChallengeAccepted = true;
         $scope.task = res.result.item;
-
+        $scope.taskName = res.info.what;
       });
 
     }
@@ -66,7 +68,15 @@ angular.module('histograph')
       $scope.isChallengeAccepted = true;
       $scope.question = 'challenge_accepted';
       // according to task type, decide what to do next
-      $scope.inspect([ $scope.task.person.id]);
+      if($scope.taskName == 'unknownpeople')
+        $state.go('entity.resources', {
+          id: $scope.task.person.id
+        })
+        // $scope.inspect([ $scope.task.person.id]);
+      if($scope.taskName == 'resourcelackingdate')
+        $state.go('resource.resources', {
+          id: $scope.task.resource.id
+        })
     };
 
     /*

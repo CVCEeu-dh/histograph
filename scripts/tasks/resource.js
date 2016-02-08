@@ -5,11 +5,13 @@
 var settings  = require('../../settings'),
     helpers   = require('../../helpers'),
 
+
     neo4j     = require('seraph')(settings.neo4j.host),
     async     = require('async'),
     path      = require('path'),
     fs        = require('fs'),
-    Resource  = require('../../models/resource');
+    Resource  = require('../../models/resource'),
+    Entity    = require('../../models/entity');
 
 module.exports = {
   
@@ -189,14 +191,15 @@ module.exports = {
       return callback(' Please specify the file path to write in with --target=path/to/source.tsv');
     }
 
-    neo4j.query('Match (loc:location)-[:appears_in]->(r:resource) WHERE has(loc.geocode_lat) RETURN {name: loc.name, lat: loc.geocode_lat, lng: loc.geocode_lng,start_time: r.start_time, start_date: r.start_date, end_time: r.end_time, end_date:r.end_date, title:COALESCE(r.name, r.title_en, r.title_fr), id:id(r)} skip {offset} LIMIT {limit} ', {
-        limit: +options.limit || 1000,
+    neo4j.query('MATCH (loc:location)-[rel:appears_in]->(res:resource) WHERE has(loc.lat) WITH loc, rel, res ORDER BY rel.frequency ASC WITH loc, last(collect(res)) as r, COUNT(res) as distribution, MIN(res.start_time) as start_time, MAX(res.end_time) as end_time RETURN {name: loc.name, lat: loc.lat, lng: loc.lng,start_time: start_time, distribution: distribution, end_time: end_time, example_title:COALESCE(r.name, r.title_en, r.title_fr), example_id:id(r), example_slug:r.slug} skip {offset} LIMIT {limit} ', {
+        limit: +options.limit || 100000,
         offset: +options.offset || 0
     }, function(err, rows) {
       if(err) {
         callback(err);
         return
       }
+      console.log('    cartodb: found', rows.length, 'rows')
       options.records = rows;
       options.fields = [
         'name',
@@ -206,8 +209,10 @@ module.exports = {
         'start_date',
         'end_time',
         'end_date',
-        'title',
-        'id'
+        'example_title',
+        'example_id',
+        'example_slug',
+        'distribution'
       ];
       options.filepath=options.target;
       
@@ -217,14 +222,16 @@ module.exports = {
   
   importTwitter: function(options, callback) {
     console.log(clc.yellowBright('\n   tasks.resource.importTwitter'));
-    console.log(options.data[0])
+    console.log(options.data[0]);
+    
      // check integrioty, @todo
     var q = async.queue(function (tweet, nextTweet) {
       var resource = {
         type: 'tweet',
-        slug: tweet.id,
+        slug: 'tweet-' + tweet.id,
         mimetype: 'text/plain',
-        name: tweet.from_user_name + ' - ' + tweet.text,
+        name: tweet.from_user_name + ' - ' + helpers.text.excerpt(tweet.text, 32),
+        
         user: options.marvin
       }
 
@@ -238,15 +245,18 @@ module.exports = {
       resource.languages = [ tweet.lang ];
 
       // title and caption
-      resource['title_'+tweet.lang] = tweet.from_user_name + ' - ' + tweet.text;
+      resource['title_'+tweet.lang] = resource.name;
+      // console.log(resource)
+      resource['caption_'+tweet.lang] = '@' + tweet.from_user_name + ' - ' + tweet.text;
 
       // console.log(resource)
-
+      resource.full_search = resource['caption_'+tweet.lang];
 
       
       console.log(clc.blackBright('   creating ...', clc.whiteBright(resource.slug)))
       
       console.log(resource);
+      
       Resource.create(resource, function (err, res) {
         if(err) {
           q.kill();
@@ -255,6 +265,112 @@ module.exports = {
           console.log(clc.blackBright('   resource: ', clc.whiteBright(res.id), 'saved,', q.length(), 'resources remaining'));
       
           nextTweet();
+          
+        }
+      })
+
+    }, 3);
+    q.push(options.data)
+    q.drain = function(){
+      callback(null, options);
+    };
+  },
+
+
+  importInstagram: function(options, callback) {
+    console.log(clc.yellowBright('\n   tasks.resource.importInstagram'));
+    console.log(options.data[0]);
+
+    var q = async.queue(function (item, nextItem) {
+      console.log(item.user_username)
+      var resource = {
+        type: 'instagram',
+        slug: 'instagram-' +item.id,
+        mimetype: _.isEmpty(item.images)?'video':'image', 
+        
+        name:  (item.user_username ) + ' - ' + helpers.text.excerpt(item.caption_text, 32),
+        user: options.marvin
+      }
+
+      console.log(clc.blackBright('    creating ...', clc.whiteBright(resource.slug)))
+      
+      // get the right url
+      resource.url = path.join('instagram', (resource.mimetype == 'image'? item.images_name:item.videos_name))
+
+      // test resource url
+      var filename = path.join(settings.paths.media, resource.url);
+
+      if(!fs.existsSync(filename)) {
+        console.log(clc.magentaBright('    file does not exist:'),filename);
+      } else {
+          console.log(clc.greenBright('    file found'), resource.url);
+      
+      }
+
+      resource.url = resource.url.replace("\\","/");
+
+      // add time
+      _.assign(resource, helpers.reconcileIntervals({
+        start_date: item.created_time, 
+        format: 'YYYY-MM-DD hh:mm:ss'
+      }));
+
+      var language = 'und'; // that is, impossible to guess, a special identifier is provided by ISO 639-2
+
+      // var Langdetect = require('languagedetect'),
+      //     langdetect = new Langdetect('iso2'),
+      //     languages  = langdetect.detect(item.caption_text),
+      //     language   = languages.length? _.first(_.first(languages)) : 'en';
+      
+      // console.log(languages)
+
+      // language
+      resource.languages = [ language ];
+
+      // title and caption
+      resource['title_'+language] = item.user_username + ' - ' + helpers.text.excerpt(item.caption_text, 32);
+
+      // console.log(resource)
+      resource['caption_'+language] = '@' + item.user_username + ' - ' + item.caption_text + ' - ' + _.compact(item.tags.split(/\s?,\s?/)).map(function(d){return '#'+d;}).join(', ');
+
+      // console.log(resource);
+      // add full text ;)
+      resource.full_search = resource['caption_'+language];
+
+      
+
+      
+      Resource.create(resource, function (err, res) {
+        if(err) {
+          q.kill();
+          callback(err)
+        } else {
+          console.log(clc.blackBright('   resource: ', clc.whiteBright(res.id), 'saved,', q.length(), 'resources remaining'));
+        
+          if(!_.isEmpty(item.location)){
+            var latlng = item.location.split(/\s?,\s?/).join(',');
+            console.log(latlng)
+            // create entity from place (the first result is the good one)
+            helpers.reverse_geocoding({latlng: latlng}, function (err, results) {
+              console.log(err,results)
+              if(err || !results.length)
+                 nextItem();
+              else
+                Entity.create(_.assign(results[0], {
+                  type: 'place',
+                  resource: {
+                    id: res.id
+                  },
+                  services: ['reverse_geocoding'],
+                }), function(err, node) {
+                  if(err) {
+                    q.kill();
+                    callback(err)
+                  } else nextItem();
+                })
+            });
+          } else
+            nextItem();
           
         }
       })
@@ -395,7 +511,7 @@ module.exports = {
     var queue = async.waterfall([
       // get pictures and documents having a caption
       function (next) {
-        neo4j.query('MATCH (a:resource) WHERE NOT(has(a.discovered)) AND NOT (a)-[:appears_in]-() RETURN a ORDER BY a.mimetype ASC skip {offset} LIMIT {limit} ', {
+        neo4j.query('MATCH (a:resource) WHERE NOT(has(a.discovered)) RETURN a ORDER BY a.mimetype ASC skip {offset} LIMIT {limit} ', {
           limit: +options.limit || 10,
           offset: +options.offset || 0
         }, function (err, nodes) {

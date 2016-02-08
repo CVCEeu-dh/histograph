@@ -6,135 +6,13 @@
  * @description
  * # histograph
  *
- * Main module of the application.
+ * Annotator diective for images, using d3 and svg instead of canvas
  */
 angular.module('histograph')
-  .directive('annotorious', function() {
-    return {
-      restrict : 'A',
-      scope: {
-        width: '=w',
-        height: '=h',
-        version: '=', // which annotation version do you want to see here?
-        tiles : '=', // has it openlayers tiles?
-        contribute: '&', // open contribution dialogue
-        item: '='
-      },
-      link : function(scope, element) {
-        // Add the plugin like so
-        anno.addPlugin('AnnotoriousBridge', {
-          onEditorShown: function(annotation){
-            console.log(annotation)
-            
-            scope.contribute({
-              item: scope.item, 
-              type: "entity", 
-              options: {
-              }
-            });
-            scope.$apply();
-          }
-        });
-        /* draw the current annotation version */
-        var src = '';
-        /*
-          draw the corresponding annotation to annotorious
-        */
-        var draw = function (ver) {
-          anno.removeAll();
-          console.log('drqw version', ver, src)
-          for(var i in ver.yaml) {
-            // trznsform pixel to %
-            var geometry = {
-              x: ver.yaml[i].region.left/(+scope.width),
-              y: ver.yaml[i].region.top/(+scope.height),
-              
-              width: 0.1,
-              height: 0.1,
-            };
-            geometry.width = -geometry.x + ver.yaml[i].region.right/(+scope.width);
-            geometry.height = -geometry.y + ver.yaml[i].region.bottom/(+scope.height);
-            // console.log(geometry, ver.yaml[i].identification, src)
-            anno.addAnnotation({
-              src: src,
-              text : ver.yaml[i].identification || '',
-              shapes : [{
-                type : 'rect',
-                geometry : geometry
-              }]
-            })
-          }
-
-          if(ver.service == 'merged') {
-            try {
-              anno.addPlugin('Merge', {src: src});
-            } catch(e){
-              console.log(e)
-            }
-          }
-        };
-
-        
-
-        scope.$watch('version', function (ver) {
-          console.log('::annotorious @version', ver, 'has tiles?', scope.tiles)
-          if(!ver)
-            return;
-          console.log('versio', element)
-          if(!element[0].complete) {
-            src = element[0].src;
-            element.bind("load" , function (e) { 
-              anno.makeAnnotatable(this);
-              draw(ver);
-            });
-          } else {
-            src = element[0].src;
-            anno.makeAnnotatable(element[0]);
-            draw(ver)
-          };
-        });
-      }
-    };
-  })
   /*
-    Annotorious with openlayers.
-  */
-  .directive('annotoriousol', function() {
-    return {
-      restrict : 'A',
-      scope: {
-        tiles : '=' // has it openlayers tiles?
-      },
-      link : function(scope, element) {
-        element.height(500);
-        // var options =
-        //   { maxExtent: new OpenLayers.Bounds(0, 0, 1475, 1184),
-        //     maxResolution: 8,
-        //     numZoomLevels: 2,
-        //     units: 'pixels' };
-
-        // var map = new OpenLayers.Map(element[0], options);
-        // var baseLayer = new OpenLayers.Layer.TMS("Baselayer", scope.tiles + '/',
-        //   { layername: ".",
-        //     serviceVersion: ".",
-        //     transitionEffect: "resize",
-        //     type:"jpg" });
-
-        // map.addLayer(baseLayer);
-        // map.zoomToMaxExtent();
-        // anno.makeAnnotatable(map);
-      }
-    };
-  })
-  /*
-    Test annotator
-    cfr.
     based on https://github.com/withanage/angularjs-image-annotate/blob/master/src/imageAnnotate.js
   */
-  .directive('annota', function () {
-
-    
-
+  .directive('annotorious', function () {
     return {
       restrict : 'A', // only element name in order to avoid errors
       scope: {
@@ -295,6 +173,8 @@ angular.module('histograph')
           load only babe. (eventually add)
         */
         function loadAnnotations() {
+          if(!scope.notes || !scope.notes.length)
+            return;
           console.log(scope.notes)
           // draw freely
           // scope.notes
@@ -381,7 +261,8 @@ angular.module('histograph')
           .attr('width', 10)
           .style({
             'position': 'absolute',
-            left: 0
+            left: 0,
+            top: 0
           })
           .style('stroke','rgba(124,240,10,1)')
           .style('fill','none')
@@ -416,19 +297,45 @@ angular.module('histograph')
         scope.$watch('notes', function(n) {
           if(n && scope.ready)
             loadAnnotations();
-        }, true)
+        }, true);
 
         img.addEventListener( 'load', function(e){
           console.log(e)
-          element.css({
-            'position':'relative',
-            width: e.target.offsetWidth,
-            margin: '0px auto'
-          })
+          // adapt the width to the container width
+          // note that element should already have an intrinsic width
+          var isLandscape =  e.target.offsetWidth > e.target.offsetHeight,
+              ratio = 1.0,
+              style = {
+                position: 'relative',
+                margin: '0px auto'
+              },
+
+              availableWidth = ele[0][0].offsetWidth;
+
+          // width > height?
+          if(isLandscape) {
+            // will occupy the 100% of available space
+            ratio = availableWidth/e.target.offsetWidth;
+            $(e.target).css({
+              width: availableWidth
+            }); // fix width
+            style.width = availableWidth
+          } else {
+            // will occupy just the same space in vertical
+            ratio = availableWidth/e.target.offsetHeight;
+            $(e.target).css({
+              'height':  availableWidth
+            });
+            style.width = this.naturalWidth * ratio
+          }
+            
+          // apply style to parent element
+          element.css(style);
+          
           scope.realHeight = this.naturalHeight;
           scope.realWidth = this.naturalWidth;
           scope.ready = true;
-          resize(e.target.offsetWidth, e.target.offsetHeight);
+          resize(this.naturalWidth * ratio,this.naturalHeight * ratio);
           start();
           loadAnnotations();
         });
@@ -443,12 +350,3 @@ angular.module('histograph')
   })
     
 
-annotorious.plugin.AnnotoriousBridge = function(options) { 
-  this.initPlugin = function(anno) {
-    // Add initialization code here, if needed (or just skip this method if not)
-    ['onEditorShown'].forEach(function (d) {
-      if(typeof options[d] == 'function')
-        anno.addHandler(d, options[d])
-    });
-  }
-};

@@ -16,8 +16,8 @@ angular.module('histograph')
       templateUrl: 'templates/partials/helpers/snippet.html',
       scope:{
         center: '=',
-        target: '='
-        
+        target: '=',
+        user: '='
       },
       link: function(scope, elem){
         $log.log('::snippets ------------');
@@ -129,6 +129,12 @@ angular.module('histograph')
               scope.itemsIds = itemsIdsToLoad;
               scope.sharedItemsModel = t.type == 'resource'? 'person' : 'resource';
               scope.sync();
+            } else if(['theme', 'location', 'person', 'place', 'organization', 'topic'].indexOf(t.type) !== -1) {
+              scope.itemsIds = itemsIdsToLoad;
+              scope.sharedItemsModel = 'resource';
+              scope.sync();
+            } else {
+              $log.error('::snippets -> show() ! check nodes type, unable to find shared items')
             }
           }
 

@@ -36,7 +36,7 @@ angular.module('histograph')
         filter: '&',
         inspect: '&'
       },
-      templateUrl: 'templates/partials/helpers/popit.html',
+      templateUrl: 'templates/partials/helpers/gasp.html',
       link : function(scope, element, attrs) {
         var _gasp = $(element[0]), // gasp instance;
             _pId  = -1, // previous id
@@ -65,6 +65,15 @@ angular.module('histograph')
           }
           $log.info('::gasp -> toggle() for type:', type, el)
           
+          // validate id
+          if(!id && isNaN(id)) {
+            $log.error('::gasp -> toggle() html DOM item lacks "data-id" attribute or it is not a number, given id:', id);
+            scope.isUnknown = true;
+            scope.$apply();
+            showGasp(pos)
+            return;
+          }
+          scope.isUnknown = false;
           // if id is the same of previous Id, ndo not need to recalculate things
           if(id == _pId) { 
             showGasp(pos);
@@ -79,11 +88,7 @@ angular.module('histograph')
               entity,
               resource;
 
-          // validate id
-          if(!id && isNaN(id)) {
-            $log.error('::gasp -> toggle() html DOM item lacks "data-id" attribute or it is not a number, given id:', id);
-            return;
-          }
+
 
           // rewrite upvotes
           if(upvotes)
@@ -142,6 +147,8 @@ angular.module('histograph')
               res.result.items[0].props.links_viaf
             ]).length;
 
+            scope.entity.isWrong = res.result.items[0].props.issues? res.result.items[0].props.issues.indexOf('wrong') != -1: false;
+
             scope.entity.props = res.result.items[0].props;
           })
         };
@@ -168,6 +175,8 @@ angular.module('histograph')
         function hide() {
           _gasp.hide(); 
         }
+
+        scope.hide = hide;
 
         function hideDelayed() {
           __timeout = setTimeout(function(){
@@ -234,6 +243,7 @@ angular.module('histograph')
 
         scope.queue = function(){
           $log.info(':: gasp -> queue()', scope.entity)
+          scope.close();
           scope.$parent.queue(scope.entity.id, true);
         }
 
@@ -244,6 +254,7 @@ angular.module('histograph')
 
         scope.inspect = function(){
           $log.info(':: gasp -> inspect()', scope.entity)
+          scope.close();
           scope.$parent.inspect(scope.entity.id);
         }
         
@@ -257,7 +268,9 @@ angular.module('histograph')
         scope.merge = function(){
           $log.info(':: gasp -> merge()', scope.entity)
           // merge two entities: add (or upvote the entity) and downvote the current entity
-          scope.feedback();
+          scope.$parent.mergeEntities(scope.entity, scope.entity.alias, scope.parent, function (err, result) {
+            scope.feedback();
+          });
         }
 
         scope.signale = function($event){
@@ -269,12 +282,12 @@ angular.module('histograph')
           return scope.$parent.typeaheadSuggest(q, type);
         }
 
-        scope.typeaheadSelected = function($item, $model, $label) {
+        scope.typeaheadSelected = function($item, $model, $label, $question) {
           $log.info(':: gasp -> typeaheadSelected()', arguments);
           if(!$item.id)
             return;
           scope.entity.alias = $item;
-          scope.question = 'contribute-confirm';
+          scope.question = $question || 'contribute-confirm';
         }
         /*
           End of the story.
@@ -299,7 +312,8 @@ angular.module('histograph')
 
         scope.cancelQuestion = function($event) {
           scope.question = false;
-          $event.stopPropagation();
+          if($event)
+            $event.stopPropagation();
         }
 
         

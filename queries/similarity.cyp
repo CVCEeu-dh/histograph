@@ -1,5 +1,10 @@
+// name: count_appear_in_the_same_document
+MATCH ()-[r:appear_in_same_document]-()
+RETURN count(r) as total_count
+
 // name: clear_appear_in_same_document
 MATCH ()-[r:appear_in_same_document]-()
+WITH r LIMIT {limit}
 DELETE r
 
 // name: computate_tfidf
@@ -42,20 +47,22 @@ SET   r.cosine = xyDotProduct / d
 
 
 // name: count_computate_jaccard_distance
-MATCH (p1: person)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2: person)
-WHERE id(p1) < id(p2)
+MATCH (p1:{:entity})-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:{:entity})
+WHERE id(p1) < id(p2) AND p1.score > -1 AND p2.score > -1
 RETURN count(*) as total_count
 
 // name: computate_jaccard_distance
 // For the "WHERE id(p1) < id(p2)" part, see:
 // https://stackoverflow.com/questions/33083491/how-to-get-a-unique-set-of-node-pairs-for-undirected-relationships/33084035#33084035
-MATCH (p1: person)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2: person)
-WHERE id(p1) < id(p2)
+MATCH (p1:{:entity})-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:{:entity})
+WHERE id(p1) < id(p2) AND p1.score > -1 AND p2.score > -1
 // WITH r1, r2, p1, p2, count(*) as intersection
 WITH p1, p2, count(*) as intersection
+WHERE intersection > 1
+WITH p1, p2, intersection
 SKIP {offset}
 LIMIT {limit}
-WITH p1, p2, intersection
+
 MATCH (p1)-[rel:appears_in]->(res1:resource)
 WITH p1,p2, intersection, collect(res1) as H1
 

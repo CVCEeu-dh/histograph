@@ -1,40 +1,22 @@
 <div ng-if="item" class="resource item">
-        <!-- div class='counters'>
-          <a ng-href='#/r/{{item.id}}/inquiries'><label>{{item.inquiries}}</label> inquiries </a><!-- <br/>
-          <a ng-href='#/r/{{item.id}}/inquiries'>comments <label>{{item.comments}}</label></a> -->
-          
-        <!-- /div -->
-        
         
         <div class="type">
-          <span class='tk-proxima-nova'>{{item.props.type}}<span>
-          
-          
-          
-        
-          <span  ng-if="item.inquiries">—
-          <a ng-href='#/r/{{item.id}}/inq' tooltip="view the related {{item.inquiries}} inquiries"><label>{{item.inquiries}}</label> <i class="fa fa-comment"></i></a>
-          </span>
+          <span class='sans-serif' translate='resource.type.{{item.props.type}}'></span>
         </div>
-        <h3 class="tk-adelle" data-id='{{item.id}}'>
-         <!--  <span ng-if="currentAnnotation" ng-href="#/r/{{item.id}}" context="item" marked="currentAnnotation.annotated.title"></span>
-          <span ng-if="!currentAnnotation" ng-href="#/r/{{item.id}}" ng-bind-html="item.props | title:language"></span> -->
-          <span ng-if='!item.annotations || !item.annotations.length' marked="item.props|lookup:'title':language"></span>
-          <span ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'title':language"></span>
-          
+        <h3 class="sans-serif" >
+          <annotator context="title" notes="notes" item='item' language="language">
+            <span lookup context='item' field='title' language='language'></span>
+          </annotator>
         </h3>
         
         <div class='context'>
-          <span ng-repeat="location in item.places">
-              <a class="tag location" ng-click="toggleMenu($event, item, location, 'place')">{{location.name}}</a><!-- 
-              <a ng-if="location.geocode_id" ng-click="toggleInquirer(location)" class="tag location" >{{location.geocode_formatted_address}}</a>
-              <a ng-if="location.geonames_id" class="tag location" >{{location.geonames_toponymName}}, {{location.geonames_countryName}}</a>
-               --><span ng-if="!$last">-</span>
-            </span>
+          <span ng-if='item.places.length'>At 
+            <span ng-repeat="place in item.places"><span class="tag place" data-id='{{place.id}}' gasp-type='place' gasp-parent='{{item.type}}-{{item.id}}'>{{place.props.name}}</span>{{$last? '':  ', '}}</span> — 
+          </span>
           
-          <span class="empty" ng-if="!item.props.start_time" tooltip='click to add a date'>without any date <a class='btn btn-contribute' ng-click=''>add</a></span>
+          <span class="empty" ng-if="!item.props.start_time" tooltip='click to add a date'>without any date <a class='btn btn-contribute' ng-click='inspectMetadata(item, "date")' translate='button.edit'></a></span>
           <span ng-if='item.props.start_time'>
-            <a class='date' ng-href="#/r/{{item.id}}/inq/create/date" tooltip='click to propose a different date' ng-if="item.props.start_time">{{item.props|guessInterval}}</a><a class='btn btn-contribute' ng-click=''>edit</a>
+            <a class='date' ng-href="#/r/{{item.id}}/inq/create/date" tooltip='click to propose a different date' ng-if="item.props.start_time">{{item.props|guessInterval}}</a><a class='btn btn-contribute' ng-click='inspectMetadata(item, "date")'>edit</a>
           </span>
           <!-- <div class="collections">
             <div class="collection" ng-repeat="collection in item.collections"><a ng-href="#/c/{{collection.id}}">{{collection.name|humanize}}</a></div>
@@ -42,28 +24,28 @@
         </div>
           
         <div class="meta">
-          <p ng-if="item.themes.length" class="tags"><strong class='tk-proxima-nova'>themes</strong>:
+          <p ng-if="item.themes.length" class="tags"><strong class='sans-serif' translate='resource.themes.mentioned'></strong>:
             <span ng-repeat="the in item.themes"><span class="tag theme" data-id='{{the.id}}' gasp-type='theme' gasp-parent='{{item.type}}-{{item.id}}'>{{the.props|lookup:"name":language}}</span>{{$last? '':  ', '}}</span> — 
           </p>
-          <p class="tags"><strong class='tk-proxima-nova'>persons mentioned</strong>:
+          <p class="tags"><strong class='sans-serif' translate='resource.people.mentioned'></strong>:
             <span ng-if="item.persons.length == 0">none.</span>
             <span ng-repeat="per in item.persons" ng-include='"templates/partials/entity-person-tag.html"'></span>   <!-- — --> 
             <a class='btn btn-contribute' ng-click='contribute(item, "person")'>add</a>
           </p>
-          <p ng-if="item.social_groups.length" class="tags"><strong class='tk-proxima-nova'> groups</strong>:
+          <p ng-if="item.social_groups.length" class="tags"><strong class='sans-serif'> groups</strong>:
             <span ng-repeat="per in item.social_groups"><span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.props.name}} {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name}} </span>{{$last? '':  ', '}}</span>    
           </p>
-          <p class="tags"><strong class='tk-proxima-nova'>  organizations</strong>:
+          <p class="tags"><strong class='sans-serif' translate>resource.organizations.mentioned</strong>:
             <span ng-if="item.organizations.length == 0">none.</span>
             <span ng-repeat="tag in item.organizations" ng-include='"templates/partials/entity-organization-tag.html"'></span>
             <a class='btn btn-contribute' ng-click='contribute(item, "organization")'>add</a>   
           </p>
-          <p class="tags"><strong class='tk-proxima-nova'>location mentioned</strong>:
+          <p class="tags"><strong class='sans-serif' translate>resource.locations.mentioned</strong>:
             <span ng-if="item.locations.length == 0">none.</span>
             <span ng-repeat="tag in item.locations" ng-include='"templates/partials/entity-location-tag.html"'></span>
             <a class='btn btn-contribute' ng-click='contribute(item, "location")'>add</a>
           </p>
-          <p ng-if="item.props.languages.length"> <strong>available in</strong>:
+          <p ng-if="item.props.languages.length"> <strong class='sans-serif' translate>resource.language.availability</strong>:
             <span class="language {{lang == language? 'active':''}}" ng-repeat="lang in item.props.languages" ng-click='setLanguage(lang)'>{{lang}} </span>
           </p>
           
@@ -75,14 +57,14 @@
             <!-- <a class="btn btn-default action" tooltip="create a new inquiry" ng-href="#/r/{{item.id}}/inq/create">
               <i class="fa fa-comment-o"></i>
             </a> -->
-            <button ng-if='!isFavItem' class="btn btn-default action" ng-click='favourite()' tooltip="add to favourite items">
+            <button ng-if='!isFavItem' class="btn btn-default action" ng-click='favourite()' tooltip="{{'tooltip.resource.add.to.favourites'|translate}}">
               <i class="fa fa-heart-o"></i><span class='number'>{{item.lovers}}</span>
             </button>
             <button ng-if='isFavItem' class="btn btn-default action" ng-click='unfavourite()' tooltip="this resource belongs to your favourite collection">
               <i class="fa fa-heart animated pulse"></i><span class='number'>{{item.lovers}}</span>
             </button>
             
-            <button class="btn btn-default action" tooltip="add to bookmark list" ng-click="queue(item.id, true)">
+            <button class="btn btn-default action" tooltip="{{'tooltip.resource.add.to.myselection'|translate}}" ng-click="queue(item.id, true)">
               <i class="fa fa-bookmark-o"></i>
             </button>
           </div>
@@ -97,9 +79,9 @@
         <div class='fluid-container'>
           <div>
             <div >
-              <annotator target="{{item.id}}" context="caption" annotations='{{notes}}'>
-              <blockquote id='caption' ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'caption':language"></blockquote>
-              <blockquote id='caption' ng-if='item.annotations.length == 0' context='item' marked="item.annotations|lookup:'caption':language"></blockquote>
+              <annotator context="caption" item='item' notes="notes" language="language">
+                <blockquote lookup context='item' field='caption' language='language'></blockquote>
+                
               </annotator>
             </div>
           
@@ -118,30 +100,22 @@
                     <li><a ng-click="switchVersion(mergedVersion)">merged version</a></li>
                   </ul>
                 </div>
-                <!-- <div class='img-wrapper' ng-if='item.props.tiles_url'>
-                  <div annotoriousol tiles='item.props.tiles_url'></div>
-                </div> -->
+                
                 <div class="img-wrapper">
-                  <div annota src="item.props.url" item='item' notes='positions' contribute='contribute(item, type, options)' prefix="media/"></div>
+                  <div annotorious src="item.props.url" item='item' notes='positions' contribute='contribute(item, type, options)' prefix="media/"></div>
                   <!-- <img  ng-src="media/{{item.props.url}}" annotorious contribute='contribute(item, type, options)' w="item.props.width" h="item.props.height" version="currentVersion" item='item' /> -->
                 </div>
               </div>
-              
-              <annotator>
-                <div class='full-text' ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'url':language" ></div>
-              </annotator>
+              <div ng-if='item.props.mimetype!="image"' >
+                <annotator context="full-text" item='item' notes="notes" language="language">
+                  <div class='full-text' ng-if='item.annotations && item.annotations.length' context='item' marked="item.annotations|annotate:'url':language" ></div>
+                </annotator>
+              </div>
             </div>
           </div>
         </div>
           
         
-        <!-- <div annotator>
-        <div class="full-text" ng-if='item.props.mimetype!="image"' lazytext url='item.props|url:language'></div>
-        </div -->
-        <!-- 
-        <blockquote ng-if="item.props.stakeholders||item.props.caption">
-         {{item.props.stakeholders||item.props.caption}}
-        </blockquote> -->
         
         <div class="doi">
           <span marked="item.props|lookup:'ipr':language"></span>

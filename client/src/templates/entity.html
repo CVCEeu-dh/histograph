@@ -1,43 +1,55 @@
 <div id='perspective-menu' class="tk-proxima-nova header-menu" ng-include src="'templates/partials/helpers/menu.html'">
 </div>
 
-<div id="perspective" class="{{queueStatus}}">
+<div id="perspective" ng-if="item"  class="{{queueStatus}}">
   
-      <div ng-if="item" class="entity item">
-        <div  ng-if="item.props.thumbnail" class="profile-pic">
-          <div class="profile-pic-wrapper">
-            
-            <img ng-src="{{item.props.thumbnail}}">
+      <div class="entity item node">
+        <div ng-if="item.props.thumbnail" class=" thumbnail">
+          <div class="thumbnail-wrapper" style='background-image: url({{item.props.thumbnail}})'></div>
+        </div>
+        <div class="content  {{item.props.thumbnail?'':'without-thumbnail'}}">
+          <h3 marked="item.props|lookup:'name':language"></h3>
+          <div class='meta' ng-if='item.type=="person"'>{{item.props|datesOfSomeone}}</div>
+          <div class='meta' ng-if='item.type=="location"'>{{item.props.country}} <a ng-href='https://www.google.com/maps/place/{{item.props.lat}},{{item.props.lng}}/@{{item.props.lat}},{{item.props.lng}},8z' target='_blank'>(view on google maps)</a></div>
+          
+          <div class="mistake" ng-if="item.props.score && item.props.score < 0">
+            signaled as <b>mistake</b> by <span ng-repeat='u in item.props.downvote'><a>{{u}}</a>{{$last?'':', '}}</span>
           </div>
         </div>
-        <h3><a>{{item.props | title : language}} </a></h3>
-        <div class="mistake" ng-if="item.props.score && item.props.score < 0">
-          signaled as <b>mistake</b> by <span ng-repeat='u in item.props.downvote'><a>{{u}}</a>{{$last?'':', '}}</span>
+        <div class='description'>
+          <span class='meta-label sans-serif'>{{item.type}}</span> {{item.props|lookup:'description':language}}
         </div>
-        
-        <div ng-if="item.type == 'location' && item.props.geonames_id" class="description">position: {{item.geocode_lat}}, {{item.geocode_lng}}</div>
+
+        <!-- <div ng-if="item.type == 'location' && item.props.geonames_id" class="description">position: {{item.geocode_lat}}, {{item.geocode_lng}}</div>
         <div ng-if="item.type == 'location' && item.props.geocode_id" class="description">position: {{item.props.geocode_lat}}, {{item.props.geocode_lng}}</div>
-        <div ng-if="item.type == 'person'" class="description">{{item.props.description}} {{item.props.birth_time | datesOfAPerson : item.props.death_time}}</div>
+        <div ng-if="item.type == 'person'" class="description">{{item.props.description}} {{item.props.birth_time | datesOfAPerson : item.props.death_time}}</div> -->
         
-        <div class="actions">
+        <!-- <div class="actions">
           <div class="btn-group">
             <button class='btn btn-default' tooltip-append-to-body="true" tooltip="this is a mistake" ng-click="downvote()"><i class="fa fa-bug"></i></button>
-            <!-- <button class="btn btn-default" tooltip-append-to-body="true" tooltip="discute this entity" comment="comment(item)"><i class="fa fa-comment-o"></i></button> -->
+            <button class="btn btn-default" tooltip-append-to-body="true" tooltip="discute this entity" comment="comment(item)"><i class="fa fa-comment-o"></i></button>
            <button class="btn btn-default" tooltip-append-to-body="true" tooltip="add to bookmark list" ng-click="queue(item.id, true)">
               <i class="fa fa-play-circle-o"></i>
             </button>
           </div>
         </div>
-        
-        <div class="tags" style='margin-left:20px; margin-right:20px' ng-if="relatedPersons.length > 0">Appearing with:  
-        <span ng-repeat="person in relatedPersons"><span class="person tag" data-id='{{person.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{person.props.name}} - {{person.props.description}} ({{person.props.birth_date | date:"yyyy"}} - {{person.props.death_date | date:"yyyy"}})' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' >
+         -->
+        <div class="tags" ng-if="relatedPersons.length > 0"><span class='meta-label sans-serif'>People mentioned</span>
+        <span ng-repeat="person in relatedPersons"><span class="person tag" data-id='{{person.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{person.props.name}} - {{person.props.description}} ({{person.props.birth_date | date:"yyyy"}} - {{person.props.death_date | date:"yyyy"}})' gasp-type='person'  >
           {{person.props.name}} ({{person.weight}})</span>{{$last?'':', '}}</span>
-        </div><span ng-if="item.props.languages.length">  —  <i>available in</i>:
+        </div>
+
+        <div class="tags" ng-if="relatedLocations.length > 0"><span class='meta-label sans-serif'>Locations mentioned</span>
+        <span ng-repeat="location in relatedLocations"><span class="location tag" data-id='{{location.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{location.props.name}} - {{location.props.country}} ' gasp-type='location'  >
+          {{location.props.name}} - {{location.props.country}} ({{location.weight}})</span>{{$last?'':', '}}</span>
+        </div>
+
+        <span ng-if="item.props.languages.length">  —  <i>available in</i>:
           <span ng-repeat="lang in item.props.languages" ng-click='setLanguage(lang)'>{{lang}} </span>
         </span>
         
         <blockquote ng-if='item.props.links_wiki' class="abstract">
-          <p><b>source: wikipedia {{item.props.links_wiki}}</b> — {{item.props | abstract : language }}</p>
+          <p><span class='meta-label sans-serif'>dbpedia: <a ng-href='http://dbpedia.org/resource/{{item.props.links_wiki}}'>{{item.props.links_wiki}}</a></span> — {{item.props | abstract : language }}</p>
         </blockquote>
         <!-- 
         <blockquote ng-if="item.abstract">

@@ -1,0 +1,30 @@
+
+
+<div class='modal-body sans-serif'>
+
+  <div ng-if='type == "date"'>
+    Can you guess the date for <b class='flatten' marked="item.props|lookup:'title':language"></b>?
+
+    <div class="row ">
+      <div class='col-sm-6'>
+        <label class=''>From</label>
+        <p class="input-group">
+          <input type="date" class="form-control" uib-datepicker-popup ng-model="date.from" is-open="popup2.opened" min-date="minDate" max-date="maxDate" datepicker-options="dateOptions" date-disabled="disabled(date, mode)" ng-required="true" close-text="Close" />
+        </p> 
+      </div>
+      <div class='col-sm-6'>
+        <label>to</label>
+        <p class="input-group">
+                <input type="date" class="form-control" uib-datepicker-popup ng-model="date.to" is-open="popup2.opened" min-date="minDate" max-date="maxDate" datepicker-options="dateOptions" date-disabled="disabled(date, mode)" ng-required="true" close-text="Close" />
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class='modal-footer'>
+  <div class="btn-group btn-group-dual" role="group">
+    <button  class='btn btn-primary btn-line {{persons.length || locations.length || organizations.length? "":"disabled"}}' ng-click='ok()'>confirm</button>
+    <button class='btn btn-secondary btn-line' ng-click='cancel()'>discard</button>
+  </div>
+</div>

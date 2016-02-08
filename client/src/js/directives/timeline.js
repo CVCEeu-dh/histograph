@@ -129,22 +129,33 @@ angular.module('histograph')
           
           tim.fn.y = d3.scale.sqrt()
             .range([
-              30,
-              0
+              10,
+              50
+            ]);
+
+          tim.fn.color = d3.scale.sqrt()
+            .range([
+              '#ccc', '#151515'
+            ]);
+
+          tim.fn.fcolor = d3.scale.sqrt()
+            .range([
+              '#AB2211', '#FF5742'
             ]);
           
-          tim.fn.area = d3.svg.area()
-              //.interpolate("monotone")
-              .x(function (d) {
-                return tim.fn.x(d.t);
-              })
-              .y0(function (d) {
-                return tim.fn.y(d.weight);
-              })
-              .y1(30);
+          // tim.fn.area = d3.svg.area()
+          //     //.interpolate("monotone")
+          //     .x(function (d) {
+          //       return tim.fn.x(d.t);
+          //     })
+          //     .y0(function (d) {
+          //       return tim.fn.y(d.weight);
+          //     })
+          //     .y1(30);
         }
         
         tim.drawDates = function (extent) {
+           $log.log('::timeline -> drawDates() ', extent);
           if(!extent) {
             tim.ui.brushDateLeft.style({
               visibility: 'hidden'
@@ -278,113 +289,167 @@ angular.module('histograph')
           })
         };
         
-        //
+        // evaluate initial filters
         tim.evaluate = function() {
           if(!tim.timeExtent)
             return false
-          if(!scope.filters.from && !scope.filters.to) {
-            tim.fn.clear();
-            return false
-            
-          }
+          
           // evaluate scope .filters agains the current timeExtension and decide if thiere is the need for updating
-          var left = scope.filters.from? d3.time.format("%Y-%m-%d").parse(scope.filters.from): tim.timeExtent[0],
-              right = scope.filters.to? d3.time.format("%Y-%m-%d").parse(scope.filters.to): tim.timeExtent[1],
+          var left = scope.filters.from && scope.filters.from.length? d3.time.format("%Y-%m-%d").parse(scope.filters.from[0]): tim.timeExtent[0],
+              right = scope.filters.to && scope.filters.to.length? d3.time.format("%Y-%m-%d").parse(scope.filters.to[0]): tim.timeExtent[1],
               proceed = left != tim.left || right != tim.right;
-              
+
           tim.left = left;
           tim.right = right;
-          $log.log('::timeline evaluate -tochange:', proceed)
+          $log.log('::timeline -> evaluate() - tochange:', proceed)
           return proceed;
         }
         
         tim.fn.clear = function() {
+          $log.log('::timeline -> clear()');
            tim.gBrush.call(tim.brush.clear());
            tim.drawDates()
         }
         
+        tim.resize = function() {
+          clearTimeout(tim.resizeTimer);
+          var isResizeNeeded = tim.width() != tim.ui.viewer[0][0].clientWidth;
+          $log.log('::timeline @resize: ', isResizeNeeded? 'resize!': 'do not rezize');
+          if(isResizeNeeded) {
+            tim.width(tim.ui.viewer[0][0].clientWidth);
+            // reset ranges according to width
+            tim.svg.attr("width", tim.width());
+            tim.resizeTimer = setTimeout(tim.drawCtx, 200);
+          }
+        }
+
         tim.draw = function() {
           clearTimeout(tim.resizeTimer);
-          if(!tim.ui.viewer)
+          if(!tim.ui.viewer || !scope.timeline)
             return;
+          // tim.width(tim.ui.viewer[0][0].clientWidth);
+          
+          var dataset,    // the current dataset, sorted
+              weigthExtent,
+              timeExtent; // [minT, maxT] array of max and min timestamps
+
+          dataset = angular.copy(_.flatten([scope.timeline])).map(function (d) {
+            d.t*=1000; // different level of aggregation
+            return d;
+          });
+
+          $log.log('::timeline -> draw() - w:', tim.width(), '- n. values:', dataset.length)
+
+          weigthExtent = d3.extent(dataset, function (d) {
+            return d.weight
+          });
+          tim.fn.fcolor.domain(weigthExtent);
+
+           console.log('    weightext: ', weigthExtent, tim.fn.fcolor(5), tim.fn.fcolor(100))
+          
+          // sort by time label
+          dataset.sort(function (a, b) {
+            return a.t < b.t ? -1 : 1
+          });
+          
+          var histogram = tim.histograms.selectAll('.tn')
+            .data(dataset, function (d){
+              return d.k || d.t
+            });
+          var _histograms = histogram.enter()
+            .append('rect')
+              .attr('class', 'tn');
+          histogram.exit()
+            .remove()
+
+          histogram.
+            attr({
+              x: function(d) {
+                return tim.fn.x(d.t)
+              },
+              y: function(d) {
+                return 15 - (tim.fn.y(d.weight)/2)
+              },
+              width: 2,
+              height: function(d) {
+                return tim.fn.y(d.weight)
+              },
+              // height: 20,
+              fill: function(d) {
+                return tim.fn.fcolor(d.weight)
+              }
+            })
+          
+          
+        };
+
+        var contextualDataset,
+            contextualweigthExtent;
+
+        tim.drawCtx = function() {
+          clearTimeout(tim.resizeTimer);
+          if(!tim.ui.viewer || !scope.contextualTimeline)
+            return;
+
           tim.width(tim.ui.viewer[0][0].clientWidth);
           
           var dataset,    // the current dataset, sorted
               weigthExtent,
               timeExtent; // [minT, maxT] array of max and min timestamps
-          
-          tim.timeExtent = d3.extent(scope.timeline, function (d) {
-            return d.t*1000
+
+
+          dataset = angular.copy(_.flatten([scope.contextualTimeline])).map(function (d) {
+            d.t*=1000; // different level of aggregation
+            return d;
+          });
+
+          $log.log('::timeline -> drawCtx() - w:', tim.width(), '- n. values:', dataset.length)
+
+          // time extent
+          tim.timeExtent = d3.extent(dataset, function (d) {
+            return d.t
           });
           
-          // if(scope.timeline.length < 1000)
-            dataset = angular.copy(scope.timeline).map(function (d) {
-              d.t*=1000; // different level of aggregation
-              return d;
-            });
-          // else {
-          //   dataset = angular.copy(scope.timeline).map(function (d) {
-          //     d.t*=1000; // different level of aggregation
-          //     d.m = tim.fn.asYear(new Date(d.t));
-          //     return d;
-          //   });
-          //   dataset = _.map(_.groupBy(dataset, 'm'), function (values, k) {
-          //     return {
-          //       weight: _.sum(values, 'weight'),
-          //       k: k,
-          //       t: _.min(values, 't').t,
-          //       t1: _.max(values, 't').t
-          //     };
-          //   });
-          //   console.log('::timeline -> draw() - sample:',_.take(dataset, 5))
-          // }
-           
+          // weight extent
           weigthExtent = d3.extent(dataset, function (d) {
             return d.weight
           });
           
-          
+          // sort by time label
           dataset.sort(function (a, b) {
             return a.t < b.t ? -1 : 1
           });
           
-          // loop throug data
-          $log.log('::timeline -> draw() - w:', tim.width(), '- n. values:', dataset.length)
-          
           // set date from extent
-          // console.log(timeExtent)
           tim.ui.dateLeft
               .text(tim.fn.asDay(new Date(tim.timeExtent[0])));
           tim.ui.dateRight
               .text(tim.fn.asDay(new Date(tim.timeExtent[1])));
+                    
           
-          
-          //, d3.time.format("%Y-%m-%d").parse(scope.filters.from));
-          
-          // transform filters in other filters.
-          tim.extension = [
-            scope.filters.from? d3.time.format("%Y-%m-%d").parse(scope.filters.from): tim.timeExtent[0],
-            scope.filters.to? d3.time.format("%Y-%m-%d").parse(scope.filters.to): tim.timeExtent[1]
-          ]
-          
-          //
-          tim.svg.attr("width", tim.width())
           tim.fn.x = d3.time.scale()
             .range([0, tim.width() - tim.padding.h * 2]);
           
           tim.fn.x.domain(tim.timeExtent);
           tim.fn.y.domain(weigthExtent);
-           
+          tim.fn.color.domain(weigthExtent);
           
-          if(tim.extension[0] || tim.extension[1]) {
+          console.log('::timeline -> drawCtx(): weight', weigthExtent, tim.fn.color(5), tim.fn.color(100))
+          console.log('::timeline -> drawCtx(): timeExtent', tim.timeExtent)
+          
+          if(tim.evaluate()) {
             tim.brush.x(tim.fn.x).extent(tim.timeExtent);
-            tim.gBrush.call(tim.brush.extent(tim.extension));
+            tim.gBrush.call(tim.brush.extent([+tim.left, +tim.right]));
             tim.gBrush.call(tim.brush.event);
             tim.gBrush.selectAll('.resize rect').attr({
               height: 60,
               width: 12
             })
           }
+
+          // move brush
+          // tim.drawDates()
+
           // let's draw !!!
           var histogram = tim.histograms.selectAll('.t')
             .data(dataset, function (d){
@@ -393,53 +458,78 @@ angular.module('histograph')
           var _histograms = histogram.enter()
             .append('rect')
               .attr('class', 't');
-          
+          histogram.exit()
+            .remove();
+
           histogram.
             attr({
               x: function(d) {
                 return tim.fn.x(d.t)
               },
-              y: function(d) {
-                return tim.fn.y(d.weight)
-              },
-              width: 3,
-              height: function(d) {
-                return 30 - tim.fn.y(d.weight)
+              // y: function(d) {
+              //   return tim.fn.y(d.weight) -5
+              // },
+              y: 10,
+              width: 2,
+              height: 10,
+              // height: function(d) {
+              //   return 30 - tim.fn.y(d.weight)
+              // },
+              fill: function(d) {
+                return tim.fn.color(d.weight)
               }
             })
           
-          
+          if(scope.timeline)
+            tim.draw();
         };
         
         /*
           Listeners, watchers
         */
-        // on graph change, change the timeline as well
+        /*
+          @timeline
+          if timeline values has changed, for some reason
+        */
         scope.$watch('timeline', function (timeline) {
-          if(!timeline)
+          if(!timeline || timeline.length == undefined)
             return;
-          $log.log('::timeline n. nodes ', timeline.length);
-          
-          tim.init();
+          $log.log('::timeline @timeline n. nodes ', timeline.length);
           tim.draw();
-          // computate min and max
         });
-        
-        scope.$watch('filters', function (filters) {
-          if(filters) {
-            $log.log('::timeline filters:',filters);
-            if(tim.evaluate())
-              tim.draw();
+
+        /*
+          @contextualTimeline
+          Draw the background timeline (context)
+          normally called once
+        */
+        scope.$watch('contextualTimeline', function (contextualTimeline) {
+          if(!contextualTimeline || contextualTimeline.length == undefined)
+            return;
+          $log.log('::timeline @contextualTimeline n. nodes ', contextualTimeline.length);
+          tim.drawCtx();
+        });
+
+        /*
+          @filters
+        */
+        scope.$watch('filters', function(filters) {
+          if(tim.evaluate()) {
+            tim.brush.x(tim.fn.x).extent(tim.timeExtent);
+            tim.gBrush.call(tim.brush.extent([+tim.left, +tim.right]));
+            tim.gBrush.call(tim.brush.event);
+            tim.gBrush.selectAll('.resize rect').attr({
+              height: 60,
+              width: 12
+            })
           }
         })
-        
-        angular.element($window).bind('resize', function() {
-          
-          clearTimeout(tim.resizeTimer);
-          tim.resizeTimer = setTimeout(tim.draw, 200);
-        });
-        
-        
+        /*
+          listen to resize window event
+        */
+        angular.element($window).bind('resize', tim.resize);
+
+        tim.init();
       }
     }
   });

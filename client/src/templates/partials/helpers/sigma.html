@@ -1,0 +1,16 @@
+<div id="playground"></div>
+       <!-- <div gmasp target="target"></div> -->
+        <!-- <div id="tips" ng-if="tips.length > 0"><div>{{tips}}</div></div> -->
+<div snippets user="user" id="sigma-snippets" target="target" center="center"></div>
+<div id="sigma-messenger" ng-if="message.text.length" class="animated {{message.visible? 'fadeIn': 'fadeOut'}}"><div class="inner">{{message.text}}</div></div>
+<div id="commands" class="{{lookup?'lookup':''}}">
+  <div tooltip="view all nodes" tooltip-append-to-body="true" class="action {{lookup? 'bounceIn animated': 'hidden'}}" ng-click="toggleLookup()"><i class="fa fa-eye"></i></div>
+  <div class="action {{status=='RUNNING'? 'bounceIn animated': ''}}" ng-click="togglePlay()"><i class="fa fa-{{status=='RUNNING' ? 'stop': 'play'}}"></i></div>
+  <div class="action" ng-click="rescale()"><i class="fa fa-dot-circle-o"></i></div>
+  <div class="action" ng-click="zoomin()"><i class="fa fa-plus"></i></div>
+  <div class="action" ng-click="zoomout()"><i class="fa fa-minus"></i></div>
+</div>
+<div id="sigma-actions">
+  
+  <button class='btn btn-line' uib-tooltip='download as SVG graphics' tooltip-placement='left' ng-click='download()'><i class='fa fa-download'></i></button>
+</div>

@@ -54,8 +54,10 @@ var sessionMiddleware = session({
   saveUninitialized: true
 })
 
-console.log('logs:', settings.paths.accesslog);
-console.log('env: ', env);
+console.log('logs: ', settings.paths.accesslog);
+console.log('env:  ', env);
+console.log('port: ', settings.port);
+console.log('url:  ', settings.baseurl)
 
 app.use(compress());
 
@@ -132,6 +134,7 @@ clientRouter.route('/').
     res.render('index', {
       user: req.user || 'anonymous',
       message: 'hooray! welcome to our api!',
+      types: settings.types,
       scripts: clientFiles.scripts
     });
   });
@@ -155,11 +158,12 @@ clientRouter.route('/login')
 clientRouter.route('/logout')
   .get(function(req, res){
     req.logout();
-    res.render('index', {
-      user: req.user || 'anonymous',
-      message: 'hooray! welcome to our api!',
-      scripts: clientFiles.scripts
-    });
+    res.redirect('/')
+    // res.render('index', {
+    //   user: req.user || 'anonymous',
+    //   message: 'hooray! welcome to our api!',
+    //   scripts: clientFiles.scripts
+    // });
   });
 
 clientRouter.route('/signup')
@@ -231,6 +235,16 @@ clientRouter.route('/auth/google/callback')
       });
     })(req, res, next)
   });
+
+clientRouter.route('/media/:path/:file')
+  .get(function (req, res, next) {
+    var filename = path.join(settings.paths.media, req.params.path, req.params.file);
+    res.sendFile(filename, {root: path.isAbsolute(settings.paths.media)?'':__dirname}, function (err) {
+      if(err) {
+        res.status(err.status).end();
+      }
+    });
+  })
 
 clientRouter.route('/media/:file')
   .get(function (req, res, next) {
@@ -446,7 +460,9 @@ apiRouter.route('/resource/:id(\\d+)/related/resource/graph')
   .get(ctrl.resource.getRelatedResourcesGraph);
 apiRouter.route('/resource/:id(\\d+)/related/resource/timeline')
   .get(ctrl.resource.getRelatedResourcesTimeline);
-apiRouter.route('/cooccurrences') // @todo move to entity controller.
+
+
+apiRouter.route('/cooccurrences/:entityA(person|theme|location|place|organization)/related/:entityB(person|theme|location|place|organization)') // @todo move to entity controller.
   .get(ctrl.resource.getCooccurrences)
 // apiRouter.route('/resource/related/:entity(person|location|organization|theme)/graph')
 
@@ -465,18 +481,21 @@ apiRouter.route('/entity/:id([\\d,]+)')
 apiRouter.route('/entity/:id(\\d+)/related/resource')
   .get(ctrl.entity.getRelatedResources);
   
-apiRouter.route('/entity/:id(\\d+)/related/:entity(person|location|organization)')
+apiRouter.route('/entity/:id(\\d+)/related/:entity(person|location|theme|organization)')
   .get(ctrl.entity.getRelatedEntities)
 
 apiRouter.route('/entity/:id(\\d+)/related/issue')
   .post(ctrl.entity.createRelatedIssue)
 
-apiRouter.route('/entity/:id/related/:entity(person|location|organization)/graph')
+apiRouter.route('/entity/:id/related/:entity(person|location|theme|organization)/graph')
   .get(ctrl.entity.getRelatedEntitiesGraph);
 
 apiRouter.route('/entity/:id(\\d+)/related/resource/graph')
   .get(ctrl.entity.getRelatedResourcesGraph);
   
+apiRouter.route('/entity/:id(\\d+)/related/resource/timeline')
+  .get(ctrl.entity.getRelatedResourcesTimeline);
+
 apiRouter.route('/entity/:id(\\d+)/upvote')
   .post(ctrl.entity.upvote)
   
@@ -487,7 +506,7 @@ apiRouter.route('/entity/:entity_id(\\d+)/related/resource/:resource_id(\\d+)')
   .post(ctrl.entity.createRelatedResource) // create or merge the relationship. The authentified user will become a curator
   .delete(ctrl.entity.removeRelatedResource); // delete the relationship whether possible
 
-apiRouter.route('/entity/:entity_id(\\d+)/related/resource/:resource_id(\\d+)/:action(upvote|downvote)')
+apiRouter.route('/entity/:entity_id(\\d+)/related/resource/:resource_id(\\d+)/:action(upvote|downvote|merge)')
   .post(ctrl.entity.updateRelatedResource);
 
   

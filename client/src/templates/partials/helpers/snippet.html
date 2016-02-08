@@ -1,16 +1,16 @@
-<div class='snip {{status}} {{center.type}}' data-id='{{center.id}}' ng-if='center' ng-click='setTarget(center)' style='background-image: url({{center.props.thumbnail}})' uib-tooltip="{{center.props|lookup:'name':language}}" tooltip-placement='right'>
+<div class='snip {{status}} {{center.type}}'  ng-if='center' ng-click='setTarget(center)' style='background-image: url({{center.props.thumbnail}})' uib-tooltip="{{center.props|lookup:'name':language}}" tooltip-placement='right'>
   <!-- <h2>{{center.props|lookup:'name':language}}</h2> -->
 </div>
 <div class="inner {{center?'wait':''}} {{status}}">
   
   <div class='nodes'>
     <div ng-if='items.length > 1' class="line">
-        <div class='weight'>{{totalItems}}</div>
+        <div class='weight'>{{totalItems || weight}}</div>
     </div>
     
     <div ng-repeat='relatedItem in items'>
       <!-- person node -->
-      <div ng-if='relatedItem.type=="person"' class='node person' data-id="{{relatedItem.id}}">
+      <div ng-if='relatedItem.type!="resource"' class='node {{relatedItem.type}}' >
         <div class='thumbnail'>
           <div class="thumbnail-wrapper" style='background-image: url({{relatedItem.props.thumbnail}})'>    
             
@@ -18,18 +18,26 @@
         </div>
         <div class='content'>
           <h4><a ng-href='#/e/{{relatedItem.id}}/g' marked="relatedItem.props|lookup:'name':language"></a></h4>
-          <div class='date'>{{relatedItem.props.birth_time | datesOfAPerson : relatedItem.props.death_time}}</div>
+          <div class='date'>{{relatedItem.type}} - 
+
+            <span ng-if='relatedItem.type=="person"'>{{relatedItem.props.birth_time | datesOfAPerson : relatedItem.props.death_time}}</span>
+            <span ng-if='relatedItem.type=="location"'>{{relatedItem.props.country}} {{relatedItem.props.lat}} - {{relatedItem.props.lng}}</span>
+          </div>
           <div ng-if="relatedItem.props.links_viaf">VIAF: {{relatedItem.props.links_viaf}}</div>
-          <div ng-if="relatedItem.props.links_wiki">DBPEDIA: {{relatedItem.props.links_wiki}}</div>
+          <div ng-if="relatedItem.props.links_wiki" class='links'><a href='http://dbpedia.org/resource/{{relatedItem.props.links_wiki}}' target='_blank'>dbpedia: {{relatedItem.props.links_wiki}}</a></div>
         </div>
         <div class="actions">
-          <a class="action" title="visit" uib-tooltip="view details and related documents" uib-tooltip-placement="top" uib-tooltip-append-to-body="true" ng-href='#/e/{{relatedItem.id}}'> <!-- ng-click="addToFilter(relatedItem)"> -->
-            <span class="fa fa-link"></span></a>
+          
           <!-- <a class='action'>
             <span class="fa fa-target"></span></a>
           </a> -->
-          <a class="action" title="filter" uib-tooltip="add to your bookmarks" uib-tooltip-placement="top" uib-tooltip-append-to-body="true" ng-click="queue(relatedItem)">
-            <span class="fa fa-bookmark-o"></span></a>
+          <!-- <a class="action" title="filter" uib-tooltip="add to your bookmarks" uib-tooltip-placement="top" uib-tooltip-append-to-body="true" ng-click="queue(relatedItem)">
+            <span class="fa fa-bookmark-o"></span></a> -->
+        </div>
+        <div class='btn-group btn-group dual' style='margin: 10px 0'>
+          <a class='btn btn-default btn-line-white' ng-href='/#/e/{{relatedItem.id}}'>more</a>
+          <button class='btn btn-default btn-line-white' ng-click="queue(relatedItem)"> <span class="fa fa-bookmark-o"></span></button>
+          <button class='btn btn-default btn-line-white' data-id="{{relatedItem.id}}"> <span class="fa fa-dot-circle-o"></span></button>
         </div>
         <div class='clear'></div>
       </div>
@@ -44,9 +52,15 @@
         </div>
         <div class='content'>
           <h4 marked="relatedItem.props|lookup:'title':language"></h4>
-          <div class='date'>{{relatedItem.props | guessInterval}} {{language}}</div>
-          
+          <div class='date'>{{relatedItem.props | guessInterval}}</div>
+
         </div>
+        <div class='btn-group btn-group dual'>
+          <a class='btn btn-default btn-line-white' ng-href='/#/r/{{relatedItem.id}}'>more</a>
+           <button class='btn btn-default btn-line-white' ng-click="queue(relatedItem)"> <span class="fa fa-bookmark-o"></span></button>
+           <button class='btn btn-default btn-line-white' data-id='{{center.id}}'> <span class="fa fa-dot-circle-o"></span></button>
+        </div>
+        
         <div class='clear'></div>
       </div>
     </div>

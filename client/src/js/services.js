@@ -108,7 +108,7 @@ angular.module('histograph')
     return $resource('/api/entity/:id', {}, {});
   })
   .factory('EntityRelatedFactory', function ($resource) {
-    return $resource('/api/entity/:id/related/:model');
+    return $resource('/api/entity/:id/related/:model/:viz');
   })
   .factory('EntityExtraFactory', function ($resource) {
     return $resource('/api/entity/:id/:extra', {}, {});
@@ -127,7 +127,7 @@ angular.module('histograph')
     GET cooccurrences
   */
   .factory('CooccurrencesFactory', function ($resource) {
-    return $resource('/api/cooccurrences', {}, {
+    return $resource('/api/cooccurrences/:model/related/:projected_model', {}, {
         query: {method: 'GET' },
     });
   })

@@ -16,7 +16,6 @@ angular.module('histograph')
     
     
     
-    
     /*
       Set graph title
     */
@@ -119,7 +118,7 @@ angular.module('histograph')
   /*
     wall of resources
   */
-  .controller('ExploreResourcesCtrl', function ($scope, $log, ResourceFactory, EVENTS) {
+  .controller('ExploreResourcesCtrl', function ($scope, $log, VisualizationFactory, VIZ, ResourceFactory, EVENTS) {
     $log.debug('ExploreResourcesCtrl ready', $scope.params);
     $scope.limit  = 20;
     $scope.offset = 0;
@@ -164,11 +163,17 @@ angular.module('histograph')
       $scope.sync();
     });
 
+    VisualizationFactory.resource(VIZ.TIMELINE).then(function (res) {
+      $log.info('ExploreCtrl init timeline', res);
+      $scope.timeline = res.data.result.timeline;
+      // $scope.initialTimeline
+    });
+
     $scope.sync();
   })
 
 
-.controller('ExploreEntitiesCtrl', function ($scope, $log, CooccurrencesFactory, EVENTS) {
+.controller('ExploreEntitiesCtrl', function ($scope, $log, CooccurrencesFactory, relatedModel, projectedModel, EVENTS) {
     $log.debug('ExploreEntitiesCtrl ready', $scope.params);
     $scope.limit  = 20;
     $scope.offset = 0;
@@ -176,7 +181,11 @@ angular.module('histograph')
       Reload related items, with filters.
     */
     $scope.syncGraph = function() {
-      CooccurrencesFactory.get($scope.params, function (res){
+      CooccurrencesFactory.get(angular.extend({}, $scope.params, {
+          model: relatedModel,
+          projected_model: projectedModel,
+          limit: 300
+        }), function (res){
         $log.log('ExploreEntitiesCtrl CooccurrencesFactory returned a graph of',res.result.graph.nodes.length, 'nodes');
         if($scope.filters.with)
           $scope.setGraph(res.result.graph, {

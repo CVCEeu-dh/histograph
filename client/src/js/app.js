@@ -6,34 +6,43 @@
  *
  * Main module of the application.
  */
-CodeMirror.defineSimpleMode("hg", {
-  start: [
-    { regex: /#/,    push: "tag", token: "tag" },
-    { regex: /@/,    push: "user", token: "comment" }
-  ],
-  tag: [
-    { regex: /\s/, pop: true, token: "tag" },
-    { regex: /./, token: "tag" }
-  ],
-  user: [
-    { regex: /\s/, pop: true, token: "comment" },
-    { regex: /./, token: "comment" }
-  ]
-});
+// CodeMirror.defineSimpleMode("hg", {
+//   start: [
+//     { regex: /#/,    push: "tag", token: "tag" },
+//     { regex: /@/,    push: "user", token: "comment" }
+//   ],
+//   tag: [
+//     { regex: /\s/, pop: true, token: "tag" },
+//     { regex: /./, token: "tag" }
+//   ],
+//   user: [
+//     { regex: /\s/, pop: true, token: "comment" },
+//     { regex: /./, token: "comment" }
+//   ]
+// });
 
 angular
   .module('histograph', [
     'ui.router',
     'ngRoute',
     'ngResource',
+    'ngSanitize',
     'ngCookies',
     'ui.bootstrap',
-    'ui.codemirror',
+    'pascalprecht.translate',// angular-translate
+    // 'ui.codemirror',
     // 'mgcrea.ngStrap'
     'perfect_scrollbar',
     'LocalStorageModule',
-    'masonry'
+    'masonry',
+    'angular-tour'
   ])
+  .constant('LOCALES', {
+    'locales': {
+      'en_US': 'English'
+    },
+    'preferredLocale': 'en_US'
+  })
   .constant("EVENTS", {
     USE_USER: 'use_user',
     USER_NOT_AUTHENTIFIED: 'user_not_authentified',
@@ -43,10 +52,14 @@ angular
     ANNOTATOR_HIDDEN: 'annotationEditorHidden',
     INFINITE_SCROLL: 'infinite_scroll',
     // proper angular events (directives needs to be alerted)
-    LOCATION_CHANGE_START: 'LOCATION_CHANGE_START',
-    STATE_CHANGE_SUCCESS: 'STATE_CHANGE_SUCCESS',
+    LOCATION_CHANGE_START: 'location_change_start',
+    STATE_CHANGE_SUCCESS: 'state_change_success',
+
+    STATE_VIEW_CONTENT_LOADED: 'state_view_content_loaded',
     // sigma spefcific events
-    SIGMA_SET_ITEM: 'sigma_set_item'
+    SIGMA_SET_ITEM: 'sigma_set_item',
+    // start tour
+    START_GUIDED_TOUR: 'start_guided_tour',
   })
   .constant("VIZ", {
     TIMELINE: 'timeline'
@@ -65,52 +78,32 @@ angular
     CLOSEST_DATE: {
       label: 'date (closest)',
       value: '-date'
+    },
+
+    ASC_DATE: {
+      label: 'date (oldest first)',
+      value: 'date'
+    },
+
+    DESC_DATE: {
+      label: 'date (closest first)',
+      value: '-date'
     }
     
   })
-  .constant('GRAMMAR', {
-    AS_TYPES: [
-      {
-        name: 'of any type',
-      },
-      {
-        name: '(pictures)',
-        filter: 'type=picture'
-      },
-      {
-        name: '(cartoons)',
-        filter: 'type=cartoon'
-      },
-      {
-        name: '(letters)',
-        filter: 'type=letter'
-      },
-      {
-        name: '(treaty)',
-        filter: 'type=treaty'
-      }
-    ],
-    IN_TYPES: [
-      {
-        name: 'in any kind of documents',
-      },
-      {
-        name: 'in pictures',
-        filter: 'type=picture'
-      },
-      {
-        name: 'in cartoons',
-        filter: 'type=cartoon'
-      },
-      {
-        name: 'in letters',
-        filter: 'type=letter'
-      },
-      {
-        name: 'in treaty',
-        filter: 'type=treaty'
-      }
-    ]
+  /*
+    Angular-translate configs
+    Cfr. https://scotch.io/tutorials/internationalization-of-angularjs-applications
+  */
+  .config(function ($translateProvider) {
+    // $translateProvider.useMissingTranslationHandlerLog();
+    $translateProvider.useSanitizeValueStrategy('sanitize');
+    $translateProvider.useStaticFilesLoader({
+        prefix: 'locale/locale-',// path to translations files
+        suffix: '.json'// suffix, currently- extension of the translations
+    });
+    $translateProvider.preferredLanguage('en_US');// is applied on first load
+    
   })
   /*
     Local-storage module config. cfr
@@ -133,6 +126,10 @@ angular
   .config(function ($stateProvider, $urlRouterProvider, GRAMMAR) {
     $urlRouterProvider
       .otherwise("/");
+
+    /*
+      set up states and rules to be used as grammar for the filters controller, cfr js/controllers/filters.js
+    */  
     $stateProvider
       .state('index', {
         url: '/in',
@@ -151,50 +148,64 @@ angular
           name: 'resource',
           label: 'show',
           choices: [
-            /*{
+            {
               name: 'explore.resources',
-              label: 'documents'
-            }, {
-              name: 'explore.persons',
-              label: 'view graph'
-            }*/
+              label: 'gallery of resources',
+
+            }, 
+            {
+              name: 'explore.projection',
+              label: 'graph of person - person cooccurrences',
+              params: {
+                modelA: 'person',
+                modelB: 'person'
+              }
+            },
+            {
+              name: 'explore.projection',
+              label: 'graph of location cooccurrences',
+              params: {
+                modelA: 'location',
+                modelB: 'location'
+              }
+            },
+            {
+              name: 'explore.projection',
+              label: 'graph of theme cooccurrences',
+              params: {
+                modelA: 'theme',
+                modelB: 'theme'
+              }
+            },
+            {
+              name: 'explore.projection',
+              label: 'graph of theme - location cooccurrences',
+              params: {
+                modelA: 'theme',
+                modelB: 'location'
+              }
+            },
+            {
+              name: 'explore.projection',
+              label: 'graph of theme - place cooccurrences',
+              params: {
+                modelA: 'theme',
+                modelB: 'place'
+              }
+            }
           ],
           connector: {
-              type: 'in documents of type',
-              relatedTo: 'which mentions',
-              notRelatedTo: 'related to anyone',
-              from: 'from',
-              to: 'to'
-            },
-            types: [
-              {
-                name: 'in any kind of documents',
-              },
-              {
-                name: 'in pictures',
-                filter: 'type=picture'
-              },
-              {
-                name: 'in letters',
-                filter: 'type=letter'
-              },
-              {
-                name: 'in treaty',
-                filter: 'type=treaty'
-              }
-            ],
-            relatedTo: {
-              typeahead: 'entity'
-            }
+            type: 'in documents of type',
+            relatedTo: 'which mentions',
+            notRelatedTo: 'related to anyone',
+            from: 'from',
+            to: 'to'
+          },
+          types: GRAMMAR.IN_TYPES,
+          relatedTo: {
+            typeahead: 'entity'
+          }
         },
-        // resolve: {
-        //   resources: function(ResourcesFactory, $location) {
-            
-        //     return ResourcesFactory.get(angular.extend({
-        //       limit: 10
-        //     }, $location.search())).$promise;
-        //   },
-        // }
       })
         .state('explore.resources', {
           url: '',
@@ -234,12 +245,12 @@ angular
             }
           },
         })
-        .state('explore.persons', {
-          url: 'per',
+        .state('explore.projection', {
+          url: 'projection/:modelA/:modelB',
           template: '<div></div>',
           controller: 'ExploreEntitiesCtrl',
           grammar: {
-            label: 'view graph',
+            label: 'graph of :modelA - :modelB cooccurrences',
             connector: {
               type: 'in documents of type',
               relatedTo: 'which mentions',
@@ -252,6 +263,62 @@ angular
               typeahead: 'entity'
             }
           },
+          resolve: {
+            relatedModel: function($stateParams) {
+              return $stateParams.modelA
+            },
+            projectedModel: function($stateParams) {
+              return $stateParams.modelB
+            },
+          }
+        })
+        .state('explore.themes', {
+          url: 'themes',
+          template: '<div></div>',
+          controller: 'ExploreEntitiesCtrl',
+          grammar: {
+            label: 'view theme cooccurrence',
+            connector: {
+              type: 'in documents of type',
+              relatedTo: 'which mentions',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: GRAMMAR.IN_TYPES,
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
+          resolve: {
+            relatedModel: function() {
+              return 'theme'
+            },
+          }
+        })
+        .state('explore.locations', {
+          url: 'locations',
+          template: '<div></div>',
+          controller: 'ExploreEntitiesCtrl',
+          grammar: {
+            label: 'view theme cooccurrence',
+            connector: {
+              type: 'in documents of type',
+              relatedTo: 'which mentions',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: GRAMMAR.IN_TYPES,
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
+          resolve: {
+            relatedModel: function() {
+              return 'location'
+            },
+          }
         })
         .state('explore.issues', {
           url: 'issues',
@@ -290,6 +357,9 @@ angular
             },  {
               name: 'entity.graph',
               label: 'graph of related people'
+            },  {
+              name: 'entity.graph.themes',
+              label: 'graph of related themes'
             }, {
               name: 'entity.persons',
               label: 'related people'
@@ -307,6 +377,14 @@ angular
             return EntityRelatedFactory.get({
               id: $stateParams.id,
               model: 'person',
+              limit: 10
+            }, {}).$promise;
+          },
+          // lcoation cooccurrences (appearing with)
+          locations: function(EntityRelatedFactory, $stateParams) {
+            return EntityRelatedFactory.get({
+              id: $stateParams.id,
+              model: 'location',
               limit: 10
             }, {}).$promise;
           },
@@ -345,6 +423,38 @@ angular
             },
             relatedModel: function() {
               return 'person'
+            },
+            relatedVizFactory: function(EntityRelatedVizFactory) {
+              return EntityRelatedVizFactory
+            }
+          }
+        })
+        .state('entity.graph.theme', {
+          url: '/theme',
+          template: '<div></div>',
+          controller: 'GraphCtrl',
+          grammar: {
+            label: 'graph of related themes',
+            connector: {
+              type: 'in documents of type',
+              relatedTo: 'which mentions',
+              notRelatedTo: 'related to anyone',
+              from: 'from',
+              to: 'to'
+            },
+            types: GRAMMAR.IN_TYPES,
+            relatedTo: {
+              typeahead: 'entity'
+            }
+          },
+          resolve:{
+            specials: function() {
+              return [
+
+              ]
+            },
+            relatedModel: function() {
+              return 'theme'
             },
             relatedVizFactory: function(EntityRelatedVizFactory) {
               return EntityRelatedVizFactory
@@ -442,7 +552,9 @@ angular
         })
         .state('entity.resources', {
           url: '',
-          templateUrl: 'templates/partials/resources.html',
+          // templateUrl: 'templates/partials/resources.html',
+          templateUrl: 'templates/partials/resources-masonry.html',
+          
           controller: 'RelatedItemsCtrl',
           grammar: {
             label: 'related documents',
@@ -660,12 +772,13 @@ angular
         })
         .state('resource.resources', {
           url: '',
-          templateUrl: 'templates/partials/resources.html',
+          //templateUrl: 'templates/partials/resources.html',
+          templateUrl: 'templates/partials/resources-masonry.html',
           controller: 'RelatedItemsCtrl',
           grammar: {
-            label: 'documents',
+            label: 'Related documents',
             connector: {
-              type: 'in documents of type',
+              type: 'of type',
               relatedTo: 'which mentions',
               notRelatedTo: 'related to anyone',
               from: 'from',
@@ -955,23 +1068,7 @@ angular
               from: 'from',
               to: 'to'
             },
-            types: [
-              {
-                name: 'of any type',
-              },
-              {
-                name: 'pictures',
-                filter: 'type=picture'
-              },
-              {
-                name: 'letters',
-                filter: 'type=letter'
-              },
-              {
-                name: 'treaty',
-                filter: 'type=treaty'
-              }
-            ],
+            types: GRAMMAR.AS_TYPES,
             relatedTo: {
               typeahead: 'entity'
             }
@@ -1197,4 +1294,4 @@ angular
         }
       };
     });
-  })
+  });

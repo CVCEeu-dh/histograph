@@ -1,6 +1,6 @@
 <div class='nodes'>
-  <div ng-repeat='relatedItem in items'>
-    <div class='node person'>
+  <div ng-repeat='relatedItem in items' style='height: 100%'>
+    <div class='node person' style='height: 100%'>
       <div class='thumbnail'>
         <div class="thumbnail-wrapper" style='background-image: url({{relatedItem.props.thumbnail}})'>    
           
@@ -8,7 +8,8 @@
       </div>
       <div class='content'>
         <h4><a ng-href='#/e/{{relatedItem.id}}' marked="relatedItem.props|lookup:'name':language"></a></h4>
-        <div class='date'>{{relatedItem.props.birth_time | datesOfAPerson : relatedItem.props.death_time}}</div>
+        <div class='date' ng-if='relatedItem.type== "person"'>{{relatedItem.type}} - {{relatedItem.props.birth_time | datesOfAPerson : relatedItem.props.death_time}}</div>
+        <div class='date' ng-if='relatedItem.type!= "person"'>{{relatedItem.type}}</div>
       </div>
       
       <div class='detail'>
@@ -41,6 +42,10 @@
 
         </blockquote>
       </div>
+
+      <div class='crowdsourcing'>
+        he
+      </div>
     </div>
   </div>
 </div>
@@ -63,8 +68,8 @@
   </div>
 </div>
 <div class="modal-body with-sidebar">
-  <div ng-repeat='relatedItem in relatedItems'>
-      <div  ng-include='"templates/partials/resource-lite.html"'></div>
+  <div ng-repeat='item in relatedItems'>
+      <div  ng-include='"templates/partials/resource.html"'></div>
   </div>
 </div>
 

@@ -25,7 +25,7 @@ validator.extend('isAnnotatorjs', function (str) {
   var q = {};
   try{
     q = JSON.parse(str);
-    return q.quote && q.ranges && q.ranges.length;
+    return q.quote && q.language && q.language.length == 2 && q.ranges && q.ranges.length;
   } catch(e) {
     console.log('OUCH', e)
     return false;
@@ -402,9 +402,9 @@ module.exports = {
       safeParams.ids = _.compact(safeParams.ids.split(',')).map(function(d) {
         return +d;
       });
-    
+
     if(safeParams.with)
-      safeParams.with = _.compact(safeParams.with.split(',')).map(function(d) {
+      safeParams.with = _.compact(String(safeParams.with).split(',')).map(function(d) {
         return +d;
       });
     

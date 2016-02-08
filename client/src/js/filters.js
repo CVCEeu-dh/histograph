@@ -26,6 +26,18 @@ angular.module('histograph')
     };
   })
   /*
+    Add UIROuter current state stateParams to GRAMMAR labels.
+    Cfr currentState listeners in FiltersCtrl controller (js/controllers/filters.js)
+  */
+  .filter('enrichWithStateParams', function() {
+    return function(input, stateParams) {
+      _.each(stateParams, function(d, k){
+        input = input.replace(':'+k, d);  
+      })
+      return input
+    } 
+  })
+  /*
     Transform ECMD categories into human readable ones (if any) _PRESS 
   */
   .filter('ecmd', function() {
@@ -113,7 +125,7 @@ angular.module('histograph')
     return function(input) {
       if(!input)
         return '';
-      return input.replace('.', ' ');
+      return input.replace(/\./g, ' ');
     };
   })
   .filter('datesOfSomeone', function() {
@@ -272,19 +284,23 @@ angular.module('histograph')
     Return the correct field for annotation purposes.
   */
   .filter('annotate', function($sce) {
-    return function(annotations, field, language) {
+    return function(annotations, field, language, props) {
       var annotation = _.get(_.find(annotations, {language:language}), 'annotation'),
-          extra = '';
-          
+          extra = '',
+          result = '';
+      
       if(!annotation) {
         annotation = _.get(_.first(annotations), 'annotation');
         extra = ''; // something like not available in english
       }
       
-      if(annotation[field])
-       return extra + annotation[field];
-      
-      return ''
+      if(annotation[field]){
+        result = extra + annotation[field];
+      }
+      if(!result.length && props) {
+        result = props[field + '_' + _.first(props.languages)]
+      }
+      return result
     }
   })
   

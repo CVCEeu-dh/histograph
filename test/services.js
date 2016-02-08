@@ -17,7 +17,7 @@ var settings = require('../settings'),
     _        = require('lodash'),
     should  = require('should');
     
-describe('services: geo', function() {
+describe('services: geonames', function() {
   it('should connect to the Geonames endpoint, if available, and return some results', function (done) {
     this.timeout(15000)
     if(!settings.geonames ||_.isEmpty(settings.geonames.username)) {
@@ -26,15 +26,38 @@ describe('services: geo', function() {
       services.geonames({
         address: 'Roma'
       }, function (err, results){
-        
-        if(err)
-            throw err;
-        // console.log(results)
+        should.not.exist(err);
+        if(!results.length) {
+          console.log(results);
+        }
         should.equal(results[0].toponymName, 'Rome')
         should.exist(results.length);
         done()
       });
+  });
+});
+
+describe('services: geocoding', function() {
+  it('should connect to the geocoding endpoint, if available, and return some results fo reverse geocoding activity', function (done) {
+    this.timeout(15000)
+    if(!settings.geocoding ||_.isEmpty(settings.geocoding.key)) {
+      console.log('no geocoding specified in settings, skipping...')
+      done();
+    } else
+      services.reverse_geocoding({
+        latlng: '43.036010285,11.60942724'
+      }, function (err, results){
+        
+        if(err)
+            throw err;
+        should.not.exist(err);
+        console.log(results)
+        // should.equal(results[0].toponymName, 'Rome')
+        // should.exist(results.length);
+        done()
+      });
   })
+
   // it('should connect to the Textrazor endpoint and return some results', function (done) {
   //   this.timeout(15000)
   //   services.textrazor({

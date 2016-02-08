@@ -42,9 +42,10 @@ module.exports = {
   */
   create: function(properties, next) {
     var now   = helpers.now(),
-        props = _.assign(properties, {
+        slug  = properties.slug? properties.slug : helpers.text.slugify(properties.name),
+        props = _.assign({}, properties, {
           type: properties.type || 'unknown',
-          slug: properties.slug || helpers.text.slugify(properties.name),
+          slug: slug,
           links_wiki: _.isEmpty(properties.links_wiki)? undefined: properties.links_wiki,
           exec_date: now.date,
           exec_time: now.time,
@@ -55,7 +56,7 @@ module.exports = {
           name_search: properties.name_search || properties.name.toLowerCase()
         }),
         query = parser.agentBrown(queries.merge_entity, props);
-        
+    
     neo4j.query(query, props, function (err, nodes) {
       if(err) {
         next(err);
@@ -229,15 +230,6 @@ module.exports = {
         relationship: function (callback) {
           neo4j.rel.update(result.rel, callback);
         },
-        action: function(callback) {
-          Action.create({
-            kind: params.annotation? Action.ANNOTATE: Action.CREATE,
-            target: Action.APPEARS_IN_RELATIONSHIP,
-            mentions: [resource.id, entity.id],
-            username: user.username,
-            annotation: params.annotation
-          }, callback);
-        },
         resource: function (callback) {
           Resource.get({
             id: result.res.id
@@ -247,16 +239,13 @@ module.exports = {
         if(err)
           next(err);
         else {
-          if(results.action.type == Action.ANNOTATE)
-            results.action.props.annotation = parser.yaml(results.action.props.annotation);
-
+          
           next(null, {
             id: result.ent.id,
             type: result.ent.type,
             props: result.ent,
             related: {
-              resource: results.resource,
-              action: results.action
+              resource: results.resource
             },
             rel: result.rel.properties
           });
@@ -312,28 +301,16 @@ module.exports = {
         result.rel.properties.celebrity =  _.compact(_.unique((result.rel.properties.upvote || []).concat(result.rel.properties.downvote|| []))).length;
         result.rel.properties.score = _.compact((result.rel.properties.upvote || [])).length - _.compact((result.rel.properties.downvote|| [])).length;
         
-        async.series({
-          relationships: function (callback) {
-            async.parallel({
-              relationship: function(_callback) {
-                neo4j.rel.update(result.rel, _callback);
-              },
-              action: function (_callback) {
-                Action.create({
-                  kind: params.action,
-                  target: Action.APPEARS_IN_RELATIONSHIP,
-                  mentions: [resource.id, entity.id],
-                  username: user.username
-                }, _callback);
-              },
-            }, callback);
+        async.series([
+          function relationships(callback) {
+            neo4j.rel.update(result.rel, callback);
           },
-          resource: function (callback) {
+          function resource (callback) {
             Resource.get({
               id: result.res.id
             }, user, callback)
           }
-        }, function (err, results) {
+        ], function (err, results) {
           if(err)
             next(err);
           else
@@ -342,8 +319,7 @@ module.exports = {
               type: result.ent.type,
               props: result.ent,
               related: {
-                resource: results.resource,
-                action: results.relationships.action
+                resource: results[1]
               },
               rel: result.rel.properties
             });
@@ -478,6 +454,22 @@ module.exports = {
         return
       };
       next(null, graph);
+    });
+  },
+
+  /*
+    get timeline of related resources (for filtering purposes)
+
+    @params entity - object containing at least the entity id
+    @params params - other filters ofr cypher query params to be assigned to the query
+    @params next   - callback function
+  */
+  getRelatedResourcesTimeline: function(entity, params, next) {
+    helpers.cypherTimeline(queries.get_related_resources_timeline, _.assign({}, params, entity), function (err, timeline) {
+      if(err)
+        next(err);
+      else
+        next(null, timeline);
     });
   },
   /**

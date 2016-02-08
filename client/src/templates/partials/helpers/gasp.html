@@ -1,0 +1,251 @@
+<div class="inner">
+  <div ng-if='isUnknown'>
+    <div>
+      <div class='node'>
+        <div class='content'>
+          <h4>
+            <a><p>unknown entity</p></a>
+          </h4>
+        </div>
+      </div>
+    </div>
+    <div class='btn-group-wrapper {{question?"disabled":""}}'>
+      <div class="btn-group">
+        <button class='btn btn-line-white obscure' ng-click='askQuestion("remove-relationship")'>REMOVE</button>
+        <button class='btn btn-line-white obscure' ng-click='askQuestion("unknown")'>
+          <i class="fa fa-bug"></i> ADD IDENTITY 
+        </button>
+      </div>
+    </div>
+  </div>
+  <div  ng-if='!isUnknown'>
+    <div>
+      <div class='node {{entity.type}}'>
+        
+        <div class='thumbnail' ng-if='entity.props.thumbnail'>
+          <div class="thumbnail-wrapper" style='background-image: url({{entity.props.thumbnail}})'>
+          </div>
+        </div>
+        <div class='content sans-serif {{entity.props.thumbnail?"":"without-thumbnail"}}'>
+          <h4>
+            <a ng-if='entity.type == "person"' ng-href='{{link.href}}' marked="entity.props|lookup:'name':language" ng-click='close()'></a>
+            <a ng-if='entity.type == "location"' ng-click='close()' ng-href='{{link.href}}'><p>{{entity.props|lookup:'name':language}}, {{entity.props.country}}</p></a>
+            <a ng-if='entity.type == "organization"' ng-click='close()' ng-href='{{link.href}}'>{{entity.props|lookup:'name':language}}</a>
+             <a ng-if='entity.type == "theme"' ng-click='close()' ng-href='{{link.href}}'>{{entity.props|lookup:'name':language}}</a>
+
+          </h4>
+          <div ng-if='entity.isWrong'>
+            {{entity.props.issues}}
+          </div>
+          <div ng-if='!entity.issues && entity.isIncomplete && entity.type == "person"' class='date'>
+            We couldn't find any information about this <strong>person</strong> automatically.. can you help us?
+          </div>
+          <div ng-if='!entity.isIncomplete && entity.type == "person"'>
+            <div class='date' >{{entity.props.birth_time | datesOfAPerson : entity.props.death_time}}</div>
+            
+          </div>
+          <div ng-if='entity.type == "location" || entity.type=="theme"'>
+            <div class='date' >{{entity.type}}</div>
+          </div>
+          <div ng-if="entity.props.links_viaf">
+            <a target='_blank' ng-href='http://viaf.org/viaf/{{entity.props.links_viaf}}'>VIAF: {{entity.props.links_viaf}}
+            </a>
+          </div>
+          <div ng-if="entity.props.links_wiki">
+            <a target='_blank' ng-href='http://dbpedia.org/resource/{{entity.props.links_wiki}}'>dbpedia: {{entity.props.links_wiki}}</a>
+          </div>
+          <div ng-if='scope.link.creator'>created by: {{scope.link.creator}}</div>
+        </div>
+        <div class="actions">
+          <a class="action" title="add to bookmark" ng-click="queue()">
+            <span class="fa fa-bookmark-o"></span></a>
+          
+        </div>
+        <a class="discard action" title="close" ng-click="close()">
+            <span class="fa fa-times-circle"></span></a>
+      </div>
+    </div>
+    <div class='btn-group-wrapper {{question?"disabled":""}}'>
+      <div class="btn-group">
+        <a class="btn btn-line-white" ng-click='close()' ng-href='/#/e/{{entity.id}}' title="visit" data-action="link">more</a>
+        
+        <button ng-if='link.removable' class='btn btn-line-white obscure' ng-click='askQuestion("remove-relationship")'>REMOVE</button>
+
+        <button ng-if='!link.removable && entity.type != "theme"'  class='btn btn-line-white obscure' ng-click='askQuestion("downvote")'><i class="fa fa-bug"></i> fix / edit </button>
+       
+        <button ng-if='!link.removable && !entity.isIncomplete' class='btn btn-line-white {{entity.upvotes.length? "btn-number":""}}' ng-click='upvote($event)'>CONFIRM <i class="fa fa-check"></i><div class='number' ng-if='entity.upvotes.length'>{{entity.upvotes.length}}</div></button>
+
+      </div>
+    </div>
+  </div>
+    
+  <div class='questions {{question}} obscure {{question?"enabled":""}}'>
+
+    <div ng-if='question=="remove-relationship"' class='question'>
+      <p class='text'>Removing the relationship does not delete the selected items, just affects the relationship itself.</p>
+      <div class='answers'>
+        <div class='btn-group btn-group-dual'>
+        <button class='btn btn-line-white btn-primary' ng-click='remove()'>remove!</button>
+        <button class='btn btn-line-white obscure' ng-click='cancelQuestion($event)'>back</button>
+        </div>
+      </div>
+    </div>
+
+    <div ng-if='question=="unknown"'>
+      <p class='text'>Is this entity in this collection?</p>
+      <div class='answers'>
+        <div >
+          <form>
+            <input autofocus type='text' name='test' typeahead-trigger-on-model-change='entity.name' ng-model='q' class='form-control' typeahead-editable='false' placeholder='search person, location, themes...' uib-typeahead='item for items in typeaheadSuggest($viewValue, entity.type)' typeahead-wait-ms='100' typeahead-on-select='typeaheadSelected($item, $model, $label, "unknown-confirm")' typeahead-template-url='templates/partials/helpers/typeahead.html'/>
+          </form>
+        </div>
+      </div>
+      <div class='answers'>
+        <button class='btn btn-line-white obscure btn-block' ng-click='askQuestion("new")'>Nope, it is a brand new</button>
+        <button class='btn btn-line-white obscure btn-block' ng-click='cancelQuestion()'>back</button>
+      </div>
+    </div>
+      <div ng-if='question=="unknown-confirm"'>
+          <p class='text'>confirm <strong class='tk-proxima-nova' style='color: white'>{{entity.alias.props|lookup:'name':language}}</strong>({{entity.alias.type}})?</p>
+          <div class='answers'>
+            <div class='btn-group btn-group-dual'>
+              <button class='btn btn-line-white btn-primary' ng-click='merge()'>yes!</button>
+              <button class='btn btn-line-white obscure' ng-click='askQuestion("contribute", $event)'>back</button>
+            </div>
+          </div>
+        </div>
+
+
+    <div ng-if='question=="new"' class='question'>
+
+       <p class='text'>Does these viaf ids applies to the person or the institution selected</p>
+      <div class='answers'>
+        <div class=''>
+          
+          
+          <button class='btn btn-line-white obscure btn-block' ng-click='cancelQuestion($event)'>back</button>
+        </div>
+      </div>
+    </div>
+
+    <div ng-if='question=="downvote"' class='question'>
+      <div class='answers'>
+        <div class=''>
+          <button class='btn btn-line-white btn-block' ng-click='downvote($event)'>this <strong>{{entity.type}}</strong> is not mentioned here</button>
+          <button class='btn btn-line-white btn-block' ng-click='askQuestion("wrongtype", $event)'>This is not a <strong>{{entity.type}}</strong></button>
+          <button class='btn btn-line-white btn-block' ng-click='askQuestion("contribute", $event)'>this is a typo / fragment / duplicate</button>
+           <button class='btn btn-line-white btn-block' ng-click='askQuestion("wrong", $event)'> remove this</button>
+          
+          <button class='btn btn-line-white obscure btn-block' ng-click='cancelQuestion($event)'>back</button>
+        </div>
+      </div>
+    </div>
+
+      <div ng-if='question=="wrong"'>
+        <p class='text'>Is this entity wrong?</p>
+        <div class='answers'>
+          <div class='btn-group btn-group-dual'>
+            <button class='btn btn-line-white btn-primary' ng-click='raiseIssue("wrong")'>yes!</button>
+            <button class='btn btn-line-white obscure' ng-click='askQuestion("downvote")'>back</button>
+          </div>
+        </div>
+      </div>
+
+      <div ng-if='question=="contribute"'>
+        <p class='text'>Can you find a better {{entity.type}} between the ones collected?</p>
+        <div class='answers'>
+          <div >
+            <form>
+              <input autofocus type='text' name='test' typeahead-trigger-on-model-change='entity.name' ng-model='q' class='form-control' typeahead-editable='false' placeholder='search person, location, themes...' uib-typeahead='item for items in typeaheadSuggest($viewValue, entity.type)' typeahead-wait-ms='100' typeahead-on-select='typeaheadSelected($item, $model, $label)' typeahead-template-url='templates/partials/helpers/typeahead.html'/>
+            </form>
+          </div>
+        </div>
+        <div class='answers'>
+          <button class='btn btn-line-white obscure btn-block' ng-click='askQuestion("new")'>Nope, it is a brand new {{entity.type}}</button>
+          <button class='btn btn-line-white obscure btn-block' ng-click='askQuestion("downvote")'>back</button>
+        </div>
+      </div>
+
+        <div ng-if='question=="contribute-confirm"'>
+          <p class='text'>Suggest <strong class='tk-proxima-nova' style='color: white'>{{entity.alias.props|lookup:'name':language}}</strong> as replacement?</p>
+          <div class='answers'>
+            <div class='btn-group btn-group-dual'>
+              <button class='btn btn-line-white btn-primary' ng-click='merge()'>yes!</button>
+              <button class='btn btn-line-white obscure' ng-click='askQuestion("contribute", $event)'>back</button>
+            </div>
+          </div>
+        </div>
+
+      <div ng-if='question=="wrongtype"' class='question'>
+        <p class='text'>Are you able to spot the correct <strong>type</strong>?</p>
+        <div class='answers'>
+          <div class="btn-group btn-block" uib-dropdown>
+            <button id="btn-append-to-body" type="button" class="btn btn-primary btn-block btn-line-white btn-primary" uib-dropdown-toggle>
+              this is ... ? <span class="caret"></span>
+            </button>
+            <ul class="uib-dropdown-menu tk-proxima-nova" style='z-index:1050' role="menu" aria-labelledby="btn-append-to-body">
+              <li role="menuitem" ng-if='entity.type != "person"'><a ng-click='raiseIssueSelected("type","person")'> this is a <strong>person</strong></a></li>
+              <li role="menuitem" ng-if='entity.type != "location"'><a ng-click='raiseIssueSelected("type", "location")'>this is a <strong>location</strong></a></li>
+              <li role="menuitem"><a ng-click='raiseIssueSelected("type", "organization")'>this is a <strong>organization</strong></a></li>
+              <li role="menuitem"><a ng-click='raiseIssueSelected("type", "social_group")'>this is a <strong>social group</strong></a></li>
+              <li class="divider"></li>
+
+              <li role="menuitem"><a ng-click='raiseIssueSelected("irrelevant")'>(this is merely irrelevant ...)</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class='answers'>
+          
+          <button class='btn btn-line-white btn-block' ng-click='askQuestion("downvote", $event)'>back</button>
+          
+        </div>
+      </div>
+
+        <div ng-if='question=="irrelevant-confirm"'>
+          <p class='text'>Is this entity not relevant? The changes will have effect once your answer is downvoted by some other user.</p>
+          <div class='answers'>
+            <div class='btn-group btn-group-dual'>
+              <button class='btn btn-line-white btn-primary' ng-click='raiseIssue("irrelevant")'>yes!</button>
+              <button class='btn btn-line-white obscure' ng-click='askQuestion("wrongtype")'>back</button>
+            </div>
+          </div>
+        </div>
+
+        <div ng-if='question=="wrongtype-confirm"'>
+          <p class='text'>Suggest <strong class='tk-proxima-nova' style='color: white'>{{entity._type}}</strong> as replacement for <strong class='tk-proxima-nova' style='color: white'>{{entity.type}}</strong>? The changes will have effect once your answer is upvoted</p>
+          <div class='answers'>
+            <div class='btn-group btn-group-dual'>
+              <button class='btn btn-line-white btn-primary' ng-click='raiseIssue("type", entity._type)'>yes!</button>
+              <button class='btn btn-line-white obscure' ng-click='askQuestion("wrongtype")'>back</button>
+            </div>
+          </div>
+        </div>
+
+      <div ng-if='question=="feedback"' class='question'>
+        <p class='text'>thank you for your feedback!</p>
+        <div class='answers'>
+          <button class='btn btn-line-white btn-primary btn-block' ng-click='close()'>close</button>
+        </div>
+      </div>
+
+  </div>
+    <!-- <div class="action-group">
+
+      
+       <a class="action filter" ng-click='addFilter()' tooltip="filter your selection" data-action="filter">
+        <span class="fa fa-filter"></span></a>
+      <a class="action" href="{{href}}" title="visit" data-action="link" tooltip="{{linkto}}">
+        <span class="fa fa-link"></span></a>
+
+      <a class="action inspect" ng-click='inspect()' tooltip="analyse and correct" data-action="inspect">
+        <span class="fa fa-lightbulb-o"></span></a>
+
+      <a class="action downvote" ng-click='downvote(item)' tooltip="downvote - the entity is not relevant in this context" data-action="downvote">
+        <span class="fa fa-thumbs-o-down"></span></a>
+
+      <a class="action downvote" ng-click='upvote(item)' tooltip="upvote - the entity is relevant in this context" data-action="upvote">
+        <span class="fa fa-thumbs-o-up"></span></a>
+        
+    </div> -->
+  </div>
+</div>

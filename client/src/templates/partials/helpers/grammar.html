@@ -3,9 +3,31 @@
   <!-- change sub state -->
   
   <!-- &nbsp;{{ruler.label}} -->
+  <!-- <div class="toggle-extend">
+    {{grammar.label}}
+    
+    <div class="btn-group" uib-dropdown is-open="false">
+      <button type="button" class="btn btn-default btn-line" uib-dropdown-toggle>
+        toggle panel
+      </button>
+      <ul class="uib-dropdown-menu dropdown-menu" role="menu" aria-labelledby="single-button">
+        <li>
+          <div>
 
+          </div>
+        </li>
+      </ul>
+    </div>
+
+  </div> -->
+
+
+  
   <div ng-if='ruler' class='grammar-choice ruler' ng-if='grammar'>
-    <b ng-if='item' class='grammar-item'>{{item.props|lookup:'name':language:36}}</b> {{grammar.label}}
+    <!-- <b ng-if='item' class='grammar-item'>{{item.props|lookup:'name':language:36}}</b> --> 
+    {{grammar.label|enrichWithStateParams:stateParams}} <span ng-if='totalItems'>(
+        {{totalItems}})
+        </span>
     <div class="btn-group" uib-dropdown is-open="false">
       <button id="single-button" type="button" class="btn btn-default" uib-dropdown-toggle>
         <i class='fa fa-angle-down'></i>
@@ -22,9 +44,7 @@
   
   <!-- grammar: filters -->
   
-        <b ng-if='totalItems'>
-        {{totalItems}}
-        </b>
+        
         
         <span ng-if='filters.type'>
             &nbsp;{{grammar.connector.type}}&nbsp;
@@ -65,7 +85,7 @@
           {{!$last? ' OR ': ''}}
         </span>
 
-        <div class='grammar-choice' ng-if='grammar.relatedTo'  isolate-item>
+        <div class='grammar-choice related-to' ng-if='grammar.relatedTo'  isolate-item>
           <span ng-if='!filters.with'>
             &nbsp;{{grammar.connector.notRelatedTo}}&nbsp;
           </span>

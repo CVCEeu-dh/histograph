@@ -212,33 +212,45 @@ WHERE id(ent) = {id}
     AND res.type in {type}
   {/if}
 WITH DISTINCT res, r, ent
+{if:orderby}
+ORDER BY {:orderby}
+{/if}
+{unless:orderby}
 ORDER BY r.tfidf DESC, res.start_time DESC
+{/unless}
+
 SKIP {offset}
 LIMIT {limit}
 
-OPTIONAL MATCH (res)-[r_loc:appears_in]-(loc:`location`)
-WITH r, ent, res, collect({  
-      id: id(loc),
-      type: 'location',
-      props: loc,
-      rel: r_loc
-    })[0..5] as locations   
+OPTIONAL MATCH (res)-[r_the:appears_in]-(the:`theme`)
+WHERE the.score > -2 AND r_the.score > -1
+WITH r, ent, res, r_the, the
+ORDER BY r_the.score DESC, r_the.tfidf DESC, r_the.frequency DESC
+WITH r, ent, res, filter(x in collect({  
+      id: id(the),
+      type: 'theme',
+      props: the,
+      rel: r_the
+    }) WHERE has(x.id))[0..5] as themes   
 
 OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
-WITH r, ent, res, locations, collect({
+WHERE per.score > -2 AND r_per.score > -1
+WITH r, ent, res, themes, r_per, per
+ORDER BY r_per.score DESC, r_per.tfidf DESC, r_per.frequency DESC
+WITH r, ent, res, themes, filter(x in collect({
       id: id(per),
       type: 'person',
       props: per,
       rel: r_per
-    })[0..5] as persons
+    }) WHERE has(x.id))[0..5] as persons
 
-WITH r, ent, res, locations, persons
+WITH r, ent, res, themes, persons
 
   RETURN {
     id: id(res),
     props: res,
     rel: r,
-    locations: locations,
+    themes: themes,
     persons: persons
   } as result
 ORDER BY r.tfidf DESC, res.start_date DESC
@@ -271,6 +283,33 @@ WHERE id(ent) = {id}
     AND res.type in {type}
   {/if}
 RETURN count(res) as count_items
+
+
+
+// name:get_related_resources_timeline
+MATCH (ent)-[:appears_in]->(res:resource){if:with}<-[:appears_in]-(ent2){/if}
+WHERE id(ent) = {id} AND has(res.start_month)
+  {if:with}
+    AND id(ent2) in {with}
+  {/if}
+  {if:mimetype}
+  AND res.mimetype = {mimetype}
+  {/if}
+  {if:type}
+  AND res.type IN {type}
+  {/if}
+  {if:start_time}
+  AND res.start_time >= {start_time}
+  {/if}
+  {if:end_time}
+  AND res.end_time <= {end_time}
+  {/if}
+WITH DISTINCT res
+  
+WITH  res.start_month as tm, min(res.start_time) as t,  count(res) as weight
+RETURN tm, t, weight
+ORDER BY tm ASC
+
 
 
 // name:get_graph

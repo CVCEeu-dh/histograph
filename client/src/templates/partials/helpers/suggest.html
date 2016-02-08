@@ -1,11 +1,34 @@
-<div>
+<div class='{{match.model.props.thumbnail?"with-thumbnail":""}}'>
         <a ng-if='match.model.type=="default"'>
           search {{query}}
         </a>
-        <a ng-if='match.model.type!="default"' ng-href='/#/{{match.model.props.type_search=="resource" ? "r": "e"}}/{{match.model.id}}'>
-          {{match.model.props | title: 'en'}}
+        <a ng-if='match.model.type=="resource"' ng-href='/#/r/{{match.model.id}}'>
+          <h4>{{match.model.props | lookup:'title': 'en'}} — {{match.model.props.type}}</h4>
         </a>
-        <span ng-if='match.model.type!="default"' ng-click='$parent.$parent.$parent.$parent.queue(match.model.id, true)'>
-          <i class='fa fa-play-circle-o'></i>
+
+        <a ng-if='match.model.type=="person"' ng-href='/#/e/{{match.model.id}}'>
+          <div class='thumbnail' ng-if='match.model.props.thumbnail' style='background-image:url({{match.model.props.thumbnail}})'></div>
+          <h4>{{match.model.props|lookup:'name':'en'}} — {{match.model.type}}</h4>
+          <p ng-if='match.model.props.birth_date'>{{match.model.props|datesOfSomeone}} {{match.model.props|lookup:'description':language}}</p>
+        </a>
+        <a ng-if='match.model.type=="place"' ng-href='/#/e/{{match.model.id}}'>
+          <div class='thumbnail' ng-if='match.model.props.thumbnail' style='background-image:url({{match.model.props.thumbnail}})'></div>
+          <h4>{{match.model.props|lookup:'name':'en'}} ({{match.model.props.country}}) — location</h4>
+        </a>
+
+        <a ng-if='match.model.type=="location"' ng-href='/#/e/{{match.model.id}}'>
+          <div class='thumbnail' ng-if='match.model.props.thumbnail' style='background-image:url({{match.model.props.thumbnail}})'></div>
+          <h4>{{match.model.props|lookup:'name':'en'}} ({{match.model.props.country}}) — location</h4>
+        </a>
+
+        <a ng-if='match.model.type=="theme"' ng-href='/#/e/{{match.model.id}}'>
+          <div class='thumbnail' ng-if='match.model.props.thumbnail' style='background-image:url({{match.model.props.thumbnail}})'></div>
+          <h4>{{match.model.props|lookup:'name':'en'}} — theme</h4>
+        </a>
+
+        
+
+        <span ng-if='match.model.type != "default"' ng-click='$parent.$parent.$parent.$parent.queue(match.model.id, true)'>
+          <i class='fa fa-bookmark-o'></i>
         </span>
       </div>
