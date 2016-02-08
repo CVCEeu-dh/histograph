@@ -7,7 +7,7 @@
   </div>
   <div ng-if='task.type == "unknown_people"'>
     <div class="question">
-      <span translate>crowd.whois</span> <a class='tag person' ng-click='challengeAccepted()'>{{task.person.props|lookup:"name":language}}</a>?
+      <span ng-click='challengeAccepted()' translate='crowd.whois' translate-values='{name: "{{task.person.props.name}}"}'></span>
       <p translate>crowd.whois.description</p>
     </div>
     <div class='context {{isChallengeAccepted? "disabled": "disabled"}}'>

@@ -10,17 +10,17 @@
   "button.disagree": "I disagree",
   "button.edit": "edit",
   "button.end": "ok, close",
-  "button.finish": "tour completed!",
+  "button.finish": "end of part {{number}}",
   "button.login.with.twitter": "log in with your twitter account",
   "button.login.with.google": "log in with your google account",
   "button.more": "more",
   "button.next": "next",
   "button.previous": "previous",
   "button.myselection.explore": "explore connections",
-  "button.skip": "skip tour",
+  "button.skip": "skip",
 
-  "crowd.whois": "Do you know who is",
-  "crowd.whois.description": "We miss some basic information about him/her and we're not sure about his/her identity",
+  "crowd.whois": "Do you know who <strong class='tag person'>{{name}}</strong> is?",
+  "crowd.whois.description": "We are missing some basic information about him/her and we're not sure about his/her identity",
 
   "crowd.identify": "Can you identify a valid %s",
 
@@ -36,21 +36,23 @@
   "grammar.sorting.date.desc": "by date (most recent first)",
   "grammar.sorting.date.asc": "by date (oldest first)",
 
-  "guided-tour.welcome": "Welcome to <strong>Histograph! </strong><br/> </br>We use cookies to track your usage and preferences",
-  "guided-tour.skip": "You can access the guided tour from your personal space",
-  "guided-tour.step.view.gallery": "You can choose between a <strong>gallery</strong> and a <strong>graph</strong> view. You are now in the <strong>gallery</strong> view",
-  "guided-tour.step.view.gallery.resource":"click on a resource to continue the guided tour",
-  "guided-tour.step.filters.timeline": "You can highlight a specific period on the timeline. Drag your selection to observe change over time.",
-  "guided-tour.step.filters.type": "Both views can be <strong>filtered</strong> according to the type of document, its creation or publication date...",
-  "guided-tour.step.filters.related-to":  "You can also filter by  *people*, *locations*, *institutions*, or *themes*",
-  "guided-tour.step.view.graph": "You can select graph views with different types of nodes (e.g. people or locations). A tie between two nodes indicates that they are mentioned together in a document. More frequent co-occurrences are represented by thicker ties. A click on a tie shows the documents which contain the two nodes.",
-  
+  "guided-tour.welcome": "Welcome to <strong>histoGraph</strong>!<br/> </br>We use cookies to track your usage and preferences",
+  "guided-tour.skip": "You can access the guided tour from your personal space at any time.",
+  "guided-tour.step.view.gallery": "You can choose between <strong>gallery</strong> and <strong>graph</strong> view. You are now in <strong>gallery</strong> view.",
+  "guided-tour.step.view.gallery.resource":"Select a resource to continue the guided tour.",
+  "guided-tour.step.filters.timeline": "You can <strong>select</strong> a specific period on the timeline to see resources from that period.",
+  "guided-tour.step.filters.type": "Both views can be <strong>filtered</strong> according to the type of resource.",
+  "guided-tour.step.filters.related-to":  "You can also filter by  <strong>people</strong>, <strong>locations</strong>, <strong>institutions</strong> or <strong>themes</strong>.",
+  "guided-tour.step.view.graph": "You can select graph views with different types of nodes (e.g. people or locations). A line connecting two nodes indicates that they are mentioned together in a document. More frequent co-occurrences are represented by thicker lines. Clicking on a line shows the resources which contain both nodes.",
+  "guided-tour.step.view.graph.nodes": "",
+  "guided-tour.step.view.graph.ties": "",
   "guided-tour.step.view.resource": "this is a bla bla",
   "guided-tour.step.view.resource.favourites": "you can add this resources to your favourite list or to your current selection",
-  "guided-tour.step.view.resource.seealso": "This is the recommended resource list, based on the tag of this document.",
+  "guided-tour.step.view.resource.seealso": "This is the list of recommended resources base on the tags of this resource",
   "guided-tour.step.view.resource.seealso.filters": "you can use the filter above to reduce the results in the recommended list",
   "guided-tour.step.view.resource.add": "you can add relevant people, location etc.. this will improve the results in the recommended section...",
   "guided-tour.step.view.resource.annotate": "select a text in the title and in the caption of the resource in order to ",
+  "guided-tour.step.view.resource.annotate.bis": "you can also <strong>annotate</strong> a text in the abstract, or annotate an image",
   "guided-tour.step.view.resource.click.entity": "guided-tour.step.view.resource.click.entity",
 
 
@@ -67,17 +69,34 @@
 
   "button.popit.more": "more",
   "tooltip.popit.more": "visit the page about %s",
-  "popit.missinginfo": "We couldn't find any information about this %s automatically... can you help us?",
-  "popit.fix.not.mentioned": "this %s is not mentioned here",
-  "popit.fix.wrong.type": "this is not a %s",
+
+  "popit.missinginfo": "We couldn't find any information about this <strong>{{type}}</strong> automatically... can you help us?",
+  "popit.fix.not.mentioned": "this <strong>{{type}}</strong> is not mentioned here",
+  "popit.fix.wrong.entity": "Do you really want to untag this <strong>{{type}}</strong>?",
+  "popit.fix.wrong.agree": "Some users suggested that this {{type}} should be untagged. Do you agree?",
+  "popit.fix.wrong.type": "this is not a <strong>{{type}}</strong>",
+  "popit.fix.brandnew": "Nope, this is a brand new <strong>{{type}}</strong>",
   "popit.fix.typo": "this is a typo / fragment / duplicate",
-  "popit.fix.typo.description": "Does %s correspond to someone else in histograph?",
-  "popit.fix.remove": "remove this",
-  "popit.fix.feedback": "thank you for your feedback",
+  "popit.fix.typo.description": "Does <strong class='sans-serif'>{{name}}</strong> correspond to someone else in histograph?",
+  "popit.fix.remove": "Untag this",
+  "popit.fix.feedback": "Thank you for your feedback",
+  "popit.fix.spotcorrecttype": "How would you classify this?",
+  "popit.fix.spotcorrecttype.label": "This is ... ?",
+  "popit.fix.spotcorrecttype.type.person": "This is a <strong>person</strong>",
+  "popit.fix.spotcorrecttype.type.location": "This is a <strong>location</strong>",
+  "popit.fix.spotcorrecttype.type.organization": "This is an <strong>organisation</strong>",
+  "popit.fix.spotcorrecttype.type.theme": "This is a <strong>theme</strong>",
+  "popit.fix.spotcorrecttype.type.irrelevant": "Untag this",
+  "popit.fix.spotcorrecttype.type.irrelevant.confirm": "Do you really want to untag this <strong class='sans-serif'>{{type}}</strong>?",
+  "popit.fix.spotcorrecttype.type.confirm": "Suggest <strong class='sans-serif' style='color: white'>{{_type}}</strong> as replacement for <strong class='sans-serif' style='color: white'>{{type}}</strong>?",
+
+  "popit.fix.suggest.confirm": "Do you think that <strong class='sans-serif'>{{name}}</strong> should be replaced with <strong class='sans-serif'>{{_name}}</strong>?",
+
+  "popit.fix.remove.relationship": "Untag {{name}} from this resource?",
 
   "resource.people.mentioned": "people mentioned",
   "resource.themes.mentioned": "themes mentioned",
-  "resource.organizations.mentioned": "organizations",
+  "resource.organizations.mentioned": "organisations",
   "resource.locations.mentioned": "locations",
 
   "resource.language.availability": "available in",
@@ -98,6 +117,9 @@
   "resource.type.treaty": "treaty",
   "resource.type.video": "video",
   "resource.type.schema": "diagram",
-  "resource.type.table": "table"
+  "resource.type.table": "table",
+
+  "placeholder.search.entity": "search {{type}}",
+  "placeholder.search.everything": "search person, location ..."
 }
 

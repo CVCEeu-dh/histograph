@@ -19,25 +19,28 @@ angular.module('histograph')
 
     $scope.steps = {
       'explore.resources': {
-        title: 'The gallery', // default titles
+        title: 'Gallery view', // default titles
         steps: [
           {
             id: 0,
-            title: 'Welcome to Histograph'
+            title: 'Welcome to histoGraph'
           }, 1,2,3,{
             id: 4,
-            title: 'timeline'
-          },5
+            title: 'Timeline'
+          },
+          { id: 5,
+            title: 'Resources'
+          }
         ]
       }, 
       'resource.resources': {
-        title: 'The resource page',
+        title: 'Resource page',
         steps: [
-          7,8,9,10,11,14
+          7,8,9,10,11,15,14
         ]
       },
       'explore.projection': {
-        title: 'The graph view', // default titles
+        title: 'Graph view', // default titles
         steps: [
           12
         ]
@@ -134,7 +137,7 @@ angular.module('histograph')
       $scope.hasPrevious = false;
       $scope.hasNext = false;
       $scope.byebye = true;
-      $scope.ttTitle = "see you later";
+      $scope.ttTitle = "See you later!";
 
     }
 

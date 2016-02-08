@@ -2276,12 +2276,11 @@ li.CodeMirror-hint-active {
        -o-transition: height .3s cubic-bezier(0.65, 0.05, 0.36, 1);
           transition: height .3s cubic-bezier(0.65, 0.05, 0.36, 1);
 }
-/*
-#pop > .inner .btn-group-wrapper.disabled{
-  height: 0;
 
+#pop > .inner .btn-group-wrapper.disabled{
+  pointer-events : auto;
 }
-*/
+
 #pop > .inner .btn-group .btn {
   height:30px;
 }
@@ -2350,11 +2349,11 @@ li.CodeMirror-hint-active {
 }
 
 #pop > .inner .questions.contribute.enabled{
-  height: 177px;
+  height: 185px;
 }
 
 #pop > .inner .questions.contribute-confirm.enabled{
-  height: 80px;
+  height: 100px;
 }
 
 #pop > .inner .questions p.text{
@@ -2364,6 +2363,9 @@ li.CodeMirror-hint-active {
     border-top: 1px solid #A9A2A2;
 }
 
+#pop > .inner .questions p strong{
+  color: #f0f0f0;
+}
 
 #pop > .inner .questions .answers{
   padding: 5px 15px 5px 15px;

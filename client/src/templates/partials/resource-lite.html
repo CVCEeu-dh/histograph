@@ -8,12 +8,12 @@
     <div class='actions '>
       <div class="btn-group">
         <button class='btn btn-default action' uib-tooltip='{{tooltip.resource.add.to.myselection|translate}}' tooltip-append-to-body="true" ng-click='queue(relatedItem.id, true)'>
-          <i class='fa fa-bookmark-o'></i>
+          <i class='fa fa-thumb-tack'></i>
         </button>
       </div>
     </div>
   </div>   
-  <div class="meta"><span class='type sans-serif' translate='resource.type.{{relatedItem.props.type}}'></span> {{$index + 1}} out of {{totalItems}}</div>
+  <div class="meta"><span class='type sans-serif' translate='resource.type.{{relatedItem.props.type}}'></span> {{$index + 1}} of {{totalItems}}</div>
   <h4>
     <a href='#/r/{{relatedItem.id}}'>
       <span lookup context='relatedItem' field='title' language='language'></span>

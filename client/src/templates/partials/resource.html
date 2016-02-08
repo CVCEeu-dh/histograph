@@ -58,14 +58,14 @@
               <i class="fa fa-comment-o"></i>
             </a> -->
             <button ng-if='!isFavItem' class="btn btn-default action" ng-click='favourite()' tooltip="{{'tooltip.resource.add.to.favourites'|translate}}">
-              <i class="fa fa-heart-o"></i><span class='number'>{{item.lovers}}</span>
+              <i class="fa fa-bookmark-o"></i><span class='number'>{{item.lovers}}</span>
             </button>
             <button ng-if='isFavItem' class="btn btn-default action" ng-click='unfavourite()' tooltip="this resource belongs to your favourite collection">
-              <i class="fa fa-heart animated pulse"></i><span class='number'>{{item.lovers}}</span>
+              <i class="fa fa-bookmark animated pulse"></i><span class='number'>{{item.lovers}}</span>
             </button>
             
             <button class="btn btn-default action" tooltip="{{'tooltip.resource.add.to.myselection'|translate}}" ng-click="queue(item.id, true)">
-              <i class="fa fa-bookmark-o"></i>
+              <i class="fa fa-thumb-tack"></i>
             </button>
           </div>
         </div>
