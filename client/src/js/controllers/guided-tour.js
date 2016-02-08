@@ -193,7 +193,7 @@ angular.module('histograph')
       $scope.forceStart = false;
       $scope.byebye = false;
       $scope.consumed = false;
-      $scope.moveTo($scope.steps[currentState].cursor);
+      $scope.moveTo($scope.steps[currentState].cursor || 0);
     }
     /*
       Set the current step to the correct number according to the view we are in
