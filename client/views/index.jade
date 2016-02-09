@@ -60,7 +60,7 @@ html
                   //- li(class='{{currentState.name == "explore.noise"?"active":""}}')
                   //-   a(href='#/noise') activities
 
-                  li(ng-controller='PulseController')
+                  li#tip-notification(ng-controller='PulseController')
                     span(uib-dropdown, on-toggle="toggle(open)")
                       a.with-number(href='#/', uib-dropdown-toggle)
                         i.fa.fa-flash
@@ -74,7 +74,7 @@ html
                         li(ng-repeat="relatedItem in notifications", ng-include='"templates/partials/action-lite.html"')
                         
                         li
-                          a(href="#/noise", ng-if='!syncing') see global activites
+                          a(href="#/noise", ng-if='!syncing', translate='header.activities') 
                  
 
                   li(class='{{currentState.name == "search.resources" || currentState.name == "search.persons" ?"active":""}}')
@@ -237,6 +237,8 @@ html
               virtual-step(tourtip="guided-tour.step.view.resource.annotate" tourtip-element=".resource.item blockquote", tourtip-offset-horizontal="0", tourtip-placement="top", tourtip-step='15')
               virtual-step(tourtip="guided-tour.step.view.resource.favourites" tourtip-element=".resource.item .actions", tourtip-offset-horizontal="0", tourtip-placement="bottom", tourtip-step='14')
               virtual-step(tourtip="guided-tour.step.view.resource.pinboard" tourtip-element=".resource.item .actions", tourtip-offset-horizontal="0", tourtip-placement="bottom", tourtip-step='16')
+
+              virtual-step(tourtip="guided-tour.step.view.resource.notifications", tourtip-element="#tip-notification", tourtip-offset-horizontal="0", tourtip-placement="bottom", tourtip-step='17')
 
               //- milkyway
               virtual-step(tourtip="guided-tour.step.view.graph" tourtip-element="#milkyway", tourtip-offset-horizontal="0", tourtip-placement="center-top", tourtip-step='12')

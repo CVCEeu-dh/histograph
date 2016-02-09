@@ -36,7 +36,10 @@ angular.module('histograph')
       'resource.resources': {
         title: 'Resource page',
         steps: [
-          8,9,10,16,14,15, 11
+          8,9,10,16,14,15, 11, {
+            id:17,
+            title: 'Notifications'
+          }
         ]
       },
       'explore.projection': {
