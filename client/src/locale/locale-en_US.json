@@ -49,24 +49,26 @@
   "grammar.sorting.date.desc": "by date (most recent first)",
   "grammar.sorting.date.asc": "by date (oldest first)",
 
-  "guided-tour.welcome": "Welcome to <strong>histoGraph</strong>!<br/> </br>We use cookies to track your usage and preferences",
+  "guided-tour.welcome": "Welcome to <strong>histograph</strong>!<br/> </br>We use cookies to track your usage and preferences.",
   "guided-tour.skip": "You can access the guided tour from your personal space at any time.",
   "guided-tour.step.view.gallery": "You can choose between <strong>gallery</strong> and <strong>graph</strong> view. You are now in <strong>gallery</strong> view.",
-  "guided-tour.step.view.gallery.resource":"Select a resource to continue the guided tour.",
+  "guided-tour.step.view.gallery.resource":"Select a resource to continue to part 2 of the guided tour.",
   "guided-tour.step.filters.timeline": "You can <strong>select</strong> a specific period on the timeline to see resources from that period.",
   "guided-tour.step.filters.type": "Both views can be <strong>filtered</strong> according to the type of resource.",
   "guided-tour.step.filters.related-to":  "You can also filter by  <strong>people</strong>, <strong>locations</strong>, <strong>institutions</strong> or <strong>themes</strong>.",
   "guided-tour.step.view.graph": "You can select graph views with different types of nodes (e.g. people or locations). A line connecting two nodes indicates that they are mentioned together in a document. More frequent co-occurrences are represented by thicker lines. Clicking on a line shows the resources which contain both nodes.",
   "guided-tour.step.view.graph.nodes": "",
   "guided-tour.step.view.graph.ties": "",
-  "guided-tour.step.view.resource": "this is a bla bla",
-  "guided-tour.step.view.resource.favourites": "you can add this resources to your favourite list or to your current selection",
-  "guided-tour.step.view.resource.seealso": "This is the list of recommended resources base on the tags of this resource",
-  "guided-tour.step.view.resource.seealso.filters": "you can use the filter above to reduce the results in the recommended list",
-  "guided-tour.step.view.resource.add": "you can add relevant people, location etc.. this will improve the results in the recommended section...",
-  "guided-tour.step.view.resource.annotate": "select a text in the title and in the caption of the resource in order to ",
-  "guided-tour.step.view.resource.annotate.bis": "you can also <strong>annotate</strong> a text in the abstract, or annotate an image",
-  "guided-tour.step.view.resource.click.entity": "guided-tour.step.view.resource.click.entity",
+   "guided-tour.step.view.resource.pinboard": "You can add resources to your <strong>pinboard ( <i class='fa fa-thumb-tack'></i> )</strong>. Then click on <strong>my pinboard</strong> to explore relations between them and to discover new resources.", 
+  "guided-tour.step.view.resource.favourites": "You can also add resources to your <strong>bookmarks ( <i class='fa fa-bookmark-o'></i> )</strong>. Resources stored in bookmarks will remain available to you for future reference.",
+  "guided-tour.step.view.resource.seealso": "This is a list of <strong>recommended resources</strong> based on the tags of a selected resource.",
+  "guided-tour.step.view.resource.seealso.filters": "You can use the facets above to filter the results in the list of recommendations.",
+  "guided-tour.step.view.resource.add": "You can add or edit relevant people, institutions or locations. This will improve the quality of recommended resources.",
+  "guided-tour.step.view.resource.annotate": "To <strong>tag</strong> a person, institution or location, highlight the text and click <strong>tag</strong>. Select the best fit from the suggestions or type in a new term." ,
+  "guided-tour.step.view.resource.click.entity": "histograph automatically detects people, institutions and locations which means that mistakes are inevitable. To fix a mistake, click on a tag and select <strong>fix/edit</strong> and choose the appropriate way to solve the problem. We also appreciate if you <strong>confirm</strong> valid tags.",
+
+  "guided-tour.step.view.entity": "this is a bla bla",
+  
 
 
   "header.logout" : "log out",
@@ -74,7 +76,7 @@
 
   "loading": "loading ...",
 
-  "login.welcome" : "Welcome to the HistoGraph collaborative platform. Sign up or log in to start",
+  "login.welcome" : "Welcome to the histograph collaborative platform. Sign up or log in to start",
 
   "myselection.item.added": "... added to your selection",
   "myselection.title": "your selection",

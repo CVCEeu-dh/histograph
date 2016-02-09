@@ -23,7 +23,7 @@ angular.module('histograph')
         steps: [
           {
             id: 0,
-            title: 'Welcome to histoGraph'
+            title: 'Welcome to histograph'
           }, 1,2,3,{
             id: 4,
             title: 'Timeline'
@@ -36,7 +36,7 @@ angular.module('histograph')
       'resource.resources': {
         title: 'Resource page',
         steps: [
-          7,8,9,10,11,15,14
+          8,9,10,16,14,15, 11
         ]
       },
       'explore.projection': {
@@ -128,10 +128,10 @@ angular.module('histograph')
       $scope.steps[currentState].consumed=true;
       $scope.saveCursors();
 
-      if($scope.ignoreSkipTip){
-        $scope.currentStep = -1;
-        return;
-      };
+      // if($scope.ignoreSkipTip){
+      //   $scope.currentStep = -1;
+      //   return;
+      // };
       
       $scope.currentStep = $scope.steps['skip-tour'].steps[0];
       $scope.hasPrevious = false;

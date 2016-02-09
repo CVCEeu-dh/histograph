@@ -108,6 +108,7 @@ angular
     });
     $translateProvider.preferredLanguage('en_US');// is applied on first load
     
+    //@ todo guided tour provider
   })
   /*
     Angular analytics config
