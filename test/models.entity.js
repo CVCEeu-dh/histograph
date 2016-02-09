@@ -74,7 +74,12 @@ describe('model:entity init', function() {
 
 
 describe('model:entity ', function() {
-  
+  it('should return the correct validator fields for Person entity type', function (done) {
+    var fields = Entity.getValidatorFields('person');
+    should.equal(_.map(fields, 'field').join(), ['first_name', 'last_name', 'reference'].join());
+    done();
+  });
+
   it('should create a brand new entity, by using links_wiki', function (done) {
     Entity.create({
       links_wiki: 'TESTESTTESTYalta_Conference',
