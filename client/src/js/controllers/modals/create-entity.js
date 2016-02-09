@@ -17,6 +17,22 @@ angular.module('histograph')
     $scope.ghost = {};
     $scope.type = type;
 
+    var availablesteps = {
+      person: [
+        'viaf',
+        'person'
+      ]
+    }
+
+    $scope.steps = availablesteps[type];
+    $scope.step = $scope.steps[0];
+
+    // initial value for typeahead
+    if(options && options.query && type =='person') {
+      $scope.autotypeahead = options.query
+      $scope.q = options.query;
+    }
+
     $scope.ok = function () {
       $log.log('CreateEntityModalCtrl -> ok()', 'saving:', $scope.ghost);
       // @todo save entity, then go back to the previous form;
@@ -29,5 +45,41 @@ angular.module('histograph')
       $uibModalInstance.dismiss('cancel');
     };
 
+    /*
+      suggest viaf!
+    */
+    $scope.typeaheadSuggestViaf = function(q) {
+      $log.log('CreateEntityModalCtrl -> typeahead() VIAF', q, type);
+      // suggest only stuff from 2 chars on
+      $scope.ghost.viaf = undefined;
+      if(q.trim().length < 2) {
+        $scope.query = '';
+        return;
+      }
+      
+      $scope.query = q.trim();
+
+      return SuggestFactory.getVIAF({
+        query: q,
+        limit: 10
+      }).$promise.then(function(res) {
+        if(res.status != 'ok')
+          return [];
+        return res.result.items
+      })
+    }
+
+    $scope.typeaheadSelectedViaf = function($item) {
+      $scope.ghost.viaf = $item;
+      $log.log('CreateEntityModalCtrl -> typeaheadSelectedViaf()', $item);
+    }
+
+    $scope.resetViaf = function() {
+      $scope.ghost.viaf = undefined;
+    }
+
+    $scope.next = function() {
+
+    }
   });
   

@@ -30,7 +30,7 @@
   "create-entity.person.firstname": "first name",
   "create-entity.person.lastname": "last name",
   "create-entity.person.reference": "reference",
-
+  "create-entity.withviaf.desciption":"add a viaf identifier for the person",
 
   "crowd.whois": "Do you know who <strong class='tag person'>{{name}}</strong> is?",
   "crowd.whois.description": "We are missing some basic information about him/her and we're not sure about his/her identity",

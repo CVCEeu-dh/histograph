@@ -4,38 +4,36 @@
   <div class='typeahead-in-dropdown'>
     <h2 translate="contribute.title" translate-values='{type: type}'></h2>
     <p translate>contribute.description</p>
-    
-    <form>
-      <input autofocus type='text' name='test' typeahead-trigger-on-model-change='autotypeahead' ng-model='q' class='form-control' typeahead-min-length="2" typeahead-editable='false' placeholder='{{"placeholder.search" | translate}}' uib-typeahead='item for items in typeaheadSuggest($viewValue, "entity")' typeahead-wait-ms='100' typeahead-on-select='typeaheadSelected($item, $model, $label)' typeahead-template-url='templates/partials/helpers/typeahead.html'  typeahead-no-results="noResults"/>
-    </form>
-    
-    <div class='results' ng-if="entities.length">
-      <span class="tags"><i>add entities</i>:
-        <span ng-repeat="per in entities">
-          {{per.type}}
-          <span ng-if="per.type=='person'">
-            <span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.props.name}} - {{per.props.description}} ({{per.props.birth_date | date:"yyyy"}} - {{per.props.death_date | date:"yyyy"}}) {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name}}</span>
-          </span>
-          <span tooltip='{{per.props.name}}' ng-if="per.type=='location'" class="tag location">{{per.props.name}}, {{per.props.country}}
-          </span>
-          <span tooltip='{{per.props.name}}' ng-if="per.type=='theme'" class="tag theme">{{per.props.name}}
-          </span>
-          {{$last? '':  ', '}}
-        </span>
-        
-      </span>
-        
+    <div id='contribute-typeahead-list'>
+      <form>
+        <input autofocus type='text' name='test' typeahead-trigger-on-model-change='autotypeahead' ng-model='q' class='form-control' typeahead-editable='false' placeholder='{{"placeholder.search" | translate}}' uib-typeahead='item for items in typeaheadSuggest($viewValue, "entity")' typeahead-wait-ms='100' typeahead-on-select='typeaheadSelected($item, $model, $label)' typeahead-template-url='templates/partials/helpers/typeahead.html'  typeahead-no-results="noResults" dropdown-append-to='#contribute-typeahead-list'/>
+      </form>
     </div>
-    
-
-    
+  </div>
+  <div style='position:relative; top/ 15px; padding: 15px;' ng-if='!entities.length && query.length'>
+    <button  class='btn btn-block btn-line' ng-click='createEntity(item, type)' translate='button.entity.create' translate-values='{type: type}'></button>
+  </div>
+  <div class='results' ng-if="entities.length">
+    <span class="tags"><i>add entities</i>:
+      <span ng-repeat="per in entities">
+        {{per.type}}
+        <span ng-if="per.type=='person'">
+          <span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.props.name}} - {{per.props.description}} ({{per.props.birth_date | date:"yyyy"}} - {{per.props.death_date | date:"yyyy"}}) {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name}}</span>
+        </span>
+        <span tooltip='{{per.props.name}}' ng-if="per.type=='location'" class="tag location">{{per.props.name}}, {{per.props.country}}
+        </span>
+        <span tooltip='{{per.props.name}}' ng-if="per.type=='theme'" class="tag theme">{{per.props.name}}
+        </span>
+        {{$last? '':  ', '}}
+      </span>
+      
+    </span>
+      
   </div>
 
 </div>
 <div class='modal-footer'>
-  <div style='margin: 0 0 15px 0; padding-top:15px' ng-if='query.length > 1'>
-    <button  class='btn btn-block btn-primary btn-line' ng-click='createEntity(item, type)' translate='button.entity.create' translate-values='{type: type}'></button>
-  </div>
+  
   <div class="btn-group btn-group-dual" role="group">
     <button  class='btn btn-primary btn-line {{entities.length? "":"disabled"}}' ng-click='ok()' translate>button.confirm</button>
     <button class='btn btn-secondary btn-line' ng-click='cancel()' translate>button.discard</button>

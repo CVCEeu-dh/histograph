@@ -86,8 +86,10 @@ angular.module('histograph')
     $scope.typeaheadSuggest = function(q) {
       $log.log('ContributeModalCtrl -> typeahead()', q, type);
       // suggest only stuff from 2 chars on
-      if(q.trim().length < 2)
+      if(q.trim().length < 2) {
+        $scope.query = '';
         return;
+      }
       
       $scope.query = q.trim();
 

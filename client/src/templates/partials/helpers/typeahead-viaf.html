@@ -1,0 +1,12 @@
+<!-- typeahead template for FILTERING purpose; used in contribute modal -->
+<div class='{{match.model.props.thumbnail?"with-thumbnail":""}}'>
+  <a ng-if='match.model.type != "default"' >
+    <div class='thumbnail' ng-if='match.model.props.thumbnail' style='background-image:url({{match.model.props.thumbnail}})'></div>
+    
+    <h4 marked="match.model.props|lookup:'name':'en'"></h4>
+    <p>
+      <span>{{match.model.term}}</span>
+      — {{match.model.viafid}}
+    </p>
+  </a>
+</div>

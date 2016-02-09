@@ -938,12 +938,14 @@ angular.module('histograph')
       ---
       Open the create new modal for the given item
       It allows users to suggest entities.
-      usage (from everywhere)
-      $scope.contribute({id: 25723, type: 'resource'})
+      usage (from everywhere, or to test)
+      $scope.contribute({id: 25723, type: 'resource'}, 'person')
     */
     $scope.createEntity = function(item, type, options) {
       $log.debug('CoreCtrl -> createEntity() - item:', item);
-
+      if(type != 'person') {
+        return;
+      }
       var language      = $scope.language;
       var modalInstance = $uibModal.open({
         animation: true,
@@ -967,7 +969,7 @@ angular.module('histograph')
         }
       })
     }
-
+    $scope.createEntity({id: 13113, type: 'resource'}, 'person', { query: 'Cumming'})
 
     
     // $scope.contribute({id: 25723})
