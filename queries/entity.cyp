@@ -38,6 +38,13 @@ ON CREATE SET
   ent.name_search   = {name_search},
   ent.celebrity     = 0,
   ent.score         = 0,
+  ent.df            = 1,
+  {if:first_name}
+    ent.first_name     = {first_name},
+  {/if}
+  {if:last_name}
+    ent.last_name     = {last_name},
+  {/if}
   {if:name_en}
     ent.name_en     = {name_en},
   {/if}
@@ -75,6 +82,12 @@ ON CREATE SET
   ent.last_modification_date = {exec_date},
   ent.last_modification_time = {exec_time}
 ON MATCH SET
+  {if:first_name}
+    ent.first_name     = {first_name},
+  {/if}
+  {if:last_name}
+    ent.last_name     = {last_name},
+  {/if}
   {if:name_en}
     ent.name_en     = {name_en},
   {/if}

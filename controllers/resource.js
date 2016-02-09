@@ -17,6 +17,7 @@ var settings   = require('../settings'),
     neo4j      = require('seraph')(settings.neo4j.host),
 
     Action     = require('../models/action'),
+    Entity     = require('../models/entity');
     Resource   = require('../models/resource');
     
 
@@ -180,6 +181,40 @@ module.exports = function(io){
         id: form.params.id,
       },form.params, function (err, items, info) {
         helpers.models.getMany(err, res, items, info, form.params);
+      });
+    },
+
+    /*
+      Add a brand new entity to the requested resource
+    */
+    createRelatedEntity: function(req, res){
+      var fields = validator.getEntityFields(req.params.entity),
+          form = validator.request(req, _.zipObject(_.map(fields, 'field'), ''), {
+            fields: fields
+          });
+          
+      // validate orderby
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+
+      Entity.create(_.assign({}, form.params, {
+        resource: {
+          id: form.params.id
+        },
+        type: form.params.entity,
+        name: form.params.name
+      }), function (err, entity) {
+        // createRelatedUser
+        if(err)
+          return helpers.cypherQueryError(err, res);
+
+        Entity.createRelatedUser(entity, req.user, function (err) {
+          if(err)
+            return helpers.cypherQueryError(err, res);
+          return res.ok({
+            item: entity
+          }, form.params);
+        });
       });
     },
     /*

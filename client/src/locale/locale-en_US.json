@@ -28,7 +28,7 @@
   "create-entity.title": "create a {{type}}",
   "create-entity.description": "Create a person.",
   "create-entity.person.firstname": "first name",
-  "create-entity.person.lastname": "first name",
+  "create-entity.person.lastname": "last name",
   "create-entity.person.reference": "reference",
 
 

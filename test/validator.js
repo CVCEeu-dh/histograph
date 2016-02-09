@@ -49,7 +49,18 @@ describe('validator: check orderby field', function() {
   });
 });
 
-
+describe('validator: check xss', function() {
+  it('should corrrectly purge the reference field with xss', function(done) {
+    var form = validator.request({}, {
+      reference: '<script>alert("xss");</script>'
+    }, {}, function (err, params) {
+      should.not.exist(err);
+      should.equal(params.reference, '&lt;script&gt;alert("xss");&lt;/script&gt;');
+      done();
+    })
+    
+  });
+});
 
 describe('validator: check limit and offset fields', function() {
   it('should work as expected', function (done) {

@@ -300,9 +300,17 @@ clientRouter.route('/txt/:path/:file')
 
   Api router configuration
   ===
+  
+  Middleware to use for all api requests.
+  If settings.allowUnauthenticatedRequests is set in settings module
+  and settings.env is set to 'development' it allows authentication free
+  api requests (e.g. to performance tuning issues)
 
 */
-apiRouter.use(function (req, res, next) { // middleware to use for all requests
+apiRouter.use(function (req, res, next) {
+  // 
+  if(settings.allowUnauthenticatedRequests && settings.env == 'development')
+    return next();
   if(req.isAuthenticated())
     return next();
   else
@@ -448,6 +456,7 @@ apiRouter.route('/resource/:id(\\d+)/related/inquiry')
   .get(ctrl.resource.getRelatedInquiry)
 apiRouter.route('/resource/:id(\\d+)/related/:entity(person|location|organization)')
   .get(ctrl.resource.getRelatedEntities)
+  .post(ctrl.resource.createRelatedEntity)
 apiRouter.route('/resource/:id(\\d+)/related/:action(annotate)')
   .get(ctrl.resource.getRelatedActions)
 apiRouter.route('/resource/:id(\\d+)/related/user')

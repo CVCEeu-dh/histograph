@@ -37,27 +37,7 @@ module.exports = {
     'name',
   ],
 
-  PERSON_FIELDS: [
-    {
-      field: 'first_name',
-      check: 'string',
-      error: 'is not a valid string'
-    }, 
-    {
-      field: 'last_name',
-      check: 'string',
-      error: 'is not a valid string'
-    },
-    {
-      field: 'reference',
-      check: 'string',
-      error: 'is not a valid string'
-    }
-  ],
-
-  getValidatorFields: function(type) {
-    return module.exports[type.toUpperCase() + '_FIELDS'];
-  },
+  
   /*
     Create a new entity or merge it if an entity with the same wikilink exists.
     Note that an entity must be linked to a document.

@@ -13,6 +13,7 @@ var settings  = require('../settings'),
     _         = require('lodash'),
     
     Resource  = require('../models/resource'),
+    Entity    = require('../models/entity'),
     User      = require('../models/user'),
 
     Session   = require('supertest-session')({
@@ -26,7 +27,8 @@ var settings  = require('../settings'),
 var session,
     __user,
     __MARVIN, // our special user
-    __resourceA;
+    __resourceA,
+    __entityA;
 
 before(function () {
   session = new Session();
@@ -300,6 +302,41 @@ describe('controller:resource (related resources)', function() {
       });
   });
   
+  it('MARVIN should attach an UNVALID brand new entity to the resource', function (done) {
+    session
+      .post('/api/resource/'+ __resourceA.id +'/related/person')
+      .send({
+        name: 'TESTTESTTEST_______TEST'
+      })
+      .expect('Content-Type', /json/)
+      .expect(400)
+      .end(function (err, res) {
+        should.not.exists(err);
+        should.equal(_.map(res.body.error.form, 'field').join(), ['first_name', 'last_name'].join())
+        done();
+      });
+  });
+  
+   it('MARVIN should attach an brand new entity to the resource', function (done) {
+    session
+      .post('/api/resource/'+ __resourceA.id +'/related/person')
+      .send({
+        name: 'TESTTESTTEST_______TEST',
+        first_name: 'Professor',
+        last_name: 'Kandiallo'
+      })
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        // console.log(res.body.result.item);
+        should.not.exists(err);
+        should.exists(res.body.result.item);
+        should.equal(res.body.result.item.rel.end, parseInt( __resourceA.id))
+        __entityA = res.body.result.item;
+        done();
+      });
+  });
+
 })
 
 
@@ -326,5 +363,13 @@ describe('controller:resource after', function() {
         throw err;
       done();
     });
+  });
+   it('should delete the entity A', function (done) {
+    Entity.remove({
+      id: __entityA.id
+    }, function (err) {
+      should.not.exist(err);
+      done();
+    })
   });
 });

@@ -7,6 +7,7 @@
 var settings = require('./settings'),
     YAML = require('yamljs'),
     _    = require('lodash'),
+    xss  = require('xss'),
     validator  = require('validator'),
     moment     = require('moment');
 
@@ -73,6 +74,39 @@ function verify(form, fields, options) {
 
 
 module.exports = {
+  PERSON_FIELDS: [
+    {
+      field: 'first_name',
+      check: 'isLength',
+      args: [
+        3,
+        40
+      ],
+      error: 'should be at least 3 to 40 chars'
+    },
+    {
+      field: 'last_name',
+      check: 'isLength',
+      args: [
+        3,
+        40
+      ],
+      error: 'should be at least 3 to 40 chars'
+    },
+    {
+      field: 'reference',
+      check: 'isLength',
+      args: [
+        0,
+        500
+      ],
+      error: 'should be max 500 chars'
+    },
+  ],
+
+  getEntityFields: function(type) {
+    return module.exports[type.toUpperCase() + '_FIELDS'];
+  },
   /*
     Special validation fields
   */
@@ -206,7 +240,7 @@ module.exports = {
       check: 'isLength',
       args: [
         3,
-        500
+        160
       ],
       error: 'should be at least 3 to 160 chars',
       optional: true
@@ -435,6 +469,9 @@ module.exports = {
 
       safeParams.annotation = YAML.stringify(JSON.parse(safeParams.annotation), 2);
     }
+
+    if(safeParams.reference)
+      safeParams.reference = xss(safeParams.reference);
 
     if(next)
       next(null, safeParams);
