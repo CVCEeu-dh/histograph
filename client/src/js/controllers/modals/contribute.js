@@ -16,7 +16,6 @@ angular.module('histograph')
     // the list of suggested entities
     $scope.entities   = [];
 
-
     $scope.type = type;
     $log.debug('ContributeModalCtrl -> ready()', resource.id, options);
 
@@ -28,10 +27,16 @@ angular.module('histograph')
     
     $scope.createEntity = function(){
       // pu it invisible...
-      options.createEntity(resource, $scope.type, {
-        query: $scope.q,
-        submit: function() {
+      $scope.isDisabled = true;
+      options.createEntity(resource, "person", {
+        query: $scope.query,
+        dismiss: function() {
+          $scope.cancel();
+        },
+        submit: function(entity) {
           // add the current saved entity
+          $scope.entities = [entity];
+          $scope.ok();
         }
       })
     }

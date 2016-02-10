@@ -594,6 +594,8 @@ apiRouter.route('/suggest/shared/:ids([\\d,]+)/:entity(person|location|organizat
 // api proxy for VIAF (they don't have CROSS ORIGIN ...)
 apiRouter.route('/suggest/viaf')
   .get(ctrl.suggest.viaf.autosuggest)
+apiRouter.route('/suggest/dbpedia')
+  .get(ctrl.suggest.dbpedia)
 
 /*
   

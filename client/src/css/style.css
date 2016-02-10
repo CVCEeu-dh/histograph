@@ -2077,6 +2077,19 @@ li.CodeMirror-hint-active {
   border-bottom: 0px transparent;
 }
 
+/*
+  Override form control bootstrap
+*/
+textarea.form-control{
+  font-size: 13px;
+  line-height: 24px;
+}
+
+input.form-control{
+  font-size: 13px;
+  height: 33px;
+}
+
 
 /*
   
@@ -6289,8 +6302,9 @@ Copyright (c) 2015 Daniel Eden
 }
 
 .modal-backdrop {
-  visibility: hidden;
-  background-color: #151515;
+  /*visibility: hidden;*/
+  background-color: #C5C5C6;
+  /*#151515;*/
 }
 
 .modal-content{
@@ -6515,12 +6529,49 @@ Copyright (c) 2015 Daniel Eden
 
 */
 .contribute .modal-dialog {
-  width: 300px
+  width: 320px
 }
 
 .contribute .modal-dialog .modal-content{
-  width: 300px;
+  width: 320px;
   bottom: auto;
+}
+
+.contribute .panel{
+  margin: 0 15px;
+}
+
+.contribute .ghost {
+ 
+  font-size:12px;
+  line-height: 21px;
+}
+
+.contribute .modal-content h4.title{
+  margin: 15px 0 0 0;
+  font-weight: bold;
+}
+
+.contribute .dates{
+  color: #747274;
+  margin: 0 0 15px 0;
+}
+
+.contribute .link{
+  background: #eee;
+  padding: 5px 15px;
+  margin-bottom: 10px;
+}
+
+.contribute .ghost .link {
+  padding: 10px;
+  
+  background: #E5E5E5;
+  border: 1px solid #C2C2C2;
+  
+}
+.contribute .ghost .title{
+  font-weight: bold;
 }
 
 .contribute .modal-dialog .modal-content .modal-body {
@@ -6554,7 +6605,7 @@ Copyright (c) 2015 Daniel Eden
 }
 
 .contribute .typeahead-in-dropdown input{
-  width: 268px;
+  width: 287px
 }
 
 .contribute .typeahead-in-dropdown ul.dropdown-menu >li{
@@ -6640,6 +6691,8 @@ Copyright (c) 2015 Daniel Eden
   margin: 0 15px
 }
 
+
+
 .typeahead-in-dropdown ul.dropdown-menu {
   position: static;
   box-shadow: none;
@@ -6660,6 +6713,10 @@ Copyright (c) 2015 Daniel Eden
 
 .typeahead-in-dropdown ul.dropdown-menu li p{
   line-height: 18px;
+}
+
+.typeahead-in-dropdown ul.dropdown-menu li h4{
+  font-weight: bold;
 }
 
 /*

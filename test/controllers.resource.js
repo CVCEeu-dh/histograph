@@ -306,7 +306,7 @@ describe('controller:resource (related resources)', function() {
     session
       .post('/api/resource/'+ __resourceA.id +'/related/person')
       .send({
-        name: 'TESTTESTTEST_______TEST'
+        // name: 'TESTTESTTEST_______TEST'
       })
       .expect('Content-Type', /json/)
       .expect(400)
@@ -317,7 +317,7 @@ describe('controller:resource (related resources)', function() {
       });
   });
   
-   it('MARVIN should attach an brand new entity to the resource', function (done) {
+  it('MARVIN should attach an brand new entity to the resource', function (done) {
     session
       .post('/api/resource/'+ __resourceA.id +'/related/person')
       .send({
@@ -333,6 +333,24 @@ describe('controller:resource (related resources)', function() {
         should.exists(res.body.result.item);
         should.equal(res.body.result.item.rel.end, parseInt( __resourceA.id))
         __entityA = res.body.result.item;
+        done();
+      });
+  });
+
+  it('MARVIN should attach a entity to the resource; since we changed something, we should raise an issue', function (done) {
+    session
+      .post('/api/resource/'+ __resourceA.id +'/related/person')
+      .send({
+        name: 'TESTTESTTEST_______TEST',
+        first_name: 'Professor',
+        last_name: 'Kandiallo'
+      })
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        console.log(res.body.result.item);
+        should.not.exists(err);
+        
         done();
       });
   });

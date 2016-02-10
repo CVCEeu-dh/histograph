@@ -8,6 +8,24 @@ RETURN {
   props: ent
 }
 
+// name: search_entity
+//
+MATCH (ent:entity:{:type}) 
+  WHERE 
+    ent.slug = {slug}
+  {if:links_wiki}
+    OR ent.links_wiki = {links_wiki} 
+  {/if}
+  {if:links_viaf}
+    OR ent.links_viaf = {links_viaf}
+  {/if}
+
+RETURN {
+  id: id(ent),
+  type: LAST(labels(ent)),
+  props: ent
+}
+LIMIT 1
 
 // name: get_entities_by_ids
 //
@@ -27,6 +45,9 @@ LIMIT {limit}
 
 // name: merge_entity
 // create or merge entity, by name or links_wiki.
+MATCH (res:resource)
+  WHERE id(res) = {resource_id}
+WITH res
 {if:links_wiki}
   MERGE (ent:entity:{:type} {links_wiki: {links_wiki}})
 {/if}
@@ -39,6 +60,12 @@ ON CREATE SET
   ent.celebrity     = 0,
   ent.score         = 0,
   ent.df            = 1,
+  {if:links_viaf}
+    ent.links_viaf         = {links_viaf},
+  {/if}
+  {if:links_wiki}
+    ent.links_wiki         = {links_wiki},
+  {/if}
   {if:first_name}
     ent.first_name     = {first_name},
   {/if}
@@ -82,6 +109,12 @@ ON CREATE SET
   ent.last_modification_date = {exec_date},
   ent.last_modification_time = {exec_time}
 ON MATCH SET
+  {if:links_viaf}
+    ent.links_viaf         = {links_viaf},
+  {/if}
+  {if:links_wiki}
+    ent.links_wiki         = {links_wiki},
+  {/if}
   {if:first_name}
     ent.first_name     = {first_name},
   {/if}

@@ -1,0 +1,12 @@
+<!-- typeahead template for data curation purpose; used in create modal -->
+<div class='{{match.model.props.thumbnail?"with-thumbnail":""}}'>
+  <a ng-if='match.model.type != "default"' >
+    <div class='thumbnail' ng-if='match.model.props.thumbnail' style='background-image:url({{match.model.props.thumbnail}})'></div>
+    
+    <h4>{{match.model.label}}</h4>
+    <p>
+      <span>{{match.model.description|cutat:100}}</span>
+      — <a ng-href='{{match.model.uri}}' ng-click="$event.stopPropagation()" target='_blank'>{{match.model.uri}}</a>
+    </p>
+  </a>
+</div>

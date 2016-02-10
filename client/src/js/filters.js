@@ -169,6 +169,19 @@ angular.module('histograph')
       }).join(',');
     };
   })
+  .filter('cutat', function() {
+    return function(text, cutAt) {
+      // cutat
+      if(isNaN(cutAt) || text.length <= cutAt)
+        return text;
+      //trim the string to the maximum length
+      var t = text.substr(0, cutAt);
+      //re-trim if we are in the middle of a word
+      t = text.substr(0, Math.min(t.length, t.lastIndexOf(' '))) + ' ...';
+      // if there is a cut at, we will strip the html
+      return t;
+    };
+  })
   // according to language, give the title a real title
   .filter('title', function($sce) {
     return function(props, language, cutAt) {
@@ -182,7 +195,7 @@ angular.module('histograph')
             //trim the string to the maximum length
             var t = text.substr(0, cutAt);
             //re-trim if we are in the middle of a word
-            if(t.length > cutAt)
+            if(text.length > cutAt)
               t = t.substr(0, Math.min(t.length, t.lastIndexOf(' '))) + ' ...';
             // if there is a cut at, we will strip the html
             return t;

@@ -942,7 +942,7 @@ angular.module('histograph')
       $scope.contribute({id: 25723, type: 'resource'}, 'person')
     */
     $scope.createEntity = function(item, type, options) {
-      $log.debug('CoreCtrl -> createEntity() - item:', item);
+      $log.debug('CoreCtrl -> createEntity() - item:', item, type, options);
       if(type != 'person') {
         return;
       }
@@ -952,6 +952,7 @@ angular.module('histograph')
         templateUrl: 'templates/modals/create-entity.html',
         controller: 'CreateEntityModalCtrl',
         windowClass: "modal fade in contribute",
+        backdrop : 'static',
         size: 'sm',
         resolve: {
           options: function() {
@@ -969,7 +970,7 @@ angular.module('histograph')
         }
       })
     }
-    $scope.createEntity({id: 13113, type: 'resource'}, 'person', { query: 'Cumming'})
+    // $scope.createEntity({id: 13113, type: 'resource'}, 'person', { query: 'Cumming'})
 
     
     // $scope.contribute({id: 25723})

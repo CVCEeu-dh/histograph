@@ -189,26 +189,48 @@ module.exports = function(io){
     */
     createRelatedEntity: function(req, res){
       var fields = validator.getEntityFields(req.params.entity),
-          form = validator.request(req, _.zipObject(_.map(fields, 'field'), ''), {
+          resource = {
+            id: form.params.id
+          };
+
+
+
+      var    required = _.zipObject(_.map(fields, 'field'), ' '),
+          form = validator.request(req, required, {
             fields: fields
           });
-          
+      console.log(required,form.isValid)
       // validate orderby
       if(!form.isValid)
         return helpers.formError(form.errors, res);
 
-      Entity.create(_.assign({}, form.params, {
-        resource: {
-          id: form.params.id
+      // check that no entity exist already, with waterfall
+      async.waterfall([
+        function check(next) {
+          Entity.check(_.assign({}, form.params, {
+            type: form.params.entity
+          }), next);
         },
-        type: form.params.entity,
-        name: form.params.name
-      }), function (err, entity) {
-        // createRelatedUser
+        function createIfNotFound(results, next) {
+          console.log('hey result', results)
+          if(results.length > 0)
+            next(null, results[0])
+          else
+            Entity.create(_.assign({}, form.params, {
+              resource: {
+                id: form.params.id
+              },
+              type: form.params.entity,
+              name: form.params.name
+            }), next);
+          
+        },
+
+      ], function (err, entity) {
         if(err)
           return helpers.cypherQueryError(err, res);
-
-        Entity.createRelatedUser(entity, req.user, function (err) {
+        // createRelatedUser
+        Entity.createRelatedResource(entity, req.user, function (err) {
           if(err)
             return helpers.cypherQueryError(err, res);
           return res.ok({
