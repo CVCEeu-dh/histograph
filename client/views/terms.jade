@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+html
+  head
+    title #{title}
+    meta(name='pinterest', content='nopin', description="contents subject to copyright")
+    
+    link(href='/css/bootstrap.min.css', rel='stylesheet')
+    link(href='/css/font-awesome.min.css', rel='stylesheet')
+    link(href='/css/perfect-scrollbar.min.css', rel='stylesheet')
+    link(href='/css/annotator.css', rel='stylesheet')
+    link(href='/css/annotorious.css', rel='stylesheet')
+    link(href='/css/codemirror.css', rel='stylesheet')
+    link(href='/css/style.css', rel='stylesheet')
+    
+    link(href='/css/abovetheline.css', rel='stylesheet')
+    link(href='/css/patch.css', rel='stylesheet')
+
+    script(src='/socket.io/socket.io.js')
+    script(src='//use.typekit.net/fwe7tir.js')
+
+    script.
+      try{Typekit.load();}catch(e){}
+
+    style.
+      #terms{
+        margin-top: 100px;
+        position:relative;
+      }
+      #terms h1{
+        margin-top: 0;
+        font-size: 21px;
+        font-weight: bold;
+        line-height: 36px;
+      }
+      #back-to-histograph{
+        position :absolute;
+        left: -20px;
+        line-height: 36px;
+      }
+      #terms h2, #terms h3{
+        font-weight: bold;
+      }
+
+  body(ng-app='histograph')
+    
+    div#terms.container
+      div.row
+        div.col-sm-6.col-md-8.col-md-offset-2
+          div#back-to-histograph
+            a(href='/')
+              i.fa.fa-arrow-circle-o-left
+          h1 #{title} 
+
+          h2(translate='termsofservice.title')
+
+          include:markdown ./includes/terms-en_US.md
+
+
+
+  each val in scripts
+    script(src=val)
+  
+  script.
+    var types = !{JSON.stringify(types)};
+    var analytics = !{JSON.stringify(analytics)};
+
+
+    /*
+      Build config according to express settings
+    */
+    angular.module('histograph')
+      .constant("SETTINGS", {
+        types: types,
+        analytics: analytics
+      })
+    .constant('GRAMMAR', {
+      AS_TYPES: [
+        {
+          name: 'of any type',
+        }
+      ].concat(types.resources.map(function (type) {
+        return {
+          name: type, // todo: add translations
+          filter: 'type=' + type
+        }
+      })),
+      IN_TYPES: [
+        {
+          name: 'in any resource type',
+        },
+      ].concat(types.resources.map(function (type) {
+        return {
+          name: 'in ' + type, // todo: add translations / pluralize
+          filter: 'type=' + type    
+        }
+      }))
+    });
+
+    console.log('--- HISTOGRAPH terms ---')

@@ -158,6 +158,7 @@
   "toast.pinboard.added": "added to your pinboard",
   "toast.pinboard.alreadyinlist": "... is already in your pinboard",
 
-  "termsofservice.check": "I accept the <a href='/termsofservice' target='_blank'>terms of service</a>"
+  "termsofservice.check": "I accept the <a href='/terms' target='_blank'>terms of service</a>",
+  "termsofservice.title": "Terms of service"
 }
 

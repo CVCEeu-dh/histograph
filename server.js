@@ -142,6 +142,17 @@ clientRouter.route('/').
     });
   });
   
+clientRouter.route('/terms').
+  get(function(req, res) { // test route to make sure everything is working (accessed at GET http://localhost:8080/api)
+    res.render('terms', {
+      user: req.user || 'anonymous',
+      message: 'hooray! welcome to our api!',
+      types: settings.types,
+      title: settings.title,
+      analytics: settings.analytics,
+      scripts: clientFiles.scripts
+    });
+  });
 
 clientRouter.route('/login')
   .post(function (req, res, next) {
