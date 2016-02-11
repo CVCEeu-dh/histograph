@@ -170,3 +170,11 @@ describe('validator: check mimetype field', function() {
   });
   
 });
+
+describe('validator: check entity fields', function() {
+  it('should return the correct validator fields for Person entity type', function (done) {
+    var fields = validator.getEntityFields('person');
+    should.equal(_.map(fields, 'field').join(), ['first_name', 'last_name', 'reference'].join());
+    done();
+  });
+});
