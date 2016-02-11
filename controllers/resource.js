@@ -225,7 +225,8 @@ module.exports = function(io){
                 id: form.params.id
               },
               type: form.params.entity,
-              name: form.params.name
+              name: form.params.name,
+              username: req.user.username
             }), next);
         },
         /*

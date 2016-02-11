@@ -66,6 +66,7 @@ module.exports = {
           languages: properties.languages,
           frequency: properties.frequency || 1,
           resource_id: properties.resource.id,
+          username: properties.username,
           name_search: properties.name_search || properties.name.toLowerCase()
         }),
         query = parser.agentBrown(queries.merge_entity, props);

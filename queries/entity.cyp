@@ -74,6 +74,7 @@ ON CREATE SET
   ent.celebrity     = 0,
   ent.score         = 0,
   ent.df            = 1,
+
   {if:links_viaf}
     ent.links_viaf         = {links_viaf},
   {/if}
@@ -184,6 +185,12 @@ WITH ent, res
     {/if}
     {if:services}
       r.services   = {services},
+    {/if}
+    {if:username}
+      r.created_by = {username},
+      r.upvote = [{username}],
+      r.celebrity = 1,
+      r.score = 1,
     {/if}
     r.creation_date = {exec_date},
     r.creation_time = {exec_time},
