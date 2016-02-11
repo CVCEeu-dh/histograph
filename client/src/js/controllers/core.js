@@ -157,6 +157,7 @@ angular.module('histograph')
     $scope.setTimeline = function(items) {
       $scope.timeline = items;
     }
+
     /*
       language handlers
     */
@@ -417,6 +418,8 @@ angular.module('histograph')
       // empty
       if(!_.isEmpty($scope.relatedItems))
         $scope.relatedItems = [];
+      if(!_.isEmpty($scope.timeline))
+        $scope.timeline = [];
     })
 
     $rootScope.$on('$stateChangeSuccess', function (e, state) {

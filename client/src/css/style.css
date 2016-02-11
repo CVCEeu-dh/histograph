@@ -6228,19 +6228,31 @@ Copyright (c) 2015 Daniel Eden
   /*display: none;*/
   position: absolute;
   width: 110px;
-  bottom: 30px;
+  bottom: 26px;
   font-weight: normal;
-  background: rgba(255,255,255, .4);
+  /*background: rgba(255,255,255, .4);*/
+  
+  bottom: 30px;
+  background: #d8d8d8;
+  font-size: 12px;
+  height: 18px;
+  line-height: 18px;
+
+  color: #151515;
+  border-radius: 2px;
 }
 
 #timeline .brushdate.left{
   /*left: 40px;*/
   text-align: right;
+  padding-right: 5px;
+ 
 }
 
 #timeline .brushdate.right{
   /*right: 40px;*/
   text-align: left;
+  padding-left: 5px;
 }
 
 #timeline path{
@@ -6256,7 +6268,7 @@ Copyright (c) 2015 Daniel Eden
 }
 
 #timeline .brush .extent {
-  stroke: #fff;
+  stroke: crimson;
   fill: #ffffff;
   fill-opacity: .165;
   shape-rendering: crispEdges;

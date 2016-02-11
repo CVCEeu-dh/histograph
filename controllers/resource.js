@@ -581,19 +581,21 @@ module.exports = function(io){
     },
     
     getTimeline: function (req, res) {
-      validator.queryParams(req.query, function (err, params, warnings) {
-        if(err)
-          return helpers.formError(err, res);
-        
-        Resource.getTimeline(params, function (err, timeline) {
-          if(err)
-            return helpers.cypherQueryError(err, res);
-          return res.ok({
-            timeline: timeline
-          }, {
-            params: params,
-            warnings: warnings
+      var form = validator.request(req, {
+            limit: 100,
+            offset: 0
           });
+
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      Resource.getTimeline(form.params, function (err, timeline) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({
+          timeline: timeline
+        }, {
+          params: form.params
         });
       });
     },
