@@ -245,8 +245,14 @@ WITH DISTINCT res
 
 // name: count_similar_resource_ids_by_entities
 // get top 100 similar resources sharing the same persons, orderd by time proximity if this info is available
-MATCH (res:resource)<-[:appears_in]-(ent:entity)-[:appears_in]->(res2:resource)
-WHERE id(res) = {id}
+MATCH (res:resource)<-[r1:appears_in]-(ent:entity)
+  WHERE id(res) = {id} AND ent.score > -1
+WITH res, r1, ent
+  ORDER BY r1.tfidf DESC
+  LIMIT 20
+WITH ent
+MATCH (ent)-[:appears_in]->(res2:resource)
+  WHERE id(res2) <> {id}
   {if:mimetype}
   AND res2.mimetype IN {mimetype}
   {/if}
@@ -259,8 +265,6 @@ WHERE id(res) = {id}
   {if:end_time}
   AND res2.end_time <= {end_time}
   {/if}
-  
-  AND id(res) <> id(res2)
 
 WITH DISTINCT res2  
 {if:with}
@@ -275,10 +279,15 @@ RETURN {
 
 
 // name: get_similar_resource_ids_by_entities
-//
-MATCH (res1:resource)<-[r1:appears_in]-(ent:entity)-[r2:appears_in]->(res2:resource)
-  WHERE id(res1) = {id}
-    AND ent.score > -1
+// top 20 entities attached to the person
+MATCH (res1:resource)<-[r1:appears_in]-(ent:entity)
+WHERE id(res1) = {id} AND ent.score > -1
+WITH res1, r1, ent
+  ORDER BY r1.score DESC, r1.tfidf DESC
+  LIMIT 20
+WITH res1, r1, ent
+MATCH (ent)-[r2:appears_in]->(res2:resource)
+  WHERE ent.score > -1 AND id(res2) <> {id}
     {if:mimetype}
     AND res2.mimetype IN {mimetype}
     {/if}
@@ -291,7 +300,7 @@ MATCH (res1:resource)<-[r1:appears_in]-(ent:entity)-[r2:appears_in]->(res2:resou
     {if:end_time}
     AND res2.end_time <= {end_time}
     {/if}
-    AND id(res1) <> id(res2)
+
 WITH  res1, res2, r1, r2, ent
 {if:with}
   MATCH (ent2:entity)-[:appears_in]->(res2)
