@@ -29,7 +29,7 @@
         <div id='create-entity-typeahead-list'>
 
         </div>
-        <div ng-if='noResultsViaf'>
+        <div ng-if='noResultsViaf' class='panel'>
           <span translate>create-entity.withviaf.noresults</span>
         </div>
         <div ng-if='isLoadingViaf' class="panel">
@@ -51,7 +51,7 @@
         </div>
         <div id='create-entity-typeahead-dbpedia-list'>
         </div>
-        <div ng-if='noResultsDbpedia'>
+        <div ng-if='noResultsDbpedia' class='panel'>
           <span translate>create-entity.withdbpedia.noresults</span>
         </div>
         <div ng-if='isLoadingDbpedia' class="panel">
@@ -59,7 +59,7 @@
         </div>
         
         <div class='panel' ng-if='!isLoadingDbpedia'>
-          <span translate>create-entity.withdbpedia.select</span>
+          <span ng-if='!noResultsDbpedia' translate>create-entity.withdbpedia.select</span>
           <button  class='btn btn-secondary btn-line' ng-click='next()' translate>button.steps.skip</button>
         </div>
       </div>

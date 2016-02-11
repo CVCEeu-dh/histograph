@@ -56,7 +56,7 @@ angular.module('histograph')
       $scope.autotypeahead = options.query
       $scope.q = options.query;
     }
-
+    
     $scope.getDataByType = function(type) {
       if(type == 'person') {
         // understand dates (later)
@@ -92,6 +92,7 @@ angular.module('histograph')
         $uibModalInstance.close();
       }, function(res){
         // some errors around there
+        $scope.setMessage('please check the data you entered')
       })
     };
 

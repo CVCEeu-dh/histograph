@@ -24,6 +24,8 @@
 
   "contribute.title": "Which {{type}} did you identify?",
   "contribute.description": "Tagging improves the quality of the recommended resources",
+  "contribute.create-entity.select": "Select an existing entity",
+  "contribute.suggest.noresults": "No result matches your search.",
 
   "create-entity.title": "Create a {{type}}",
   "create-entity.person.description": "Add or edit person basic information",
@@ -40,6 +42,7 @@
   "create-entity.withviaf.loading": "Loading VIAF entries ...",
   "create-entity.withviaf.select": "Select one VIAF identity from the list, or",
   "create-entity.withdbpedia.desciption":"Search in dbpedia (optional)",
+  "create-entity.withdbpedia.noresults":"No result matches your search.",
   "create-entity.withdbpedia.loading": "Loading dbpedia entries ...",
   "create-entity.withdbpedia.select": "Select one dbpedia entity from the list, or",
 
@@ -129,8 +132,8 @@
   "resource.language.availability": "available in",
   "resource.seealso.title": "recommended resources",
 
-  "tooltip.resource.add.to.favourites": "add to favourite items",
-  "tooltip.resource.add.to.myselection": "add to your selection",
+  "tooltip.resource.add.to.favourites": "add to your bookmarks",
+  "tooltip.resource.add.to.myselection": "add to your pinboard",
   "tooltip.visit.entity.page": "visit %s page",
 
   "resource.type.cartoon": "cartoon",
@@ -150,6 +153,9 @@
   "placeholder.search.entity": "search {{type}}",
   "placeholder.search.everything": "search person, location ...",
 
-  "typeahead.noresults.alt": "Can't find what your looking for?"
+  "typeahead.noresults.alt": "Can't find what your looking for?",
+
+  "toast.pinboard.added": "added to your pinboard",
+  "toast.pinboard.alreadyinlist": "... is already in your pinboard"
 }
 

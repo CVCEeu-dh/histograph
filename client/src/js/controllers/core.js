@@ -367,7 +367,7 @@ angular.module('histograph')
     $scope.message = '';
     $scope.messaging = false;
     var _messengerTimer;
-    $scope.setMessage = function(message, timeout) {
+    $scope.setMessage = function(message, timeout, options) {
       if(!message) {
         $scope.unsetMessage();
         return;
@@ -396,11 +396,11 @@ angular.module('histograph')
       Use it when it's busy in doing something
     */
     $scope.lock = function() {
-      $scope.isBusy = true;
+      $scope.isLoading=true;
     }
   
     $scope.unlock = function() {
-      $scope.isBusy = false;
+      $scope.isLoading=false;
     }
     /*
     
@@ -410,9 +410,10 @@ angular.module('histograph')
     */
     var _resizeTimer;
     $rootScope.$on('$stateChangeStart', function (e, state) {
-      if(state.resolve) {
-        $scope.lock(); 
-      }
+      // if(state.resolve) {
+        
+      // }
+      $scope.lock(); 
       // empty
       if(!_.isEmpty($scope.relatedItems))
         $scope.relatedItems = [];
@@ -423,8 +424,8 @@ angular.module('histograph')
       // the ui.router state (cfr app.js)
       $scope.currentState = state;
 
-      if(state.resolve)
-        $scope.unlock();
+      // if(state.resolve)
+        // $scope.unlock();
 
       $scope.unsetMessage();
       
@@ -449,6 +450,7 @@ angular.module('histograph')
     // fire event when DOM is ready
     $scope.$on('$viewContentLoaded', function(event){
       // $rootScope.$emit
+      $scope.unlock();
       $rootScope.$emit(EVENTS.STATE_VIEW_CONTENT_LOADED, $scope.currentState);
     });
     /*
@@ -541,7 +543,7 @@ angular.module('histograph')
             $log.log('CoreCtrl -> addToQueue() SuggestFactory', res);
             $scope.playlist = $scope.playlist.concat(res.result.items);
             $scope.playlistIds = _.map( $scope.playlist, 'id');
-            $scope.setMessage('added to your bookmark list');
+            $scope.setMessage('toast.pinboard.added');
             // $scope.queueStatus = 'active'; @todo: simply blink the 
             $scope.queueRedirect();
           });
@@ -561,7 +563,7 @@ angular.module('histograph')
       $log.log('   ', itemId, isAlreadyInQueue?'is already presend in readlist, skipping ...': 'adding', $scope.playlistIds.indexOf(itemId))
       
       if(isAlreadyInQueue) {
-        $scope.setMessage('... it is already in your bookmark list');
+        $scope.setMessage('toast.pinboard.alreadyinlist');
         // $scope.queueStatus = 'active';
         if(!inprog)
           $scope.$apply();
@@ -574,7 +576,7 @@ angular.module('histograph')
       if(typeof item == 'object') {
         $scope.playlist.push(item);
         $scope.playlistIds.push(item.id);
-        $scope.setMessage('... added to your bookmarks');
+        $scope.setMessage('toast.pinboard.added');
         
         // $scope.queueStatus = 'active';
         if(!inprog)
@@ -584,7 +586,7 @@ angular.module('histograph')
         SuggestFactory.getUnknownNodes({
           ids: [itemId]
         }, function (res) {
-          $scope.setMessage('... added to your bookmarks');
+          $scope.setMessage('toast.pinboard.added');
           $scope.playlist.push(res.result.items[0]);
           $scope.playlistIds.push(res.result.items[0].id);
           // $scope.queueStatus = 'active';
@@ -1193,7 +1195,6 @@ angular.module('histograph')
     $scope.totalItems  = relatedItems.info.total_items;
     $scope.limit       = relatedItems.info.limit;
     $scope.offset      = relatedItems.info.offset;
-    $scope.loading     = false;
     // $scope.page        = 1; // always first page!!
     
     /*
@@ -1296,7 +1297,7 @@ angular.module('histograph')
     // $scope.syncGraph();
     $log.log('RelatedItemsCtrl -> setRelatedItems - items', relatedItems.result.items);
     $scope.setRelatedItems(relatedItems.result.items);
-    
+    $scope.isLoading=false;
     if($stateParams.ids || $stateParams.query || ~~!specials.indexOf('syncGraph'))
       $scope.syncGraph();
   })

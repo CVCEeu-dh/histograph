@@ -1,7 +1,7 @@
- <div  class='{{currentCtrl}}' ng-cloak>
+ <div  class='{{currentCtrl}}'>
     <h3 class='see-also-header'>{{totalItems}} <span translate>resource.seealso.title</span> <span lookup context='item' field='name' language='language'></span> </h3>
 
-    <div class="empty-list" ng-if="relatedItems.length == 0">
+    <div class="empty-list" ng-if="totalItems == 0">
       There are no related <i>resources</i>.
     </div>
     <div masonry='{ "transitionDuration" : "0s" , "itemSelector" : ".masonry-brick"}'>
@@ -10,6 +10,6 @@
       
     </div>
     <div class='more' ng-if='totalItems > 0 && offset + limit < totalItems'>
-      <button ng-click='more()' class='btn btn-block '>{{loading?'loading...':'load more items'}}</button>
+      <button ng-click='more()' class='btn btn-block '>{{isLoading?'loading...':'load more items'}}</button>
     </div>
   </div>

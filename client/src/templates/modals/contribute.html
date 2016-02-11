@@ -15,7 +15,7 @@
       <div ng-if='isLoading' class="panel">
         <span translate>contribute.suggest.loading</span>
       </div>
-      <div class='panel' ng-if='!isLoadingDbpedia'>
+      <div class='panel' ng-if='!isLoadingDbpedia && query.length && !entities.length'>
         <span ng-if='!noResults' translate>contribute.create-entity.select</span>
         
         <button  class='btn btn-secondary btn-line' ng-click='createEntity()' translate='button.entity.create' translate-values='{type: "person"}'></button>

@@ -1,5 +1,5 @@
 
-<div class="related {{relatedItem.users.length? 'with-users':''}}">
+<div class="related animated fadeIn {{relatedItem.users.length? 'with-users':''}}">
   <!-- {{relatedItem.users}} -->
   <div class='user sans-serif' ng-repeat='user in relatedItem.users' ng-if='$index == 0'>
     {{user.username}} <strong>{{user.type}}</strong> {{user.last_modification_time*1000|date:'longDate'}}

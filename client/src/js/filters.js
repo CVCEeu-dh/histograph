@@ -171,6 +171,8 @@ angular.module('histograph')
   })
   .filter('cutat', function() {
     return function(text, cutAt) {
+      if(!text)
+        return ''
       // cutat
       if(isNaN(cutAt) || text.length <= cutAt)
         return text;

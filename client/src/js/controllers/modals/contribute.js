@@ -28,17 +28,19 @@ angular.module('histograph')
     $scope.createEntity = function(){
       // pu it invisible...
       $scope.isDisabled = true;
-      options.createEntity(resource, "person", {
+      options.createEntity(resource, "person", _.assign({}, options, {
         query: $scope.query,
+        language: options.language,
+
         dismiss: function() {
           $scope.cancel();
         },
         submit: function(entity) {
           // add the current saved entity
-          $scope.entities = [entity];
-          $scope.ok();
+          $scope.entities=[entity];
+          $scope.ok()
         }
-      })
+      }));
     }
     $scope.ok = function () {
       // get the annotation, if any

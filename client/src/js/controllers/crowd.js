@@ -8,7 +8,7 @@
  */
 angular.module('histograph')
   .controller('CrowdCtrl', function($scope, $log, $state, $timeout, UserFactory) {
-    $scope.short_delay = 600;
+    $scope.short_delay = 60000;
     $scope.long_delay = 180000;
 
     $scope.isVisible = false;

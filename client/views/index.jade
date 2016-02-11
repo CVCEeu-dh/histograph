@@ -21,13 +21,68 @@ html
     script.
       try{Typekit.load();}catch(e){}
 
+    style.
+
+      .loader{
+        position :absolute;
+        z-index: 100;
+        left:50%;
+        top:50%;
+        margin-left:-50px;
+        margin-top: -50px;
+        width: 100px;
+        height: 100px;
+      }
+
+      .sk-double-bounce {
+        width: 40px;
+        height: 40px;
+        position: relative;
+        margin: 40px auto;
+      }
+
+      .sk-double-bounce .sk-child {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background-color: #333;
+        opacity: 0.6;
+        position: absolute;
+        top: 0;
+        left: 0;
+        -webkit-animation: sk-doubleBounce 2s infinite ease-in-out;
+                animation: sk-doubleBounce 2s infinite ease-in-out;
+      }
+      
+      .sk-double-bounce .sk-double-bounce2 {
+        -webkit-animation-delay: -1.0s;
+                animation-delay: -1.0s;
+      }
+
+      @-webkit-keyframes sk-doubleBounce {
+        0%, 100% {
+          -webkit-transform: scale(0);
+                  transform: scale(0); }
+        50% {
+          -webkit-transform: scale(1);
+                  transform: scale(1); }
+      }
+
+      @keyframes sk-doubleBounce {
+        0%, 100% {
+          -webkit-transform: scale(0);
+                  transform: scale(0); }
+        50% {
+          -webkit-transform: scale(1);
+                  transform: scale(1); } 
+      }
 
 
   body(ng-app='histograph', class=!user.username? 'login-page':'')
     script(type='text/javascript').
       var socket = io(); 
 
-    div(ng-controller='CoreCtrl') 
+    div(ng-controller='CoreCtrl')
       div(ng-controller='FiltersCtrl')
         if user.username
           header(class='{{queueStatus}}') 
@@ -123,7 +178,7 @@ html
               //-   img(src='images/hg_v.png')
               h5 #{title}
               form
-                p.tk-proxima-nova
+                p.sans-serif
                   span(translate='login.welcome')
 
                 div(class="", role="group")
@@ -137,6 +192,11 @@ html
 
             
         else
+          div.loader.animated(ng-class='isLoading?"fadeIn": "fadeOut"')
+            div.sk-double-bounce
+              div.sk-child.sk-double-bounce1
+              div.sk-child.sk-double-bounce2
+
           div(class='view {{currentCtrl}} {{currentState.name|humanizeState}} {{queueStatus}} viewpoint-{{viewpoint.selected.name}}', infinite-scroll='addMoreItems()', infinite-scroll-collection='relatedItems')
             div(ui-view='')
           
@@ -146,7 +206,7 @@ html
             
           div(id='pop', gasp, target="target", redirect='redirect(path)', filter='addFilter(key, item)', comment="startCommenting(item, tag, hashtag)", queue="queue(item, inprog)", inspect='inspect(item)')
           
-          div(id='crowd',ng-controller='CrowdCtrl', ng-include='"templates/partials/crowd.html"', class='tk-proxima-nova {{isVisible? "animated fadeIn":"animated fadeOut"}}')
+          div(id='crowd',ng-controller='CrowdCtrl', ng-include='"templates/partials/crowd.html"', class='sans-serif {{isVisible? "animated fadeIn":"animated fadeOut"}}')
             div campaign
           //- div(id='popit', popit, target="target", redirect='redirect(path)', comment="startCommenting(item, tag, hashtag)", queue="queue(item, inprog)")
             div(class='action-group')
@@ -251,9 +311,9 @@ html
               
 
 
-      div(id="messenger", class="tk-proxima-nova {{messaging? 'active': ''}}")
+      div(id="messenger", class="sans-serif {{messaging? 'active': ''}}")
         div.inner
-          span {{message}}
+          span(translate='{{message}}')
       
       
         
