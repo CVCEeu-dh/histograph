@@ -310,25 +310,31 @@ WITH  res1, res2, r1, r2, ent
 
 WITH res1, res2, count(*) as intersection
 
-MATCH (res1)<-[rel:appears_in]-(r1:entity)
-WITH res1, res2, intersection, count(rel) as H1
+// MATCH (res1)<-[rel:appears_in]-(r1:entity)
+// WITH res1, res2, intersection, count(rel) as H1
 
-MATCH (res2)<-[rel:appears_in]-(r1:entity)
-WITH res1,res2, intersection, H1, count(rel) as H2
-WITH res1, res2, intersection, H1+H2 as union
-WITH res1, res2, intersection, union, toFloat(intersection)/toFloat(union) as JACCARD
+// MATCH (res2)<-[rel:appears_in]-(r1:entity)
+// WITH res1,res2, intersection, H1, count(rel) as H2
+// WITH res1, res2, intersection, H1+H2 as union
+// WITH res1, res2, intersection, union, toFloat(intersection)/toFloat(union) as JACCARD
 
+// {unless:orderby}
+// ORDER BY JACCARD DESC
+// SKIP {offset}
+// LIMIT {limit}
+// {/unless}
 {unless:orderby}
-ORDER BY JACCARD DESC
-SKIP {offset}
-LIMIT {limit}
+ ORDER BY intersection DESC
+ SKIP {offset}
+ LIMIT {limit}
 {/unless}
 RETURN {
   target: id(res2),
   type: LAST(labels(res2)),
   dst : abs(coalesce(res1.start_time, 1000000000) - coalesce(res2.start_time, 0)),
   det : abs(coalesce(res1.end_time, 1000000000) - coalesce(res2.end_time, 0)),
-  weight: JACCARD
+  // weight: JACCARD
+  weight : intersection
 } as result
 {if:orderby}
   ORDER BY {:orderby}
