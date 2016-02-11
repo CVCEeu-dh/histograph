@@ -83,7 +83,8 @@ module.exports = {
     Check that an entity candidate can be found
     (unique values: name, viaf, wiki)
   */
-  check: function(properties, next) {console.log('check',properties)
+  check: function(properties, next) {
+    // console.log('check',properties)
     var slug = module.exports._slug(properties),
         props = _.assign({}, properties, {
           type: properties.type || 'unknown',
@@ -92,7 +93,7 @@ module.exports = {
           links_viaf: _.isEmpty(properties.links_viaf)? undefined: properties.links_viaf
         }),
         query = parser.agentBrown(queries.search_entity, props);
-    console.log(slug, 'q',query)
+    // console.log(slug, 'q',query)
     neo4j.query(query, props, function (err, nodes) {
       if(err) {
         next(err);

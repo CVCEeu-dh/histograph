@@ -20,11 +20,25 @@ MATCH (ent:entity:{:type})
     OR ent.links_viaf = {links_viaf}
   {/if}
 
-RETURN {
-  id: id(ent),
-  type: LAST(labels(ent)),
-  props: ent
-}
+{if:resource_id}
+  WITH ent
+  OPTIONAL MATCH (res:resource)<-[rel:appears_in]-(ent)
+  WHERE id(res) = {resource_id}
+  WITH {
+    id: id(ent),
+    type: LAST(labels(ent)),
+    rel: rel,
+    props: ent
+  } as alias_ent
+{/if}
+{unless:resource_id}
+  WITH {
+    id: id(ent),
+    type: LAST(labels(ent)),
+    props: ent
+  } as alias_ent
+{/unless}
+RETURN alias_ent
 LIMIT 1
 
 // name: get_entities_by_ids
@@ -638,16 +652,6 @@ MERGE (ent)-[r1:appears_in]->(res)
     r1.last_modification_date = {exec_date},
     r1.last_modification_time = {exec_time}
 
-MERGE (u)-[r2:curates]->(ent)
-  ON CREATE SET
-    r2.creation_date = {exec_date},
-    r2.creation_time = {exec_time},
-    r2.last_modification_date = {exec_date},
-    r2.last_modification_time = {exec_time}
-  ON MATCH SET
-    r2.last_modification_date = {exec_date},
-    r2.last_modification_time = {exec_time}
-
 MERGE (u)-[r3:curates]->(res)
   ON CREATE SET
     r3.creation_date = {exec_date},
@@ -662,7 +666,7 @@ SET
   ent.last_modification_date = {exec_date},
   ent.last_modification_time = {exec_time}
 
-return ent, u, res, r1 as rel, r2
+return ent, u, res, r1 as rel
 
 
 // name: reconcile_entities

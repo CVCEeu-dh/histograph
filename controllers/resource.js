@@ -189,32 +189,36 @@ module.exports = function(io){
     */
     createRelatedEntity: function(req, res){
       var fields = validator.getEntityFields(req.params.entity),
-          resource = {
-            id: form.params.id
-          };
-
-
-
-      var    required = _.zipObject(_.map(fields, 'field'), ' '),
+          required = _.assign({name: ''}, _.zipObject(_.map(fields, 'field'), ' ')),
           form = validator.request(req, required, {
             fields: fields
           });
-      console.log(required,form.isValid)
-      // validate orderby
+
       if(!form.isValid)
         return helpers.formError(form.errors, res);
-
+      // console.log('createRelatedEntity', form.isValid)
+      var resource = {
+            id: form.params.id
+          };
       // check that no entity exist already, with waterfall
       async.waterfall([
+        /*
+          Check that we do not create a new entity
+          (same entity type plus [slug | viaf number | wiki)
+        */
         function check(next) {
-          Entity.check(_.assign({}, form.params, {
+          Entity.check(_.assign({ resource_id: resource.id}, form.params, {
             type: form.params.entity
           }), next);
         },
+        /*
+          if check returns an empty result set, we will create the entity
+        */
         function createIfNotFound(results, next) {
-          console.log('hey result', results)
           if(results.length > 0)
-            next(null, results[0])
+            next(null, _.assign({
+              entityExists: true
+            }, results[0]));
           else
             Entity.create(_.assign({}, form.params, {
               resource: {
@@ -223,20 +227,48 @@ module.exports = function(io){
               type: form.params.entity,
               name: form.params.name
             }), next);
-          
         },
-
+        /*
+          if the antity has been created, let's add an action to store that specific info.
+        */
+        function createActionIfBrandNewEntity(entity, next) {
+          if(entity.entityExists) {
+            if(!entity.rel) {
+              // console.log("rel need to be created");
+              Entity.createRelatedResource(entity, resource, req.user, {}, function (err, item) {
+                next(err, item)
+              });
+            } else {
+              next(null, entity);
+            }
+          } else { // entity has been created
+            // console.log("entity has been created");
+            Action.create({
+              kind: Action.CREATE,
+              target: Action.BRAND_NEW_ENTITY,
+              mentions: [
+                resource.id,
+                entity.id
+              ],
+              username: req.user.username
+            }, function (err, action) {
+              if(action)
+                _.assign(entity, {
+                  related: {
+                    action: action
+                  }
+                });
+              // console.log("entity has been created", entity);
+              next(err, entity);
+            });
+          }
+        }
       ], function (err, entity) {
         if(err)
           return helpers.cypherQueryError(err, res);
-        // createRelatedUser
-        Entity.createRelatedResource(entity, req.user, function (err) {
-          if(err)
-            return helpers.cypherQueryError(err, res);
-          return res.ok({
-            item: entity
-          }, form.params);
-        });
+        return res.ok({
+          item: entity
+        }, form.params);
       });
     },
     /*
@@ -588,7 +620,7 @@ module.exports = function(io){
     },
     
     /*
-      Create a relationship bzetween the current user and the resoruce
+      Create a LIKES relationship bzetween the current user and the resoruce
     */
     createRelatedUser: function (req, res) {
       var form = validator.request(req);
@@ -613,6 +645,13 @@ module.exports = function(io){
       }, function (err, results) {
         if(err)
           return helpers.cypherQueryError(err, res);
+        // attach the likes action
+        _.assign(results.resource, {
+          related: {
+            action: results.action
+          }
+        });
+        
         io.emit('resource:create-related-user:done', {
           user: req.user.username,
           id:   form.params.id, 

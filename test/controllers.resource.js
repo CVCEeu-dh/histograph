@@ -13,6 +13,7 @@ var settings  = require('../settings'),
     _         = require('lodash'),
     
     Resource  = require('../models/resource'),
+    Action    = require('../models/action'),
     Entity    = require('../models/entity'),
     User      = require('../models/user'),
 
@@ -163,8 +164,11 @@ describe('controller:resource (related users)', function() {
         should.equal(res.body.result.item.rel.start, __user.id);
         should.equal(res.body.result.item.rel.end, __resourceA.id);
         should.equal(res.body.result.item.rel.type, 'likes');
-        
-        done();
+        should.equal(res.body.result.item.related.action.props.target, Action.LIKES_RELATIONSHIP)
+        Action.remove(res.body.result.item.related.action, function (err){
+          should.not.exists(err);
+          done();
+        });
       });
   })
   
@@ -306,18 +310,20 @@ describe('controller:resource (related resources)', function() {
     session
       .post('/api/resource/'+ __resourceA.id +'/related/person')
       .send({
-        // name: 'TESTTESTTEST_______TEST'
+        // name: 'TESTTESTTEST_______TEST',
+        // first_name: 'Professor',
+        // last_name: 'Kandiallo'
       })
       .expect('Content-Type', /json/)
       .expect(400)
       .end(function (err, res) {
         should.not.exists(err);
-        should.equal(_.map(res.body.error.form, 'field').join(), ['first_name', 'last_name'].join())
+        should.equal(_.map(res.body.error.form, 'field').join(), ['name','first_name', 'last_name'].join())
         done();
       });
   });
   
-  it('MARVIN should attach an brand new entity to the resource', function (done) {
+  it('MARVIN should attach a brand new entity to the resource', function (done) {
     session
       .post('/api/resource/'+ __resourceA.id +'/related/person')
       .send({
@@ -328,12 +334,22 @@ describe('controller:resource (related resources)', function() {
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
-        // console.log(res.body.result.item);
         should.not.exists(err);
         should.exists(res.body.result.item);
-        should.equal(res.body.result.item.rel.end, parseInt( __resourceA.id))
         __entityA = res.body.result.item;
-        done();
+
+        should.exists(res.body.result.item.related.action);
+        should.equal(res.body.result.item.related.action.type, Action.CREATE)
+        should.equal(res.body.result.item.related.action.props.target, Action.BRAND_NEW_ENTITY)
+        should.equal(res.body.result.item.rel.end, parseInt( __resourceA.id))
+        
+        // should delete the action
+        Action.remove(res.body.result.item.related.action, function(err){
+          should.not.exists(err);
+          done();
+        })
+        
+        
       });
   });
 
@@ -348,9 +364,7 @@ describe('controller:resource (related resources)', function() {
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
-        console.log(res.body.result.item);
         should.not.exists(err);
-        
         done();
       });
   });
