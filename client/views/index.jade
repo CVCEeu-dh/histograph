@@ -181,11 +181,18 @@ html
                 p.sans-serif
                   span(translate='login.welcome')
 
+                p
+                  div.checkbox
+                    label.sans-serif
+                      input(type="checkbox", ng-model="acceptTermsOfService")
+                      span(translate='termsofservice.check')
+                  
+
                 div(class="", role="group")
-                  a(ng-href='/auth/twitter?next={{locationPath}}&jsonparams={{locationJson}}', class='btn btn-block btn-default btn-line expanded')
+                  a(ng-disabled="!acceptTermsOfService", ng-href='/auth/twitter?next={{locationPath}}&jsonparams={{locationJson}}', class='btn btn-block btn-default btn-line expanded')
                     span(translate='button.login.with.twitter') 
                     i(class='fa fa-twitter')
-                  a(ng-href='/auth/google?next={{locationPath}}&jsonparams={{locationJson}}', class='btn btn-block  btn-default btn-line expanded')
+                  a(ng-disabled="!acceptTermsOfService", ng-href='/auth/google?next={{locationPath}}&jsonparams={{locationJson}}', class='btn btn-block  btn-default btn-line expanded')
                     span(translate='button.login.with.google') 
                     i(class='fa fa-google-plus')
 

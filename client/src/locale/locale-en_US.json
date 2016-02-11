@@ -24,7 +24,7 @@
 
   "contribute.title": "Which {{type}} did you identify?",
   "contribute.description": "Tagging improves the quality of the recommended resources",
-  "contribute.create-entity.select": "Select an existing entity",
+  "contribute.create-entity.select": "Select from the list above or",
   "contribute.suggest.noresults": "No result matches your search.",
 
   "create-entity.title": "Create a {{type}}",
@@ -156,6 +156,8 @@
   "typeahead.noresults.alt": "Can't find what your looking for?",
 
   "toast.pinboard.added": "added to your pinboard",
-  "toast.pinboard.alreadyinlist": "... is already in your pinboard"
+  "toast.pinboard.alreadyinlist": "... is already in your pinboard",
+
+  "termsofservice.check": "I accept the <a href='/termsofservice' target='_blank'>terms of service</a>"
 }
 
