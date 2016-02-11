@@ -269,10 +269,10 @@ module.exports = {
       field: 'description',
       check: 'isLength',
       args: [
-        3,
+        0,
         2500
       ],
-      error: 'should be at least 3 to 250 chars'
+      error: 'should be at max 2500 chars'
     },
     {
       field: 'password',
