@@ -25,6 +25,7 @@
     "decypher": "^0.1.2",
     "exectimer": "^1.0.2",
     "express": "^4.12.2",
+    "express-redis-cache": "^0.2.0",
     "express-session": "^1.10.3",
     "gexf": "^0.2.5",
     "inquirer": "^0.10.1",

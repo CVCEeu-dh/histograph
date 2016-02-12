@@ -34,7 +34,7 @@ var express       = require('express'),        // call express
                       }
                     }),
 
-    
+    cache, // undefined; cfr. below
 
     clientRouter  = express.Router(),
     apiRouter     = express.Router(),
@@ -44,6 +44,11 @@ var express       = require('express'),        // call express
     // app client scripts dependencies (load scripts in jade)
     clientFiles  = require('./client/src/files')[env];
 
+
+// cache
+var getCacheName = function(req) {
+    return [req.path, JSON.stringify(req.query)].join().split(/[\/\{,:"\}]/).join('-');// + '?' + JSON.stringify(req.query);
+  };
 
 // initilalize session middleware
 var sessionMiddleware = session({
@@ -59,6 +64,9 @@ console.log('logs: ', settings.paths.accesslog);
 console.log('env:  ', env);
 console.log('port: ', settings.port);
 console.log('url:  ', settings.baseurl);
+
+
+
 
 app.use(compress());
 
@@ -107,7 +115,7 @@ express.response.ok = function(result, info, warnings) {
   
   if(warnings)
     res.warnings = warnings
-  
+
   return this.json(res);
 };
 
@@ -319,18 +327,49 @@ clientRouter.route('/txt/:path/:file')
 
 */
 apiRouter.use(function (req, res, next) {
-  // 
-  if(settings.allowUnauthenticatedRequests && settings.env == 'development')
+  if(req.isAuthenticated() || (settings.allowUnauthenticatedRequests && settings.env == 'development')) {
     return next();
-  if(req.isAuthenticated())
-    return next();
-  else
+  } else
     return res.error(403);
 });
+
+// OPTIN enable cache if required
+if(settings.cache && settings.cache.redis) {
+  cache = require('express-redis-cache')({
+        host: settings.cache.redis.host,
+        port: settings.cache.redis.port,
+        expire: 60 // 20 seconds
+      });
+
+  cache.on('message', function (message) {
+  console.log('cache:', message); 
+});
+
+  cache.on('connected', function () {
+    console.log('cache:','connected to redis'); 
+  });
+
+  cache.on('error', function (error) {
+    console.log('redis connection error', error)
+  });
+  apiRouter.use(function (req, res, next) {
+    var cachename = getCacheName(req);
+
+    console.log('this is', cachename)
+    
+    // res.use_express_redis_cache = _.isEmpty(req.query);
+    cache.route({
+      name: cachename,
+      expire: _.isEmpty(req.query)? 120: 20,
+    })(req, res, next);
+  })
+};
 
 // api index
 apiRouter.route('/').
   get(function(req, res) { // test route to make sure everything is working (accessed at GET http://localhost:8080/api)
+    console.log('get /');
+    
     res.ok({ message: 'hooray! welcome to our api!' });   
   });
 
@@ -607,6 +646,7 @@ apiRouter.route('/suggest/viaf')
   .get(ctrl.suggest.viaf.autosuggest)
 apiRouter.route('/suggest/dbpedia')
   .get(ctrl.suggest.dbpedia)
+
 
 /*
   
