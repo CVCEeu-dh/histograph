@@ -111,8 +111,9 @@ MATCH (res:resource)
   WITH res
   MATCH res<-[:appears_in]-(ent)
   WHERE id(ent) IN {with}
+  WITH DISTINCT res
 {/if}
-WITH DISTINCT res
+
   {?res:ids__inID} {AND?res:start_time__gt} {AND?res:end_time__lt} {AND?res:mimetype__in} {AND?res:type__in}
 WITH DISTINCT res
 
@@ -328,7 +329,34 @@ WITH res1, res2, count(*) as intersection
  SKIP {offset}
  LIMIT {limit}
 {/unless}
+WITH res1, res2, intersection
+OPTIONAL MATCH (res2)<-[r_per:appears_in]-(per:`person`)
+WHERE per.score > -2
+WITH res1, res2, intersection, r_per, per
+ORDER BY  r_per.score DESC, r_per.tfidf DESC, r_per.frequency DESC
+WITH res1, res2, intersection, filter(x in collect({  
+      id: id(per),
+      type: 'person',
+      props: per,
+      rel: r_per
+    }) WHERE has(x.id))[0..5] as persons
+
+WITH res1, res2, intersection, persons
+OPTIONAL MATCH (res2)<-[r_the:appears_in]-(the:`theme`)
+WITH res1, res2, intersection, persons, r_the, the
+ORDER BY  r_the.score DESC, r_the.tfidf DESC, r_the.frequency DESC
+WITH res1, res2, intersection, persons, filter(x in collect({  
+      id: id(the),
+      type: 'theme',
+      props: the,
+      rel: r_the
+    }) WHERE has(x.id))[0..5] as themes
+
 RETURN {
+  id: id(res2),
+  props: res2,
+  persons: persons,
+  themes: themes,
   target: id(res2),
   type: LAST(labels(res2)),
   dst : abs(coalesce(res1.start_time, 1000000000) - coalesce(res2.start_time, 0)),

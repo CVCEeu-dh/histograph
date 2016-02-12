@@ -74,13 +74,17 @@ WITH p1, p2, intersection, cdiff, count(distinct res) as union
 WITH p1, p2, intersection,  union, toFloat(intersection)/toFloat(union) as jaccard, cdiff
 WITH p1, p2, intersection,  union, jaccard, cdiff, toFloat(cdiff)/toFloat(union) as overlapping
 
-MERGE (p1)-[r:appear_in_same_document]-(p2)
-  SET
-    r.jaccard     = jaccard,
-    r.intersections  = intersection,
-    r.union       = union,
-    r.overlapping = overlapping,
-    r.cdiff       = cdiff
+FOREACH(x in CASE WHEN 
+  intersection > 1
+  THEN [1] ELSE [] END |
+  MERGE (p1)-[r:appear_in_same_document]-(p2)
+    SET
+      r.jaccard     = jaccard,
+      r.intersections  = intersection,
+      r.union       = union,
+      r.overlapping = overlapping,
+      r.cdiff       = cdiff
+)
 
 
 
