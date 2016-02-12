@@ -1296,11 +1296,11 @@ angular
   .config(function ($httpProvider) {
     $httpProvider.interceptors.push(function ($q, $log, $rootScope, EVENTS) {
       return {
-        response: function(response) {
-          if(response.data.user)
-            $rootScope.$broadcast(EVENTS.USE_USER, response.data.user);
-          return response
-        },
+        // response: function(response) {
+        //   if(response.data.user)
+        //     $rootScope.$broadcast(EVENTS.USE_USER, response.data.user);
+        //   return response
+        // },
         responseError: function(rejection) {
           if(rejection.status === 403) {
             $rootScope.$broadcast(EVENTS.USER_NOT_AUTHENTIFIED);

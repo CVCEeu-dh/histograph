@@ -8,7 +8,7 @@
  */
 angular.module('histograph')
   
-  .controller('CoreCtrl', function ($scope, $rootScope, $location, $state, $timeout, $route, $log, $timeout, $http, $routeParams, $modal, $uibModal, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, EntityExtraFactory, EntityRelatedExtraFactory, localStorageService, EntityRelatedFactory, EVENTS, VIZ, MESSAGES, ORDER_BY) {
+  .controller('CoreCtrl', function ($scope, $rootScope, $location, $state, $timeout, $route, $log, $timeout, $http, $routeParams, $modal, $uibModal, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, EntityExtraFactory, EntityRelatedExtraFactory, localStorageService, EntityRelatedFactory, EVENTS, VIZ, MESSAGES, ORDER_BY, SETTINGS) {
     $log.debug('CoreCtrl ready');
     $scope.locationPath = $location.path();
     $scope.locationJson  = JSON.stringify($location.search()); 
@@ -456,27 +456,7 @@ angular.module('histograph')
       $scope.unlock();
       $rootScope.$emit(EVENTS.STATE_VIEW_CONTENT_LOADED, $scope.currentState);
     });
-    /*
-      change the given user, programmatically. Cfr httpProvider config in app.js
-    */
-    $scope.$on(EVENTS.USE_USER, function (e, user) {
-      if($scope.user.id != user.id) {
-        $log.debug('CoreCtrl @EVENTS.USE_USER', user);
-        $scope.user = user;
-        /*
-          First load only,
-          or to be updated whenever a
-          CHANGES in resource set occurs
-        */
-        
-
-        VisualizationFactory.resource(VIZ.TIMELINE).then(function (res) {
-          $log.info('CoreCtrl @EVENTS.USE_USER VisualizationFactory', res);
-          $scope.contextualTimeline = res.data.result.timeline;
-          // $scope.initialTimeline
-        });
-      }
-    });
+    
     
     $scope.$on(EVENTS.USER_NOT_AUTHENTIFIED, function (e) {
       $scope.unsetMessage(MESSAGES.LOADING);
@@ -1028,6 +1008,32 @@ angular.module('histograph')
     $scope.$on(EVENTS.ANNOTATOR_HIDDEN, function() {
       $scope.isAnnotating = false;
     })
+
+    /*
+      Load timeline, after some ms
+    */
+    $timeout(function(){
+      /*
+        change the given user, programmatically. Cfr httpProvider config in app.js
+      */
+      if(!SETTINGS.user.id) {
+        // do nothing
+        return;
+      }
+      $scope.user = SETTINGS.user;
+        /*
+          First load only,
+          or to be updated whenever a
+          CHANGES in resource set occurs
+        */
+        
+
+        VisualizationFactory.resource(VIZ.TIMELINE).then(function (res) {
+          $log.info('CoreCtrl @EVENTS.USE_USER VisualizationFactory', res);
+          $scope.contextualTimeline = res.data.result.timeline;
+          // $scope.initialTimeline
+        });
+    }, 236);
     
   })
   

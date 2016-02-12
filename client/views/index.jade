@@ -329,6 +329,7 @@ html
       script.
         var types = !{JSON.stringify(types)};
         var analytics = !{JSON.stringify(analytics)};
+        var user = !{JSON.stringify(user)};
 
 
         /*
@@ -337,7 +338,8 @@ html
         angular.module('histograph')
           .constant("SETTINGS", {
             types: types,
-            analytics: analytics
+            analytics: analytics,
+            user: user
           })
         .constant('GRAMMAR', {
           AS_TYPES: [

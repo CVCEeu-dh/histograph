@@ -106,7 +106,7 @@ app.use(auth.passport.session());
 express.response.ok = function(result, info, warnings) {
   var res = {
     status: 'ok',
-    user: this.req.user,
+    // user: this.req.user,
     result: result
   };
   
@@ -253,6 +253,10 @@ clientRouter.route('/auth/google/callback')
       req.logIn(user, function(err) {
         if (err)
           return next(err);
+        if(req.session.redirectAfterLogin) {
+          console.log('redirect to', req.session.redirectAfterLogin)
+          return res.redirect('/#' + req.session.redirectAfterLogin)
+        }
         return res.redirect('/');
       });
     })(req, res, next)
@@ -341,9 +345,9 @@ if(settings.cache && settings.cache.redis) {
         expire: 60 // 20 seconds
       });
 
-  cache.on('message', function (message) {
-  console.log('cache:', message); 
-});
+//   cache.on('message', function (message) {
+//   console.log('cache:', message); 
+// });
 
   cache.on('connected', function () {
     console.log('cache:','connected to redis'); 
@@ -355,8 +359,10 @@ if(settings.cache && settings.cache.redis) {
   apiRouter.use(function (req, res, next) {
     var cachename = getCacheName(req);
 
-    console.log('this is', cachename)
-    
+    console.log('this is', cachename, req.path.indexOf('/user') == 0)
+    if(req.path.indexOf('/user') == 0 || req.method != 'GET') {
+      res.use_express_redis_cache = false;
+    }
     // res.use_express_redis_cache = _.isEmpty(req.query);
     cache.route({
       name: cachename,
@@ -368,8 +374,6 @@ if(settings.cache && settings.cache.redis) {
 // api index
 apiRouter.route('/').
   get(function(req, res) { // test route to make sure everything is working (accessed at GET http://localhost:8080/api)
-    console.log('get /');
-    
     res.ok({ message: 'hooray! welcome to our api!' });   
   });
 
