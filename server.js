@@ -359,14 +359,14 @@ if(settings.cache && settings.cache.redis) {
   apiRouter.use(function (req, res, next) {
     var cachename = getCacheName(req);
 
-    console.log('this is', cachename, req.path.indexOf('/user') == 0)
+    // console.log('this is', cachename, req.path.indexOf('/user') == 0)
     if(req.path.indexOf('/user') == 0 || req.method != 'GET') {
       res.use_express_redis_cache = false;
     }
     // res.use_express_redis_cache = _.isEmpty(req.query);
     cache.route({
       name: cachename,
-      expire: _.isEmpty(req.query)? 120: 20,
+      expire: _.isEmpty(req.query)? 120: 40,
     })(req, res, next);
   })
 };
