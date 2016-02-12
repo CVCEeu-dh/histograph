@@ -10,6 +10,7 @@
   "button.disagree": "I disagree",
   "button.discard": "discard",
   "button.edit": "edit",
+  "button.egonetwork": "egonetwork",
   "button.end": "ok, close",
   "button.entity.create": "Create a {{type}}",
   "button.finish": "end of part {{number}}",
@@ -135,6 +136,7 @@
   "tooltip.resource.add.to.favourites": "add to your bookmarks",
   "tooltip.resource.add.to.myselection": "add to your pinboard",
   "tooltip.visit.entity.page": "visit %s page",
+  "tooltip.sigma.center": "find in the current graph",
 
   "resource.type.cartoon": "cartoon",
   "resource.type.external-text": "miscellaneous texts" ,
