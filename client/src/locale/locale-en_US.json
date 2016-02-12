@@ -159,6 +159,10 @@
   "toast.pinboard.alreadyinlist": "... is already in your pinboard",
 
   "termsofservice.check": "I accept the <a href='/terms' target='_blank'>terms of service</a>",
-  "termsofservice.title": "Terms of service"
+  "termsofservice.title": "Terms of service",
+
+  "playlist.title": "my pinboard",
+  "playlist.description": " find interesting resources and entities in your pinboard",
+  "playlist.noitems": "There are no items in your pinboard yet. Click on the icon <i class='fa fa-thumb-tack'></i> to collect resources, people, locations and institutions."
 }
 
