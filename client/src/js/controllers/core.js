@@ -679,13 +679,15 @@ angular.module('histograph')
     $scope.raiseIssue = function(entity, resource, kind, solution, next){
       var params = {
         kind: kind,
+      }
+      if(resource) {
         mentioning: resource.id
       };
 
       if(solution)
         params.solution = solution;
 
-      $log.log('CoreCtrl -> raiseIssue() on entity:', entity.id, '- mentioning:', resource.id);
+      $log.log('CoreCtrl -> raiseIssue() on entity:', entity.id, '- mentioning:', resource);
       
 
       EntityRelatedFactory.save({
@@ -696,7 +698,36 @@ angular.module('histograph')
         if(next)
           next(null, res);
       });
-    }
+    };
+
+    /*
+      $scope.confirm
+      Confirm the entity without confiming the relationship between the entity and the resource
+    */
+    $scope.confirm = function(entity, next) {
+      $log.log('CoreCtrl -> confirm() entity:', entity.id);
+      EntityExtraFactory.save({
+        id: entity.id,
+        extra: 'upvote'
+      }, {}, function (res) {
+        $log.log('CoreCtrl -> confirm()', res.status);
+        if(next)
+          next(res.result);
+      });
+    };
+
+    $scope.unconfirm = function(entity, next) {
+      $log.log('CoreCtrl -> unconfirm() entity:', entity.id);
+      EntityExtraFactory.save({
+        id: entity.id,
+        extra: 'downvote'
+      }, {}, function (res) {
+        $log.log('CoreCtrl -> unconfirm()', res.status);
+        if(next)
+          next(res.result);
+      });
+    };
+
     /*
       Voting mechanism: upvote the relationships between an entity and a resource
       (their id and the type will suffice)
@@ -815,6 +846,9 @@ angular.module('histograph')
           },
           language: function() {
             return language
+          },
+          core: function() {
+            return $scope;
           }
         }
         // resolve: {
@@ -825,7 +859,6 @@ angular.module('histograph')
       });
     };
 
-    // $scope.inspect({id: 17190});
 
     /*
       MetadataInspect
@@ -1033,6 +1066,10 @@ angular.module('histograph')
           $scope.contextualTimeline = res.data.result.timeline;
           // $scope.initialTimeline
         });
+
+
+      $scope.inspect({id: 17190});
+
     }, 236);
     
   })

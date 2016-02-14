@@ -5,6 +5,7 @@
   "button.back": "back",
   "button.close": "close",
   "button.confirm": "confirm",
+  "button.confirmed": "confirmed",
   "button.crowd.canfixthis": "Yes, I can fix this",
   "button.crowd.askmelater": "ask me later",
   "button.disagree": "I disagree",
@@ -90,6 +91,8 @@
   "header.activities" : "See all activities",
   "header.myselection": "my selection",
 
+  "inspect.entity.iswrong": "It seems that <strong>{{name}}</strong> is a <strong>mistake</strong> and could be safely removed.",
+
   "loading": "loading ...",
 
   "login.welcome" : "Welcome to the histograph collaborative platform. Sign up or log in to start",
@@ -109,7 +112,6 @@
   "popit.fix.brandnew": "Nope, this is a brand new <strong>{{type}}</strong>",
   "popit.fix.typo": "this is a typo / fragment / duplicate",
   "popit.fix.typo.description": "Does <strong class='sans-serif'>{{name}}</strong> correspond to someone else in histograph?",
-  "popit.fix.remove": "Untag this",
   "popit.fix.feedback": "Thank you for your feedback",
   "popit.fix.spotcorrecttype": "How would you classify this?",
   "popit.fix.spotcorrecttype.label": "This is ... ?",
@@ -122,8 +124,11 @@
   "popit.fix.spotcorrecttype.type.confirm": "Suggest <strong class='sans-serif' style='color: white'>{{_type}}</strong> as replacement for <strong class='sans-serif' style='color: white'>{{type}}</strong>?",
 
   "popit.fix.suggest.confirm": "Do you think that <strong class='sans-serif'>{{name}}</strong> should be replaced with <strong class='sans-serif'>{{_name}}</strong>?",
-
+  "popit.fix.remove": "Remove this",
+  
   "popit.fix.remove.relationship": "Untag {{name}} from this resource?",
+  "popit.fix.untag": "Untag this",
+
 
   "resource.people.mentioned": "people mentioned",
   "resource.themes.mentioned": "themes mentioned",

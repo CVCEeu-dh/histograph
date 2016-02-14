@@ -2045,7 +2045,8 @@ li.CodeMirror-hint-active {
 }
 
 .btn-group-wrapper{
-  padding: 5px 10px 0 10px;
+  /*padding: 5px 10px 0 10px;*/
+      padding: 5px 0 0 0;
   text-align: center
 }
 
@@ -6354,14 +6355,50 @@ Copyright (c) 2015 Daniel Eden
   bootstrap: modal;
   Inspector component
 */
-.modal-content .nodes {
+.inspect .modal-content .nodes {
   position: absolute;
   background-color: #383838;
   left: 0px;
   top: 0;
   bottom: 0;
-    width: 250px;
+  width: 300px;
   border-top-right-radius: 0;
+}
+
+.inspect .btn-group .btn {
+  height: 30px;
+  padding-top:0;
+  padding-bottom:2px;
+  line-height: 30px;
+}
+
+.inspect .btn-group .btn .fa{
+  font-size: 15px;
+}
+
+
+.inspect .questions{
+  padding: 15px 25px;
+}
+
+.inspect .questions .text{
+  color: #A9A2A2;
+}
+
+.inspect .questions .text strong{
+  color: #f0f0f0;
+  font-weight: normal;
+}
+
+.inspect .crowdsourcing{
+  margin: 0 15px 15px 15px;
+  color: #A9A2A2;
+  border-bottom: 1px solid #A9A2A2;
+  padding: 15px 0;
+}
+.inspect .crowdsourcing strong{
+  color: #f0f0f0;
+  font-weight: normal;
 }
 
 .modal-content .nodes .node h4 a {
@@ -6407,15 +6444,12 @@ Copyright (c) 2015 Daniel Eden
 
 .modal-content  .node .content {
   margin-left: 50px;
-  height: 70px;
+  min-height: 70px;
 }
 
 .modal-content .node .detail {
-  position: absolute;
+  position: relative;
   width: 100%;
-  top:70px;
-  left:0;
-  bottom: 0;
   overflow: auto;
 }
 
@@ -6491,7 +6525,7 @@ Copyright (c) 2015 Daniel Eden
 }
 
 .modal-content .modal-header.with-sidebar{
-  margin-left: 250px;
+  margin-left: 300px;
   height: 100px;
 }
 
@@ -6500,7 +6534,7 @@ Copyright (c) 2015 Daniel Eden
   position: absolute;
   top: 100px;
   bottom: 0px;
-  left:250px;
+  left:300px;
   right: 0;
 }
 

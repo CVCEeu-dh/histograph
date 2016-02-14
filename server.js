@@ -553,6 +553,10 @@ apiRouter.route('/entity/:id(\\d+)/related/:entity(person|location|theme|organiz
 apiRouter.route('/entity/:id(\\d+)/related/issue')
   .post(ctrl.entity.createRelatedIssue)
 
+apiRouter.route('/entity/:id(\\d+)/related/issue/:action(downvote)')
+  .post(ctrl.entity.createRelatedIssue)
+
+
 apiRouter.route('/entity/:id/related/:entity(person|location|theme|organization)/graph')
   .get(ctrl.entity.getRelatedEntitiesGraph);
 

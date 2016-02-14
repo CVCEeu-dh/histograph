@@ -1,50 +1,47 @@
 <div class='nodes'>
-  <div ng-repeat='relatedItem in items' style='height: 100%'>
+  <div style='height: 100%; overflow: auto'>
     <div class='node person' style='height: 100%'>
       <div class='thumbnail'>
-        <div class="thumbnail-wrapper" style='background-image: url({{relatedItem.props.thumbnail}})'>    
+        <div class="thumbnail-wrapper" style='background-image: url({{entity.props.thumbnail}})'>    
           
         </div>
       </div>
       <div class='content'>
-        <h4><a ng-href='#/e/{{relatedItem.id}}' marked="relatedItem.props|lookup:'name':language"></a></h4>
-        <div class='date' ng-if='relatedItem.type== "person"'>{{relatedItem.type}} - {{relatedItem.props.birth_time | datesOfAPerson : relatedItem.props.death_time}}</div>
-        <div class='date' ng-if='relatedItem.type!= "person"'>{{relatedItem.type}}</div>
+        <h4><a ng-href='#/e/{{entity.id}}' marked="entity.props|lookup:'name':language"></a></h4>
+        <div class='date' ng-if='entity.type== "person"'>{{entity.type}} - {{entity.props.birth_time | datesOfAPerson : entity.props.death_time}}</div>
+        <div class='date' ng-if='entity.type!= "person"'>{{entity.type}}</div>
+
+        
       </div>
-      
-      <div class='detail'>
-        <div class='viaf' ng-if='chooseVIAF'>
-          <div class='question tk-proxima-nova'>Is <b>{{relatedItem.props|lookup:'name':language}}</b> in <b>VIAF</b> ?</div>
-          <table class='table'>
+      <div class="crowdsourcing" ng-if='entity.isWrong'>
+        <span translate translate-values='entity.props'>inspect.entity.iswrong</span>
 
-            <tr class='viaf-item' ng-repeat='item in relatedItem.viafItems'>
-              <td><a class='tag tk-proxima-nova' target='_blank' ng-href='http://viaf.org/viaf/{{item.viafid}}'>{{item.viafid}}</a></td>
-              <td>
-                {{item.term}} 
-              </td>
-              <td>
-                <input type='checkbox'>
-              </td>
-            </tr>
-
-          </table>
-          <!-- <div class='viaf-item'>
-            Other:
-            <input type='text'>
-          </div> -->
+      </div>
+      <div class='btn-group-wrapper' ng-if="!isWrong">
+        <div class="btn-group">
+          <a class="btn btn-line-white" ng-click='cancel()' ng-href='/#/e/{{entity.id}}' title="{{tooltip.popit.more | translate}}" data-action="link" translate>button.more</a>
+          <button ng-if='entity.type != "theme"'  class='btn btn-line-white obscure' ng-click='askQuestion("downvote")'><i class="fa fa-bug"></i> fix / edit </button>
+          <button ng-if='!entity.isWrong && !entity.isIncomplete && !isUpvotedByUser' class='btn btn-line-white {{entity.props.upvote.length? "btn-number":""}}' ng-click='confirm()'><span translate>button.confirm</span> <i class="fa fa-check"></i><div class='number' ng-if='entity.props.upvote.length'>{{entity.props.upvote.length}}</div></button>
+          <button ng-if='!entity.isWrong && !entity.isIncomplete && isUpvotedByUser' class='btn btn-line-white {{entity.props.upvote.length? "btn-number":""}}' ng-click='unconfirm()'><span translate>button.confirmed</span> <div class='number' ng-if='entity.props.upvote.length'>{{entity.props.upvote.length}}</div></button>
         </div>
+      </div>
 
-        <blockquote  marked="relatedItem.props|lookup:'abstract':language">
+      <div class='questions' ng-include='"templates/partials/helpers/questions.html"'></div>
+
+      <div class='detail'>
+        
+          
+        <blockquote  marked="entity.props|lookup:'abstract':language">
         </blockquote>
-        <blockquote>source: <a ng-href='http://viaf.org/viaf/{{relatedItem.props.links_viaf}}' target='_blank' ng-if='relatedItem.props.links_viaf'>viaf</a>
+        <blockquote>source: <a ng-href='http://viaf.org/viaf/{{entity.props.links_viaf}}' target='_blank' ng-if='entity.props.links_viaf'>viaf</a>
 
-        <a ng-href='http://dbpedia.org/page/{{relatedItem.props.links_wiki}}' target='_blank' ng-if='relatedItem.props.links_wiki'>dbpedia</a>
+        <a ng-href='http://dbpedia.org/page/{{entity.props.links_wiki}}' target='_blank' ng-if='entity.props.links_wiki'>dbpedia</a>
 
         </blockquote>
       </div>
 
-      <div class='crowdsourcing'>
-        he
+      <div class='crowdhesourcing'>
+        
       </div>
     </div>
   </div>
@@ -57,7 +54,7 @@
   </h3>
   <table class='table'>
     <tr ng-repeat='relatedItem in items'>
-      <td>Is <b>{{relatedItem.props|lookup:'name':language}} {{relatedItem.props.birth_time | datesOfAPerson : relatedItem.props.death_time}}</b>?</td>
+      <td>Is <b>{{entity.props|lookup:'name':language}} {{entity.props.birth_time | datesOfAPerson : entity.props.death_time}}</b>?</td>
       <td>
         <div class='btn-group' >
           <button class='btn btn-default' ng-click='upvote()'>yes</button>

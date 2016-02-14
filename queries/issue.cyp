@@ -138,7 +138,7 @@ MATCH (u:user {username:{username}}), (t)
 
 WITH u, t
 
-  MERGE (iss:issue:{:kind})-[r:questions]->t
+  MERGE (iss:issue:{:kind})-[r:questions]->(t)
     ON CREATE SET
       // wrong <property> with custom content
       r.creation_date  = {exec_date},
@@ -151,7 +151,7 @@ WITH u, t
       r.last_modification_time = {exec_time}
 
 WITH u, t, iss
-  MERGE u-[r:curates]->t
+  MERGE (u)-[r:curates]->(t)
     ON CREATE SET
       r.creation_date  = {exec_date},
       r.creation_time  = {exec_time},
@@ -161,7 +161,7 @@ WITH u, t, iss
       r.last_modification_date = {exec_date},
       r.last_modification_time = {exec_time}
 WITH iss, u, t
-  MERGE u-[r:follows]->iss
+  MERGE (u)-[r:follows]->(iss)
     ON CREATE SET
       r.creation_date  = {exec_date},
       r.creation_time  = {exec_time},
@@ -172,7 +172,7 @@ WITH iss, u, t
       r.last_modification_time = {exec_time}
 {if:solution}
   WITH iss, u, t
-    MERGE u-[r:writes]->(com:comment {solution:{solution}})-[:answers]->iss
+    MERGE (u)-[r:writes]->(com:comment {solution:{solution}})-[:answers]->(iss)
       ON CREATE SET
         com.creation_date  = {exec_date},
         com.creation_time  = {exec_time},
@@ -188,7 +188,7 @@ WITH iss, u, t
   MATCH (con)
     WHERE id(con) IN {mentioning}
   WITH iss, u, t, con
-    MERGE iss-[r:mentions]->con
+    MERGE (iss)-[r:mentions]->(con)
     ON CREATE SET
       r.creation_date  = {exec_date},
       r.creation_time  = {exec_time},
