@@ -7,6 +7,7 @@ module.exports = {
   baseurl: 'http://localhost:8000', // the remote address used to handle OAuth2 callbacks, without TRAILING slashes
   port: 8000,
   env: 'development', // production | development
+  title: 'Histograph', // name of 
 
   secret: {
     cookie: 'cookie secret', // cookie salt
@@ -34,6 +35,14 @@ module.exports = {
     }
   },
   
+  /*
+    google analytics account to track view pages
+  */
+  analytics: {
+    // account: 'UA-XXXXXXXXX-1',
+    domainName: 'none'
+  },
+
   // list of resource fields to analyse.
   // note that the language will be appended.
   disambiguation: {

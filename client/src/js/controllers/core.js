@@ -8,7 +8,7 @@
  */
 angular.module('histograph')
   
-  .controller('CoreCtrl', function ($scope, $rootScope, $location, $state, $timeout, $route, $log, $timeout, $http, $routeParams, $modal, $uibModal, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, EntityExtraFactory, EntityRelatedExtraFactory, localStorageService, EntityRelatedFactory, EVENTS, VIZ, MESSAGES, ORDER_BY) {
+  .controller('CoreCtrl', function ($scope, $rootScope, $location, $state, $timeout, $route, $log, $timeout, $http, $routeParams, $modal, $uibModal, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, EntityExtraFactory, EntityRelatedExtraFactory, localStorageService, EntityRelatedFactory, EVENTS, VIZ, MESSAGES, ORDER_BY, SETTINGS) {
     $log.debug('CoreCtrl ready');
     $scope.locationPath = $location.path();
     $scope.locationJson  = JSON.stringify($location.search()); 
@@ -157,6 +157,7 @@ angular.module('histograph')
     $scope.setTimeline = function(items) {
       $scope.timeline = items;
     }
+
     /*
       language handlers
     */
@@ -367,7 +368,7 @@ angular.module('histograph')
     $scope.message = '';
     $scope.messaging = false;
     var _messengerTimer;
-    $scope.setMessage = function(message, timeout) {
+    $scope.setMessage = function(message, timeout, options) {
       if(!message) {
         $scope.unsetMessage();
         return;
@@ -396,11 +397,11 @@ angular.module('histograph')
       Use it when it's busy in doing something
     */
     $scope.lock = function() {
-      $scope.isBusy = true;
+      $scope.isLoading=true;
     }
   
     $scope.unlock = function() {
-      $scope.isBusy = false;
+      $scope.isLoading=false;
     }
     /*
     
@@ -410,12 +411,15 @@ angular.module('histograph')
     */
     var _resizeTimer;
     $rootScope.$on('$stateChangeStart', function (e, state) {
-      if(state.resolve) {
-        $scope.lock(); 
-      }
+      // if(state.resolve) {
+        
+      // }
+      $scope.lock(); 
       // empty
       if(!_.isEmpty($scope.relatedItems))
         $scope.relatedItems = [];
+      if(!_.isEmpty($scope.timeline))
+        $scope.timeline = [];
     })
 
     $rootScope.$on('$stateChangeSuccess', function (e, state) {
@@ -423,8 +427,8 @@ angular.module('histograph')
       // the ui.router state (cfr app.js)
       $scope.currentState = state;
 
-      if(state.resolve)
-        $scope.unlock();
+      // if(state.resolve)
+        // $scope.unlock();
 
       $scope.unsetMessage();
       
@@ -449,29 +453,10 @@ angular.module('histograph')
     // fire event when DOM is ready
     $scope.$on('$viewContentLoaded', function(event){
       // $rootScope.$emit
+      $scope.unlock();
       $rootScope.$emit(EVENTS.STATE_VIEW_CONTENT_LOADED, $scope.currentState);
     });
-    /*
-      change the given user, programmatically. Cfr httpProvider config in app.js
-    */
-    $scope.$on(EVENTS.USE_USER, function (e, user) {
-      if($scope.user.id != user.id) {
-        $log.debug('CoreCtrl @EVENTS.USE_USER', user);
-        $scope.user = user;
-        /*
-          First load only,
-          or to be updated whenever a
-          CHANGES in resource set occurs
-        */
-        
-
-        VisualizationFactory.resource(VIZ.TIMELINE).then(function (res) {
-          $log.info('CoreCtrl @EVENTS.USE_USER VisualizationFactory', res);
-          $scope.contextualTimeline = res.data.result.timeline;
-          // $scope.initialTimeline
-        });
-      }
-    });
+    
     
     $scope.$on(EVENTS.USER_NOT_AUTHENTIFIED, function (e) {
       $scope.unsetMessage(MESSAGES.LOADING);
@@ -541,7 +526,7 @@ angular.module('histograph')
             $log.log('CoreCtrl -> addToQueue() SuggestFactory', res);
             $scope.playlist = $scope.playlist.concat(res.result.items);
             $scope.playlistIds = _.map( $scope.playlist, 'id');
-            $scope.setMessage('added to your bookmark list');
+            $scope.setMessage('toast.pinboard.added');
             // $scope.queueStatus = 'active'; @todo: simply blink the 
             $scope.queueRedirect();
           });
@@ -561,7 +546,7 @@ angular.module('histograph')
       $log.log('   ', itemId, isAlreadyInQueue?'is already presend in readlist, skipping ...': 'adding', $scope.playlistIds.indexOf(itemId))
       
       if(isAlreadyInQueue) {
-        $scope.setMessage('... it is already in your bookmark list');
+        $scope.setMessage('toast.pinboard.alreadyinlist');
         // $scope.queueStatus = 'active';
         if(!inprog)
           $scope.$apply();
@@ -574,7 +559,7 @@ angular.module('histograph')
       if(typeof item == 'object') {
         $scope.playlist.push(item);
         $scope.playlistIds.push(item.id);
-        $scope.setMessage('... added to your bookmarks');
+        $scope.setMessage('toast.pinboard.added');
         
         // $scope.queueStatus = 'active';
         if(!inprog)
@@ -584,7 +569,7 @@ angular.module('histograph')
         SuggestFactory.getUnknownNodes({
           ids: [itemId]
         }, function (res) {
-          $scope.setMessage('... added to your bookmarks');
+          $scope.setMessage('toast.pinboard.added');
           $scope.playlist.push(res.result.items[0]);
           $scope.playlistIds.push(res.result.items[0].id);
           // $scope.queueStatus = 'active';
@@ -806,13 +791,11 @@ angular.module('histograph')
       ---
       Open the inspector issue modal
       and load the desired items.
+      
 
     */
-    $scope.inspect = function(items) {
-      if(typeof items != 'object')
-        items = [items];
-
-      $log.log('CoreCtrl -> inspect() - item:', items);
+    $scope.inspect = function(entity) {
+      $log.log('CoreCtrl -> inspect() - entity:', entity);
       var language = $scope.language;
 
       var modalInstance = $uibModal.open({
@@ -821,8 +804,8 @@ angular.module('histograph')
         controller: 'InspectModalCtrl',
         windowClass: "modal fade in inspect",
         resolve: {
-          items: function(SuggestFactory) {
-            return SuggestFactory.getUnknownNodes({ids: items}).$promise
+          entity: function(EntityFactory) {
+            return EntityFactory.get({id: entity.id}).$promise
           },
           relatedModel: function() {
             return 'resource'
@@ -841,6 +824,8 @@ angular.module('histograph')
         // }
       });
     };
+
+    // $scope.inspect({id: 17190});
 
     /*
       MetadataInspect
@@ -889,7 +874,11 @@ angular.module('histograph')
     $scope.contribute = function(item, type, options) {
       $log.debug('CoreCtrl -> contribute() - item:', item);
 
-      var language      = $scope.language;
+      var language      = $scope.language,
+          options       =  options || {};
+
+      options.createEntity = $scope.createEntity;
+
       var modalInstance = $uibModal.open({
         animation: true,
         templateUrl: 'templates/modals/contribute.html',
@@ -898,7 +887,7 @@ angular.module('histograph')
         size: 'sm',
         resolve: {
           options: function() {
-            return options || {}
+            return options
           },
           type: function(){
             return type
@@ -928,6 +917,45 @@ angular.module('histograph')
       });
 
     };
+
+    /*
+      Create New
+      ---
+      Open the create new modal for the given item
+      It allows users to suggest entities.
+      usage (from everywhere, or to test)
+      $scope.contribute({id: 25723, type: 'resource'}, 'person')
+    */
+    $scope.createEntity = function(item, type, options) {
+      $log.debug('CoreCtrl -> createEntity() - item:', item, type, options);
+      if(type != 'person') {
+        return;
+      }
+      var language      = $scope.language;
+      var modalInstance = $uibModal.open({
+        animation: true,
+        templateUrl: 'templates/modals/create-entity.html',
+        controller: 'CreateEntityModalCtrl',
+        windowClass: "modal fade in contribute",
+        backdrop : 'static',
+        size: 'sm',
+        resolve: {
+          options: function() {
+            return options || {}
+          },
+          type: function(){
+            return type
+          },
+          resource: function() {
+            return item
+          },
+          language: function() {
+            return language
+          }
+        }
+      })
+    }
+    // $scope.createEntity({id: 13113, type: 'resource'}, 'person', { query: 'Cumming'})
 
     
     // $scope.contribute({id: 25723})
@@ -980,100 +1008,35 @@ angular.module('histograph')
     $scope.$on(EVENTS.ANNOTATOR_HIDDEN, function() {
       $scope.isAnnotating = false;
     })
-    
-  })
-  /*
-    Inspect an entity.
 
-    Template: cfr. templates/modals/inspect.html
-  */
-  .controller('InspectModalCtrl', function ($scope, $log, $uibModalInstance, items, relatedFactory, relatedModel, EntityRelatedExtraFactory, SuggestFactory, language ) {
-    $scope.mergeMode = items.length > 1;
-    $scope.items = items.result.items;
-    $scope.limit = 1;
-    $scope.offset = 0;
-    $scope.modalStatus = 'quiet';
-    $scope.language = language;
-    
+    /*
+      Load timeline, after some ms
+    */
+    $timeout(function(){
+      /*
+        change the given user, programmatically. Cfr httpProvider config in app.js
+      */
+      if(!SETTINGS.user.id) {
+        // do nothing
+        return;
+      }
+      $scope.user = SETTINGS.user;
+        /*
+          First load only,
+          or to be updated whenever a
+          CHANGES in resource set occurs
+        */
+        
 
-    $scope.ok = function () {
-      $uibModalInstance.close();
-    };
-
-    $scope.cancel = function () {
-      $uibModalInstance.dismiss('cancel');
-    };
-
-    $scope.upvote = function() {
-      $scope.modalStatus = 'voting';
-      
-      EntityRelatedExtraFactory.save({
-        id: $scope.items[0].id,
-        model: relatedModel,
-        related_id: $scope.relatedItems[0].id,
-        extra: 'upvote'
-      }, {}, function (res) {
-        $log.log('InspectModalCtrl -> upvote()', res.status);
-        $scope.modalStatus = 'voted';
-      })
-    }
-
-    $scope.downvote = function () {
-      $scope.modalStatus = 'voting';
-      EntityRelatedExtraFactory.save({
-        id: $scope.items[0].id,
-        model: relatedModel,
-        related_id: $scope.relatedItems[0].id,
-        extra: 'downvote'
-      }, {}, function (res) {
-        $log.log('InspectModalCtrl -> downvote()', res.status);
-        $scope.modalStatus = 'voted';
-      });
-    }
-
-    $scope.next = function() {
-      $scope.modalStatus = 'quiet';
-      $scope.offset = Math.min($scope.totalItems -1, $scope.offset + 1);
-      $scope.sync();
-    };
-
-    $scope.previous = function() {
-      $scope.offset = Math.max($scope.offset -1, 0);
-      $scope.sync();
-    };
-
-    $scope.sync = function(){
-      $scope.modalStatus = 'loading';
-      if($scope.items.length == 1) {
-        relatedFactory.get({
-          id: $scope.items[0].id,
-          model: relatedModel,
-          limit: $scope.limit,
-          offset: $scope.offset
-        }, function (res) {
-          $scope.modalStatus = 'quiet';
-          $scope.relatedItems = res.result.items;
-          $scope.totalItems = res.info.total_items;
+        VisualizationFactory.resource(VIZ.TIMELINE).then(function (res) {
+          $log.info('CoreCtrl @EVENTS.USE_USER VisualizationFactory', res);
+          $scope.contextualTimeline = res.data.result.timeline;
+          // $scope.initialTimeline
         });
-      }
-    };
-
-    $scope.sync();
-
-    // if the item has not viaf_id or wiki_id IDENTIFIER attached, propose a set of probable entities. The user will then choose.
-    for(var i=0, l=$scope.items.length; i < l; i++)
-      if(_.isEmpty($scope.items[i].props.links_viaf) || _.isEmpty($scope.items[i].props.links_wiki)){
-        $scope.chooseVIAF = true;
-        SuggestFactory.getVIAF({
-          query: $scope.items[i].props.name
-        }, function(res) {
-          $scope.items[i].viafItems = _.map(_.values(_.groupBy(res.result.items, 'viafid')), function(d){
-            return _.first(d)
-          });
-        })
-        break; // only the first item
-      }
+    }, 236);
+    
   })
+  
 
   
   /*
@@ -1150,7 +1113,6 @@ angular.module('histograph')
     $scope.totalItems  = relatedItems.info.total_items;
     $scope.limit       = relatedItems.info.limit;
     $scope.offset      = relatedItems.info.offset;
-    $scope.loading     = false;
     // $scope.page        = 1; // always first page!!
     
     /*
@@ -1253,7 +1215,7 @@ angular.module('histograph')
     // $scope.syncGraph();
     $log.log('RelatedItemsCtrl -> setRelatedItems - items', relatedItems.result.items);
     $scope.setRelatedItems(relatedItems.result.items);
-    
+    $scope.isLoading=false;
     if($stateParams.ids || $stateParams.query || ~~!specials.indexOf('syncGraph'))
       $scope.syncGraph();
   })

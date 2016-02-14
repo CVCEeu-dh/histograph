@@ -161,6 +161,19 @@ describe('controller:suggest viaf', function() {
   })
 });
 
+describe('controller:suggest dbpedia', function() {
+  it('should return the dbpedia api results for Winston_Churchill', function (done) {
+    session
+      .get('/api/suggest/dbpedia?link=Winston_Churchill')
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exist(err) // err on statusCode
+        should.exist(res.body.result.item)
+        done();
+      })
+  })
+});
+
 describe('controller:suggest ', function() {
   it('should get the entity that match "konr"', function (done) {
     session

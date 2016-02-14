@@ -23,15 +23,19 @@
 
 angular
   .module('histograph', [
+    // core
     'ui.router',
     'ngRoute',
     'ngResource',
     'ngSanitize',
     'ngCookies',
+
+    // analytics
+    'angular-google-analytics',
+
     'ui.bootstrap',
     'pascalprecht.translate',// angular-translate
     // 'ui.codemirror',
-    // 'mgcrea.ngStrap'
     'perfect_scrollbar',
     'LocalStorageModule',
     'masonry',
@@ -104,6 +108,19 @@ angular
     });
     $translateProvider.preferredLanguage('en_US');// is applied on first load
     
+    //@ todo guided tour provider
+  })
+  /*
+    Angular analytics config
+  */
+  .config(function (AnalyticsProvider, SETTINGS) {
+    if(SETTINGS.analytics.account)
+      AnalyticsProvider
+        .setAccount(SETTINGS.analytics.account)
+        .setDomainName(SETTINGS.analytics.domainName || 'none')
+        .trackUrlParams(true)
+        // .logAllCalls(true)
+        .setPageEvent('$stateChangeSuccess');
   })
   /*
     Local-storage module config. cfr
@@ -155,7 +172,7 @@ angular
             }, 
             {
               name: 'explore.projection',
-              label: 'graph of person - person cooccurrences',
+              label: 'graph of person--person co-occurrences',
               params: {
                 modelA: 'person',
                 modelB: 'person'
@@ -163,7 +180,7 @@ angular
             },
             {
               name: 'explore.projection',
-              label: 'graph of location cooccurrences',
+              label: 'graph of location co-occurrences',
               params: {
                 modelA: 'location',
                 modelB: 'location'
@@ -171,7 +188,7 @@ angular
             },
             {
               name: 'explore.projection',
-              label: 'graph of theme cooccurrences',
+              label: 'graph of theme co-occurrences',
               params: {
                 modelA: 'theme',
                 modelB: 'theme'
@@ -250,7 +267,7 @@ angular
           template: '<div></div>',
           controller: 'ExploreEntitiesCtrl',
           grammar: {
-            label: 'graph of :modelA - :modelB cooccurrences',
+            label: 'graph of :modelA---:modelB co-occurrences',
             connector: {
               type: 'in documents of type',
               relatedTo: 'which mentions',
@@ -873,7 +890,7 @@ angular
             },
             types: [
               {
-                name: 'in any kind of documents',
+                name: 'in any resource type',
               },
               {
                 name: 'in pictures',
@@ -1279,11 +1296,11 @@ angular
   .config(function ($httpProvider) {
     $httpProvider.interceptors.push(function ($q, $log, $rootScope, EVENTS) {
       return {
-        response: function(response) {
-          if(response.data.user)
-            $rootScope.$broadcast(EVENTS.USE_USER, response.data.user);
-          return response
-        },
+        // response: function(response) {
+        //   if(response.data.user)
+        //     $rootScope.$broadcast(EVENTS.USE_USER, response.data.user);
+        //   return response
+        // },
         responseError: function(rejection) {
           if(rejection.status === 403) {
             $rootScope.$broadcast(EVENTS.USER_NOT_AUTHENTIFIED);
@@ -1294,4 +1311,8 @@ angular
         }
       };
     });
-  });
+  })
+
+  .run(function(Analytics) {
+    
+  })

@@ -8,6 +8,38 @@ RETURN {
   props: ent
 }
 
+// name: search_entity
+//
+MATCH (ent:entity:{:type}) 
+  WHERE 
+    ent.slug = {slug}
+  {if:links_wiki}
+    OR ent.links_wiki = {links_wiki} 
+  {/if}
+  {if:links_viaf}
+    OR ent.links_viaf = {links_viaf}
+  {/if}
+
+{if:resource_id}
+  WITH ent
+  OPTIONAL MATCH (res:resource)<-[rel:appears_in]-(ent)
+  WHERE id(res) = {resource_id}
+  WITH {
+    id: id(ent),
+    type: LAST(labels(ent)),
+    rel: rel,
+    props: ent
+  } as alias_ent
+{/if}
+{unless:resource_id}
+  WITH {
+    id: id(ent),
+    type: LAST(labels(ent)),
+    props: ent
+  } as alias_ent
+{/unless}
+RETURN alias_ent
+LIMIT 1
 
 // name: get_entities_by_ids
 //
@@ -27,6 +59,9 @@ LIMIT {limit}
 
 // name: merge_entity
 // create or merge entity, by name or links_wiki.
+MATCH (res:resource)
+  WHERE id(res) = {resource_id}
+WITH res
 {if:links_wiki}
   MERGE (ent:entity:{:type} {links_wiki: {links_wiki}})
 {/if}
@@ -38,6 +73,20 @@ ON CREATE SET
   ent.name_search   = {name_search},
   ent.celebrity     = 0,
   ent.score         = 0,
+  ent.df            = 1,
+
+  {if:links_viaf}
+    ent.links_viaf         = {links_viaf},
+  {/if}
+  {if:links_wiki}
+    ent.links_wiki         = {links_wiki},
+  {/if}
+  {if:first_name}
+    ent.first_name     = {first_name},
+  {/if}
+  {if:last_name}
+    ent.last_name     = {last_name},
+  {/if}
   {if:name_en}
     ent.name_en     = {name_en},
   {/if}
@@ -75,6 +124,18 @@ ON CREATE SET
   ent.last_modification_date = {exec_date},
   ent.last_modification_time = {exec_time}
 ON MATCH SET
+  {if:links_viaf}
+    ent.links_viaf         = {links_viaf},
+  {/if}
+  {if:links_wiki}
+    ent.links_wiki         = {links_wiki},
+  {/if}
+  {if:first_name}
+    ent.first_name     = {first_name},
+  {/if}
+  {if:last_name}
+    ent.last_name     = {last_name},
+  {/if}
   {if:name_en}
     ent.name_en     = {name_en},
   {/if}
@@ -124,6 +185,12 @@ WITH ent, res
     {/if}
     {if:services}
       r.services   = {services},
+    {/if}
+    {if:username}
+      r.created_by = {username},
+      r.upvote = [{username}],
+      r.celebrity = 1,
+      r.score = 1,
     {/if}
     r.creation_date = {exec_date},
     r.creation_time = {exec_time},
@@ -592,16 +659,6 @@ MERGE (ent)-[r1:appears_in]->(res)
     r1.last_modification_date = {exec_date},
     r1.last_modification_time = {exec_time}
 
-MERGE (u)-[r2:curates]->(ent)
-  ON CREATE SET
-    r2.creation_date = {exec_date},
-    r2.creation_time = {exec_time},
-    r2.last_modification_date = {exec_date},
-    r2.last_modification_time = {exec_time}
-  ON MATCH SET
-    r2.last_modification_date = {exec_date},
-    r2.last_modification_time = {exec_time}
-
 MERGE (u)-[r3:curates]->(res)
   ON CREATE SET
     r3.creation_date = {exec_date},
@@ -616,7 +673,7 @@ SET
   ent.last_modification_date = {exec_date},
   ent.last_modification_time = {exec_time}
 
-return ent, u, res, r1 as rel, r2
+return ent, u, res, r1 as rel
 
 
 // name: reconcile_entities

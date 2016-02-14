@@ -1,0 +1,138 @@
+<div class='modal-body'>
+  <div class='typeahead-in-dropdown'>
+    <h2><span translate="create-entity.title" translate-values='{type: type}'></span> {{cursor+1}} / {{steps.length}}
+    </h2>
+    <div class='panel'>
+    <span  translate='{{step.description}}' translate-values='ghost'></span>
+  </div>
+
+    <!-- <div class='panel ghost' ng-if='ghost.viaf || ghost.dbpedia'>
+      <div class='link' ng-if='ghost.viaf'>
+        (viaf) {{ghost.viaf.viafid}}
+      </div>
+      <div class='' ng-if='ghost.first_name'>
+        <span class='service'>name: </span>
+        <span class='title sans-serif'>{{ghost.last_name}}, {{ghost.first_name}}</span>
+      </div>
+      <div class='link' ng-if='ghost.dbpedia'>
+        <span class='service'>dbpedia: </span> <span class='title sans-serif'> {{ghost.dbpedia.label}}</span>
+        {{ghost.dbpedia.description | cutat:100}}
+      </div>
+    </div> -->
+
+    <form name='ghost.form'>
+
+      <div ng-if='step.name  == "viaf"'>
+        <div class="form-group">
+          <input autofocus type='text' name='test' typeahead-trigger-on-model-change='autotypeahead' ng-model='q' class='form-control' typeahead-editable='false' placeholder='{{"placeholder.search" | translate}}' uib-typeahead='item for items in typeaheadSuggestViaf($viewValue, "entity")' typeahead-wait-ms='100' typeahead-on-select='typeaheadSelectedViaf($item, $model, $label)' typeahead-template-url='templates/partials/helpers/typeahead-viaf.html'  typeahead-no-results="noResultsViaf" dropdown-append-to='#create-entity-typeahead-list' typeahead-loading="isLoadingViaf"/>
+        </div>
+        <div id='create-entity-typeahead-list'>
+
+        </div>
+        <div ng-if='noResultsViaf' class='panel'>
+          <span translate>create-entity.withviaf.noresults</span>
+        </div>
+        <div ng-if='isLoadingViaf' class="panel">
+          <span translate>create-entity.withviaf.loading</span>
+        </div>
+        <div class='panel' ng-if='!isLoadingViaf'>
+          <span translate>create-entity.withviaf.select</span>
+          <button  class='btn btn-secondary btn-line' ng-click='next()' translate>button.steps.skip</button>
+        </div>
+
+      
+      </div>
+
+      <div ng-if='step.name == "dbpedia"'>
+        <div class="form-group">
+          
+          <input autofocus type='text' name='test' typeahead-trigger-on-model-change='autotypeahead' ng-model='q' class='form-control' typeahead-editable='false' placeholder='{{"placeholder.search" | translate}}' uib-typeahead='item for items in typeaheadSuggestDbpedia($viewValue, "entity")' typeahead-wait-ms='100' typeahead-on-select='typeaheadSelectedDbpedia($item, $model, $label)' typeahead-template-url='templates/partials/helpers/typeahead-dbpedia.html'  typeahead-no-results="noResultsDbpedia" dropdown-append-to='#create-entity-typeahead-dbpedia-list'
+          typeahead-loading="isLoadingDbpedia"/>
+        </div>
+        <div id='create-entity-typeahead-dbpedia-list'>
+        </div>
+        <div ng-if='noResultsDbpedia' class='panel'>
+          <span translate>create-entity.withdbpedia.noresults</span>
+        </div>
+        <div ng-if='isLoadingDbpedia' class="panel">
+          <span translate>create-entity.withdbpedia.loading</span>
+        </div>
+        
+        <div class='panel' ng-if='!isLoadingDbpedia'>
+          <span ng-if='!noResultsDbpedia' translate>create-entity.withdbpedia.select</span>
+          <button  class='btn btn-secondary btn-line' ng-click='next()' translate>button.steps.skip</button>
+        </div>
+      </div>
+
+      <div ng-if='step.name == "person"'>
+        <div class="form-group">
+          <label class='sans-serif' translate>create-entity.person.firstname</label>
+          <input class="form-control" type='text' ng-model='ghost.first_name' required>
+        </div>
+        <div class="form-group">
+          <label class='sans-serif' translate>create-entity.person.lastname</label>
+          <input class="form-control" type='text' ng-model='ghost.last_name' required>
+        </div>
+        <div class="form-group">
+          <label class='sans-serif' translate>create-entity.person.field.description</label>
+          <div style='margin: 0 15px'>
+            <textarea class=" form-control" type='text' ng-model='ghost.description'></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div ng-if='step.name == "person-dates"'>
+        <div class="form-group">
+          <label class='sans-serif'><span translate>create-entity.person.birthdate</span> <span style='font-weight: normal' ng-if='ghost.birth_date'>({{ghost.birth_date|date:"longDate"}})</span></label>
+          <input class="form-control" type='text' ng-model='ghost.birth_date' >
+        </div>
+        <div class="form-group">
+          <label class='sans-serif'><span translate>create-entity.person.deathdate</span> <span style='font-weight: normal' ng-if='ghost.death_date'>({{ghost.death_date|date:"longDate"}})</span></label>
+          <input class="form-control" type='text' ng-model='ghost.death_date'>
+        </div>
+        
+      </div>
+
+
+      <div ng-if='step.name == "person-more"'>
+        <div class='panel'>
+          <div class='sans-serif'>
+            <div class='' ng-if='ghost.first_name'>
+              <h4 class='title sans-serif'>{{ghost.last_name}}, {{ghost.first_name}}</h4>
+              <div class='dates'>({{ghost.birth_date|date:"longDate"}} - {{ghost.death_date|date:"longDate"||"..."}})</div>
+            </div>
+            <div class='link' ng-if='ghost.viaf'>
+            viaf: <a ng-href='http://viaf.org/viaf/{{ghost.viaf.viafid}}' target='_blank'>{{ghost.viaf.viafid}}</a>
+            </div>
+            <div class='link' ng-if='ghost.dbpedia'>
+              <span class='service'>dbpedia: </span>
+              <a ng-href='http://dbpedia.org/page/{{ghost.links_wiki}}'> {{ghost.dbpedia.links_wiki}}</a>
+            </div>
+            
+          </div>
+          <blockquote>
+            {{ghost.description | cutat:100}}</blockquote>
+        </div>
+        <div class="form-group">
+          <label class='sans-serif' translate>create-entity.person.reference</label>
+          <div style='margin: 0 15px'>
+            <textarea class="form-control"  ng-model='ghost.reference'></textarea>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    
+
+  </div>
+</div>
+
+<div class='modal-footer'>
+  <div class="btn-group btn-group-dual" role="group">
+    <button ng-if='cursor == 0' class='btn btn-secondary btn-line' ng-click='cancel()' translate>button.discard</button>
+    <button ng-if='cursor > 0' class='btn btn-secondary btn-line' ng-click='previous()' translate>button.back</button>
+    <button  ng-if='!isLastStep' class='btn btn-primary btn-line {{ghost.form.$invalid? "disabled": ""}}' ng-click='next()' ng-disabled="ghost.form.$invalid" translate>button.next</button>
+    <button ng-if='isLastStep' class='btn btn-primary btn-line {{!isLastStep || ghost.form.$invalid? "disabled": ""}}' ng-click='ok()' ng-disabled="!isLastStep || ghost.form.$invalid" translate>button.confirm</button>
+    
+  </div>
+</div>

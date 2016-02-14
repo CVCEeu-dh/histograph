@@ -85,7 +85,8 @@ RETURN count(per) as count_items
 MATCH (per:person)-[r:appears_in]->(res:resource)
 WHERE NOT(has(per.last_name))
   AND per.celebrity = 0
-WITH per, collect(res) as resources, count(res) as df
+WITH per, collect(res) as resources
+WITH per, resources, length(resources) as df
 WHERE df > 1
 WITH per, resources, df
 ORDER BY df DESC

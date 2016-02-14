@@ -1,40 +1,53 @@
 
-
-<div class='modal-body'>
+<div class='animated {{isDisabled? "hidden": "fadeIn"}}'>
+<div class='modal-body' >
   <div class='typeahead-in-dropdown'>
-    <h2>which {{type}} do you suggest</h2>
-    <p>This would allow to discover other related resources</p>
-    
-    <form>
-      <input autofocus type='text' name='test' typeahead-trigger-on-model-change='autotypeahead' ng-model='q' class='form-control' typeahead-editable='false' placeholder='search person, location, themes...' uib-typeahead='item for items in typeaheadSuggest($viewValue, "entity")' typeahead-wait-ms='100' typeahead-on-select='typeaheadSelected($item, $model, $label)' typeahead-template-url='templates/partials/helpers/typeahead.html'/>
-    </form>
-
-    <div class='results' ng-if="entities.length">
-      <span class="tags"><i>add entities</i>:
-        <span ng-repeat="per in entities">
-          {{per.type}}
-          <span ng-if="per.type=='person'">
-            <span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.props.name}} - {{per.props.description}} ({{per.props.birth_date | date:"yyyy"}} - {{per.props.death_date | date:"yyyy"}}) {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name}}</span>
-          </span>
-          <span tooltip='{{per.props.name}}' ng-if="per.type=='location'" class="tag location">{{per.props.name}}, {{per.props.country}}
-          </span>
-          <span tooltip='{{per.props.name}}' ng-if="per.type=='theme'" class="tag theme">{{per.props.name}}
-          </span>
-          {{$last? '':  ', '}}
-        </span>
+    <h2 translate="contribute.title" translate-values='{type: type}'></h2>
+    <p translate>contribute.description</p>
+    <div >
+      <form>
+        <input autofocus type='text' name='test' typeahead-trigger-on-model-change='autotypeahead' ng-model='q' class='form-control' typeahead-editable='false' placeholder='{{"placeholder.search" | translate}}' uib-typeahead='item for items in typeaheadSuggest($viewValue, "entity")' typeahead-wait-ms='100' typeahead-on-select='typeaheadSelected($item, $model, $label)' typeahead-template-url='templates/partials/helpers/typeahead.html'  typeahead-no-results="noResults" dropdown-append-to='#contribute-typeahead-list' typeahead-loading="isLoading"/>
+      </form>
+      <div id='contribute-typeahead-list'></div>
+      <div ng-if='noResults' class="panel">
+        <span translate>contribute.suggest.noresults</span>
+      </div>
+      <div ng-if='isLoading' class="panel">
+        <span translate>contribute.suggest.loading</span>
+      </div>
+      <div class='panel' ng-if='!isLoadingDbpedia && query.length && !entities.length'>
+        <span ng-if='!noResults' translate>contribute.create-entity.select</span>
         
-      </span>
-        
+        <button  class='btn btn-secondary btn-line' ng-click='createEntity()' translate='button.entity.create' translate-values='{type: "person"}'></button>
+      </div>
     </div>
-    
-
-    
+  </div>
+  
+  <div class='results' ng-if="entities.length">
+    <span class="tags"><i>add entities</i>:
+      <span ng-repeat="per in entities">
+        {{per.type}}
+        <span ng-if="per.type=='person'">
+          <span data-id='{{per.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{per.props.name}} - {{per.props.description}} ({{per.props.birth_date | date:"yyyy"}} - {{per.props.death_date | date:"yyyy"}}) {{per.props.score < 0? " - signaled as a mistake":""}}' gasp-type='person' gasp-parent='{{item.type}}-{{item.id}}' class="tag person {{per.props.score < 0? 'downvoted': '' }}">{{per.props.name}}</span>
+        </span>
+        <span tooltip='{{per.props.name}}' ng-if="per.type=='location'" class="tag location">{{per.props.name}}, {{per.props.country}}
+        </span>
+        <span tooltip='{{per.props.name}}' ng-if="per.type=='theme'" class="tag theme">{{per.props.name}}
+        </span>
+        {{$last? '':  ', '}}
+      </span>
+      
+    </span>
+      
   </div>
 
 </div>
 <div class='modal-footer'>
+  
   <div class="btn-group btn-group-dual" role="group">
-    <button  class='btn btn-primary btn-line {{entities.length? "":"disabled"}}' ng-click='ok()'>confirm</button>
-    <button class='btn btn-secondary btn-line' ng-click='cancel()'>discard</button>
+    
+    <button class='btn btn-secondary btn-line' ng-click='cancel()' translate>button.discard</button>
+    <button  class='btn btn-primary btn-line {{entities.length? "":"disabled"}}' ng-click='ok()' translate>button.confirm</button>
   </div>
+</div>
 </div>

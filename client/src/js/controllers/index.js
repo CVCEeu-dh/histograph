@@ -118,7 +118,7 @@ angular.module('histograph')
   /*
     wall of resources
   */
-  .controller('ExploreResourcesCtrl', function ($scope, $log, VisualizationFactory, VIZ, ResourceFactory, EVENTS) {
+  .controller('ExploreResourcesCtrl', function ($scope, $log, ResourceVizFactory, VIZ, ResourceFactory, EVENTS) {
     $log.debug('ExploreResourcesCtrl ready', $scope.params);
     $scope.limit  = 20;
     $scope.offset = 0;
@@ -145,7 +145,24 @@ angular.module('histograph')
       }) 
     }
     
-   
+    /*
+      LoadTimeline
+      ---
+
+      load the timeline of filtered resources
+    */
+    $scope.syncTimeline = function() {
+      if(!_.isEmpty($scope.params))
+        ResourceVizFactory.get(angular.extend({
+          viz: 'timeline'
+        }, $scope.params), function (res) {
+          // if(res.result.titmeline)
+          $scope.setTimeline(res.result.timeline)
+        });
+      else
+        $scope.setTimeline([])
+    };
+
     /*
       listener: EVENTS.API_PARAMS_CHANGED
       some query parameter has changed, reload the list accordingly.
@@ -155,6 +172,8 @@ angular.module('histograph')
       $log.debug('ExploreCtrl @API_PARAMS_CHANGED', $scope.params);
       $scope.sync();
       // $scope.syncGraph();
+      $scope.syncTimeline();
+
     });
     
     $scope.$on(EVENTS.INFINITE_SCROLL, function (e) {
@@ -163,17 +182,14 @@ angular.module('histograph')
       $scope.sync();
     });
 
-    VisualizationFactory.resource(VIZ.TIMELINE).then(function (res) {
-      $log.info('ExploreCtrl init timeline', res);
-      $scope.timeline = res.data.result.timeline;
-      // $scope.initialTimeline
-    });
+    if(!_.isEmpty($scope.params))
+      $scope.syncTimeline();
 
     $scope.sync();
   })
 
 
-.controller('ExploreEntitiesCtrl', function ($scope, $log, CooccurrencesFactory, relatedModel, projectedModel, EVENTS) {
+.controller('ExploreEntitiesCtrl', function ($scope, $log, CooccurrencesFactory, ResourceVizFactory, relatedModel, projectedModel, EVENTS) {
     $log.debug('ExploreEntitiesCtrl ready', $scope.params);
     $scope.limit  = 20;
     $scope.offset = 0;
@@ -196,7 +212,23 @@ angular.module('histograph')
       });
     };
     
-    
+     /*
+      LoadTimeline
+      ---
+
+      load the timeline of filtered resources
+    */
+    $scope.syncTimeline = function() {
+      if(!_.isEmpty($scope.params))
+        ResourceVizFactory.get(angular.extend({
+          viz: 'timeline'
+        }, $scope.params), function (res) {
+          // if(res.result.titmeline)
+          $scope.setTimeline(res.result.timeline)
+        });
+      else
+        $scope.setTimeline([]);
+    };
     /*
       listener: EVENTS.API_PARAMS_CHANGED
       some query parameter has changed, reload the list accordingly.
@@ -205,7 +237,11 @@ angular.module('histograph')
       $scope.offset = 0;
       $log.debug('ExploreEntitiesCtrl @API_PARAMS_CHANGED', $scope.params);
       $scope.syncGraph();
+      $scope.syncTimeline();
     });
     
     $scope.syncGraph();
+
+    if(!_.isEmpty($scope.params))
+      $scope.syncTimeline();
   });

@@ -1,5 +1,5 @@
 <!-- typeahead template for FILTERING purpose; used in contribute modal -->
-<div class='{{match.model.props.thumbnail?"with-thumbnail":""}}'>
+<div style='cursor:pointer' title='click to select'  class='{{match.model.props.thumbnail?"with-thumbnail":""}}'>
   <a ng-if='match.model.type != "default"' >
     <div class='thumbnail' ng-if='match.model.props.thumbnail' style='background-image:url({{match.model.props.thumbnail}})'></div>
     

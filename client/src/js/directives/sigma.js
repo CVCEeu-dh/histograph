@@ -430,8 +430,9 @@ angular.module('histograph')
             // rescale();
             si.refresh();
             play(); 
+            scope.setMessage({message: false});
           }, 100);
-          scope.setMessage({message: false});
+          
         });
         
          /*

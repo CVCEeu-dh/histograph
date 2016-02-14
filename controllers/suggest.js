@@ -638,5 +638,39 @@ module.exports =  function(io){
         })
       }
     },
+
+    /*
+      Proxy suggest for DBPEDIA
+    */
+    dbpedia: function(req, res) {
+      var services = require('../services');
+
+      var form = validator.request(req, {
+        limit: 10,
+        offset: 0,
+        link: ''
+      }, {
+        fields:[
+          {
+            field:'link',
+            check: 'matches',
+            args: [
+              /^[a-zA-Z0-9,_\-%\.]+$/
+            ]
+          }
+        ]
+      });
+      // console.log(form)
+      if(!form.isValid)
+        return helpers.models.formError(form.errors, res);
+      helpers.dbpediaPerson(form.params.link, function (err, result){
+        if(err)
+          res.error();
+        else
+          res.ok({
+            item: result
+          },form.params);
+      })
+    }
   }
 }

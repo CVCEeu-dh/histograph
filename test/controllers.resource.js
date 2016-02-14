@@ -13,6 +13,8 @@ var settings  = require('../settings'),
     _         = require('lodash'),
     
     Resource  = require('../models/resource'),
+    Action    = require('../models/action'),
+    Entity    = require('../models/entity'),
     User      = require('../models/user'),
 
     Session   = require('supertest-session')({
@@ -26,7 +28,8 @@ var settings  = require('../settings'),
 var session,
     __user,
     __MARVIN, // our special user
-    __resourceA;
+    __resourceA,
+    __entityA;
 
 before(function () {
   session = new Session();
@@ -161,8 +164,11 @@ describe('controller:resource (related users)', function() {
         should.equal(res.body.result.item.rel.start, __user.id);
         should.equal(res.body.result.item.rel.end, __resourceA.id);
         should.equal(res.body.result.item.rel.type, 'likes');
-        
-        done();
+        should.equal(res.body.result.item.related.action.props.target, Action.LIKES_RELATIONSHIP)
+        Action.remove(res.body.result.item.related.action, function (err){
+          should.not.exists(err);
+          done();
+        });
       });
   })
   
@@ -300,6 +306,69 @@ describe('controller:resource (related resources)', function() {
       });
   });
   
+  it('MARVIN should attach an UNVALID brand new entity to the resource', function (done) {
+    session
+      .post('/api/resource/'+ __resourceA.id +'/related/person')
+      .send({
+        // name: 'TESTTESTTEST_______TEST',
+        // first_name: 'Professor',
+        // last_name: 'Kandiallo'
+      })
+      .expect('Content-Type', /json/)
+      .expect(400)
+      .end(function (err, res) {
+        should.not.exists(err);
+        should.equal(_.map(res.body.error.form, 'field').join(), ['name','first_name', 'last_name'].join())
+        done();
+      });
+  });
+  
+  it('MARVIN should attach a brand new entity to the resource', function (done) {
+    session
+      .post('/api/resource/'+ __resourceA.id +'/related/person')
+      .send({
+        name: 'TESTTESTTEST_______TEST',
+        first_name: 'Professor',
+        last_name: 'Kandiallo'
+      })
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exists(err);
+        should.exists(res.body.result.item);
+        __entityA = res.body.result.item;
+
+        should.exists(res.body.result.item.related.action);
+        should.equal(res.body.result.item.related.action.type, Action.CREATE)
+        should.equal(res.body.result.item.related.action.props.target, Action.BRAND_NEW_ENTITY)
+        should.equal(res.body.result.item.rel.end, parseInt( __resourceA.id))
+        
+        // should delete the action
+        Action.remove(res.body.result.item.related.action, function(err){
+          should.not.exists(err);
+          done();
+        })
+        
+        
+      });
+  });
+
+  it('MARVIN should attach a entity to the resource; since we changed something, we should raise an issue', function (done) {
+    session
+      .post('/api/resource/'+ __resourceA.id +'/related/person')
+      .send({
+        name: 'TESTTESTTEST_______TEST',
+        first_name: 'Professor',
+        last_name: 'Kandiallo'
+      })
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exists(err);
+        done();
+      });
+  });
+
 })
 
 
@@ -326,5 +395,13 @@ describe('controller:resource after', function() {
         throw err;
       done();
     });
+  });
+   it('should delete the entity A', function (done) {
+    Entity.remove({
+      id: __entityA.id
+    }, function (err) {
+      should.not.exist(err);
+      done();
+    })
   });
 });

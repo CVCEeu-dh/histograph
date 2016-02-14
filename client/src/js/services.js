@@ -174,6 +174,13 @@ angular.module('histograph')
           model:''
         }
       },
+      getDbpedia: {
+        method: 'GET',
+        params: {
+          m: 'dbpedia',
+          model:''
+        }
+      },
       getUnknownNodes: {
         method: 'GET',
         params: {
@@ -247,46 +254,14 @@ angular.module('histograph')
     return $resource('/api/issue');
   })
   
-  
-  // .factory('SuggestFactory', function ($http) {
-  //   return {
-  //     get: function(options) {
-  //       return $http.get('/api/suggest', {
-  //         params: options
-  //       });
-  //     },
-  //     allShortestPaths: function(options) {
-  //       return $http.get('/api/suggest/all-shortest-paths/' + options.ids);
-  //     },
-  //     allInBetween: function(options) {
-  //       return $http.get('/api/suggest/all-in-between/' + options.ids);
-  //     },
-  //     getUnknownNode: function(options) {
-  //       return $http.get('/api/suggest/unknown-node/' + options.id);
-  //     },
-  //     getUnknownNodes: function(options) {
-  //       return $http.get('/api/suggest/unknown-nodes/' + options.ids);
-  //     },
-  //     neighbors: function(options) {
-  //       return $http.get('/api/suggest/neighbors/' + options.ids);
-  //     },
-  //     getResources: function(options) {
-  //       return $http.get('/api/suggest/resources', {
-  //         params: options
-  //       });
-  //     },
-  //     getEntities: function(options) {
-  //       return $http.get('/api/suggest/entities', {
-  //         params: options
-  //       });
-  //     },
-  //     getGraph: function(options) {
-  //       return $http.get('/api/suggest/graph', {
-  //         params: options
-  //       });
-  //     } 
-  //   };
-  // })
+  .factory('DbpediaFactory', function ($resource) {
+    return $resource('http://lookup.dbpedia.org/api/search.asmx/PrefixSearch',{}, {
+      headers: { 
+        'Accept': 'application/json' 
+      }
+    });
+  })
+
   /*
     Socket.io service, thqnks to http://briantford.com/blog/angular-socket-io
   */

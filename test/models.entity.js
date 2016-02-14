@@ -75,6 +75,7 @@ describe('model:entity init', function() {
 
 describe('model:entity ', function() {
   
+
   it('should create a brand new entity, by using links_wiki', function (done) {
     Entity.create({
       links_wiki: 'TESTESTTESTYalta_Conference',

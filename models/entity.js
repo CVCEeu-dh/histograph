@@ -36,23 +36,37 @@ module.exports = {
     'slug',
     'name',
   ],
+
+  /*
+    Create a slug (should guarantee the unicity.)
+  */
+  _slug: function(properties) {
+    if(properties.slug)
+      return properties.slug;
+    if(!_.isEmpty(properties.links_viaf))
+      return helpers.text.slugify('viaf-'+properties.links_viaf);
+    return helpers.text.slugify(properties.name);
+  },
   /*
     Create a new entity or merge it if an entity with the same wikilink exists.
     Note that an entity must be linked to a document.
   */
+
   create: function(properties, next) {
     var now   = helpers.now(),
-        slug  = properties.slug? properties.slug : helpers.text.slugify(properties.name),
+        slug  = module.exports._slug(properties),
         props = _.assign({}, properties, {
           type: properties.type || 'unknown',
           slug: slug,
           links_wiki: _.isEmpty(properties.links_wiki)? undefined: properties.links_wiki,
+          links_viaf: _.isEmpty(properties.links_viaf)? undefined: properties.links_viaf,
           exec_date: now.date,
           exec_time: now.time,
           services: properties.services,
           languages: properties.languages,
           frequency: properties.frequency || 1,
           resource_id: properties.resource.id,
+          username: properties.username,
           name_search: properties.name_search || properties.name.toLowerCase()
         }),
         query = parser.agentBrown(queries.merge_entity, props);
@@ -63,6 +77,30 @@ module.exports = {
         return;
       }
       next(null, nodes[0]);
+    })
+  },
+
+  /*
+    Check that an entity candidate can be found
+    (unique values: name, viaf, wiki)
+  */
+  check: function(properties, next) {
+    // console.log('check',properties)
+    var slug = module.exports._slug(properties),
+        props = _.assign({}, properties, {
+          type: properties.type || 'unknown',
+          slug: slug,
+          links_wiki: _.isEmpty(properties.links_wiki)? undefined: properties.links_wiki,
+          links_viaf: _.isEmpty(properties.links_viaf)? undefined: properties.links_viaf
+        }),
+        query = parser.agentBrown(queries.search_entity, props);
+    // console.log(slug, 'q',query)
+    neo4j.query(query, props, function (err, nodes) {
+      if(err) {
+        next(err);
+        return;
+      }
+      next(null, nodes);
     })
   },
   

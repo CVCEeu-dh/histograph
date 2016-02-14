@@ -562,11 +562,13 @@ module.exports = {
         next(err);
         return;
       }
-      module.exports.getByIds(_.assign({}, params, {
-        ids: _.map(results.items, 'target')
-      }), function (err, items){
-        next(null, items, results.count_items);
-      });
+      next(null, results.items, results.count_items);
+      
+      // module.exports.getByIds(_.assign({}, params, {
+      //   ids: _.map(results.items, 'target')
+      // }), function (err, items){
+      //   next(null, items, results.count_items);
+      // });
       
     }); 
     

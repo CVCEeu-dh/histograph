@@ -17,6 +17,7 @@ var settings   = require('../settings'),
     neo4j      = require('seraph')(settings.neo4j.host),
 
     Action     = require('../models/action'),
+    Entity     = require('../models/entity');
     Resource   = require('../models/resource');
     
 
@@ -180,6 +181,95 @@ module.exports = function(io){
         id: form.params.id,
       },form.params, function (err, items, info) {
         helpers.models.getMany(err, res, items, info, form.params);
+      });
+    },
+
+    /*
+      Add a brand new entity to the requested resource
+    */
+    createRelatedEntity: function(req, res){
+      var fields = validator.getEntityFields(req.params.entity),
+          required = _.assign({name: ''}, _.zipObject(_.map(fields, 'field'), ' ')),
+          form = validator.request(req, required, {
+            fields: fields
+          });
+
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      // console.log('createRelatedEntity', form.isValid)
+      var resource = {
+            id: form.params.id
+          };
+      // check that no entity exist already, with waterfall
+      async.waterfall([
+        /*
+          Check that we do not create a new entity
+          (same entity type plus [slug | viaf number | wiki)
+        */
+        function check(next) {
+          Entity.check(_.assign({ resource_id: resource.id}, form.params, {
+            type: form.params.entity
+          }), next);
+        },
+        /*
+          if check returns an empty result set, we will create the entity
+        */
+        function createIfNotFound(results, next) {
+          if(results.length > 0)
+            next(null, _.assign({
+              entityExists: true
+            }, results[0]));
+          else
+            Entity.create(_.assign({}, form.params, {
+              resource: {
+                id: form.params.id
+              },
+              type: form.params.entity,
+              name: form.params.name,
+              username: req.user.username
+            }), next);
+        },
+        /*
+          if the antity has been created, let's add an action to store that specific info.
+        */
+        function createActionIfBrandNewEntity(entity, next) {
+          if(entity.entityExists) {
+            if(!entity.rel) {
+              // console.log("rel need to be created");
+              Entity.createRelatedResource(entity, resource, req.user, {}, function (err, item) {
+                next(err, item)
+              });
+            } else {
+              next(null, entity);
+            }
+          } else { // entity has been created
+            // console.log("entity has been created");
+            Action.create({
+              kind: Action.CREATE,
+              target: Action.BRAND_NEW_ENTITY,
+              mentions: [
+                resource.id,
+                entity.id
+              ],
+              username: req.user.username
+            }, function (err, action) {
+              if(action)
+                _.assign(entity, {
+                  related: {
+                    action: action
+                  }
+                });
+              // console.log("entity has been created", entity);
+              next(err, entity);
+            });
+          }
+        }
+      ], function (err, entity) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({
+          item: entity
+        }, form.params);
       });
     },
     /*
@@ -491,19 +581,21 @@ module.exports = function(io){
     },
     
     getTimeline: function (req, res) {
-      validator.queryParams(req.query, function (err, params, warnings) {
-        if(err)
-          return helpers.formError(err, res);
-        
-        Resource.getTimeline(params, function (err, timeline) {
-          if(err)
-            return helpers.cypherQueryError(err, res);
-          return res.ok({
-            timeline: timeline
-          }, {
-            params: params,
-            warnings: warnings
+      var form = validator.request(req, {
+            limit: 100,
+            offset: 0
           });
+
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      Resource.getTimeline(form.params, function (err, timeline) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({
+          timeline: timeline
+        }, {
+          params: form.params
         });
       });
     },
@@ -531,7 +623,7 @@ module.exports = function(io){
     },
     
     /*
-      Create a relationship bzetween the current user and the resoruce
+      Create a LIKES relationship bzetween the current user and the resoruce
     */
     createRelatedUser: function (req, res) {
       var form = validator.request(req);
@@ -556,6 +648,13 @@ module.exports = function(io){
       }, function (err, results) {
         if(err)
           return helpers.cypherQueryError(err, res);
+        // attach the likes action
+        _.assign(results.resource, {
+          related: {
+            action: results.action
+          }
+        });
+        
         io.emit('resource:create-related-user:done', {
           user: req.user.username,
           id:   form.params.id, 

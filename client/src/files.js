@@ -43,10 +43,14 @@ module.exports = {
       '/js/lib/angular-sanitize.min.js',
       '/js/lib/angular-local-storage.min.js',
 
+      // google analytics
+      '/js/lib/angular-google-analytics.min.js',
+
       // translation mechanism
       '/js/lib/angular-translate.min.js',
       '/js/lib/angular-translate-loader-static-files.min.js',
 
+      // masonry: reesources as bricks
       '/js/lib/angular-masonry.min.js',
       
       // angular guided tour, by daft-monk
@@ -89,6 +93,8 @@ module.exports = {
 
       // modal controllers. templates in templates/modal
       '/js/controllers/modals/contribute.js',
+      '/js/controllers/modals/create-entity.js',
+      '/js/controllers/modals/inspect.js',
 
 
       '/js/directives/annotator.js', 

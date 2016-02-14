@@ -2077,6 +2077,19 @@ li.CodeMirror-hint-active {
   border-bottom: 0px transparent;
 }
 
+/*
+  Override form control bootstrap
+*/
+textarea.form-control{
+  font-size: 13px;
+  line-height: 24px;
+}
+
+input.form-control{
+  font-size: 13px;
+  height: 33px;
+}
+
 
 /*
   
@@ -2113,7 +2126,8 @@ li.CodeMirror-hint-active {
 */
 #search-field .dropdown-menu{
   max-width: 100%;
-    
+    max-height: 360px;
+    overflow-y: scroll;
 }
 #search-field .dropdown-menu li{
   padding: 10px 30px 5px 15px;
@@ -2276,12 +2290,11 @@ li.CodeMirror-hint-active {
        -o-transition: height .3s cubic-bezier(0.65, 0.05, 0.36, 1);
           transition: height .3s cubic-bezier(0.65, 0.05, 0.36, 1);
 }
-/*
-#pop > .inner .btn-group-wrapper.disabled{
-  height: 0;
 
+#pop > .inner .btn-group-wrapper.disabled{
+  pointer-events : auto;
 }
-*/
+
 #pop > .inner .btn-group .btn {
   height:30px;
 }
@@ -2350,11 +2363,11 @@ li.CodeMirror-hint-active {
 }
 
 #pop > .inner .questions.contribute.enabled{
-  height: 177px;
+  height: 185px;
 }
 
 #pop > .inner .questions.contribute-confirm.enabled{
-  height: 80px;
+  height: 100px;
 }
 
 #pop > .inner .questions p.text{
@@ -2364,6 +2377,9 @@ li.CodeMirror-hint-active {
     border-top: 1px solid #A9A2A2;
 }
 
+#pop > .inner .questions p strong{
+  color: #f0f0f0;
+}
 
 #pop > .inner .questions .answers{
   padding: 5px 15px 5px 15px;
@@ -6212,19 +6228,31 @@ Copyright (c) 2015 Daniel Eden
   /*display: none;*/
   position: absolute;
   width: 110px;
-  bottom: 30px;
+  bottom: 26px;
   font-weight: normal;
-  background: rgba(255,255,255, .4);
+  /*background: rgba(255,255,255, .4);*/
+  
+  bottom: 30px;
+  background: #d8d8d8;
+  font-size: 12px;
+  height: 18px;
+  line-height: 18px;
+
+  color: #151515;
+  border-radius: 2px;
 }
 
 #timeline .brushdate.left{
   /*left: 40px;*/
   text-align: right;
+  padding-right: 5px;
+ 
 }
 
 #timeline .brushdate.right{
   /*right: 40px;*/
   text-align: left;
+  padding-left: 5px;
 }
 
 #timeline path{
@@ -6240,7 +6268,7 @@ Copyright (c) 2015 Daniel Eden
 }
 
 #timeline .brush .extent {
-  stroke: #fff;
+  stroke: crimson;
   fill: #ffffff;
   fill-opacity: .165;
   shape-rendering: crispEdges;
@@ -6286,8 +6314,9 @@ Copyright (c) 2015 Daniel Eden
 }
 
 .modal-backdrop {
-  visibility: hidden;
-  background-color: #151515;
+  /*visibility: hidden;*/
+  background-color: #C5C5C6;
+  /*#151515;*/
 }
 
 .modal-content{
@@ -6512,12 +6541,49 @@ Copyright (c) 2015 Daniel Eden
 
 */
 .contribute .modal-dialog {
-  width: 300px
+  width: 320px
 }
 
 .contribute .modal-dialog .modal-content{
-  width: 300px;
+  width: 320px;
   bottom: auto;
+}
+
+.contribute .panel{
+  margin: 0 15px;
+}
+
+.contribute .ghost {
+ 
+  font-size:12px;
+  line-height: 21px;
+}
+
+.contribute .modal-content h4.title{
+  margin: 15px 0 0 0;
+  font-weight: bold;
+}
+
+.contribute .dates{
+  color: #747274;
+  margin: 0 0 15px 0;
+}
+
+.contribute .link{
+  background: #eee;
+  padding: 5px 15px;
+  margin-bottom: 10px;
+}
+
+.contribute .ghost .link {
+  padding: 10px;
+  
+  background: #E5E5E5;
+  border: 1px solid #C2C2C2;
+  
+}
+.contribute .ghost .title{
+  font-weight: bold;
 }
 
 .contribute .modal-dialog .modal-content .modal-body {
@@ -6551,7 +6617,7 @@ Copyright (c) 2015 Daniel Eden
 }
 
 .contribute .typeahead-in-dropdown input{
-  width: 268px;
+  width: 287px
 }
 
 .contribute .typeahead-in-dropdown ul.dropdown-menu >li{
@@ -6637,19 +6703,32 @@ Copyright (c) 2015 Daniel Eden
   margin: 0 15px
 }
 
+
+
 .typeahead-in-dropdown ul.dropdown-menu {
   position: static;
   box-shadow: none;
   border: 0px solid;
-  max-height: 400px;
+  max-height: 260px;
   height: auto;
   overflow: hidden;
   overflow-y: auto;
   padding: 0;
   margin: 0;
   width: 100%;
-      background: #f8f8f8;
+      background: #f2f2f2;
     border-top: 1px solid #e8e8e7;
+   border-bottom: 1px solid #ccc;
+    margin-bottom: 15px;
+ 
+}
+
+.typeahead-in-dropdown ul.dropdown-menu li p{
+  line-height: 18px;
+}
+
+.typeahead-in-dropdown ul.dropdown-menu li h4{
+  font-weight: bold;
 }
 
 /*

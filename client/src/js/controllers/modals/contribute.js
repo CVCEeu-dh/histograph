@@ -16,7 +16,6 @@ angular.module('histograph')
     // the list of suggested entities
     $scope.entities   = [];
 
-
     $scope.type = type;
     $log.debug('ContributeModalCtrl -> ready()', resource.id, options);
 
@@ -26,7 +25,23 @@ angular.module('histograph')
       $scope.q = options.query;
     }
     
+    $scope.createEntity = function(){
+      // pu it invisible...
+      $scope.isDisabled = true;
+      options.createEntity(resource, "person", _.assign({}, options, {
+        query: $scope.query,
+        language: options.language,
 
+        dismiss: function() {
+          $scope.cancel();
+        },
+        submit: function(entity) {
+          // add the current saved entity
+          $scope.entities=[entity];
+          $scope.ok()
+        }
+      }));
+    }
     $scope.ok = function () {
       // get the annotation, if any
       var params = {};
@@ -78,9 +93,13 @@ angular.module('histograph')
     $scope.typeaheadSuggest = function(q) {
       $log.log('ContributeModalCtrl -> typeahead()', q, type);
       // suggest only stuff from 2 chars on
-      if(q.trim().length < 2)
+      if(q.trim().length < 2) {
+        $scope.query = '';
         return;
+      }
       
+      $scope.query = q.trim();
+
       return SuggestFactory.get({
         m: type,
         query: q,

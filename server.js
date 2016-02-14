@@ -34,7 +34,7 @@ var express       = require('express'),        // call express
                       }
                     }),
 
-    
+    cache, // undefined; cfr. below
 
     clientRouter  = express.Router(),
     apiRouter     = express.Router(),
@@ -45,6 +45,11 @@ var express       = require('express'),        // call express
     clientFiles  = require('./client/src/files')[env];
 
 
+// cache
+var getCacheName = function(req) {
+    return [req.path, JSON.stringify(req.query)].join().split(/[\/\{,:"\}]/).join('-');// + '?' + JSON.stringify(req.query);
+  };
+
 // initilalize session middleware
 var sessionMiddleware = session({
   name: 'hg.sid',
@@ -54,10 +59,14 @@ var sessionMiddleware = session({
   saveUninitialized: true
 })
 
+console.log('title:', settings.title);
 console.log('logs: ', settings.paths.accesslog);
 console.log('env:  ', env);
 console.log('port: ', settings.port);
-console.log('url:  ', settings.baseurl)
+console.log('url:  ', settings.baseurl);
+
+
+
 
 app.use(compress());
 
@@ -97,7 +106,7 @@ app.use(auth.passport.session());
 express.response.ok = function(result, info, warnings) {
   var res = {
     status: 'ok',
-    user: this.req.user,
+    // user: this.req.user,
     result: result
   };
   
@@ -106,7 +115,7 @@ express.response.ok = function(result, info, warnings) {
   
   if(warnings)
     res.warnings = warnings
-  
+
   return this.json(res);
 };
 
@@ -135,10 +144,23 @@ clientRouter.route('/').
       user: req.user || 'anonymous',
       message: 'hooray! welcome to our api!',
       types: settings.types,
+      title: settings.title,
+      analytics: settings.analytics,
       scripts: clientFiles.scripts
     });
   });
   
+clientRouter.route('/terms').
+  get(function(req, res) { // test route to make sure everything is working (accessed at GET http://localhost:8080/api)
+    res.render('terms', {
+      user: req.user || 'anonymous',
+      message: 'hooray! welcome to our api!',
+      types: settings.types,
+      title: settings.title,
+      analytics: settings.analytics,
+      scripts: clientFiles.scripts
+    });
+  });
 
 clientRouter.route('/login')
   .post(function (req, res, next) {
@@ -231,6 +253,10 @@ clientRouter.route('/auth/google/callback')
       req.logIn(user, function(err) {
         if (err)
           return next(err);
+        if(req.session.redirectAfterLogin) {
+          console.log('redirect to', req.session.redirectAfterLogin)
+          return res.redirect('/#' + req.session.redirectAfterLogin)
+        }
         return res.redirect('/');
       });
     })(req, res, next)
@@ -297,14 +323,53 @@ clientRouter.route('/txt/:path/:file')
 
   Api router configuration
   ===
+  
+  Middleware to use for all api requests.
+  If settings.allowUnauthenticatedRequests is set in settings module
+  and settings.env is set to 'development' it allows authentication free
+  api requests (e.g. to performance tuning issues)
 
 */
-apiRouter.use(function (req, res, next) { // middleware to use for all requests
-  if(req.isAuthenticated())
+apiRouter.use(function (req, res, next) {
+  if(req.isAuthenticated() || (settings.allowUnauthenticatedRequests && settings.env == 'development')) {
     return next();
-  else
+  } else
     return res.error(403);
 });
+
+// OPTIN enable cache if required
+if(settings.cache && settings.cache.redis) {
+  cache = require('express-redis-cache')({
+        host: settings.cache.redis.host,
+        port: settings.cache.redis.port,
+        expire: 60 // 20 seconds
+      });
+
+//   cache.on('message', function (message) {
+//   console.log('cache:', message); 
+// });
+
+  cache.on('connected', function () {
+    console.log('cache:','connected to redis'); 
+  });
+
+  cache.on('error', function (error) {
+    console.log('redis connection error', error)
+  });
+  apiRouter.use(function (req, res, next) {
+    var cachename = getCacheName(req);
+
+    // console.log('this is', cachename, req.path.indexOf('/user') == 0)
+    if(req.path.indexOf('/user') == 0 || req.method != 'GET') {
+      res.use_express_redis_cache = false;
+    }
+    // res.use_express_redis_cache = _.isEmpty(req.query);
+    cache.route({
+      name: cachename,
+      expire: _.isEmpty(req.query)? 120: 40,
+    })(req, res, next);
+  })
+};
 
 // api index
 apiRouter.route('/').
@@ -445,6 +510,7 @@ apiRouter.route('/resource/:id(\\d+)/related/inquiry')
   .get(ctrl.resource.getRelatedInquiry)
 apiRouter.route('/resource/:id(\\d+)/related/:entity(person|location|organization)')
   .get(ctrl.resource.getRelatedEntities)
+  .post(ctrl.resource.createRelatedEntity)
 apiRouter.route('/resource/:id(\\d+)/related/:action(annotate)')
   .get(ctrl.resource.getRelatedActions)
 apiRouter.route('/resource/:id(\\d+)/related/user')
@@ -582,6 +648,9 @@ apiRouter.route('/suggest/shared/:ids([\\d,]+)/:entity(person|location|organizat
 // api proxy for VIAF (they don't have CROSS ORIGIN ...)
 apiRouter.route('/suggest/viaf')
   .get(ctrl.suggest.viaf.autosuggest)
+apiRouter.route('/suggest/dbpedia')
+  .get(ctrl.suggest.dbpedia)
+
 
 /*
   

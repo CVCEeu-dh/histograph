@@ -27,6 +27,7 @@ module.exports = _.assign(model.generate({
   RAISE_ISSUE: 'issued',
   UPVOTE:      'upvote',
 
+  BRAND_NEW_ENTITY: 'BRAND_NEW_ENTITY',
   ENTITY_LABEL: 'ENTITY_LABEL',
   ENTITY_WRONG: 'ENTITY_WRONG',
   APPEARS_IN_RELATIONSHIP: 'APPEARS_IN_RELATIONSHIP',

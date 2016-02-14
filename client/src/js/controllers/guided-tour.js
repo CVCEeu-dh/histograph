@@ -19,25 +19,31 @@ angular.module('histograph')
 
     $scope.steps = {
       'explore.resources': {
-        title: 'The gallery', // default titles
+        title: 'Gallery view', // default titles
         steps: [
           {
             id: 0,
-            title: 'Welcome to Histograph'
+            title: 'Welcome to histograph'
           }, 1,2,3,{
             id: 4,
-            title: 'timeline'
-          },5
+            title: 'Timeline'
+          },
+          { id: 5,
+            title: 'Resources'
+          }
         ]
       }, 
       'resource.resources': {
-        title: 'The resource page',
+        title: 'Resource page',
         steps: [
-          7,8,9,10,11,14
+          8,9,10,16,14,15, 11, {
+            id:17,
+            title: 'Notifications'
+          }
         ]
       },
       'explore.projection': {
-        title: 'The graph view', // default titles
+        title: 'Graph view', // default titles
         steps: [
           12
         ]
@@ -125,16 +131,16 @@ angular.module('histograph')
       $scope.steps[currentState].consumed=true;
       $scope.saveCursors();
 
-      if($scope.ignoreSkipTip){
-        $scope.currentStep = -1;
-        return;
-      };
+      // if($scope.ignoreSkipTip){
+      //   $scope.currentStep = -1;
+      //   return;
+      // };
       
       $scope.currentStep = $scope.steps['skip-tour'].steps[0];
       $scope.hasPrevious = false;
       $scope.hasNext = false;
       $scope.byebye = true;
-      $scope.ttTitle = "see you later";
+      $scope.ttTitle = "See you later!";
 
     }
 
@@ -190,7 +196,7 @@ angular.module('histograph')
       $scope.forceStart = false;
       $scope.byebye = false;
       $scope.consumed = false;
-      $scope.moveTo($scope.steps[currentState].cursor);
+      $scope.moveTo($scope.steps[currentState].cursor || 0);
     }
     /*
       Set the current step to the correct number according to the view we are in

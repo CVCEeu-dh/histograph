@@ -1,4 +1,4 @@
-<div ng-if="item" class="resource item">
+<div ng-if="item" class="resource item animated fadeIn">
         
         <div class="type">
           <span class='sans-serif' translate='resource.type.{{item.props.type}}'></span>
@@ -57,16 +57,17 @@
             <!-- <a class="btn btn-default action" tooltip="create a new inquiry" ng-href="#/r/{{item.id}}/inq/create">
               <i class="fa fa-comment-o"></i>
             </a> -->
+             <button class="btn btn-default action" tooltip="{{'tooltip.resource.add.to.myselection'|translate}}" ng-click="queue(item.id, true)">
+              <i class="fa fa-thumb-tack"></i>
+            </button>
             <button ng-if='!isFavItem' class="btn btn-default action" ng-click='favourite()' tooltip="{{'tooltip.resource.add.to.favourites'|translate}}">
-              <i class="fa fa-heart-o"></i><span class='number'>{{item.lovers}}</span>
+              <i class="fa fa-bookmark-o"></i><span class='number'>{{item.lovers}}</span>
             </button>
             <button ng-if='isFavItem' class="btn btn-default action" ng-click='unfavourite()' tooltip="this resource belongs to your favourite collection">
-              <i class="fa fa-heart animated pulse"></i><span class='number'>{{item.lovers}}</span>
+              <i class="fa fa-bookmark animated pulse"></i><span class='number'>{{item.lovers}}</span>
             </button>
             
-            <button class="btn btn-default action" tooltip="{{'tooltip.resource.add.to.myselection'|translate}}" ng-click="queue(item.id, true)">
-              <i class="fa fa-bookmark-o"></i>
-            </button>
+           
           </div>
         </div>
         

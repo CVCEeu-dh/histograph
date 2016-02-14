@@ -111,8 +111,9 @@ MATCH (res:resource)
   WITH res
   MATCH res<-[:appears_in]-(ent)
   WHERE id(ent) IN {with}
+  WITH DISTINCT res
 {/if}
-WITH DISTINCT res
+
   {?res:ids__inID} {AND?res:start_time__gt} {AND?res:end_time__lt} {AND?res:mimetype__in} {AND?res:type__in}
 WITH DISTINCT res
 
@@ -245,8 +246,14 @@ WITH DISTINCT res
 
 // name: count_similar_resource_ids_by_entities
 // get top 100 similar resources sharing the same persons, orderd by time proximity if this info is available
-MATCH (res:resource)<-[:appears_in]-(ent:entity)-[:appears_in]->(res2:resource)
-WHERE id(res) = {id}
+MATCH (res:resource)<-[r1:appears_in]-(ent:entity)
+  WHERE id(res) = {id} AND ent.score > -1
+WITH res, r1, ent
+  ORDER BY r1.tfidf DESC
+  LIMIT 20
+WITH ent
+MATCH (ent)-[:appears_in]->(res2:resource)
+  WHERE id(res2) <> {id}
   {if:mimetype}
   AND res2.mimetype IN {mimetype}
   {/if}
@@ -259,8 +266,6 @@ WHERE id(res) = {id}
   {if:end_time}
   AND res2.end_time <= {end_time}
   {/if}
-  
-  AND id(res) <> id(res2)
 
 WITH DISTINCT res2  
 {if:with}
@@ -275,10 +280,15 @@ RETURN {
 
 
 // name: get_similar_resource_ids_by_entities
-//
-MATCH (res1:resource)<-[r1:appears_in]-(ent:entity)-[r2:appears_in]->(res2:resource)
-  WHERE id(res1) = {id}
-    AND ent.score > -1
+// top 20 entities attached to the person
+MATCH (res1:resource)<-[r1:appears_in]-(ent:entity)
+WHERE id(res1) = {id} AND ent.score > -1
+WITH res1, r1, ent
+  ORDER BY r1.score DESC, r1.tfidf DESC
+  LIMIT 20
+WITH res1, r1, ent
+MATCH (ent)-[r2:appears_in]->(res2:resource)
+  WHERE ent.score > -1 AND id(res2) <> {id}
     {if:mimetype}
     AND res2.mimetype IN {mimetype}
     {/if}
@@ -291,7 +301,7 @@ MATCH (res1:resource)<-[r1:appears_in]-(ent:entity)-[r2:appears_in]->(res2:resou
     {if:end_time}
     AND res2.end_time <= {end_time}
     {/if}
-    AND id(res1) <> id(res2)
+
 WITH  res1, res2, r1, r2, ent
 {if:with}
   MATCH (ent2:entity)-[:appears_in]->(res2)
@@ -301,25 +311,58 @@ WITH  res1, res2, r1, r2, ent
 
 WITH res1, res2, count(*) as intersection
 
-MATCH (res1)<-[rel:appears_in]-(r1:entity)
-WITH res1, res2, intersection, count(rel) as H1
+// MATCH (res1)<-[rel:appears_in]-(r1:entity)
+// WITH res1, res2, intersection, count(rel) as H1
 
-MATCH (res2)<-[rel:appears_in]-(r1:entity)
-WITH res1,res2, intersection, H1, count(rel) as H2
-WITH res1, res2, intersection, H1+H2 as union
-WITH res1, res2, intersection, union, toFloat(intersection)/toFloat(union) as JACCARD
+// MATCH (res2)<-[rel:appears_in]-(r1:entity)
+// WITH res1,res2, intersection, H1, count(rel) as H2
+// WITH res1, res2, intersection, H1+H2 as union
+// WITH res1, res2, intersection, union, toFloat(intersection)/toFloat(union) as JACCARD
 
+// {unless:orderby}
+// ORDER BY JACCARD DESC
+// SKIP {offset}
+// LIMIT {limit}
+// {/unless}
 {unless:orderby}
-ORDER BY JACCARD DESC
-SKIP {offset}
-LIMIT {limit}
+ ORDER BY intersection DESC
+ SKIP {offset}
+ LIMIT {limit}
 {/unless}
+WITH res1, res2, intersection
+OPTIONAL MATCH (res2)<-[r_per:appears_in]-(per:`person`)
+WHERE per.score > -2
+WITH res1, res2, intersection, r_per, per
+ORDER BY  r_per.score DESC, r_per.tfidf DESC, r_per.frequency DESC
+WITH res1, res2, intersection, filter(x in collect({  
+      id: id(per),
+      type: 'person',
+      props: per,
+      rel: r_per
+    }) WHERE has(x.id))[0..5] as persons
+
+WITH res1, res2, intersection, persons
+OPTIONAL MATCH (res2)<-[r_the:appears_in]-(the:`theme`)
+WITH res1, res2, intersection, persons, r_the, the
+ORDER BY  r_the.score DESC, r_the.tfidf DESC, r_the.frequency DESC
+WITH res1, res2, intersection, persons, filter(x in collect({  
+      id: id(the),
+      type: 'theme',
+      props: the,
+      rel: r_the
+    }) WHERE has(x.id))[0..5] as themes
+
 RETURN {
+  id: id(res2),
+  props: res2,
+  persons: persons,
+  themes: themes,
   target: id(res2),
   type: LAST(labels(res2)),
   dst : abs(coalesce(res1.start_time, 1000000000) - coalesce(res2.start_time, 0)),
   det : abs(coalesce(res1.end_time, 1000000000) - coalesce(res2.end_time, 0)),
-  weight: JACCARD
+  // weight: JACCARD
+  weight : intersection
 } as result
 {if:orderby}
   ORDER BY {:orderby}
@@ -858,7 +901,21 @@ return count(distinct res.start_time)
 // name: get_timeline
 //
 MATCH (res:resource)
+
+{if:with}
   WHERE has(res.start_month)
+  WITH res
+  MATCH (ent:entity)-[r:appears_in]->(res)
+  WHERE id(ent) IN {with}
+  WITH DISTINCT res 
+{/if}
+  WHERE has(res.start_month)
+{if:mimetype}
+  AND res.mimetype = {mimetype}
+{/if}
+{if:type}
+  AND res.type IN {type}
+{/if}
 {if:start_time}
   AND res.start_time >= {start_time}
 {/if}
@@ -866,8 +923,8 @@ MATCH (res:resource)
   AND res.end_time <= {end_time}
 {/if} 
 WITH  res.start_month as tm, min(res.start_time) as t, count(res) as weight
-RETURN t, weight
-
+RETURN tm, t, weight
+ORDER BY tm ASC
 
 // name: get_related_resources_timeline
 //
