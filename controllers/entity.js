@@ -326,10 +326,17 @@ module.exports = function(io){
           if(form.params.kind == Issue.WRONG)
             params.downvoted_by = req.user.username;
           
-          Entity.update(+form.params.id, params, next);
+          if(!form.params.action)
+            params.issue_upvoted_by = req.user.username;
+          else
+            params.issue_downvoted_by = req.user.username;
+
+          Entity.update({
+            id: form.params.id
+          }, params, next);
         },
         issue: function(next) {
-          Issue.create({
+          Issue.create({ // or merges
             kind:         form.params.kind,
             solution:     form.params.solution, 
             questioning:  form.params.id,
@@ -403,12 +410,14 @@ module.exports = function(io){
       
       if(!form.isValid)
         return helpers.formError(err, res);
-      Entity.update(form.params.id, {
+      Entity.update({
+        id: form.params.id
+      }, {
         upvoted_by: req.user.username
       }, function (err, ent) {
         if(err)
           return helpers.cypherQueryError(err, res);
-        io.emit('done:upvote_entity', {
+        io.emit('entity:upvote:done', {
           user: req.user.username,
           doi: +req.params.id, 
           data: ent
@@ -424,12 +433,14 @@ module.exports = function(io){
       
       if(!form.isValid)
         return helpers.formError(err, res);
-      Entity.update(form.params.id, {
+      Entity.update({
+        id: form.params.id
+      }, {
         downvoted_by: req.user.username
       }, function (err, ent) {
         if(err)
           return helpers.cypherQueryError(err, res);
-        io.emit('done:downvote_entity', {
+        io.emit('entity:downvote:done', {
           user: req.user.username,
           doi: +req.params.id, 
           data: ent

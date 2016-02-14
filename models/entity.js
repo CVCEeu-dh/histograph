@@ -412,12 +412,12 @@ module.exports = {
     Useful api for downvoting/upvoting
     Note that You can modify the original one only if you're the owner of the comment.
   */
-  update: function(id, params, next) {
+  update: function(entity, params, next) {
     var now = helpers.now();
         // query = parser.agentBrown(queries.update_comment, properties);
     
     neo4j.query(queries.get_entity, {
-      id: id
+      id: entity.id
     }, function (err, ent) {
       if(err) {
         next(err);
@@ -431,9 +431,12 @@ module.exports = {
       
       if(params.upvoted_by) {
         ent.props.upvote = _.unique((ent.props.upvote || []).concat([params.upvoted_by]));
+        if(ent.props.downvote && ent.props.downvote.indexOf(params.downvoted_by) != -1)
+          ent.props.downvote = _.remove(ent.props.downvote, params.upvoted_by);
       }
-      if(params.downvoted_by) {
-        ent.props.downvote = _.unique((ent.props.downvote || []).concat([params.downvoted_by]));
+      // can only downvote if it has been upvoted byt the same user before.
+      if(params.downvoted_by && ent.props.upvote && !!~ent.props.upvote.indexOf(params.downvoted_by)) {
+        ent.props.upvote = _.remove(ent.props.upvote, params.downvoted_by);
       }
       ent.props.celebrity =  _.unique((ent.props.upvote || []).concat(ent.props.downvote|| [])).length;
       ent.props.score = (ent.props.upvote || []).length - (ent.props.downvote|| []).length;
@@ -442,6 +445,21 @@ module.exports = {
       
       if(params.issue) {
         ent.props.issues = _.unique((ent.props.issues || []).concat([params.issue]));
+        // if used with downvote endpoint: remove the user from the issue list. 
+        if(params.issue_upvoted_by) {
+          ent.props['issue_' + params.issue + '_upvote'] = _.unique(ent.props['issue_' + params.issue + '_upvote'] || []).concat([params.issue_upvoted_by])
+          if(ent.props['issue_' + params.issue + '_downvote'] && ent.props['issue_' + params.issue + '_downvote'].indexOf(params.issue_upvoted_by) != -1){
+            ent.props['issue_' + params.issue + '_downvote'] = _.remove(ent.props['issue_' + params.issue + '_downvote'], params.issue_upvoted_by);
+          }
+        }
+
+        if(params.issue_downvoted_by) {
+          ent.props['issue_' + params.issue + '_downvote'] = _.unique(ent.props['issue_' + params.issue + '_downvote'] || []).concat([params.issue_downvoted_by])
+          if(ent.props['issue_' + params.issue + '_upvote'] && ent.props['issue_' + params.issue + '_upvote'].indexOf(params.issue_downvoted_by) != -1){
+            ent.props['issue_' + params.issue + '_upvote'] = _.remove(ent.props['issue_' + params.issue + '_upvote'], params.issue_downvoted_by);
+          }
+        }
+
       }
       
       // async.parallel({

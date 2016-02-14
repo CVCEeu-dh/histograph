@@ -205,9 +205,9 @@ describe('controller:resource (related entities)', function() {
 
 
 describe('controller:resource (related resources)', function() {
-  it('should show a list of 10 related letters, if any', function (done) {
+  it('should show a list of 10 related '+ settings.types.resources[0] +', if any', function (done) {
     session
-      .get('/api/resource/'+ __resourceA.id +'/related/resource?limit=13&type=letter')
+      .get('/api/resource/'+ __resourceA.id +'/related/resource?limit=13&type=' + settings.types.resources[0])
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
@@ -221,9 +221,9 @@ describe('controller:resource (related resources)', function() {
       });
   });
   
-  it('should show a list of 10 related letters, if any, sorted by date', function (done) {
+  it('should show a list of 10 related '+ settings.types.resources[0] + ', if any, sorted by date', function (done) {
     session
-      .get('/api/resource/'+__resourceA.id+'/related/resource?limit=10&type=picture&orderby=date')
+      .get('/api/resource/'+__resourceA.id+'/related/resource?limit=10&type='+ settings.types.resources[0] + '&orderby=date')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {

@@ -204,6 +204,42 @@ describe('model:entity ', function() {
   });
 });
 
+describe('model:entity upvote downvote the entity', function() {
+  it('should upvote the entity correctly', function (done) {
+    Entity.update(__entity, {
+      upvoted_by: __user.username
+    },function (err, entity) {
+      should.not.exist(err);
+      should.equal(entity.props.upvote.join(), __user.username);
+      should.equal(entity.props.celebrity, 1);
+      should.equal(entity.props.score, 1);
+      done();
+    }) // we provide the same id for the entity and for the user. Will the neo4j labels work properly?
+  });
+  it('should downvote the entity we just upvoted (UNDO)', function (done) {
+    Entity.update(__entity, {
+      downvoted_by: __user.username
+    },function (err, entity) {
+      should.not.exist(err);
+      should.equal(entity.props.upvote.length, 0);
+      should.equal(entity.props.celebrity, 0);
+      should.equal(entity.props.score, 0);
+      done();
+    }) // we provide the same id for the entity and for the user. Will the neo4j labels work properly?
+  });
+  it('should not downvote the entity (no reason, ISSUE should be used instead)', function (done) {
+    Entity.update(__entity, {
+      downvoted_by: __user.username
+    },function (err, entity) {
+      should.not.exist(err);
+      should.equal(entity.props.upvote.length, 0);
+      should.not.exist(entity.props.downvote);
+      should.equal(entity.props.celebrity, 0);
+      should.equal(entity.props.score, 0);
+      done();
+    }) // we provide the same id for the entity and for the user. Will the neo4j labels work properly?
+  });
+});
 
 describe('model:entity upvote downvote and create relationship', function() {
   it('should return an error since the USER does not exist', function (done) {
