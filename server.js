@@ -45,7 +45,23 @@ var express       = require('express'),        // call express
     clientFiles  = require('./client/src/files')[env];
 
 
-// cache
+// check cache availability with redis
+if(settings.cache && settings.cache.redis) {
+  cache = require('express-redis-cache')({
+    host: settings.cache.redis.host,
+    port: settings.cache.redis.port,
+    expire: 60 // 20 seconds
+  });
+
+  cache.on('connected', function () {
+    console.log('cache:','connected to redis'); 
+  });
+
+  cache.on('error', function (error) {
+    console.log('redis connection error', error)
+  });
+}
+
 var getCacheName = function(req) {
     return [req.path, JSON.stringify(req.query)].join().split(/[\/\{,:"\}]/).join('-');// + '?' + JSON.stringify(req.query);
   };
@@ -64,7 +80,9 @@ console.log('logs: ', settings.paths.accesslog);
 console.log('env:  ', env);
 console.log('port: ', settings.port);
 console.log('url:  ', settings.baseurl);
-
+if(!cache){
+  console.log('cache:', 'not enabled');
+}
 
 
 
@@ -338,24 +356,7 @@ apiRouter.use(function (req, res, next) {
 });
 
 // OPTIN enable cache if required
-if(settings.cache && settings.cache.redis) {
-  cache = require('express-redis-cache')({
-        host: settings.cache.redis.host,
-        port: settings.cache.redis.port,
-        expire: 60 // 20 seconds
-      });
-
-//   cache.on('message', function (message) {
-//   console.log('cache:', message); 
-// });
-
-  cache.on('connected', function () {
-    console.log('cache:','connected to redis'); 
-  });
-
-  cache.on('error', function (error) {
-    console.log('redis connection error', error)
-  });
+if(cache) {
   apiRouter.use(function (req, res, next) {
     var cachename = getCacheName(req);
 
