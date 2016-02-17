@@ -75,8 +75,8 @@ passport.use(new TwitterStrategy({
       console.log('twitter:', err?'error':'ok');
 
       if(err) {
-        return done(err);
         console.log(err)
+        return done(err);
       }
       var user = res[0];
       return done(null, user);

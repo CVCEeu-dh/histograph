@@ -247,7 +247,7 @@ module.exports = {
       // it increases score and celebrity, removes from the downvotes if any
       result.ent.upvote = _.unique((result.ent.upvote || []).concat(user.username));
       if(result.ent.downvote && !!~result.ent.downvote.indexOf(user.username)) {
-        result.ent.downvote = _.remove(result.ent.downvote, user.username);
+        _.remove(result.ent.downvote, function(d) {return d==user.username});
       }
       result.ent.celebrity =  result.ent.upvote.length + (result.ent.downvote|| []).length;
       result.ent.score = result.ent.upvote.length - (result.ent.downvote|| []).length;
@@ -256,7 +256,7 @@ module.exports = {
       // 2. UPVOTE RELATIONSHIP
       result.rel.properties.upvote = _.unique((result.rel.properties.upvote || []).concat(user.username));
       if(result.rel.properties.downvote && !!~result.rel.properties.downvote.indexOf(user.username)) {
-        result.rel.properties.downvote = _.remove(result.rel.properties.downvote, user.username);
+        _.remove(result.rel.properties.downvote, function(d) {return d==user.username});
       }
       
       // 3.  
@@ -320,7 +320,7 @@ module.exports = {
         if(params.action == 'upvote') {
           result.rel.properties.upvote = _.unique((result.rel.properties.upvote || []).concat(user.username));
           if(result.rel.properties.downvote && !!~result.rel.properties.downvote.indexOf(user.username)) {
-            result.rel.properties.downvote = _.remove(result.rel.properties.downvote, user.username);
+            _.remove(result.rel.properties.downvote, function(d) {return d==user.username});
           }
 
           // 1. upvote the entity
@@ -330,7 +330,7 @@ module.exports = {
         if(params.action == 'downvote') {
           result.rel.properties.downvote = _.unique((result.rel.properties.downvote || []).concat(user.username));
           if(result.rel.properties.upvote && !!~result.rel.properties.upvote.indexOf(user.username)) {
-            result.rel.properties.upvote =_.remove(result.rel.properties.upvote, user.username);
+            _.remove(result.rel.properties.upvote, function(d) {return d==user.username});
           }
 
 
@@ -432,11 +432,11 @@ module.exports = {
       if(params.upvoted_by) {
         ent.props.upvote = _.unique((ent.props.upvote || []).concat([params.upvoted_by]));
         if(ent.props.downvote && ent.props.downvote.indexOf(params.downvoted_by) != -1)
-          ent.props.downvote = _.remove(ent.props.downvote, params.upvoted_by);
+          _.remove(ent.props.downvote, function(d) {return d==params.upvoted_by});
       }
       // can only downvote if it has been upvoted byt the same user before.
-      if(params.downvoted_by && ent.props.upvote && !!~ent.props.upvote.indexOf(params.downvoted_by)) {
-        ent.props.upvote = _.remove(ent.props.upvote, params.downvoted_by);
+      if(params.downvoted_by && ent.props.upvote && ent.props.upvote.indexOf(params.downvoted_by) != -1) {
+        _.remove(ent.props.upvote, function(d) {return d==params.downvoted_by});
       }
       ent.props.celebrity =  _.unique((ent.props.upvote || []).concat(ent.props.downvote|| [])).length;
       ent.props.score = (ent.props.upvote || []).length - (ent.props.downvote|| []).length;
@@ -449,14 +449,14 @@ module.exports = {
         if(params.issue_upvoted_by) {
           ent.props['issue_' + params.issue + '_upvote'] = _.unique(ent.props['issue_' + params.issue + '_upvote'] || []).concat([params.issue_upvoted_by])
           if(ent.props['issue_' + params.issue + '_downvote'] && ent.props['issue_' + params.issue + '_downvote'].indexOf(params.issue_upvoted_by) != -1){
-            ent.props['issue_' + params.issue + '_downvote'] = _.remove(ent.props['issue_' + params.issue + '_downvote'], params.issue_upvoted_by);
+            _.remove(ent.props['issue_' + params.issue + '_downvote'], function(d) {return d==params.issue_upvoted_by});
           }
         }
 
         if(params.issue_downvoted_by) {
           ent.props['issue_' + params.issue + '_downvote'] = _.unique(ent.props['issue_' + params.issue + '_downvote'] || []).concat([params.issue_downvoted_by])
           if(ent.props['issue_' + params.issue + '_upvote'] && ent.props['issue_' + params.issue + '_upvote'].indexOf(params.issue_downvoted_by) != -1){
-            ent.props['issue_' + params.issue + '_upvote'] = _.remove(ent.props['issue_' + params.issue + '_upvote'], params.issue_downvoted_by);
+            _.remove(ent.props['issue_' + params.issue + '_upvote'], function(d) {return d==params.issue_downvoted_by});
           }
         }
 
