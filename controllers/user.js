@@ -36,16 +36,16 @@ module.exports = function(io) {
   return {
     // set user fav language. the resources will be 
     setLanguage: function (req, res) {
-      return res.json({
-        user: req.session
+      return res.ok({
+        item: req.session
       });
     },
     /*
       give some information about current session
     */
     session: function (req, res) {
-      return res.json({
-        user: req.session
+      return res.ok({
+        item: req.session.passport.user
       });
     },
 
