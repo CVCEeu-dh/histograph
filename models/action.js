@@ -25,6 +25,7 @@ module.exports = _.assign(model.generate({
   DOWNVOTE:    'downvote',
   MERGE:       'merge',
   RAISE_ISSUE: 'issued',
+  DOWNVOTE_ISSUE: 'downvoteissue',
   UPVOTE:      'upvote',
 
   BRAND_NEW_ENTITY: 'BRAND_NEW_ENTITY',

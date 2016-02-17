@@ -281,7 +281,7 @@ module.exports = function(io){
 
     createRelatedIssue: function (req, res) {
       var Issue   = require('../models/issue'), 
-          form = validator.request(req, {}, {
+          form = validator.request(req, { kind: ''}, {
             fields: [
               {
                 field: 'mentioning',
@@ -366,7 +366,7 @@ module.exports = function(io){
     */
     removeRelatedIssue: function (req, res) {
       var Issue   = require('../models/issue'), 
-          form = validator.request(req, {}, {
+          form = validator.request(req, {kind: ''}, {
             fields: [
               {
                 field: 'kind',
@@ -386,7 +386,55 @@ module.exports = function(io){
 
       if(!form.isValid)
         return helpers.formError(form.errors, res);
+      var params = {
+        issue: form.params.kind
+      };
+      // downvte only if the type is explicit ly set as sWRONG
+      params.issue_downvoted_by = req.user.username;
+      
+      async.parallel({
+        entity: function(next) {
+          var params = {
+            issue: form.params.kind
+          };
+          // downvte only if the type is explicit ly set as sWRONG
+          if(form.params.kind == Issue.WRONG)
+            params.upvoted_by = req.user.username;
+          
+          params.issue_downvoted_by = req.user.username;
+          
+          Entity.update({
+            id: form.params.id
+          }, params, next);
+        },
+        action: function(next) {
+          Action.create({
+            kind: Action.DOWNVOTE_ISSUE,
+            target: form.params.kind == Issue.WRONG? Action.ENTITY_WRONG :Action.ENTITY_LABEL,
+            mentions: [+form.params.id].concat(form.params.mentioning || []),
+            username: req.user.username
+          }, next);
+        }
+      }, function (err, results) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
 
+        io.emit('entity:create-related-issue:done', {
+          user: req.user.username,
+          id:  +form.params.id, 
+          data: results.action
+        });
+
+        return res.ok({
+          item: _.assign({
+            related:{
+              action: results.action
+            }
+          }, results.entity)
+        }, form.params);
+        
+      });
+    
       // async.series({
       //   entity: function(next) {
       //     var params = {

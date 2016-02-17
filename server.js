@@ -380,7 +380,7 @@ if(cache) {
 
     res.use_express_redis_cache = req.path.indexOf('/user') == -1 && req.method == 'GET';
 
-    console.log(cachename,'use cache',res.use_express_redis_cache);
+    // console.log(cachename,'use cache',res.use_express_redis_cache);
     cache.route({
       name: cachename,
       expire: _.isEmpty(req.query)? 60: 40,

@@ -454,9 +454,19 @@ module.exports = {
         }
 
         if(params.issue_downvoted_by) {
-          ent.props['issue_' + params.issue + '_downvote'] = _.unique(ent.props['issue_' + params.issue + '_downvote'] || []).concat([params.issue_downvoted_by])
+
           if(ent.props['issue_' + params.issue + '_upvote'] && ent.props['issue_' + params.issue + '_upvote'].indexOf(params.issue_downvoted_by) != -1){
             _.remove(ent.props['issue_' + params.issue + '_upvote'], function(d) {return d==params.issue_downvoted_by});
+          }
+          // reset
+          if(ent.props['issue_' + params.issue + '_upvote'].length == 0) {
+            _.remove(ent.props.issues, function(d){ 
+              return d == params.issue
+            });
+            if(ent.props['issue_' + params.issue + '_downvote'] && ent.props['issue_' + params.issue + '_downvote'].length)
+              ent.props['issue_' + params.issue + '_downvote'] = [];
+          } else {
+            ent.props['issue_' + params.issue + '_downvote'] = _.unique(ent.props['issue_' + params.issue + '_downvote'] || []).concat([params.issue_downvoted_by]);
           }
         }
 
@@ -472,6 +482,7 @@ module.exports = {
       // })
       neo4j.save(ent.props, function (err, props) {
         if(err) {
+          console.log(err)
           next(err);
           return;
         }

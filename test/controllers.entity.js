@@ -318,12 +318,15 @@ describe('controller:entity related items', function() {
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
+        should.not.exists(err);
         should.exist(res.body.result.item.rel);
         should.exist(res.body.result.item.related.action.props);
         should.exist(res.body.result.item.rel.created_by);
         should.equal(res.body.result.item.related.action.type, Action.ANNOTATE);
-        should.not.exists(err);
-        done();
+        Action.remove(res.body.result.item.related.action, function(err) {
+          should.not.exist(err);
+          done();
+        });
 
       });
   });
@@ -362,7 +365,7 @@ describe('controller:entity related items', function() {
 });
 
 describe('controller:entity related issues', function() {
-  it('should create a issue on entity type, without a solution of course...' , function (done) {
+  it('should create an issue on entity type, without a solution of course...' , function (done) {
     session
       .post('/api/entity/' + __entity.id +'/related/issue')
       .send({
@@ -403,6 +406,8 @@ describe('controller:entity related issues', function() {
       });
   });
 
+
+
   it('should UPDATE the issue on entity type, by adding mentioning ' , function (done) {
     session
       .post('/api/entity/' + __entity.id +'/related/issue')
@@ -421,7 +426,10 @@ describe('controller:entity related issues', function() {
         should.equal(res.body.result.item.id,__entity.id);
         should.equal(res.body.result.item.props.issue_type_upvote.join(''), __user.username);
         should.exist(res.body.result.item.props.issues);
-        done();
+        Action.remove(res.body.result.item.related.action, function(err) {
+          should.not.exist(err);
+          done();
+        });
       });
   });
 
@@ -433,9 +441,55 @@ describe('controller:entity related issues', function() {
       .expect(200)
       .end(function (err, res) {
         should.not.exists(err);
-        console.log('hey', res.body.result.item)
         should.exist(res.body.result.item.props.issues);
+        should.equal(res.body.result.item.props.score, 1);
         done();
+      });
+  });
+
+  it('should downvote the issue WRONG TYPE', function (done) {
+    session
+      .delete('/api/entity/' + __entity.id + '/related/issue')
+      .send({
+        kind: Issue.TYPE
+      })
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        err && console.log(res.body)
+        should.not.exists(err);
+        // console.log('REMOVE', res.body.result.item.related.action)
+        Action.remove(res.body.result.item.related.action, function(err) {
+          should.not.exist(err);
+          done();
+        });
+        // should.exist(res.body.result.item.props.issues);
+        
+      });
+  });
+
+  it('should create an issue on entity of type WRONG' , function (done) {
+    session
+      .post('/api/entity/' + __entity.id +'/related/issue')
+      .send({
+        kind: Issue.WRONG
+      })
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exists(err); // it should throw a 400 statusCode
+        should.equal(res.body.result.item.id, __entity.id);
+        should.equal(res.body.result.item.props.issues.length, 1);
+        // console.log(res.body.result.item.props)
+        // reduce score, singe it is of type WRONG
+        // console.log('REMOVE', res.body.result.item.related.action)
+        
+        Action.remove(res.body.result.item.related.action, function(err) {
+          should.not.exist(err);
+          done();
+        });
+        should.equal(res.body.result.item.props.score, 0);
+        
       });
   });
 });
