@@ -9,6 +9,7 @@
     "discover": "node ./migration/discover.js",
     "import": "node ./migration/import.js",
     "test": "mocha test",
+    "test-settings": "mocha -g 'core:'",
     "start": "node ./server.js",
     "dates": "node ./scripts/dates.js",
     "locations": "node ./scripts/locations.js",

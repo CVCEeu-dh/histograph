@@ -424,6 +424,7 @@ describe('controller:entity related issues', function() {
       .expect(200)
       .end(function (err, res) {
         should.not.exists(err);
+        console.log(res.body.result.item.props)
         should.exist(res.body.result.item.props.issues);
         done();
       });

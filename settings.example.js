@@ -73,6 +73,17 @@ module.exports = {
   },
   
   /*
+    Enable the cache mechanism with redis-server
+  
+  cache: {
+    redis: {
+      host: 'localhost',
+      port: 6379
+    }
+  },
+  */
+  
+  /*
     Grouping on (node).type properties
     (facets, loaded on view index.jade page load)
   */
