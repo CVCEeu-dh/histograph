@@ -255,8 +255,7 @@ module.exports = function(io){
     /*
       Create an isse, optionally providing a solution.
       Cfr models.issue
-    */
-    /*
+    
       create a new issue for this entity
       use cases.
 
@@ -279,6 +278,7 @@ module.exports = function(io){
 
       Use case 3 should preload the entity in Issue.get (@todo)
     */
+
     createRelatedIssue: function (req, res) {
       var Issue   = require('../models/issue'), 
           form = validator.request(req, {}, {
@@ -326,11 +326,8 @@ module.exports = function(io){
           if(form.params.kind == Issue.WRONG)
             params.downvoted_by = req.user.username;
           
-          if(!form.params.action)
-            params.issue_upvoted_by = req.user.username;
-          else
-            params.issue_downvoted_by = req.user.username;
-
+          params.issue_upvoted_by = req.user.username;
+          
           Entity.update({
             id: form.params.id
           }, params, next);
@@ -372,6 +369,50 @@ module.exports = function(io){
       });
     },
 
+    /*
+      Remove or ask for removal.
+      If the issue has no other upvotes/downvotes than the current auth user,
+      the issue is then removed from the entity. 
+    */
+    removeRelatedIssue: function (req, res) {
+      var Issue   = require('../models/issue'), 
+          form = validator.request(req, {}, {
+            fields: [
+              {
+                field: 'kind',
+                check: 'includedIn',
+                args: [
+                  [
+                    Issue.TYPE,
+                    Issue.IRRELEVANT,
+                    Issue.WRONG,
+                    Issue.MERGEABLE
+                  ]
+                ],
+                error: 'wrong value'
+              }
+            ]
+          });
+
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+
+      async.series({
+        entity: function(next) {
+          var params = {
+            issue: form.params.kind
+          };
+          if(form.params.kind == Issue.WRONG)
+            params.downvoted_by = req.user.username;
+          
+          params.issue_downvoted_by = req.user.username;
+
+          Entity.update({
+            id: form.params.id
+          }, params, next);
+        },
+
+    },
 
     /*
       Create a comment specific for the entity ?
