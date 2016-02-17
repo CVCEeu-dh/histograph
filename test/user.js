@@ -27,7 +27,7 @@ after(function () {
 });
 
 
-describe('create a new user', function() {
+describe('user: create a new user', function() {
   it('should create a new user into the database', function (done) {
     session
       .post('/signup')
@@ -50,7 +50,7 @@ describe('create a new user', function() {
 })
 
 
-describe('authenticate the user, but failing', function() {
+describe('user: authenticate the user, but failing', function() {
   it('should fail on password length', function (done) {
     session
       .post('/signup')
@@ -143,7 +143,7 @@ describe('authenticate the user, but failing', function() {
 })
 
 
-describe('authenticate the user, succeed', function() {
+describe('user: authenticate the user, succeed', function() {
   it('should change the activation key, via cypher', function (done) {
     neo4j.query('MATCH(n:user {email:{email}}) SET n.activation = {key} RETURN n', {
       email: 'world@globetrotter.it',
@@ -186,13 +186,13 @@ describe('authenticate the user, succeed', function() {
 
   it('should show user properties', function (done) {
     session
-      .get('/api')
+      .get('/api/user/session')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function(err, res) { //
         console.log('needs supertest session to work...')
         should.equal(res.body.status, 'ok');
-        should.equal(res.body.user.email, 'world@globetrotter.it');
+        should.equal(res.body.result.item.email, 'world@globetrotter.it');
         done();
       });
   })

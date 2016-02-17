@@ -210,13 +210,13 @@ describe('controllers: authenticate the user, succeed', function() {
 
   it('should show user properties', function (done) {
     session
-      .get('/api')
+      .get('/api/user/session')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function(err, res) { //
-        __user = res.body.user;
+        __user = res.body.result.item;
         should.equal(res.body.status, 'ok');
-        should.equal(res.body.user.email, 'world@globetrotter.it');
+        should.equal(res.body.result.item.email, 'world@globetrotter.it');
         done();
       });
   })
@@ -268,10 +268,12 @@ describe('controllers: get resource items available to the user', function() {
 
   it('should return a NOT FOUND error via API', function (done) {
     session
-      .get('/api/resource/512000000')
+      .get('/api/resource/51200000012')
       .expect('Content-Type', /json/)
       .expect(404)
       .end(function (err, res) {
+        console.log(res.body)
+        should.not.exists(err);
         should.equal(res.body.status, 'error');
         should.equal(res.statusCode, 404)
         done();
@@ -415,11 +417,7 @@ describe('controllers: inquiries', function() {
       .expect(200)
       .end(function (err, res) {
         should.not.exist(err);
-        
-        should.equal(res.body.user.username, 'hello-world')
         should.equal(res.body.result.item.proposed_by, 'hello-world')
-        if(err)
-          console.log(err)   
         __inquiry = res.body.result.item;
         
         done();

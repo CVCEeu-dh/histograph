@@ -238,21 +238,21 @@ describe('controller:entity related items', function() {
       });
   });
 
-  it('should merge the two entities (with param)', function(done) {
-    session
-      .post('/api/entity/' + __entity.id +'/related/resource/'+ __resourceB.id + '/merge')
-      .send({
-        'with': __entityB.id
-      })
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        console.log(res.body)
-        should.not.exists(err);
-        // should.equal(res.body.status, 'empty');
-        done();
-      });
-  });
+  // it('should merge the two entities (with param)', function(done) {
+  //   session
+  //     .post('/api/entity/' + __entity.id +'/related/resource/'+ __resourceB.id + '/merge')
+  //     .send({
+  //       'with': __entityB.id
+  //     })
+  //     .expect('Content-Type', /json/)
+  //     .expect(200)
+  //     .end(function (err, res) {
+  //       // console.log(res.body)
+  //       should.not.exists(err);
+  //       // should.equal(res.body.status, 'empty');
+  //       done();
+  //     });
+  // });
   
   it('should delete the manual connection', function(done) {
     session
@@ -366,21 +366,27 @@ describe('controller:entity related issues', function() {
     session
       .post('/api/entity/' + __entity.id +'/related/issue')
       .send({
-        kind: 'type'
+        kind: Issue.TYPE
       })
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
+        err && console.log(res.body);
         should.not.exists(err);
-        __issue = res.body.result.item;
-        should.exist(res.body.result.item.id);
-        should.equal(res.body.result.item.mentioning.length, 0);
-        should.equal(res.body.result.item.questioning.id,__entity.id);
-        should.exist(res.body.result.item.answers);
-        should.exist(res.body.result.action.id);
-        done();
+        should.equal(res.body.result.item.id, __entity.id);
+        should.equal(res.body.result.item.related.action.mentioning.length, 1);
+        should.equal(res.body.result.item.related.action.type, Action.RAISE_ISSUE);
+        should.equal(res.body.result.item.props.issues.join(''), Issue.TYPE)
+        should.equal(res.body.result.item.props.issue_type_upvote.join(''), __user.username)
+        // delete the action ;)
+        Action.remove(res.body.result.item.related.action, function(err) {
+          should.not.exist(err);
+          done();
+        });
       });
   });
+
+
 
   it('should NOT create a issue on entity type, wrong issue kind' , function (done) {
     session
@@ -397,21 +403,24 @@ describe('controller:entity related issues', function() {
       });
   });
 
-  it('should UPTATE the issue on entity type, by adding mentioning' , function (done) {
+  it('should UPDATE the issue on entity type, by adding mentioning ' , function (done) {
     session
       .post('/api/entity/' + __entity.id +'/related/issue')
       .send({
-        kind: 'type',
+        kind: Issue.TYPE,
         mentioning: [__resourceB.id, __resource.id].join(',')
       })
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
         should.not.exists(err);
-        should.equal(res.body.result.item.mentioning.length, 2);
-        should.equal(_.map(res.body.result.item.mentioning,'id').indexOf(__resourceB.id) !== -1, true);
-        should.equal(res.body.result.item.questioning.id,__entity.id);
-        should.exist(res.body.result.item.answers);
+        should.equal(res.body.result.item.id, __entity.id);
+        
+        should.equal(res.body.result.item.related.action.mentioning.length, 3);
+        should.equal(_.map(res.body.result.item.related.action.mentioning,'id').indexOf(__resourceB.id) !== -1, true);
+        should.equal(res.body.result.item.id,__entity.id);
+        should.equal(res.body.result.item.props.issue_type_upvote.join(''), __user.username);
+        should.exist(res.body.result.item.props.issues);
         done();
       });
   });
@@ -424,7 +433,7 @@ describe('controller:entity related issues', function() {
       .expect(200)
       .end(function (err, res) {
         should.not.exists(err);
-        console.log(res.body.result.item.props)
+        console.log('hey', res.body.result.item)
         should.exist(res.body.result.item.props.issues);
         done();
       });
@@ -461,13 +470,7 @@ describe('controller:entity after', function() {
       done();
     });
   });
-  it('should delete the issue', function (done) {
-    Issue.remove(__issue, function (err) {
-      if(err)
-        throw err;
-      done();
-    });
-  });
+  
   it('should delete the researcher', function (done) {
     User.remove(generator.user.researcher(), function (err) {
       if(err)

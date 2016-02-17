@@ -447,7 +447,7 @@ module.exports = {
         ent.props.issues = _.unique((ent.props.issues || []).concat([params.issue]));
         // if used with downvote endpoint: remove the user from the issue list. 
         if(params.issue_upvoted_by) {
-          ent.props['issue_' + params.issue + '_upvote'] = _.unique(ent.props['issue_' + params.issue + '_upvote'] || []).concat([params.issue_upvoted_by])
+          ent.props['issue_' + params.issue + '_upvote'] = _.unique((ent.props['issue_' + params.issue + '_upvote'] || []).concat([params.issue_upvoted_by]));
           if(ent.props['issue_' + params.issue + '_downvote'] && ent.props['issue_' + params.issue + '_downvote'].indexOf(params.issue_upvoted_by) != -1){
             _.remove(ent.props['issue_' + params.issue + '_downvote'], function(d) {return d==params.issue_upvoted_by});
           }

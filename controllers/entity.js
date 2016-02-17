@@ -276,7 +276,7 @@ module.exports = function(io){
           Then,
           ```req.query.solution = <merge-to-entity-id>```
 
-      Use case 3 should preload the entity in Issue.get (@todo)
+      
     */
 
     createRelatedIssue: function (req, res) {
@@ -313,16 +313,14 @@ module.exports = function(io){
       if(form.params.mentioning) {
         form.params.mentioning = _.map(form.params.mentioning.split(','),  _.parseInt);
       }
-
-      // if form.params.kind == Issue.DATE
-      // check that the solution param is an array of valid dates.
       // if form.params.kind == Issue.TYPE
       //   check that the solution param is an available label
-      async.series({
+      async.parallel({
         entity: function(next) {
           var params = {
             issue: form.params.kind
           };
+          // downvte only if the type is explicit ly set as sWRONG
           if(form.params.kind == Issue.WRONG)
             params.downvoted_by = req.user.username;
           
@@ -332,39 +330,31 @@ module.exports = function(io){
             id: form.params.id
           }, params, next);
         },
-        issue: function(next) {
-          Issue.create({ // or merges
-            kind:         form.params.kind,
-            solution:     form.params.solution, 
-            questioning:  form.params.id,
-            mentioning:   form.params.mentioning,
-            user:         req.user
+        action: function(next) {
+          Action.create({
+            kind: Action.RAISE_ISSUE,
+            target: form.params.kind == Issue.WRONG? Action.ENTITY_WRONG :Action.ENTITY_LABEL,
+            mentions: [+form.params.id].concat(form.params.mentioning || []),
+            username: req.user.username
           }, next);
         }
       }, function (err, results) {
-        var mentions = _.compact([results.issue.id, +form.params.id].concat(form.params.mentioning));
+        if(err)
+          return helpers.cypherQueryError(err, res);
 
-        Action.create({
-          kind: Action.RAISE_ISSUE,
-          target: form.params.kind == Issue.WRONG? Action.ENTITY_WRONG :Action.ENTITY_LABEL,
-          mentions: mentions,
-          username: req.user.username
-        }, function (err, act) {
-          // console.log(err, act)
-          if(err)
-            return helpers.cypherQueryError(err, res);
-
-          io.emit('entity:create-related-issue:done', {
-            user: req.user.username,
-            id:  +form.params.id, 
-            data: results.issue
-          });
-
-          return res.ok({
-            item: results.issue,
-            action: act
-          });
+        io.emit('entity:create-related-issue:done', {
+          user: req.user.username,
+          id:  +form.params.id, 
+          data: results.action
         });
+
+        return res.ok({
+          item: _.assign({
+            related:{
+              action: results.action
+            }
+          }, results.entity)
+        }, form.params);
         
       });
     },
@@ -397,20 +387,20 @@ module.exports = function(io){
       if(!form.isValid)
         return helpers.formError(form.errors, res);
 
-      async.series({
-        entity: function(next) {
-          var params = {
-            issue: form.params.kind
-          };
-          if(form.params.kind == Issue.WRONG)
-            params.downvoted_by = req.user.username;
+      // async.series({
+      //   entity: function(next) {
+      //     var params = {
+      //       issue: form.params.kind
+      //     };
+      //     if(form.params.kind == Issue.WRONG)
+      //       params.downvoted_by = req.user.username;
           
-          params.issue_downvoted_by = req.user.username;
+      //     params.issue_downvoted_by = req.user.username;
 
-          Entity.update({
-            id: form.params.id
-          }, params, next);
-        },
+      //     Entity.update({
+      //       id: form.params.id
+      //     }, params, next);
+      //   },
 
     },
 

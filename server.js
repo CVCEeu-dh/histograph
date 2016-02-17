@@ -34,7 +34,7 @@ var express       = require('express'),        // call express
                       }
                     }),
 
-    cache, // undefined; cfr. below
+    cache         = undefined, // undefined; cfr. below
 
     clientRouter  = express.Router(),
     apiRouter     = express.Router(),
@@ -63,7 +63,11 @@ if(settings.cache && settings.cache.redis) {
 }
 
 var getCacheName = function(req) {
-    return [req.path, JSON.stringify(req.query)].join().split(/[\/\{,:"\}]/).join('-');// + '?' + JSON.stringify(req.query);
+    return [req.path, JSON.stringify(req.query)].join().split(/[\/\{,:"\}]/)
+      .join('-')
+      .replace(/-{2,}/g, '-')
+      .replace(/^-/, '')
+      .replace(/-$/, '');// + '?' + JSON.stringify(req.query);
   };
 
 // initilalize session middleware
@@ -133,8 +137,22 @@ express.response.ok = function(result, info, warnings) {
   
   if(warnings)
     res.warnings = warnings
-
-  return this.json(res);
+  
+  if(cache && (this.req.method == 'POST' || this.req.method == 'DELETE')) {
+    // console.log(this.req.method , getCacheName(this.req));
+    // refresh related caches if any
+    var cnm = getCacheName(this.req).match(/[a-z]+-\d+/),
+        __ins = this;
+    // it "should" be improved @todo
+    if(cnm)
+      cache.del(cnm[0] + '*', function() {
+        return __ins.json(res);
+      });
+    else
+      return this.json(res);
+  }
+  else 
+    return this.json(res);
 };
 
 express.response.empty = function(warnings) {
@@ -360,14 +378,12 @@ if(cache) {
   apiRouter.use(function (req, res, next) {
     var cachename = getCacheName(req);
 
-    // console.log('this is', cachename, req.path.indexOf('/user') == 0)
-    if(req.path.indexOf('/user') == 0 || req.method != 'GET') {
-      res.use_express_redis_cache = false;
-    }
-    // res.use_express_redis_cache = _.isEmpty(req.query);
+    res.use_express_redis_cache = req.path.indexOf('/user') == -1 && req.method == 'GET';
+
+    console.log(cachename,'use cache',res.use_express_redis_cache);
     cache.route({
       name: cachename,
-      expire: _.isEmpty(req.query)? 120: 40,
+      expire: _.isEmpty(req.query)? 60: 40,
     })(req, res, next);
   })
 };
