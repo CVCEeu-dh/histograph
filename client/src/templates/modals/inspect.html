@@ -13,8 +13,8 @@
 
         
       </div>
-      <div class="crowdsourcing" ng-if='entity.isWrong'>
-        <span translate translate-values='entity.props'>inspect.entity.iswrong</span>
+      <div class="crowdsourcing" ng-if='entity.isWrong' ng-include='"templates/partials/helpers/crowdsourcing/issue-iswrong.html"'>
+        
 
       </div>
       <div class='btn-group-wrapper' ng-if="!isWrong">

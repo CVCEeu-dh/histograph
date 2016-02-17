@@ -431,21 +431,28 @@ module.exports = {
       
       if(params.upvoted_by) {
         ent.props.upvote = _.unique((ent.props.upvote || []).concat([params.upvoted_by]));
-        if(ent.props.downvote && ent.props.downvote.indexOf(params.downvoted_by) != -1)
+        if(ent.props.downvote && ent.props.downvote.indexOf(params.upvoted_by) != -1)
           _.remove(ent.props.downvote, function(d) {return d==params.upvoted_by});
       }
-      // can only downvote if it has been upvoted byt the same user before.
-      if(params.downvoted_by && ent.props.upvote && ent.props.upvote.indexOf(params.downvoted_by) != -1) {
-        _.remove(ent.props.upvote, function(d) {return d==params.downvoted_by});
+      
+      if(params.downvoted_by) {
+        ent.props.downvote = _.unique((ent.props.downvote || []).concat([params.downvoted_by]));
+        // if the user had upvoted it before.
+        if(ent.props.upvote && ent.props.upvote.indexOf(params.downvoted_by) != -1) {
+          _.remove(ent.props.upvote, function(d) {return d==params.downvoted_by});
+        }
       }
+      // calculate celebrity and score for the entity
       ent.props.celebrity =  _.unique((ent.props.upvote || []).concat(ent.props.downvote|| [])).length;
       ent.props.score = (ent.props.upvote || []).length - (ent.props.downvote|| []).length;
       ent.props.last_modification_date = now.date;
       ent.props.last_modification_time = now.time;
       
+      // if there is an issue, add it to the entity directly (mongodb style)
       if(params.issue) {
         ent.props.issues = _.unique((ent.props.issues || []).concat([params.issue]));
-        // if used with downvote endpoint: remove the user from the issue list. 
+        
+        // add the user to the upvoters (if he/she raised the issue or she/he agrees)
         if(params.issue_upvoted_by) {
           ent.props['issue_' + params.issue + '_upvote'] = _.unique((ent.props['issue_' + params.issue + '_upvote'] || []).concat([params.issue_upvoted_by]));
           if(ent.props['issue_' + params.issue + '_downvote'] && ent.props['issue_' + params.issue + '_downvote'].indexOf(params.issue_upvoted_by) != -1){
@@ -453,19 +460,20 @@ module.exports = {
           }
         }
 
+        // add the user to the downvoters (she/he disagrees)
         if(params.issue_downvoted_by) {
-
+          // is the downvoter among the upvoters (I.e he/she changed his/her minds)
           if(ent.props['issue_' + params.issue + '_upvote'] && ent.props['issue_' + params.issue + '_upvote'].indexOf(params.issue_downvoted_by) != -1){
             _.remove(ent.props['issue_' + params.issue + '_upvote'], function(d) {return d==params.issue_downvoted_by});
           }
-          // reset
+          // if theres no more upvoters , the issue can safely disappear. 
           if(ent.props['issue_' + params.issue + '_upvote'].length == 0) {
             _.remove(ent.props.issues, function(d){ 
               return d == params.issue
-            });
-            if(ent.props['issue_' + params.issue + '_downvote'] && ent.props['issue_' + params.issue + '_downvote'].length)
-              ent.props['issue_' + params.issue + '_downvote'] = [];
+            }); 
+            // We do not reset the downvotes, since if someone raise it again, the downvoters will be there already ;)
           } else {
+            // there's still upoters, just add the suer to the downvoters
             ent.props['issue_' + params.issue + '_downvote'] = _.unique(ent.props['issue_' + params.issue + '_downvote'] || []).concat([params.issue_downvoted_by]);
           }
         }

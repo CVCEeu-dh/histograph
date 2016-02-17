@@ -345,7 +345,7 @@ module.exports = function(io){
         io.emit('entity:create-related-issue:done', {
           user: req.user.username,
           id:  +form.params.id, 
-          data: results.action
+          data: results.entity
         });
 
         return res.ok({
@@ -390,6 +390,10 @@ module.exports = function(io){
         issue: form.params.kind
       };
       // downvte only if the type is explicit ly set as sWRONG
+      // downvte only if the type is explicit ly set as sWRONG
+      if(form.params.kind == Issue.WRONG)
+        params.upvoted_by = req.user.username;
+
       params.issue_downvoted_by = req.user.username;
       
       async.parallel({
@@ -419,10 +423,10 @@ module.exports = function(io){
         if(err)
           return helpers.cypherQueryError(err, res);
 
-        io.emit('entity:create-related-issue:done', {
+        io.emit('entity:remove-related-issue:done', {
           user: req.user.username,
           id:  +form.params.id, 
-          data: results.action
+          data: results.entity
         });
 
         return res.ok({

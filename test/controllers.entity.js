@@ -408,7 +408,7 @@ describe('controller:entity related issues', function() {
 
 
 
-  it('should UPDATE the issue on entity type, by adding mentioning ' , function (done) {
+  it('should UPDATE the issue on entity type, by adding mentioning ', function (done) {
     session
       .post('/api/entity/' + __entity.id +'/related/issue')
       .send({
@@ -488,7 +488,7 @@ describe('controller:entity related issues', function() {
           should.not.exist(err);
           done();
         });
-        should.equal(res.body.result.item.props.score, 0);
+        should.equal(res.body.result.item.props.score, -1);
         
       });
   });

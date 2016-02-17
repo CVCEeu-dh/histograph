@@ -1,0 +1,8 @@
+<span translate translate-values='entity.props'>inspect.entity.iswrong</span>
+({{entity.props.issue_wrong_upvote}})
+<div class='answers'>
+  <div class='btn-group btn-group-dual'>
+	<button class='btn btn-line-white btn-primary' ng-click='raiseIssue("wrong")'><span translate>button.agree </span>({{entity.props.downvote.length}})</button>
+	<button class='btn btn-line-white obscure' ng-click='downvoteIssue("wrong")'><span translate>button.disagree </span>({{entity.props.upvote.length || 0}})</button>
+  </div>
+ </div>

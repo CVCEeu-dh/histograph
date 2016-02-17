@@ -61,7 +61,7 @@
     </div>
 
       <div ng-if='question=="wrong"'>
-        <p class='text' translate='popit.fix.wrong.entity' translate-values='{type: "{{entity.type}}"}'></p>
+        <p class='text' translate translate-values='{type: "{{entity.type}}"}'>popit.fix.wrong.entity</p>
         <div class='answers'>
           <div class='btn-group btn-group-dual'>
             <button class='btn btn-line-white btn-primary' ng-click='raiseIssue("wrong")' translate>button.confirm</button>

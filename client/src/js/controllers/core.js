@@ -680,9 +680,8 @@ angular.module('histograph')
       var params = {
         kind: kind,
       }
-      if(resource) {
-        mentioning: resource.id
-      };
+      if(resource)
+        params.mentioning = resource.id;
 
       if(solution)
         params.solution = solution;
@@ -699,6 +698,29 @@ angular.module('histograph')
           next(null, res);
       });
     };
+
+    $scope.downvoteIssue = function(entity, resource, kind, solution, next){
+      var params = {
+        kind: kind,
+      }
+      if(resource)
+        params.mentioning = resource.id;
+
+      if(solution)
+        params.solution = solution;
+
+      $log.log('CoreCtrl -> downvoteIssue() kind: ' + kind+'- on entity:', entity.id, '- mentioning:', resource);
+      
+
+      EntityRelatedFactory.delete(_.assign({
+        id: entity.id,
+        model: 'issue'
+      }, params), function (res) {
+        $log.log('CoreCtrl -> downvoteIssue()', res.status);
+        if(next)
+          next(null, res);
+      });
+    }
 
     /*
       $scope.confirm
@@ -837,6 +859,9 @@ angular.module('histograph')
         resolve: {
           entity: function(EntityFactory) {
             return EntityFactory.get({id: entity.id}).$promise
+          },
+          user: function(){
+            return $scope.user;
           },
           relatedModel: function() {
             return 'resource'
@@ -1068,7 +1093,7 @@ angular.module('histograph')
         });
 
 
-      $scope.inspect({id: 17190});
+      // $scope.inspect({id: 17190});
 
     }, 236);
     

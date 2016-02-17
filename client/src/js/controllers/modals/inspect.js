@@ -8,16 +8,20 @@
  *
  */
 angular.module('histograph')
-  .controller('InspectModalCtrl', function ($scope, $log, $uibModalInstance, entity, relatedFactory, relatedModel, EntityRelatedExtraFactory, SuggestFactory, language, core, socket) {
+  .controller('InspectModalCtrl', function ($scope, $log, $uibModalInstance, entity, relatedFactory, relatedModel, EntityRelatedExtraFactory, SuggestFactory, language, user, core, socket) {
     $log.debug('InspectModalCtrl ready', entity.result.item, core.user);
 
     $scope.entity = entity.result.item;
-
+    $scope.user = user;
     // @todo wrongtype
-    $scope.entity.isWrong = entity.result.item.props.issues && entity.result.item.props.issues.indexOf('wrong') != -1;
-    $scope.entity.isIncomplete = !_.compact([entity.result.item.props.links_wiki, entity.result.item.props.links_viaf]).length;
-    $scope.isUpvotedByUser = entity.result.item.props.upvote && entity.result.item.props.upvote.indexOf(core.user.username) != -1;
-    $scope.isDownvotedByUser = entity.result.item.props.downvote && entity.result.item.props.downvote.indexOf(core.user.username) != -1;
+    $scope.setIssues = function(properties) {
+      $scope.entity.isWrong = properties.issues && properties.issues.indexOf('wrong') != -1;
+      $scope.entity.isIncomplete = !_.compact([properties.links_wiki, properties.links_viaf]).length;
+      $scope.isUpvotedByUser = properties.upvote && properties.upvote.indexOf(core.user.username) != -1;
+      $scope.isDownvotedByUser = properties.downvote && entity.result.item.props.downvote.indexOf(core.user.username) != -1;
+    }
+
+    $scope.setIssues(entity.result.item.props);
 
     $scope.limit = 1;
     $scope.offset = 0;
@@ -62,28 +66,41 @@ angular.module('histograph')
     $scope.raiseIssue = function(type, solution) {
       $log.log('InspectModalCtrl  -~> raiseIssue() type:', type, '- solution:', solution);
       $scope.isLocked = true;
+      $scope.cancelQuestion();
       core.raiseIssue($scope.entity, null, type, solution, function(){
         $scope.isLocked = false;
       });
-    }
+    };
 
     $scope.raiseIssueSelected = function(type, solution) {
 
-    }
+    };
+    /*
+      Disagree with the specific topic.
+      If you have already voted this do not apply.
+    */
+    $scope.downvoteIssue = function(type, solution) {
+      $log.log('InspectModalCtrl  -~> downvoteIssue() type:', type, '- solution:', solution);
+      $scope.isLocked = true;
+      $scope.cancelQuestion();
+      core.downvoteIssue($scope.entity, null, type, solution, function() {
+        $scope.isLocked = false;
+      });
+    };
 
     /*
       socket linstener
 
     */
     socket.on('entity:upvote:done', function (result) {
-      $log.info('ResourceCtrl socket@entity:upvote:done - by:', result.user);
+      $log.info('InspectModalCtrl socket@entity:upvote:done - by:', result.user);
       if(result.data.id == $scope.entity.id)
         $scope.entity.props.upvote = result.data.props.upvote;
       if(result.user == core.user.username)
         $scope.isUpvotedByUser = true;
     })
     socket.on('entity:downvote:done', function (result) {
-      $log.info('ResourceCtrl socket@entity:downvote:done - by:', result.user);
+      $log.info('InspectModalCtrl socket@entity:downvote:done - by:', result.user);
       if(result.data.id == $scope.entity.id)
         $scope.entity.props.upvote = result.data.props.upvote;
       if(result.user == core.user.username)
@@ -91,12 +108,20 @@ angular.module('histograph')
     })
 
     socket.on('entity:create-related-issue:done', function (result) {
-      if(result.data.questioning.id == $scope.entity.id){
-        $scope.entity.props.upvote = result.data.props.upvote;
-        $scope.entity.props.downvote = result.data.props.downvote;
+      $log.info('InspectModalCtrl socket@entity:create-related-issue:done - by:', result.user, '- result:', result);
+      
+      if(result.data.id == $scope.entity.id){
+        $scope.entity.props = result.data.props;
+        $scope.setIssues(result.data.props);
       }
-      if(result.user == core.user.username)
-        $scope.isUpvotedByUser = false;
+    });
+
+    socket.on('entity:remove-related-issue:done', function (result) {
+      $log.info('InspectModalCtrl socket@entity:remove-related-issue:done - by:', result.user, '- result:', result);
+      if(result.data.id == $scope.entity.id){
+        $scope.entity.props = result.data.props;
+        $scope.setIssues(result.data.props);
+      }
     });
 
     

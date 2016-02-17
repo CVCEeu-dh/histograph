@@ -1151,9 +1151,6 @@ angular
             {
               name: 'search.resources',
               label: 'documents'
-            }, {
-              name: 'search.persons',
-              label: 'people'
             }
           ]
         },
