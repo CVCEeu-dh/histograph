@@ -21,7 +21,7 @@ WITH u
   WITH u,a
   MATCH (t) 
     WHERE id(t) in {mentions}
-  CREATE (a)-[r2:mentions]->t
+  CREATE (a)-[r2:mentions]->(t)
     SET
       r2.creation_date  = {exec_date},
       r2.creation_time  = {exec_time},
