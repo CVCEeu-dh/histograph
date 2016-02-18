@@ -280,7 +280,32 @@ clientRouter.route('/auth/twitter/callback')
 
 // google oauth mechanism
 clientRouter.route('/auth/google')
-  .get(auth.passport.authenticate('google',  { scope: 'https://www.googleapis.com/auth/plus.login' }));
+  .get(function (req, res, next) {
+    if(req.query.next) {
+      var qs = '';
+      
+      if(req.query.jsonparams) {
+        try{
+          var params = JSON.parse(req.query.jsonparams),
+              qsp =  [];
+              
+          for(var key in params) {
+            qsp.push(encodeURIComponent(key) + '=' + encodeURIComponent(params[key]));
+          }
+          
+          if(qsp.length)
+            qs = '?' + qsp.join('&')
+        } catch(e){
+          
+        }
+      }
+      req.session.redirectAfterLogin = req.query.next + qs;
+      
+      console.log(req.query, req.params, req.session)
+    }
+    
+    auth.passport.authenticate('google',  { scope: 'https://www.googleapis.com/auth/plus.login' })(req, res, next)
+  });
 
 clientRouter.route('/auth/google/callback')
   .get(function (req, res, next) {
