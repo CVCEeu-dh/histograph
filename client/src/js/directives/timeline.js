@@ -155,7 +155,7 @@ angular.module('histograph')
         }
         
         tim.drawDates = function (extent) {
-           $log.log('::timeline -> drawDates() ', extent);
+          // $log.log('::timeline -> drawDates() ', extent);
           if(!extent) {
             tim.ui.brushDateLeft.style({
               visibility: 'hidden'

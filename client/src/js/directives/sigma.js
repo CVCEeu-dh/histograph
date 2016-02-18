@@ -20,6 +20,8 @@ angular.module('histograph')
         user: '=',
         graph: '=',
         tips: '=',
+        isLoading: '=isloading',
+        params: '=', // current filters, cfr CoreCtrl
         controller: '=',
         redirect: '&',
         addToQueue: '&queue',
@@ -301,12 +303,6 @@ angular.module('histograph')
             si.refresh();
           }, 300);
         });
-        /*
-          watch current target.
-        */
-        scope.$watch('target', function(t) {
-          
-        })
         
         scope.$on(EVENTS.LOCATION_CHANGE_START, function (v) {
           stop();
@@ -323,6 +319,7 @@ angular.module('histograph')
         scope.$on(EVENTS.STATE_CHANGE_SUCCESS, function (e, stateName) {
           $log.log('::sigma @EVENTS.STATE_CHANGE_SUCCESS', stateName);
           scope.center = null;
+          scope.target = false;
           if(stateName.indexOf('graph') != -1)
             scope.setMessage({message: 'loading graph ...'});
         });

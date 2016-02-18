@@ -15,6 +15,7 @@ angular.module('histograph')
       restrict : 'A',
       templateUrl: 'templates/partials/helpers/snippet.html',
       scope:{
+        params: '=',
         center: '=',
         target: '=',
         user: '='
@@ -59,41 +60,45 @@ angular.module('histograph')
         };
 
         /*
-          Load one entity related items
+          scope private method
+          @param res - the api response containing result.items
         */
-        scope.loadRelatedItems = function(entity) {
-          $log.log('::snippets -> loadRelatedItems() for entity id:' , entity.id);
-          if(!isNaN(entity.id))
-            EntityRelatedFactory.get({
-              id: entity.id,
-              model: 'resource'
-            }, function(res) {
-              scope.sharedItems = res.result.items
-              scope.totalItems = res.info.total_items;
-            })
+        scope._fillSharedItems = function(res) {
+          if(scope.offset > 0) {
+            scope.sharedItems = scope.sharedItems.concat(res.result.items);
+          } else {
+            scope.sharedItems = res.result.items
+            scope.totalItems = res.info.total_items;
+          }
         };
-
         /*
           load shared items.
           with limits and offsets.
         */
         scope.sync = function() {
-          $log.log('::snippets -> sync() getSharedItems between:' , scope.itemsIds);
-          $log.debug('::snippets -> sync() center:', scope.center)
-          SuggestFactory.getShared(angular.extend({
-            ids: scope.itemsIds,
-            model: scope.sharedItemsModel
-          }, scope.$parent.$parent.params, {
-            limit: scope.limit,
-            offset: scope.offset
-          }), function (res) {
-            if(scope.offset > 0)
-              scope.sharedItems = scope.sharedItems.concat(res.result.items)
-            else {
-              scope.sharedItems = res.result.items;
-              scope.totalItems  = res.info.total_items;
-            }
-          })
+          $log.log('::snippets -> sync() params:', scope.params);
+          if(scope.target.type == 'node' && scope.target.data.node.type != "resource"){
+            $log.log('   getRelatedItem for:' , scope.target.data.node.id);
+            
+            EntityRelatedFactory.get(angular.extend({
+              id: scope.target.data.node.id,
+              model: 'resource'
+            }, scope.params, {
+              limit: scope.limit,
+              offset: scope.offset
+            }), scope._fillSharedItems);
+          } else if(scope.itemsIds.length) {
+            $log.log('   getSharedItems between:' , scope.itemsIds);
+            SuggestFactory.getShared(angular.extend({
+              ids: scope.itemsIds,
+              model: scope.sharedItemsModel
+            }, scope.params, {
+              limit: scope.limit,
+              offset: scope.offset
+            }), scope._fillSharedItems);
+          } else {
+            $log.error('::snippets -> sync() without params')
+          };
         };
 
         /*
@@ -129,7 +134,7 @@ angular.module('histograph')
             }
             // load entity related items
             if(target.data.node.type != "resource"){
-              scope.loadRelatedItems(target.data.node);
+              scope.sync();
             }
 
           } else if(target.type == 'edge') {
@@ -263,11 +268,11 @@ angular.module('histograph')
         /*
           Listen to api params changes
         */
+
         scope.$on(EVENTS.API_PARAMS_CHANGED, function(e, params) {
-          $log.log('::snippets @EVENTS.API_PARAMS_CHANGED');
+          $log.log('::snippets @EVENTS.API_PARAMS_CHANGED', params, scope.params);
           scope.offset = 0;
-          if(scope.itemsIds.length)
-            scope.sync();
+          scope.sync();
         });
 
         /*
