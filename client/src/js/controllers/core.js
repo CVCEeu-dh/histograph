@@ -396,25 +396,33 @@ angular.module('histograph')
     /*
       Use it when it's busy in doing something
     */
+    $scope.loadingQueue = {};
+
     $scope.lock = function(key) {
       $log.log('CoreCtrl -> lock() - key:', key?key:'no key provided');
       
       if(key)
-        $scope.loadingKey = key;
+        $scope.loadingQueue[key] = true;
+
       $scope.isLoading=true;
     }
   
     $scope.unlock = function(key) {
-      $log.log('CoreCtrl -> unlock() - key:', key?key:'no key provided');
-      if($scope.loadingKey)
-        if(key == $scope.loadingKey) {
-          $scope.isLoading=false; // else: still waiting babe
-          $scope.loadingKey = undefined;
-        }
-      else
-        $scope.isLoading=false;
+      
+      if(key)
+        $scope.loadingQueue[key] = false;
 
+      var pending = _.compact(_.values($scope.loadingQueue)).length > 0;
+      $log.log('CoreCtrl -> unlock() - key:', key?key:'no key provided', '- pending:', $scope.loadingQueue);
+      
+      if(!pending)
+        $scope.isLoading=false;
     }
+
+    $scope.forceUnlock = function(){
+      $log.log('CoreCtrl -> forceUnlock()');
+      $scope.loadingQueue = {};
+    };
     /*
     
       Events listeners
@@ -424,9 +432,9 @@ angular.module('histograph')
     var _resizeTimer;
     $rootScope.$on('$stateChangeStart', function (e, state) {
       // if(state.resolve) {
-        
+      $scope.forceUnlock();
       // }
-      $scope.lock(); 
+      $scope.lock('$dom'); 
       // empty
       if(!_.isEmpty($scope.relatedItems))
         $scope.relatedItems = [];
@@ -465,7 +473,7 @@ angular.module('histograph')
     // fire event when DOM is ready
     $scope.$on('$viewContentLoaded', function(event){
       // $rootScope.$emit
-      $scope.unlock();
+      $scope.unlock('$dom');
       $rootScope.$emit(EVENTS.STATE_VIEW_CONTENT_LOADED, $scope.currentState);
     });
     
@@ -1265,14 +1273,14 @@ angular.module('histograph')
       Reload related items, with filters.
     */
     $scope.sync = function() {
-      $scope.lock();
+      $scope.lock('RelatedItemsCtrl');
 
       relatedFactory.get(angular.extend({
         model: relatedModel,
         limit: $scope.limit,
         offset: $scope.offset
       }, $stateParams, $scope.params), function (res) {
-        $scope.unlock();
+        $scope.unlock('RelatedItemsCtrl');
         $scope.offset  = res.info.offset;
         $scope.limit   = res.info.limit;
         $scope.totalItems = res.info.total_items;
@@ -1325,7 +1333,7 @@ angular.module('histograph')
     // $scope.syncGraph();
     $log.log('RelatedItemsCtrl -> setRelatedItems - items', relatedItems.result.items);
     $scope.setRelatedItems(relatedItems.result.items);
-    $scope.unlock();
+    
     if($stateParams.ids || $stateParams.query || ~~!specials.indexOf('syncGraph'))
       $scope.syncGraph();
   });

@@ -15,13 +15,13 @@ angular.module('histograph')
       Reload related items, with filters.
     */
     $scope.syncGraph = function() {
-      $scope.lock('graph');
+      $scope.lock('ProjectionCtrlgraph');
       CooccurrencesFactory.get(angular.extend({}, $scope.params, {
           model: relatedModel,
           projected_model: projectedModel,
           limit: 300
         }), function (res){
-        $scope.unlock('graph');
+        $scope.unlock('ProjectionCtrlgraph');
         $log.log('ProjectionCtrl CooccurrencesFactory returned a graph of',res.result.graph.nodes.length, 'nodes');
         if($scope.filters.with)
           $scope.setGraph(res.result.graph, {

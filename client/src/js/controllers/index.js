@@ -126,11 +126,12 @@ angular.module('histograph')
       Reload related items, with filters.
     */
     $scope.sync = function() {
-      $scope.loading = true;
+      $scope.lock('ExploreResourcesCtrl');
       ResourceFactory.get(angular.extend({
         limit: $scope.limit,
         offset: $scope.offset
       }, $scope.params), function (res) {
+        $scope.unlock('ExploreResourcesCtrl');
         $scope.loading = false;
         $scope.offset  = res.info.offset;
         $scope.limit   = res.info.limit;
