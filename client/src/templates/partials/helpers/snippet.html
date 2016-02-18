@@ -31,13 +31,13 @@
           <!-- <a class='action'>
             <span class="fa fa-target"></span></a>
           </a> -->
-          <!-- <a class="action" title="filter" uib-tooltip="add to your bookmarks" uib-tooltip-placement="top" uib-tooltip-append-to-body="true" ng-click="queue(relatedItem)">
-            <span class="fa fa-bookmark-o"></span></a> -->
+          <a class="action" title="filter" uib-tooltip='{{"tooltip.resource.add.to.myselection" |translate}}' uib-tooltip-placement="top" uib-tooltip-append-to-body="true" ng-click="queue(relatedItem)">
+            <span class="fa fa-thumb-tack"></span></a>
         </div>
         <div class='btn-group btn-group dual' style='margin: 10px 0'>
           <a class='btn btn-default btn-line-white' ng-href='/#/e/{{relatedItem.id}}' translate>button.more</a>
           <a class='btn btn-default btn-line-white' ng-href='/#/e/{{relatedItem.id}}/g' translate>button.egonetwork</a>
-          <button class='btn btn-default btn-line-white' ng-click="queue(relatedItem)"> <span class="fa fa-thumb-tack" title='{{"tooltip.resource.add.to.myselection" |translate}}'></span></button>
+          <!-- <button class='btn btn-default btn-line-white' ng-click="queue(relatedItem)"> <span class="fa fa-thumb-tack" title='{{"tooltip.resource.add.to.myselection" |translate}}'></span></button> -->
           <button class='btn btn-default btn-line-white' title='{{"tooltip.sigma.center" |translate}}' data-id="{{relatedItem.id}}"> <span class="fa fa-dot-circle-o"></span></button>
         </div>
         <div class='clear'></div>
