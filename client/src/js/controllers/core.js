@@ -738,6 +738,10 @@ angular.module('histograph')
       });
     };
 
+    /*
+      $scope.confirm
+      Unconfirm the entity without unconfiming the relationship between the entity and the resource
+    */
     $scope.unconfirm = function(entity, next) {
       $log.log('CoreCtrl -> unconfirm() entity:', entity.id);
       EntityExtraFactory.save({
@@ -800,6 +804,36 @@ angular.module('histograph')
         $log.log('CoreCtrl -> discardvote()', res.status);
       });
     };
+
+
+    /*
+      Favourite the current resource ♥
+    */
+    $scope.favourite = function(resource, next) {
+      ResourceRelatedFactory.save({
+        id: resource.id,
+        model: 'user',  
+      }, {}, function (res) {
+        console.log('CoreCtrl -> favourite() - result:', res.status);
+        if(next)
+          next(res.result);
+      });
+    };
+    
+    /*
+      Unfavourite the current resource (#@# --> ♥)
+    */
+    $scope.unfavourite = function(resource, next) {
+      ResourceRelatedFactory.delete({
+        id: resource.id,
+        model: 'user',  
+      }, {}, function (res) {
+        console.log('CoreCtrl -> unfavourite() - result:', res.status);
+        if(next)
+          next(res.result);
+      });
+    };
+
 
     /*
       Merge two entities together in a specific resource

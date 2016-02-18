@@ -333,6 +333,7 @@ a#header-title {
   width: 30px;
   padding: 0px;
   height: 30px;
+  text-align: center;
   cursor: pointer;
 }
 
@@ -1671,17 +1672,19 @@ height: 150px;
 } 
 
 .nodes .line .weight{
-      position: absolute;
-    top: 40%;
-    background: #575757;
-    line-height: 20px;
-    /* width: 20px; */
-    height: 20px;
-    border-radius: 4px;
-    font-weight: bold;
-    left: 12px;
-    color: white;
-    padding: 0 10px;
+  position: absolute;
+  top: 40%;
+  background: #383838;
+  line-height: 20px;
+  /* width: 20px; */
+  height: 20px;
+  border-radius: 2px;
+  font-weight: normal;
+  right: 0px;
+  color: #f0f0f0;
+  padding: 0 5px;
+  text-align: right;
+  border: 1px solid #ccc;
 }
 
 .node {
@@ -1696,17 +1699,18 @@ height: 150px;
 
 .node .actions a.action {
   color: #A9A2A2;
-  border-width: 0;
+  border-width: 1px;
   width: 30px;
   padding: 0px;
   height: 30px;
   display: inline-block;
   line-height: 30px;
+  text-align:center;
   cursor: pointer;
-  -webkit-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
-     -moz-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
-       -o-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
-          transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+  -webkit-transition: color .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
+     -moz-transition: color .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+       -o-transition: color .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+          transition: color .3s cubic-bezier(0.65, 0.05, 0.36, 1);
 }
 
 .node .actions a.action:hover{
@@ -6121,24 +6125,21 @@ Copyright (c) 2015 Daniel Eden
 
 #messenger{
   position: fixed;
+  z-index: 1075;
   bottom: 200px;
   left: 50%;
   width: 240px;
-  
   color: white;
   pointer-events: none;
-  
   opacity: 0;
   text-align: center;
-
   font-size: 13px;
   margin-left: -120px;
     -webkit-transition: opacity .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
      -moz-transition: opacity .3s cubic-bezier(0.65, 0.05, 0.36, 1);
        -o-transition: opacity .3s cubic-bezier(0.65, 0.05, 0.36, 1);
           transition: opacity .3s cubic-bezier(0.65, 0.05, 0.36, 1);
-  
- 
+
 }
 
 #messenger > .inner{
@@ -6545,7 +6546,7 @@ Copyright (c) 2015 Daniel Eden
   line-height: 49px;
   text-align: center
 }
-.modal-content .action {
+/*.modal-content .action {
   width: 30px;
   height: 30px;
   margin-top: 10px;
@@ -6553,7 +6554,7 @@ Copyright (c) 2015 Daniel Eden
   line-height: 30px;
   border: 1px solid #E8E8E7;
   color: #a5a5a5;
-}
+}*/
 
 .modal-content .action.right{
   float: right;

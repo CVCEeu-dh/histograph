@@ -85,6 +85,7 @@ OPTIONAL MATCH (inq)-[:questions]->(res)
 RETURN {
   resource: {
     id: id(res),
+    type: last(labels(res)),
     props: res,
     curated_by_user: curated_by_user,
     loved_by_user: loved_by_user,

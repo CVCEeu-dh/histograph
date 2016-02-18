@@ -30,28 +30,7 @@ angular.module('histograph')
       $scope.$broadcast('focuson', {id:id});
     }
     
-    /*
-      Favourite the current resource ♥
-    */
-    $scope.favourite = function() {
-      ResourceRelatedFactory.save({
-        id: $stateParams.id,
-        model: 'user',  
-      }, {}, function (res) {
-        console.log('ResourceCtrl -> favourite() - result:', res.status);
-        $scope.isFavItem = true;
-      });
-    }
     
-    $scope.unfavourite = function() {
-      ResourceRelatedFactory.delete({
-        id: $stateParams.id,
-        model: 'user',  
-      }, {}, function (res) {
-        console.log('ResourceCtrl -> unfavourite() - result:', res.status);
-        $scope.isFavItem = false;
-      });
-    };
 
     /*
       LoadTimeline

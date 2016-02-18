@@ -10,19 +10,26 @@
         <h4><a ng-href='#/e/{{entity.id}}' marked="entity.props|lookup:'name':language"></a></h4>
         <div class='date' ng-if='entity.type== "person"'>{{entity.type}} - {{entity.props.birth_time | datesOfAPerson : entity.props.death_time}}</div>
         <div class='date' ng-if='entity.type!= "person"'>{{entity.type}}</div>
-
-        
-      </div>
-      <div class="crowdsourcing" ng-if='entity.isWrong' ng-include='"templates/partials/helpers/crowdsourcing/issue-iswrong.html"'>
-        
+      
 
       </div>
+
+      <!-- crowdsourcing tasks for issues  -->
+      <div class="crowdsourcing" ng-if='entity.isWrong' ng-include='"templates/partials/helpers/crowdsourcing/issue-iswrong.html"'></div>
+
+      <!--  pinboard and bookmarks -->
+      <div class="actions">
+        <a class="action" title="{{'tooltip.resource.add.to.myselection'|translate}}" ng-click="queue()">
+        <span class="fa fa-thumb-tack"></span></a>
+      </div>
+
+
       <div class='btn-group-wrapper' ng-if="!isWrong">
         <div class="btn-group">
-          <a class="btn btn-line-white" ng-click='cancel()' ng-href='/#/e/{{entity.id}}' title="{{tooltip.popit.more | translate}}" data-action="link" translate>button.more</a>
+          <a class="btn btn-line-white" ng-click='cancel()' ng-href='/#/e/{{entity.id}}' title="{{tooltip.popit.more | translate}}" data-action="link" translate>button.visit</a>
           <button ng-if='entity.type != "theme"'  class='btn btn-line-white obscure' ng-click='askQuestion("downvote")'><i class="fa fa-bug"></i> fix / edit </button>
-          <button ng-if='!entity.isWrong && !entity.isIncomplete && !isUpvotedByUser' class='btn btn-line-white {{entity.props.upvote.length? "btn-number":""}}' ng-click='confirm()'><span translate>button.confirm</span> <i class="fa fa-check"></i><div class='number' ng-if='entity.props.upvote.length'>{{entity.props.upvote.length}}</div></button>
-          <button ng-if='!entity.isWrong && !entity.isIncomplete && isUpvotedByUser' class='btn btn-line-white {{entity.props.upvote.length? "btn-number":""}}' ng-click='unconfirm()'><span translate>button.confirmed</span> <div class='number' ng-if='entity.props.upvote.length'>{{entity.props.upvote.length}}</div></button>
+          <!-- <button ng-if='!entity.isWrong && !entity.isIncomplete && !isUpvotedByUser' class='btn btn-line-white {{entity.props.upvote.length? "btn-number":""}}' ng-click='confirm()'><span translate>button.confirm</span> <i class="fa fa-check"></i><div class='number' ng-if='entity.props.upvote.length'>{{entity.props.upvote.length}}</div></button>
+          <button ng-if='!entity.isWrong && !entity.isIncomplete && isUpvotedByUser' class='btn btn-line-white {{entity.props.upvote.length? "btn-number":""}}' ng-click='unconfirm()'><span translate>button.unconfirm</span> <div class='number' ng-if='entity.props.upvote.length'>{{entity.props.upvote.length}}</div></button> -->
         </div>
       </div>
 
@@ -40,16 +47,14 @@
         </blockquote>
       </div>
 
-      <div class='crowdhesourcing'>
-        
-      </div>
+      
     </div>
   </div>
 </div>
 <div class="modal-header with-sidebar">
   <h3 class="modal-title">
     <a ng-click='previous()' class='action left'><i class='fa fa-angle-left'></i></a>
-    <span ng-if='modalStatus!="quiet"'>{{modalStatus}}</span><span ng-if='modalStatus!="loading"'>{{offset + limit}} / {{totalItems}} documents</span>
+    <span ng-if='modalStatus!="quiet"'>{{modalStatus}}</span><span ng-if='modalStatus!="loading"'>{{offset + limit}} / {{totalItems}} <span translate>inspect.entity.related_documents</span></span>
     <a ng-click='next()' class='action right'><i class='fa fa-angle-right'></i></a>
   </h3>
   <table class='table'>

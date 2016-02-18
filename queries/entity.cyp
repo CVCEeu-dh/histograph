@@ -316,6 +316,7 @@ WITH r, ent, res, themes, persons
   RETURN {
     id: id(res),
     props: res,
+    type: last(labels(res)),
     rel: r,
     themes: themes,
     persons: persons

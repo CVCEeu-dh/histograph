@@ -30,6 +30,25 @@ angular.module('histograph')
     
     $scope.isLocked = false;
 
+    $scope.queue = function(item) {
+      $log.log('InspectModalCtrl  -~> queue()', item);
+      core.queue(item.id? item : $scope.entity, true);
+    };
+
+    $scope.favourite = function(item) {
+      $scope.isLocked = true;
+      core.favourite(item, function(){
+        $scope.isLocked = false;
+      });
+    };
+
+    $scope.unfavourite = function(item) {
+      $scope.isLocked = true;
+      core.unfavourite(item, function(){
+        $scope.isLocked = false;
+      });
+    };
+
     $scope.ok = function () {
       $uibModalInstance.close();
     };

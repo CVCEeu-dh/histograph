@@ -6,6 +6,7 @@
   "button.close": "close",
   "button.confirm": "confirm",
   "button.confirmed": "confirmed",
+  "button.unconfirm": "un-validate",
   "button.crowd.canfixthis": "Yes, I can fix this",
   "button.crowd.askmelater": "ask me later",
   "button.disagree": "I disagree",
@@ -18,6 +19,7 @@
   "button.login.with.twitter": "log in with your twitter account",
   "button.login.with.google": "log in with your google account",
   "button.more": "more",
+  "button.visit": "visit page",
   "button.next": "next",
   "button.previous": "previous",
   "button.myselection.explore": "explore connections",
@@ -92,6 +94,7 @@
   "header.myselection": "my selection",
 
   "inspect.entity.iswrong": "It seems that <strong>{{name}}</strong> is a <strong>mistake</strong> and could be safely removed.",
+  "inspect.entity.related_documents": "related documents",
 
   "loading": "loading ...",
 

@@ -9,7 +9,7 @@
  * Use suggestFactory as service
  */
 angular.module('histograph')
-  .directive('snippets', function ($log, $location, $timeout, EVENTS, SuggestFactory) {
+  .directive('snippets', function ($log, $location, $timeout, EVENTS, SuggestFactory, EntityRelatedFactory) {
     'use strict';
      return {
       restrict : 'A',
@@ -58,7 +58,20 @@ angular.module('histograph')
           
         };
 
-
+        /*
+          Load one entity related items
+        */
+        scope.loadRelatedItems = function(entity) {
+          $log.log('::snippets -> loadRelatedItems() for entity id:' , entity.id);
+          if(!isNaN(entity.id))
+            EntityRelatedFactory.get({
+              id: entity.id,
+              model: 'resource'
+            }, function(res) {
+              scope.sharedItems = res.result.items
+              scope.totalItems = res.info.total_items;
+            })
+        };
 
         /*
           load shared items.
@@ -111,8 +124,13 @@ angular.module('histograph')
             scope.sharedItems = [];
             if(target.data.node.props) {// if the node has already  been loaded
               scope.fill([target.data.node])
-            } else
+            } else {
               itemsIdsToLoad.push(target.data.node.id);
+            }
+            // load entity related items
+            if(target.data.node.type != "resource"){
+              scope.loadRelatedItems(target.data.node);
+            }
 
           } else if(target.type == 'edge') {
             var s = target.data.edge.nodes.source,
