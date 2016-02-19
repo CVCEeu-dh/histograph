@@ -50,7 +50,7 @@ var fs          = require('fs'),
           callback(null, options);
         },
         tasks.entity.jaccard,
-        tasks.entity.cosine
+        // tasks.entity.cosine
       ],
       /*
         Only for resources having url ending with .jpg or .png

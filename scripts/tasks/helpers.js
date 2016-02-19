@@ -422,7 +422,7 @@ module.exports = {
       console.log(clc.blackBright('   executing query: ', clc.magentaBright(options.cypher), '...\n'));
       
       
-      query = parser.agentBrown(queries[path[1]], options);
+      query = (options.profile? 'PROFILE ':'') + parser.agentBrown(queries[path[1]], options);
       console.log(query)
       
       console.log('with params')
