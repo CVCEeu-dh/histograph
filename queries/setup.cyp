@@ -26,6 +26,10 @@ CREATE INDEX ON :resource(end_time)
 // create index on start date to group / filter result by date
 CREATE INDEX ON :resource(end_month)
 
-// name: create_index_on_entity_score
-// create index on start date to group / filter result by timestamp
-CREATE INDEX ON :entity(score)
+// name: create_index_on_entity_status
+// create index
+CREATE INDEX ON :entity(status)
+
+// name: create_index_on_entity_common
+// create index
+CREATE INDEX ON :entity(common)
