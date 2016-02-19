@@ -323,7 +323,7 @@ module.exports = {
             _.remove(result.rel.properties.downvote, function(d) {return d==user.username});
           }
 
-          // 1. upvote the entity
+          // 1. not upvote the entity
           
         }
 
@@ -339,6 +339,7 @@ module.exports = {
         result.rel.properties.celebrity =  _.compact(_.unique((result.rel.properties.upvote || []).concat(result.rel.properties.downvote|| []))).length;
         result.rel.properties.score = _.compact((result.rel.properties.upvote || [])).length - _.compact((result.rel.properties.downvote|| [])).length;
         
+
         async.series([
           function relationships(callback) {
             neo4j.rel.update(result.rel, callback);
@@ -436,10 +437,13 @@ module.exports = {
       }
       
       if(params.downvoted_by) {
-        ent.props.downvote = _.unique((ent.props.downvote || []).concat([params.downvoted_by]));
-        // if the user had upvoted it before.
+        // if the user had upvoted it before, it will just remove the downcvote
         if(ent.props.upvote && ent.props.upvote.indexOf(params.downvoted_by) != -1) {
           _.remove(ent.props.upvote, function(d) {return d==params.downvoted_by});
+        }
+        // only when a VALID REASON applies
+        if(params.issue) {
+            ent.props.downvote = _.unique((ent.props.downvote || []).concat([params.downvoted_by]));
         }
       }
       // calculate celebrity and score for the entity
@@ -447,6 +451,7 @@ module.exports = {
       ent.props.score = (ent.props.upvote || []).length - (ent.props.downvote|| []).length;
       ent.props.last_modification_date = now.date;
       ent.props.last_modification_time = now.time;
+      ent.props.status = (ent.props.score >= 0? 1: (ent.props.score < -1? 0: -1));
       
       // if there is an issue, add it to the entity directly (mongodb style)
       if(params.issue) {

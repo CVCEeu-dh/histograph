@@ -552,8 +552,8 @@ module.exports = {
   getRelatedResources: function (params, next) {
     models.getMany({
       queries: {
-        count_items: rQueries.count_similar_resource_ids_by_entities,
-        items: rQueries.get_similar_resource_ids_by_entities
+        count_items: rQueries.count_related_resources,
+        items: rQueries.get_related_resources
       },
       params: params
     }, function (err, results) {
