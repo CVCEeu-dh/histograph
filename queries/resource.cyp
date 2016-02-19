@@ -245,16 +245,30 @@ WITH DISTINCT res
   RETURN result
 
 
-// name: count_similar_resource_ids_by_entities
+// name: count_related_resources
 // get top 100 similar resources sharing the same persons, orderd by time proximity if this info is available
-MATCH (res:resource)<-[r1:appears_in]-(ent:entity)
-  WHERE id(res) = {id} AND ent.score > -1
+MATCH (res:resource)
+  WHERE id(res) = {id} 
+WITH res
+MATCH (res)<-[r1:appears_in]-(ent:entity)
+  WHERE ent.score > -1 AND ent.df > 1
 WITH res, r1, ent
   ORDER BY r1.tfidf DESC
-  LIMIT 20
+  LIMIT 15
 WITH ent
 MATCH (ent)-[:appears_in]->(res2:resource)
+{if:with}
   WHERE id(res2) <> {id}
+
+  WITH res2
+  MATCH (res2)<-[:appears_in]-(ent2:entity) 
+  WHERE id(ent2) IN {with}
+
+{/if}
+{unless:with}
+  WHERE id(res2) <> {id}
+{/unless}
+
   {if:mimetype}
   AND res2.mimetype IN {mimetype}
   {/if}
@@ -267,29 +281,24 @@ MATCH (ent)-[:appears_in]->(res2:resource)
   {if:end_time}
   AND res2.end_time <= {end_time}
   {/if}
-
-WITH DISTINCT res2  
-{if:with}
-  MATCH (ent:entity)-[:appears_in]->(res2)
-  WHERE id(ent) IN {with}
-  WITH DISTINCT res2
-{/if}
+WITH res2
 RETURN {
   group: {if:group}res2.{:group}{/if}{unless:group}res2.type{/unless}, 
   count_items: count(res2)
 } // count per type
 
 
-// name: get_similar_resource_ids_by_entities
+// name: get_related_resources
 // top 20 entities attached to the person
 MATCH (res1:resource)<-[r1:appears_in]-(ent:entity)
-WHERE id(res1) = {id} AND ent.score > -1
+WHERE id(res1) = {id} AND ent.score > -1 AND ent.df > 1
 WITH res1, r1, ent
   ORDER BY r1.score DESC, r1.tfidf DESC
-  LIMIT 20
+  LIMIT 15
 WITH res1, r1, ent
-MATCH (ent)-[r2:appears_in]->(res2:resource)
-  WHERE ent.score > -1 AND id(res2) <> {id}
+MATCH (ent)-[r2:appears_in]->(res2:resource){if:with}<-[:appears_in]-(ent2:entity) WHERE id(ent2) IN {with} AND id(res2) <> {id}{/if}
+{unless:with} WHERE id(res2) <> {id} {/unless}
+
     {if:mimetype}
     AND res2.mimetype IN {mimetype}
     {/if}
@@ -302,13 +311,6 @@ MATCH (ent)-[r2:appears_in]->(res2:resource)
     {if:end_time}
     AND res2.end_time <= {end_time}
     {/if}
-
-WITH  res1, res2, r1, r2, ent
-{if:with}
-  MATCH (ent2:entity)-[:appears_in]->(res2)
-  WHERE id(ent2) IN {with}
-  WITH  res1, res2, r1, r2, ent
-{/if}
 
 WITH res1, res2, count(*) as intersection
 
@@ -622,7 +624,7 @@ WITH res
 {unless:with}
 MATCH (p1:{:entity})-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:{:entity})
 {/unless}
-  WHERE id(p1) < id(p2)
+  WHERE id(p1) < id(p2) AND p1.score > -1 AND p2.score > -1 AND p1.df > 1 AND p2.df > 1
   {if:start_time}
     AND res.start_time >= {start_time}
   {/if}
@@ -635,13 +637,9 @@ MATCH (p1:{:entity})-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:{:enti
   {if:type}
     AND res.type in {type}
   {/if}
-  
-  AND p1.score > -1
-  AND p2.score > -1
-WITH p1, p2, res
-ORDER BY r1.tfidf DESC, r2.tfidf DESC
-// limit here?
-WITH p1, p2, count(DISTINCT res) as w
+WITH p1, p2, count(res) as w
+ORDER BY w DESC
+LIMIT {limit}
 RETURN {
     source: {
       id: id(p1),
@@ -657,8 +655,6 @@ RETURN {
     },
     weight: w
   } as result
-ORDER BY w DESC
-LIMIT {limit}
 
 
 // name: get_bipartite_cooccurrences
@@ -687,10 +683,9 @@ MATCH (p1:{:entityA})-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:{:ent
   {/if}
   
   
-WITH p1, p2, res
-ORDER BY r1.tfidf DESC, r2.tfidf DESC
-// limit here?
-WITH p1, p2, count(DISTINCT res) as w
+WITH p1, p2, count(res) as w
+ORDER BY w DESC
+LIMIT {limit}
 RETURN {
     source: {
       id: id(p1),
@@ -706,8 +701,6 @@ RETURN {
     },
     weight: w
   } as result
-ORDER BY w DESC
-LIMIT {limit}
 
 
 // name: get_graph_persons

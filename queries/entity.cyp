@@ -73,6 +73,7 @@ ON CREATE SET
   ent.name_search   = {name_search},
   ent.celebrity     = 0,
   ent.score         = 0,
+  ent.status        = 1,
   ent.df            = 1,
 
   {if:links_viaf}
