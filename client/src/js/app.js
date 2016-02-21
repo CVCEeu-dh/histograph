@@ -64,6 +64,8 @@ angular
     SIGMA_SET_ITEM: 'sigma_set_item',
     // start tour
     START_GUIDED_TOUR: 'start_guided_tour',
+    // start search
+    START_EMODE: 'start_emode',
   })
   .constant("VIZ", {
     TIMELINE: 'timeline'
@@ -1246,11 +1248,17 @@ angular
   .config(function ($httpProvider) {
     $httpProvider.interceptors.push(function ($q, $log, $rootScope, EVENTS) {
       return {
-        // response: function(response) {
-        //   if(response.data.user)
-        //     $rootScope.$broadcast(EVENTS.USE_USER, response.data.user);
-        //   return response
-        // },
+        response: function(response) {
+          if($rootScope.isEMODE && response.data && response.data.result && response.data.result.items ) {
+            console.log("PIGGI MODE ON ");
+            response.data.result.items = _.map(response.data.result.items, function(d, k) {
+              d.props.alternative_url = "http://vignette1.wikia.nocookie.net/muppet/images/8/8f/Macexplode.JPG/revision/latest?cb=20060418180148"
+              return d;
+            })
+            // $rootScope.$broadcast(EVENTS.USE_USER, response.data.user);
+          }
+          return response
+        },
         responseError: function(rejection) {
           if(rejection.status === 403) {
             $rootScope.$broadcast(EVENTS.USER_NOT_AUTHENTIFIED);

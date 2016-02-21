@@ -34,7 +34,8 @@
     </span>
   </div>
            
-  <div class='img-wrapper' ng-if='relatedItem.props.mimetype=="image" && relatedItem.props.url'><a ng-href='/#/r/{{relatedItem.id}}'><div class="img"  style='background-image: url(/media/{{relatedItem.props.url}})'></div></a></div>
+  <div class='img-wrapper' ng-if='relatedItem.props.mimetype=="image" && !relatedItem.props.alternative_url && relatedItem.props.url'><a ng-href='/#/r/{{relatedItem.id}}'><div class="img"  style='background-image: url(/media/{{relatedItem.props.url}})'></div></a></div>
+  <div class='img-wrapper' ng-if='relatedItem.props.mimetype=="image" && relatedItem.props.alternative_url'><a ng-href='/#/r/{{relatedItem.id}}'><div class="img"  style='background-image: url({{relatedItem.props.alternative_url}})'></div></a></div>
   
   <blockquote lookup context='relatedItem' field='caption' language='language'></blockquote>
   <blockquote style='font-style:normal' lookup context='relatedItem' field='ipr' language='language'></blockquote>

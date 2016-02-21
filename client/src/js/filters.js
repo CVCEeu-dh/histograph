@@ -354,7 +354,7 @@ angular.module('histograph')
     Return a valid url for the given mimetype and props.
     IT allows to handle localisation without changing the global language.
   */
-  .filter('url', function($sce) {
+  .filter('url', function($rootScope) {
     return function(props, language, cutAt) {
       if(props.mimetype == 'image')
         return 'media/' + props.url;

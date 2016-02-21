@@ -332,7 +332,7 @@ html
         var types = !{JSON.stringify(types)};
         var analytics = !{JSON.stringify(analytics)};
         var user = !{JSON.stringify(user)};
-
+        var emode = !{JSON.stringify(demo) || '{query:"miss piggy"}'};
 
         /*
           Build config according to express settings
@@ -365,6 +365,11 @@ html
             }
           }))
         });
+        /*
+          Enable demo mode
+        */
+        angular.module('histograph')
+          .constant("EMODE", emode);
 
         console.log('--- HISTOGRAPH ---')
 
