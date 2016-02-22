@@ -4,11 +4,13 @@
 <div class="inner {{center?'wait':''}} {{status}}">
   
   <div class='nodes'>
-    <div ng-if='items.length > 1' class="line">
-        <div class='weight sans-serif'>{{totalItems || weight}}</div>
-    </div>
     
-    <div ng-repeat='relatedItem in items'>
+    
+    <div ng-repeat='relatedItem in items' style='position:relative'>
+      <div ng-if='$first && items.length > 1' class="line" >
+        <div class='weight sans-serif'>{{totalItems || weight}}</div>
+      </div>
+
       <!-- person node -->
       <div ng-if='relatedItem.type!="resource"' class='node {{relatedItem.type}}' >
         <div class='thumbnail'>
@@ -34,12 +36,17 @@
           <a class="action" title="filter" uib-tooltip='{{"tooltip.resource.add.to.myselection" |translate}}' uib-tooltip-placement="top" uib-tooltip-append-to-body="true" ng-click="queue(relatedItem)">
             <span class="fa fa-thumb-tack"></span></a>
         </div>
+
+
         <div class='btn-group btn-group dual' style='margin: 10px 0'>
           <a class='btn btn-default btn-line-white' ng-href='/#/e/{{relatedItem.id}}' translate>button.more</a>
           <a class='btn btn-default btn-line-white' ng-href='/#/e/{{relatedItem.id}}/g' translate>button.egonetwork</a>
           <!-- <button class='btn btn-default btn-line-white' ng-click="queue(relatedItem)"> <span class="fa fa-thumb-tack" title='{{"tooltip.resource.add.to.myselection" |translate}}'></span></button> -->
           <button class='btn btn-default btn-line-white' title='{{"tooltip.sigma.center" |translate}}' data-id="{{relatedItem.id}}"> <span class="fa fa-dot-circle-o"></span></button>
         </div>
+        <div ng-if='items.length == 1' reporter entity='relatedItem' user='user'></div>
+
+
         <div class='clear'></div>
       </div>
 
@@ -69,9 +76,13 @@
   <!-- use detail only if a single node has been selected -->
   <div class='detail' ng-if='items.length == 1'>
     <div ng-repeat='relatedItem in items'>
-      <div ng-if='relatedItem.type=="person"'>
-        <blockquote  marked="relatedItem.props|lookup:'abstract':language">
+      <div class="abstract {{showMore?'expanded': ''}}" ng-if='relatedItem.type=="person" '>
+        <blockquote lookup context='relatedItem' field='abstract' language='language'>
         </blockquote>
+        <div class="ellipsis">
+          <button ng-click='showMore = true' class='btn btn-line-white btn-straight' translate>button.readmore</button>
+
+        </div>
       </div>
       <div ng-if='relatedItem.type=="resource"'>
         <div class="meta">

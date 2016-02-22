@@ -1,5 +1,23 @@
+<div class="reporter">
+  <!-- crowdsourcing tasks for issues  -->
+  <div class="crowdsourcing" ng-if='entity.props.issues && entity.props.issues.length' class='animated fadeIn"'>
+    <div ng-if='entity.isWrong' ng-include='"templates/partials/helpers/crowdsourcing/issue-iswrong.html"'></div>
+  </div>
 
-   <div ng-if='question=="remove-relationship"' class='question'>
+  <!-- Report Error form -->
+  <div class='error-reporting-toggle btn-group-wrapper' ng-if="!isWrong">
+    <div class="btn-group">
+      <a ng-if='showMore' class='btn btn-default btn-line-white' ng-href='/#/e/{{entity.id}}' translate>button.more</a>
+      <a ng-if='showEgonetwork' class='btn btn-default btn-line-white' ng-href='/#/e/{{entity.id}}/g' translate>button.egonetwork</a>
+
+      <button  ng-if='showEgonetwork' class='btn btn-default btn-line-white' title='{{"tooltip.sigma.center" |translate}}' data-id="{{entity.id}}"> <span class="fa fa-dot-circle-o"></span></button>
+
+      <button ng-if='entity.type != "theme"'  class='btn btn-line-white' ng-click='askQuestion("downvote")'><i class="fa fa-bug"></i> fix / edit </button>
+    </div>
+  </div>
+
+  <div class="questions {{question}} {{enabled? 'enabled':''}} {{parent? 'with-parent': ''}}">
+    <div ng-if='question=="remove-relationship"' class='question'>
       <p class='text' translate="popit.fix.remove.relationship" translate-values='{name: "{{entity.props.name}}"}'></p>
       <div class='answers'>
         <div class='btn-group btn-group-dual'>
@@ -80,7 +98,7 @@
           </div>
         </div>
         <div class='answers'>
-          <button class='btn btn-line-white obscure btn-block' ng-click='askQuestion("new")' translate='popit.fix.brandnew' translate-values='{type: "{{entity.type}}"}'></button>
+          <button class='btn btn-line-white obscure btn-block disabled' ng-click='askQuestion("new")' translate translate-values='{type: "{{entity.type}}"}'>popit.fix.brandnew</button>
           <button class='btn btn-line-white obscure btn-block' ng-click='askQuestion("downvote")'>back</button>
         </div>
       </div>
@@ -145,3 +163,5 @@
           <button class='btn btn-line-white btn-primary btn-block' ng-click='close()' translate>button.close</button>
         </div>
       </div>
+  </div>
+</div>

@@ -483,6 +483,8 @@ a#header-title {
 .item.entity {
   margin: 0;
   padding: 20px;
+  background-color: #383838;
+  color: #A9A2A2;
 }
 
 .item.entity h3, .item.entity .description{
@@ -491,12 +493,12 @@ a#header-title {
 
 .item.entity h3{
   margin: 0;
-  border-bottom: 1px solid #383838;
-  font-weight: bold;
+  border-bottom: 1px solid #A9A2A2;
+  font-weight: normal;
   font-size: 15px;
   line-height: 24px;
   padding-bottom: 0px;
-  color: #151515;
+  color: #fff;
 }
 
 .item.entity .meta{
@@ -505,14 +507,15 @@ a#header-title {
 
 .item.entity .meta-label{
   display: inline;
-  border: 1px solid #151515;
-  color: #151515;
+  /*border: 1px solid #151515;*/
+  /*color: #151515;*/
   font-style: normal;
-  padding: 2px 4px;
+  /*padding: 2px 4px;*/
   margin: 0;
   border-radius: 2px;
   text-transform: uppercase;
-  font-size: 12px
+  /*font-size: 12px*/
+  color: #f0f0f0;
 }
 
 
@@ -551,7 +554,12 @@ a#header-title {
 }
 
 .item.entity .tags .tag{
-  
+  background: #474747;
+  cursor: pointer;
+}
+.item.entity .tags .tag:hover{
+  background: #383838;
+  color: #f0f0f0;
 }
 
 .item.entity .profile-pic{
@@ -1650,6 +1658,10 @@ height: 150px;
     transition-delay: .3s;
 }
 
+#sigma-snippets .reporter{
+      padding: 0 10px;
+}
+
 .nodes {
   position: relative;
   background-color: #383838;
@@ -1702,8 +1714,8 @@ height: 150px;
   position: absolute;
   width: 4px;
   background-color: #ccc;
-  bottom: 50px;
-  top: 20px;
+  bottom: -10px;
+  top: 60px;
   left: 34px;
 } 
 
@@ -1822,7 +1834,42 @@ margin-left: 50px;
   background: #383838;
 }
 
+#sigma-snippets .detail .abstract{
+  height: 112px; /* 4 lines at 24px of line-height + 10 px margin + 10 px button*/
+  overflow: hidden;
+  position:relative;
+}
+
+
+#sigma-snippets .detail .abstract .ellipsis{
+  position:absolute;
+  bottom:0px;
+  width: 100%;
+  height: 60px; /* that is one line 24px plus 10 px margin*/
+  background: rgba(56,56,56,0);
+  background: -moz-linear-gradient(top, rgba(56,56,56,0) 0%, rgba(56,56,56,1) 56%, rgba(56,56,56,1) 100%);
+  background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(56,56,56,0)), color-stop(56%, rgba(56,56,56,1)), color-stop(100%, rgba(56,56,56,1)));
+  background: -webkit-linear-gradient(top, rgba(56,56,56,0) 0%, rgba(56,56,56,1) 56%, rgba(56,56,56,1) 100%);
+  background: -o-linear-gradient(top, rgba(56,56,56,0) 0%, rgba(56,56,56,1) 56%, rgba(56,56,56,1) 100%);
+  background: -ms-linear-gradient(top, rgba(56,56,56,0) 0%, rgba(56,56,56,1) 56%, rgba(56,56,56,1) 100%);
+  background: linear-gradient(to bottom, rgba(56,56,56,0) 0%, rgba(56,56,56,1) 56%, rgba(56,56,56,1) 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#383838', endColorstr='#383838', GradientType=0 );
+}
+
+#sigma-snippets .detail .abstract.expanded{
+  height: auto
+}
+
+#sigma-snippets .detail .abstract .ellipsis > button{
+  position: absolute;
+  left: 50%;
+  width: 100px;
+  margin-left: -50px;
+  bottom: 10px;
+}
+
 #sigma-snippets .detail blockquote{
+  margin: 15px;
   font-family: inherit;
   margin: 0;
   background: transparent;
@@ -2245,7 +2292,6 @@ input.form-control{
   /*border: 1px solid #C5C5C6;*/
   border-radius: 3px;
   z-index: 1050;
-  box-shadow: 0 5px 10px rgba(0,0,0,.175);
   opacity: .9;
   transition: opacity .22s ease-in-out;
 }
@@ -2256,6 +2302,8 @@ input.form-control{
   background: #383838;
   border-radius: 3px;
   width: 300px;
+  box-shadow: 0 5px 10px rgba(0,0,0,.75);
+  
 }
 
 #pop > .inner .node .thumbnail {
@@ -2375,54 +2423,78 @@ input.form-control{
   line-height: 38px;
 }
 
-#pop > .inner .questions{
+.questions{
   height: 0;
   overflow: hidden;
-   -webkit-transition: height .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
-     -moz-transition: height .3s cubic-bezier(0.65, 0.05, 0.36, 1);
-       -o-transition: height .3s cubic-bezier(0.65, 0.05, 0.36, 1);
-          transition: height .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+   -webkit-transition: border-color .3s ease-in, height  .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
+     -moz-transition: border-color .3s ease-in, height  .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+       -o-transition: border-color .3s ease-in, height  .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+          transition: border-color .3s ease-in, height  .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+
+  border-top: 1px solid #383838;
+  border-bottom: 1px solid #808080;
+  background-color: #202020;
+  border-left: 1px solid #383838;
+  border-right: 1px solid #383838;
+  margin-top: 10px;
+
 }
 
-#pop > .inner .questions.enabled{
+.questions .question{
+  
+  padding: 5px 0 5px 0;
+  
+}
+
+.questions.enabled{
   height: 120px;
+  /*border-top-color: #A9A2A2;
+  border-bottom-color: #A9A2A2;
+  border-left-color: #808080;
+  border-right-color: #808080;*/    
+  
 }
-#pop > .inner .questions.feedback{
+.questions.feedback{
   height: 80px;
 }
-#pop > .inner .questions.wrongtype{
+.questions.wrongtype{
+  overflow: visible;
+  height: 130px;
+}
+.questions.wrong{
   overflow: visible;
 }
-#pop > .inner .questions.wrong{
-  overflow: visible;
-}
-#pop > .inner .questions.wrong.enabled{
+.questions.wrong.enabled{
   height: 80px;
 }
-#pop > .inner .questions.downvote.enabled{
+.questions.downvote.enabled{
+  height: 161px;
+}
+.questions.downvote.enabled.with-parent{
   height: 187px;
 }
 
-#pop > .inner .questions.contribute.enabled{
+.questions.contribute.enabled{
   height: 185px;
 }
 
-#pop > .inner .questions.contribute-confirm.enabled{
+.questions.contribute-confirm.enabled{
   height: 100px;
 }
 
-#pop > .inner .questions p.text{
+.questions p.text{
     color: #A9A2A2;
     margin: 0px 20px;
     padding: 10px 0 0 0;
-    border-top: 1px solid #A9A2A2;
+    
 }
 
-#pop > .inner .questions p strong{
+.questions p strong{
   color: #f0f0f0;
+  font-weight: normal;
 }
 
-#pop > .inner .questions .answers{
+.questions .answers{
   padding: 5px 15px 5px 15px;
 }
 
@@ -2875,6 +2947,21 @@ input.form-control{
 
 }
 
+.crowdsourcing{
+  background: #252525;
+  border: 1px solid #FF5742;
+  padding: 10px 15px;
+  margin: 15px 0;
+} 
+
+.crowdsourcing .issue{
+  margin-bottom: 10px;
+}
+
+.crowdsourcing strong {
+  font-weight: normal;
+  color: #f0f0f0;
+}
 /*
   
   Animate.css animations

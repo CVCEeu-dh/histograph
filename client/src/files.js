@@ -104,7 +104,7 @@ module.exports = {
       '/js/directives/sigma.js',  
       '/js/directives/snippets.js', 
       '/js/directives/timeline.js',
-      '/js/directives/history.js',
+      '/js/directives/reporter.js',
       '/js/directives/popit.js',
       '/js/directives/lazy-text.js',
     ]

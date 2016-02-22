@@ -3,7 +3,7 @@
 
 <div id="perspective" ng-if="item"  class="{{queueStatus}}">
   
-      <div class="entity item node">
+      <div class="entity item node {{entity.type}}">
         <div ng-if="item.props.thumbnail" class=" thumbnail">
           <div class="thumbnail-wrapper" style='background-image: url({{item.props.thumbnail}})'></div>
         </div>
@@ -12,13 +12,22 @@
           <div class='meta' ng-if='item.type=="person"'>{{item.props|datesOfSomeone}}</div>
           <div class='meta' ng-if='item.type=="location"'>{{item.props.country}} <a ng-href='https://www.google.com/maps/place/{{item.props.lat}},{{item.props.lng}}/@{{item.props.lat}},{{item.props.lng}},8z' target='_blank'>(view on google maps)</a></div>
           
-          <div class="mistake" ng-if="item.props.score && item.props.score < 0">
-            signaled as <b>mistake</b> by <span ng-repeat='u in item.props.downvote'><a>{{u}}</a>{{$last?'':', '}}</span>
-          </div>
+          
         </div>
+        
+
+        <!--  pinboard and bookmarks -->
+        <div class="actions">
+          <a class="action" uib-tooltip="{{'tooltip.resource.add.to.myselection'|translate}}" ng-click="queue(entity, true)">
+          <span class="fa fa-thumb-tack"></span></a>
+        </div>
+
         <div class='description'>
           <span class='meta-label sans-serif'>{{item.type}}</span> {{item.props|lookup:'description':language}}
         </div>
+
+        
+        <div reporter entity='entity' user='user'></div>
 
         <!-- <div ng-if="item.type == 'location' && item.props.geonames_id" class="description">position: {{item.geocode_lat}}, {{item.geocode_lng}}</div>
         <div ng-if="item.type == 'location' && item.props.geocode_id" class="description">position: {{item.props.geocode_lat}}, {{item.props.geocode_lng}}</div>
@@ -35,12 +44,12 @@
         </div>
          -->
         <div class="tags" ng-if="relatedPersons.length > 0"><span class='meta-label sans-serif'>People mentioned</span>
-        <span ng-repeat="person in relatedPersons"><span class="person tag" data-id='{{person.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{person.props.name}} - {{person.props.description}} ({{person.props.birth_date | date:"yyyy"}} - {{person.props.death_date | date:"yyyy"}})' gasp-type='person'  >
+        <span ng-repeat="person in relatedPersons"><span class="person tag" data-id='{{person.id}}'  gasp-type='person' ng-click='setFilter("with", person.id)'>
           {{person.props.name}} ({{person.weight}})</span>{{$last?'':', '}}</span>
         </div>
 
         <div class="tags" ng-if="relatedLocations.length > 0"><span class='meta-label sans-serif'>Locations mentioned</span>
-        <span ng-repeat="location in relatedLocations"><span class="location tag" data-id='{{location.id}}' removed-ng-click="startCommenting(item, per, 'person')" tooltip='{{location.props.name}} - {{location.props.country}} ' gasp-type='location'  >
+        <span ng-repeat="location in relatedLocations"><span class="location tag" data-id='{{location.id}}' ng-click='setFilter("with", location.id)' gasp-type='location'  >
           {{location.props.name}} - {{location.props.country}} ({{location.weight}})</span>{{$last?'':', '}}</span>
         </div>
 

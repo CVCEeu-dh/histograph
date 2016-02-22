@@ -63,6 +63,9 @@ angular.module('histograph')
     */
     $scope.addFilter = function(key, value) {
       // force string
+      if(!value)
+        return;
+      
       value = '' + value;
       if(!$scope.filters[key])
         $location.search(key, value);

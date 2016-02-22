@@ -250,11 +250,10 @@ WITH DISTINCT res
 MATCH (res:resource)
   WHERE id(res) = {id} 
 WITH res
-MATCH (res)<-[r1:appears_in]-(ent:entity)
-  WHERE ent.score > -1 AND ent.df > 1
+MATCH (res)<-[r1:appears_in]-(ent:entity {status:1, common:true})
 WITH res, r1, ent
   ORDER BY r1.tfidf DESC
-  LIMIT 15
+  LIMIT 9
 WITH ent
 MATCH (ent)-[:appears_in]->(res2:resource)
 {if:with}
@@ -291,12 +290,12 @@ RETURN {
 // name: get_related_resources
 // top 20 entities attached to the person
 MATCH (res1:resource)<-[r1:appears_in]-(ent:entity)
-WHERE id(res1) = {id} AND ent.score > -1 AND ent.df > 1
+WHERE id(res1) = {id} AND ent.status = 1 AND ent.common
 WITH res1, r1, ent
   ORDER BY r1.score DESC, r1.tfidf DESC
-  LIMIT 15
+  LIMIT 9
 WITH res1, r1, ent
-MATCH (ent)-[r2:appears_in]->(res2:resource){if:with}<-[:appears_in]-(ent2:entity) WHERE id(ent2) IN {with} AND id(res2) <> {id}{/if}
+MATCH (ent)-[r2:appears_in]->(res2:resource){if:with}, (res2)<-[:appears_in]-(ent2:entity) WHERE id(ent2) IN {with} AND id(res2) <> {id}{/if}
 {unless:with} WHERE id(res2) <> {id} {/unless}
 
     {if:mimetype}
@@ -589,8 +588,8 @@ RETURN col, res
 
 // name: get_precomputated_cooccurrences
 //
-MATCH (p1:{:entity})-[r:appear_in_same_document]-(p2:{:entity})
-WHERE id(p1) < id(p2) AND p1.score > -1 AND p2.score > -1
+MATCH (p1:{:entity} {status:1})-[r:appear_in_same_document]-(p2:{:entity} {status:1})
+WHERE id(p1) < id(p2)
 WITH p1,p2,r
 ORDER BY r.intersections DESC
 LIMIT {limit}
@@ -624,7 +623,7 @@ WITH res
 {unless:with}
 MATCH (p1:{:entity})-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:{:entity})
 {/unless}
-  WHERE id(p1) < id(p2) AND p1.score > -1 AND p2.score > -1 AND p1.df > 1 AND p2.df > 1
+  WHERE id(p1) < id(p2) AND p1.status = 1 AND p2.status = 1 AND p1.common AND p2.common
   {if:start_time}
     AND res.start_time >= {start_time}
   {/if}
