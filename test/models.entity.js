@@ -302,7 +302,6 @@ describe('model:entity upvote downvote and create relationship', function() {
   });
 });
 
-
 describe('model:entity after', function() {
   it('should delete the resource', function (done) {
     Resource.remove(__resource, function (err) {

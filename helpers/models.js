@@ -25,7 +25,27 @@ module.exports = {
   generate: function(options) {
     'use-strict';
 
-    var queries = options.queries; 
+    var queries = options.queries;
+    
+    /*
+      Perform a query given a prefix
+    */
+    function cook(prefix, item, next) {
+      var now = helpers.now(),
+          query = parser.agentBrown(queries[prefix + '_' +options.model], item);
+      
+      neo4j.query(query, _.assign({
+        exec_date: now.date,
+        exec_time: now.time
+      }, item), function (err, nodes) {
+        if(err || !nodes.length) {
+          next(err||helpers.IS_EMPTY);
+          return;
+        }
+        next(null, nodes[0]);
+      })
+    };
+
     return {
       /*
         Get a single item.
@@ -53,19 +73,17 @@ module.exports = {
         Return the object having at least the neo4j identifier and the properties
       */
       create: function(item, next) {
-        var now = helpers.now(),
-            query = parser.agentBrown(queries['create_'+options.model], item);
-          
-        neo4j.query(query, _.assign({
-          exec_date: now.date,
-          exec_time: now.time
-        }, item), function (err, nodes) {
-          if(err || !nodes.length) {
-            next(err||helpers.IS_EMPTY);
-            return;
-          }
-          next(null, nodes[0]);
-        })
+        cook('create', item, next);
+      },
+      /*
+        Update or merge
+      */
+      update: function(item, next) {
+        cook('update', item, next);
+      },
+
+      merge: function(item, next) {
+        cook('merge', item, next);
       },
       /*
         Get a lot of basic item, with sorting orders.

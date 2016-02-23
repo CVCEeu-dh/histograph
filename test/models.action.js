@@ -121,6 +121,69 @@ describe('model:action voteup relationship', function() {
   });
 });
 
+describe('model:action raise, upvote or downvote an issued action', function() {
+  it('should create an ENTITY_LABEL issue', function (done) {
+    Action.merge({
+      kind: Action.RAISE_ISSUE,
+      target: Action.ENTITY_LABEL,
+      focus: parseInt(__entity.id),
+      mentions: [__entity.id],
+      username: __userA.username
+    }, function (err, node) {
+      should.not.exist(err);
+      should.equal(node.performed_by.id, __userA.id);
+      should.equal(node.props.target, Action.ENTITY_LABEL);
+      should.equal(node.props.focus, __entity.id);
+      __actionB = node;
+      done();
+    })
+  });
+
+  it('should UPVOTE the ENTITY_LABEL issue', function (done) {
+    Action.merge({
+      kind: Action.RAISE_ISSUE,
+      target: Action.ENTITY_LABEL,
+      focus: parseInt(__entity.id),
+      mentions: [__entity.id],
+      username: __userB.username
+    }, function (err, node) {
+      should.not.exist(err);
+      should.equal(node.performed_by.id, __userB.id);
+      should.equal(node.id, __actionB.id)
+      
+      done();
+    })
+  });
+
+  it('should DOWNVOTE the ENTITY_LABEL issue', function (done) {
+    Action.merge({
+      kind: Action.RAISE_ISSUE,
+      target: Action.ENTITY_LABEL,
+      focus: parseInt(__entity.id),
+      mentions: [__entity.id],
+      username: __userA.username,
+      downvoted_by: __userA.username
+    }, function (err, node) {
+      should.not.exist(err);
+      should.equal(node.id, __actionB.id)
+      
+      done();
+    })
+  });
+
+  it('should show the issues on the entity', function (done) {
+    Entity.get(__entity.id, function(err, node) {
+      should.not.exist(err)
+      var usernames = _(node.issues).map('users').flatten().map('username').value().join();
+
+      should.equal(usernames, [__userA.username,__userB.username,__userA.username].join())
+      
+      done();
+    })
+  });
+
+});
+
 describe('model:action after', function() {  
   it('should delete the user A', function (done) {
     User.remove({email: __userA.email}, function (err) {
@@ -140,6 +203,13 @@ describe('model:action after', function() {
   
   it('should delete the actionA', function (done) {
     Action.remove(__actionA, function (err) {
+      should.not.exist(err);
+      done();
+    })
+  });
+
+  it('should delete the actionB', function (done) {
+    Action.remove(__actionB, function (err) {
       should.not.exist(err);
       done();
     })

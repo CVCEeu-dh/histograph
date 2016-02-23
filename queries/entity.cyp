@@ -1,11 +1,18 @@
 // name: get_entity
-//
+// get entity with issues
 MATCH (ent:entity)
   WHERE id(ent) = {id}
+WITH ent // collect issues
+  OPTIONAL MATCH (u:user)-[r:performs|:criticizes]->(act:issued)-[:mentions]->(ent)
+  WITH ent, act, {id: id(u), username: u.username, rel: type(r)} as alias_u
+  WITH ent, {id: id(act), props: act, users: collect(alias_u )} as alias_issue 
+  WITH ent, filter(x in collect(alias_issue) WHERE has(x.id)) as issues
+
 RETURN {
   id: id(ent),
   type: LAST(labels(ent)),
-  props: ent
+  props: ent,
+  issues: issues
 }
 
 // name: search_entity
