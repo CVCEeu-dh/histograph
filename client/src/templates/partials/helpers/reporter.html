@@ -2,6 +2,7 @@
   <!-- crowdsourcing tasks for issues  -->
   <div class="crowdsourcing" ng-if='entity.props.issues && entity.props.issues.length' class='animated fadeIn"'>
     <div ng-if='entity.isWrong' ng-include='"templates/partials/helpers/crowdsourcing/issue-iswrong.html"'></div>
+    <div ng-if='entity.isWrongType' ng-include='"templates/partials/helpers/crowdsourcing/issue-iswrongtype.html"'></div>
   </div>
 
   <!-- Report Error form -->
@@ -53,8 +54,7 @@
 
 
     <div ng-if='question=="new"' class='question'>
-
-       <p class='text'>Does these viaf ids applies to the person or the institution selected</p>
+      <p class='text'>Does these viaf ids applies to the person or the institution selected</p>
       <div class='answers'>
         <div class=''>
           
@@ -70,9 +70,8 @@
           <button class='btn btn-line-white btn-block' ng-if='parent' ng-click='downvote($event)' translate translate-values='{type: "{{entity.type}}"}'>popit.fix.not.mentioned</button>
           <button class='btn btn-line-white btn-block' ng-click='askQuestion("wrongtype", $event)' translate='popit.fix.wrong.type' translate-values='{type: "{{entity.type}}"}'></button>
           <button class='btn btn-line-white btn-block' ng-click='askQuestion("contribute", $event)' translate>popit.fix.typo</button>
-           <button ng-if='parent' class='btn btn-line-white btn-block' ng-click='askQuestion("wrong", $event)' translate>popit.fix.untag</button>
-           <button ng-if='!parent' class='btn btn-line-white btn-block' ng-click='askQuestion("wrong", $event)' translate>popit.fix.remove</button>
-          
+          <button ng-if='parent' class='btn btn-line-white btn-block' ng-click='askQuestion("wrong", $event)' translate>popit.fix.untag</button>
+          <button ng-if='!parent' class='btn btn-line-white btn-block' ng-click='askQuestion("wrong", $event)' translate>popit.fix.remove</button>
           <button class='btn btn-line-white obscure btn-block' ng-click='cancelQuestion($event)' translate>button.back</button>
         </div>
       </div>
@@ -89,7 +88,7 @@
       </div>
 
       <div ng-if='question=="contribute"'>{{entity.name}}
-        <p class='text' translate='popit.fix.typo.description' translate-values='{name: "{{entity.props.name}}"}'></p>
+        <p class='text' translate="" translate-values='{name: "{{entity.props.name}}"}'>popit.fix.typo.description</p>
         <div class='answers'>
           <div >
             <form>
@@ -121,18 +120,18 @@
               <span translate>popit.fix.spotcorrecttype.label</span> <span class="caret"></span>
             </button>
             <ul class="uib-dropdown-menu tk-proxima-nova" style='z-index:1050' role="menu" aria-labelledby="btn-append-to-body">
-              <li role="menuitem" ng-if='entity.type != "person"'><a ng-click='raiseIssueSelected("type","person")' translate>popit.fix.spotcorrecttype.type.person</a></li>
-              <li role="menuitem" ng-if='entity.type != "location"'><a ng-click='raiseIssueSelected("type", "location")' translate>popit.fix.spotcorrecttype.type.location</a></li>
-              <li role="menuitem"><a ng-click='raiseIssueSelected("type", "organization")' translate>popit.fix.spotcorrecttype.type.organization</a></li>
-              <li role="menuitem"><a ng-click='raiseIssueSelected("type", "theme")'translate>popit.fix.spotcorrecttype.type.theme</a></li>
+              <li role="menuitem" ng-if='entity.type != "person"'><a ng-click='selectReplacement("type","person")' translate>popit.fix.spotcorrecttype.type.person</a></li>
+              <li role="menuitem" ng-if='entity.type != "location"'><a ng-click='selectReplacement("type", "location")' translate>popit.fix.spotcorrecttype.type.location</a></li>
+              <li role="menuitem"><a ng-click='selectReplacement("type", "organization")' translate>popit.fix.spotcorrecttype.type.organization</a></li>
+              <li role="menuitem"><a ng-click='selectReplacement("type", "theme")'translate>popit.fix.spotcorrecttype.type.theme</a></li>
 
-              <li role="menuitem"><a ng-click='raiseIssueSelected("irrelevant")' translate>popit.fix.spotcorrecttype.type.irrelevant</a></li>
+              <li role="menuitem"><a ng-click='askQuestion("wrong")' translate>popit.fix.spotcorrecttype.type.irrelevant</a></li>
             </ul>
           </div>
         </div>
         <div class='answers'>
           
-          <button class='btn btn-line-white btn-block' ng-click='askQuestion("downvote", $event)'>back</button>
+          <button class='btn btn-line-white btn-block' ng-click='askQuestion("downvote", $event)' translate>button.back</button>
           
         </div>
       </div>
@@ -148,11 +147,11 @@
         </div>
 
         <div ng-if='question=="wrongtype-confirm"'>
-          <p class='text' translate='popit.fix.spotcorrecttype.type.confirm' translate-values='{type: "{{entity._type}}", _type:"{{entity.type}}"}'></p>
+          <p class='text' translate translate-values='{type: "{{entity.type}}", _type:"{{entity._type}}"}'>popit.fix.spotcorrecttype.type.confirm</p>
           <div class='answers'>
             <div class='btn-group btn-group-dual'>
-              <button class='btn btn-line-white btn-primary' ng-click='raiseIssue("type", entity._type)'>yes!</button>
-              <button class='btn btn-line-white obscure' ng-click='askQuestion("wrongtype")'>back</button>
+              <button class='btn btn-line-white btn-primary' ng-click='raiseIssue("type", entity._type)' translate>button.confirm</button>
+              <button class='btn btn-line-white obscure' ng-click='askQuestion("wrongtype")' translate>button.back</button>
             </div>
           </div>
         </div>

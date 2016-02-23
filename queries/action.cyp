@@ -56,7 +56,7 @@ return {
 // EXPLICIT MERGE action FOR issue VOTING PURPOSES ONLY. You should provide a focus
 MATCH (u:user {username:{username}})
 WITH u
-MERGE (a:action{if:kind}:{:kind}{/if} {target:{target}, focus:{focus}})
+MERGE (a:action{if:kind}:{:kind}{/if} {target:{target}, focus:{focus}{if:solution}, solution:{solution}{/if}})
   ON CREATE SET
     a.creation_date  = {exec_date},
     a.creation_time  = {exec_time}
@@ -65,13 +65,16 @@ WITH u,a, {
     username: u.username,
     picture: u.picture
   } as alias_u
-{if:downvoted_by}
-MERGE (u)-[r:criticizes]->(a)
-{/if}
-{unless:downvoted_by}
+
 MERGE (u)-[r:performs]->(a)
-{/unless}
+
 ON CREATE SET
+  {if:downvoted_by}
+    r.vote = -1,
+  {/if}
+  {unless:downvoted_by}
+    r.vote = 1,
+  {/unless}
   r.creation_date  = {exec_date},
   r.creation_time  = {exec_time},
   r.last_modification_date = {exec_date},
@@ -79,6 +82,12 @@ ON CREATE SET
   a.last_modification_date  = {exec_date},
   a.last_modification_time  = {exec_time}
 ON MATCH SET
+  {if:downvoted_by}
+    r.vote = -1,
+  {/if}
+  {unless:downvoted_by}
+    r.vote = 1,
+  {/unless}
   r.last_modification_date = {exec_date},
   r.last_modification_time = {exec_time},
   a.last_modification_date  = {exec_date},
@@ -96,13 +105,18 @@ MATCH (t)
     ON MATCH SET
       r2.last_modification_date = {exec_date},
       r2.last_modification_time = {exec_time}
-WITH a, alias_u, r
+WITH a, alias_u, r, filter(x in collect({
+    id: id(t),
+    props: t,
+    type: last(labels(t))
+  }) WHERE has(x.id)) AS alias_ms
 return {
   id: id(a),
   props: a,
   type: last(labels(a)),
   performed_by: alias_u,
-  rel: type(r)
+  mentioning: alias_ms,
+  rel: r.vote
 }
 LIMIT 1
 

@@ -253,25 +253,25 @@ module.exports = function(io){
     },
 
     /*
-      Create an isse, optionally providing a solution.
+      Create a node (action:issued), optionally providing a solution.
       Cfr models.issue
     
       create a new issue for this entity
       use cases.
 
       1)  with request param
-          ```if req.query.kind == Issue.TYPE```
+          ```if req.query.kind ==  Action.ISSUE_CHECK_TYPE```
           one can raise the issue that the 'label' for that entity is not correct.
           Then, 
           ```req.query.solution = 'correct label'```
       
       2)  with request param
-          ```if req.query.kind == Issue.IRRELEVANT```
+          ```if req.query.kind == Action.ISSUE_CHECK_IS_IRRELEVANT```
           one can raise the issue that the entity is a dumb error.
           No solution should be provided for this issue.
 
       3)  with request param
-          ```if req.query.kind == Issue.MERGEABLE```
+          ```if req.query.kind == Action.ISSUE_CHECK_CAN_MERGE```
           one can raise the issue that the entity can be merged with another entity.
           Then,
           ```req.query.solution = <merge-to-entity-id>```
@@ -280,8 +280,7 @@ module.exports = function(io){
     */
 
     createRelatedIssue: function (req, res) {
-      var Issue   = require('../models/issue'), 
-          form = validator.request(req, { kind: ''}, {
+      var form = validator.request(req, { kind: ''}, {
             fields: [
               {
                 field: 'mentioning',
@@ -296,13 +295,21 @@ module.exports = function(io){
                 check: 'includedIn',
                 args: [
                   [
-                    Issue.TYPE,
-                    Issue.IRRELEVANT,
-                    Issue.WRONG,
-                    Issue.MERGEABLE
+                    Action.ISSUE_CHECK_TYPE,
+                    Action.ISSUE_CHECK_CAN_MERGE,
+                    Action.ISSUE_CHECK_IS_IRRELEVANT,
+                    Action.ISSUE_CHECK_IS_WRONG
                   ]
                 ],
                 error: 'wrong value'
+              },
+              {
+                field: 'solution',
+                check: 'includedIn',
+                args: [
+                  settings.types.entity
+                ],
+                error: 'wrong value for solution'
               }
             ]
           });
@@ -315,13 +322,24 @@ module.exports = function(io){
       }
       // if form.params.kind == Issue.TYPE
       //   check that the solution param is an available label
-      async.parallel({
-        entity: function(next) {
+      async.series([
+        function action(next) {
+          Action.merge({
+            kind: Action.RAISE_ISSUE,
+            focus: +form.params.id,
+            solution: form.params.solution,
+            target: form.params.kind == Action.ISSUE_CHECK_IS_WRONG? Action.ENTITY_WRONG :Action.ENTITY_LABEL,
+            mentions: [+form.params.id].concat(form.params.mentioning || []),
+            username: req.user.username
+          }, next);
+        },
+        // action has created the link btw the user and the entity. we then update the entity in order to recalculate links
+        function entity(next) {
           var params = {
             issue: form.params.kind
           };
           // downvte only if the type is explicit ly set as sWRONG
-          if(form.params.kind == Issue.WRONG)
+          if(form.params.kind == Action.ISSUE_CHECK_IS_WRONG)
             params.downvoted_by = req.user.username;
           
           params.issue_upvoted_by = req.user.username;
@@ -329,31 +347,24 @@ module.exports = function(io){
           Entity.update({
             id: form.params.id
           }, params, next);
-        },
-        action: function(next) {
-          Action.create({
-            kind: Action.RAISE_ISSUE,
-            target: form.params.kind == Issue.WRONG? Action.ENTITY_WRONG :Action.ENTITY_LABEL,
-            mentions: [+form.params.id].concat(form.params.mentioning || []),
-            username: req.user.username
-          }, next);
         }
-      }, function (err, results) {
+      ], function (err, results) {
         if(err)
           return helpers.cypherQueryError(err, res);
+        var item = _.assign({
+            related:{
+              action: results[0]
+            }
+          }, results[1]);
 
         io.emit('entity:create-related-issue:done', {
           user: req.user.username,
           id:  +form.params.id, 
-          data: results.entity
+          data: item
         });
 
         return res.ok({
-          item: _.assign({
-            related:{
-              action: results.action
-            }
-          }, results.entity)
+          item: item
         }, form.params);
         
       });
@@ -365,18 +376,17 @@ module.exports = function(io){
       the issue is then removed from the entity. 
     */
     removeRelatedIssue: function (req, res) {
-      var Issue   = require('../models/issue'), 
-          form = validator.request(req, {kind: ''}, {
+      var form = validator.request(req, {kind: ''}, {
             fields: [
               {
                 field: 'kind',
                 check: 'includedIn',
                 args: [
                   [
-                    Issue.TYPE,
-                    Issue.IRRELEVANT,
-                    Issue.WRONG,
-                    Issue.MERGEABLE
+                    Action.ISSUE_CHECK_TYPE,
+                    Action.ISSUE_CHECK_CAN_MERGE,
+                    Action.ISSUE_CHECK_IS_IRRELEVANT,
+                    Action.ISSUE_CHECK_IS_WRONG
                   ]
                 ],
                 error: 'wrong value'
@@ -391,18 +401,28 @@ module.exports = function(io){
       };
       // downvte only if the type is explicit ly set as sWRONG
       // downvte only if the type is explicit ly set as sWRONG
-      if(form.params.kind == Issue.WRONG)
+      if(form.params.kind == Action.ISSUE_CHECK_IS_WRONG)
         params.upvoted_by = req.user.username;
 
       params.issue_downvoted_by = req.user.username;
       
-      async.parallel({
-        entity: function(next) {
+      async.series([
+        function action(next) {
+          Action.merge({
+            kind: Action.RAISE_ISSUE,
+            focus: +form.params.id,
+            target: form.params.kind == Action.ISSUE_CHECK_IS_WRONG? Action.ENTITY_WRONG :Action.ENTITY_LABEL,
+            mentions: [+form.params.id].concat(form.params.mentioning || []),
+            username: req.user.username,
+            downvoted_by: req.user.username
+          }, next);
+        },
+        function entity(next) {
           var params = {
             issue: form.params.kind
           };
-          // downvte only if the type is explicit ly set as sWRONG
-          if(form.params.kind == Issue.WRONG)
+          // UPVOTE if we want to remove the issue WRONG: ebntity score will be updated accordingly, cfr Entity.update()
+          if(form.params.kind == Action.ISSUE_CHECK_IS_WRONG)
             params.upvoted_by = req.user.username;
           
           params.issue_downvoted_by = req.user.username;
@@ -410,50 +430,28 @@ module.exports = function(io){
           Entity.update({
             id: form.params.id
           }, params, next);
-        },
-        action: function(next) {
-          Action.create({
-            kind: Action.DOWNVOTE_ISSUE,
-            target: form.params.kind == Issue.WRONG? Action.ENTITY_WRONG :Action.ENTITY_LABEL,
-            mentions: [+form.params.id].concat(form.params.mentioning || []),
-            username: req.user.username
-          }, next);
         }
-      }, function (err, results) {
+      ], function (err, results) {
         if(err)
           return helpers.cypherQueryError(err, res);
+
+        var item = _.assign({
+            related:{
+              action: results[0]
+            }
+          }, results[1]);
 
         io.emit('entity:remove-related-issue:done', {
           user: req.user.username,
           id:  +form.params.id, 
-          data: results.entity
+          data: item
         });
 
         return res.ok({
-          item: _.assign({
-            related:{
-              action: results.action
-            }
-          }, results.entity)
+          item: item
         }, form.params);
         
       });
-    
-      // async.series({
-      //   entity: function(next) {
-      //     var params = {
-      //       issue: form.params.kind
-      //     };
-      //     if(form.params.kind == Issue.WRONG)
-      //       params.downvoted_by = req.user.username;
-          
-      //     params.issue_downvoted_by = req.user.username;
-
-      //     Entity.update({
-      //       id: form.params.id
-      //     }, params, next);
-      //   },
-
     },
 
     /*

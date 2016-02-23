@@ -6,4 +6,4 @@
     gasp-creator="{{per.rel.properties.created_by||''}}"
     gasp-type='person'
     gasp-parent='{{item.type}}-{{item.id}}'
-    class="tag person {{per.props.starred?'starred':''}} {{per.props.issues?'with-issues': ''}} {{per.rel.properties.downvote.length > 1? 'deprecated': '' }} {{per.rel.properties.downvote.length > 0? 'downvoted': '' }} {{per.rel.properties.upvote.length > 0? 'validated': '' }} {{user.username == per.rel.properties.created_by? 'yours': ''}}">{{per.props.name}}</span><!-- {{$last? '':  ', '}} -->
+    class="tag person {{per.props.starred?'starred':''}} {{per.props.issues.length?'with-issues': ''}} {{per.rel.properties.downvote.length > 1? 'deprecated': '' }} {{per.rel.properties.downvote.length > 0? 'downvoted': '' }} {{per.rel.properties.upvote.length > 0? 'validated': '' }} {{user.username == per.rel.properties.created_by? 'yours': ''}}">{{per.props.name}}</span><!-- {{$last? '':  ', '}} -->

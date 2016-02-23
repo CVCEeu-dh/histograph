@@ -96,6 +96,7 @@
   "header.myselection": "my selection",
 
   "inspect.entity.iswrong": "It seems that <strong>{{name}}</strong> is a <strong>mistake</strong> and could be safely removed.",
+  "inspect.entity.iswrongtype": "It seems that <strong>{{name}}</strong> type should be changed",
   "inspect.entity.related_documents": "related documents",
 
   "loading": "loading ...",

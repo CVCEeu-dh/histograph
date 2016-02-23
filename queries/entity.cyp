@@ -3,8 +3,8 @@
 MATCH (ent:entity)
   WHERE id(ent) = {id}
 WITH ent // collect issues
-  OPTIONAL MATCH (u:user)-[r:performs|:criticizes]->(act:issued)-[:mentions]->(ent)
-  WITH ent, act, {id: id(u), username: u.username, rel: type(r)} as alias_u
+  OPTIONAL MATCH (u:user)-[r:performs]->(act:issued)-[:mentions]->(ent)
+  WITH ent, act, {id: id(u), username: u.username, vote: r.vote, last_modification_time: r.last_modification_time} as alias_u
   WITH ent, {id: id(act), props: act, users: collect(alias_u )} as alias_issue 
   WITH ent, filter(x in collect(alias_issue) WHERE has(x.id)) as issues
 

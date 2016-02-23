@@ -9,7 +9,7 @@
  * Use suggestFactory as service
  */
 angular.module('histograph')
-  .directive('snippets', function ($log, $location, $timeout, EVENTS, SuggestFactory, EntityRelatedFactory) {
+  .directive('snippets', function ($log, $location, $timeout, EVENTS, SuggestFactory, EntityFactory, EntityRelatedFactory) {
     'use strict';
      return {
       restrict : 'A',
@@ -161,7 +161,15 @@ angular.module('histograph')
             }
           }
 
-          if(itemsIdsToLoad.length > 0) 
+          if(itemsIdsToLoad.length == 1 && target.type == 'node' && target.data.node.type != "resource"){
+            EntityFactory.get({
+              id: itemsIdsToLoad[0]
+            }, function (res) {
+              if(res.result && res.result.item)
+                scope.fill([res.result.item]);
+            });
+          } else if(itemsIdsToLoad.length > 0){
+
             SuggestFactory.getUnknownNodes({
               ids: itemsIdsToLoad
             }, function (res) {
@@ -170,6 +178,8 @@ angular.module('histograph')
                 scope.fill(res.result.items);
                 // load in between
             });
+          }
+            
         };
         /*
           hide snippet

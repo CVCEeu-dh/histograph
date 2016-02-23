@@ -89,7 +89,7 @@
             <span class="fa fa-times-circle"></span></a>
       </div>
     </div>
-    <div class='btn-group-wrapper {{question?"disabled":""}}'>
+    <!-- <div class='btn-group-wrapper {{question?"disabled":""}}'>
       <div class="btn-group">
         <a class="btn btn-line-white" ng-click='close()' ng-href='/#/e/{{entity.id}}' title="{{tooltip.popit.more | translate}}" data-action="link">more</a>
         
@@ -100,14 +100,15 @@
         <button ng-if='!link.removable && !entity.isIncomplete' class='btn btn-line-white {{entity.upvotes.length? "btn-number":""}}' ng-click='upvote($event)'>CONFIRM <i class="fa fa-check"></i><div class='number' ng-if='entity.upvotes.length'>{{entity.upvotes.length}}</div></button>
 
       </div>
-    </div>
+    </div> -->
   </div>
     
-  <div class='questions {{question}} obscure {{question?"enabled":""}}' ng-include='"templates/partials/helpers/questions.html"'>
-
+  <div reporter ng-if='user' entity='entity' user='user' show-more='true'></div>
+  <!-- <div class='questions {{question}} obscure {{question?"enabled":""}}' ng-include='"templates/partials/helpers/questions.html"'>
+ 
  
 
-  </div>
+  </div> -->
     <!-- <div class="action-group">
 
       

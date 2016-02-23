@@ -28,6 +28,12 @@ module.exports = _.assign(model.generate({
   DOWNVOTE_ISSUE: 'downvoteissue',
   UPVOTE:      'upvote',
 
+  ISSUE_CHECK_DATE: 'date',
+  ISSUE_CHECK_TYPE: 'type',
+  ISSUE_CHECK_CAN_MERGE: 'mergeable',
+  ISSUE_CHECK_IS_IRRELEVANT: 'irrelevant',
+  ISSUE_CHECK_IS_WRONG: 'wrong',
+
   BRAND_NEW_ENTITY: 'BRAND_NEW_ENTITY',
   ENTITY_LABEL: 'ENTITY_LABEL',
   ENTITY_WRONG: 'ENTITY_WRONG',

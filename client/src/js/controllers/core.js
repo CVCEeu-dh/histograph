@@ -696,7 +696,7 @@ angular.module('histograph')
       Raise a new Issue
       for an entity in a specific context.
     */
-    $scope.raiseIssue = function(entity, resource, kind, solution, next){
+    $rootScope.raiseIssue = function(entity, resource, kind, solution, next){
       var params = {
         kind: kind,
       }
@@ -719,7 +719,7 @@ angular.module('histograph')
       });
     };
 
-    $scope.downvoteIssue = function(entity, resource, kind, solution, next){
+    $rootScope.downvoteIssue = function(entity, resource, kind, solution, next){
       var params = {
         kind: kind,
       }
@@ -859,7 +859,7 @@ angular.module('histograph')
       Merge two entities together in a specific resource
 
     */
-    $scope.mergeEntities = function(wrong, trusted, resource, next) {
+    $rootScope.mergeEntities = function(wrong, trusted, resource, next) {
       debugger
       EntityRelatedExtraFactory.save({
         id: wrong.id,

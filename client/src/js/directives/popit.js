@@ -25,10 +25,11 @@ angular.module('histograph')
   /*
     Jquery Popup. One popup in DOM to handle every damn entity
   */
-  .directive('gasp', function ($log, SuggestFactory) {
+  .directive('popit', function ($log, EntityFactory) {
     return {
       restrict : 'A',
       scope:{
+        user: '=',
         target: '=',
         comment: '&comment',
         redirect: '&',
@@ -36,7 +37,7 @@ angular.module('histograph')
         filter: '&',
         inspect: '&'
       },
-      templateUrl: 'templates/partials/helpers/gasp.html',
+      templateUrl: 'templates/partials/helpers/popit.html',
       link : function(scope, element, attrs) {
         var _gasp = $(element[0]), // gasp instance;
             _pId  = -1, // previous id
@@ -63,11 +64,11 @@ angular.module('histograph')
             hide();
             return;
           }
-          $log.info('::gasp -> toggle() for type:', type, el)
+          $log.info(':: popit -> toggle() for type:', type, el)
           
           // validate id
           if(!id && isNaN(id)) {
-            $log.error('::gasp -> toggle() html DOM item lacks "data-id" attribute or it is not a number, given id:', id);
+            $log.error(':: popit -> toggle() html DOM item lacks "data-id" attribute or it is not a number, given id:', id);
             scope.isUnknown = true;
             scope.$apply();
             showGasp(pos)
@@ -103,7 +104,7 @@ angular.module('histograph')
             };
 
             if(!parent.id) {
-              $log.error('::gasp -> toggle()  html DOM item lacks "gasp-parent" attribute');
+              $log.error(':: popit -> toggle()  html DOM item lacks "gasp-parent" attribute');
               return;
             }
           }
@@ -130,7 +131,7 @@ angular.module('histograph')
           if(removable === 'true')
             scope.link.removable = true;
 
-          $log.log('::gasp -> -> toggle() is removable:', scope.link,removable === 'true')
+          $log.log(':: popit -> -> toggle() is removable:', scope.link,removable === 'true')
           // apply scope
           scope.$apply();
           // set the id
@@ -140,16 +141,17 @@ angular.module('histograph')
           showGasp(pos);
 
           // load item
-          SuggestFactory.getUnknownNodes({ids:[scope.entity.id]}, function (res) {
-            $log.log('::gasp getUnknownNodes:', scope.entity.id)
-            scope.entity.isIncomplete = !_.compact([
-              res.result.items[0].props.links_wiki,
-              res.result.items[0].props.links_viaf
-            ]).length;
+          EntityFactory.get({id:scope.entity.id}, function (res) {
+            $log.log(':: popit getUnknownNodes:', scope.entity.id)
+            scope.entity = res.result.item;
+            // scope.entity.isIncomplete = !_.compact([
+            //   res.result.items[0].props.links_wiki,
+            //   res.result.items[0].props.links_viaf
+            // ]).length;
 
-            scope.entity.isWrong = res.result.items[0].props.issues? res.result.items[0].props.issues.indexOf('wrong') != -1: false;
+            // scope.entity.isWrong = res.result.items[0].props.issues? res.result.items[0].props.issues.indexOf('wrong') != -1: false;
 
-            scope.entity.props = res.result.items[0].props;
+            // scope.entity.props = res.result.items[0].props;
           })
         };
         

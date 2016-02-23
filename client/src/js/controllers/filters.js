@@ -79,7 +79,7 @@ angular.module('histograph')
             list.push(value);
         })
         // cleanup duplicates
-        list = _.unique(list);
+        list = _.uniq(list);
         
         if(list.length)
           $location.search(key, list.join(','));
@@ -123,7 +123,7 @@ angular.module('histograph')
           qs = [];
       // handle 'type' and mimetype (pseudo-array)
       for (var i in candidates) {
-        var list = _.unique(_.compact(_.map((''+candidates[i]).split(','), _.trim)));
+        var list = _.uniq(_.compact(_.map((''+candidates[i]).split(','), _.trim)));
         filters[i] = list;
         qs.push(encodeURIComponent(i) + '=' +encodeURIComponent(candidates[i]));
       }

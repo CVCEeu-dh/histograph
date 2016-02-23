@@ -109,13 +109,13 @@ a#header-title {
   position:absolute;
   left:0px;
   right: 10px;
-  height: 50px;
-  width: 50px;
+  height: 70px;
+  width: 70px;
 }
 #header-logo img{
-  height: 25px;
   padding: 0;
-  margin: 12px;
+  margin: 5px 0px 0 10px;
+  max-width: 50px;
 }
 
 .view{
@@ -485,6 +485,7 @@ a#header-title {
   padding: 20px;
   background-color: #383838;
   color: #A9A2A2;
+  min-height: 100%;   
 }
 
 .item.entity h3, .item.entity .description{
@@ -1548,6 +1549,7 @@ height: 150px;
        -o-transition: color .3s cubic-bezier(0.65, 0.05, 0.36, 1);
           transition: color .3s cubic-bezier(0.65, 0.05, 0.36, 1);
 }
+
 #milkyway .gasp .action.disabled {
   opacity: .1; 
 }
@@ -1591,6 +1593,7 @@ height: 150px;
   background: transparent;
   pointer-events: none;
   overflow: hidden;
+  color: #A9A2A2;
 }
 
 #sigma-snippets > .snip {
@@ -2372,14 +2375,17 @@ input.form-control{
 }
 
 #pop > .inner .btn-group-wrapper{
-  height:50px;
+  height: 35px;
    overflow: hidden;
    -webkit-transition: height .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
      -moz-transition: height .3s cubic-bezier(0.65, 0.05, 0.36, 1);
        -o-transition: height .3s cubic-bezier(0.65, 0.05, 0.36, 1);
           transition: height .3s cubic-bezier(0.65, 0.05, 0.36, 1);
 }
-
+#pop > .inner .questions{
+      border-bottom: 1px solid #383838;
+    border-top: 1px solid #383838;
+}
 #pop > .inner .btn-group-wrapper.disabled{
   pointer-events : auto;
 }

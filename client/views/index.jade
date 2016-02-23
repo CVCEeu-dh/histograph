@@ -12,8 +12,7 @@ html
     link(href='/css/codemirror.css', rel='stylesheet')
     link(href='/css/style.css', rel='stylesheet')
     
-    link(href='/css/abovetheline.css', rel='stylesheet')
-    link(href='/css/patch.css', rel='stylesheet')
+    
 
     script(src='/socket.io/socket.io.js')
     script(src='//use.typekit.net/fwe7tir.js')
@@ -22,6 +21,157 @@ html
       try{Typekit.load();}catch(e){}
 
     style.
+      /*
+        Patch file: above the fold;
+      */
+      html{
+        height: 100%;
+        margin: 0;
+        padding: 0
+      }
+
+
+      body{
+        font-size: 13px;
+        line-height: 24px;
+        color: #1d1d1d;
+        height: 100%;
+        overflow: hidden;
+        background-color: #e9e9e9;
+        margin: 0;
+        padding: 0
+      }
+
+      body.login-page{
+        background: #f0f0f0; 
+      }
+
+      h1,h2,h3,h4{
+        font-weight:normal;
+        font-size: inherit;
+        line-height: inherit;
+      }
+
+      header{
+        height: 50px;
+        position: fixed;
+        left:0px;
+        right:0px;
+        top: 0px;
+        background: #383838;
+        z-index: 15;
+        line-height: 50px;
+        font-size:13px;
+        padding: 0 50px;
+      }
+
+      header ul{
+        display: inline-block;
+        list-style-type: none;
+      }
+
+
+
+
+      header img {
+        display: inline-block;
+        height: 25px;
+        padding: 0px 10px 0 0;
+      }
+
+      blockquote{
+        padding: 10px 15px;
+        font-size: 12px;
+        line-height: 18px;
+        font-style: italic;
+        border: 0px solid transparent;
+        background: #eee;
+      }
+
+      a{
+        color: #FF5742;
+      }
+      a:focus, a:hover{
+        color: #151515;
+        text-decoration: none;
+      }
+
+      .navbar-header a{
+        color: #f0f0f0;
+        font-size: 21px;
+        -webkit-transition: color .3s ease-out; /* Changed here */ 
+         -moz-transition: color .3s ease-out;
+           -o-transition: color .3s ease-out;
+              transition: color .3s ease-out;
+      }
+
+      .navbar-header a:hover{
+        color: white;
+      }
+
+      #login{
+        margin: 100px auto;
+        width: 300px;
+        text-align: center;
+      }
+
+      #login .btn{
+        font-size: 12px;
+        border: 1px solid #3B3B3B;
+      }
+      #login h5{
+        margin-bottom: 86px;
+        color: #151515;
+        font-size:24px;
+      }
+
+      #login p {
+        color: #a9a2a2;
+        
+      }
+
+      #logo{
+        font-size: 28px;
+        line-height: 56px;
+        position: absolute;
+        bottom: 10px;
+        /* z-index: 1000000; */
+        left: 50%;
+        width: 160px;
+        margin-left: -80px;
+        text-align: center;
+      }
+
+      /*
+        Flickr API experiment
+      */
+      #flickr{
+        position: absolute;
+        z-index: -1;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #fff 
+      }
+
+      .DEP-halftone-overlay{
+        position: absolute;
+        z-index: 1;
+        width: 100%;
+        height: 100%;
+        background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAMAAAADCAYAAABWKLW/AAAAF0lEQVQIW2NkYGD4z8DAwMgAI0AMDA4AI3EBBCKrOnQAAAAASUVORK5CYII=) repeat;
+      }
+      #logo img{
+        max-width: 80px;
+      }
+
+      #header-logo{
+        position : absolute;
+      }
+      #header-logo img{
+        max-width:50px
+      }
 
       .loader{
         position :absolute;
@@ -77,6 +227,348 @@ html
                   transform: scale(1); } 
       }
 
+      /*
+        Patch
+      */
+      header{
+        height: 70px;
+        line-height: 70px;
+        background: #f0f0f0;
+        padding: 0 50px 0 70px;
+      }
+
+      .navbar-header a {
+          color: black;
+          font-size: 17px;
+      }
+
+      .view {
+        top: 70px;
+        background: #fff;
+      }
+
+      a.with-number{
+        cursor:pointer;
+      }
+
+      header ul.menu ul.dropdown-menu li a{
+        line-height: 20px;
+            line-height: 2em;
+          padding: 5px 0;
+      }
+
+      header ul.menu li a{
+        line-height: 70px;
+        color: #8A8A8A;
+      }
+
+      header ul.menu li.active a{
+        color: #FF5742;
+      }
+
+      header ul.menu li a:hover{
+        color: black
+      }
+
+      #search-field {
+          padding-top: 23px;
+      }
+      #search-field input{
+        background: transparent;
+        font-size: 13px;
+        color: black;
+        width: 110px;
+
+      }
+
+      #search-field .dropdown-menu li a{
+        padding: 0;
+      }
+
+      #milkyway {
+        position: fixed;
+        top: 110px;
+        left: 0;
+        right: 0;
+        bottom: 50px;
+      }
+
+      #milkyway.explore.persons{
+        left:0;
+      }
+
+      #milkyway.graph{
+        left:0;
+      }
+
+      .explore #see-also {
+          width: auto;
+          margin-left: 0;
+          left: 35px;
+      }
+      header ul.dropdown-menu li .notification a {
+          display: inline;
+          line-height: inherit;
+          padding: 0;
+      }
+      #see-also{
+        right: 0;
+        top: 40px;
+      }
+
+      #perspective-menu{
+        
+
+        background: white;
+        height: auto;
+        border-bottom: 1px solid #d8d8d8;
+      }
+
+      #perspective-menu ul{
+        border-bottom: none;
+      }
+      /*
+        View specific perspective menu
+      */
+
+
+
+
+
+
+      .search #perspective-menu > ul{
+        padding-left: 70px;
+      }
+
+      .resource #perspective-menu > ul{
+        padding-left: 70px
+      }
+
+      .explore #perspective-menu > ul{
+        padding-left: 70px;
+      }
+
+
+      .explore #see-also{
+        top: 40px;
+      }
+      .search #see-also {
+        left: 190px;
+        top: 40px;
+      }
+      .user #see-also,.neighbors #see-also{
+        left:10px;
+      }
+
+
+      #milkyway.search  {
+        left: 540px
+      }
+
+
+      #pop{
+        z-index: 1052;
+       }
+      /*
+        Modals
+      */
+      .modal.in .modal-dialog{
+        pointer-events: none;
+      }
+      .modal-content{
+        pointer-events:auto;
+      }
+      .modal.inspect-metadata .modal-dialog{
+        width: 400px;
+        height: 400px;
+      }
+      .modal.inspect-metadata .modal-dialog .modal-content{
+        bottom: auto;
+        height: auto;
+      }
+      .modal.inspect .modal-body.with-sidebar{
+        padding: 0;
+      }
+
+      .modal.inspect .modal-body.with-sidebar .item{
+        padding:0;
+      }
+
+      .modal.inspect .modal-body.with-sidebar .item .type, .modal.inspect .modal-body.with-sidebar .item h3{
+        margin:0;
+      }
+      .modal.inspect .modal-body.with-sidebar .item .meta{
+        margin: 20px 0;
+      }
+      .modal.inspect .modal-body.with-sidebar .item img{
+        min-width: auto;
+        max-height: none;
+      }
+      .modal.inspect .modal-body.with-sidebar .item blockquote{
+          padding: 20px 0;
+      }
+      .modal.inspect .modal-body.with-sidebar .item .doi{
+          padding: 10px 20px;
+      }
+
+      .flatten > p{
+        display: inline
+      }
+      /*
+        Playlist
+      */
+      #playlist{
+        width:230px;
+        -webkit-transform: translateX(-230px);
+          -ms-transform: translateX(-230px);
+          transform: translateX(-230px);
+      }
+      #playlist-close{
+        z-index: 100;
+      }
+      #playlist-actions {
+        width: 100%;
+      }
+      #playlist-actions h5{
+          padding: 0 20px 0px 0;
+          border-bottom: 1px solid #383838;
+          color: #a9a9a9;
+          height: 70px;
+          line-height: 70px;
+          margin: 0 20px 0 20px;
+      }
+      #playlist-actions .contents{
+        color:#b0b0b0;
+        margin: 20px;
+          border-bottom: 1px solid #383838;
+          padding-bottom: 20px;
+
+      }
+      #playlist-shadow.neighbors{
+        opacity: 0
+      }
+      #playlist-queue{
+        bottom:0;
+      }
+      .playlist-item{
+        width: 210px
+      }
+      #playlist-queue{
+        top: 240px;
+      }
+      /*
+
+      */
+      #sigma-snippets .btn-line-white .fa{
+            font-size: 13px;
+          line-height: 15px;
+
+      }
+
+
+
+      #sigma-snippets .content .links{
+        margin-left:20px;
+        text-align: left
+      }
+
+      #sigma-snippets .content .links a:hover{
+        color: #fff;
+      }
+
+      .entity #see-also{
+        margin-left: auto;
+        width: auto;
+        margin-right: 0px;
+        left: 360px;
+      }
+
+      .entity #perspective{
+        left: 0;
+      }
+
+      /*
+        Annotator
+      */
+      .annotator-hl{
+        border-bottom: 1px solid rgba(50,50,50,0.5)
+      }
+
+      /*
+        MEDIA PATCH
+      */
+      @media screen and (min-width : 768px) {
+        .masonry-brick{
+          width: 100%;
+        }
+
+        .resource #see-also {
+          width: 320px
+        }
+        .resource #perspective {
+          right: 320px;
+        }
+        header ul.menu li a{
+          padding: 0 10px;
+        }
+      }
+
+      @media screen and (min-width: 992px) {
+        /**/
+        .masonry-brick{
+          width: 50%;
+        }
+        .resource #perspective {
+          width: 540px;
+        }
+
+        .entity #perspective{
+          width: 360px;
+        }
+
+        
+        .resource #see-also {
+          left: 550px;
+          margin-left: 0;
+          width: auto ;
+        }
+      }
+
+      @media screen and (min-width: 1200px) {
+        header ul.menu li a{
+          padding: 0 20px;
+        }
+        .resource #perspective {
+          width: 670px;
+        }
+        .resource #see-also {
+          left: 680px;
+          margin-left: 0;
+          width: auto ;
+      }
+
+        .resource #perspective-menu{
+          
+        }
+        
+        .entity .masonry-brick{
+          width: 33%;
+        }
+
+        .masonry-brick{
+          width: 50%;
+        }
+      }
+
+      @media screen and (min-width: 1440px) {
+        .masonry-brick{
+          width: 33%;
+        }
+        .entity .masonry-brick{
+          width: 25%;
+        }
+      }
+
 
   body(ng-app='histograph', class=!user.username? 'login-page':'')
     script(type='text/javascript').
@@ -88,13 +580,15 @@ html
           header(class='{{queueStatus}}') 
             //- a(id='header-logo', href='#/')
             //-   img(src='images/hg_v.png')
-             
+            a(id='header-logo', href='http://www.cvce.eu')
+              img(src='images/cvce.svg')
+              
             
             div(class='row', ng-cloak)
               div(class='col-sm-12')
                 div.navbar-header
                   a.serif(href='/#/')
-                    span #{title} {{isLoading}}
+                    span #{title}
 
                 ul.menu.nav.navbar-nav.navbar-right
                   li(class='{{currentState.name == "explore.resources"?"active":""}}')
@@ -169,16 +663,20 @@ html
             //-   div(history='', trails='trails')
             
         if !user.username
+
+            div(id='logo')
+              img(src='images/cvce.svg')
+
             div#flickr
               div(flickr='')
               div.halftone-overlay
               
             div(id='login')
-              //- div(id='logo')
-              //-   img(src='images/hg_v.png')
+              
+
               h5 #{title}
               form
-                p.sans-serif
+                p
                   span(translate='login.welcome')
 
                 p
@@ -211,7 +709,7 @@ html
           
           div(id='timeline', timeline, class='{{currentState.name}} {{queueStatus}}', t='timeline', cxt='contextualTimeline', filters="filters")
             
-          div(id='pop', gasp, target="target", redirect='redirect(path)', filter='addFilter(key, item)', comment="startCommenting(item, tag, hashtag)", queue="queue(item, inprog)", inspect='inspect(item)')
+          div(id='pop', popit, user='user', target="target", redirect='redirect(path)', filter='addFilter(key, item)', comment="startCommenting(item, tag, hashtag)", queue="queue(item, inprog)", inspect='inspect(item)')
           
           div(id='crowd',ng-controller='CrowdCtrl', ng-include='"templates/partials/crowd.html"', class='sans-serif {{isVisible? "animated fadeIn":"animated fadeOut"}}')
             div campaign
