@@ -397,7 +397,6 @@ module.exports = {
       if(!queries[path[1]]) {
         console.log(clc.blackBright('  queries available:'), _.keys(queries));
         return callback(' Please specify a valid query name with --name=<queryname>');
-      
       }
       
       // autotransform stringified array in array
@@ -421,6 +420,14 @@ module.exports = {
       
       console.log(clc.blackBright('   executing query: ', clc.magentaBright(options.cypher), '...\n'));
       
+      // enrich options with timestamp (always useful though)
+      if(!options.exec_time || !options.exec_date){
+        var now = require('../../helpers').now();
+        options.exec_time = now.time;
+        options.exec_date = now.date;
+      }
+
+
       
       query = (options.profile? 'PROFILE ':'') + parser.agentBrown(queries[path[1]], options);
       console.log(query)
