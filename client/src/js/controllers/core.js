@@ -905,8 +905,8 @@ angular.module('histograph')
       
 
     */
-    $scope.inspect = function(entity) {
-      $log.log('CoreCtrl -> inspect() - entity:', entity);
+    $rootScope.inspect = function(entity, resource, issue) {
+      $log.log('CoreCtrl -> inspect() - entity:', entity, (resource? '- resource: ' + resource.id: ''));
       var language = $scope.language;
 
       var modalInstance = $uibModal.open({
@@ -917,6 +917,9 @@ angular.module('histograph')
         resolve: {
           entity: function(EntityFactory) {
             return EntityFactory.get({id: entity.id}).$promise
+          },
+          issue: function(){
+            return issue
           },
           user: function(){
             return $scope.user;

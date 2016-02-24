@@ -176,7 +176,7 @@ angular.module('histograph')
             $log.error(':: reporter  -~> upvote() failed, entity or resource not valid');
             return;
           }
-          debugger
+          
           $scope.isLocked = true;
           $rootScope.upvote($scope.entity, $scope.resource, function(){
             $scope.isLocked = false;
@@ -203,14 +203,27 @@ angular.module('histograph')
         /*
           Merge in context. 
         */
-        $scope.mergeInContext = function() {
-          debugger
+        $scope.mergeInContext = function(entityToMergeWith) {
+          $log.log(':: reporter  -~> mergeInContext() entity:', $scope.entity.id, '- resource:', $scope.resource.id, '- MERGE WITH:', entityToMergeWith);
+          if(isNaN($scope.entity.id) || isNaN($scope.resource.id)){
+            $log.error(':: reporter  -~> mergeInContext() failed, entity or resource not valid');
+            return;
+          }
+          
           $scope.isLocked = true;
-          scope.$parent.mergeEntities(scope.entity, scope.entity.alias, scope.parent, function (err, result) {
+          $rootScope.mergeEntities($scope.entity, entityToMergeWith, $scope.resource, function (err, result) {
             $scope.isLocked = false;
             $scope.cancelQuestion();
           });
         };
+
+        /*
+          Inspect for a specific
+        */
+        $scope.inspectIssue = function(issue) {
+          $rootScope.inspect($scope.entity, $scope.resource, issue);
+        };
+
         /*
           Disagree with the specific topic.
           If you have already voted this do not apply.
@@ -304,6 +317,14 @@ angular.module('histograph')
         socket.on('entity:upvote-related-resource:done', function (result) {
           if($scope.entity && result.resource.id == $scope.resource.id && result.data.id == $scope.entity.id){
             $log.info(':: reporter socket@entity:upvote-related-resource:done - by:', result.user, '- result:', result);
+            $scope.entity.upvotes = result.data.rel.upvote || [];
+            $scope.entity.downvotes = result.data.rel.downvote || [];
+          }
+        });
+
+        socket.on('entity:merge-entity:done', function (result) {
+          if($scope.entity && result.resource.id == $scope.resource.id && result.data.id == $scope.entity.id){
+            $log.info(':: reporter entity:merge-entity:done - by:', result.user, '- result:', result);
             $scope.entity.upvotes = result.data.rel.upvote || [];
             $scope.entity.downvotes = result.data.rel.downvote || [];
           }

@@ -1,57 +1,5 @@
-<div class='nodes'>
-  <div style='height: 100%; overflow: auto'>
-    <div class='node person' style='height: 100%'>
-      <div class='thumbnail'>
-        <div class="thumbnail-wrapper" style='background-image: url({{entity.props.thumbnail}})'>    
-          
-        </div>
-      </div>
-      <div class='content'>
-        <h4><a ng-href='#/e/{{entity.id}}' marked="entity.props|lookup:'name':language"></a></h4>
-        <div class='date' ng-if='entity.type== "person"'>{{entity.type}} - {{entity.props.birth_time | datesOfAPerson : entity.props.death_time}}</div>
-        <div class='date' ng-if='entity.type!= "person"'>{{entity.type}}</div>
-      
 
-      </div>
-
-      <!-- crowdsourcing tasks for issues  -->
-      <div class="crowdsourcing" ng-if='entity.isWrong' ng-include='"templates/partials/helpers/crowdsourcing/issue-iswrong.html"'></div>
-
-      <!--  pinboard and bookmarks -->
-      <div class="actions">
-        <a class="action" title="{{'tooltip.resource.add.to.myselection'|translate}}" ng-click="queue()">
-        <span class="fa fa-thumb-tack"></span></a>
-      </div>
-
-
-      <div class='btn-group-wrapper' ng-if="!isWrong">
-        <div class="btn-group">
-          <a class="btn btn-line-white" ng-click='cancel()' ng-href='/#/e/{{entity.id}}' title="{{tooltip.popit.more | translate}}" data-action="link" translate>button.visit</a>
-          <button ng-if='entity.type != "theme"'  class='btn btn-line-white obscure' ng-click='askQuestion("downvote")'><i class="fa fa-bug"></i> fix / edit </button>
-          <!-- <button ng-if='!entity.isWrong && !entity.isIncomplete && !isUpvotedByUser' class='btn btn-line-white {{entity.props.upvote.length? "btn-number":""}}' ng-click='confirm()'><span translate>button.confirm</span> <i class="fa fa-check"></i><div class='number' ng-if='entity.props.upvote.length'>{{entity.props.upvote.length}}</div></button>
-          <button ng-if='!entity.isWrong && !entity.isIncomplete && isUpvotedByUser' class='btn btn-line-white {{entity.props.upvote.length? "btn-number":""}}' ng-click='unconfirm()'><span translate>button.unconfirm</span> <div class='number' ng-if='entity.props.upvote.length'>{{entity.props.upvote.length}}</div></button> -->
-        </div>
-      </div>
-
-      <div class='questions' ng-include='"templates/partials/helpers/reporter.html"'></div>
-
-      <div class='detail'>
-        
-          
-        <blockquote  marked="entity.props|lookup:'abstract':language">
-        </blockquote>
-        <blockquote>source: <a ng-href='http://viaf.org/viaf/{{entity.props.links_viaf}}' target='_blank' ng-if='entity.props.links_viaf'>viaf</a>
-
-        <a ng-href='http://dbpedia.org/page/{{entity.props.links_wiki}}' target='_blank' ng-if='entity.props.links_wiki'>dbpedia</a>
-
-        </blockquote>
-      </div>
-
-      
-    </div>
-  </div>
-</div>
-<div class="modal-header with-sidebar">
+<div class="modal-header">
   <h3 class="modal-title">
     <a ng-click='previous()' class='action left'><i class='fa fa-angle-left'></i></a>
     <span ng-if='modalStatus!="quiet"'>{{modalStatus}}</span><span ng-if='modalStatus!="loading"'>{{offset + limit}} / {{totalItems}} <span translate>inspect.entity.related_documents</span></span>
@@ -69,7 +17,7 @@
     </tr>
   </div>
 </div>
-<div class="modal-body with-sidebar">
+<div class="modal-body">
   <div ng-repeat='item in relatedItems'>
       <div  ng-include='"templates/partials/resource.html"'></div>
   </div>

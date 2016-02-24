@@ -3,7 +3,7 @@
   
   <!-- crowdsourcing tasks for issues  -->
   <div class="crowdsourcing" ng-if='entity.isDownvoted || (entity.props.issues && entity.props.issues.length)' class='animated fadeIn"'>
-    <div ng-if='entity.isDownvoted' ng-include='"templates/partials/helpers/crowdsourcing/isdownvoted.html"'></div>
+    <div ng-if='entity.isDownvoted && !entity.isMergeable' ng-include='"templates/partials/helpers/crowdsourcing/isdownvoted.html"'></div>
     <div ng-if='entity.isWrong' ng-include='"templates/partials/helpers/crowdsourcing/issue-iswrong.html"'></div>
     <div ng-if='entity.isWrongType' ng-include='"templates/partials/helpers/crowdsourcing/issue-iswrongtype.html"'></div>
     <div ng-if='entity.isMergeable' ng-include='"templates/partials/helpers/crowdsourcing/issue-ismergeable.html"'></div>
