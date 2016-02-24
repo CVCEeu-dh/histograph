@@ -24,6 +24,7 @@ angular.module('histograph')
         showMore: '=', // boolean
         user: '=',        
         'entity': '=', // entity item Cfr. EntityCtrl
+        'resource': '=', // entity item Cfr. directive/popit
       },
 
       link: function($scope) {
@@ -35,6 +36,7 @@ angular.module('histograph')
             return;
           $log.debug(':: reporter sync() -> entity:', $scope.entity.props.name, '- user:', $scope.user.username);
           $scope.setIssues($scope.entity.issues, $scope.entity.props);
+          $scope.cancelQuestion();
         };
 
         /*
