@@ -94,7 +94,7 @@
         <div class='answers'>
           <div >
             <form>
-              <input autofocus type='text' name='test' typeahead-trigger-on-model-change='entity.name' ng-model='q' class='form-control' typeahead-editable='false' placeholder="search person" uib-typeahead='item for items in typeaheadSuggest($viewValue, entity.type)' typeahead-wait-ms='100' typeahead-on-select='typeaheadSelected($item, $model, $label)' typeahead-template-url='templates/partials/helpers/typeahead.html'/>
+              <input autofocus type='text' name='test' ng-model='q' class='form-control' typeahead-editable='false' placeholder="search person" uib-typeahead='item for items in typeaheadSuggest($viewValue, entity.type)' typeahead-wait-ms='100' typeahead-on-select='typeaheadSelected($item, $model, $label)' typeahead-template-url='templates/partials/helpers/typeahead.html'/>
             </form>
           </div>
         </div>
@@ -105,11 +105,21 @@
       </div>
 
         <div ng-if='question=="contribute-confirm"'>
-          <p class='text' translate='popit.fix.suggest.confirm' translate-values='{name: "{{entity.props.name}}",_name: "{{entity.alias.props.name}}"}'></p>
-          <div class='answers'>
-            <div class='btn-group btn-group-dual'>
-              <button class='btn btn-line-white btn-primary' ng-click='merge()'>yes!</button>
-              <button class='btn btn-line-white obscure' ng-click='askQuestion("contribute", $event)'>back</button>
+          <div ng-if='entity.id != entity.alias.id'>
+            <p class='text' translate='popit.fix.suggest.confirm' translate-values='{name: "{{entity.props.name}}",_name: "{{entity.alias.props.name}}"}'></p>
+            <div class='answers'>
+              <div class='btn-group btn-group-dual'>
+                <button class='btn btn-line-white btn-primary' ng-click='merge()'>yes!</button>
+                <button class='btn btn-line-white obscure' ng-click='askQuestion("contribute", $event)'>back</button>
+              </div>
+            </div>
+          </div>
+          <div ng-if='entity.id == entity.alias.id'>
+            <p class='text' translate='popit.fix.suggest.same_entity' translate-values='{name: "{{entity.props.name}}",_name: "{{entity.alias.props.name}}"}'></p>
+            <div class='answers'>
+              <div>
+                <button class='btn btn-line-white obscure btn-block' ng-click='askQuestion("contribute", $event)'>back</button>
+              </div>
             </div>
           </div>
         </div>

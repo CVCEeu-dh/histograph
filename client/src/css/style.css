@@ -2504,14 +2504,14 @@ input.form-control{
   padding: 5px 15px 5px 15px;
 }
 
-#pop > .inner ul.dropdown-menu{
+.questions ul.dropdown-menu{
   right: 15px;
       max-height: 270px;
     overflow-y: scroll;
 
 }
 
-#pop > .inner ul.dropdown-menu li>div {
+.questions ul.dropdown-menu li>div {
   padding: 5px 15px;
 }
 
@@ -6939,6 +6939,11 @@ ul.dropdown-menu >li a .thumbnail {
   margin-right: 10px;
   border-radius: 50px;
   border: 2px solid;
+}
+
+
+.item.entity.node .dropdown-menu >li a .thumbnail {
+  position: static;
 }
 
 /*
