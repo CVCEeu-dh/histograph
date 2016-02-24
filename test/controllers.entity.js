@@ -238,21 +238,7 @@ describe('controller:entity related items', function() {
       });
   });
 
-  // it('should merge the two entities (with param)', function(done) {
-  //   session
-  //     .post('/api/entity/' + __entity.id +'/related/resource/'+ __resourceB.id + '/merge')
-  //     .send({
-  //       'with': __entityB.id
-  //     })
-  //     .expect('Content-Type', /json/)
-  //     .expect(200)
-  //     .end(function (err, res) {
-  //       // console.log(res.body)
-  //       should.not.exists(err);
-  //       // should.equal(res.body.status, 'empty');
-  //       done();
-  //     });
-  // });
+  
   
   it('should delete the manual connection', function(done) {
     session
@@ -490,6 +476,28 @@ describe('controller:entity related issues', function() {
         });
         should.equal(res.body.result.item.props.score, -1);
         
+      });
+  });
+
+  it('should merge the two entities (with param)', function(done) {
+    session
+      .post('/api/entity/' + __entity.id +'/related/issue')
+      .send({
+        'kind': 'mergeable',
+        'solution': __entityB.id
+      })
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exists(err);
+        should.equal(res.body.result.item.issues[0].props.focus, __entity.id )
+        should.equal(res.body.result.item.issues[0].props.solution, __entityB.id)
+        // should.equal(res.body.status, 'empty');
+        // delete action
+        Action.remove(res.body.result.item.related.action, function(err) {
+          should.not.exist(err);
+          done();
+        });
       });
   });
 });

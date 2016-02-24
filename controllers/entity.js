@@ -280,8 +280,28 @@ module.exports = function(io){
     */
 
     createRelatedIssue: function (req, res) {
+      var solutions = {}
+
+      solutions[Action.ISSUE_CHECK_TYPE] = {
+        field: 'solution',
+        check: 'includedIn',
+        args: [
+          settings.types.entity
+        ],
+        error: 'wrong value for solution'
+      };
+
+      solutions[Action.ISSUE_CHECK_CAN_MERGE] = {
+        field: 'solution',
+        check: 'matches',
+        args: [
+          /\d[\d,]+/
+        ],
+        error: 'wrong value for solution'
+      };
+
       var form = validator.request(req, { kind: ''}, {
-            fields: [
+            fields: _.compact([
               {
                 field: 'mentioning',
                 check: 'matches',
@@ -303,17 +323,12 @@ module.exports = function(io){
                 ],
                 error: 'wrong value'
               },
-              {
-                field: 'solution',
-                check: 'includedIn',
-                args: [
-                  settings.types.entity
-                ],
-                error: 'wrong value for solution'
-              }
-            ]
+              solutions[req.body.kind]
+            ])
           });
-      // console.log(form.params, Issue.KINDS)
+
+      // console.log(form.params, _.keys(req), )// mergeable
+
       if(!form.isValid)
         return helpers.formError(form.errors, res);
 
@@ -327,8 +342,8 @@ module.exports = function(io){
           Action.merge({
             kind: Action.RAISE_ISSUE,
             focus: +form.params.id,
-            solution: form.params.solution,
-            target: form.params.kind == Action.ISSUE_CHECK_IS_WRONG? Action.ENTITY_WRONG :Action.ENTITY_LABEL,
+            solution: _.keys(solutions).indexOf(form.params.kind) == -1? '': form.params.solution, // solution has been checked for the types on the left
+            target: Action.getTargetByIssue(form.params.kind),
             mentions: [+form.params.id].concat(form.params.mentioning || []),
             username: req.user.username
           }, next);
