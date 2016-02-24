@@ -385,7 +385,7 @@ a#header-title {
 }
 
 .tag.with-issues{
-  border-color: gold;
+  border-color: #FF5742;
 }
 
 .tag.starred{
@@ -420,7 +420,7 @@ a#header-title {
 }
 
 .item .source a{
-  background: cyan;
+  background: #FF5742;
 }
 
 .item .caption{
@@ -758,9 +758,6 @@ header ul li .notification a {
   border-bottom: 1px solid transparent;
 }
 
-#perspective-menu > ul{
-  padding-left: 50px;
-}
 
 
 #perspective-menu a.inline{
@@ -2292,6 +2289,7 @@ input.form-control{
   top: 0;
   left: 0;
   background: #585858;
+  color: #A9A2A2;
   /*border: 1px solid #C5C5C6;*/
   border-radius: 3px;
   z-index: 1050;
@@ -2485,7 +2483,7 @@ input.form-control{
 }
 
 .questions.contribute-confirm.enabled{
-  height: 100px;
+  height: 112px;
 }
 
 .questions p.text{
@@ -2954,14 +2952,16 @@ input.form-control{
 }
 
 .crowdsourcing{
-  background: #252525;
-  border: 1px solid #FF5742;
-  padding: 10px 15px;
-  margin: 15px 0;
+  background: #252525; 
+  /*#252525;*/
+  /*border: 1px solid #FF5742;*/
+  /*box-shadow: inset 0 0 6px #111;*/
+  padding: 10px 20px 10px 20px;
+  margin: 10px 0 5px 0;
 } 
 
 .crowdsourcing .issue{
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 .crowdsourcing strong {

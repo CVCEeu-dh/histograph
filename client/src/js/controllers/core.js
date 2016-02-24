@@ -779,7 +779,9 @@ angular.module('histograph')
       (their id and the type will suffice)
     
     */
-    $scope.upvote = function(entity, resource, next) {
+    $rootScope.upvote = function(entity, resource, next) {
+      $log.log('CoreCtrl -> upvote() entity:', entity.id, '- resource:', resource.id);
+      
       EntityRelatedExtraFactory.save({
         id: entity.id,
         model: 'resource',
@@ -796,7 +798,9 @@ angular.module('histograph')
       (the id and the type will suffice)
 
     */
-    $scope.downvote = function(entity, resource, next) {
+    $rootScope.downvote = function(entity, resource, next) {
+      $log.log('CoreCtrl -> downvote() entity:', entity.id, '- resource:', resource.id);
+      
       EntityRelatedExtraFactory.save({
         id: entity.id,
         model: 'resource',

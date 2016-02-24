@@ -4,10 +4,32 @@ MATCH (ent:entity)
   WHERE id(ent) = {id}
 WITH ent // collect issues
   OPTIONAL MATCH (u:user)-[r:performs]->(act:issued)-[:mentions]->(ent)
-  WITH ent, act, {id: id(u), username: u.username, vote: r.vote, last_modification_time: r.last_modification_time} as alias_u
-  WITH ent, {id: id(act), props: act, users: collect(alias_u )} as alias_issue 
-  WITH ent, filter(x in collect(alias_issue) WHERE has(x.id)) as issues
+  WITH ent, act,
+    {
+      id: id(u),
+      username: u.username,
+      vote: r.vote,
+      last_modification_time: r.last_modification_time
+    } as alias_u
 
+  WITH ent, act, collect(alias_u) as alias_us
+  OPTIONAL MATCH (act)-[:mentions]->(ent2:entity)
+    WHERE ent2 <> ent
+  WITH ent, act, alias_us,
+    {
+      id: id(ent2),
+      props: ent2,
+      type: last(labels(ent2))
+    } as alias_m
+  WITH ent, act, alias_us, filter(x in collect(alias_m) WHERE has(x.id)) as alias_ms
+  WITH ent, 
+    {
+      id: id(act),
+      props: act,
+      users: alias_us,
+      mentioning: alias_ms
+    } as alias_issue 
+  WITH ent, filter(x in collect(alias_issue) WHERE has(x.id)) as issues
 RETURN {
   id: id(ent),
   type: LAST(labels(ent)),

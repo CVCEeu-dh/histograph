@@ -626,6 +626,8 @@ angular.module('histograph')
           }
           $log.info('::sigma --> focus()', nodeId);//, _.map(si.graph.nodes(), 'id'))
           var node = si.graph.nodes(nodeId);
+          if(!node)
+            return;
           try{
 
             sigma.misc.animation.camera(

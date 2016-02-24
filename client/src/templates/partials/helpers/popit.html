@@ -18,7 +18,8 @@
       </div>
     </div>
   </div>
-  <div ng-if='entity.isWrong'>
+  
+  <div  ng-if='!isUnknown'>
     <div>
       <div class='node {{entity.type}}'>
         
@@ -34,41 +35,16 @@
              <a ng-if='entity.type == "theme"' ng-click='close()' ng-href='{{link.href}}'>{{entity.props|lookup:'name':language}}</a>
 
           </h4>
-
-          <p style='color:white' translate>popit.fix.wrong.agree</p>
-        </div>
-
-
-
-      </div>
-    </div>
-  </div>
-  <div  ng-if='!isUnknown && !entity.isWrong'>
-    <div>
-      <div class='node {{entity.type}}'>
-        
-        <div class='thumbnail' ng-if='entity.props.thumbnail'>
-          <div class="thumbnail-wrapper" style='background-image: url({{entity.props.thumbnail}})'>
-          </div>
-        </div>
-        <div class='content sans-serif {{entity.props.thumbnail?"":"without-thumbnail"}}'>
-          <h4>
-            <a ng-if='entity.type == "person"' ng-href='{{link.href}}' marked="entity.props|lookup:'name':language" ng-click='close()'></a>
-            <a ng-if='entity.type == "location"' ng-click='close()' ng-href='{{link.href}}'><p>{{entity.props|lookup:'name':language}}, {{entity.props.country}}</p></a>
-            <a ng-if='entity.type == "organization"' ng-click='close()' ng-href='{{link.href}}'>{{entity.props|lookup:'name':language}}</a>
-             <a ng-if='entity.type == "theme"' ng-click='close()' ng-href='{{link.href}}'>{{entity.props|lookup:'name':language}}</a>
-
-          </h4>
-          <div ng-if='entity.props.issues'>
+          <!-- <div ng-if='entity.props.issues'>
             {{entity.props.issues}}
-          </div>
+          </div> -->
           <div ng-if='!entity.issues && entity.isIncomplete && entity.type == "person"' class='date' translate='popit.missinginfo' translate-values='{type: "person"}'>
           </div>
           <div ng-if='!entity.isIncomplete && entity.type == "person"'>
             <div class='date' >{{entity.props.birth_time | datesOfAPerson : entity.props.death_time}}</div>
             
           </div>
-          <div ng-if='entity.type == "location" || entity.type=="theme"'>
+          <div ng-if='entity.isIncomplete || entity.type == "location" || entity.type=="theme"'>
             <div class='date' >{{entity.type}}</div>
           </div>
           <div ng-if="entity.props.links_viaf">
@@ -103,7 +79,7 @@
     </div> -->
   </div>
     
-  <div reporter ng-if='user' entity='entity' user='user' resource='parent' show-more='true'></div>
+  <div reporter ng-if='isReady' entity='entity' user='user' resource='parent' show-more='true'></div>
   <!-- <div class='questions {{question}} obscure {{question?"enabled":""}}' ng-include='"templates/partials/helpers/questions.html"'>
  
  
@@ -127,5 +103,4 @@
         <span class="fa fa-thumbs-o-up"></span></a>
         
     </div> -->
-  </div>
 </div>

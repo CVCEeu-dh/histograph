@@ -23,7 +23,7 @@
   "button.next": "next",
   "button.previous": "previous",
   "button.readmore": "read more",
-  "button.remove.issue": "remove this issue",
+  "button.remove.issue": "close this issue",
   "button.myselection.explore": "explore connections",
   "button.skip": "skip",
   "button.steps.skip": "skip this step",
@@ -95,6 +95,8 @@
   "header.activities" : "See all activities",
   "header.myselection": "my selection",
 
+  "inspect.open": "I can check this!",
+  "inspect.entity.isdownvoted": "It seems that <strong>{{name}}</strong> should not appear here",
   "inspect.entity.iswrong": "It seems that <strong>{{name}}</strong> is a <strong>mistake</strong> and could be safely removed.",
   "inspect.entity.iswrongtype": "It seems that <strong>{{name}}</strong> type should be changed",
   "inspect.entity.related_documents": "related documents",
@@ -112,7 +114,9 @@
 
   "popit.missinginfo": "We couldn't find any information about this <strong>{{type}}</strong> automatically... can you help us?",
   "popit.fix.not.mentioned": "this <strong>{{type}}</strong> is not mentioned here",
-  "popit.fix.wrong.entity": "Do you really want to untag this <strong>{{type}}</strong>?",
+  "popit.fix.wrong_in_context.entity": "Do you really want to untag this <strong>{{type}}</strong>?",
+  
+  "popit.fix.wrong.entity": "Do you really want to remove this <strong>{{type}}</strong>?",
   "popit.fix.wrong.agree": "Some users suggested that this {{type}} should be untagged. Do you agree?",
   "popit.fix.wrong.type": "this is not a <strong>{{type}}</strong>",
   "popit.fix.brandnew": "Nope, this is a brand new <strong>{{type}}</strong>",
@@ -129,7 +133,8 @@
   "popit.fix.spotcorrecttype.type.irrelevant.confirm": "Do you really want to untag this <strong class='sans-serif'>{{type}}</strong>?",
   "popit.fix.spotcorrecttype.type.confirm": "Suggest <strong class='sans-serif' style='color: white'>{{_type}}</strong> as replacement for <strong class='sans-serif' style='color: white'>{{type}}</strong>?",
   "popit.fix.suggest.same_entity": "They are the same (@todo)",
-  "popit.fix.suggest.confirm": "Do you think that <strong class='sans-serif'>{{name}}</strong> should be replaced with <strong class='sans-serif'>{{_name}}</strong>?",
+  "popit.fix.suggest.confirm": "It seems that <strong class='sans-serif'>{{name}}</strong> can be replaced with <strong class='sans-serif'>{{_name}}</strong>?",
+  "popit.fix.suggest.confirm_in_context": "It seems that <strong class='sans-serif'>{{name}}</strong> can be replaced with <strong class='sans-serif'>{{_name}}</strong> in this specific context",
   "popit.fix.remove": "Remove this",
   
   "popit.fix.remove.relationship": "Untag {{name}} from this resource?",

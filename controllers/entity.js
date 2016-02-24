@@ -335,6 +335,10 @@ module.exports = function(io){
       if(form.params.mentioning) {
         form.params.mentioning = _.map(form.params.mentioning.split(','),  _.parseInt);
       }
+      // for merge options, mentions both trsuted and untrusted
+      if(form.params.kind == Action.ISSUE_CHECK_CAN_MERGE)
+        form.params.mentioning = (form.params.mentioning||[]).concat([+form.params.solution]);
+
       // if form.params.kind == Issue.TYPE
       //   check that the solution param is an available label
       async.series([

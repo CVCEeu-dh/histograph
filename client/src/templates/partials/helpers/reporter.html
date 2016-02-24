@@ -1,8 +1,12 @@
-<div class="reporter">
+<div class="reporter sans-serif">
+  <!-- crowdsourcing tasks for downvotes  -->
+  
   <!-- crowdsourcing tasks for issues  -->
-  <div class="crowdsourcing" ng-if='entity.props.issues && entity.props.issues.length' class='animated fadeIn"'>
+  <div class="crowdsourcing" ng-if='entity.isDownvoted || (entity.props.issues && entity.props.issues.length)' class='animated fadeIn"'>
+    <div ng-if='entity.isDownvoted' ng-include='"templates/partials/helpers/crowdsourcing/isdownvoted.html"'></div>
     <div ng-if='entity.isWrong' ng-include='"templates/partials/helpers/crowdsourcing/issue-iswrong.html"'></div>
     <div ng-if='entity.isWrongType' ng-include='"templates/partials/helpers/crowdsourcing/issue-iswrongtype.html"'></div>
+    <div ng-if='entity.isMergeable' ng-include='"templates/partials/helpers/crowdsourcing/issue-ismergeable.html"'></div>
   </div>
 
   <!-- Report Error form -->
@@ -69,16 +73,17 @@
     <div ng-if='question=="downvote"' class='question'>
       <div class='answers'>
         <div class=''>
-          <button class='btn btn-line-white btn-block' ng-if='resource' ng-click='downvote($event)' translate translate-values='{type: "{{entity.type}}"}'>popit.fix.not.mentioned</button>
+          <button class='btn btn-line-white btn-block' ng-if='resource' ng-click='downvote()' translate translate-values='{type: "{{entity.type}}"}'>popit.fix.not.mentioned</button>
           <button class='btn btn-line-white btn-block' ng-click='askQuestion("wrongtype", $event)' translate='popit.fix.wrong.type' translate-values='{type: "{{entity.type}}"}'></button>
           <button class='btn btn-line-white btn-block' ng-click='askQuestion("contribute", $event)' translate>popit.fix.typo</button>
-          <button ng-if='resource' class='btn btn-line-white btn-block' ng-click='askQuestion("wrong", $event)' translate>popit.fix.untag</button>
+          <button ng-if='resource' class='btn btn-line-white btn-block' ng-click='askQuestion("wrong", $event)' translate>popit.fix.remove</button>
           <button ng-if='!resource' class='btn btn-line-white btn-block' ng-click='askQuestion("wrong", $event)' translate>popit.fix.remove</button>
           <button class='btn btn-line-white obscure btn-block' ng-click='cancelQuestion($event)' translate>button.back</button>
         </div>
       </div>
     </div>
 
+      <!-- REMOVE this -->
       <div ng-if='question=="wrong"'>
         <p class='text' translate translate-values='{type: "{{entity.type}}"}'>popit.fix.wrong.entity</p>
         <div class='answers'>
@@ -171,7 +176,7 @@
       <div ng-if='question=="feedback"' class='question'>
         <p class='text' translate>popit.fix.feedback</p>
         <div class='answers'>
-          <button class='btn btn-line-white btn-primary btn-block' ng-click='close()' translate>button.close</button>
+          <button class='btn btn-line-white btn-primary btn-block' ng-click='cancelQuestion()' translate>button.close</button>
         </div>
       </div>
   </div>

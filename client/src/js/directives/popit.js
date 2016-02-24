@@ -58,12 +58,28 @@ angular.module('histograph')
               type    = el.attr('gasp-type'),
               id      = el.attr('data-id'),
               pos     = el.offset();
-
+          // was there a prefious one?
           // if there is no type, it is like clicking on stage
+          
+
           if(!type) { 
             hide();
             return;
           }
+          if(scope.entity && scope.entity.id == id) {
+            showGasp(pos)
+            return;
+          } else if(scope.entity){
+            scope.entity = {
+              props: {
+                name: '...'
+              },
+              id: id,
+              type: type
+            };
+            scope.$apply();
+          }
+          
           $log.info(':: popit -> toggle() for type:', type, el)
           
           // validate id
@@ -74,6 +90,7 @@ angular.module('histograph')
             showGasp(pos)
             return;
           }
+
           scope.isUnknown = false;
           // if id is the same of previous Id, ndo not need to recalculate things
           if(id == _pId) { 
@@ -81,19 +98,23 @@ angular.module('histograph')
             return;
           }
 
+          scope.isReady = false;
+
           var parent  = el.attr('gasp-parent'),
               tooltip = el.attr('gasp-tip'),
               removable = el.attr('gasp-removable'),
               creator   = el.attr('gasp-creator'),
               upvotes   = el.attr('gasp-upvotes'),
+              downvotes = el.attr('gasp-downvotes'),
               entity,
               resource;
 
 
 
           // rewrite upvotes
-          if(upvotes)
-            upvotes = angular.fromJson(upvotes)
+          upvotes = upvotes && upvotes.length? angular.fromJson(upvotes): [];
+          downvotes = downvotes && downvotes.length? angular.fromJson(downvotes): [];
+          
           // rewrite parent, if is present, as an object
           if(parent) {
             var parent_parts = parent.split('-');
@@ -118,7 +139,7 @@ angular.module('histograph')
 
           };
 
-          scope.entity.upvotes = upvotes || [];
+          
           scope.parent = !parent? null: parent;
 
           
@@ -142,17 +163,13 @@ angular.module('histograph')
 
           // load item
           EntityFactory.get({id:scope.entity.id}, function (res) {
-            $log.log(':: popit getUnknownNodes:', scope.entity.id)
+            $log.log(':: popit toggle() loaded: ', scope.entity.id);
             scope.entity = res.result.item;
-            // scope.entity.isIncomplete = !_.compact([
-            //   res.result.items[0].props.links_wiki,
-            //   res.result.items[0].props.links_viaf
-            // ]).length;
+            scope.entity.upvotes = upvotes;
+            scope.entity.downvotes = downvotes;
 
-            // scope.entity.isWrong = res.result.items[0].props.issues? res.result.items[0].props.issues.indexOf('wrong') != -1: false;
-
-            // scope.entity.props = res.result.items[0].props;
-          })
+            scope.isReady = true;
+          });
         };
         
         
@@ -188,18 +205,7 @@ angular.module('histograph')
 
 
         
-        /*
-          Listener: body.mouseenter
-        */
-        $('body')
-          // .on('click', '[gasp-type]', toggle)
-          // .on('mouseenter', '[gasp-type]', toggle)
-          // .on('mouseleave', '[gasp-type]', hideDelayed)
-          .on('sigma.clickStage', hide)
-          .on('click', toggle)
-          .on('click', '.obscure', function(e) {
-            e.stopImmediatePropagation();
-          })
+        
         // element.bind('mouseenter', toggle);
         // element.bind('mouseleave', hideDelayed);
 

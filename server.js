@@ -50,7 +50,7 @@ if(settings.cache && settings.cache.redis) {
   cache = require('express-redis-cache')({
     host: settings.cache.redis.host,
     port: settings.cache.redis.port,
-    expire: 60 // 20 seconds
+    expire: 5 * 60 // 5 min OR till a POST/delete has benn done
   });
 
   cache.on('connected', function () {
@@ -139,17 +139,22 @@ express.response.ok = function(result, info, warnings) {
     res.warnings = warnings
   
   if(cache && (this.req.method == 'POST' || this.req.method == 'DELETE')) {
-    // console.log(this.req.method , getCacheName(this.req));
-    // refresh related caches if any
-    var cnm = getCacheName(this.req).match(/[a-z]+-\d+/),
-        __ins = this;
-    // it "should" be improved @todo
-    if(cnm)
-      cache.del(cnm[0] + '*', function() {
-        return __ins.json(res);
-      });
-    else
-      return this.json(res);
+    // delete the cache comppletely
+    var __ins = this;
+    cache.del('*', function() {
+      return __ins.json(res);
+    });
+    // // console.log(this.req.method , getCacheName(this.req));
+    // // refresh related caches if any
+    // var cnm = getCacheName(this.req).match(/[a-z]+-\d+/),
+    //     __ins = this;
+    // // it "should" be improved @todo
+    // if(cnm)
+    //   cache.del(cnm[0] + '*', function() {
+    //     return __ins.json(res);
+    //   });
+    // else
+    //   return this.json(res);
   }
   else 
     return this.json(res);
