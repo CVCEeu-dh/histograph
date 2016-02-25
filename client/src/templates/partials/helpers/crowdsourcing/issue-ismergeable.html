@@ -9,10 +9,10 @@
     <div ng-if="resource">
       <span translate translate-values='{name: "{{entity.props.name}}",_name: "{{mentioned.props.name}}"}'>popit.fix.suggest.confirm_in_context</span>
       <!-- merge in context -->
-
+      
       <div class='answers btn-group-wrapper'>
         <div class='btn-group '>
-          <button class='btn btn-line-white btn-primary btn-number' ng-click='mergeInContext(mentioned)'>
+          <button class='btn btn-line-white btn-primary btn-number' ng-click='mergeInContext(entity, mentioned)'>
             <span translate>button.agree </span>
             <span class='number'>{{entity.downvotes.length || 0}}</span>
           </button>

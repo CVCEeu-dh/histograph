@@ -1,6 +1,13 @@
-<div class="reporter sans-serif">
+<div class="reporter sans-serif" ng-class='isLocked?"locked":""'>
   <!-- crowdsourcing tasks for downvotes  -->
-  
+  <div class='loading animated' ng-class='isLocked?"fadeIn": "fadeOut"'>
+    <div class='loader'>
+      <div class="sk-double-bounce">
+        <div class="sk-child sk-double-bounce1"></div>
+        <div class="sk-child sk-double-bounce2"></div>
+      </div>
+    </div>
+  </div>
   <!-- crowdsourcing tasks for issues  -->
   <div class="crowdsourcing" ng-if='entity.isDownvoted || (entity.props.issues && entity.props.issues.length)' class='animated fadeIn"'>
     <div ng-if='entity.isDownvoted && !entity.isMergeable' ng-include='"templates/partials/helpers/crowdsourcing/isdownvoted.html"'></div>
@@ -20,6 +27,10 @@
       <button  ng-if='showEgonetwork' class='btn btn-default btn-line-white' title='{{"tooltip.sigma.center" |translate}}' data-id="{{entity.id}}"> <span class="fa fa-dot-circle-o"></span></button>
 
       <button ng-if='entity.type != "theme"'  class='btn btn-line-white' ng-click='askQuestion("downvote")'><i class="fa fa-bug"></i> fix / edit </button>
+      <button ng-click='upvote()' ng-if='resource && !entity.isIncomplete && !entity.isDownvoted' class='btn btn-line-white' ng-class='entity.upvotes.length? "btn-number": ""'>
+        <span translate>button.confirm</span>
+        <span ng-if='entity.upvotes.length' class='number'>{{entity.upvotes.length}}</span>
+      </button>
     </div>
   </div>
 

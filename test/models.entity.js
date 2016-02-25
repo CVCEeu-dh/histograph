@@ -85,6 +85,8 @@ describe('model:entity ', function() {
     }, function (err, entity) {
       should.not.exist(err, err);
       should.equal(entity.rel.type, 'appears_in');
+      should.equal(entity.rel.start, entity.props.id);
+      should.equal(entity.rel.end, __resource.props.id);
       should.exist(entity.props.name)
       __entity = entity;
       done();
@@ -112,8 +114,8 @@ describe('model:entity ', function() {
       if(err)
         console.log(err.neo4jError.message)
       should.not.exist(err);
-      should.equal(entity.rel.end, __entity.id);
-      should.equal(entity.rel.start, __user.id);
+      should.equal(entity.rel.end, __entity.props.id);
+      should.equal(entity.rel.start, __user.props.id);
       should.equal(entity.rel.type, 'curates');
       should.exist(entity.props.name);
       done()

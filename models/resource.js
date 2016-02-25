@@ -242,7 +242,8 @@ module.exports = {
     
     var query = parser.agentBrown(rQueries.get_resources, params);
     // console.log(query)
-    
+
+    console.log('getById', query, params)
     neo4j.query(query, _.assign(params, {
       limit: params.limit || params.ids.length,
       offset: 0
@@ -288,6 +289,7 @@ module.exports = {
       
     }
     properties = _.assign(properties, {
+      uuid: helpers.uuid(),
       creation_date: now.date,
       creation_time: now.time,
       username: properties.user.username

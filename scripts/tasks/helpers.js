@@ -3,6 +3,7 @@
   
 */
 var settings   = require('../../settings'),
+    helpers   = require('../../helpers'),
     neo4j      = require('seraph')(settings.neo4j.host),
     fs         = require('fs'),
     csv        = require('csv'),
@@ -13,7 +14,44 @@ var settings   = require('../../settings'),
     
 module.exports = {
   utils: {
-    
+    /*
+      assign an uuid property whene there's none
+    */
+    uuid: function(options, callback) {
+      console.log(clc.yellowBright('\n   tasks.helpers.utils.uuid'));
+
+      neo4j.query('MATCH (n) WHERE not(has(n.uuid)) RETURN count(n) as total_count', function(err, results) {
+        if(err) {
+          callback(err);
+          return;
+        }
+        
+        async.timesSeries(results[0].total_count, function (n, _next) {
+          var uuid = helpers.uuid();
+
+          console.log('    set uuid ', uuid,'for:', n, 'of', results[0].total_count)
+          
+          neo4j.query('MATCH (n) WHERE not(has(n.uuid)) WITH n LIMIT 1 SET n.uuid = {uuid} RETURN n', {
+            uuid: uuid
+          }, function(err, results){
+            if(err)
+              _next(err);
+            console.log(' node internal id:', results[0].id, 'uuid', results[0].uuid);
+            _next();
+          });
+          // get nodes and save nodes
+
+          // neo4j.query(, {
+          //   limit: limit
+          // }, _next);
+        }, function (err) {
+          if(err)
+            callback(err);
+          else
+            callback(null, options)
+        });
+      })
+    },
     /*
       merge by options.property two or more nodes from the options.records collection. .
       Always ask for confirmation before merging.

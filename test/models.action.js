@@ -126,7 +126,7 @@ describe('model:action raise, upvote or downvote an issued action', function() {
     Action.merge({
       kind: Action.RAISE_ISSUE,
       target: Action.ENTITY_LABEL,
-      focus: parseInt(__entity.id),
+      focus: __entity.id, // it is a string ... sic
       mentions: [__entity.id],
       username: __userA.username
     }, function (err, node) {
@@ -143,7 +143,7 @@ describe('model:action raise, upvote or downvote an issued action', function() {
     Action.merge({
       kind: Action.RAISE_ISSUE,
       target: Action.ENTITY_LABEL,
-      focus: parseInt(__entity.id),
+      focus: __entity.id,
       mentions: [__entity.id],
       username: __userB.username
     }, function (err, node) {
@@ -159,7 +159,7 @@ describe('model:action raise, upvote or downvote an issued action', function() {
     Action.merge({
       kind: Action.RAISE_ISSUE,
       target: Action.ENTITY_LABEL,
-      focus: parseInt(__entity.id),
+      focus: __entity.id,
       mentions: [__entity.id],
       username: __userA.username,
       downvoted_by: __userA.username
@@ -175,8 +175,9 @@ describe('model:action raise, upvote or downvote an issued action', function() {
     Entity.get(__entity.id, function(err, node) {
       should.not.exist(err)
       var usernames = _(node.issues).map('users').flatten().map('username').value().join();
-
-      should.equal(usernames, [__userA.username,__userB.username,__userA.username].join())
+      // in order of edit
+      // console.log(node)
+      should.equal(usernames, [__userB.username,__userA.username].join())
       
       done();
     })

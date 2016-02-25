@@ -21,6 +21,60 @@ var settings   = require('../settings'),
     Entity     = require('../models/entity'),
     Resource   = require('../models/resource');
     
+/*
+  helper: form for related issues, cfr. blow createRelatedissue and RemoveRelatedIssue
+*/
+var __solutions = {};
+
+__solutions[Action.ISSUE_CHECK_TYPE] = {
+  field: 'solution',
+  check: 'includedIn',
+  args: [
+    settings.types.entity
+  ],
+  error: 'wrong value for solution'
+};
+
+__solutions[Action.ISSUE_CHECK_CAN_MERGE] = {
+  field: 'solution',
+  check: 'matches',
+  args: [
+    /\d[\d,]+/
+  ],
+  error: 'wrong value for solution'
+};
+
+function _relatedIssueForm(req) {
+  var form = validator.request(req, { kind: ''}, {
+        fields: _.compact([
+          {
+            field: 'mentioning',
+            check: 'matches',
+            args: [
+              /\d[\d,]+/
+            ],
+            error: 'mention should contain only numbers and commas'
+          },
+          {
+            field: 'kind',
+            check: 'includedIn',
+            args: [
+              [
+                Action.ISSUE_CHECK_TYPE,
+                Action.ISSUE_CHECK_CAN_MERGE,
+                Action.ISSUE_CHECK_IS_IRRELEVANT,
+                Action.ISSUE_CHECK_IS_WRONG
+              ]
+            ],
+            error: 'wrong value'
+          },
+          __solutions[req.body.kind]
+        ])
+      });
+
+  return form;
+};
+
 
 module.exports = function(io){
   // io socket event listener
@@ -65,7 +119,7 @@ module.exports = function(io){
     /*
       Update [:appear_in] relationship, entity side
 
-      api: api/entity/:entity_id(\\d+)/related/resource/:resource_id(\\d)+/:action(upvote|downvote)
+      api: api/entity/:entity_id(\\d+)/related/resource/:resource_id(\\d)+/:action(upvote|downvote|merge)
       
       According to `:action` param, modify or create the relationship between an entity and a resource. If there is no action, an upvoted relationship will be created.
       Anyway, the authentified user becomes a "curator" of the entity (he/she knows a lot about it).
@@ -192,6 +246,8 @@ module.exports = function(io){
           resource = {id: +form.params.resource_id};
 
       Entity.createRelatedResource(entity, resource, req.user, form.params, function (err, item) {
+        if(err)
+            return helpers.cypherQueryError(err, res);
         Action.create({
           kind: form.params.annotation? Action.ANNOTATE: Action.CREATE,
           target: Action.APPEARS_IN_RELATIONSHIP,
@@ -278,56 +334,9 @@ module.exports = function(io){
 
       
     */
-
+    
     createRelatedIssue: function (req, res) {
-      var solutions = {}
-
-      solutions[Action.ISSUE_CHECK_TYPE] = {
-        field: 'solution',
-        check: 'includedIn',
-        args: [
-          settings.types.entity
-        ],
-        error: 'wrong value for solution'
-      };
-
-      solutions[Action.ISSUE_CHECK_CAN_MERGE] = {
-        field: 'solution',
-        check: 'matches',
-        args: [
-          /\d[\d,]+/
-        ],
-        error: 'wrong value for solution'
-      };
-
-      var form = validator.request(req, { kind: ''}, {
-            fields: _.compact([
-              {
-                field: 'mentioning',
-                check: 'matches',
-                args: [
-                  /\d[\d,]+/
-                ],
-                error: 'mention should contain only numbers and commas'
-              },
-              {
-                field: 'kind',
-                check: 'includedIn',
-                args: [
-                  [
-                    Action.ISSUE_CHECK_TYPE,
-                    Action.ISSUE_CHECK_CAN_MERGE,
-                    Action.ISSUE_CHECK_IS_IRRELEVANT,
-                    Action.ISSUE_CHECK_IS_WRONG
-                  ]
-                ],
-                error: 'wrong value'
-              },
-              solutions[req.body.kind]
-            ])
-          });
-
-      // console.log(form.params, _.keys(req), )// mergeable
+      var form = _relatedIssueForm(req);
 
       if(!form.isValid)
         return helpers.formError(form.errors, res);
@@ -339,14 +348,16 @@ module.exports = function(io){
       if(form.params.kind == Action.ISSUE_CHECK_CAN_MERGE)
         form.params.mentioning = (form.params.mentioning||[]).concat([+form.params.solution]);
 
-      // if form.params.kind == Issue.TYPE
-      //   check that the solution param is an available label
+      // if solution is an ID
+      if(!isNaN(form.params.solution))
+        form.params.solution = parseInt(form.params.solution);
+      
       async.series([
         function action(next) {
           Action.merge({
             kind: Action.RAISE_ISSUE,
             focus: +form.params.id,
-            solution: _.keys(solutions).indexOf(form.params.kind) == -1? '': form.params.solution, // solution has been checked for the types on the left
+            solution: _.keys(__solutions).indexOf(form.params.kind) == -1? '': form.params.solution, // solution has been checked for the types on the left
             target: Action.getTargetByIssue(form.params.kind),
             mentions: [+form.params.id].concat(form.params.mentioning || []),
             username: req.user.username
@@ -395,42 +406,35 @@ module.exports = function(io){
       the issue is then removed from the entity. 
     */
     removeRelatedIssue: function (req, res) {
-      var form = validator.request(req, {kind: ''}, {
-            fields: [
-              {
-                field: 'kind',
-                check: 'includedIn',
-                args: [
-                  [
-                    Action.ISSUE_CHECK_TYPE,
-                    Action.ISSUE_CHECK_CAN_MERGE,
-                    Action.ISSUE_CHECK_IS_IRRELEVANT,
-                    Action.ISSUE_CHECK_IS_WRONG
-                  ]
-                ],
-                error: 'wrong value'
-              }
-            ]
-          });
+      var form = _relatedIssueForm(req);
 
       if(!form.isValid)
         return helpers.formError(form.errors, res);
-      var params = {
-        issue: form.params.kind
-      };
-      // downvte only if the type is explicit ly set as sWRONG
+
+      if(form.params.mentioning) {
+        form.params.mentioning = _.map(form.params.mentioning.split(','),  _.parseInt);
+      }
+
+      // if solution is an ID
+      if(!isNaN(form.params.solution))
+        form.params.solution = parseInt(form.params.solution);
+      
+      // for merge options, mentions both trsuted and untrusted
+      if(form.params.kind == Action.ISSUE_CHECK_CAN_MERGE)
+        form.params.mentioning = (form.params.mentioning||[]).concat([+form.params.solution]);
+
       // downvte only if the type is explicit ly set as sWRONG
       if(form.params.kind == Action.ISSUE_CHECK_IS_WRONG)
         params.upvoted_by = req.user.username;
 
-      params.issue_downvoted_by = req.user.username;
-      
+
       async.series([
         function action(next) {
           Action.merge({
             kind: Action.RAISE_ISSUE,
             focus: +form.params.id,
-            target: form.params.kind == Action.ISSUE_CHECK_IS_WRONG? Action.ENTITY_WRONG :Action.ENTITY_LABEL,
+            solution: _.keys(__solutions).indexOf(form.params.kind) == -1? '': form.params.solution, // solution has been checked for the types on the left
+            target: Action.getTargetByIssue(form.params.kind),
             mentions: [+form.params.id].concat(form.params.mentioning || []),
             username: req.user.username,
             downvoted_by: req.user.username

@@ -2968,6 +2968,38 @@ input.form-control{
   font-weight: normal;
   color: #f0f0f0;
 }
+
+.reporter{
+  position:relative;
+}
+.reporter.locked{
+  opacity: .2;
+  pointer-events: none;
+}
+
+.reporter .loading{
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 50px;
+  margin-left: -25px;
+  z-index: 10;
+}
+
+.reporter .loading .loader{
+  height: 30px;
+  margin-top: 0;
+  top: 0;
+}
+
+.reporter .loading .loader .sk-double-bounce{
+  margin: 0 auto ;
+}
+.reporter .loading .loader .sk-double-bounce .sk-double-bounce1{
+  background-color: #fff;
+  opacity: 1;
+}
 /*
   
   Animate.css animations

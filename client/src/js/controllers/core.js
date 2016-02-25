@@ -704,7 +704,7 @@ angular.module('histograph')
         params.mentioning = resource.id;
 
       if(solution)
-        params.solution = solution;
+        params.solution = !isNaN(solution)? parseInt(solution): solution;
 
       $log.log('CoreCtrl -> raiseIssue() on entity:', entity.id, '- mentioning:', resource);
       
@@ -727,7 +727,7 @@ angular.module('histograph')
         params.mentioning = resource.id;
 
       if(solution)
-        params.solution = solution;
+        params.solution = !isNaN(solution)? parseInt(solution): solution;
 
       $log.log('CoreCtrl -> downvoteIssue() kind: ' + kind+'- on entity:', entity.id, '- mentioning:', resource);
       
@@ -864,7 +864,6 @@ angular.module('histograph')
 
     */
     $rootScope.mergeEntities = function(wrong, trusted, resource, next) {
-      debugger
       EntityRelatedExtraFactory.save({
         id: wrong.id,
         model: 'resource',

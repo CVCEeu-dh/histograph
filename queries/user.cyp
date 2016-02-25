@@ -2,21 +2,62 @@
 // to be used with OAuth2provider
 MERGE (k:user { email:{email} })
   ON CREATE SET
-    k.status={status},
-    k.picture={picture},
-    k.username={username},
-    k.firstname={firstname},
-    k.strategy={strategy},
-    k.about={about},
-    k.salt={salt},
-    k.password={password},
-    k.gender={gender},
+    k.uuid = {uuid},
+    k.username   = {username},
+
+    k.status     = {status},
+
+    {if:picture}
+    k.picture  = {picture},
+    {/if}
+    
+    {if:firstname}
+    k.firstname  = {firstname},
+    {/if}
+
+    {if:gender}
+    k.gender     = {gender},
+    {/if}
+
+    k.strategy   = {strategy},
+    k.about      = {about},
+
     k.last_notification_time={exec_time},
-    k.last_notification_date={exec_date}
+    k.last_notification_date={exec_date},
+
+    k.creation_time = {exec_time},
+    k.creation_date = {exec_date},
+    k.last_modification_time = {exec_time},
+    k.last_modification_date = {exec_date},
+
+    k.password   = {password},
+    k.salt       = {salt},
+    k.status     = {status},
+    k.activation = {activation}
+    
+    
+    
   ON MATCH SET
-    k.picture={picture},
-    k.gender={gender}
-  RETURN k
+    
+    k.last_modification_time = {exec_time},
+    {if:picture}
+      k.picture    = {picture},
+    {/if}
+
+    {if:firstname}
+      k.firstname  = {firstname},
+    {/if}
+    {if:gender}
+      k.gender     = {gender},
+    {/if}
+    k.last_modification_date = {exec_date}
+    
+  RETURN {
+    id: k.uuid,
+    username: k.username,
+    email: k.email,
+    props: k
+  }
 
 
 // name: count_pulse
@@ -38,7 +79,7 @@ WITH you
 MATCH (u:user)-[:performs]->(act:action)
 WHERE id(you) <> id(u) AND act.last_modification_time > you.last_notification_time
 WITH act, you, u, {
-    id: id(u),
+    id: u.uuid,
     username: u.username,
     picture: u.picture
   } as alias_u
@@ -50,12 +91,12 @@ WITH DISTINCT act, alias_u
 WITH act, alias_u
 MATCH (act)-[r2:mentions]->(t)
 WITH act, alias_u, filter(x in collect({
-    id: id(t),
+    id: t.uuid,
     props: t,
     type: last(labels(t))
   }) WHERE has(x.id)) AS alias_ms
 RETURN {
-  id: id(act),
+  id: act.uuid,
   props: act,
   type: last(labels(act)),
   performed_by: alias_u,
@@ -72,6 +113,7 @@ MATCH (u:user)-[:performs]->(act:action)
 WHERE id(you) <> id(u) AND act.last_modification_time > you.last_notification_time
 RETURN act
 
+
 // name: count_crowdsourcing_unknownpeople
 // is ... a Person?
 MATCH (per:person)-[r:appears_in]->(res:resource)
@@ -79,6 +121,7 @@ WHERE NOT(has(per.last_name))
   AND per.celebrity = 0 AND per.df > 1
 WITH DISTINCT per
 RETURN count(per) as count_items
+
 
 // name: get_crowdsourcing_unknownpeople
 // is ... a Person? It should also give you a simple context (that probably you may know... @todo)
@@ -93,12 +136,12 @@ ORDER BY df DESC
 SKIP {offset}
 LIMIT {limit}
 WITH {
-    id: id(per),
+    id: per.uuid,
     type: 'person',
     props: per
   } as alias_per, last(resources) as res
 WITH {
-    id: id(res),
+    id: res.uuid,
     type: 'resource',
     props: res
   } as alias_res, alias_per
@@ -124,7 +167,7 @@ WITH res, count(r) as df
 SKIP {offset}
 LIMIT {limit}
 WITH {
-  id: id(res),
+  id: res.uuid,
   type: 'resource',
   props: res
 } as alias_res
@@ -190,7 +233,7 @@ OPTIONAL MATCH (res)-[r_loc:appears_in]->(loc:`location`)
 WITH u_rel, res, r_loc, loc
 ORDER BY r_loc.tfidf DESC, r_loc.frequency DESC
 WITH u_rel, res, collect({  
-      id: id(loc),
+      id: loc.uuid,
       type: 'location',
       props: loc,
       rel: r_loc
@@ -199,7 +242,7 @@ OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
 WITH u_rel, res, locations, r_per, per
 ORDER BY r_per.tfidf DESC, r_per.frequency DESC
 WITH u_rel, res, locations, collect({
-      id: id(per),
+      id: per.uuid,
       type: 'person',
       props: per,
       rel: r_per
@@ -207,7 +250,7 @@ WITH u_rel, res, locations, collect({
 OPTIONAL MATCH (res)-[r_org:appears_in]-(org:`organization`)
 
 WITH u_rel, res, locations, persons, collect({  
-      id: id(org),
+      id: org.uuid,
       type: 'organization',
       props: org,
       rel: r_org
@@ -215,7 +258,7 @@ WITH u_rel, res, locations, persons, collect({
 OPTIONAL MATCH (res)-[r_soc:appears_in]-(soc:`social_group`)
 
 WITH u_rel, res, locations, persons, organizations, collect({
-      id: id(soc),
+      id: soc.uuid,
       type: 'social_group',
       props: soc,
       rel: r_soc
@@ -228,7 +271,7 @@ WITH u_rel, res, locations, persons, organizations, social_groups
 {/if}
 
 RETURN {
-  id:id(res),
+  id: res.uuid,
   type: 'resource',
   props: res,
   {if:with}
@@ -283,12 +326,12 @@ UNWIND resources as res
 MATCH p=(res)-[r:appears_in]-(ent)
 return{
   source: {
-    id: id(res),
+    id: res.uuid,
     type: 'resource',
     label: COALESCE(res.name, res.title_en, res.title_fr)
   },
   target: {
-    id: id(ent),
+    id: ent.uuid,
     type: last(labels(ent)),
     label: COALESCE(ent.name, ent.title_en, ent.title_fr)
   },
@@ -324,7 +367,7 @@ LIMIT {limit}
 WITH res
 MATCH (res:resource)<-[r:likes|curates]-(u)
 WITH res, max(r.last_modification_time) as last_modification_time, collect({
-  id: id(u),
+  id: u.uuid,
   username: u.username,
   last_modification_time: r.last_modification_time,
   last_modification_date: r.last_modification_date,
@@ -336,7 +379,7 @@ WITH res, last_modification_time, users, r_loc, loc
   ORDER BY r_loc.tfidf DESC, r_loc.frequency DESC
 
 WITH res, last_modification_time, users, collect({  
-      id: id(loc),
+      id: loc.uuid,
       type: 'location',
       props: loc,
       rel: r_loc
@@ -347,7 +390,7 @@ WITH res, last_modification_time, users, locations, r_per, per
   ORDER BY r_per.tfidf DESC, r_per.frequency DESC
 
 WITH res, last_modification_time, users, locations, collect({
-      id: id(per),
+      id: per.uuid,
       type: 'person',
       props: per,
       rel: r_per
@@ -358,7 +401,7 @@ WITH res, last_modification_time, users, locations, persons, r_org, org
   ORDER BY r_org.tfidf DESC, r_org.frequency DESC
 
 WITH res, last_modification_time, users, locations, persons, collect({  
-      id: id(org),
+      id: org.uuid,
       type: 'organization',
       props: org,
       rel: r_org
@@ -369,7 +412,7 @@ WITH res, last_modification_time, users, locations, persons, organizations, r_so
   ORDER BY r_soc.tfidf DESC, r_soc.frequency DESC
 
 WITH res, last_modification_time, users, locations, persons, organizations, collect({
-      id: id(soc),
+      id: soc.uuid,
       type: 'social_group',
       props: soc,
       rel: r_soc
@@ -377,7 +420,7 @@ WITH res, last_modification_time, users, locations, persons, organizations, coll
 
 
 RETURN {
-  id:id(res),
+  id: res.uuid,
   type: 'resource',
   props:   res,
   persons: persons,

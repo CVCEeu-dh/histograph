@@ -13,8 +13,8 @@ var settings        = require('./settings'),
     GoogleStrategy  = require('passport-google-oauth').OAuth2Strategy,
     
 
-    queries        = require('decypher')('./queries/user.cyp'),
-
+    queries         = require('decypher')('./queries/user.cyp'),
+    User            = require('./models/user'),
     neo4j           = require('seraph')(settings.neo4j.host);
 
 
@@ -58,8 +58,7 @@ passport.use(new TwitterStrategy({
     callbackURL: settings.baseurl + "/auth/twitter/callback"
   },
   function(token, tokenSecret, profile, done) {
-    var now = helpers.now();
-    neo4j.query('MERGE (k:user { email:{email} }) ON CREATE SET k.status={status}, k.picture={picture}, k.username={username}, k.firstname={firstname}, k.strategy={strategy}, k.about={about}, k.salt={salt}, k.password={password} RETURN k', {
+    User.create({
       email: '@' + profile.displayName,
       username: '@' + profile.displayName,
       firstname: '@' + profile.displayName,
@@ -69,16 +68,12 @@ passport.use(new TwitterStrategy({
       strategy: 'twitter',
       about: '' + profile.description,
       picture: profile.photos? profile.photos.pop().value: '',
-      exec_time: now.time,
-      exec_date: now.date
-    },  function(err, res) {
+    },  function(err, user) {
       console.log('twitter:', err?'error':'ok');
-
       if(err) {
         console.log(err)
         return done(err);
       }
-      var user = res[0];
       return done(null, user);
     });
   }

@@ -5,6 +5,7 @@
  */
 var settings  = require('../settings'),
     helpers   = require('../helpers'),
+    parser    = require('../parser'),
     models    = require('../helpers/models'),
     queries   = require('decypher')('./queries/user.cyp'),
     neo4j     = require('seraph')(settings.neo4j.host),
@@ -19,13 +20,14 @@ module.exports = {
     password   : 'WorldHello',
     email      : 'world@globetrotter.it',
     firstname  : 'Milky',
-    lastame    : 'Way',
+    lastname    : 'Way',
     strategy   : 'local', // the strategy passport who creates his account, like local or google or twitter
     about      : ''
   */
   create: function(user, next) {
     // enrich user with some field
-    var now = helpers.now(), 
+    var now = helpers.now(),
+        uuid = helpers.uuid(),
         encrypted,
         activation;
         
@@ -41,22 +43,22 @@ module.exports = {
       length: 128,
       digest: 'sha1'
     });
-      
+    
     _.assign(user, {
-      last_notification_date:   now.date,
-      last_notification_time:   now.time,
-      password              : encrypted.key,
-      salt                  : encrypted.salt,
-      status                : user.status || 'disabled',
-      activation            : activation.key   
+      uuid                   : uuid,                 
+      exec_date              : now.date,
+      exec_time              : now.time,
+      password               : encrypted.key,
+      salt                   : encrypted.salt,
+      status                 : user.status || 'disabled',
+      activation             : activation.key   
     });
      
-    neo4j.save(user, 'user', function (err, node) {
+    neo4j.query(parser.agentBrown(queries.merge_user, user), user, function (err, node) {
       if(err)
-        
         next(err);
       else
-        next(null, node);
+        next(null, node[0]);
     });
   },
 

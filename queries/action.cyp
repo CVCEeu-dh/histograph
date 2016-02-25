@@ -5,7 +5,7 @@
 // use only to upvote or coreate. See merge_action for type:ISSUED
 MATCH (u:user {username:{username}})
 WITH u
-  CREATE (u)-[r:performs]->(a:action{if:kind}:{:kind}{/if})
+  CREATE (u)-[r:performs]->(a:action{if:kind}:{:kind}{/if} {uuid:{uuid}})
     SET
       a.target = {target},
       {if:annotation}
@@ -27,7 +27,7 @@ WITH u
       r.last_modification_time = {exec_time}
   WITH u,a
   MATCH (t) 
-    WHERE id(t) in {mentions}
+    WHERE t.uuid in {mentions}
   CREATE (a)-[r2:mentions]->(t)
     SET
       r2.creation_date  = {exec_date},
@@ -35,17 +35,17 @@ WITH u
       r2.last_modification_date = {exec_date},
       r2.last_modification_time = {exec_time}
   WITH DISTINCT a, filter(x in collect({
-    id: id(t),
+    id: t.uuid,
     props: t,
     type: last(labels(t))
   }) WHERE has(x.id)) AS alias_ms,{
-    id: id(u),
+    id: u.uuid,
     username: u.username,
     picture: u.picture
   } as alias_u
 
 return {
-  id: id(a),
+  id: a.uuid,
   props: a,
   type: last(labels(a)),
   performed_by: alias_u,
@@ -58,10 +58,11 @@ MATCH (u:user {username:{username}})
 WITH u
 MERGE (a:action{if:kind}:{:kind}{/if} {target:{target}, focus:{focus}{if:solution}, solution:{solution}{/if}})
   ON CREATE SET
+    a.uuid = {uuid},
     a.creation_date  = {exec_date},
     a.creation_time  = {exec_time}
 WITH u,a, {
-    id: id(u),
+    id: u.uuid,
     username: u.username,
     picture: u.picture
   } as alias_u
@@ -95,7 +96,7 @@ ON MATCH SET
 
 WITH a, alias_u, r
 MATCH (t) 
-  WHERE id(t) in {mentions}
+  WHERE t.uuid in {mentions}
   MERGE (a)-[r2:mentions]->(t)
     ON CREATE SET
       r2.creation_date  = {exec_date},
@@ -106,12 +107,12 @@ MATCH (t)
       r2.last_modification_date = {exec_date},
       r2.last_modification_time = {exec_time}
 WITH a, alias_u, r, filter(x in collect({
-    id: id(t),
+    id: t.uuid,
     props: t,
     type: last(labels(t))
   }) WHERE has(x.id)) AS alias_ms
 return {
-  id: id(a),
+  id: a.uuid,
   props: a,
   type: last(labels(a)),
   performed_by: alias_u,
@@ -134,13 +135,13 @@ WITH act
 MATCH (u:user)-[r:performs]->act
 
 WITH act, r, {
-    id: id(u),
+    id: u.uuid,
     username: u.username,
     picture: u.picture
   } as alias_u
 
 RETURN {
-  id: id(act),
+  id: act.uuid,
   type: last(labels(act)),
   props: act,
   performed_by: alias_u
@@ -160,6 +161,6 @@ RETURN {
 // name: remove_action
 //BEware: remove the action as it never existed.
 MATCH (act:action)
-WHERE id(act) = {id}
+WHERE act.uuid = {id}
 OPTIONAL MATCH (act)-[r]-()
 DELETE act, r

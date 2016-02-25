@@ -475,9 +475,9 @@ apiRouter.route('/user/task/:what(unknownpeople|resourcelackingdate)') // return
   .get(ctrl.user.task)
 
 
-apiRouter.route('/user/:id(\\d+)/related/resource') // api session info
+apiRouter.route('/user/:id([\\da-z\\-]+)/related/resource') // api session info
   .get(ctrl.user.getRelatedResources)
-apiRouter.route('/user/:id(\\d+)/related/resource/graph') // api session info
+apiRouter.route('/user/:id([\\da-z\\-]+)/related/resource/graph') // api session info
   .get(ctrl.user.getRelatedResourcesGraph)
   
 
@@ -492,9 +492,9 @@ apiRouter.route('/user/:id(\\d+)/related/resource/graph') // api session info
 */
 apiRouter.route('/inquiry')
   .get(ctrl.inquiry.getItems)
-apiRouter.route('/inquiry/:id(\\d+)')
+apiRouter.route('/inquiry/:id([\\da-z\\-]+)')
   .get(ctrl.inquiry.getItem)
-apiRouter.route('/inquiry/:id(\\d+)/related/comment') // POST
+apiRouter.route('/inquiry/:id([\\da-z\\-]+)/related/comment') // POST
   .post(ctrl.inquiry.createComment)
   .get(ctrl.inquiry.getRelatedComment)
 
@@ -510,11 +510,11 @@ apiRouter.route('/inquiry/:id(\\d+)/related/comment') // POST
 */
 apiRouter.route('/issue')
   .get(ctrl.issue.getItems)
-apiRouter.route('/issue/:id(\\d+)')
+apiRouter.route('/issue/:id([\\da-z\\-]+)')
   .get(ctrl.issue.getItem)
-apiRouter.route('/issue/:id(\\d+)/upvote')
+apiRouter.route('/issue/:id([\\da-z\\-]+)/upvote')
   .post(ctrl.issue.upvote)
-apiRouter.route('/issue/:id(\\d+)/downvote')
+apiRouter.route('/issue/:id([\\da-z\\-]+)/downvote')
   .post(ctrl.issue.downvote)
 
 
@@ -528,9 +528,9 @@ apiRouter.route('/issue/:id(\\d+)/downvote')
   Cfr Neo4j queries: queries/inquiry.cyp
   
 */
-apiRouter.route('/comment/:id(\\d+)/upvote')
+apiRouter.route('/comment/:id([\\da-z\\-]+)/upvote')
   .post(ctrl.comment.upvote)
-apiRouter.route('/comment/:id(\\d+)/downvote')
+apiRouter.route('/comment/:id([\\da-z\\-]+)/downvote')
   .post(ctrl.comment.downvote)
 
 /*
@@ -548,30 +548,30 @@ apiRouter.route('/resource/timeline')
   .get(ctrl.resource.getTimeline)
 apiRouter.route('/resource/:id([\\d,]+)')
   .get(ctrl.resource.getItem)
-apiRouter.route('/resource/:id(\\d+)/related/resource')
+apiRouter.route('/resource/:id([\\da-z\\-]+)/related/resource')
   .get(ctrl.resource.getRelatedItems)
-apiRouter.route('/resource/:id(\\d+)/related/comment') // POST
+apiRouter.route('/resource/:id([\\da-z\\-]+)/related/comment') // POST
   .post(ctrl.resource.createComment)
-apiRouter.route('/resource/:id(\\d+)/related/inquiry')
+apiRouter.route('/resource/:id([\\da-z\\-]+)/related/inquiry')
   .post(ctrl.resource.createInquiry)
   .get(ctrl.resource.getRelatedInquiry)
-apiRouter.route('/resource/:id(\\d+)/related/:entity(person|location|organization)')
+apiRouter.route('/resource/:id([\\da-z\\-]+)/related/:entity(person|location|organization)')
   .get(ctrl.resource.getRelatedEntities)
   .post(ctrl.resource.createRelatedEntity)
-apiRouter.route('/resource/:id(\\d+)/related/:action(annotate)')
+apiRouter.route('/resource/:id([\\da-z\\-]+)/related/:action(annotate)')
   .get(ctrl.resource.getRelatedActions)
-apiRouter.route('/resource/:id(\\d+)/related/user')
+apiRouter.route('/resource/:id([\\da-z\\-]+)/related/user')
   .get(ctrl.resource.getRelatedUsers)
   .post(ctrl.resource.createRelatedUser)
   .delete(ctrl.resource.removeRelatedUser) 
-apiRouter.route('/resource/:id(\\d+)/related/issue')
+apiRouter.route('/resource/:id([\\da-z\\-]+)/related/issue')
   .post(ctrl.resource.createIssue)
   .get(ctrl.resource.getRelatedIssue)
-apiRouter.route('/resource/:id(\\d+)/related/:entity(person|location|organization)/graph')
+apiRouter.route('/resource/:id([\\da-z\\-]+)/related/:entity(person|location|organization)/graph')
   .get(ctrl.resource.getRelatedEntitiesGraph);
-apiRouter.route('/resource/:id(\\d+)/related/resource/graph')
+apiRouter.route('/resource/:id([\\da-z\\-]+)/related/resource/graph')
   .get(ctrl.resource.getRelatedResourcesGraph);
-apiRouter.route('/resource/:id(\\d+)/related/resource/timeline')
+apiRouter.route('/resource/:id([\\da-z\\-]+)/related/resource/timeline')
   .get(ctrl.resource.getRelatedResourcesTimeline);
 
 
@@ -591,36 +591,36 @@ apiRouter.route('/cooccurrences/:entityA(person|theme|location|place|organizatio
 apiRouter.route('/entity/:id([\\d,]+)')
   .get(ctrl.entity.getItem)
   
-apiRouter.route('/entity/:id(\\d+)/related/resource')
+apiRouter.route('/entity/:id([\\da-z\\-]+)/related/resource')
   .get(ctrl.entity.getRelatedResources);
   
-apiRouter.route('/entity/:id(\\d+)/related/:entity(person|location|theme|organization)')
+apiRouter.route('/entity/:id([\\da-z\\-]+)/related/:entity(person|location|theme|organization)')
   .get(ctrl.entity.getRelatedEntities)
 
-apiRouter.route('/entity/:id(\\d+)/related/issue')
+apiRouter.route('/entity/:id([\\da-z\\-]+)/related/issue')
   .post(ctrl.entity.createRelatedIssue) // that is, I AGREE
   .delete(ctrl.entity.removeRelatedIssue); // that is, I DISAGREE
 
 apiRouter.route('/entity/:id/related/:entity(person|location|theme|organization)/graph')
   .get(ctrl.entity.getRelatedEntitiesGraph);
 
-apiRouter.route('/entity/:id(\\d+)/related/resource/graph')
+apiRouter.route('/entity/:id([\\da-z\\-]+)/related/resource/graph')
   .get(ctrl.entity.getRelatedResourcesGraph);
   
-apiRouter.route('/entity/:id(\\d+)/related/resource/timeline')
+apiRouter.route('/entity/:id([\\da-z\\-]+)/related/resource/timeline')
   .get(ctrl.entity.getRelatedResourcesTimeline);
 
-apiRouter.route('/entity/:id(\\d+)/upvote')
+apiRouter.route('/entity/:id([\\da-z\\-]+)/upvote')
   .post(ctrl.entity.upvote)
   
-apiRouter.route('/entity/:id(\\d+)/downvote')
+apiRouter.route('/entity/:id([\\da-z\\-]+)/downvote')
   .post(ctrl.entity.downvote)
 
-apiRouter.route('/entity/:entity_id(\\d+)/related/resource/:resource_id(\\d+)')
+apiRouter.route('/entity/:entity_id([\\da-z\\-]+)/related/resource/:resource_id([\\da-z\\-]+)')
   .post(ctrl.entity.createRelatedResource) // create or merge the relationship. The authentified user will become a curator
   .delete(ctrl.entity.removeRelatedResource); // delete the relationship whether possible
 
-apiRouter.route('/entity/:entity_id(\\d+)/related/resource/:resource_id(\\d+)/:action(upvote|downvote|merge)')
+apiRouter.route('/entity/:entity_id([\\da-z\\-]+)/related/resource/:resource_id([\\da-z\\-]+)/:action(upvote|downvote|merge)')
   .post(ctrl.entity.updateRelatedResource);
 
   

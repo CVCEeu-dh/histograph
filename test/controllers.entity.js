@@ -225,10 +225,12 @@ describe('controller:entity related items', function() {
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
+        err && console.log(res.body);
+        should.not.exists(err);
         should.exist(res.body.result.item.rel);
         should.exist(res.body.result.item.related.action.props);
         should.exist(res.body.result.item.rel.created_by);
-        should.not.exists(err);
+        
 
         // should remove the action
         Action.remove(res.body.result.item.related.action, function(){

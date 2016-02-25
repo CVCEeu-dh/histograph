@@ -3,13 +3,13 @@
 MATCH (iss:issue)-[r:questions]->(t)
 WHERE id(iss) = {id}
 WITH iss, r, {
-    id: id(t),
+    id: t.uuid,
     props: t,
     type: last(labels(t))
   } as alias_t
 OPTIONAL MATCH (iss)-[:mentions]->(m)
 WITH iss, r, alias_t, filter(x  in collect({
-    id: id(m),
+    id: m.uuid,
     props: m,
     type: last(labels(m))
   }) WHERE has(x.id)) as alias_ms
@@ -20,7 +20,7 @@ WITH iss, r, alias_t, alias_ms, count(u) as followers
 OPTIONAL MATCH (u:user)-[:writes]->(com:comment)-[:answers]->iss
 WITH iss, r, alias_t, alias_ms, followers,
   {
-    id: id(u),
+    id: u.uuid,
     username: u.username,
     picture: u.picture
   } as alias_u, com
@@ -78,7 +78,7 @@ SKIP {offset}
 LIMIT {limit}
 
 WITH iss, r, {
-    id: id(t),
+    id: t.uuid,
     props: t,
     type: last(labels(t))
   } as alias_t
@@ -87,7 +87,7 @@ MATCH (u:user)-[:follows]->iss
 WITH iss, r, alias_t, count(u) as followers 
 OPTIONAL MATCH (iss)-[:mentions]->(m)
 WITH iss, r, followers, alias_t, collect({
-    id: id(m),
+    id: m.uuid,
     props: m,
     type: last(labels(m))
   }) as alias_ms
@@ -97,7 +97,7 @@ WITH iss, r, alias_t, alias_ms, followers
 OPTIONAL MATCH (u:user)-[:writes]->(com:comment)-[:answers]->iss
 WITH iss, r, alias_t, alias_ms, followers,
   {
-    id: id(u),
+    id: u.uuid,
     username: u.username,
     picture: u.picture
   } as alias_u, com
@@ -145,7 +145,8 @@ WITH u, t
       r.creation_time  = {exec_time},
       r.last_modification_date = {exec_date},
       r.last_modification_time = {exec_time},
-      iss.created_by     = {username}
+      iss.created_by     = {username},
+      iss.uuid = {uuid},
     ON MATCH SET
       r.last_modification_date = {exec_date},
       r.last_modification_time = {exec_time}

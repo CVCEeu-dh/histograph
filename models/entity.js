@@ -56,6 +56,7 @@ module.exports = {
     var now   = helpers.now(),
         slug  = module.exports._slug(properties),
         props = _.assign({}, properties, {
+          uuid: helpers.uuid(),
           type: properties.type || 'unknown',
           slug: slug,
           links_wiki: _.isEmpty(properties.links_wiki)? undefined: properties.links_wiki,
@@ -128,7 +129,7 @@ module.exports = {
   
   get: function(id, next) {
     neo4j.query(queries.get_entity, {
-      id: +id
+      id: id
     }, function (err, node) {
       if(err) {
         next(err);
@@ -192,6 +193,7 @@ module.exports = {
     @param params - a dict containing at least the entity label (type: 'person|location') and the resource id
   */
   getRelatedEntities: function (params, next) {
+    console.log("ldqjflksjflksjflksjflksdjflkd")
     models.getMany({
       queries: {
         count_items: queries.count_related_entities,
@@ -199,6 +201,7 @@ module.exports = {
       },
       params: params
     }, function (err, results) {
+      console.log(err)
       if(err) {
         console.log(err)
         next(err);
@@ -245,7 +248,7 @@ module.exports = {
       
       // 1. UPVOTE ENTITY upvote automatically, since you admitted that the entity exists ;)
       // it increases score and celebrity, removes from the downvotes if any
-      result.ent.upvote = _.unique((result.ent.upvote || []).concat(user.username));
+      result.ent.upvote = _.unique((result.ent.upvote || []).concat([user.username]));
       if(result.ent.downvote && !!~result.ent.downvote.indexOf(user.username)) {
         _.remove(result.ent.downvote, function(d) {return d==user.username});
       }
@@ -254,10 +257,12 @@ module.exports = {
       
 
       // 2. UPVOTE RELATIONSHIP
-      result.rel.properties.upvote = _.unique((result.rel.properties.upvote || []).concat(user.username));
+      result.rel.properties.upvote = _.unique((result.rel.properties.upvote || []).concat([user.username]));
       if(result.rel.properties.downvote && !!~result.rel.properties.downvote.indexOf(user.username)) {
         _.remove(result.rel.properties.downvote, function(d) {return d==user.username});
       }
+
+      console.log ("updating", result.ent)
       
       // 3.  
       // download the updated version for the given resource
@@ -298,10 +303,11 @@ module.exports = {
     @param resoruce - resource.id should be an integer identifier
     @param user     - user.id and user.username should exist
     @param params   - used only wioth params.action upvote or downvote
+    , (u:user {uuid: {user_id}})
   */
   updateRelatedResource: function(entity, resource, user, params, next) {
     var now = helpers.now();
-
+    
     neo4j.query(queries.update_entity_related_resource, {
       entity_id: entity.id,
       resource_id: resource.id,

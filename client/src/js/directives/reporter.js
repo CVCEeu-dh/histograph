@@ -46,7 +46,7 @@ angular.module('histograph')
         */
         $scope.setIssues = function(issues, entity) {
           $scope.entity.isWrong = entity.props.issues && entity.props.issues.indexOf('wrong') != -1;
-          $scope.entity.isIncomplete = !_.compact([entity.props.links_wiki, entity.props.links_viaf]).length;
+          $scope.entity.isIncomplete = !_.compact([entity.props.links_wiki, entity.props.links_viaf, entity.props.last_name]).length;
           $scope.entity.isWrongType = entity.props.issues && entity.props.issues.indexOf('type') != -1;
           $scope.entity.isMergeable = entity.props.issues && entity.props.issues.indexOf('mergeable') != -1;
           $scope.entity.isDownvoted = $scope.entity.downvotes? $scope.entity.downvotes.length > 0: false;
@@ -125,6 +125,8 @@ angular.module('histograph')
           Select correct type
         */
         $scope.selectReplacement = function(type, solution) {
+          if($scope.isLocked)
+            return;
           if(type == 'type') {
             if(solution != $scope.entity.type) {
             // just discard IF IT IS NOT THE CASE
@@ -141,6 +143,8 @@ angular.module('histograph')
           Cfr. downvote issue for undo.
         */
         $scope.raiseIssue = function(type, solution) {
+          if($scope.isLocked)
+            return;
           $log.log(':: reporter  -~> raiseIssue() type:', type, '- solution:', solution);
           $scope.isLocked = true;
           $scope.cancelQuestion();
@@ -154,6 +158,8 @@ angular.module('histograph')
           $scope.resource should be set, cfr. popit directive
         */
         $scope.downvote = function() {
+          if($scope.isLocked)
+            return;
           $log.log(':: reporter  -~> downvote() entity:', $scope.entity.id, '- resource:', $scope.resource.id);
           if(isNaN($scope.entity.id) || isNaN($scope.resource.id)){
             $log.error(':: reporter  -~> downvote() failed, entity or resource not valid');
@@ -162,6 +168,7 @@ angular.module('histograph')
           $scope.isLocked = true;
           $rootScope.downvote($scope.entity, $scope.resource, function(){
             $scope.isLocked = false;
+            $scope.cancelQuestion();
           })
         };
 
@@ -170,6 +177,8 @@ angular.module('histograph')
           $scope.resource should be set, cfr. popit directive
         */
         $scope.upvote = function() {
+          if($scope.isLocked)
+            return;
           $log.log(':: reporter  -~> upvote() entity:', $scope.entity.id, '- resource:', $scope.resource.id);
           
           if(isNaN($scope.entity.id) || isNaN($scope.resource.id)){
@@ -178,6 +187,7 @@ angular.module('histograph')
           }
           
           $scope.isLocked = true;
+          
           $rootScope.upvote($scope.entity, $scope.resource, function(){
             $scope.isLocked = false;
           })
@@ -187,31 +197,42 @@ angular.module('histograph')
           Raise a merge Issue.
         */
         $scope.merge = function(){
+          if($scope.isLocked)
+            return;
           if(!$scope.entity.props.name || isNaN($scope.entity.alias.props.id)){
             $log.log(':: reporter -> merge() unable to merge, no alias has been selected');
             return;
           }
           $scope.isLocked = true;
+          debugger
           $log.log(':: reporter -> merge() -~> raiseIssue() type: merge - entity:', $scope.entity.props.name, '- with:',$scope.entity.alias.props.name);
           // merge two entities: add (or upvote the entity) and downvote the current entity
           $rootScope.raiseIssue($scope.entity, null, 'mergeable', $scope.entity.alias.props.id, function(){
-            $scope.isLocked = false;
-            $scope.cancelQuestion();
+            // downvote and upvote
+            if(!$scope.resource){
+              $scope.isLocked = false;
+              $scope.cancelQuestion();
+            } else {
+              $scope.isLocked = false;
+              $scope.mergeInContext($scope.entity, $scope.entity.alias);
+            }
           });
         };
 
         /*
           Merge in context. 
         */
-        $scope.mergeInContext = function(entityToMergeWith) {
-          $log.log(':: reporter  -~> mergeInContext() entity:', $scope.entity.id, '- resource:', $scope.resource.id, '- MERGE WITH:', entityToMergeWith);
-          if(isNaN($scope.entity.id) || isNaN($scope.resource.id)){
+        $scope.mergeInContext = function(entity, entityToMergeWith) {
+          if($scope.isLocked)
+            return;
+          $log.log(':: reporter  -~> mergeInContext() entity:', entity.id, '- resource:', $scope.resource.id, '- MERGE WITH:', entityToMergeWith);
+          if(isNaN(entity.id) || isNaN($scope.resource.id)){
             $log.error(':: reporter  -~> mergeInContext() failed, entity or resource not valid');
             return;
           }
           
           $scope.isLocked = true;
-          $rootScope.mergeEntities($scope.entity, entityToMergeWith, $scope.resource, function (err, result) {
+          $rootScope.mergeEntities(entity, entityToMergeWith, $scope.resource, function (err, result) {
             $scope.isLocked = false;
             $scope.cancelQuestion();
           });
@@ -221,6 +242,8 @@ angular.module('histograph')
           Inspect for a specific
         */
         $scope.inspectIssue = function(issue) {
+          if($scope.isLocked)
+            return;
           $rootScope.inspect($scope.entity, $scope.resource, issue);
         };
 
@@ -229,6 +252,8 @@ angular.module('histograph')
           If you have already voted this do not apply.
         */
         $scope.downvoteIssue = function(type, solution) {
+          if($scope.isLocked)
+            return;
           $log.log(':: reporter  -~> downvoteIssue() type:', type, '- solution:', solution);
           $scope.isLocked = true;
           $scope.cancelQuestion();
@@ -307,7 +332,7 @@ angular.module('histograph')
         });
 
         socket.on('entity:downvote-related-resource:done', function (result) {
-          if($scope.entity && result.resource.id == $scope.resource.id && result.data.id == $scope.entity.id){
+          if($scope.entity && $scope.resource.id && result.resource.id == $scope.resource.id && result.data.id == $scope.entity.id){
             $log.info(':: reporter socket@entity:downvote-related-resource:done - by:', result.user, '- result:', result);
             $scope.entity.upvotes = result.data.rel.upvote || [];
             $scope.entity.downvotes = result.data.rel.downvote || [];
@@ -315,7 +340,7 @@ angular.module('histograph')
         });
 
         socket.on('entity:upvote-related-resource:done', function (result) {
-          if($scope.entity && result.resource.id == $scope.resource.id && result.data.id == $scope.entity.id){
+          if($scope.entity && $scope.resource.id && result.resource.id == $scope.resource.id && result.data.id == $scope.entity.id){
             $log.info(':: reporter socket@entity:upvote-related-resource:done - by:', result.user, '- result:', result);
             $scope.entity.upvotes = result.data.rel.upvote || [];
             $scope.entity.downvotes = result.data.rel.downvote || [];
@@ -323,7 +348,7 @@ angular.module('histograph')
         });
 
         socket.on('entity:merge-entity:done', function (result) {
-          if($scope.entity && result.resource.id == $scope.resource.id && result.data.id == $scope.entity.id){
+          if($scope.entity && $scope.resource.id && result.resource.id == $scope.resource.id && result.data.id == $scope.entity.id){
             $log.info(':: reporter entity:merge-entity:done - by:', result.user, '- result:', result);
             $scope.entity.upvotes = result.data.rel.upvote || [];
             $scope.entity.downvotes = result.data.rel.downvote || [];
