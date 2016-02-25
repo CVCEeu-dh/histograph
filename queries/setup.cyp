@@ -10,6 +10,21 @@ CREATE CONSTRAINT ON (res:resource) ASSERT res.doi IS UNIQUE
 // create email constraint for user
 CREATE CONSTRAINT ON (u:user) ASSERT u.username IS UNIQUE
 
+// name: create_constraint_user_uuid
+CREATE CONSTRAINT ON (u:user) ASSERT u.uuid IS UNIQUE
+
+// name: create_constraint_resource_uuid
+CREATE CONSTRAINT ON (res:resource) ASSERT res.uuid IS UNIQUE
+
+// name: create_constraint_entity_uuid
+CREATE CONSTRAINT ON (ent:entity) ASSERT ent.uuid IS UNIQUE
+
+// name: create_constraint_action_uuid
+CREATE CONSTRAINT ON (act:action) ASSERT act.uuid IS UNIQUE
+
+// name: create_constraint_version_uuid
+CREATE CONSTRAINT ON (ver:version) ASSERT ver.uuid IS UNIQUE
+
 // name: create_index_on_start_time
 // create index on start date to group / filter result by timestamp
 CREATE INDEX ON :resource(start_time)
