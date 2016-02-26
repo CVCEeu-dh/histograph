@@ -2388,11 +2388,11 @@ input.form-control{
   pointer-events : auto;
 }
 
-#pop > .inner .btn-group .btn {
+.reporter .btn-group .btn {
   height:30px;
 }
 
-#pop > .inner .btn-group .btn .fa{
+.reporter .btn-group .btn .fa{
   line-height: 15px
 }
 

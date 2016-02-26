@@ -24,13 +24,14 @@
 
       <!-- <a ng-if='resource' class='btn btn-default btn-line-white' ng-click='confirm()' translate>button.confirm</a> -->
 
-      <button  ng-if='showEgonetwork' class='btn btn-default btn-line-white' title='{{"tooltip.sigma.center" |translate}}' data-id="{{entity.id}}"> <span class="fa fa-dot-circle-o"></span></button>
+      <button  ng-if='showInNetwork' class='btn btn-default btn-line-white' title='{{"tooltip.sigma.center" |translate}}' data-id="{{entity.id}}"> <span class="fa fa-dot-circle-o"></span></button>
 
       <button ng-if='entity.type != "theme"'  class='btn btn-line-white' ng-click='askQuestion("downvote")'><i class="fa fa-bug"></i> fix / edit </button>
-      <button ng-click='upvote()' ng-if='resource && !entity.isIncomplete && !entity.isDownvoted' class='btn btn-line-white' ng-class='entity.upvotes.length? "btn-number": ""'>
+      <button ng-click='upvote()' ng-if='resource && !entity.isIncomplete && !entity.isDownvoted && !entity.isRemoveable' class='btn btn-line-white' ng-class='entity.upvotes.length? "btn-number": ""'>
         <span translate>button.confirm</span>
         <span ng-if='entity.upvotes.length' class='number'>{{entity.upvotes.length}}</span>
       </button>
+      <button ng-click='discardvote()' class='btn btn-line-white' ng-if='entity.isRemoveable && resource.id' translate=''>button.untag</button>
     </div>
   </div>
 

@@ -27,6 +27,7 @@
   "button.myselection.explore": "explore connections",
   "button.skip": "skip",
   "button.steps.skip": "skip this step",
+  "button.untag": "untag this",
 
   "contribute.title": "Which {{type}} did you identify?",
   "contribute.description": "Tagging improves the quality of the recommended resources",

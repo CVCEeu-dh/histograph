@@ -818,7 +818,9 @@ angular.module('histograph')
       (only if the user is the creator of the relationship and there are no other upvotes)
 
     */
-    $scope.discardvote = function(entity, resource) {
+    $rootScope.discardvote = function(entity, resource, next) {
+      $log.log('CoreCtrl -> discardvote() entity:', entity.id, '- resource:', resource.id);
+      
       EntityRelatedExtraFactory.delete({
         id: entity.id,
         model: 'resource',
@@ -826,6 +828,8 @@ angular.module('histograph')
         extra: ''
       }, {}, function (res) {
         $log.log('CoreCtrl -> discardvote()', res.status);
+        if(next)
+          next(res.result);
       });
     };
 

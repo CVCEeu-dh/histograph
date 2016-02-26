@@ -21,6 +21,7 @@ angular.module('histograph')
       scope: {
         language: '=',
         showEgonetwork: '=', // boolean
+        showInNetwork: '=', // boolean
         showMore: '=', // boolean
         user: '=',        
         'entity': '=', // entity item Cfr. EntityCtrl
@@ -50,7 +51,7 @@ angular.module('histograph')
           $scope.entity.isWrongType = entity.props.issues && entity.props.issues.indexOf('type') != -1;
           $scope.entity.isMergeable = entity.props.issues && entity.props.issues.indexOf('mergeable') != -1;
           $scope.entity.isDownvoted = $scope.entity.downvotes? $scope.entity.downvotes.length > 0: false;
-          
+          $scope.entity.isRemoveable = $scope.entity.removable == "true";
           //isDownvoted
 
           $scope.isUpvotedByUser = entity.props.upvote && entity.props.upvote.indexOf($scope.user.username) != -1;
@@ -192,6 +193,24 @@ angular.module('histograph')
             $scope.isLocked = false;
           })
         };
+
+        /*
+          Discard a vote. enabled only if the entity is removeable
+          and it has not be upvoted in place.
+        */
+        $scope.discardvote = function(){
+          if($scope.isLocked)
+            return;
+          $log.info(':: reporter  -~> discardVote() entity:', $scope.entity.id, '- resource:', $scope.resource.id);
+          if(!($scope.entity.id) || !($scope.resource.id)){
+            $log.error(':: reporter  -~> discardVote() failed, entity or resource not valid');
+            return;
+          }
+          $rootScope.discardvote($scope.entity, $scope.resource, function(){
+            $scope.isLocked = false;
+            $scope.resource = undefined;
+          });
+        }
 
         /*
           Raise a merge Issue.

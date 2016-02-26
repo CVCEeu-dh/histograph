@@ -167,7 +167,7 @@ angular.module('histograph')
             scope.entity = res.result.item;
             scope.entity.upvotes = upvotes;
             scope.entity.downvotes = downvotes;
-
+            scope.entity.removable = removable;
             scope.isReady = true;
           });
         };
