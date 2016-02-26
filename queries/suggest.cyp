@@ -37,7 +37,7 @@ RETURN extract(n in filter(x IN nodes(p) WHERE NOT id(x) IN {ids})|{
 // serendipity graph
 MATCH p=(n)-[r:appears_in*..3]-(t) WHERE id(n) in {ids} AND id(t) in {ids}
 RETURN extract(n IN nodes(p)| {
-  id: id(n),
+  id: n.uuid,
   type: last(labels(n)),
   label: coalesce(n.name, n.title_en, n.title_fr)
 }) AS paths, relationships(p) as rels, length(p) as count
@@ -48,9 +48,10 @@ LIMIT {limit}
 
 // name: count_all_in_between_resources
 // return grouped by resource type (picture, treaty ...)
-MATCH (n),(t)
-  WHERE id(n) in {ids}
-    AND id(t) in {ids}
+MATCH (n)
+  WHERE n.uuid in {ids}
+MATCH (t)
+  WHERE t.uuid in {ids}
 WITH n, t
 MATCH p=allShortestPaths((n)-[:appears_in*..4]-(t))
 WITH filter(x in nodes(p) WHERE last(labels(x))='resource') as ns UNWIND ns as res
@@ -65,9 +66,10 @@ RETURN {
 
 // name: get_all_in_between_resources
 // return a set of id for the all-in-between resource.
-MATCH (n),(t)
-  WHERE id(n) in {ids}
-    AND id(t) in {ids}
+MATCH (n)
+  WHERE n.uuid in {ids}
+MATCH (t)
+  WHERE t.uuid in {ids}
 WITH n, t
 MATCH p=allShortestPaths((n)-[:appears_in*..4]-(t))
 WITH filter(x in nodes(p) WHERE last(labels(x))='resource') as ns UNWIND ns as res
@@ -156,14 +158,16 @@ UNWIND ns as n return count(distinct n)
 
 // name: all_shortest_paths
 // get all shortestpath between nodes.
+MATCH (a), (b)
+WHERE a.uuid IN {ids} AND b.uuid IN {ids}
+WITH a,b
 MATCH p = allShortestPaths((a)-[*..4]-(b))
-WHERE id(a) in {ids} AND id(b) in {ids}
 WITH p, 
-  length(FILTER(x IN NODES(p) WHERE id(x) in {ids})) - {threshold} as coherence,
+  length(FILTER(x IN NODES(p) WHERE x.uuid in {ids})) - {threshold} as coherence,
   length(FILTER(x IN NODES(p) WHERE last(labels(x)) in {labels})) as purity,
   length(p) as distance
 WITH p, coherence, distance, purity - length(nodes(p)) as adequancy,
-  EXTRACT(n IN NODES(p)|{id:id(n), name:n.name, type: last(labels(n))}) as candidate
+  EXTRACT(n IN NODES(p)|{id:n.uuid, name:n.name, type: last(labels(n))}) as candidate
 RETURN {
   path: candidate,
   distance: distance,
@@ -177,40 +181,51 @@ LIMIT {limit}
 
 // name: get_unknown_node
 // given a simple ID, return the complete node (id, props)
-MATCH (n)
-WHERE id(n) = {id}
+OPTIONAL MATCH (res:resource {uuid:{id}})
+OPTIONAL MATCH (ent:entity {uuid:{id}})
+WITH coalesce(res, ent) as n 
 RETURN {
-  id: id(n),
+  id: n.uuid,
   props: n,
-  type: LAST(labels(n))
+  type: LAST(labels(n)) 
 } as result
 
 
 // name: get_unknown_nodes
 // given a list of IDs, return the complete nodes (id, props)
-MATCH (n)
-WHERE id(n) in {ids}
+OPTIONAL MATCH (res:resource)
+WHERE res.uuid IN {ids}
+WITH res
+OPTIONAL MATCH (ent:entity)
+WHERE ent.uuid IN {ids}
+WITH coalesce(res, ent) as n 
 RETURN {
-  id: id(n),
+  id: n.uuid,
   props: n,
-  type: LAST(labels(n))
+  type: LAST(labels(n)) 
 } as result
-LIMIT 1000
+LIMIT 500
 
 // name: get_neighbors
 // [33828,26750,26389,33759,33758, 26441, 27631, 11173]
-MATCH (a)-[r]-(b)
-WHERE id(a) in {ids} AND last(labels(b)) in {labels}
+MATCH (a:resource)
+WHERE a.uuid IN {ids}
+WITH a
+OPTIONAL MATCH (a1:entity)
+WHERE a1.uuid IN {ids}
+wITH coalesce(a, a1) as n
+MATCH (n)-[r:appears_in]-(b)
+WHERE last(labels(b)) in {labels}
 RETURN {
   source: {
-    id: id(a),
-    label: COALESCE(a.name, a.title_en, a.title_fr),
-    start_time: a.start_time,
-    end_time: a.end_time,
-    type: last(labels(a))
+    id: n.uuid,
+    label: COALESCE(n.name, n.title_en, n.title_fr),
+    start_time: n.start_time,
+    end_time: n.end_time,
+    type: last(labels(n))
   },
   target: {
-    id: id(b),
+    id: b.uuid,
     label: COALESCE(b.name, b.title_en, b.title_fr),
     start_time: b.start_time,
     end_time: b.end_time,

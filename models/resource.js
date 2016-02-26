@@ -243,7 +243,7 @@ module.exports = {
     var query = parser.agentBrown(rQueries.get_resources, params);
     // console.log(query)
 
-    console.log('getById', query, params)
+    // console.log('getById', query, params)
     neo4j.query(query, _.assign(params, {
       limit: params.limit || params.ids.length,
       offset: 0

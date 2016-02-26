@@ -25,7 +25,7 @@ passport.use(new LocalStrategy(function (username, password, done) {
     username: username,
     password: password
   }, function(err, user) {
-    console.log(err, user)
+    // console.log(err, user)
     if(err)
       done({reason: 'credentials not matching', error: err});
     else if(user.props.status != 'enabled')
@@ -81,12 +81,12 @@ passport.use(new TwitterStrategy({
       about: '' + profile.description,
       picture: profile.photos? profile.photos.pop().value: '',
     },  function(err, user) {
-      console.log('twitter:', err?'error':'ok');
+      console.log('twitter:', err? 'error': 'ok');
       if(err) {
         console.log(err)
-        return done(err);
-      }
-      return done(null, user);
+        done(err);
+      } else
+        done(null, user);
     });
   }
 ));
@@ -101,8 +101,7 @@ passport.use(new GoogleStrategy({
     callbackURL:  settings.baseurl + "/auth/google/callback"
   },
   function(accessToken, refreshToken, profile, done) {
-    var now = helpers.now();
-    neo4j.query(queries.merge_user, {
+    User.create({
       email: 'g@' + profile.id,
       username: profile.displayName + profile.id,
       firstname: profile.displayName,
@@ -113,15 +112,13 @@ passport.use(new GoogleStrategy({
       strategy: 'google',
       about: '' + profile.description || '',
       picture: profile.photos? profile.photos.pop().value: '',
-      exec_time: now.time,
-      exec_date: now.date
-    },  function(err, res) {
-      console.log(err, res);
-      if(err)
-        return done(err);
-      console.log(profile, res)
-      var user = res[0];
-      return done(null, user);
+    },  function(err, user) {
+      console.log('google:', err? 'error': 'ok');
+      if(err) {
+        console.log(err);
+        done(err);
+      } else
+        done(null, user);
     });
   }
 ));

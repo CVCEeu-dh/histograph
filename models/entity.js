@@ -193,7 +193,6 @@ module.exports = {
     @param params - a dict containing at least the entity label (type: 'person|location') and the resource id
   */
   getRelatedEntities: function (params, next) {
-    console.log("ldqjflksjflksjflksjflksdjflkd")
     models.getMany({
       queries: {
         count_items: queries.count_related_entities,
@@ -201,7 +200,6 @@ module.exports = {
       },
       params: params
     }, function (err, results) {
-      console.log(err)
       if(err) {
         console.log(err)
         next(err);
@@ -262,8 +260,6 @@ module.exports = {
         _.remove(result.rel.properties.downvote, function(d) {return d==user.username});
       }
 
-      console.log ("updating", result.ent)
-      
       // 3.  
       // download the updated version for the given resource
       async.series({
@@ -275,7 +271,7 @@ module.exports = {
         },
         resource: function (callback) {
           Resource.get({
-            id: result.res.id
+            id: result.res.uuid
           }, user, callback)
         }
       }, function (err, results) {
@@ -284,7 +280,7 @@ module.exports = {
         else {
           
           next(null, {
-            id: result.ent.id,
+            id: result.ent.uuid,
             type: result.ent.type,
             props: result.ent,
             related: {
@@ -307,7 +303,7 @@ module.exports = {
   */
   updateRelatedResource: function(entity, resource, user, params, next) {
     var now = helpers.now();
-    
+    // console.log('model.updateRelatedResource entity',entity, resource, user)
     neo4j.query(queries.update_entity_related_resource, {
       entity_id: entity.id,
       resource_id: resource.id,
@@ -315,13 +311,14 @@ module.exports = {
       exec_date: now.date,
       exec_time: now.time
     }, function (err, results) {
+      // console.log('model.updateRelatedResource entity', err, results)
       if(err || !results.length) {
         next(err || helpers.IS_EMPTY);
         return;
       }
 
       var result = results[0];
-
+      
       if(!!~['upvote', 'downvote'].indexOf(params.action)) {
         if(params.action == 'upvote') {
           result.rel.properties.upvote = _.unique((result.rel.properties.upvote || []).concat(user.username));
@@ -345,14 +342,13 @@ module.exports = {
         result.rel.properties.celebrity =  _.compact(_.unique((result.rel.properties.upvote || []).concat(result.rel.properties.downvote|| []))).length;
         result.rel.properties.score = _.compact((result.rel.properties.upvote || [])).length - _.compact((result.rel.properties.downvote|| [])).length;
         
-
         async.series([
           function relationships(callback) {
             neo4j.rel.update(result.rel, callback);
           },
           function resource (callback) {
             Resource.get({
-              id: result.res.id
+              id: result.res.uuid
             }, user, callback)
           }
         ], function (err, results) {
@@ -360,7 +356,7 @@ module.exports = {
             next(err);
           else
             next(null, {
-              id: result.ent.id,
+              id: result.ent.uuid,
               type: result.ent.type,
               props: result.ent,
               related: {
@@ -372,7 +368,7 @@ module.exports = {
       } else {
         // nothing special to do
         next(null, {
-          id: result.ent.id,
+          id: result.ent.uuid,
           props: result.ent,
           rel: result.rel
         });

@@ -195,6 +195,7 @@ describe('controller:entity related items', function() {
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
+        err && console.log(res.body)
         should.not.exists(err);
         should.equal(res.body.result.item.id, __entity.id);
         should.exist(res.body.result.item.rel);

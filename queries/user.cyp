@@ -193,8 +193,10 @@ RETURN {
 
 // name: count_related_resources
 // get last "touched" resources, by type
-MATCH (u:user)-[r]-(res:resource){if:with}<-[:appears_in]-(ent){/if}
-  WHERE id(u) = {id}
+MATCH (u:user {uuid: {id}}){if:with},(ent:entity) WHERE ent.uuid in {with} {/if}
+  WITH (u){if:with},ent{/if}
+    MATCH (u)-[r:likes|curates]->(res:resource){if:with}<-[:appears_in]-(ent){/if}
+  WHERE u:user
   {if:mimetype}
     AND res.mimetype IN {mimetype}
   {/if}
@@ -207,9 +209,7 @@ MATCH (u:user)-[r]-(res:resource){if:with}<-[:appears_in]-(ent){/if}
   {if:end_time}
     AND res.end_time <= {end_time}
   {/if}
-  {if:with}
-    AND id(ent) in {with}
-  {/if}
+
 WITH collect(res) as resources
 WITH resources, length(resources) as total_items
 UNWIND resources as res
@@ -221,8 +221,10 @@ RETURN {
 
 // name: get_related_resources
 // get last "touched" resources
-MATCH (u:user)-[r]-(res:resource){if:with}<-[:appears_in]-(ent){/if}
-  WHERE id(u) = {id}
+MATCH (u:user {uuid: {id}}){if:with},(ent:entity) WHERE ent.uuid in {with} {/if}
+  WITH (u){if:with},ent{/if}
+    MATCH (u)-[r:likes|curates]->(res:resource){if:with}<-[:appears_in]-(ent){/if}
+  WHERE u:user
   {if:mimetype}
     AND res.mimetype IN {mimetype}
   {/if}
@@ -235,9 +237,7 @@ MATCH (u:user)-[r]-(res:resource){if:with}<-[:appears_in]-(ent){/if}
   {if:end_time}
     AND res.end_time <= {end_time}
   {/if}
-  {if:with}
-    AND id(ent) in {with}
-  {/if}
+  
 WITH r,res
 ORDER BY r.creation_time DESC
 SKIP {offset}
@@ -245,7 +245,7 @@ LIMIT {limit}
 WITH r AS u_rel, res
 OPTIONAL MATCH (res)-[r_loc:appears_in]->(loc:`location`)
 WITH u_rel, res, r_loc, loc
-ORDER BY r_loc.tfidf DESC, r_loc.frequency DESC
+ORDER BY r_loc.score DESC, r_loc.tfidf DESC, r_loc.frequency DESC
 WITH u_rel, res, collect({  
       id: loc.uuid,
       type: 'location',
@@ -254,7 +254,7 @@ WITH u_rel, res, collect({
     })[0..5] as locations   
 OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
 WITH u_rel, res, locations, r_per, per
-ORDER BY r_per.tfidf DESC, r_per.frequency DESC
+ORDER BY r_per.score DESC, r_per.tfidf DESC, r_per.frequency DESC
 WITH u_rel, res, locations, collect({
       id: per.uuid,
       type: 'person',
@@ -311,8 +311,8 @@ DELETE  n, r
 
 // name: get_related_resources_graph
 // bipartite graph of related resoruces and entities in between
-MATCH (u:user)-[r]-(res:resource){if:with}<-[:appears_in]-(ent){/if}
-  WHERE id(u)={id}
+MATCH (u:user {uuid: {id}})-[r]-(res:resource){if:with}<-[:appears_in]-(ent){/if}
+  WHERE u:user
   {if:mimetype}
     AND res.mimetype IN {mimetype}
   {/if}

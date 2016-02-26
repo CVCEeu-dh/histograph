@@ -80,7 +80,7 @@ module.exports = {
       });
 
       if(!_user.isValid) {
-        next(helper.IS_EMPTY); // credential not matching
+        next(helpers.IS_EMPTY); // credential not matching
       } else {
         next(null, _user);
       }
@@ -192,7 +192,7 @@ module.exports = {
       params: params
     }, function (err, results) {
       if(err) {
-        console.log(err)
+        console.log('getRelatedResources',err)
         next(err);
         return;
       }

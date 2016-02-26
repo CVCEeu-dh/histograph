@@ -314,9 +314,11 @@ describe('controller:suggest perform some queries', function() {
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
-        if(err)
-          console.log(err);
+        // console.log('SUGGEST',__resourceA.id)
+        // console.log(err)
+        !!err && !!res && console.log(res.body);
         should.not.exist(err);
+        should.equal(res.body.result.item.id, __resourceA.id)
         should.exist(res.body.result.item);
         done()
       });
@@ -328,8 +330,7 @@ describe('controller:suggest perform some queries', function() {
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
-        if(err)
-          console.log(err);
+        !!err && !!res && console.log(res.body);
         should.not.exist(err);
         should.equal(_.map(res.body.result.items, 'id').sort().join(), [__resourceA.id,  __resourceB.id].sort().join());
         done()
@@ -342,8 +343,7 @@ describe('controller:suggest perform some queries', function() {
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
-        if(err)
-          console.log(err);
+        !!err && !!res && console.log(res.body);
         should.not.exist(err);
         should.exist(res.body.result.items.length);
         done()

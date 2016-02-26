@@ -215,7 +215,7 @@ describe('model:entity upvote downvote the entity', function() {
       should.equal(entity.props.upvote.join(), __user.username);
       should.equal(entity.props.celebrity, 1);
       should.equal(entity.props.score, 1);
-      console.log('upvote', entity.props.downvote)
+      // console.log('upvote', entity.props.downvote)
       done();
     }) // we provide the same id for the entity and for the user. Will the neo4j labels work properly?
   });
@@ -227,7 +227,7 @@ describe('model:entity upvote downvote the entity', function() {
       should.equal(entity.props.upvote.length, 0);
       should.equal(entity.props.celebrity, 0);
       should.equal(entity.props.score, 0);
-      console.log('upvote', entity.props.downvote)
+      // console.log('upvote', entity.props.downvote)
       done();
     }) // we provide the same id for the entity and for the user. Will the neo4j labels work properly?
   });
@@ -287,7 +287,6 @@ describe('model:entity upvote downvote and create relationship', function() {
 
   it('should remove a relationship between the entity B and the reosurce A', function (done) {
     Entity.removeRelatedResource(__entityB, __resource, __user, {}, function (err, result) {
-      console.log(err)
       should.not.exist(err);
       done();
     })

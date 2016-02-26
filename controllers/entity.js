@@ -136,9 +136,9 @@ module.exports = function(io){
       if(!form.isValid)
         return helpers.formError(form.errors, res);
 
-      var entity = {id: +form.params.entity_id},
-          resource = {id: +form.params.resource_id};
-      
+      var entity = {id: form.params.entity_id},
+          resource = {id: form.params.resource_id};
+      // console.log('updateRelatedResource', form.params)
       if(form.params.action == 'merge') {// upvote /create the first and downvote the second
         async.series([
           function discarded(next) {
@@ -195,6 +195,7 @@ module.exports = function(io){
 
       } else if(form.params.action) {
         Entity.updateRelatedResource(entity, resource, req.user, form.params, function (err, item) {
+          // console.log('UPDATED', err)
           if(err)
             return helpers.cypherQueryError(err, res);
 
@@ -212,10 +213,10 @@ module.exports = function(io){
 
             io.emit('entity:' + form.params.action + '-related-resource:done', {
               user: req.user.username,
-              id: +form.params.entity_id,
+              id: form.params.entity_id,
               data: item,
               resource: {
-                id: +form.params.resource_id
+                id: form.params.resource_id
               }
             });
 
@@ -242,9 +243,8 @@ module.exports = function(io){
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       
-      var entity = {id: +form.params.entity_id},
-          resource = {id: +form.params.resource_id};
-
+      var entity = {id: form.params.entity_id},
+          resource = {id: form.params.resource_id};
       Entity.createRelatedResource(entity, resource, req.user, form.params, function (err, item) {
         if(err)
             return helpers.cypherQueryError(err, res);
@@ -267,7 +267,7 @@ module.exports = function(io){
 
           io.emit('entity:create-related-resource:done', {
             user: req.user.username,
-            id: +form.params.entity_id,
+            id: form.params.entity_id,
             data: item,
             resource: resource
           });
@@ -285,10 +285,10 @@ module.exports = function(io){
       var form = validator.request(req);
 
       Entity.removeRelatedResource({
-        id: +form.params.entity_id
+        id: form.params.entity_id
       },
       {
-        id: +form.params.resource_id
+        id: form.params.resource_id
       },
       req.user,
       form.params, function (err, item) {
@@ -297,10 +297,10 @@ module.exports = function(io){
 
         io.emit('entity:remove-related-resource:done', {
           user: req.user.username,
-          id: +form.params.entity_id,
+          id: form.params.entity_id,
           data: item,
           resource: {
-            id: +form.params.resource_id
+            id: form.params.resource_id
           }
         });
 
@@ -342,11 +342,11 @@ module.exports = function(io){
         return helpers.formError(form.errors, res);
 
       if(form.params.mentioning) {
-        form.params.mentioning = _.map(form.params.mentioning.split(','),  _.parseInt);
+        form.params.mentioning = form.params.mentioning.split(',');
       }
       // for merge options, mentions both trsuted and untrusted
       if(form.params.kind == Action.ISSUE_CHECK_CAN_MERGE)
-        form.params.mentioning = (form.params.mentioning||[]).concat([+form.params.solution]);
+        form.params.mentioning = (form.params.mentioning||[]).concat([form.params.solution]);
 
       // if solution is an ID
       if(!isNaN(form.params.solution))
@@ -356,10 +356,10 @@ module.exports = function(io){
         function action(next) {
           Action.merge({
             kind: Action.RAISE_ISSUE,
-            focus: +form.params.id,
+            focus: form.params.id,
             solution: _.keys(__solutions).indexOf(form.params.kind) == -1? '': form.params.solution, // solution has been checked for the types on the left
             target: Action.getTargetByIssue(form.params.kind),
-            mentions: [+form.params.id].concat(form.params.mentioning || []),
+            mentions: [form.params.id].concat(form.params.mentioning || []),
             username: req.user.username
           }, next);
         },
@@ -389,7 +389,7 @@ module.exports = function(io){
 
         io.emit('entity:create-related-issue:done', {
           user: req.user.username,
-          id:  +form.params.id, 
+          id:  form.params.id, 
           data: item
         });
 
@@ -432,10 +432,10 @@ module.exports = function(io){
         function action(next) {
           Action.merge({
             kind: Action.RAISE_ISSUE,
-            focus: +form.params.id,
+            focus: form.params.id,
             solution: _.keys(__solutions).indexOf(form.params.kind) == -1? '': form.params.solution, // solution has been checked for the types on the left
             target: Action.getTargetByIssue(form.params.kind),
-            mentions: [+form.params.id].concat(form.params.mentioning || []),
+            mentions: [form.params.id].concat(form.params.mentioning || []),
             username: req.user.username,
             downvoted_by: req.user.username
           }, next);
@@ -466,7 +466,7 @@ module.exports = function(io){
 
         io.emit('entity:remove-related-issue:done', {
           user: req.user.username,
-          id:  +form.params.id, 
+          id:  form.params.id, 
           data: item
         });
 
@@ -546,7 +546,7 @@ module.exports = function(io){
           return helpers.cypherQueryError(err, res);
         io.emit('entity:downvote:done', {
           user: req.user.username,
-          doi: +req.params.id, 
+          doi: req.params.id, 
           data: ent
         });
         return res.ok({
@@ -581,7 +581,7 @@ module.exports = function(io){
         
         if(form.params.limit == 1 && items.length)
           Resource.get({
-            id: +items[0].id
+            id: items[0].id
           }, req.user, function (err, item) {
             helpers.models.getMany(err, res, [item], info, form.params);
           });
