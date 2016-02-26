@@ -161,7 +161,7 @@ angular.module('histograph')
           if($scope.isLocked)
             return;
           $log.log(':: reporter  -~> downvote() entity:', $scope.entity.id, '- resource:', $scope.resource.id);
-          if(isNaN($scope.entity.id) || isNaN($scope.resource.id)){
+          if(!($scope.entity.id) || !($scope.resource.id)){
             $log.error(':: reporter  -~> downvote() failed, entity or resource not valid');
             return;
           }
@@ -181,7 +181,7 @@ angular.module('histograph')
             return;
           $log.log(':: reporter  -~> upvote() entity:', $scope.entity.id, '- resource:', $scope.resource.id);
           
-          if(isNaN($scope.entity.id) || isNaN($scope.resource.id)){
+          if(!($scope.entity.id) || !($scope.resource.id)){
             $log.error(':: reporter  -~> upvote() failed, entity or resource not valid');
             return;
           }
@@ -199,7 +199,7 @@ angular.module('histograph')
         $scope.merge = function(){
           if($scope.isLocked)
             return;
-          if(!$scope.entity.props.name || isNaN($scope.entity.alias.props.id)){
+          if(!$scope.entity.props.name || !($scope.entity.alias.props.id)){
             $log.log(':: reporter -> merge() unable to merge, no alias has been selected');
             return;
           }
@@ -226,7 +226,7 @@ angular.module('histograph')
           if($scope.isLocked)
             return;
           $log.log(':: reporter  -~> mergeInContext() entity:', entity.id, '- resource:', $scope.resource.id, '- MERGE WITH:', entityToMergeWith);
-          if(isNaN(entity.id) || isNaN($scope.resource.id)){
+          if(!(entity.id) || !($scope.resource.id)){
             $log.error(':: reporter  -~> mergeInContext() failed, entity or resource not valid');
             return;
           }

@@ -438,9 +438,7 @@ module.exports = {
       });
 
     if(safeParams.with)
-      safeParams.with = _.compact(String(safeParams.with).split(',')).map(function(d) {
-        return +d;
-      });
+      safeParams.with = _.compact(String(safeParams.with).split(','));
     
     if(safeParams.limit)
       safeParams.limit = +safeParams.limit;

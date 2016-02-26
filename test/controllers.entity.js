@@ -498,7 +498,27 @@ describe('controller:entity related issues', function() {
         should.equal(res.body.result.item.issues[0].props.solution, __entityB.id)
         // should.equal(res.body.status, 'empty');
         // delete action
-        console.log(res.body.result.item.issues)
+        // console.log(res.body.result.item.issues)
+        Action.remove(res.body.result.item.related.action, function(err) {
+          should.not.exist(err);
+          done();
+        });
+      });
+  });
+
+  it('should merge the two entities in resource (with param)', function(done) {
+    session
+      .post('/api/entity/' + __entity.id +'/related/resource/' +__resource.id+'/merge')
+      .send({
+        'with': __entityB.id
+      })
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exist(err);
+        should.equal(res.body.result.item.id, __entity.id)
+        should.equal(res.body.result.item.related.resource.id, __resource.id);
+
         Action.remove(res.body.result.item.related.action, function(err) {
           should.not.exist(err);
           done();

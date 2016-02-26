@@ -120,8 +120,8 @@ angular.module('histograph')
             var parent_parts = parent.split('-');
             
             parent  = {
-              type: parent_parts[0],
-              id:   parent_parts[1] 
+              type: parent_parts.shift(),
+              id:   parent_parts.join('-')
             };
 
             if(!parent.id) {

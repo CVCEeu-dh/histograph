@@ -588,7 +588,7 @@ apiRouter.route('/cooccurrences/:entityA(person|theme|location|place|organizatio
   Cfr Neo4j queries: queries/entity.cyp
   
 */
-apiRouter.route('/entity/:id([\\d,]+)')
+apiRouter.route('/entity/:id([\\d,a-z\\-]+)')
   .get(ctrl.entity.getItem)
   
 apiRouter.route('/entity/:id([\\da-z\\-]+)/related/resource')
@@ -634,18 +634,18 @@ apiRouter.route('/entity/:entity_id([\\da-z\\-]+)/related/resource/:resource_id(
   Cfr Neo4j queries: queries/collection.cyp
   
 */
-apiRouter.route('/collection')
-  .get(ctrl.collection.getItems)
-  .post(ctrl.collection.create);
-apiRouter.route('/collection/:id')
-  .get(ctrl.collection.getItem);
-apiRouter.route('/collection/:id/graph')
-  .get(ctrl.collection.getGraph);
-// apiRouter.route('/collection/:id/related/item') // generic items related to a collection
-  // .get(ctrl.collection.getRelatedItems)
-  // .post(ctrl.collection.addRelatedItems);
-apiRouter.route('/collection/:id/related/resources')
-  .get(ctrl.collection.getRelatedResources);
+// apiRouter.route('/collection')
+//   .get(ctrl.collection.getItems)
+//   .post(ctrl.collection.create);
+// apiRouter.route('/collection/:id')
+//   .get(ctrl.collection.getItem);
+// apiRouter.route('/collection/:id/graph')
+//   .get(ctrl.collection.getGraph);
+// // apiRouter.route('/collection/:id/related/item') // generic items related to a collection
+//   // .get(ctrl.collection.getRelatedItems)
+//   // .post(ctrl.collection.addRelatedItems);
+// apiRouter.route('/collection/:id/related/resources')
+//   .get(ctrl.collection.getRelatedResources);
 
 
 /*
@@ -673,24 +673,24 @@ apiRouter.route('/suggest/resource/graph')
 apiRouter.route('/suggest/:entity(person|location|organization)/graph')
   .get(ctrl.suggest.getEntitiesGraph)
 
-apiRouter.route('/suggest/all-in-between/:ids(\\d[\\d,]+)/resource/graph')
+apiRouter.route('/suggest/all-in-between/:ids(\\d[\\d,a-z\\-]+)/resource/graph')
   .get(ctrl.suggest.getAllInBetweenGraph)
-apiRouter.route('/suggest/all-in-between/:ids(\\d[\\d,]+)/resource')
+apiRouter.route('/suggest/all-in-between/:ids(\\d[\\d,a-z\\-]+)/resource')
   .get(ctrl.suggest.getAllInBetweenResources)
   
-apiRouter.route('/suggest/all-shortest-paths/:ids([\\d,]+)')
+apiRouter.route('/suggest/all-shortest-paths/:ids([\\d,a-z\\-]+)')
   .get(ctrl.suggest.allShortestPaths)
 apiRouter.route('/suggest/all-in-between')
   .get(ctrl.suggest.allInBetween)
-apiRouter.route('/suggest/unknown-node/:id([\\d,]+)')
+apiRouter.route('/suggest/unknown-node/:id([\\da-z\\-]+)')
   .get(ctrl.suggest.getUnknownNode)
-apiRouter.route('/suggest/unknown-nodes/:ids([\\d,]+)')
+apiRouter.route('/suggest/unknown-nodes/:ids([\\d,a-z\\-]+)')
   .get(ctrl.suggest.getUnknownNodes)
-apiRouter.route('/suggest/neighbors/:ids([\\d,]+)')
+apiRouter.route('/suggest/neighbors/:ids([\\d,a-z\\-]+)')
   .get(ctrl.suggest.getNeighbors)
-apiRouter.route('/suggest/shared/:ids([\\d,]+)/resource')
+apiRouter.route('/suggest/shared/:ids([\\d,a-z\\-]+)/resource')
   .get(ctrl.suggest.getSharedResources)
-apiRouter.route('/suggest/shared/:ids([\\d,]+)/:entity(person|location|organization)')
+apiRouter.route('/suggest/shared/:ids([\\d,a-z\\-]+)/:entity(person|location|organization)')
   .get(ctrl.suggest.getSharedEntities)
 
 // api proxy for VIAF (they don't have CROSS ORIGIN ...)

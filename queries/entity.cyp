@@ -392,11 +392,10 @@ RETURN count(res) as count_items
 
 
 // name:get_related_resources_timeline
-MATCH (ent)-[:appears_in]->(res:resource){if:with}<-[:appears_in]-(ent2){/if}
-WHERE ent.uuid = {id} AND has(res.start_month)
-  {if:with}
-    AND ent2.uuid in {with}
-  {/if}
+MATCH (ent:entity {uuid: {id}})
+WITH ent
+MATCH (ent)-[:appears_in]->(res:resource)
+  WHERE has(res.start_month)
   {if:mimetype}
   AND res.mimetype = {mimetype}
   {/if}
@@ -409,6 +408,15 @@ WHERE ent.uuid = {id} AND has(res.start_month)
   {if:end_time}
   AND res.end_time <= {end_time}
   {/if}
+
+{if:with}
+  WITH res
+  MATCH (ent2)
+  WHERE ent2.uuid in {with}
+  WITH res, ent2
+  MATCH (res)<-[:appears_in]-(ent2)
+{/if}
+  
 WITH DISTINCT res
   
 WITH  res.start_month as tm, min(res.start_time) as t,  count(res) as weight

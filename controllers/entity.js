@@ -138,7 +138,7 @@ module.exports = function(io){
 
       var entity = {id: form.params.entity_id},
           resource = {id: form.params.resource_id};
-      // console.log('updateRelatedResource', form.params)
+      
       if(form.params.action == 'merge') {// upvote /create the first and downvote the second
         async.series([
           function discarded(next) {
@@ -148,7 +148,7 @@ module.exports = function(io){
           },
           function trusted(next) {
             Entity.createRelatedResource({
-              id: +form.params.with.pop()
+              id: form.params.with[0]
             }, resource, req.user, {}, next);
           }
 
