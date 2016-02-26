@@ -259,7 +259,8 @@ WITH DISTINCT res
 MATCH (res:resource)
   WHERE res.uuid = {id} 
 WITH res
-MATCH (res)<-[r1:appears_in]-(ent:entity {status:1, common:true})
+MATCH (res)<-[r1:appears_in]-(ent:entity)
+WHERE r1.score > -1 AND ent.score > -1
 WITH res, r1, ent
   ORDER BY r1.tfidf DESC
   LIMIT 9
@@ -299,7 +300,7 @@ RETURN {
 // name: get_related_resources
 // top 20 entities attached to the person
 MATCH (res1:resource {uuid: {id}})<-[r1:appears_in]-(ent:entity)
-WHERE ent.status = 1 AND ent.common
+WHERE r1.score > -1 AND ent.score > -1
 WITH res1, r1, ent
   ORDER BY r1.score DESC, r1.tfidf DESC
   LIMIT 9
