@@ -673,9 +673,9 @@ apiRouter.route('/suggest/resource/graph')
 apiRouter.route('/suggest/:entity(person|location|organization)/graph')
   .get(ctrl.suggest.getEntitiesGraph)
 
-apiRouter.route('/suggest/all-in-between/:ids(\\d[\\d,a-z\\-]+)/resource/graph')
+apiRouter.route('/suggest/all-in-between/:ids([\\da-z][\\d,a-z\\-]+)/resource/graph')
   .get(ctrl.suggest.getAllInBetweenGraph)
-apiRouter.route('/suggest/all-in-between/:ids(\\d[\\d,a-z\\-]+)/resource')
+apiRouter.route('/suggest/all-in-between/:ids([\\da-z][\\d,a-z\\-]+)/resource')
   .get(ctrl.suggest.getAllInBetweenResources)
   
 apiRouter.route('/suggest/all-shortest-paths/:ids([\\d,a-z\\-]+)')

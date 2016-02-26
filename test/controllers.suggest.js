@@ -141,7 +141,16 @@ describe('controller:suggest check lucene query', function() {
       .expect(200)
       .end(function (err, res) {
         should.not.exist(err) // err on statusCode
-        
+        done();
+      })
+  });
+  it('should get the resource A because of "IMPROBABLE QUERY EVER" query', function (done) {
+    session
+      .get('/api/suggest/resource?query=improbable query ever')
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exist(err) // err on statusCode
+        should.equal(_.map(res.body.result.items, 'id').indexOf(__resourceA.id) != -1, true);
         done();
       })
   });

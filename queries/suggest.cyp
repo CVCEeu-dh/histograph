@@ -4,7 +4,7 @@ start n=node:node_auto_index({resource_query})
 WITH n
 LIMIT {limit}
 RETURN {
-  id: id(n),
+  id: n.uuid,
   props: n,
   type: 'resource'
 } AS result
@@ -16,7 +16,7 @@ WITH n, count(r) as distribution
 ORDER BY n.celebrity DESC, distribution DESC
 LIMIT {limit}
 RETURN {
-  id: id(n),
+  id: n.uuid,
   props: n,
   type: last(labels(n))
 } AS result
@@ -76,16 +76,25 @@ WITH filter(x in nodes(p) WHERE last(labels(x))='resource') as ns UNWIND ns as r
 WITH DISTINCT res
   {?res:start_time__gt} {AND?res:end_time__lt} {AND?res:mimetype__in} {AND?res:type__in}
 WITH DISTINCT res
-return id(res) as id
+return res.uuid as id
 SKIP {offset}
 LIMIT {limit}
 
 
+// name: get_all_in_between_graph_new
+//
+
+
 // name: get_all_in_between_graph
 // retutn rels, nodes from a) the shortes path and b) enlarged path
+OPTIONAL MATCH (res:resource)
+  WHERE res.uuid in {ids} 
+WITH res
+OPTIONAL MATCH (ent:entity)
+  WHERE res.uuid in {ids}
+WITH coalesce(res, ent) as n, coalesce(res, ent) as t
 MATCH p=allShortestPaths((n)-[:appears_in*..4]-(t))
-  WHERE id(n) in {ids}
-    AND id(t) in {ids}
+  WHERE n <> t
 {if:type}
   AND ALL(x in FILTER(x in nodes(p) WHERE last(labels(x)) = 'resource') WHERE x.type in {type})
 {/if}
@@ -97,7 +106,7 @@ MATCH p=allShortestPaths((n)-[:appears_in*..4]-(t))
 {/if}
 WITH p, reduce(tfidf=toFloat(0), r in relationships(p)|tfidf + COALESCE(r.tfidf,0.0)) as tfidf
 RETURN extract( n IN nodes(p)| {
-  id: id(n),
+  id: n.uuid,
   type: last(labels(n)),
   ghost: 0,
   label: coalesce(n.name, n.title_en, n.title_fr)
@@ -264,8 +273,10 @@ WITH res
 {AND?res:type__in}
 WITH DISTINCT res
 {if:with}
-  MATCH (ent:entity)-[:appears_in]->(res)
-  WHERE id(ent) IN {with}
+  MATCH (ent:entity)
+    WHERE ent.uuid IN {with}
+  WITH ent
+  MATCH (ent) -[:appears_in]->(res)
   WITH DISTINCT res
 {/if}
 RETURN {
@@ -284,53 +295,39 @@ WITH res
 WITH DISTINCT res
 {if:with}
   MATCH (ent:entity)-[:appears_in]->(res)
-  WHERE id(ent) IN {with}
+  WHERE ent.uuid IN {with}
   WITH DISTINCT res
 {/if}
 SKIP {offset}
 LIMIT {limit}
 WITH res
 
-OPTIONAL MATCH (res)-[r_loc:appears_in]-(loc:`location`)
+OPTIONAL MATCH (res)<-[r_the:appears_in]-(the:`theme`)
+WITH res, r_the, the
+ORDER BY r_the.score DESC, r_the.tfidf DESC, r_the.frequency DESC
 WITH res, collect({  
-      id: id(loc),
-      type: 'location',
-      props: loc,
-      rel: r_loc
-    })[0..5] as locations
+      id: the.uuid,
+      type: 'theme',
+      props: the,
+      rel: r_the
+    })[0..5] as themes
       
 OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
-WITH res, locations, collect({
-      id: id(per),
+WITH res, themes, r_per, per
+ORDER BY r_per.score DESC, r_per.tfidf DESC, r_per.frequency DESC
+WITH res, themes, collect({
+      id: per.uuid,
       type: 'person',
       props: per,
       rel: r_per
     })[0..5] as persons
 
-OPTIONAL MATCH (res)-[r_org:appears_in]-(org:`organization`)
-WITH res, locations, persons, collect({  
-      id: id(org),
-      type: 'organization',
-      props: org,
-      rel: r_org
-    })[0..5] as organizations
-
-OPTIONAL MATCH (res)-[r_soc:appears_in]-(soc:`social_group`)
-WITH res, locations, persons, organizations, collect({
-      id: id(soc),
-      type: 'social_group',
-      props: soc,
-      rel: r_soc
-    })[0..5] as social_groups
-
 RETURN {
-  id: id(res),
+  id: res.uuid,
   props: res,
   type: 'resource',
   persons:        persons,
-  organizations:  organizations,
-  locations:      locations,
-  social_groups:  social_groups
+  themes:  themes
 } AS result
 
 
@@ -350,15 +347,15 @@ RETURN {
 start n=node:node_auto_index({query})
 WHERE {entity} in labels(n)
 WITH (n)
-MATCH (n)-[r:appears_in]->(res:resource)
-WITH n, last(collect(res)) as last_resource
+MATCH (n)-[r:appears_in]->()
+WITH n, count(r) as df
 RETURN {
-  id: id(n),
+  id: n.uuid,
   props: n,
-  appearing: last_resource,
+  // appearing: last_resource,
   type: last(labels(n))
 } AS result
-ORDER BY n.score DESC, n.specificity DESC
+ORDER BY n.score DESC, df DESC
 SKIP {offset}
 LIMIT {limit}
 
@@ -382,12 +379,12 @@ WITH ent, resources UNWIND resources as res
 MATCH (res)<-[r:appears_in]-(ent)
 RETURN {
   source: {
-    id: id(res),
+    id: res.uuid,
     type: LAST(labels(res)),
     label: COALESCE(res.name, res.title_en, res.title_fr, res.title_de)
   },
   target: {
-    id: id(ent),
+    id: ent.uuid,
     type: LAST(labels(ent)),
     label: COALESCE(ent.name, ent.title_en, ent.title_fr, ent.title_de),
     url: ent.thumbnail
@@ -408,12 +405,12 @@ MATCH (m)-[r:appears_in]->(ent)
   WHERE m in ms
 RETURN {
   source: {
-    id: id(m),
+    id: m.uuid,
     type: LAST(labels(m)),
     label: COALESCE(m.name, m.title_en, m.title_fr, m.title_de)
   },
   target: {
-    id: id(ent),
+    id: ent.uuid,
     type: LAST(labels(ent)),
     label: COALESCE(ent.name, ent.title_en, ent.title_fr, ent.title_de)
   },

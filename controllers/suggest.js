@@ -405,7 +405,8 @@ module.exports =  function(io){
     
     
     /*
-      Lucene results. can also be used for typeahead, since it is very fast.
+      Lucene results. can also be used for typeahead, 
+      since it is very fast.
     */
     getEntities: function (req, res) {
       var form = validator.request(req, {
@@ -422,13 +423,14 @@ module.exports =  function(io){
       
       var q = parser.toLucene(req.query.query, 'name_search');
       form.params.query = q;
-      
+      console.log('get_entities', form.params.query);
       models.getMany({
         queries: {
           count_items: queries.get_matching_entities_count,
           items: queries.get_matching_entities
         },
-        params: form.params
+        params: form.params,
+        // ignoreCount: true
       }, function (err, results) {
         if(err)
           return helpers.cypherQueryError(err, res);

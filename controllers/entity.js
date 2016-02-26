@@ -423,10 +423,6 @@ module.exports = function(io){
       if(form.params.kind == Action.ISSUE_CHECK_CAN_MERGE)
         form.params.mentioning = (form.params.mentioning||[]).concat([+form.params.solution]);
 
-      // downvte only if the type is explicit ly set as sWRONG
-      if(form.params.kind == Action.ISSUE_CHECK_IS_WRONG)
-        params.upvoted_by = req.user.username;
-
 
       async.series([
         function action(next) {
