@@ -197,9 +197,9 @@ module.exports = {
     },
     {
       field: 'center',
-      check: 'isInt',
+      check: 'matches',
       args: [
-        0
+        /[\da-z\-]+/
       ],
       error: 'center should be a valid integer id'
     },
@@ -433,9 +433,7 @@ module.exports = {
       safeParams.id = ''+safeParams.id;
     
     if(safeParams.ids)
-      safeParams.ids = _.compact(safeParams.ids.split(',')).map(function(d) {
-        return +d;
-      });
+      safeParams.ids = _.compact(safeParams.ids.split(','));
 
     if(safeParams.with)
       safeParams.with = _.compact(String(safeParams.with).split(','));

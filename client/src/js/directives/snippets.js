@@ -58,7 +58,7 @@ angular.module('histograph')
           scope.items = items;
           
         };
-
+        
         /*
           scope private method
           @param res - the api response containing result.items
@@ -89,12 +89,14 @@ angular.module('histograph')
             }), scope._fillSharedItems);
           } else if(scope.itemsIds.length) {
             $log.log('   getSharedItems between:' , scope.itemsIds);
+
             SuggestFactory.getShared(angular.extend({
               ids: scope.itemsIds,
               model: scope.sharedItemsModel
             }, scope.params, {
               limit: scope.limit,
-              offset: scope.offset
+              offset: scope.offset,
+              center: scope.target.center? scope.target.center.id: undefined
             }), scope._fillSharedItems);
           } else {
             $log.error('::snippets -> sync() without params')

@@ -380,7 +380,7 @@ angular.module('histograph')
             si.graph.clear();
           // si.refresh();
             // previous nodes
-            var pns = previousGraph? _.indexBy(previousGraph.nodes, 'id'): {};
+            var pns = previousGraph? _.keyBy(previousGraph.nodes, 'id'): {};
             // set size, and fixes what need to be fixed. If there are fixed nodes, the camera should center on it
             graph.nodes = graph.nodes.map(function (n) {
               if(pns[n.id]) {
@@ -590,7 +590,8 @@ angular.module('histograph')
           
           scope.target = {
             type: 'edge',
-            data: e.data
+            data: e.data,
+            center: scope.center
           };
           scope.$apply();
           si.refresh();

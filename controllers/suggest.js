@@ -215,7 +215,7 @@ module.exports =  function(io){
       
       if(!form.isValid)
         return helpers.formError(form.errors, res);
-      
+      // console.log(form.params)
       models.getMany({
         queries: {
           count_items: queries.count_shared_resources,
@@ -223,6 +223,8 @@ module.exports =  function(io){
         },
         params: form.params
       }, function (err, results) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
         helpers.models.getMany(err, res, results.items, results.count_items, form.params);
       })
     },

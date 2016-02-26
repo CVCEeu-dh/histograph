@@ -453,11 +453,9 @@ LIMIT {limit}
 
 // name: get_related_entities_graph
 // monopartite graph of entities
-MATCH (n:entity)-[r]-(t:resource){if:with}<-[:appears_in]-(ent2){/if}
-  WHERE n.uuid = {id}
-  {if:with}
-    AND ent2.uuid in {with}
-  {/if}
+PROFILE 
+MATCH (n:entity {uuid: {id}})-[r:appears_in]->(t:resource)
+  WHERE r.score > -1
   {if:start_time}
     AND t.start_time >= {start_time}
   {/if}
@@ -471,25 +469,29 @@ MATCH (n:entity)-[r]-(t:resource){if:with}<-[:appears_in]-(ent2){/if}
     AND t.type in {type}
   {/if}
 WITH t
- MATCH (p1:{:entity})-[:appears_in]->(t)<-[:appears_in]-(p2:{:entity})
- WHERE p1.score > -1 AND p2.score > -1
-WITH p1, p2, length(collect(DISTINCT t)) as w
-  
-RETURN {
-    source: {
-      id: p1.uuid,
-      type: LAST(labels(p1)),
-      label: COALESCE(p1.name, p1.title_en, p1.title_fr,p1.title, '')
-    },
-    target: {
-      id: p2.uuid,
-      type: LAST(labels(p2)),
-      label: COALESCE(p2.name, p2.title_en, p2.title_fr,p2.title, '')
-    },
-    weight: w 
-  } as result
-ORDER BY w DESC
-LIMIT {limit}
+{if:with}
+  MATCH (t)<-[r2:appears_in]-(ent2:entity)
+  WHERE ent2.uuid in {with} AND r2.score > -1
+  WITH t
+{/if}
+MATCH (p1:{:entity})-[:appears_in]->(t)<-[:appears_in]-(p2:{:entity})
+WHERE id(p1) > id(p2) 
+WITH p1, p2, min(p1.score) as min_score,
+count(t) as w WITH p1,p2,min_score,w ORDER BY min_score DESC, w DESC
+LIMIT {limit} RETURN {
+  source: { 
+    id: p1.uuid, 
+    type: '{:entity}', 
+    label: COALESCE(p1.name, p1.title_en, p1.title_fr,p1.title, '')
+  },
+  target: { 
+    id: p2.uuid, 
+    type: '{:entity}',
+    label: COALESCE(p2.name, p2.title_en, p2.title_fr,p2.title, '') 
+  },
+  weight: w
+} as result 
+
 
 
 // name: get_related_resources_graph

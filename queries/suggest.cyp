@@ -423,34 +423,32 @@ LIMIT {limit}
 // name: count_shared_resources
 // an overview of how many resources are between two entities (one step), according to filters
 {if:center}
-  MATCH (ent)-[:appears_in]->(res:resource)
-    WHERE id(ent) = {center}
+  MATCH (ent:entity {uuid: {center}})-[:appears_in]->(res:resource)
   WITH res
 {/if}
-{if:with}
-  MATCH (res)<-[r0:appears_in]-(ent)
-    WHERE id(ent) in {with}
-  WITH distinct res
-  MATCH p=(n:entity)-[r1:appears_in]->(res)<-[r2:appears_in]-(t:entity)
+MATCH (n:entity)-[r1:appears_in]->{if:center}(res){/if}{unless:center}(res:resource){/unless}
+WHERE n.uuid IN {ids}
+{if:start_time}
+  AND res.start_time >= {start_time}
 {/if}
-{unless:with}
-  MATCH p=(n:entity)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(t:entity)
-{/unless}
-  WHERE id(n) in {ids}
-    AND id(t) in {ids}
-    AND id(n) < id(t)
-    {if:start_time}
-      AND res.start_time >= {start_time}
-    {/if}
-    {if:end_time}
-      AND res.end_time <= {end_time}
-    {/if}
-    {if:mimetype}
-      AND res.mimetype in {mimetype}
-    {/if}
-    {if:type}
-      AND res.type in {type}
-    {/if}  
+{if:end_time}
+  AND res.end_time <= {end_time}
+{/if}
+{if:mimetype}
+  AND res.mimetype in {mimetype}
+{/if}
+{if:type}
+  AND res.type in {type}
+{/if}
+WITH res, count(r1) as z
+  WHERE z = size({ids})
+WITH res
+{if:with}
+  MATCH (res)<-[r:appears_in]-(ent:entity)
+    WHERE ent.uuid in {with}
+  WITH res, count(r) as df
+{/if}
+
 RETURN {
   group: {if:group}res.{:group}{/if}{unless:group}res.type{/unless}, 
   count_items: count(res)
@@ -460,51 +458,48 @@ RETURN {
 // name: get_shared_resources
 // an overview of first n resources in between two entities
 {if:center}
-  MATCH (ent)-[:appears_in]->(res:resource)
-    WHERE id(ent) = {center}
+  MATCH (ent:entity {uuid: {center}})-[:appears_in]->(res:resource)
   WITH res
 {/if}
-{if:with}
-  MATCH (res)<-[r:appears_in]-(ent)
-    WHERE id(ent) in {with}
-  WITH distinct res
-  MATCH p=(n:entity)-[r1:appears_in]->(res)<-[r2:appears_in]-(t:entity)
+MATCH (n:entity)-[r1:appears_in]->{if:center}(res){/if}{unless:center}(res:resource){/unless}
+WHERE n.uuid IN {ids}
+{if:start_time}
+  AND res.start_time >= {start_time}
 {/if}
-{unless:with}
-  MATCH p=(n:entity)-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(t:entity)
-{/unless}
-  WHERE id(n) in {ids}
-    AND id(t) in {ids}
-    AND id(n) < id(t)
-    {if:start_time}
-      AND res.start_time >= {start_time}
-    {/if}
-    {if:end_time}
-      AND res.end_time <= {end_time}
-    {/if}
-    {if:mimetype}
-      AND res.mimetype in {mimetype}
-    {/if}
-    {if:type}
-      AND res.type in {type}
-    {/if}
-    
-WITH res, r1, r2
-ORDER BY r1.tfidf DESC, r2.tfidf DESC
+{if:end_time}
+  AND res.end_time <= {end_time}
+{/if}
+{if:mimetype}
+  AND res.mimetype in {mimetype}
+{/if}
+{if:type}
+  AND res.type in {type}
+{/if}
+WITH res, max(coalesce(r1.frequency,0)) as ms, count(r1) as z
+  WHERE z = size({ids})
+WITH res, ms
+{if:with}
+  MATCH (res)<-[r:appears_in]-(ent:entity)
+    WHERE ent.uuid in {with}
+  WITH res, ms, count(r) as df
+{/if}
+ORDER BY ms DESC
 SKIP {offset}
 LIMIT {limit}
-WITH DISTINCT res
+
+WITH res
 OPTIONAL MATCH (per:person)-[r_per:appears_in]->(res)
 WHERE per.score > -1
 WITH res, per, r_per
-ORDER BY r_per.tfidf DESC
+ORDER BY r_per.score DESC, r_per.tfidf DESC
 WITH res, collect({
-      id: id(per),
+      id:   per.uuid,
       type: 'person',
-      props:per
+      props: per,
+      rel: r_per
     })[0..5] as persons
 RETURN {
-  id: id(res),
+  id: res.uuid,
   props: res,
   type: 'resource',
   persons: persons

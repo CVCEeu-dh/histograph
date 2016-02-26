@@ -211,9 +211,10 @@ describe('controller:suggest ', function() {
 describe('controller:suggest get shared resources', function() {
   it('should get a bunch of resources between a couple of entity ids', function (done) {
     session
-      .get('/api/suggest/shared/17178,26413/resource')
+      .get('/api/suggest/shared/994be8f0-dbc4-11e5-ae0f-d53111cbd39f,98d1fe00-dbc4-11e5-ae0f-d53111cbd39f/resource?limit=10&offset=0&center=9b9d2bf0-dbc4-11e5-ae0f-d53111cbd39f')
       .expect(200)
       .end(function (err, res) {
+        console.log(res.body)
         should.not.exist(err) // err on statusCode
         should.exist(res.body.info.total_items);
         should.exist(res.body.info.limit)
