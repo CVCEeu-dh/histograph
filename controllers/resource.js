@@ -60,7 +60,7 @@ module.exports = function(io){
       if(ids.length == 0)
         return res.error(404);
       if(ids.length == 1)
-        Resource.get({id: +req.params.id}, req.user, function (err, item) {
+        Resource.get({id: req.params.id}, req.user, function (err, item) {
           if(err == helpers.IS_EMPTY)
             return res.error(404);
           if(err)

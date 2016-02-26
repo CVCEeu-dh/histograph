@@ -1,7 +1,6 @@
 // name: get_resource
 // get resource with its version and comments
-MATCH (res) WHERE res.uuid = {id}
-
+MATCH (res:resource {uuid: {id}})
 WITH res
 OPTIONAL MATCH (res)<-[r_cur:curates]-(u:user {username:{username}})
 WITH res, count(r_cur) as curated_by_user
@@ -126,7 +125,7 @@ WHERE res:resource
 {/if}
 
 
-WITH DISTINCT res
+WITH res
 
 {if:orderby}
 ORDER BY {:orderby}
@@ -138,7 +137,7 @@ SKIP {offset}
 LIMIT {limit}
 WITH res
 OPTIONAL MATCH (res)-[r_loc:appears_in]->(loc:`location`)
-WHERE loc.score > -2
+// WHERE loc.score > -2
 WITH res, r_loc, loc
 ORDER BY r_loc.score DESC, r_loc.tfidf DESC, r_loc.frequency DESC
 WITH res,  filter(x in collect({  
@@ -148,7 +147,7 @@ WITH res,  filter(x in collect({
       rel: r_loc
     }) WHERE has(x.id))[0..5] as locations   
 OPTIONAL MATCH (res)<-[r_per:appears_in]-(per:`person`)
-WHERE per.score > -2
+// WHERE per.score > -2
 WITH res, locations, r_per, per
 ORDER BY  r_per.score DESC, r_per.tfidf DESC, r_per.frequency DESC
 WITH res, locations,  filter(x in collect({  
@@ -158,7 +157,7 @@ WITH res, locations,  filter(x in collect({
       rel: r_per
     }) WHERE has(x.id))[0..5] as persons
 OPTIONAL MATCH (res)<-[r_org:appears_in]-(org:`organization`)
-WHERE org.score > -2
+// WHERE org.score > -2
 WITH res, locations, persons,  filter(x in collect({    
       id: org.uuid,
       type: 'organization',
@@ -166,7 +165,7 @@ WITH res, locations, persons,  filter(x in collect({
       rel: r_org
     }) WHERE has(x.id))[0..5] as organizations
 OPTIONAL MATCH (res)<-[r_soc:appears_in]-(soc:`social_group`)
-WHERE soc.score > -2
+// WHERE soc.score > -2
 WITH res, locations, persons, organizations,  filter(x in collect({  
       id: soc.uuid,
       type: 'social_group',
@@ -174,7 +173,7 @@ WITH res, locations, persons, organizations,  filter(x in collect({
       rel: r_soc
     }) WHERE has(x.id))[0..5] as social_groups
 OPTIONAL MATCH (res)<-[r_the:appears_in]-(the:`theme`)
-WHERE the.score > -2
+// WHERE the.score > -2
 WITH res, locations, persons, organizations, social_groups, filter(x in collect({    
       id: the.uuid,
       type: 'theme',
@@ -306,7 +305,7 @@ WITH res1, r1, ent
   LIMIT 9
 WITH res1, r1, ent
 MATCH (ent)-[r2:appears_in]->(res2:resource){if:with}, (res2)<-[:appears_in]-(ent2:entity) WHERE id(ent2) IN {with} AND id(res2) <> {id}{/if}
-{unless:with} WHERE id(res2) <> {id} {/unless}
+{unless:with} WHERE res2.uuid <> {id} {/unless}
 
     {if:mimetype}
     AND res2.mimetype IN {mimetype}
@@ -365,11 +364,11 @@ WITH res1, res2, intersection, persons, filter(x in collect({
     }) WHERE has(x.id))[0..5] as themes
 
 RETURN {
-  id: id(res2),
+  id: res2.uuid,
   props: res2,
   persons: persons,
   themes: themes,
-  target: id(res2),
+  target: res2.uuid,
   type: LAST(labels(res2)),
   dst : abs(coalesce(res1.start_time, 1000000000) - coalesce(res2.start_time, 0)),
   det : abs(coalesce(res1.end_time, 1000000000) - coalesce(res2.end_time, 0)),
@@ -608,13 +607,13 @@ LIMIT {limit}
 WITH p1,p2,r
 RETURN {
   source: {
-    id: id(p1),
+    id: p1.uuid,
     type: {entity},
     label: COALESCE(p1.name, p1.title_en, p1.title_fr),
     url: p1.thumbnail
   },
   target: {
-    id: id(p2),
+    id: p2.uuid,
     type: {entity},
     label: COALESCE(p2.name, p2.title_en, p2.title_fr),
     url: p2.thumbnail
@@ -627,8 +626,10 @@ RETURN {
 // name: get_cooccurrences
 // 
 {if:with}
-MATCH (res:resource)<-[:appears_in]-(ent2:entity)
-  WHERE id(ent2) IN {with}
+MATCH (ent2:entity)
+  WHERE ent2.uuid IN {with}
+WITH ent2
+MATCH (res:resource)<-[:appears_in]-(ent2)
 WITH res
   MATCH (p1:{:entity})-[r1:appears_in]->(res)<-[r2:appears_in]-(p2:{:entity})
 {/if}
@@ -653,13 +654,13 @@ ORDER BY w DESC
 LIMIT {limit}
 RETURN {
     source: {
-      id: id(p1),
+      id: p1.uuid,
       type: {entity},
       label: COALESCE(p1.name, p1.title_en, p1.title_fr),
       url: p1.thumbnail
     },
     target: {
-      id: id(p2),
+      id: p2.uuid,
       type: {entity},
       label: COALESCE(p2.name, p2.title_en, p2.title_fr),
       url: p2.thumbnail
@@ -671,8 +672,10 @@ RETURN {
 // name: get_bipartite_cooccurrences
 //
 {if:with}
-MATCH (res:resource)<-[:appears_in]-(ent2:entity)
-  WHERE id(ent2) IN {with}
+MATCH (ent2:entity)
+  WHERE ent2.uuid IN {with}
+WITH ent2
+MATCH (res:resource)<-[:appears_in]-(ent2)
 WITH res
   MATCH (p1:{:entityA})-[r1:appears_in]->(res)<-[r2:appears_in]-(p2:{:entityB})
 {/if}
@@ -699,13 +702,13 @@ ORDER BY w DESC
 LIMIT {limit}
 RETURN {
     source: {
-      id: id(p1),
+      id: p1.uuid,
       type: {entityA},
       label: p1.name,
       url: p1.thumbnail
     },
     target: {
-      id: id(p2),
+      id: p2.uuid,
       type: {entityB},
       label: p2.name,
       url: p2.thumbnail
@@ -714,38 +717,10 @@ RETURN {
   } as result
 
 
-// name: get_graph_persons
-// DEPRECATED
-MATCH (n)-[r]-(per:person)
-  WHERE n.uuid = {id}
-WITH per
-  MATCH (per)--(res:resource)
-WITH res
-  MATCH (p1:person)-[:appears_in]-(res)-[:appears_in]-(p2:person)
-  WHERE p1.score > -1 AND p2.score > -1
-WITH p1, p2, count(DISTINCT res) as w
-RETURN {
-  source: {
-    id: id(p1),
-    type: LAST(labels(p1)),
-    score: p1.score,
-    label: p1.name
-  },
-  target: {
-    id: id(p2),
-    type: LAST(labels(p2)),
-    score: p2.score,
-    label: p2.name
-  },
-  weight: w 
-} as result
-ORDER BY result.weight DESC
-LIMIT {limit}
 
 // name: get_related_entities_graph
 //
-MATCH (n)<-[r1:appears_in]-(ent:{:entity})-[r2:appears_in]->(res:resource)
-  WHERE n.uuid = {id}
+MATCH (n:resource {uuid: {id}})<-[r1:appears_in]-(ent:{:entity})-[r2:appears_in]->(res:resource)
 WITH r1, r2, res
   ORDER BY r1.tfidf DESC, r2.tfidf DESC
   LIMIT 100
@@ -772,9 +747,8 @@ LIMIT 500
 
 
 // name: get_related_resources_bipartite_graph
-MATCH (res1:resource)<-[r1:appears_in]-(ent:entity)-[r2:appears_in]->(res2:resource)
-  WHERE id(res1) = {id}
-    AND ent.score > -1
+MATCH (res1:resource {uuid: {id}})<-[r1:appears_in]-(ent:entity)-[r2:appears_in]->(res2:resource)
+  WHERE ent.score > -1
     {if:mimetype}
     AND res2.mimetype IN {mimetype}
     {/if}
@@ -791,7 +765,7 @@ MATCH (res1:resource)<-[r1:appears_in]-(ent:entity)-[r2:appears_in]->(res2:resou
 WITH  res1, res2, r1, r2, ent
 {if:with}
   MATCH (ent2:entity)-[:appears_in]->(res2)
-  WHERE id(ent2) IN {with}
+  WHERE ent2.uuid IN {with}
   WITH  res1, res2, r1, r2, ent
 {/if}
 
@@ -835,9 +809,8 @@ LIMIT 250
 
 // name: get_related_resources_graph
 //
-MATCH (res1:resource)<-[r1:appears_in]-(ent:entity)-[r2:appears_in]->(res2:resource)
-  WHERE id(res1) = {id}
-    AND ent.score > -1
+MATCH (res1:resource {uuid: {id}})<-[r1:appears_in]-(ent:entity)-[r2:appears_in]->(res2:resource)
+  WHERE ent.score > -1
     {if:mimetype}
     AND res2.mimetype IN {mimetype}
     {/if}
@@ -853,8 +826,10 @@ MATCH (res1:resource)<-[r1:appears_in]-(ent:entity)-[r2:appears_in]->(res2:resou
 
 WITH  res1, res2, r1, r2, ent
 {if:with}
-  MATCH (ent2:entity)-[:appears_in]->(res2)
-  WHERE id(ent2) IN {with}
+  MATCH (ent2:entity)
+  WHERE ent2.uuid IN {with}
+  WITH ent2
+  MATCH (ent2)-[:appears_in]->(res2)
   WITH  res1, res2, r1, r2, ent
 {/if}
 
@@ -880,12 +855,12 @@ ORDER BY ent.specificity DESC
 WITH P, Q, count(distinct ent) as intersection
 RETURN {
   source: {
-    id: id(P),
+    id: P.uuid,
     type: 'resource',
     label: COALESCE(P.name, P.title_en, P.title_fr)
   },
   target: {
-    id: id(Q),
+    id: Q.uuid,
     type:'resource',
     label: COALESCE(Q.name, Q.title_en, Q.title_fr)
   },
@@ -937,12 +912,15 @@ MATCH (res:resource)<-[:appears_in]-(ent:entity)
 WHERE res.uuid = {id} AND ent.score > -1
 WITH ent
 {if:with}
+  MATCH (ent2:entity)
+  WHERE ent2.uuid  IN {with}
+  WITH ent2
   MATCH (ent2)-[:appears_in]->(res:resource)<-[r:appears_in]-(ent)
-  WHERE id(ent2) IN {with}
   WITH DISTINCT res
 {/if}
 {unless:with}
   MATCH (res:resource)<-[r:appears_in]-(ent)
+  WITH DISTINCT res
 {/unless}
 
 WHERE res.uuid <> {id} AND has(res.start_month)
@@ -980,24 +958,6 @@ WITH  res.start_time as t, count(res) as weight
 RETURN t, weight
 
 
-// name: get_timeline_similar_resource_ids_by_entities
-//
-MATCH (res)
-WHERE res.uuid = 19389
-WITH res
-OPTIONAL MATCH (res)--(per:person)--(r)
-OPTIONAL MATCH (res)--(loc:location)--(r)
-WHERE r.uuid <> res.uuid
-WITH 
-{
-  id: r.uuid,
-  shared_persons: count(DISTINCT per),
-  shared_locations: count(DISTINCT loc),
-  start_time: r.start_time
-} as candidate
-WHERE candidate.start_time IS NOT NULL AND candidate.shared_persons > 0 OR candidate.shared_locations > 0
-RETURN candidate.start_time as t, count(*) as weight
-
 
 // name: create_related_user
 // create or merge the cureted by relationship on a specific entity
@@ -1031,8 +991,7 @@ DELETE r RETURN count(r)
 
 // name:count_related_users
 // get related users that 'curates's OR liked the resource
-MATCH (u:user)-[*0..2]-(res)
-WHERE res.uuid = {id}
+MATCH (u:user)-[*0..2]-(res:resource {uuid: {id}})
 RETURN count(DISTINCT u) as count_items
 
 // name:get_related_users

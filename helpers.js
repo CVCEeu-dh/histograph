@@ -548,9 +548,7 @@ module.exports = {
     */
     toIds: function (ids) {
       return ids.split(',').filter(function (d) {
-        return !isNaN(d)
-      }).map(function (d) {
-        return +d;
+        return !!d.match(/[\da-z\-]+/)
       });
     },
 

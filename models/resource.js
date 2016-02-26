@@ -76,7 +76,7 @@ module.exports = {
   get: function(resource, user, next) {
     if(typeof resource != 'object') {
       resource = {
-        id: +resource
+        id: resource
       }
     }
     var query = parser.agentBrown(rQueries.get_resource)
