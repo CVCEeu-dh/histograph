@@ -59,6 +59,20 @@ MERGE (k:user { email:{email} })
     props: k
   }
 
+// name: get_matching_user
+// given an username and a password
+MATCH (u:user)
+  WHERE u.email = {username}
+    OR u.username = {username}
+WITH u
+  LIMIT 1
+RETURN {
+  id: u.uuid,
+  username: u.username,
+  email: u.email,
+  props: u
+}
+
 
 // name: count_pulse
 // get total number of user activities/notifications

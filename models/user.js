@@ -63,6 +63,31 @@ module.exports = {
   },
 
   /*
+    Validate user agains username and password
+  */
+  check: function(user, next) {
+    neo4j.query(queries.get_matching_user, user, function(err, nodes) {
+      if(err || !nodes.length){
+        next(err || helper.IS_EMPTY);
+        return;
+      }
+      var _user = nodes[0];
+
+      _user.isValid = helpers.comparePassword(user.password, _user.props.password, {
+        from: 'localstrategy',
+        secret: settings.secret.salt, 
+        salt: _user.props.salt
+      });
+
+      if(!_user.isValid) {
+        next(helper.IS_EMPTY); // credential not matching
+      } else {
+        next(null, _user);
+      }
+    });
+  },
+
+  /*
     This method MUST NOT HAVE an API access.
     user can contain just the email field.
   */
