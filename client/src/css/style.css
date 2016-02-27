@@ -555,7 +555,7 @@ a#header-title {
 }
 
 .item.entity .tags .tag{
-  background: #474747;
+  background: transparent;
   cursor: pointer;
 }
 .item.entity .tags .tag:hover{

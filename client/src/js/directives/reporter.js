@@ -218,7 +218,7 @@ angular.module('histograph')
         $scope.merge = function(){
           if($scope.isLocked)
             return;
-          if(!$scope.entity.props.name || !($scope.entity.alias.props.id)){
+          if(!$scope.entity.props.name || !($scope.entity.alias.id)){
             $log.log(':: reporter -> merge() unable to merge, no alias has been selected');
             return;
           }
@@ -226,7 +226,7 @@ angular.module('histograph')
           debugger
           $log.log(':: reporter -> merge() -~> raiseIssue() type: merge - entity:', $scope.entity.props.name, '- with:',$scope.entity.alias.props.name);
           // merge two entities: add (or upvote the entity) and downvote the current entity
-          $rootScope.raiseIssue($scope.entity, null, 'mergeable', $scope.entity.alias.props.id, function(){
+          $rootScope.raiseIssue($scope.entity, null, 'mergeable', $scope.entity.alias.id, function(){
             // downvote and upvote
             if(!$scope.resource){
               $scope.isLocked = false;
