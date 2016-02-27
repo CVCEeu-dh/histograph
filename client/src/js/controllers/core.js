@@ -369,6 +369,9 @@ angular.module('histograph')
     $scope.messaging = false;
     var _messengerTimer;
     $scope.setMessage = function(message, timeout, options) {
+      if(!$scope.user.id) {
+        return;
+      }
       if(!message) {
         $scope.unsetMessage();
         return;
@@ -479,7 +482,11 @@ angular.module('histograph')
     
     
     $scope.$on(EVENTS.USER_NOT_AUTHENTIFIED, function (e) {
-      $scope.unsetMessage(MESSAGES.LOADING);
+      if($scope.user.id) {
+        // inform the user that it has to authentify ag
+        $scope.setMessage("authentification troubles");
+      } else
+        $scope.unsetMessage(MESSAGES.LOADING);
     });
     
     
