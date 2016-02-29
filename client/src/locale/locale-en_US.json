@@ -23,7 +23,7 @@
   "button.next": "next",
   "button.previous": "previous",
   "button.readmore": "read more",
-  "button.remove.issue": "close this issue",
+  "button.remove.issue": "undo",
   "button.myselection.explore": "explore connections",
   "button.skip": "skip",
   "button.steps.skip": "skip this step",
@@ -98,6 +98,7 @@
 
   "inspect.open": "I can check this!",
   "inspect.entity.isdownvoted": "It seems that <strong>{{name}}</strong> should not appear here",
+  "inpect.yours.entity.iswrong": "You reported <strong>{{name}}</strong> as a <strong>mistake</strong>",
   "inspect.entity.iswrong": "It seems that <strong>{{name}}</strong> is a <strong>mistake</strong> and could be safely removed.",
   "inspect.entity.iswrongtype": "It seems that <strong>{{name}}</strong> type should be changed",
   "inspect.entity.related_documents": "related documents",
