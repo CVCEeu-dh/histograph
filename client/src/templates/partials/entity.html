@@ -1,0 +1,62 @@
+<div class="entity item node {{entity.type}}">
+  <div ng-if="item.props.thumbnail" class=" thumbnail">
+    <div class="thumbnail-wrapper" style='background-image: url({{item.props.thumbnail}})'></div>
+  </div>
+  <div class="content  {{item.props.thumbnail?'':'without-thumbnail'}}">
+    <h3 marked="item.props|lookup:'name':language"></h3>
+    <div class='meta' ng-if='item.type=="person"'>{{item.props|datesOfSomeone}}</div>
+    <div class='meta' ng-if='item.type=="location"'>{{item.props.country}} <a ng-href='https://www.google.com/maps/place/{{item.props.lat}},{{item.props.lng}}/@{{item.props.lat}},{{item.props.lng}},8z' target='_blank'>(view on google maps)</a></div>
+    
+    
+  </div>
+  
+
+  <!--  pinboard and bookmarks -->
+  <div class="actions">
+    <a class="action" uib-tooltip="{{'tooltip.resource.add.to.myselection'|translate}}" ng-click="queue(entity, true)">
+    <span class="fa fa-thumb-tack"></span></a>
+  </div>
+
+  <div class='description'>
+    <span class='meta-label sans-serif'>{{item.type}}</span> {{item.props|lookup:'description':language}}
+  </div>
+
+  
+  <div reporter show-egonetwork='true' entity='entity' user='user'></div>
+
+  <!-- <div ng-if="item.type == 'location' && item.props.geonames_id" class="description">position: {{item.geocode_lat}}, {{item.geocode_lng}}</div>
+  <div ng-if="item.type == 'location' && item.props.geocode_id" class="description">position: {{item.props.geocode_lat}}, {{item.props.geocode_lng}}</div>
+  <div ng-if="item.type == 'person'" class="description">{{item.props.description}} {{item.props.birth_time | datesOfAPerson : item.props.death_time}}</div> -->
+  
+  <!-- <div class="actions">
+    <div class="btn-group">
+      <button class='btn btn-default' tooltip-append-to-body="true" tooltip="this is a mistake" ng-click="downvote()"><i class="fa fa-bug"></i></button>
+      <button class="btn btn-default" tooltip-append-to-body="true" tooltip="discute this entity" comment="comment(item)"><i class="fa fa-comment-o"></i></button>
+     <button class="btn btn-default" tooltip-append-to-body="true" tooltip="add to bookmark list" ng-click="queue(item.id, true)">
+        <i class="fa fa-play-circle-o"></i>
+      </button>
+    </div>
+  </div>
+   -->
+  <div class="tags" ng-if="relatedPersons.length > 0"><span class='meta-label sans-serif'>People mentioned</span>
+  <span ng-repeat="person in relatedPersons"><span class="person tag" data-id='{{person.id}}'  gasp-type='person' ng-click='setFilter("with", person.id)'>
+    {{person.props.name}} ({{person.weight}})</span>{{$last?'':', '}}</span>
+  </div>
+
+  <div class="tags" ng-if="relatedLocations.length > 0"><span class='meta-label sans-serif'>Locations mentioned</span>
+  <span ng-repeat="location in relatedLocations"><span class="location tag" data-id='{{location.id}}' ng-click='setFilter("with", location.id)' gasp-type='location'  >
+    {{location.props.name}} - {{location.props.country}} ({{location.weight}})</span>{{$last?'':', '}}</span>
+  </div>
+
+  <span ng-if="item.props.languages.length">  —  <i>available in</i>:
+    <span ng-repeat="lang in item.props.languages" ng-click='setLanguage(lang)'>{{lang}} </span>
+  </span>
+  
+  <blockquote ng-if='item.props.links_wiki' class="abstract">
+    <p><span class='meta-label sans-serif'>dbpedia: <a ng-href='http://dbpedia.org/resource/{{item.props.links_wiki}}'>{{item.props.links_wiki}}</a></span> — {{item.props | abstract : language }}</p>
+  </blockquote>
+  <!-- 
+  <blockquote ng-if="item.abstract">
+   {{item.name}} - {{item.description}}
+  </blockquote> -->
+</div>

@@ -34,13 +34,7 @@ function toRegexp(query) {
 /*
   Transform a comma separated list of id candidate in a javascript array of Integer IDS
 */
-function toIds(ids) {
-  return ids.split(',').filter(function (d) {
-    return !isNaN(d)
-  }).map(function (d) {
-    return +d;
-  });
-}
+
 
 module.exports =  function(io){
   return {
@@ -182,7 +176,7 @@ module.exports =  function(io){
       api/suggest/
     */
     allShortestPaths: function(req, res) {
-      var ids = toIds(req.params.ids);
+      var ids = helpers.text.toIds(req.params.ids);
       
       if(!ids.length)
         return res.error({})
@@ -221,7 +215,7 @@ module.exports =  function(io){
       
       if(!form.isValid)
         return helpers.formError(form.errors, res);
-      
+      // console.log(form.params)
       models.getMany({
         queries: {
           count_items: queries.count_shared_resources,
@@ -229,6 +223,8 @@ module.exports =  function(io){
         },
         params: form.params
       }, function (err, results) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
         helpers.models.getMany(err, res, results.items, results.count_items, form.params);
       })
     },
@@ -263,18 +259,23 @@ module.exports =  function(io){
     */
     getUnknownNode: function (req, res) {
       neo4j.query(queries.get_unknown_node, {
-        id: +req.params.id
+        id: req.params.id
       }, function (err, items) {
         if(err)
           return helpers.cypherQueryError(err, res);
+        if(!items[0].id){
+          res.error(404);  
+          return;
+        }
         return res.ok({
-          item: _.first(items)
+          item: items[0]
         });
       })
     },
     
     getUnknownNodes: function (req, res) {
-      var ids = toIds(req.params.ids);
+
+      var ids = helpers.text.toIds(req.params.ids);
       if(!ids.length)
         return res.error({})
       
@@ -295,7 +296,7 @@ module.exports =  function(io){
     /*
     */
     getNeighbors: function (req, res) {
-      var ids = toIds(req.params.ids);
+      var ids = helpers.text.toIds(req.params.ids);
       
       if(!ids.length)
         return res.error({})
@@ -406,7 +407,8 @@ module.exports =  function(io){
     
     
     /*
-      Lucene results. can also be used for typeahead, since it is very fast.
+      Lucene results. can also be used for typeahead, 
+      since it is very fast.
     */
     getEntities: function (req, res) {
       var form = validator.request(req, {
@@ -423,13 +425,14 @@ module.exports =  function(io){
       
       var q = parser.toLucene(req.query.query, 'name_search');
       form.params.query = q;
-      
+      console.log('get_entities', form.params.query);
       models.getMany({
         queries: {
           count_items: queries.get_matching_entities_count,
           items: queries.get_matching_entities
         },
-        params: form.params
+        params: form.params,
+        // ignoreCount: true
       }, function (err, results) {
         if(err)
           return helpers.cypherQueryError(err, res);
@@ -498,7 +501,7 @@ module.exports =  function(io){
           });
       if(!form.isValid)
         return helpers.formError(form.errors, res);
-      
+      console.log('query passed', form.params.query)
       var q = parser.toLucene(form.params.query, 'name_search');
 
       // build a nodes edges graph

@@ -76,7 +76,7 @@ module.exports = {
   get: function(resource, user, next) {
     if(typeof resource != 'object') {
       resource = {
-        id: +resource
+        id: resource
       }
     }
     var query = parser.agentBrown(rQueries.get_resource)
@@ -242,7 +242,8 @@ module.exports = {
     
     var query = parser.agentBrown(rQueries.get_resources, params);
     // console.log(query)
-    
+
+    // console.log('getById', query, params)
     neo4j.query(query, _.assign(params, {
       limit: params.limit || params.ids.length,
       offset: 0
@@ -288,6 +289,7 @@ module.exports = {
       
     }
     properties = _.assign(properties, {
+      uuid: helpers.uuid(),
       creation_date: now.date,
       creation_time: now.time,
       username: properties.user.username
@@ -552,8 +554,8 @@ module.exports = {
   getRelatedResources: function (params, next) {
     models.getMany({
       queries: {
-        count_items: rQueries.count_similar_resource_ids_by_entities,
-        items: rQueries.get_similar_resource_ids_by_entities
+        count_items: rQueries.count_related_resources,
+        items: rQueries.get_related_resources
       },
       params: params
     }, function (err, results) {

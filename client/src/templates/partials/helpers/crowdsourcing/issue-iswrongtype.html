@@ -1,0 +1,7 @@
+<div class="issue" translate translate-values='entity.props'>inspect.entity.iswrongtype</div>
+<!--  for each solution provided babe -->
+<div class='answers' ng-repeat='issue in issues.ENTITY_LABEL'>
+   IT is a {{issue.props.solution}}
+  <button class='btn btn-line-white obscure' ng-click='raiseIssue("type", issue.props.solution)'><span translate>button.agree</span>{{issue.upvotes}}</button>
+  <button class='btn btn-line-white obscure' ng-click='downvoteIssue("type", issue.props.solution)'><span translate>button.disagree </span>({{issue.downvotes || 0}})</button>
+</div>

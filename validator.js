@@ -148,7 +148,7 @@ module.exports = {
       field: 'with',
       check: 'matches',
       args: [
-        /\d[\d,]+/
+        /[\da-z\-][\d,a-z\-]+/
       ],
       error: 'with should contain only numbers and commas, at least one'
     },
@@ -181,9 +181,9 @@ module.exports = {
   FIELDS:[
     {
       field: 'id',
-      check: 'isInt',
+      check: 'matches',
       args: [
-        0
+        /[\d,a-z\-]+/
       ],
       error: 'id not valid'
     },
@@ -197,9 +197,9 @@ module.exports = {
     },
     {
       field: 'center',
-      check: 'isInt',
+      check: 'matches',
       args: [
-        0
+        /[\da-z\-]+/
       ],
       error: 'center should be a valid integer id'
     },
@@ -207,7 +207,7 @@ module.exports = {
       field: 'ids',
       check: 'matches',
       args: [
-        /\d[\d,]+/
+        /[\da-z\-][\d,a-z\-]+/
       ],
       error: 'ids should contain only numbers and commas'
     },
@@ -215,7 +215,7 @@ module.exports = {
       field: 'with',
       check: 'matches',
       args: [
-        /[\d,]+/
+        /[\da-z\-][\d,a-z\-]+/
       ],
       error: 'with should contain only numbers and commas'
     },
@@ -430,17 +430,13 @@ module.exports = {
     safeParams = params;
     
     if(safeParams.id)
-      safeParams.id = +safeParams.id;
+      safeParams.id = ''+safeParams.id;
     
     if(safeParams.ids)
-      safeParams.ids = _.compact(safeParams.ids.split(',')).map(function(d) {
-        return +d;
-      });
+      safeParams.ids = _.compact(safeParams.ids.split(','));
 
     if(safeParams.with)
-      safeParams.with = _.compact(String(safeParams.with).split(',')).map(function(d) {
-        return +d;
-      });
+      safeParams.with = _.compact(String(safeParams.with).split(','));
     
     if(safeParams.limit)
       safeParams.limit = +safeParams.limit;

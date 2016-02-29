@@ -21,6 +21,60 @@ var settings   = require('../settings'),
     Entity     = require('../models/entity'),
     Resource   = require('../models/resource');
     
+/*
+  helper: form for related issues, cfr. blow createRelatedissue and RemoveRelatedIssue
+*/
+var __solutions = {};
+
+__solutions[Action.ISSUE_CHECK_TYPE] = {
+  field: 'solution',
+  check: 'includedIn',
+  args: [
+    settings.types.entity
+  ],
+  error: 'wrong value for solution'
+};
+
+__solutions[Action.ISSUE_CHECK_CAN_MERGE] = {
+  field: 'solution',
+  check: 'matches',
+  args: [
+    /\d[\d,]+/
+  ],
+  error: 'wrong value for solution'
+};
+
+function _relatedIssueForm(req) {
+  var form = validator.request(req, { kind: ''}, {
+        fields: _.compact([
+          {
+            field: 'mentioning',
+            check: 'matches',
+            args: [
+              /\d[\d,]+/
+            ],
+            error: 'mention should contain only numbers and commas'
+          },
+          {
+            field: 'kind',
+            check: 'includedIn',
+            args: [
+              [
+                Action.ISSUE_CHECK_TYPE,
+                Action.ISSUE_CHECK_CAN_MERGE,
+                Action.ISSUE_CHECK_IS_IRRELEVANT,
+                Action.ISSUE_CHECK_IS_WRONG
+              ]
+            ],
+            error: 'wrong value'
+          },
+          __solutions[req.body.kind]
+        ])
+      });
+
+  return form;
+};
+
 
 module.exports = function(io){
   // io socket event listener
@@ -65,7 +119,7 @@ module.exports = function(io){
     /*
       Update [:appear_in] relationship, entity side
 
-      api: api/entity/:entity_id(\\d+)/related/resource/:resource_id(\\d)+/:action(upvote|downvote)
+      api: api/entity/:entity_id(\\d+)/related/resource/:resource_id(\\d)+/:action(upvote|downvote|merge)
       
       According to `:action` param, modify or create the relationship between an entity and a resource. If there is no action, an upvoted relationship will be created.
       Anyway, the authentified user becomes a "curator" of the entity (he/she knows a lot about it).
@@ -82,8 +136,8 @@ module.exports = function(io){
       if(!form.isValid)
         return helpers.formError(form.errors, res);
 
-      var entity = {id: +form.params.entity_id},
-          resource = {id: +form.params.resource_id};
+      var entity = {id: form.params.entity_id},
+          resource = {id: form.params.resource_id};
       
       if(form.params.action == 'merge') {// upvote /create the first and downvote the second
         async.series([
@@ -94,7 +148,7 @@ module.exports = function(io){
           },
           function trusted(next) {
             Entity.createRelatedResource({
-              id: +form.params.with.pop()
+              id: form.params.with[0]
             }, resource, req.user, {}, next);
           }
 
@@ -141,6 +195,7 @@ module.exports = function(io){
 
       } else if(form.params.action) {
         Entity.updateRelatedResource(entity, resource, req.user, form.params, function (err, item) {
+          // console.log('UPDATED', err)
           if(err)
             return helpers.cypherQueryError(err, res);
 
@@ -158,10 +213,10 @@ module.exports = function(io){
 
             io.emit('entity:' + form.params.action + '-related-resource:done', {
               user: req.user.username,
-              id: +form.params.entity_id,
+              id: form.params.entity_id,
               data: item,
               resource: {
-                id: +form.params.resource_id
+                id: form.params.resource_id
               }
             });
 
@@ -188,10 +243,11 @@ module.exports = function(io){
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       
-      var entity = {id: +form.params.entity_id},
-          resource = {id: +form.params.resource_id};
-
+      var entity = {id: form.params.entity_id},
+          resource = {id: form.params.resource_id};
       Entity.createRelatedResource(entity, resource, req.user, form.params, function (err, item) {
+        if(err)
+            return helpers.cypherQueryError(err, res);
         Action.create({
           kind: form.params.annotation? Action.ANNOTATE: Action.CREATE,
           target: Action.APPEARS_IN_RELATIONSHIP,
@@ -211,7 +267,7 @@ module.exports = function(io){
 
           io.emit('entity:create-related-resource:done', {
             user: req.user.username,
-            id: +form.params.entity_id,
+            id: form.params.entity_id,
             data: item,
             resource: resource
           });
@@ -229,10 +285,10 @@ module.exports = function(io){
       var form = validator.request(req);
 
       Entity.removeRelatedResource({
-        id: +form.params.entity_id
+        id: form.params.entity_id
       },
       {
-        id: +form.params.resource_id
+        id: form.params.resource_id
       },
       req.user,
       form.params, function (err, item) {
@@ -241,10 +297,10 @@ module.exports = function(io){
 
         io.emit('entity:remove-related-resource:done', {
           user: req.user.username,
-          id: +form.params.entity_id,
+          id: form.params.entity_id,
           data: item,
           resource: {
-            id: +form.params.resource_id
+            id: form.params.resource_id
           }
         });
 
@@ -253,60 +309,105 @@ module.exports = function(io){
     },
 
     /*
-      Create an isse, optionally providing a solution.
+      Create a node (action:issued), optionally providing a solution.
       Cfr models.issue
-    */
-    /*
+    
       create a new issue for this entity
       use cases.
 
       1)  with request param
-          ```if req.query.kind == Issue.TYPE```
+          ```if req.query.kind ==  Action.ISSUE_CHECK_TYPE```
           one can raise the issue that the 'label' for that entity is not correct.
           Then, 
           ```req.query.solution = 'correct label'```
       
       2)  with request param
-          ```if req.query.kind == Issue.IRRELEVANT```
+          ```if req.query.kind == Action.ISSUE_CHECK_IS_IRRELEVANT```
           one can raise the issue that the entity is a dumb error.
           No solution should be provided for this issue.
 
       3)  with request param
-          ```if req.query.kind == Issue.MERGEABLE```
+          ```if req.query.kind == Action.ISSUE_CHECK_CAN_MERGE```
           one can raise the issue that the entity can be merged with another entity.
           Then,
           ```req.query.solution = <merge-to-entity-id>```
 
-      Use case 3 should preload the entity in Issue.get (@todo)
+      
     */
+    
     createRelatedIssue: function (req, res) {
-      var Issue   = require('../models/issue'), 
-          form = validator.request(req, {}, {
-            fields: [
-              {
-                field: 'mentioning',
-                check: 'matches',
-                args: [
-                  /\d[\d,]+/
-                ],
-                error: 'mention should contain only numbers and commas'
-              },
-              {
-                field: 'kind',
-                check: 'includedIn',
-                args: [
-                  [
-                    Issue.TYPE,
-                    Issue.IRRELEVANT,
-                    Issue.WRONG,
-                    Issue.MERGEABLE
-                  ]
-                ],
-                error: 'wrong value'
-              }
-            ]
-          });
-      // console.log(form.params, Issue.KINDS)
+      var form = _relatedIssueForm(req);
+
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+
+      if(form.params.mentioning) {
+        form.params.mentioning = form.params.mentioning.split(',');
+      }
+      // for merge options, mentions both trsuted and untrusted
+      if(form.params.kind == Action.ISSUE_CHECK_CAN_MERGE)
+        form.params.mentioning = (form.params.mentioning||[]).concat([form.params.solution]);
+
+      // if solution is an ID
+      if(!isNaN(form.params.solution))
+        form.params.solution = parseInt(form.params.solution);
+      
+      async.series([
+        function action(next) {
+          Action.merge({
+            kind: Action.RAISE_ISSUE,
+            focus: form.params.id,
+            solution: _.keys(__solutions).indexOf(form.params.kind) == -1? '': form.params.solution, // solution has been checked for the types on the left
+            target: Action.getTargetByIssue(form.params.kind),
+            mentions: [form.params.id].concat(form.params.mentioning || []),
+            username: req.user.username
+          }, next);
+        },
+        // action has created the link btw the user and the entity. we then update the entity in order to recalculate links
+        function entity(next) {
+          var params = {
+            issue: form.params.kind
+          };
+          // downvte only if the type is explicit ly set as sWRONG
+          if(form.params.kind == Action.ISSUE_CHECK_IS_WRONG)
+            params.downvoted_by = req.user.username;
+          
+          params.issue_upvoted_by = req.user.username;
+          
+          Entity.update({
+            id: form.params.id
+          }, params, next);
+        }
+      ], function (err, results) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        var item = _.assign({
+            related:{
+              action: results[0]
+            }
+          }, results[1]);
+
+        io.emit('entity:create-related-issue:done', {
+          user: req.user.username,
+          id:  form.params.id, 
+          data: item
+        });
+
+        return res.ok({
+          item: item
+        }, form.params);
+        
+      });
+    },
+
+    /*
+      Remove or ask for removal.
+      If the issue has no other upvotes/downvotes than the current auth user,
+      the issue is then removed from the entity. 
+    */
+    removeRelatedIssue: function (req, res) {
+      var form = _relatedIssueForm(req);
+
       if(!form.isValid)
         return helpers.formError(form.errors, res);
 
@@ -314,57 +415,63 @@ module.exports = function(io){
         form.params.mentioning = _.map(form.params.mentioning.split(','),  _.parseInt);
       }
 
-      // if form.params.kind == Issue.DATE
-      // check that the solution param is an array of valid dates.
-      // if form.params.kind == Issue.TYPE
-      //   check that the solution param is an available label
-      async.series({
-        entity: function(next) {
+      // if solution is an ID
+      if(!isNaN(form.params.solution))
+        form.params.solution = parseInt(form.params.solution);
+      
+      // for merge options, mentions both trsuted and untrusted
+      if(form.params.kind == Action.ISSUE_CHECK_CAN_MERGE)
+        form.params.mentioning = (form.params.mentioning||[]).concat([+form.params.solution]);
+
+
+      async.series([
+        function action(next) {
+          Action.merge({
+            kind: Action.RAISE_ISSUE,
+            focus: form.params.id,
+            solution: _.keys(__solutions).indexOf(form.params.kind) == -1? '': form.params.solution, // solution has been checked for the types on the left
+            target: Action.getTargetByIssue(form.params.kind),
+            mentions: [form.params.id].concat(form.params.mentioning || []),
+            username: req.user.username,
+            downvoted_by: req.user.username
+          }, next);
+        },
+        function entity(next) {
           var params = {
             issue: form.params.kind
           };
-          if(form.params.kind == Issue.WRONG)
-            params.downvoted_by = req.user.username;
+          // UPVOTE if we want to remove the issue WRONG: ebntity score will be updated accordingly, cfr Entity.update()
+          if(form.params.kind == Action.ISSUE_CHECK_IS_WRONG)
+            params.upvoted_by = req.user.username;
           
-          Entity.update(+form.params.id, params, next);
-        },
-        issue: function(next) {
-          Issue.create({
-            kind:         form.params.kind,
-            solution:     form.params.solution, 
-            questioning:  form.params.id,
-            mentioning:   form.params.mentioning,
-            user:         req.user
-          }, next);
+          params.issue_downvoted_by = req.user.username;
+          
+          Entity.update({
+            id: form.params.id
+          }, params, next);
         }
-      }, function (err, results) {
-        var mentions = _.compact([results.issue.id, +form.params.id].concat(form.params.mentioning));
+      ], function (err, results) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
 
-        Action.create({
-          kind: Action.RAISE_ISSUE,
-          target: form.params.kind == Issue.WRONG? Action.ENTITY_WRONG :Action.ENTITY_LABEL,
-          mentions: mentions,
-          username: req.user.username
-        }, function (err, act) {
-          // console.log(err, act)
-          if(err)
-            return helpers.cypherQueryError(err, res);
+        var item = _.assign({
+            related:{
+              action: results[0]
+            }
+          }, results[1]);
 
-          io.emit('entity:create-related-issue:done', {
-            user: req.user.username,
-            id:  +form.params.id, 
-            data: results.issue
-          });
-
-          return res.ok({
-            item: results.issue,
-            action: act
-          });
+        io.emit('entity:remove-related-issue:done', {
+          user: req.user.username,
+          id:  form.params.id, 
+          data: item
         });
+
+        return res.ok({
+          item: item
+        }, form.params);
         
       });
     },
-
 
     /*
       Create a comment specific for the entity ?
@@ -403,12 +510,14 @@ module.exports = function(io){
       
       if(!form.isValid)
         return helpers.formError(err, res);
-      Entity.update(form.params.id, {
+      Entity.update({
+        id: form.params.id
+      }, {
         upvoted_by: req.user.username
       }, function (err, ent) {
         if(err)
           return helpers.cypherQueryError(err, res);
-        io.emit('done:upvote_entity', {
+        io.emit('entity:upvote:done', {
           user: req.user.username,
           doi: +req.params.id, 
           data: ent
@@ -424,14 +533,16 @@ module.exports = function(io){
       
       if(!form.isValid)
         return helpers.formError(err, res);
-      Entity.update(form.params.id, {
+      Entity.update({
+        id: form.params.id
+      }, {
         downvoted_by: req.user.username
       }, function (err, ent) {
         if(err)
           return helpers.cypherQueryError(err, res);
-        io.emit('done:downvote_entity', {
+        io.emit('entity:downvote:done', {
           user: req.user.username,
-          doi: +req.params.id, 
+          doi: req.params.id, 
           data: ent
         });
         return res.ok({
@@ -466,7 +577,7 @@ module.exports = function(io){
         
         if(form.params.limit == 1 && items.length)
           Resource.get({
-            id: +items[0].id
+            id: items[0].id
           }, req.user, function (err, item) {
             helpers.models.getMany(err, res, [item], info, form.params);
           });

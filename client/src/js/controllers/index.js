@@ -126,11 +126,12 @@ angular.module('histograph')
       Reload related items, with filters.
     */
     $scope.sync = function() {
-      $scope.loading = true;
+      $scope.lock('ExploreResourcesCtrl');
       ResourceFactory.get(angular.extend({
         limit: $scope.limit,
         offset: $scope.offset
       }, $scope.params), function (res) {
+        $scope.unlock('ExploreResourcesCtrl');
         $scope.loading = false;
         $scope.offset  = res.info.offset;
         $scope.limit   = res.info.limit;
@@ -189,59 +190,4 @@ angular.module('histograph')
   })
 
 
-.controller('ExploreEntitiesCtrl', function ($scope, $log, CooccurrencesFactory, ResourceVizFactory, relatedModel, projectedModel, EVENTS) {
-    $log.debug('ExploreEntitiesCtrl ready', $scope.params);
-    $scope.limit  = 20;
-    $scope.offset = 0;
-    /*
-      Reload related items, with filters.
-    */
-    $scope.syncGraph = function() {
-      CooccurrencesFactory.get(angular.extend({}, $scope.params, {
-          model: relatedModel,
-          projected_model: projectedModel,
-          limit: 300
-        }), function (res){
-        $log.log('ExploreEntitiesCtrl CooccurrencesFactory returned a graph of',res.result.graph.nodes.length, 'nodes');
-        if($scope.filters.with)
-          $scope.setGraph(res.result.graph, {
-            centers: _.map($scope.filters.with, _.parseInt)
-          })
-        else
-          $scope.setGraph(res.result.graph)
-      });
-    };
-    
-     /*
-      LoadTimeline
-      ---
 
-      load the timeline of filtered resources
-    */
-    $scope.syncTimeline = function() {
-      if(!_.isEmpty($scope.params))
-        ResourceVizFactory.get(angular.extend({
-          viz: 'timeline'
-        }, $scope.params), function (res) {
-          // if(res.result.titmeline)
-          $scope.setTimeline(res.result.timeline)
-        });
-      else
-        $scope.setTimeline([]);
-    };
-    /*
-      listener: EVENTS.API_PARAMS_CHANGED
-      some query parameter has changed, reload the list accordingly.
-    */
-    $scope.$on(EVENTS.API_PARAMS_CHANGED, function() {
-      $scope.offset = 0;
-      $log.debug('ExploreEntitiesCtrl @API_PARAMS_CHANGED', $scope.params);
-      $scope.syncGraph();
-      $scope.syncTimeline();
-    });
-    
-    $scope.syncGraph();
-
-    if(!_.isEmpty($scope.params))
-      $scope.syncTimeline();
-  });

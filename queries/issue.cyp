@@ -3,13 +3,13 @@
 MATCH (iss:issue)-[r:questions]->(t)
 WHERE id(iss) = {id}
 WITH iss, r, {
-    id: id(t),
+    id: t.uuid,
     props: t,
     type: last(labels(t))
   } as alias_t
 OPTIONAL MATCH (iss)-[:mentions]->(m)
 WITH iss, r, alias_t, filter(x  in collect({
-    id: id(m),
+    id: m.uuid,
     props: m,
     type: last(labels(m))
   }) WHERE has(x.id)) as alias_ms
@@ -20,7 +20,7 @@ WITH iss, r, alias_t, alias_ms, count(u) as followers
 OPTIONAL MATCH (u:user)-[:writes]->(com:comment)-[:answers]->iss
 WITH iss, r, alias_t, alias_ms, followers,
   {
-    id: id(u),
+    id: u.uuid,
     username: u.username,
     picture: u.picture
   } as alias_u, com
@@ -78,7 +78,7 @@ SKIP {offset}
 LIMIT {limit}
 
 WITH iss, r, {
-    id: id(t),
+    id: t.uuid,
     props: t,
     type: last(labels(t))
   } as alias_t
@@ -87,7 +87,7 @@ MATCH (u:user)-[:follows]->iss
 WITH iss, r, alias_t, count(u) as followers 
 OPTIONAL MATCH (iss)-[:mentions]->(m)
 WITH iss, r, followers, alias_t, collect({
-    id: id(m),
+    id: m.uuid,
     props: m,
     type: last(labels(m))
   }) as alias_ms
@@ -97,7 +97,7 @@ WITH iss, r, alias_t, alias_ms, followers
 OPTIONAL MATCH (u:user)-[:writes]->(com:comment)-[:answers]->iss
 WITH iss, r, alias_t, alias_ms, followers,
   {
-    id: id(u),
+    id: u.uuid,
     username: u.username,
     picture: u.picture
   } as alias_u, com
@@ -138,20 +138,21 @@ MATCH (u:user {username:{username}}), (t)
 
 WITH u, t
 
-  MERGE (iss:issue:{:kind})-[r:questions]->t
+  MERGE (iss:issue:{:kind})-[r:questions]->(t)
     ON CREATE SET
       // wrong <property> with custom content
       r.creation_date  = {exec_date},
       r.creation_time  = {exec_time},
       r.last_modification_date = {exec_date},
       r.last_modification_time = {exec_time},
-      iss.created_by     = {username}
+      iss.created_by     = {username},
+      iss.uuid = {uuid},
     ON MATCH SET
       r.last_modification_date = {exec_date},
       r.last_modification_time = {exec_time}
 
 WITH u, t, iss
-  MERGE u-[r:curates]->t
+  MERGE (u)-[r:curates]->(t)
     ON CREATE SET
       r.creation_date  = {exec_date},
       r.creation_time  = {exec_time},
@@ -161,7 +162,7 @@ WITH u, t, iss
       r.last_modification_date = {exec_date},
       r.last_modification_time = {exec_time}
 WITH iss, u, t
-  MERGE u-[r:follows]->iss
+  MERGE (u)-[r:follows]->(iss)
     ON CREATE SET
       r.creation_date  = {exec_date},
       r.creation_time  = {exec_time},
@@ -172,7 +173,7 @@ WITH iss, u, t
       r.last_modification_time = {exec_time}
 {if:solution}
   WITH iss, u, t
-    MERGE u-[r:writes]->(com:comment {solution:{solution}})-[:answers]->iss
+    MERGE (u)-[r:writes]->(com:comment {solution:{solution}})-[:answers]->(iss)
       ON CREATE SET
         com.creation_date  = {exec_date},
         com.creation_time  = {exec_time},
@@ -188,7 +189,7 @@ WITH iss, u, t
   MATCH (con)
     WHERE id(con) IN {mentioning}
   WITH iss, u, t, con
-    MERGE iss-[r:mentions]->con
+    MERGE (iss)-[r:mentions]->(con)
     ON CREATE SET
       r.creation_date  = {exec_date},
       r.creation_time  = {exec_time},

@@ -161,8 +161,8 @@ describe('controller:resource (related users)', function() {
       .end(function (err, res) {
         should.not.exists(err);
         should.exist(res.body.result.item);
-        should.equal(res.body.result.item.rel.start, __user.id);
-        should.equal(res.body.result.item.rel.end, __resourceA.id);
+        should.equal(res.body.result.item.rel.start, __user.props.id);
+        should.equal(res.body.result.item.rel.end, __resourceA.props.id);
         should.equal(res.body.result.item.rel.type, 'likes');
         should.equal(res.body.result.item.related.action.props.target, Action.LIKES_RELATIONSHIP)
         Action.remove(res.body.result.item.related.action, function (err){
@@ -205,9 +205,9 @@ describe('controller:resource (related entities)', function() {
 
 
 describe('controller:resource (related resources)', function() {
-  it('should show a list of 10 related letters, if any', function (done) {
+  it('should show a list of 10 related '+ settings.types.resources[0] +', if any', function (done) {
     session
-      .get('/api/resource/'+ __resourceA.id +'/related/resource?limit=13&type=letter')
+      .get('/api/resource/'+ __resourceA.id +'/related/resource?limit=13&type=' + settings.types.resources[0])
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
@@ -221,9 +221,9 @@ describe('controller:resource (related resources)', function() {
       });
   });
   
-  it('should show a list of 10 related letters, if any, sorted by date', function (done) {
+  it('should show a list of 10 related '+ settings.types.resources[0] + ', if any, sorted by date', function (done) {
     session
-      .get('/api/resource/'+__resourceA.id+'/related/resource?limit=10&type=picture&orderby=date')
+      .get('/api/resource/'+__resourceA.id+'/related/resource?limit=10&type='+ settings.types.resources[0] + '&orderby=date')
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
@@ -341,7 +341,7 @@ describe('controller:resource (related resources)', function() {
         should.exists(res.body.result.item.related.action);
         should.equal(res.body.result.item.related.action.type, Action.CREATE)
         should.equal(res.body.result.item.related.action.props.target, Action.BRAND_NEW_ENTITY)
-        should.equal(res.body.result.item.rel.end, parseInt( __resourceA.id))
+        should.equal(res.body.result.item.rel.end, parseInt( __resourceA.props.id))
         
         // should delete the action
         Action.remove(res.body.result.item.related.action, function(err){

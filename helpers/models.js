@@ -25,7 +25,27 @@ module.exports = {
   generate: function(options) {
     'use-strict';
 
-    var queries = options.queries; 
+    var queries = options.queries;
+    
+    /*
+      Perform a query given a prefix
+    */
+    function cook(prefix, item, next) {
+      var now = helpers.now(),
+          query = parser.agentBrown(queries[prefix + '_' +options.model], item);
+      
+      neo4j.query(query, _.assign({
+        exec_date: now.date,
+        exec_time: now.time
+      }, item), function (err, nodes) {
+        if(err || !nodes.length) {
+          next(err||helpers.IS_EMPTY);
+          return;
+        }
+        next(null, nodes[0]);
+      })
+    };
+
     return {
       /*
         Get a single item.
@@ -33,7 +53,7 @@ module.exports = {
       */
       get: function(item, next) {
         neo4j.query(queries['get_'+options.model], {
-          id: +item.id
+          id: item.uuid
         }, function (err, node) {
           if(err) {
             next(err);
@@ -53,19 +73,21 @@ module.exports = {
         Return the object having at least the neo4j identifier and the properties
       */
       create: function(item, next) {
-        var now = helpers.now(),
-            query = parser.agentBrown(queries['create_'+options.model], item);
-          
-        neo4j.query(query, _.assign({
-          exec_date: now.date,
-          exec_time: now.time
-        }, item), function (err, nodes) {
-          if(err || !nodes.length) {
-            next(err||helpers.IS_EMPTY);
-            return;
-          }
-          next(null, nodes[0]);
-        })
+        cook('create', _.assign({
+          uuid: helpers.uuid()
+        }, item), next);
+      },
+      /*
+        Update or merge
+      */
+      update: function(item, next) {
+        cook('update', item, next);
+      },
+
+      merge: function(item, next) {
+        cook('merge', _.assign({
+          uuid: helpers.uuid()
+        }, item), next);
       },
       /*
         Get a lot of basic item, with sorting orders.
@@ -120,37 +142,36 @@ module.exports = {
     }
   */
   getMany: function(options, next) {
-    async.parallel({
-      count_items: function (callback) {
+    async.series([
+      function count_items (callback) {
         var query = parser.agentBrown(options.queries.count_items, options.params);
         neo4j.query(query, options.params, function (err, result) {
-          if(err)
-            return callback(err);
-          if(!isNaN(result.count_items))
+          if(err) {
+            callback(err);
+          } else if(!isNaN(result.count_items)){
             callback(null, {
               total_items: result.count_items
             })
-          else {
+          } else {
             callback(null, {
               groups: result,
               total_items: _.sum(result, 'count_items') 
-            })
+            });
           }
         })
       },
-      items: function (callback) {
+      function items (callback) {
         var query = parser.agentBrown(options.queries.items, options.params);
-        neo4j.query(query, options.params, function (err, nodes) {
-          if(err)
-            return callback(err);
-          callback(null, nodes);
-        });
+        neo4j.query(query, options.params, callback);
       }
-    }, function (err, results) {
+    ], function (err, results) {
       if(err)
         next(err);
       else
-        next(null, results);
+        next(null, {
+          count_items: results[0],
+          items: results[1],
+        });
     });
   }
 }

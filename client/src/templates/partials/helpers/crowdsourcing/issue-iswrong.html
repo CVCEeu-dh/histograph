@@ -1,0 +1,21 @@
+<div class="issue">
+  <div translate translate-values='entity.props'>inspect.entity.iswrong</div>
+  
+  <div class='answers'>
+    <div ng-if='entity.issue_wrong_removable'>
+      <button class='btn btn-line-white btn-block' ng-click='downvoteIssue("wrong")'><span translate>button.remove.issue</span></button>
+    </div>
+    <div ng-if='!entity.issue_wrong_removable'>
+      <div class='btn-group btn-group-dual'>
+        <button class='btn btn-line-white btn-primary btn-number' ng-click='raiseIssue("wrong")'>
+          <span translate>button.agree </span>
+          <span class='number'>{{entity.props.downvote.length}}</span>
+        </button>
+        <button class='btn btn-line-white obscure btn-number' ng-click='downvoteIssue("wrong")'>
+          <span translate>button.disagree </span>
+          <span class='number'>{{entity.props.upvote.length || 0}}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

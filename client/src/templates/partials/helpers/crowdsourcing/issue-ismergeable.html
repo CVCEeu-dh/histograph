@@ -1,0 +1,31 @@
+<div class='issue' ng-repeat='issue in issues.ENTITY_MERGE'>
+  <div ng-repeat="mentioned in issue.mentioning">
+    <div ng-if="!resource">
+      <span translate translate-values='{name: "{{entity.props.name}}",_name: "{{mentioned.props.name}}"}'>popit.fix.suggest.confirm</span>
+      <div class='btn-group'>
+        <button class='btn btn-line-white btn-straight btn-block' ng-click='inspectIssue(issue)' translate>inspect.open</button>
+      </div>
+    </div>
+    <div ng-if="resource">
+      <span translate translate-values='{name: "{{entity.props.name}}",_name: "{{mentioned.props.name}}"}'>popit.fix.suggest.confirm_in_context</span>
+      <!-- merge in context -->
+      
+      <div class='answers btn-group-wrapper'>
+        <div class='btn-group '>
+          <button class='btn btn-line-white btn-primary btn-number' ng-click='mergeInContext(entity, mentioned)'>
+            <span translate>button.agree </span>
+            <span class='number'>{{entity.downvotes.length || 0}}</span>
+          </button>
+          <!-- disagree with merge: upvote entity will suffice -->
+          <button class='btn btn-line-white obscure btn-number' ng-click='upvote()'>
+            <span translate>button.disagree </span>
+            <span class='number'>{{entity.upvotes.length || 0}}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div ng-if='entity.issue_mergeable_removable' style='margin:10px; text-align: center'>
+      <button class='btn btn-line-white btn-straight' ng-click='downvoteIssue("mergeable", issue.props.solution)' translate>button.remove.issue</button>
+    </div>
+  </div>
+</div>

@@ -2,6 +2,7 @@
   A bunch of useful functions
 */
 var fs       = require('fs'),
+    uuid     = require('uuid'),
     path     = require('path'),
     async    = require('async'),
     crypto   = require('crypto'),
@@ -547,9 +548,7 @@ module.exports = {
     */
     toIds: function (ids) {
       return ids.split(',').filter(function (d) {
-        return !isNaN(d)
-      }).map(function (d) {
-        return +d;
+        return !!d.match(/[\da-z\-]+/)
       });
     },
 
@@ -873,6 +872,10 @@ module.exports = {
     result.date = now.format();
     result.time = +now.format('X');
     return result;
+  },
+
+  uuid: function(){
+    return uuid.v1();
   },
 
   /*

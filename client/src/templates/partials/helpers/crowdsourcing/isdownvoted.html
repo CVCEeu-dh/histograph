@@ -1,0 +1,16 @@
+<div class="issue">
+  <div translate translate-values='entity.props'>inspect.entity.isdownvoted</div>
+  
+  <div class='answers btn-group-wrapper'>
+    <div class='btn-group '>
+      <button class='btn btn-line-white btn-primary btn-number' ng-click='downvote()'>
+        <span translate>button.agree </span>
+        <span class='number'>{{entity.downvotes.length || 0}}</span>
+      </button>
+      <button class='btn btn-line-white obscure btn-number' ng-click='upvote()'>
+        <span translate>button.disagree </span>
+        <span class='number'>{{entity.upvotes.length || 0}}</span>
+      </button>
+    </div>
+  </div>
+</div>

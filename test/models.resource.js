@@ -85,15 +85,15 @@ describe('model:resource ', function() {
   it('should create a relationship with an entity', function (done) {
     Resource.createRelatedEntity(__resourceA, generator.entity.social_group(), function (err, entity) {
       __social_group = entity;
-      should.equal(__social_group.rel.end, __resourceA.id)
+      should.equal(__social_group.rel.end, __resourceA.props.id)
       done();
     })
   });
   
   it('should create a relationship with a second user', function (done) {
     Resource.createRelatedUser(__resourceA, __userB, function (err, resource) {
-      should.equal(resource.rel.start, __userB.id)
-      should.equal(resource.rel.end, __resourceA.id)
+      should.equal(resource.rel.start, __userB.props.id)
+      should.equal(resource.rel.end, __resourceA.props.id)
       done();
     })
   });

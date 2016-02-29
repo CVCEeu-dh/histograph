@@ -13,39 +13,51 @@ var settings        = require('./settings'),
     GoogleStrategy  = require('passport-google-oauth').OAuth2Strategy,
     
 
-    queries        = require('decypher')('./queries/user.cyp'),
-
+    queries         = require('decypher')('./queries/user.cyp'),
+    User            = require('./models/user'),
     neo4j           = require('seraph')(settings.neo4j.host);
 
 
 // auth mechanism: Local
 passport.use(new LocalStrategy(function (username, password, done) {
   // get user having username or email = username and check if encription matches and check if 
-  neo4j.query('Match(user:user) WHERE user.email = {nickname} OR user.username = {nickname} RETURN user',{
-    nickname: username
-  }, function(err, res) {
+  User.check({
+    username: username,
+    password: password
+  }, function(err, user) {
+    // console.log(err, user)
     if(err)
-      return done(err)
-    
-    if(!res.length) 
-      return done({reason: 'user not found'}) // the real reason, for loggin purposes. user not found
-    
-    var user = res[0];
-    
-    user.isValid = helpers.comparePassword(password, user.password, {
-      from: 'localstrategy',
-      secret: settings.secret.salt, 
-      salt: user.salt
-    });
-
-    if(!user.isValid)
-      return done({reason: 'credentials not matching'});
-
-    if(user.status != 'enabled')
-      return done({reason: 'user is NOT active, its status should be enabled', found: user.status});
-
-    return done(null, user)
+      done({reason: 'credentials not matching', error: err});
+    else if(user.props.status != 'enabled')
+      done({reason: 'user is NOT active, its status should be enabled', found: user.status});
+    else
+      done(null, user);
   })
+  // neo4j.query('Match(user:user) WHERE user.email = {nickname} OR user.username = {nickname} RETURN user',{
+  //   nickname: username
+  // }, function(err, res) {
+  //   if(err)
+  //     return done(err)
+    
+  //   if(!res.length) 
+  //     return done({reason: 'user not found'}) // the real reason, for loggin purposes. user not found
+    
+  //   var user = res[0];
+    
+  //   user.isValid = helpers.comparePassword(password, user.password, {
+  //     from: 'localstrategy',
+  //     secret: settings.secret.salt, 
+  //     salt: user.salt
+  //   });
+
+  //   if(!user.isValid)
+  //     return done({reason: 'credentials not matching'});
+
+  //   if(user.status != 'enabled')
+  //     return done({reason: 'user is NOT active, its status should be enabled', found: user.status});
+
+  //   return done(null, user)
+  // })
 }));
 
 
@@ -58,8 +70,7 @@ passport.use(new TwitterStrategy({
     callbackURL: settings.baseurl + "/auth/twitter/callback"
   },
   function(token, tokenSecret, profile, done) {
-    var now = helpers.now();
-    neo4j.query('MERGE (k:user { email:{email} }) ON CREATE SET k.status={status}, k.picture={picture}, k.username={username}, k.firstname={firstname}, k.strategy={strategy}, k.about={about}, k.salt={salt}, k.password={password} RETURN k', {
+    User.create({
       email: '@' + profile.displayName,
       username: '@' + profile.displayName,
       firstname: '@' + profile.displayName,
@@ -69,17 +80,13 @@ passport.use(new TwitterStrategy({
       strategy: 'twitter',
       about: '' + profile.description,
       picture: profile.photos? profile.photos.pop().value: '',
-      exec_time: now.time,
-      exec_date: now.date
-    },  function(err, res) {
-      console.log('twitter:', err?'error':'ok');
-
+    },  function(err, user) {
+      console.log('twitter:', err? 'error': 'ok');
       if(err) {
-        return done(err);
         console.log(err)
-      }
-      var user = res[0];
-      return done(null, user);
+        done(err);
+      } else
+        done(null, user);
     });
   }
 ));
@@ -94,8 +101,7 @@ passport.use(new GoogleStrategy({
     callbackURL:  settings.baseurl + "/auth/google/callback"
   },
   function(accessToken, refreshToken, profile, done) {
-    var now = helpers.now();
-    neo4j.query(queries.merge_user, {
+    User.create({
       email: 'g@' + profile.id,
       username: profile.displayName + profile.id,
       firstname: profile.displayName,
@@ -106,15 +112,13 @@ passport.use(new GoogleStrategy({
       strategy: 'google',
       about: '' + profile.description || '',
       picture: profile.photos? profile.photos.pop().value: '',
-      exec_time: now.time,
-      exec_date: now.date
-    },  function(err, res) {
-      console.log(err, res);
-      if(err)
-        return done(err);
-      console.log(profile, res)
-      var user = res[0];
-      return done(null, user);
+    },  function(err, user) {
+      console.log('google:', err? 'error': 'ok');
+      if(err) {
+        console.log(err);
+        done(err);
+      } else
+        done(null, user);
     });
   }
 ));
@@ -123,12 +127,12 @@ passport.use(new GoogleStrategy({
 
 passport.serializeUser(function(user, done) {
   done(null, {
-    firstname: user.firstname,
-    lastname:  user.lastname,
+    firstname: user.props.firstname,
+    lastname:  user.props.lastname,
     email:     user.email,
     username:  user.username,
     id:        user.id,
-    picture:   user.picture
+    picture:   user.props.picture
   });
 });
 

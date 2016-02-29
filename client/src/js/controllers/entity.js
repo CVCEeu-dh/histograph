@@ -23,6 +23,7 @@ angular.module('histograph')
     // cooccurrences
     $scope.graphType = 'monopartite-entity';
 
+
     /*
       LoadTimeline
       ---

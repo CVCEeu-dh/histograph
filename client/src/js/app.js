@@ -265,7 +265,7 @@ angular
         .state('explore.projection', {
           url: 'projection/:modelA/:modelB',
           template: '<div></div>',
-          controller: 'ExploreEntitiesCtrl',
+          controller: 'ProjectionCtrl',
           grammar: {
             label: 'graph of :modelA---:modelB co-occurrences',
             connector: {
@@ -289,54 +289,7 @@ angular
             },
           }
         })
-        .state('explore.themes', {
-          url: 'themes',
-          template: '<div></div>',
-          controller: 'ExploreEntitiesCtrl',
-          grammar: {
-            label: 'view theme cooccurrence',
-            connector: {
-              type: 'in documents of type',
-              relatedTo: 'which mentions',
-              notRelatedTo: 'related to anyone',
-              from: 'from',
-              to: 'to'
-            },
-            types: GRAMMAR.IN_TYPES,
-            relatedTo: {
-              typeahead: 'entity'
-            }
-          },
-          resolve: {
-            relatedModel: function() {
-              return 'theme'
-            },
-          }
-        })
-        .state('explore.locations', {
-          url: 'locations',
-          template: '<div></div>',
-          controller: 'ExploreEntitiesCtrl',
-          grammar: {
-            label: 'view theme cooccurrence',
-            connector: {
-              type: 'in documents of type',
-              relatedTo: 'which mentions',
-              notRelatedTo: 'related to anyone',
-              from: 'from',
-              to: 'to'
-            },
-            types: GRAMMAR.IN_TYPES,
-            relatedTo: {
-              typeahead: 'entity'
-            }
-          },
-          resolve: {
-            relatedModel: function() {
-              return 'location'
-            },
-          }
-        })
+        
         .state('explore.issues', {
           url: 'issues',
           templateUrl: 'templates/partials/issues-masonry.html',
@@ -1048,7 +1001,7 @@ angular
       */    
       .state('neighbors', {
         abstract: true,
-        url: '/neighbors/{ids:[0-9,]+}',
+        url: '/neighbors/{ids:[0-9,a-z-]+}',
         templateUrl: 'templates/neighbors.html',
         controller: 'NeighborsCtrl',
         grammar: {
@@ -1151,9 +1104,6 @@ angular
             {
               name: 'search.resources',
               label: 'documents'
-            }, {
-              name: 'search.persons',
-              label: 'people'
             }
           ]
         },

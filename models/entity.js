@@ -56,6 +56,7 @@ module.exports = {
     var now   = helpers.now(),
         slug  = module.exports._slug(properties),
         props = _.assign({}, properties, {
+          uuid: helpers.uuid(),
           type: properties.type || 'unknown',
           slug: slug,
           links_wiki: _.isEmpty(properties.links_wiki)? undefined: properties.links_wiki,
@@ -128,7 +129,7 @@ module.exports = {
   
   get: function(id, next) {
     neo4j.query(queries.get_entity, {
-      id: +id
+      id: id
     }, function (err, node) {
       if(err) {
         next(err);
@@ -245,20 +246,20 @@ module.exports = {
       
       // 1. UPVOTE ENTITY upvote automatically, since you admitted that the entity exists ;)
       // it increases score and celebrity, removes from the downvotes if any
-      result.ent.upvote = _.unique((result.ent.upvote || []).concat(user.username));
+      result.ent.upvote = _.unique((result.ent.upvote || []).concat([user.username]));
       if(result.ent.downvote && !!~result.ent.downvote.indexOf(user.username)) {
-        result.ent.downvote = _.remove(result.ent.downvote, user.username);
+        _.remove(result.ent.downvote, function(d) {return d==user.username});
       }
       result.ent.celebrity =  result.ent.upvote.length + (result.ent.downvote|| []).length;
       result.ent.score = result.ent.upvote.length - (result.ent.downvote|| []).length;
       
 
       // 2. UPVOTE RELATIONSHIP
-      result.rel.properties.upvote = _.unique((result.rel.properties.upvote || []).concat(user.username));
+      result.rel.properties.upvote = _.unique((result.rel.properties.upvote || []).concat([user.username]));
       if(result.rel.properties.downvote && !!~result.rel.properties.downvote.indexOf(user.username)) {
-        result.rel.properties.downvote = _.remove(result.rel.properties.downvote, user.username);
+        _.remove(result.rel.properties.downvote, function(d) {return d==user.username});
       }
-      
+
       // 3.  
       // download the updated version for the given resource
       async.series({
@@ -270,7 +271,7 @@ module.exports = {
         },
         resource: function (callback) {
           Resource.get({
-            id: result.res.id
+            id: result.res.uuid
           }, user, callback)
         }
       }, function (err, results) {
@@ -279,7 +280,7 @@ module.exports = {
         else {
           
           next(null, {
-            id: result.ent.id,
+            id: result.ent.uuid,
             type: result.ent.type,
             props: result.ent,
             related: {
@@ -298,10 +299,11 @@ module.exports = {
     @param resoruce - resource.id should be an integer identifier
     @param user     - user.id and user.username should exist
     @param params   - used only wioth params.action upvote or downvote
+    , (u:user {uuid: {user_id}})
   */
   updateRelatedResource: function(entity, resource, user, params, next) {
     var now = helpers.now();
-
+    // console.log('model.updateRelatedResource entity',entity, resource, user)
     neo4j.query(queries.update_entity_related_resource, {
       entity_id: entity.id,
       resource_id: resource.id,
@@ -309,28 +311,29 @@ module.exports = {
       exec_date: now.date,
       exec_time: now.time
     }, function (err, results) {
+      // console.log('model.updateRelatedResource entity', err, results)
       if(err || !results.length) {
         next(err || helpers.IS_EMPTY);
         return;
       }
 
       var result = results[0];
-
+      
       if(!!~['upvote', 'downvote'].indexOf(params.action)) {
         if(params.action == 'upvote') {
           result.rel.properties.upvote = _.unique((result.rel.properties.upvote || []).concat(user.username));
           if(result.rel.properties.downvote && !!~result.rel.properties.downvote.indexOf(user.username)) {
-            result.rel.properties.downvote = _.remove(result.rel.properties.downvote, user.username);
+            _.remove(result.rel.properties.downvote, function(d) {return d==user.username});
           }
 
-          // 1. upvote the entity
+          // 1. not upvote the entity
           
         }
 
         if(params.action == 'downvote') {
           result.rel.properties.downvote = _.unique((result.rel.properties.downvote || []).concat(user.username));
           if(result.rel.properties.upvote && !!~result.rel.properties.upvote.indexOf(user.username)) {
-            result.rel.properties.upvote =_.remove(result.rel.properties.upvote, user.username);
+            _.remove(result.rel.properties.upvote, function(d) {return d==user.username});
           }
 
 
@@ -345,7 +348,7 @@ module.exports = {
           },
           function resource (callback) {
             Resource.get({
-              id: result.res.id
+              id: result.res.uuid
             }, user, callback)
           }
         ], function (err, results) {
@@ -353,7 +356,7 @@ module.exports = {
             next(err);
           else
             next(null, {
-              id: result.ent.id,
+              id: result.ent.uuid,
               type: result.ent.type,
               props: result.ent,
               related: {
@@ -365,7 +368,7 @@ module.exports = {
       } else {
         // nothing special to do
         next(null, {
-          id: result.ent.id,
+          id: result.ent.uuid,
           props: result.ent,
           rel: result.rel
         });
@@ -412,12 +415,12 @@ module.exports = {
     Useful api for downvoting/upvoting
     Note that You can modify the original one only if you're the owner of the comment.
   */
-  update: function(id, params, next) {
+  update: function(entity, params, next) {
     var now = helpers.now();
         // query = parser.agentBrown(queries.update_comment, properties);
     
     neo4j.query(queries.get_entity, {
-      id: id
+      id: entity.id
     }, function (err, ent) {
       if(err) {
         next(err);
@@ -431,17 +434,57 @@ module.exports = {
       
       if(params.upvoted_by) {
         ent.props.upvote = _.unique((ent.props.upvote || []).concat([params.upvoted_by]));
+        if(ent.props.downvote && ent.props.downvote.indexOf(params.upvoted_by) != -1)
+          _.remove(ent.props.downvote, function(d) {return d==params.upvoted_by});
       }
+      
       if(params.downvoted_by) {
-        ent.props.downvote = _.unique((ent.props.downvote || []).concat([params.downvoted_by]));
+        // if the user had upvoted it before, it will just remove the downcvote
+        if(ent.props.upvote && ent.props.upvote.indexOf(params.downvoted_by) != -1) {
+          _.remove(ent.props.upvote, function(d) {return d==params.downvoted_by});
+        }
+        // only when a VALID REASON applies
+        if(params.issue) {
+            ent.props.downvote = _.unique((ent.props.downvote || []).concat([params.downvoted_by]));
+        }
       }
+      // calculate celebrity and score for the entity
       ent.props.celebrity =  _.unique((ent.props.upvote || []).concat(ent.props.downvote|| [])).length;
       ent.props.score = (ent.props.upvote || []).length - (ent.props.downvote|| []).length;
       ent.props.last_modification_date = now.date;
       ent.props.last_modification_time = now.time;
+      ent.props.status = (ent.props.score >= 0? 1: (ent.props.score < -1? 0: -1));
       
+      // if there is an issue, add it to the entity directly (mongodb style)
       if(params.issue) {
         ent.props.issues = _.unique((ent.props.issues || []).concat([params.issue]));
+        
+        // add the user to the upvoters (if he/she raised the issue or she/he agrees)
+        if(params.issue_upvoted_by) {
+          ent.props['issue_' + params.issue + '_upvote'] = _.unique((ent.props['issue_' + params.issue + '_upvote'] || []).concat([params.issue_upvoted_by]));
+          if(ent.props['issue_' + params.issue + '_downvote'] && ent.props['issue_' + params.issue + '_downvote'].indexOf(params.issue_upvoted_by) != -1){
+            _.remove(ent.props['issue_' + params.issue + '_downvote'], function(d) {return d==params.issue_upvoted_by});
+          }
+        }
+
+        // add the user to the downvoters (she/he disagrees)
+        if(params.issue_downvoted_by) {
+          // is the downvoter among the upvoters (I.e he/she changed his/her minds)
+          if(ent.props['issue_' + params.issue + '_upvote'] && ent.props['issue_' + params.issue + '_upvote'].indexOf(params.issue_downvoted_by) != -1){
+            _.remove(ent.props['issue_' + params.issue + '_upvote'], function(d) {return d==params.issue_downvoted_by});
+          }
+          // if theres no more upvoters , the issue can safely disappear. 
+          if(ent.props['issue_' + params.issue + '_upvote'].length == 0) {
+            _.remove(ent.props.issues, function(d){ 
+              return d == params.issue
+            }); 
+            // We do not reset the downvotes, since if someone raise it again, the downvoters will be there already ;)
+          } else {
+            // there's still upoters, just add the suer to the downvoters
+            ent.props['issue_' + params.issue + '_downvote'] = _.unique(ent.props['issue_' + params.issue + '_downvote'] || []).concat([params.issue_downvoted_by]);
+          }
+        }
+
       }
       
       // async.parallel({
@@ -454,6 +497,7 @@ module.exports = {
       // })
       neo4j.save(ent.props, function (err, props) {
         if(err) {
+          console.log(err)
           next(err);
           return;
         }

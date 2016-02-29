@@ -3,7 +3,8 @@
     gasp-tip='{{per.props.name}} - {{per.props|lookup:"description":32}} ({{per.props.birth_date | date:"yyyy"}} - {{per.props.death_date | date:"yyyy"}}) {{per.props.score < 0? " - signaled as a mistake":""}}'
     gasp-removable="{{user.username == per.rel.properties.created_by && per.rel.properties.upvote.length == 1}}"
     gasp-upvotes="{{per.rel.properties.upvote}}"
+    gasp-downvotes="{{per.rel.properties.downvote}}"
     gasp-creator="{{per.rel.properties.created_by||''}}"
     gasp-type='person'
     gasp-parent='{{item.type}}-{{item.id}}'
-    class="tag person {{per.props.starred?'starred':''}} {{per.props.issues?'with-issues': ''}} {{per.rel.properties.downvote.length > 1? 'deprecated': '' }} {{per.rel.properties.downvote.length > 0? 'downvoted': '' }} {{per.rel.properties.upvote.length > 0? 'validated': '' }} {{user.username == per.rel.properties.created_by? 'yours': ''}}">{{per.props.name}}</span><!-- {{$last? '':  ', '}} -->
+    class="tag person {{per.props.starred?'starred':''}} {{per.props.issues.length?'with-issues': ''}} {{per.rel.properties.downvote.length > 1? 'deprecated': '' }} {{per.rel.properties.downvote.length > 0? 'downvoted': '' }} {{per.rel.properties.upvote.length > 0? 'validated': '' }} {{user.username == per.rel.properties.created_by? 'yours': ''}}">{{per.props.name}}</span><!-- {{$last? '':  ', '}} -->

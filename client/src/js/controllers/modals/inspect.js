@@ -8,13 +8,46 @@
  *
  */
 angular.module('histograph')
-  .controller('InspectModalCtrl', function ($scope, $log, $uibModalInstance, entity, relatedFactory, relatedModel, EntityRelatedExtraFactory, SuggestFactory, language ) {
+  .controller('InspectModalCtrl', function ($scope, $log, $uibModalInstance, entity, relatedFactory, relatedModel, EntityRelatedExtraFactory, SuggestFactory, language, user, core, socket) {
+    $log.debug('InspectModalCtrl ready', entity.result.item, core.user);
+
     $scope.entity = entity.result.item;
+    $scope.user = user;
+    // @todo wrongtype
+    $scope.setIssues = function(properties) {
+      $scope.entity.isWrong = properties.issues && properties.issues.indexOf('wrong') != -1;
+      $scope.entity.isIncomplete = !_.compact([properties.links_wiki, properties.links_viaf]).length;
+      $scope.isUpvotedByUser = properties.upvote && properties.upvote.indexOf(core.user.username) != -1;
+      $scope.isDownvotedByUser = properties.downvote && entity.result.item.props.downvote.indexOf(core.user.username) != -1;
+    }
+
+    $scope.setIssues(entity.result.item.props);
+
     $scope.limit = 1;
     $scope.offset = 0;
     $scope.modalStatus = 'quiet';
     $scope.language = language;
     
+    $scope.isLocked = false;
+
+    $scope.queue = function(item) {
+      $log.log('InspectModalCtrl  -~> queue()', item);
+      core.queue(item.id? item : $scope.entity, true);
+    };
+
+    $scope.favourite = function(item) {
+      $scope.isLocked = true;
+      core.favourite(item, function(){
+        $scope.isLocked = false;
+      });
+    };
+
+    $scope.unfavourite = function(item) {
+      $scope.isLocked = true;
+      core.unfavourite(item, function(){
+        $scope.isLocked = false;
+      });
+    };
 
     $scope.ok = function () {
       $uibModalInstance.close();
@@ -23,6 +56,94 @@ angular.module('histograph')
     $scope.cancel = function () {
       $uibModalInstance.dismiss('cancel');
     };
+
+
+    $scope.askQuestion = function(question){
+      $scope.question = question;
+    }
+
+    $scope.cancelQuestion = function() {
+      $scope.question = undefined;
+    }
+
+    $scope.confirm = function() {
+      $log.log('InspectModalCtrl  -~> confirm()');
+      $scope.isLocked = true;
+      core.confirm($scope.entity, function(){
+        $scope.isLocked = false;
+      });
+    };
+
+    $scope.unconfirm = function() {
+      $log.log('InspectModalCtrl  -~> unconfirm()');
+      $scope.isLocked = true;
+      core.unconfirm($scope.entity, function(){
+        $scope.isLocked = false;
+      });
+    };
+
+    $scope.raiseIssue = function(type, solution) {
+      $log.log('InspectModalCtrl  -~> raiseIssue() type:', type, '- solution:', solution);
+      $scope.isLocked = true;
+      $scope.cancelQuestion();
+      core.raiseIssue($scope.entity, null, type, solution, function(){
+        $scope.isLocked = false;
+      });
+    };
+
+    $scope.raiseIssueSelected = function(type, solution) {
+
+    };
+    /*
+      Disagree with the specific topic.
+      If you have already voted this do not apply.
+    */
+    $scope.downvoteIssue = function(type, solution) {
+      $log.log('InspectModalCtrl  -~> downvoteIssue() type:', type, '- solution:', solution);
+      $scope.isLocked = true;
+      $scope.cancelQuestion();
+      core.downvoteIssue($scope.entity, null, type, solution, function() {
+        $scope.isLocked = false;
+      });
+    };
+
+    /*
+      socket linstener
+
+    */
+    socket.on('entity:upvote:done', function (result) {
+      $log.info('InspectModalCtrl socket@entity:upvote:done - by:', result.user);
+      if(result.data.id == $scope.entity.id)
+        $scope.entity.props.upvote = result.data.props.upvote;
+      if(result.user == core.user.username)
+        $scope.isUpvotedByUser = true;
+    })
+    socket.on('entity:downvote:done', function (result) {
+      $log.info('InspectModalCtrl socket@entity:downvote:done - by:', result.user);
+      if(result.data.id == $scope.entity.id)
+        $scope.entity.props.upvote = result.data.props.upvote;
+      if(result.user == core.user.username)
+        $scope.isUpvotedByUser = false;
+    })
+
+    socket.on('entity:create-related-issue:done', function (result) {
+      $log.info('InspectModalCtrl socket@entity:create-related-issue:done - by:', result.user, '- result:', result);
+      
+      if(result.data.id == $scope.entity.id){
+        $scope.entity.props = result.data.props;
+        $scope.setIssues(result.data.props);
+      }
+    });
+
+    socket.on('entity:remove-related-issue:done', function (result) {
+      $log.info('InspectModalCtrl socket@entity:remove-related-issue:done - by:', result.user, '- result:', result);
+      if(result.data.id == $scope.entity.id){
+        $scope.entity.props = result.data.props;
+        $scope.setIssues(result.data.props);
+      }
+    });
+
+    
 
     $scope.upvote = function(resource) {
       $scope.modalStatus = 'voting';
@@ -64,9 +185,9 @@ angular.module('histograph')
 
     $scope.sync = function(){
       $scope.modalStatus = 'loading';
-      if($scope.items.length == 1) {
+      if($scope.entity.id) {
         relatedFactory.get({
-          id: $scope.items[0].id,
+          id: $scope.entity.id,
           model: relatedModel,
           limit: $scope.limit,
           offset: $scope.offset
@@ -77,20 +198,7 @@ angular.module('histograph')
         });
       }
     };
-
+    // start everthing
     $scope.sync();
 
-    // if the item has not viaf_id or wiki_id IDENTIFIER attached, propose a set of probable entities. The user will then choose.
-    for(var i=0, l=$scope.items.length; i < l; i++)
-      if(_.isEmpty($scope.items[i].props.links_viaf) || _.isEmpty($scope.items[i].props.links_wiki)){
-        $scope.chooseVIAF = true;
-        SuggestFactory.getVIAF({
-          query: $scope.items[i].props.name
-        }, function(res) {
-          $scope.items[i].viafItems = _.map(_.values(_.groupBy(res.result.items, 'viafid')), function(d){
-            return _.first(d)
-          });
-        })
-        break; // only the first item
-      }
   })

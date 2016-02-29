@@ -25,10 +25,11 @@ angular.module('histograph')
   /*
     Jquery Popup. One popup in DOM to handle every damn entity
   */
-  .directive('gasp', function ($log, SuggestFactory) {
+  .directive('popit', function ($log, EntityFactory) {
     return {
       restrict : 'A',
       scope:{
+        user: '=',
         target: '=',
         comment: '&comment',
         redirect: '&',
@@ -36,7 +37,7 @@ angular.module('histograph')
         filter: '&',
         inspect: '&'
       },
-      templateUrl: 'templates/partials/helpers/gasp.html',
+      templateUrl: 'templates/partials/helpers/popit.html',
       link : function(scope, element, attrs) {
         var _gasp = $(element[0]), // gasp instance;
             _pId  = -1, // previous id
@@ -57,22 +58,39 @@ angular.module('histograph')
               type    = el.attr('gasp-type'),
               id      = el.attr('data-id'),
               pos     = el.offset();
-
+          // was there a prefious one?
           // if there is no type, it is like clicking on stage
+          
+
           if(!type) { 
             hide();
             return;
           }
-          $log.info('::gasp -> toggle() for type:', type, el)
+          if(scope.entity && scope.entity.id == id) {
+            showGasp(pos)
+            return;
+          } else if(scope.entity){
+            scope.entity = {
+              props: {
+                name: '...'
+              },
+              id: id,
+              type: type
+            };
+            scope.$apply();
+          }
+          
+          $log.info(':: popit -> toggle() for type:', type, el)
           
           // validate id
           if(!id && isNaN(id)) {
-            $log.error('::gasp -> toggle() html DOM item lacks "data-id" attribute or it is not a number, given id:', id);
+            $log.error(':: popit -> toggle() html DOM item lacks "data-id" attribute or it is not a number, given id:', id);
             scope.isUnknown = true;
             scope.$apply();
             showGasp(pos)
             return;
           }
+
           scope.isUnknown = false;
           // if id is the same of previous Id, ndo not need to recalculate things
           if(id == _pId) { 
@@ -80,30 +98,34 @@ angular.module('histograph')
             return;
           }
 
+          scope.isReady = false;
+
           var parent  = el.attr('gasp-parent'),
               tooltip = el.attr('gasp-tip'),
               removable = el.attr('gasp-removable'),
               creator   = el.attr('gasp-creator'),
               upvotes   = el.attr('gasp-upvotes'),
+              downvotes = el.attr('gasp-downvotes'),
               entity,
               resource;
 
 
 
           // rewrite upvotes
-          if(upvotes)
-            upvotes = angular.fromJson(upvotes)
+          upvotes = upvotes && upvotes.length? angular.fromJson(upvotes): [];
+          downvotes = downvotes && downvotes.length? angular.fromJson(downvotes): [];
+          
           // rewrite parent, if is present, as an object
           if(parent) {
             var parent_parts = parent.split('-');
             
             parent  = {
-              type: parent_parts[0],
-              id:   parent_parts[1] 
+              type: parent_parts.shift(),
+              id:   parent_parts.join('-')
             };
 
             if(!parent.id) {
-              $log.error('::gasp -> toggle()  html DOM item lacks "gasp-parent" attribute');
+              $log.error(':: popit -> toggle()  html DOM item lacks "gasp-parent" attribute');
               return;
             }
           }
@@ -117,7 +139,7 @@ angular.module('histograph')
 
           };
 
-          scope.entity.upvotes = upvotes || [];
+          
           scope.parent = !parent? null: parent;
 
           
@@ -130,7 +152,7 @@ angular.module('histograph')
           if(removable === 'true')
             scope.link.removable = true;
 
-          $log.log('::gasp -> -> toggle() is removable:', scope.link,removable === 'true')
+          $log.log(':: popit -> -> toggle() is removable:', scope.link,removable === 'true')
           // apply scope
           scope.$apply();
           // set the id
@@ -140,17 +162,14 @@ angular.module('histograph')
           showGasp(pos);
 
           // load item
-          SuggestFactory.getUnknownNodes({ids:[scope.entity.id]}, function (res) {
-            $log.log('::gasp getUnknownNodes:', scope.entity.id)
-            scope.entity.isIncomplete = !_.compact([
-              res.result.items[0].props.links_wiki,
-              res.result.items[0].props.links_viaf
-            ]).length;
-
-            scope.entity.isWrong = res.result.items[0].props.issues? res.result.items[0].props.issues.indexOf('wrong') != -1: false;
-
-            scope.entity.props = res.result.items[0].props;
-          })
+          EntityFactory.get({id:scope.entity.id}, function (res) {
+            $log.log(':: popit toggle() loaded: ', scope.entity.id);
+            scope.entity = res.result.item;
+            scope.entity.upvotes = upvotes;
+            scope.entity.downvotes = downvotes;
+            scope.entity.removable = removable;
+            scope.isReady = true;
+          });
         };
         
         
@@ -186,18 +205,7 @@ angular.module('histograph')
 
 
         
-        /*
-          Listener: body.mouseenter
-        */
-        $('body')
-          // .on('click', '[gasp-type]', toggle)
-          // .on('mouseenter', '[gasp-type]', toggle)
-          // .on('mouseleave', '[gasp-type]', hideDelayed)
-          .on('sigma.clickStage', hide)
-          .on('click', toggle)
-          .on('click', '.obscure', function(e) {
-            e.stopImmediatePropagation();
-          })
+        
         // element.bind('mouseenter', toggle);
         // element.bind('mouseleave', hideDelayed);
 

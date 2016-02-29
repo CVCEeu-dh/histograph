@@ -9,6 +9,17 @@ var settings = require('../settings'),
 var app = require('../server').app;
 
 
+describe('core:neo4j connectivity', function() {
+  it('should check that neo4j is correctly set and running', function (done) {
+    should.exist(settings.neo4j)
+    var neo4j     = require('seraph')(settings.neo4j.host);
+    neo4j.query('MATCH (n) RETURN n LIMIT 1', function(err, nodes) {
+      should.not.exist(err);
+      should.exist(nodes.length);
+      done();
+    })
+  });
+});
 
 describe('core:settings', function() {
   it('should check that settings sections are correctly set :D', function (done) {

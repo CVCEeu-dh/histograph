@@ -5,23 +5,29 @@
   "button.back": "back",
   "button.close": "close",
   "button.confirm": "confirm",
+  "button.confirmed": "confirmed",
+  "button.unconfirm": "un-validate",
   "button.crowd.canfixthis": "Yes, I can fix this",
   "button.crowd.askmelater": "ask me later",
   "button.disagree": "I disagree",
   "button.discard": "discard",
   "button.edit": "edit",
-  "button.egonetwork": "egonetwork",
+  "button.egonetwork": "ego-network",
   "button.end": "ok, close",
   "button.entity.create": "Create a {{type}}",
   "button.finish": "end of part {{number}}",
   "button.login.with.twitter": "log in with your twitter account",
   "button.login.with.google": "log in with your google account",
   "button.more": "more",
+  "button.visit": "visit page",
   "button.next": "next",
   "button.previous": "previous",
+  "button.readmore": "read more",
+  "button.remove.issue": "close this issue",
   "button.myselection.explore": "explore connections",
   "button.skip": "skip",
   "button.steps.skip": "skip this step",
+  "button.untag": "untag this",
 
   "contribute.title": "Which {{type}} did you identify?",
   "contribute.description": "Tagging improves the quality of the recommended resources",
@@ -90,6 +96,12 @@
   "header.activities" : "See all activities",
   "header.myselection": "my selection",
 
+  "inspect.open": "I can check this!",
+  "inspect.entity.isdownvoted": "It seems that <strong>{{name}}</strong> should not appear here",
+  "inspect.entity.iswrong": "It seems that <strong>{{name}}</strong> is a <strong>mistake</strong> and could be safely removed.",
+  "inspect.entity.iswrongtype": "It seems that <strong>{{name}}</strong> type should be changed",
+  "inspect.entity.related_documents": "related documents",
+
   "loading": "loading ...",
 
   "login.welcome" : "Welcome to the histograph collaborative platform. Sign up or log in to start",
@@ -103,13 +115,14 @@
 
   "popit.missinginfo": "We couldn't find any information about this <strong>{{type}}</strong> automatically... can you help us?",
   "popit.fix.not.mentioned": "this <strong>{{type}}</strong> is not mentioned here",
-  "popit.fix.wrong.entity": "Do you really want to untag this <strong>{{type}}</strong>?",
+  "popit.fix.wrong_in_context.entity": "Do you really want to untag this <strong>{{type}}</strong>?",
+  
+  "popit.fix.wrong.entity": "Do you really want to remove this <strong>{{type}}</strong>?",
   "popit.fix.wrong.agree": "Some users suggested that this {{type}} should be untagged. Do you agree?",
   "popit.fix.wrong.type": "this is not a <strong>{{type}}</strong>",
   "popit.fix.brandnew": "Nope, this is a brand new <strong>{{type}}</strong>",
   "popit.fix.typo": "this is a typo / fragment / duplicate",
   "popit.fix.typo.description": "Does <strong class='sans-serif'>{{name}}</strong> correspond to someone else in histograph?",
-  "popit.fix.remove": "Untag this",
   "popit.fix.feedback": "Thank you for your feedback",
   "popit.fix.spotcorrecttype": "How would you classify this?",
   "popit.fix.spotcorrecttype.label": "This is ... ?",
@@ -120,10 +133,14 @@
   "popit.fix.spotcorrecttype.type.irrelevant": "Untag this",
   "popit.fix.spotcorrecttype.type.irrelevant.confirm": "Do you really want to untag this <strong class='sans-serif'>{{type}}</strong>?",
   "popit.fix.spotcorrecttype.type.confirm": "Suggest <strong class='sans-serif' style='color: white'>{{_type}}</strong> as replacement for <strong class='sans-serif' style='color: white'>{{type}}</strong>?",
-
-  "popit.fix.suggest.confirm": "Do you think that <strong class='sans-serif'>{{name}}</strong> should be replaced with <strong class='sans-serif'>{{_name}}</strong>?",
-
+  "popit.fix.suggest.same_entity": "They are the same (@todo)",
+  "popit.fix.suggest.confirm": "It seems that <strong class='sans-serif'>{{name}}</strong> can be replaced with <strong class='sans-serif'>{{_name}}</strong>?",
+  "popit.fix.suggest.confirm_in_context": "It seems that <strong class='sans-serif'>{{name}}</strong> can be replaced with <strong class='sans-serif'>{{_name}}</strong> in this specific context",
+  "popit.fix.remove": "Remove this",
+  
   "popit.fix.remove.relationship": "Untag {{name}} from this resource?",
+  "popit.fix.untag": "Untag this",
+
 
   "resource.people.mentioned": "people mentioned",
   "resource.themes.mentioned": "themes mentioned",

@@ -20,6 +20,8 @@ angular.module('histograph')
         user: '=',
         graph: '=',
         tips: '=',
+        isLoading: '=isloading',
+        params: '=', // current filters, cfr CoreCtrl
         controller: '=',
         redirect: '&',
         addToQueue: '&queue',
@@ -301,12 +303,6 @@ angular.module('histograph')
             si.refresh();
           }, 300);
         });
-        /*
-          watch current target.
-        */
-        scope.$watch('target', function(t) {
-          
-        })
         
         scope.$on(EVENTS.LOCATION_CHANGE_START, function (v) {
           stop();
@@ -323,6 +319,7 @@ angular.module('histograph')
         scope.$on(EVENTS.STATE_CHANGE_SUCCESS, function (e, stateName) {
           $log.log('::sigma @EVENTS.STATE_CHANGE_SUCCESS', stateName);
           scope.center = null;
+          scope.target = false;
           if(stateName.indexOf('graph') != -1)
             scope.setMessage({message: 'loading graph ...'});
         });
@@ -383,7 +380,7 @@ angular.module('histograph')
             si.graph.clear();
           // si.refresh();
             // previous nodes
-            var pns = previousGraph? _.indexBy(previousGraph.nodes, 'id'): {};
+            var pns = previousGraph? _.keyBy(previousGraph.nodes, 'id'): {};
             // set size, and fixes what need to be fixed. If there are fixed nodes, the camera should center on it
             graph.nodes = graph.nodes.map(function (n) {
               if(pns[n.id]) {
@@ -593,7 +590,8 @@ angular.module('histograph')
           
           scope.target = {
             type: 'edge',
-            data: e.data
+            data: e.data,
+            center: scope.center
           };
           scope.$apply();
           si.refresh();
@@ -629,6 +627,8 @@ angular.module('histograph')
           }
           $log.info('::sigma --> focus()', nodeId);//, _.map(si.graph.nodes(), 'id'))
           var node = si.graph.nodes(nodeId);
+          if(!node)
+            return;
           try{
 
             sigma.misc.animation.camera(

@@ -57,13 +57,13 @@
             <!-- <a class="btn btn-default action" tooltip="create a new inquiry" ng-href="#/r/{{item.id}}/inq/create">
               <i class="fa fa-comment-o"></i>
             </a> -->
-             <button class="btn btn-default action" tooltip="{{'tooltip.resource.add.to.myselection'|translate}}" ng-click="queue(item.id, true)">
+             <button class="btn btn-default action" tooltip="{{'tooltip.resource.add.to.myselection'|translate}}" ng-click="queue(item, true)">
               <i class="fa fa-thumb-tack"></i>
             </button>
-            <button ng-if='!isFavItem' class="btn btn-default action" ng-click='favourite()' tooltip="{{'tooltip.resource.add.to.favourites'|translate}}">
+            <button ng-if='!item.loved_by_user' class="btn btn-default action" ng-click='favourite(item)' tooltip="{{'tooltip.resource.add.to.favourites'|translate}}">
               <i class="fa fa-bookmark-o"></i><span class='number'>{{item.lovers}}</span>
             </button>
-            <button ng-if='isFavItem' class="btn btn-default action" ng-click='unfavourite()' tooltip="this resource belongs to your favourite collection">
+            <button ng-if='item.loved_by_user' class="btn btn-default action" ng-click='unfavourite(item)' tooltip="this resource belongs to your favourite collection">
               <i class="fa fa-bookmark animated pulse"></i><span class='number'>{{item.lovers}}</span>
             </button>
             

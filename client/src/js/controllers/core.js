@@ -369,6 +369,9 @@ angular.module('histograph')
     $scope.messaging = false;
     var _messengerTimer;
     $scope.setMessage = function(message, timeout, options) {
+      if(!$scope.user.id) {
+        return;
+      }
       if(!message) {
         $scope.unsetMessage();
         return;
@@ -396,13 +399,33 @@ angular.module('histograph')
     /*
       Use it when it's busy in doing something
     */
-    $scope.lock = function() {
+    $scope.loadingQueue = {};
+
+    $scope.lock = function(key) {
+      $log.log('CoreCtrl -> lock() - key:', key?key:'no key provided');
+      
+      if(key)
+        $scope.loadingQueue[key] = true;
+
       $scope.isLoading=true;
     }
   
-    $scope.unlock = function() {
-      $scope.isLoading=false;
+    $scope.unlock = function(key) {
+      
+      if(key)
+        $scope.loadingQueue[key] = false;
+
+      var pending = _.compact(_.values($scope.loadingQueue)).length > 0;
+      $log.log('CoreCtrl -> unlock() - key:', key?key:'no key provided', '- pending:', $scope.loadingQueue);
+      
+      if(!pending)
+        $scope.isLoading=false;
     }
+
+    $scope.forceUnlock = function(){
+      $log.log('CoreCtrl -> forceUnlock()');
+      $scope.loadingQueue = {};
+    };
     /*
     
       Events listeners
@@ -412,9 +435,9 @@ angular.module('histograph')
     var _resizeTimer;
     $rootScope.$on('$stateChangeStart', function (e, state) {
       // if(state.resolve) {
-        
+      $scope.forceUnlock();
       // }
-      $scope.lock(); 
+      $scope.lock('$dom'); 
       // empty
       if(!_.isEmpty($scope.relatedItems))
         $scope.relatedItems = [];
@@ -453,13 +476,17 @@ angular.module('histograph')
     // fire event when DOM is ready
     $scope.$on('$viewContentLoaded', function(event){
       // $rootScope.$emit
-      $scope.unlock();
+      $scope.unlock('$dom');
       $rootScope.$emit(EVENTS.STATE_VIEW_CONTENT_LOADED, $scope.currentState);
     });
     
     
     $scope.$on(EVENTS.USER_NOT_AUTHENTIFIED, function (e) {
-      $scope.unsetMessage(MESSAGES.LOADING);
+      if($scope.user.id) {
+        // inform the user that it has to authentify ag
+        $scope.setMessage("authentification troubles");
+      } else
+        $scope.unsetMessage(MESSAGES.LOADING);
     });
     
     
@@ -676,16 +703,17 @@ angular.module('histograph')
       Raise a new Issue
       for an entity in a specific context.
     */
-    $scope.raiseIssue = function(entity, resource, kind, solution, next){
+    $rootScope.raiseIssue = function(entity, resource, kind, solution, next){
       var params = {
         kind: kind,
-        mentioning: resource.id
-      };
+      }
+      if(resource)
+        params.mentioning = resource.id;
 
       if(solution)
-        params.solution = solution;
+        params.solution = !isNaN(solution)? parseInt(solution): solution;
 
-      $log.log('CoreCtrl -> raiseIssue() on entity:', entity.id, '- mentioning:', resource.id);
+      $log.log('CoreCtrl -> raiseIssue() on entity:', entity.id, '- mentioning:', resource);
       
 
       EntityRelatedFactory.save({
@@ -696,13 +724,71 @@ angular.module('histograph')
         if(next)
           next(null, res);
       });
+    };
+
+    $rootScope.downvoteIssue = function(entity, resource, kind, solution, next){
+      var params = {
+        kind: kind,
+      }
+      if(resource)
+        params.mentioning = resource.id;
+
+      if(solution)
+        params.solution = !isNaN(solution)? parseInt(solution): solution;
+
+      $log.log('CoreCtrl -> downvoteIssue() kind: ' + kind+'- on entity:', entity.id, '- mentioning:', resource);
+      
+
+      EntityRelatedFactory.delete(_.assign({
+        id: entity.id,
+        model: 'issue'
+      }, params), function (res) {
+        $log.log('CoreCtrl -> downvoteIssue()', res.status);
+        if(next)
+          next(null, res);
+      });
     }
+
+    /*
+      $scope.confirm
+      Confirm the entity without confiming the relationship between the entity and the resource
+    */
+    $scope.confirm = function(entity, next) {
+      $log.log('CoreCtrl -> confirm() entity:', entity.id);
+      EntityExtraFactory.save({
+        id: entity.id,
+        extra: 'upvote'
+      }, {}, function (res) {
+        $log.log('CoreCtrl -> confirm()', res.status);
+        if(next)
+          next(res.result);
+      });
+    };
+
+    /*
+      $scope.confirm
+      Unconfirm the entity without unconfiming the relationship between the entity and the resource
+    */
+    $scope.unconfirm = function(entity, next) {
+      $log.log('CoreCtrl -> unconfirm() entity:', entity.id);
+      EntityExtraFactory.save({
+        id: entity.id,
+        extra: 'downvote'
+      }, {}, function (res) {
+        $log.log('CoreCtrl -> unconfirm()', res.status);
+        if(next)
+          next(res.result);
+      });
+    };
+
     /*
       Voting mechanism: upvote the relationships between an entity and a resource
       (their id and the type will suffice)
     
     */
-    $scope.upvote = function(entity, resource, next) {
+    $rootScope.upvote = function(entity, resource, next) {
+      $log.log('CoreCtrl -> upvote() entity:', entity.id, '- resource:', resource.id);
+      
       EntityRelatedExtraFactory.save({
         id: entity.id,
         model: 'resource',
@@ -719,7 +805,9 @@ angular.module('histograph')
       (the id and the type will suffice)
 
     */
-    $scope.downvote = function(entity, resource, next) {
+    $rootScope.downvote = function(entity, resource, next) {
+      $log.log('CoreCtrl -> downvote() entity:', entity.id, '- resource:', resource.id);
+      
       EntityRelatedExtraFactory.save({
         id: entity.id,
         model: 'resource',
@@ -737,7 +825,9 @@ angular.module('histograph')
       (only if the user is the creator of the relationship and there are no other upvotes)
 
     */
-    $scope.discardvote = function(entity, resource) {
+    $rootScope.discardvote = function(entity, resource, next) {
+      $log.log('CoreCtrl -> discardvote() entity:', entity.id, '- resource:', resource.id);
+      
       EntityRelatedExtraFactory.delete({
         id: entity.id,
         model: 'resource',
@@ -745,15 +835,46 @@ angular.module('histograph')
         extra: ''
       }, {}, function (res) {
         $log.log('CoreCtrl -> discardvote()', res.status);
+        if(next)
+          next(res.result);
       });
     };
+
+
+    /*
+      Favourite the current resource ♥
+    */
+    $scope.favourite = function(resource, next) {
+      ResourceRelatedFactory.save({
+        id: resource.id,
+        model: 'user',  
+      }, {}, function (res) {
+        console.log('CoreCtrl -> favourite() - result:', res.status);
+        if(next)
+          next(res.result);
+      });
+    };
+    
+    /*
+      Unfavourite the current resource (#@# --> ♥)
+    */
+    $scope.unfavourite = function(resource, next) {
+      ResourceRelatedFactory.delete({
+        id: resource.id,
+        model: 'user',  
+      }, {}, function (res) {
+        console.log('CoreCtrl -> unfavourite() - result:', res.status);
+        if(next)
+          next(res.result);
+      });
+    };
+
 
     /*
       Merge two entities together in a specific resource
 
     */
-    $scope.mergeEntities = function(wrong, trusted, resource, next) {
-      debugger
+    $rootScope.mergeEntities = function(wrong, trusted, resource, next) {
       EntityRelatedExtraFactory.save({
         id: wrong.id,
         model: 'resource',
@@ -794,8 +915,8 @@ angular.module('histograph')
       
 
     */
-    $scope.inspect = function(entity) {
-      $log.log('CoreCtrl -> inspect() - entity:', entity);
+    $rootScope.inspect = function(entity, resource, issue) {
+      $log.log('CoreCtrl -> inspect() - entity:', entity, (resource? '- resource: ' + resource.id: ''));
       var language = $scope.language;
 
       var modalInstance = $uibModal.open({
@@ -807,6 +928,12 @@ angular.module('histograph')
           entity: function(EntityFactory) {
             return EntityFactory.get({id: entity.id}).$promise
           },
+          issue: function(){
+            return issue
+          },
+          user: function(){
+            return $scope.user;
+          },
           relatedModel: function() {
             return 'resource'
           },
@@ -815,6 +942,9 @@ angular.module('histograph')
           },
           language: function() {
             return language
+          },
+          core: function() {
+            return $scope;
           }
         }
         // resolve: {
@@ -825,7 +955,6 @@ angular.module('histograph')
       });
     };
 
-    // $scope.inspect({id: 17190});
 
     /*
       MetadataInspect
@@ -1033,6 +1162,10 @@ angular.module('histograph')
           $scope.contextualTimeline = res.data.result.timeline;
           // $scope.initialTimeline
         });
+
+
+      // $scope.inspect({id: 17190});
+
     }, 236);
     
   })
@@ -1132,11 +1265,13 @@ angular.module('histograph')
       Load graph data
     */
     $scope.syncGraph = function() {
+      $scope.lock('graph');
       relatedVizFactory.get(angular.extend({
         model: relatedModel,
         viz: 'graph',
         limit: 100,
       },  $stateParams, $scope.params), function (res) {
+        $scope.unlock('graph');
         if($stateParams.ids) {
           $scope.setGraph(res.result.graph, {
             centers: $stateParams.ids
@@ -1155,14 +1290,14 @@ angular.module('histograph')
       Reload related items, with filters.
     */
     $scope.sync = function() {
-      $scope.lock();
+      $scope.lock('RelatedItemsCtrl');
 
       relatedFactory.get(angular.extend({
         model: relatedModel,
         limit: $scope.limit,
         offset: $scope.offset
       }, $stateParams, $scope.params), function (res) {
-        $scope.unlock();
+        $scope.unlock('RelatedItemsCtrl');
         $scope.offset  = res.info.offset;
         $scope.limit   = res.info.limit;
         $scope.totalItems = res.info.total_items;
@@ -1215,45 +1350,7 @@ angular.module('histograph')
     // $scope.syncGraph();
     $log.log('RelatedItemsCtrl -> setRelatedItems - items', relatedItems.result.items);
     $scope.setRelatedItems(relatedItems.result.items);
-    $scope.isLoading=false;
+    
     if($stateParams.ids || $stateParams.query || ~~!specials.indexOf('syncGraph'))
       $scope.syncGraph();
-  })
-  /*
-    Make graph easily readable
-  */
-  .controller('GraphCtrl', function ($scope, $log, $stateParams, relatedModel, relatedVizFactory, EVENTS) {
-    // sort of preload
-    if($scope.item)
-      $scope.triggerGraphEvent(EVENTS.SIGMA_SET_ITEM, $scope.item)
-    /*
-      Load graph data
-    */
-    $scope.syncGraph = function() {
-      // send a message
-      relatedVizFactory.get(angular.extend({
-        model: relatedModel,
-        viz: 'graph',
-        limit: 100,
-      },  $stateParams, $scope.params), function (res) {
-        if($stateParams.ids) {
-          $scope.setGraph(res.result.graph, {
-            centers: $stateParams.ids
-          });
-        } else if($scope.item && $scope.item.id)
-          $scope.setGraph(res.result.graph, {
-            centers: [$scope.item.id]
-          });
-        else
-          $scope.setGraph(res.result.graph);
-      });
-    }
-
-    $scope.$on(EVENTS.API_PARAMS_CHANGED, function() {
-      $log.debug('ResourcesCtrl @API_PARAMS_CHANGED', $scope.params);
-      $scope.syncGraph();
-    });
-
-    $scope.syncGraph();
-    $log.log('GraphCtrl -> ready');
-  })
+  });

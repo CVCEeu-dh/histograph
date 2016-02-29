@@ -30,28 +30,7 @@ angular.module('histograph')
       $scope.$broadcast('focuson', {id:id});
     }
     
-    /*
-      Favourite the current resource ♥
-    */
-    $scope.favourite = function() {
-      ResourceRelatedFactory.save({
-        id: $stateParams.id,
-        model: 'user',  
-      }, {}, function (res) {
-        console.log('ResourceCtrl -> favourite() - result:', res.status);
-        $scope.isFavItem = true;
-      });
-    }
     
-    $scope.unfavourite = function() {
-      ResourceRelatedFactory.delete({
-        id: $stateParams.id,
-        model: 'user',  
-      }, {}, function (res) {
-        console.log('ResourceCtrl -> unfavourite() - result:', res.status);
-        $scope.isFavItem = false;
-      });
-    };
 
     /*
       LoadTimeline
@@ -210,7 +189,7 @@ angular.module('histograph')
     socket.on('entity:remove-related-resource:done', function (result) {
       console.log(result)
       if(result.resource.id == $stateParams.id) { // update user notificaation
-        $log.info('ResourceCtrl socket@entity:remove-related-resource:done - by:', result.user);
+        $log.info('ResourceCtrl socket@entity:remove-related-resource:done - by:', result.user, '- result:', result);
         $scope.item = result.data.related.resource; 
       } 
     })

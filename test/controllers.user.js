@@ -110,8 +110,8 @@ describe('controller:user (related users)', function() {
       .end(function (err, res) {
         should.not.exists(err);
         should.exist(res.body.result.item);
-        should.equal(res.body.result.item.rel.start, __user.id);
-        should.equal(res.body.result.item.rel.end, __resourceA.id);
+        should.equal(res.body.result.item.rel.start, __user.props.id);
+        should.equal(res.body.result.item.rel.end, __resourceA.props.id);
         should.equal(res.body.result.item.rel.type, 'likes');
         
         done();
@@ -153,7 +153,6 @@ describe('controller:user (related users)', function() {
       .expect('Content-Type', /json/)
       .expect(200)
       .end(function (err, res) {
-        console.log(res.body)
         should.not.exists(err);
         
         

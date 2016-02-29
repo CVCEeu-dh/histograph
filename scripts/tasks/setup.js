@@ -20,8 +20,10 @@ module.exports = {
       console.log(clc.blackBright('...executing'), query.name)
       
       neo4j.query(query.cypher, function (err, result) {
-        if(err)
-          throw err;
+        if(err) {
+          q.kill();callback(err);
+        }
+
         console.log(clc.greenBright('   done'),  q.length(), clc.blackBright('remaining\n'))
         nextQuery();
       })

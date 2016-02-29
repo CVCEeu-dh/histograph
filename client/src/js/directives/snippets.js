@@ -9,12 +9,13 @@
  * Use suggestFactory as service
  */
 angular.module('histograph')
-  .directive('snippets', function ($log, $location, $timeout, EVENTS, SuggestFactory) {
+  .directive('snippets', function ($log, $location, $timeout, EVENTS, SuggestFactory, EntityFactory, EntityRelatedFactory) {
     'use strict';
      return {
       restrict : 'A',
       templateUrl: 'templates/partials/helpers/snippet.html',
       scope:{
+        params: '=',
         center: '=',
         target: '=',
         user: '='
@@ -57,30 +58,49 @@ angular.module('histograph')
           scope.items = items;
           
         };
-
-
-
+        
+        /*
+          scope private method
+          @param res - the api response containing result.items
+        */
+        scope._fillSharedItems = function(res) {
+          if(scope.offset > 0) {
+            scope.sharedItems = scope.sharedItems.concat(res.result.items);
+          } else {
+            scope.sharedItems = res.result.items
+            scope.totalItems = res.info.total_items;
+          }
+        };
         /*
           load shared items.
           with limits and offsets.
         */
         scope.sync = function() {
-          $log.log('::snippets -> sync() getSharedItems between:' , scope.itemsIds);
-          $log.debug('::snippets -> sync() center:', scope.center)
-          SuggestFactory.getShared(angular.extend({
-            ids: scope.itemsIds,
-            model: scope.sharedItemsModel
-          }, scope.$parent.$parent.params, {
-            limit: scope.limit,
-            offset: scope.offset
-          }), function (res) {
-            if(scope.offset > 0)
-              scope.sharedItems = scope.sharedItems.concat(res.result.items)
-            else {
-              scope.sharedItems = res.result.items;
-              scope.totalItems  = res.info.total_items;
-            }
-          })
+          $log.log('::snippets -> sync() params:', scope.params);
+          if(scope.target.type == 'node' && scope.target.data.node.type != "resource"){
+            $log.log('   getRelatedItem for:' , scope.target.data.node.id);
+            
+            EntityRelatedFactory.get(angular.extend({
+              id: scope.target.data.node.id,
+              model: 'resource'
+            }, scope.params, {
+              limit: scope.limit,
+              offset: scope.offset
+            }), scope._fillSharedItems);
+          } else if(scope.itemsIds.length) {
+            $log.log('   getSharedItems between:' , scope.itemsIds);
+
+            SuggestFactory.getShared(angular.extend({
+              ids: scope.itemsIds,
+              model: scope.sharedItemsModel
+            }, scope.params, {
+              limit: scope.limit,
+              offset: scope.offset,
+              center: scope.target.center? scope.target.center.id: undefined
+            }), scope._fillSharedItems);
+          } else {
+            $log.error('::snippets -> sync() without params')
+          };
         };
 
         /*
@@ -111,8 +131,13 @@ angular.module('histograph')
             scope.sharedItems = [];
             if(target.data.node.props) {// if the node has already  been loaded
               scope.fill([target.data.node])
-            } else
+            } else {
               itemsIdsToLoad.push(target.data.node.id);
+            }
+            // load entity related items
+            if(target.data.node.type != "resource"){
+              scope.sync();
+            }
 
           } else if(target.type == 'edge') {
             var s = target.data.edge.nodes.source,
@@ -138,7 +163,15 @@ angular.module('histograph')
             }
           }
 
-          if(itemsIdsToLoad.length > 0) 
+          if(itemsIdsToLoad.length == 1 && target.type == 'node' && target.data.node.type != "resource"){
+            EntityFactory.get({
+              id: itemsIdsToLoad[0]
+            }, function (res) {
+              if(res.result && res.result.item)
+                scope.fill([res.result.item]);
+            });
+          } else if(itemsIdsToLoad.length > 0){
+
             SuggestFactory.getUnknownNodes({
               ids: itemsIdsToLoad
             }, function (res) {
@@ -147,6 +180,8 @@ angular.module('histograph')
                 scope.fill(res.result.items);
                 // load in between
             });
+          }
+            
         };
         /*
           hide snippet
@@ -245,11 +280,11 @@ angular.module('histograph')
         /*
           Listen to api params changes
         */
+
         scope.$on(EVENTS.API_PARAMS_CHANGED, function(e, params) {
-          $log.log('::snippets @EVENTS.API_PARAMS_CHANGED');
+          $log.log('::snippets @EVENTS.API_PARAMS_CHANGED', params, scope.params);
           scope.offset = 0;
-          if(scope.itemsIds.length)
-            scope.sync();
+          scope.sync();
         });
 
         /*

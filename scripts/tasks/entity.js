@@ -360,16 +360,16 @@ module.exports = {
       Count relationships to be cleaned
     */
     var loops = 0,
-        limit= isNaN(options.limit)? 5000: options.limit;
+        limit= isNaN(options.limit)? 20000: options.limit;
 
-    neo4j.query(queries.count_appear_in_the_same_document, function (err, results){
+    neo4j.query(queries.count_appear_in_same_document, function (err, results){
       if(err) {
         callback(err);
         return;
       }
       
-      loops = Math.ceil(results.total_count / limit);
-      console.log('    loops needed:', loops,'- total:',results.total_count);
+      loops = Math.ceil(results[0].total_count / limit);
+      console.log('    loops needed:', loops,'- total:',results[0].total_count);
       async.timesSeries(loops, function (n, _next) {
         console.log('    loop:', n ,'- offset:', n*limit, '- limit:', limit, '- total:', results.total_count)
         neo4j.query(queries.clear_appear_in_same_document, {
@@ -404,16 +404,33 @@ module.exports = {
   
   tfidf: function(options, callback) {
     console.log(clc.yellowBright('\n   tasks.entity.tfidf'));
-    var query = parser.agentBrown(queries.computate_tfidf, options);
-    neo4j.query(query, function (err) {
-      if(err)
-        callback(err)
-      else {
-        console.log(clc.cyanBright('   created'),'tfidf properties');
-        callback(null, options);
-    
+    var loops = 0,
+        limit= isNaN(options.limit)? 50000: options.limit;
+
+    neo4j.query(queries.count_appears_in, function(err, results) {
+      if(err) {
+        callback(err);
+        return;
       }
-    })
+      loops = Math.ceil(results[0].total_count / limit);
+      console.log('    loops needed:', loops,'- total:',results[0].total_count);
+      
+      var query = parser.agentBrown(queries.computate_tfidf, options);
+
+      async.timesSeries(loops, function (n, _next) {
+        console.log('    loop:', n ,'- offset:', n*limit, '- limit:', limit, '- total:', results[0].total_count)
+        neo4j.query(query, {
+          offset: n*limit,
+          limit: limit
+        }, _next);
+      }, function (err) {
+        if(err)
+          callback(err);
+        else
+          callback(null, options)
+      });
+    });
+    
   },
   
   jaccard: function(options, callback) {
