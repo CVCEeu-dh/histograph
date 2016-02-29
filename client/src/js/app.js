@@ -1066,31 +1066,31 @@ angular
             }
           }
         })
-        .state('neighbors.persons', {
-          url: '/per',
-          templateUrl: 'templates/partials/entities.html',
-          controller: 'EntitiesCtrl',
-          resolve: {
-            model: function(){
-              return 'person'
-            },
-            relatedVizFactory: function(SuggestVizFactory) {
-              return SuggestAllInBetweenVizFactory
-            },
-            relatedFactory: function(ResourceRelatedFactory) {
-              return SuggestAllInBetweenFactory
-            },
-            entities: function(SuggestAllInBetweenFactory, $stateParams) {
-            // clean limit here
-            // console.log($stateParams)
-              return SuggestAllInBetweenFactory.get({
-                ids: $stateParams.ids,
-                limit: 10,
-                model: 'person'
-              }).$promise; 
-            }
-          }
-        })
+        // .state('neighbors.persons', {
+        //   url: '/per',
+        //   templateUrl: 'templates/partials/entities.html',
+        //   controller: 'EntitiesCtrl',
+        //   resolve: {
+        //     model: function(){
+        //       return 'person'
+        //     },
+        //     relatedVizFactory: function(SuggestVizFactory) {
+        //       return SuggestAllInBetweenVizFactory
+        //     },
+        //     relatedFactory: function(ResourceRelatedFactory) {
+        //       return SuggestAllInBetweenFactory
+        //     },
+        //     entities: function(SuggestAllInBetweenFactory, $stateParams) {
+        //     // clean limit here
+        //     // console.log($stateParams)
+        //       return SuggestAllInBetweenFactory.get({
+        //         ids: $stateParams.ids,
+        //         limit: 10,
+        //         model: 'person'
+        //       }).$promise; 
+        //     }
+        //   }
+        // })
       
       .state('search', {
         abstract:true,

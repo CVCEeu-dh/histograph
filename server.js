@@ -677,6 +677,8 @@ apiRouter.route('/suggest/all-in-between/:ids([\\da-z][\\d,a-z\\-]+)/resource/gr
   .get(ctrl.suggest.getAllInBetweenGraph)
 apiRouter.route('/suggest/all-in-between/:ids([\\da-z][\\d,a-z\\-]+)/resource')
   .get(ctrl.suggest.getAllInBetweenResources)
+apiRouter.route('/suggest/all-in-between/:ids([\\da-z][\\d,a-z\\-]+)/resource/timeline')
+.get(ctrl.suggest.getAllInBetweenTimeline)
   
 apiRouter.route('/suggest/all-shortest-paths/:ids([\\d,a-z\\-]+)')
   .get(ctrl.suggest.allShortestPaths)

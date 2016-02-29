@@ -361,6 +361,20 @@ describe('controller:suggest perform some queries', function() {
   });
 });
 
+describe('controller:suggest timeline', function() {
+  it('should get the all in between timeline', function (done) {
+    session
+      .get('/api/suggest/all-in-between/'+ __resourceA.id +','+ __resourceB.id + '/resource/timeline')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        !!err && !!res && console.log(res.body);
+        should.not.exist(err);
+        done()
+      });
+  });
+});
+
 
 
 

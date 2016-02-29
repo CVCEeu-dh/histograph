@@ -5,19 +5,45 @@
  * # NeighborsCtrl
  */
 angular.module('histograph')
-  .controller('NeighborsCtrl', function ($scope, $log, $stateParams, socket) {
-    $log.log('NeighborsCtrl ready, ids:', $stateParams.ids);
-    $scope.syncQueue($stateParams.ids);
+  .controller('NeighborsCtrl', function ($scope, $log, $stateParams, socket, SuggestFactory, EVENTS) {
+    $log.debug('NeighborsCtrl ready, ids:', $stateParams.ids);
+    // $scope.syncQueue($stateParams.ids);
     
-    // $scope.syncGraph = function () {
-    //   SuggestVizFactory.allInBetween({
+    // /*
+    //   Load/sync graph
+    //   ---
+
+    //   load the timeline of entity related resources
+    // */
+    // $scope.syncGraph = function() {
+    //   SuggestFactory.allInBetween(angular.extend({
     //     ids:$stateParams.ids,
     //     viz: 'graph',
+    //     model: 'resource',
     //     entity: 'person'
-    //   }, function(res) {
+    //   }, $scope.params), function(res) {
     //     $scope.setGraph(res.result.graph);
     //   })
-    // }
+    // };
+
+    /*
+      LoadTimeline
+      ---
+
+      load the timeline of entity related resources
+    */
+    $scope.syncTimeline = function() {
+      $log.log('NeighborsCtrl -> syncTimeline()');
+      SuggestFactory.allInBetween(angular.extend({
+        ids:$stateParams.ids,
+        viz: 'timeline',
+        model: 'resource',
+        entity: 'person'
+      }, $scope.params), function(res) {
+         $scope.setTimeline(res.result.timeline)
+      });
+    };
+
     // $scope.setGraph(allInBetween.data.result.graph);
     
     // $scope.related = allInBetween.data.info.clusters;
@@ -29,35 +55,17 @@ angular.module('histograph')
     // // get some resource ids to load
     
     // $scope.syncGraph();
-  })
-  //
-  .controller('NeighborsResourcesCtrl', function ($scope, $log, $stateParams, ResourceFactory) {
-    $log.log('NeighborsResourcesCtrl ready');
-    
-    return;
-    
-    $scope.totalItems = allInBetween.data.info.clusters.resource || 0;
-    // get resources to load...
-    var playlistIds = $stateParams.ids.split(',').map(function(d) {
-      return +d;
+
+    /*
+      listener: EVENTS.API_PARAMS_CHANGED
+      some query parameter has changed, reload the list accordingly.
+    */
+    $scope.$on(EVENTS.API_PARAMS_CHANGED, function() {
+      $scope.offset = 0;
+      $log.debug('NeighborsCtrl @API_PARAMS_CHANGED', $scope.params);
+      // $scope.syncGraph();
+      $scope.syncTimeline();
     });
-    
-    var resourcesToLoad = allInBetween.data.result.graph.nodes.filter(function (d) {
-      return d.type == 'resource' && playlistIds.indexOf(d.id)== -1;
-    }).map(function (d) {
-      return d.id;
-    });
-    
-    $log.log('NeighborsCtrl load related items ',resourcesToLoad.length);
-    
-    
-    if(resourcesToLoad.length)
-      ResourceFactory.get({
-        id: resourcesToLoad.join(',')
-      }, function(res) {
-        console.log(resourcesToLoad.join(','))
-        $scope.setRelatedItems(res.result.items || [res.result.item]);
-      })
-    else
-      $scope.setRelatedItems([])
+
+    $scope.syncTimeline();
   });

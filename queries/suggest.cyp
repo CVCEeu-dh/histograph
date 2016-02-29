@@ -48,16 +48,13 @@ LIMIT {limit}
 
 // name: count_all_in_between_resources
 // return grouped by resource type (picture, treaty ...)
-MATCH (n)
-  WHERE n.uuid in {ids}
-MATCH (t)
-  WHERE t.uuid in {ids}
-WITH n, t
-MATCH p=allShortestPaths((n)-[:appears_in*..4]-(t))
-WITH filter(x in nodes(p) WHERE last(labels(x))='resource') as ns UNWIND ns as res
-WITH DISTINCT res
-  {?res:start_time__gt} {AND?res:end_time__lt} {AND?res:mimetype__in} {AND?res:type__in}
-WITH DISTINCT res
+MATCH (ent:entity)
+  WHERE ent.uuid in {ids}
+WITH ent
+MATCH (ent)-[r:appears_in]->(res:resource)
+{?res:start_time__gt} {AND?res:end_time__lt} {AND?res:mimetype__in} {AND?res:type__in}
+WITH res, count(ent) as c
+WITH res 
 RETURN {
   group: res.type, 
   count_items: count(res)
@@ -66,107 +63,115 @@ RETURN {
 
 // name: get_all_in_between_resources
 // return a set of id for the all-in-between resource.
-MATCH (n)
-  WHERE n.uuid in {ids}
-MATCH (t)
-  WHERE t.uuid in {ids}
-WITH n, t
-MATCH p=allShortestPaths((n)-[:appears_in*..4]-(t))
-WITH filter(x in nodes(p) WHERE last(labels(x))='resource') as ns UNWIND ns as res
-WITH DISTINCT res
-  {?res:start_time__gt} {AND?res:end_time__lt} {AND?res:mimetype__in} {AND?res:type__in}
-WITH DISTINCT res
-return res.uuid as id
+MATCH (ent:entity)
+  WHERE ent.uuid in {ids}
+WITH ent
+MATCH (ent)-[r:appears_in]->(res:resource)
+{?res:start_time__gt} {AND?res:end_time__lt} {AND?res:mimetype__in} {AND?res:type__in}
+WITH res, sum(r.tf) as stf, collect({
+    id: ent.uuid,
+    type: last(labels(ent)),
+    props: ent,
+    rel: r
+  })  as matches 
+WITH res,matches,stf
+ORDER BY size(matches) DESC, stf DESC
+WITH res, matches
 SKIP {offset}
 LIMIT {limit}
+WITH res, matches
+  OPTIONAL MATCH (res)<-[r_per:appears_in]-(per:`person`)
+  WITH res, matches, r_per, per
+  ORDER BY  r_per.score DESC, 
+            r_per.tfidf DESC, 
+            r_per.frequency DESC
+WITH res, matches, filter(x in collect({  
+      id: per.uuid,
+      type: 'person',
+      props: per,
+      rel: r_per
+    }) WHERE has(x.id))[0..5] as people
+  OPTIONAL MATCH (res)<-[r_the:appears_in]-(the:`theme`)
+  WITH res, matches, people, r_the, the
+  ORDER BY  r_the.score DESC, 
+            r_the.tfidf DESC, 
+            r_the.frequency DESC
+WITH res, matches, people, filter(x in collect({    
+      id: the.uuid,
+      type: 'theme',
+      props: the,
+      rel: r_the
+    }) WHERE has(x.id))[0..5] as themes
 
+RETURN {
+  id: res.uuid,
+  type: 'resource',
+  props: res,
+  persons:     people,
+  themes:     themes,
+  matches: matches
+} as resource
 
-// name: get_all_in_between_graph_new
-//
 
 
 // name: get_all_in_between_graph
-// retutn rels, nodes from a) the shortes path and b) enlarged path
-OPTIONAL MATCH (res:resource)
-  WHERE res.uuid in {ids} 
-WITH res
-OPTIONAL MATCH (ent:entity)
-  WHERE ent.uuid in {ids} 
-WITH coalesce(res,ent) as n
-OPTIONAL MATCH (res:resource)
-  WHERE res.uuid in {ids} 
-WITH n, res
-OPTIONAL MATCH (ent:entity)
-  WHERE ent.uuid in {ids} 
-WITH n, coalesce(res,ent) as t
-WHERE n <>t
-WITH n,t
-MATCH p=allShortestPaths((n)-[:appears_in*..4]-(t))
-  WHERE n <> t
-{if:type}
-  AND ALL(x in FILTER(x in nodes(p) WHERE last(labels(x)) = 'resource') WHERE x.type in {type})
-{/if}
-{if:start_time}
-  AND ALL(x in FILTER(x in nodes(p) WHERE last(labels(x)) = 'resource') WHERE x.start_time >= {start_time})
-{/if}
-{if:end_time}
-  AND ALL(x in FILTER(x in nodes(p) WHERE last(labels(x)) = 'resource') WHERE x.end_time <= {end_time})
-{/if}
-WITH p, reduce(tfidf=toFloat(0), r in relationships(p)|tfidf + COALESCE(r.tfidf,0.0)) as tfidf
-RETURN extract( n IN nodes(p)| {
-  id: n.uuid,
-  _id: id(n),
-  type: last(labels(n)),
-  ghost: 0,
-  label: coalesce(n.name, n.title_en, n.title_fr)
-}) AS ns, relationships(p) as rels, tfidf, length(p) as lp
-ORDER BY lp ASC, tfidf DESC
-LIMIT {limit}
+// get relationships between the elements of your choice
+MATCH (ent:entity)
+  WHERE ent.uuid in {ids}
+WITH ent
+  MATCH (ent)-[r:appears_in]->(res:resource)
+  {?res:start_time__gt} {AND?res:end_time__lt} {AND?res:mimetype__in} {AND?res:type__in}
+WITH res, sum(r.tf) as stf, count(ent)  as c 
+WHERE c > 1
+WITH res, c, stf
+ORDER BY c DESC, stf DESC
+LIMIT 50
+WITH res 
+  MATCH (A:person)-[r1:appears_in]->(res)<-[:appears_in]-(B:person)
+  WHERE id(A) > id(B) WITH A,B, count(res) as w 
+  ORDER BY w DESC
+  LIMIT {limit}
+RETURN {
+  source: {
+    id: A.uuid,
+    type: last(labels(A)),
+    label: A.name
+  },
+  target: {
+    id: B.uuid,
+    type: last(labels(B)),
+    label: B.name
+  },
+  weight: w
+} as result
 
-// UNION
-// OPTIONAL MATCH (res:resource)
-//   WHERE res.uuid in {ids} 
-// WITH res
-// OPTIONAL MATCH (ent:entity)
-//   WHERE ent.uuid in {ids} 
-// WITH coalesce(res,ent) as n
-// OPTIONAL MATCH (res:resource)
-//   WHERE res.uuid in {ids} 
-// WITH n, res
-// OPTIONAL MATCH (ent:entity)
-//   WHERE ent.uuid in {ids} 
-// WITH n, coalesce(res,ent) as t
-// WHERE n <>t
-// WITH n,t
-// MATCH (n)-[r:appears_in*..2]-(t:{:entity})
-//   // top common nodes at distance 0 to 2
-// WITH t, count(DISTINCT r) as rr 
-// WHERE rr > 1
-// WITH t, rr
-// ORDER BY rr DESC
-// LIMIT 50
-//   // how do we reach top common nodes
-// MATCH p=allShortestPaths((n)-[r:appears_in*..2]-(t))
-// WHERE id(n) in {ids} AND id(n) <> id(t)
-// {if:type}
-//   AND ALL(x in FILTER(x in nodes(p) WHERE last(labels(x)) = 'resource') WHERE x.type in {type})
-// {/if}
-// {if:start_time}
-//   AND ALL(x in FILTER(x in nodes(p) WHERE last(labels(x)) = 'resource') WHERE x.start_time >= {start_time})
-// {/if}
-// {if:end_time}
-//   AND ALL(x in FILTER(x in nodes(p) WHERE last(labels(x)) = 'resource') WHERE x.end_time <= {end_time})
-// {/if}
-// 
-// WITH p, reduce(tfidf=toFloat(0), r in relationships(p)|tfidf + COALESCE(r.tfidf,0.0)) as tfidf
-// RETURN extract( n IN nodes(p)| {
-//   id: id(n),
-//   type: last(labels(n)),
-//   ghost: 1,
-//   label: coalesce(n.name, n.title_en, n.title_fr)
-// }) AS ns, relationships(p) as rels, tfidf, length(p) as lp
-// ORDER BY length(p) ASC, tfidf DESC
-// LIMIT {limit}
+
+// name: get_all_in_between_timeline
+// get relationships between the elements of your choice
+MATCH (ent:entity)
+  WHERE ent.uuid in {ids}
+WITH ent
+  MATCH (ent)-[r:appears_in]->(res:resource)
+  WHERE has(res.start_month)
+    {if:mimetype}
+    AND res.mimetype = {mimetype}
+    {/if}
+    {if:type}
+    AND res.type IN {type}
+    {/if}
+    {if:start_time}
+    AND res.start_time >= {start_time}
+    {/if}
+    {if:end_time}
+    AND res.end_time <= {end_time}
+    {/if}
+WITH res, sum(r.tf) as stf, count(ent)  as c 
+WHERE c > 1
+WITH res.start_month as tm, min(res.start_time) as t,  count(res) as weight
+RETURN tm, t, weight
+ORDER BY tm ASC
+
+
 
 
 // name: get_shortest_paths_graph
