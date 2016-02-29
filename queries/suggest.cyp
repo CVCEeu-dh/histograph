@@ -91,8 +91,16 @@ OPTIONAL MATCH (res:resource)
   WHERE res.uuid in {ids} 
 WITH res
 OPTIONAL MATCH (ent:entity)
-  WHERE res.uuid in {ids}
-WITH coalesce(res, ent) as n, coalesce(res, ent) as t
+  WHERE ent.uuid in {ids} 
+WITH coalesce(res,ent) as n
+OPTIONAL MATCH (res:resource)
+  WHERE res.uuid in {ids} 
+WITH n, res
+OPTIONAL MATCH (ent:entity)
+  WHERE ent.uuid in {ids} 
+WITH n, coalesce(res,ent) as t
+WHERE n <>t
+WITH n,t
 MATCH p=allShortestPaths((n)-[:appears_in*..4]-(t))
   WHERE n <> t
 {if:type}
@@ -107,43 +115,58 @@ MATCH p=allShortestPaths((n)-[:appears_in*..4]-(t))
 WITH p, reduce(tfidf=toFloat(0), r in relationships(p)|tfidf + COALESCE(r.tfidf,0.0)) as tfidf
 RETURN extract( n IN nodes(p)| {
   id: n.uuid,
+  _id: id(n),
   type: last(labels(n)),
   ghost: 0,
   label: coalesce(n.name, n.title_en, n.title_fr)
 }) AS ns, relationships(p) as rels, tfidf, length(p) as lp
 ORDER BY lp ASC, tfidf DESC
 LIMIT {limit}
-UNION
-MATCH (n)-[r:appears_in*..2]-(t:{:entity})
-  WHERE id(n) in {ids} AND id(n) <> id(t)
-  // top common nodes at distance 0 to 2
-WITH t, count(DISTINCT r) as rr 
-WHERE rr > 1
-WITH t, rr
-ORDER BY rr DESC
-LIMIT 50
-  // how do we reach top common nodes
-MATCH p=allShortestPaths((n)-[r:appears_in*..2]-(t))
-WHERE id(n) in {ids} AND id(n) <> id(t)
-{if:type}
-  AND ALL(x in FILTER(x in nodes(p) WHERE last(labels(x)) = 'resource') WHERE x.type in {type})
-{/if}
-{if:start_time}
-  AND ALL(x in FILTER(x in nodes(p) WHERE last(labels(x)) = 'resource') WHERE x.start_time >= {start_time})
-{/if}
-{if:end_time}
-  AND ALL(x in FILTER(x in nodes(p) WHERE last(labels(x)) = 'resource') WHERE x.end_time <= {end_time})
-{/if}
 
-WITH p, reduce(tfidf=toFloat(0), r in relationships(p)|tfidf + COALESCE(r.tfidf,0.0)) as tfidf
-RETURN extract( n IN nodes(p)| {
-  id: id(n),
-  type: last(labels(n)),
-  ghost: 1,
-  label: coalesce(n.name, n.title_en, n.title_fr)
-}) AS ns, relationships(p) as rels, tfidf, length(p) as lp
-ORDER BY length(p) ASC, tfidf DESC
-LIMIT {limit}
+// UNION
+// OPTIONAL MATCH (res:resource)
+//   WHERE res.uuid in {ids} 
+// WITH res
+// OPTIONAL MATCH (ent:entity)
+//   WHERE ent.uuid in {ids} 
+// WITH coalesce(res,ent) as n
+// OPTIONAL MATCH (res:resource)
+//   WHERE res.uuid in {ids} 
+// WITH n, res
+// OPTIONAL MATCH (ent:entity)
+//   WHERE ent.uuid in {ids} 
+// WITH n, coalesce(res,ent) as t
+// WHERE n <>t
+// WITH n,t
+// MATCH (n)-[r:appears_in*..2]-(t:{:entity})
+//   // top common nodes at distance 0 to 2
+// WITH t, count(DISTINCT r) as rr 
+// WHERE rr > 1
+// WITH t, rr
+// ORDER BY rr DESC
+// LIMIT 50
+//   // how do we reach top common nodes
+// MATCH p=allShortestPaths((n)-[r:appears_in*..2]-(t))
+// WHERE id(n) in {ids} AND id(n) <> id(t)
+// {if:type}
+//   AND ALL(x in FILTER(x in nodes(p) WHERE last(labels(x)) = 'resource') WHERE x.type in {type})
+// {/if}
+// {if:start_time}
+//   AND ALL(x in FILTER(x in nodes(p) WHERE last(labels(x)) = 'resource') WHERE x.start_time >= {start_time})
+// {/if}
+// {if:end_time}
+//   AND ALL(x in FILTER(x in nodes(p) WHERE last(labels(x)) = 'resource') WHERE x.end_time <= {end_time})
+// {/if}
+// 
+// WITH p, reduce(tfidf=toFloat(0), r in relationships(p)|tfidf + COALESCE(r.tfidf,0.0)) as tfidf
+// RETURN extract( n IN nodes(p)| {
+//   id: id(n),
+//   type: last(labels(n)),
+//   ghost: 1,
+//   label: coalesce(n.name, n.title_en, n.title_fr)
+// }) AS ns, relationships(p) as rels, tfidf, length(p) as lp
+// ORDER BY length(p) ASC, tfidf DESC
+// LIMIT {limit}
 
 
 // name: get_shortest_paths_graph

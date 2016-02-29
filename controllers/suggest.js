@@ -576,7 +576,7 @@ module.exports =  function(io){
         return helpers.formError(form.errors, res);
       
       query = parser.agentBrown(queries.get_all_in_between_graph, form.params);
-      
+      console.log(query, form.params)
       neo4j.query(query, form.params, function (err, paths) {
         if(err)
           return helpers.cypherQueryError(err, res);
@@ -585,11 +585,11 @@ module.exports =  function(io){
         for(var i=0, lp=paths.length; i < lp; i++){
           //for each nodes
           for(var j=0, ln=paths[i].ns.length; j < ln; j++)
-            if(!nodes[paths[i].ns[j].id]) {
-              nodes[paths[i].ns[j].id] = paths[i].ns[j]
-              nodes[paths[i].ns[j].id].degree=1
+            if(!nodes[paths[i].ns[j]._id]) {
+              nodes[paths[i].ns[j]._id] = paths[i].ns[j]
+              nodes[paths[i].ns[j]._id].degree=1
             } else {
-              nodes[paths[i].ns[j].id].degree++;
+              nodes[paths[i].ns[j]._id].degree++;
             }
           // for each relationship
           for(var j=0, lr=paths[i].rels.length; j < lr; j++) {
@@ -597,8 +597,8 @@ module.exports =  function(io){
             if(!edges[paths[i].rels[j].id])
               edges[paths[i].rels[j].id] = {
                 id: paths[i].rels[j].id,
-                source: paths[i].rels[j].start,
-                target: paths[i].rels[j].end,
+                source: nodes[paths[i].rels[j].start].id,
+                target: nodes[paths[i].rels[j].end].id,
                 weight: paths[i].rels[j].properties.frequency
               }
           }
