@@ -223,7 +223,7 @@ angular.module('histograph')
             return;
           }
           $scope.isLocked = true;
-          debugger
+          // debugger
           $log.log(':: reporter -> merge() -~> raiseIssue() type: merge - entity:', $scope.entity.props.name, '- with:',$scope.entity.alias.props.name);
           // merge two entities: add (or upvote the entity) and downvote the current entity
           $rootScope.raiseIssue($scope.entity, null, 'mergeable', $scope.entity.alias.id, function(){
