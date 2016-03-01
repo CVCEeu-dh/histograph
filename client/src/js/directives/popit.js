@@ -172,10 +172,6 @@ angular.module('histograph')
           });
         };
         
-        
-        
-        
-
         /*
           Position the gasp and show it
         */

@@ -7239,12 +7239,18 @@ g.note.manual .note-borders{
 }
 
 @media screen and (max-width: 992px) {
-  .entity #see-also, .resource #see-also{
+  .resource #see-also{
     width: 280px;
   }
 
-  .resource #perspective, .entity #perspective{
+  .resource #perspective{
     right: 300px;
+  }
+  .entity #perspective{
+    width: 360px;
+  }
+  .entity #see-also {
+    left: 360px;
   }
 }
 

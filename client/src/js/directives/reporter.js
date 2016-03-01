@@ -25,7 +25,7 @@ angular.module('histograph')
         showMore: '=', // boolean
         user: '=',        
         'entity': '=', // entity item Cfr. EntityCtrl
-        'resource': '=', // entity item Cfr. directive/popit
+        'resource': '=' // entity item Cfr. directive/popit
       },
 
       link: function($scope) {
@@ -351,7 +351,7 @@ angular.module('histograph')
         });
 
         socket.on('entity:downvote-related-resource:done', function (result) {
-          if($scope.entity && $scope.resource.id && result.resource.id == $scope.resource.id && result.data.id == $scope.entity.id){
+          if($scope.entity && $scope.resource && $scope.resource.id && result.resource.id == $scope.resource.id && result.data.id == $scope.entity.id){
             $log.info(':: reporter socket@entity:downvote-related-resource:done - by:', result.user, '- result:', result);
             $scope.entity.upvotes = result.data.rel.upvote || [];
             $scope.entity.downvotes = result.data.rel.downvote || [];
@@ -359,7 +359,7 @@ angular.module('histograph')
         });
 
         socket.on('entity:upvote-related-resource:done', function (result) {
-          if($scope.entity && $scope.resource.id && result.resource.id == $scope.resource.id && result.data.id == $scope.entity.id){
+          if($scope.entity && $scope.resource && $scope.resource.id && result.resource.id == $scope.resource.id && result.data.id == $scope.entity.id){
             $log.info(':: reporter socket@entity:upvote-related-resource:done - by:', result.user, '- result:', result);
             $scope.entity.upvotes = result.data.rel.upvote || [];
             $scope.entity.downvotes = result.data.rel.downvote || [];
@@ -367,7 +367,7 @@ angular.module('histograph')
         });
 
         socket.on('entity:merge-entity:done', function (result) {
-          if($scope.entity && $scope.resource.id && result.resource.id == $scope.resource.id && result.data.id == $scope.entity.id){
+          if($scope.entity && $scope.resource && $scope.resource.id && result.resource.id == $scope.resource.id && result.data.id == $scope.entity.id){
             $log.info(':: reporter entity:merge-entity:done - by:', result.user, '- result:', result);
             $scope.entity.upvotes = result.data.rel.upvote || [];
             $scope.entity.downvotes = result.data.rel.downvote || [];

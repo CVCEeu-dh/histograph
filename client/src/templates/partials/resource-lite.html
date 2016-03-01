@@ -25,7 +25,7 @@
 
     <span gasp-type="date" class="empty" gasp-parent="{{item.type}}-{{item.id}}" ng-if="!relatedItem.props.start_time">no date found</span>
     <span class='date' ng-if="relatedItem.props.start_time"> {{relatedItem.props|guessInterval}}</span>
-    <span ng-if='relatedItem.themes.length' class='tags'> — <i translate>resource.in_between</i>:
+    <span ng-if='relatedItem.matches.length' class='tags'> — <i translate>resource.in_between</i>:
       <span ng-repeat="mat in relatedItem.matches">
         <span class="tag match" data-id='{{mat.id}}' gasp-type='{{mat.type}}' gasp-parent='{{relatedItem.type}}-{{relatedItem.id}}'>{{mat.props.name}}</span>{{$last? '':  ', '}}
       </span>

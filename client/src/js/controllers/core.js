@@ -1332,7 +1332,7 @@ angular.module('histograph')
     });
     
     function onSocket(result) {
-      console.log('RelatedItemsCtrl @socket')
+      console.log('RelatedItemsCtrl @socket', result)
       for(var i=0, l=$scope.relatedItems.length; i < l; i++){
         if($scope.relatedItems[i].id == result.resource.id) {
           $scope.relatedItems[i] = result.data.related.resource
@@ -1346,6 +1346,8 @@ angular.module('histograph')
     */
     socket.on('entity:upvote-related-resource:done', onSocket);
     socket.on('entity:downvote-related-resource:done', onSocket);
+    socket.on('entity:merge-entity:done', onSocket);
+    
 
     // $scope.syncGraph();
     $log.log('RelatedItemsCtrl -> setRelatedItems - items', relatedItems.result.items);
