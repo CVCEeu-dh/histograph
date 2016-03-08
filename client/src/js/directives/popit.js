@@ -57,7 +57,8 @@ angular.module('histograph')
           var el      = $(e.target),
               type    = el.attr('gasp-type'),
               id      = el.attr('data-id'),
-              pos     = el.offset();
+              pos     = el.offset(),
+              parent  = el.attr('gasp-parent');
           // was there a prefious one?
           // if there is no type, it is like clicking on stage
           
@@ -65,20 +66,21 @@ angular.module('histograph')
           if(!type) { 
             hide();
             return;
-          }
-          if(scope.entity && scope.entity.id == id) {
-            showGasp(pos)
-            return;
-          } else if(scope.entity){
-            scope.entity = {
-              props: {
-                name: '...'
-              },
-              id: id,
-              type: type
-            };
-            scope.$apply();
-          }
+          };
+          // debugger
+          // if(scope.entity && scope.entity.id == id && (scope.parent && )) {
+          //   showGasp(pos)
+          //   return;
+          // } else if(scope.entity){
+          //   scope.entity = {
+          //     props: {
+          //       name: '...'
+          //     },
+          //     id: id,
+          //     type: type
+          //   };
+          //   scope.$apply();
+          // }
           
           $log.info(':: popit -> toggle() for type:', type, el)
           
@@ -93,15 +95,16 @@ angular.module('histograph')
 
           scope.isUnknown = false;
           // if id is the same of previous Id, ndo not need to recalculate things
-          if(id == _pId) { 
+          if(id == _pId && !parent) { 
             showGasp(pos);
             return;
           }
 
+          $log.info(':: popit -> toggle() reload')
+
           scope.isReady = false;
 
-          var parent  = el.attr('gasp-parent'),
-              tooltip = el.attr('gasp-tip'),
+          var tooltip = el.attr('gasp-tip'),
               removable = el.attr('gasp-removable'),
               creator   = el.attr('gasp-creator'),
               upvotes   = el.attr('gasp-upvotes'),
@@ -136,7 +139,9 @@ angular.module('histograph')
           scope.entity  = {
             type: type,
             id: id,
-
+            props: {
+                name: '...'
+              },
           };
 
           
@@ -157,6 +162,7 @@ angular.module('histograph')
           scope.$apply();
           // set the id
           _pId = id;
+
 
           // show gasp item
           showGasp(pos);
