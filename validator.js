@@ -148,7 +148,7 @@ module.exports = {
       field: 'with',
       check: 'matches',
       args: [
-        /[\da-z\-][\d,a-z\-]+/
+        /[\dA-Za-z\-_][\d,A-Za-z\-_]+/
       ],
       error: 'with should contain only numbers and commas, at least one'
     },
@@ -183,7 +183,7 @@ module.exports = {
       field: 'id',
       check: 'matches',
       args: [
-        /[\d,a-z\-]+/
+        /[\d,a-zA-Z\-_]+/
       ],
       error: 'id not valid'
     },
@@ -199,7 +199,7 @@ module.exports = {
       field: 'center',
       check: 'matches',
       args: [
-        /[\da-z\-]+/
+        /[\da-zA-Z\-_]+/
       ],
       error: 'center should be a valid integer id'
     },
@@ -207,7 +207,7 @@ module.exports = {
       field: 'ids',
       check: 'matches',
       args: [
-        /[\da-z\-][\d,a-z\-]+/
+        /[\da-zA-Z\-_][\d,a-zA-Z\-_]+/
       ],
       error: 'ids should contain only numbers and commas'
     },
@@ -215,7 +215,7 @@ module.exports = {
       field: 'with',
       check: 'matches',
       args: [
-        /[\da-z\-][\d,a-z\-]+/
+        /[\da-zA-Z\-_][\d,a-zA-Z\-_]+/
       ],
       error: 'with should contain only numbers and commas'
     },

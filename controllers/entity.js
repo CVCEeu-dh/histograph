@@ -39,7 +39,7 @@ __solutions[Action.ISSUE_CHECK_CAN_MERGE] = {
   field: 'solution',
   check: 'matches',
   args: [
-    /\d[\d,]+/
+    /[\da-zA-Z\-_][\da-zA-Z\-_,]+/
   ],
   error: 'wrong value for solution'
 };
@@ -51,7 +51,7 @@ function _relatedIssueForm(req) {
             field: 'mentioning',
             check: 'matches',
             args: [
-              /\d[\d,]+/
+              /[\da-zA-Z\-_][\da-zA-Z\-_,]+/
             ],
             error: 'mention should contain only numbers and commas'
           },
