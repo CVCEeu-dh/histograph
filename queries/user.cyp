@@ -310,9 +310,9 @@ DELETE  n, r
 
 
 // name: get_related_resources_graph
-// bipartite graph of related resoruces and entities in between
-MATCH (u:user {uuid: {id}})-[r]-(res:resource){if:with}<-[:appears_in]-(ent){/if}
-  WHERE u:user
+// bipartite graph of related resoruces and entities in between PROFILE MATCH (u:user {uuid: 'N1srS9_vnx'})-[r:likes|curates]-(res:resource) RETURN res
+MATCH (u:user {uuid: {id}})-[r:likes|curates]->(res:resource){if:with}<-[:appears_in]-(ent:entity){/if}
+WHERE u:user
   {if:mimetype}
     AND res.mimetype IN {mimetype}
   {/if}
@@ -329,27 +329,25 @@ MATCH (u:user {uuid: {id}})-[r]-(res:resource){if:with}<-[:appears_in]-(ent){/if
     AND id(ent) in {with}
   {/if}
 WITH res
-MATCH (ent:entity)-[r:appears_in]->(res)
-WITH res, r, ent
-ORDER BY r.tfidf DESC
-WITH ent, collect(DISTINCT res) as resources
-WITH ent, resources, length(resources) as weight
-WHERE weight > 1
-WITH ent, resources
-UNWIND resources as res
-MATCH p=(res)-[r:appears_in]-(ent)
+MATCH (entA:person)-[r1:appears_in]->(res)<-[r2:appears_in]-(entB:person)
+WHERE id(entA) < id(entB) AND r1.score > -1 AND r2.score > -1 AND entA.score > -1 AND entB.score > -1
+WITH entA, entB, count(res) as w, min(r1.tf + r2.tf) as minf
+WHERE w > 1
+WITH entA, entB, w, minf
+ORDER BY w DESC, minf DESC
+LIMIT 500
 return{
   source: {
-    id: res.uuid,
-    type: 'resource',
-    label: COALESCE(res.name, res.title_en, res.title_fr)
+    id: entA.uuid,
+    type: last(labels(entA)),
+    label: COALESCE(entA.name, entA.title_en, entA.title_fr)
   },
   target: {
-    id: ent.uuid,
-    type: last(labels(ent)),
-    label: COALESCE(ent.name, ent.title_en, ent.title_fr)
+    id: entB.uuid,
+    type: last(labels(entB)),
+    label: COALESCE(entB.name, entB.title_en, entB.title_fr)
   },
-  weight: r.frequency
+  weight: w
 }
 
 
