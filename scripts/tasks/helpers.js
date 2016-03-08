@@ -20,7 +20,7 @@ module.exports = {
     uuid: function(options, callback) {
       console.log(clc.yellowBright('\n   tasks.helpers.utils.uuid'));
 
-      neo4j.query('MATCH (n) WHERE not(has(n.uuid)) RETURN count(n) as total_count', function(err, results) {
+      neo4j.query('MATCH (n) WHERE size(n.uuid) > 24 RETURN count(n) as total_count', function(err, results) {
         if(err) {
           callback(err);
           return;
@@ -31,7 +31,7 @@ module.exports = {
 
           console.log('    set uuid ', uuid,'for:', n, 'of', results[0].total_count)
           
-          neo4j.query('MATCH (n) WHERE not(has(n.uuid)) WITH n LIMIT 1 SET n.uuid = {uuid} RETURN n', {
+          neo4j.query('MATCH (n) WHERE size(n.uuid) > 24 WITH n LIMIT 1 SET n.uuid = {uuid} RETURN n', {
             uuid: uuid
           }, function(err, results){
             if(err)
