@@ -375,6 +375,9 @@ module.exports = {
   csv: {
     stringify: function(options, callback) {
       console.log(clc.yellowBright('\n   tasks.helpers.csv.stringify'));
+      if(!options.filepath) {
+        return callback(' Please specify the output csv file path with --filepath=path/to/source.tsv');
+      }
       csv.stringify(options.records, {
         delimiter: options.delimiter || '\t',
         columns:   options.fields,
@@ -386,6 +389,8 @@ module.exports = {
             callback(err);
             return
           }
+          console.log(clc.blackBright('   file created successfully:', clc.cyanBright(options.filepath), 'containing', clc.magentaBright(options.records.length),'records'));
+        
           callback(null, options);
         })
       });
@@ -407,6 +412,7 @@ module.exports = {
           return;
         }
         console.log(clc.blackBright('   parsing csv file completed,', clc.magentaBright(data.length), 'records found'));
+        console.log(clc.blackBright('   e.g:'), _.take(data,2));
         options.data = data;
         callback(null, options);
       });
