@@ -29,6 +29,10 @@ CREATE CONSTRAINT ON (ver:version) ASSERT ver.uuid IS UNIQUE
 // create index on start date to group / filter result by timestamp
 CREATE INDEX ON :resource(start_time)
 
+// name: create_index_on_last_modification_time
+// create index on start date to group / filter result by timestamp
+CREATE INDEX ON :resource(last_modification_time)
+
 // name: create_index_on_start_month
 // create index on start date to group / filter result by date
 CREATE INDEX ON :resource(start_month)
