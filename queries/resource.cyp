@@ -131,7 +131,7 @@ WITH res
 ORDER BY {:orderby}
 {/if}
 {unless:orderby}
-ORDER BY res.start_time DESC
+ORDER BY res.last_modification_time DESC
 {/unless}
 SKIP {offset} 
 LIMIT {limit}

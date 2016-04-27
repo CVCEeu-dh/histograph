@@ -1001,7 +1001,7 @@ angular
       */    
       .state('neighbors', {
         abstract: true,
-        url: '/neighbors/{ids:[0-9,a-z-]+}',
+        url: '/neighbors/{ids:[0-9,A-Z_a-z-]+}',
         templateUrl: 'templates/neighbors.html',
         controller: 'NeighborsCtrl',
         grammar: {
