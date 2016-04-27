@@ -1078,7 +1078,7 @@ module.exports = {
               if(!yaml[ent.context[i].language])
                 yaml[ent.context[i].language] = [];
               yaml[ent.context[i].language].push({
-                id: entity.id,
+                id: entity.uuid,
                 context: {
                   left: ent.context[i].left,
                   right: ent.context[i].right
