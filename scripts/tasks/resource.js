@@ -13,7 +13,7 @@ var settings  = require('../../settings'),
     Resource  = require('../../models/resource'),
     Entity    = require('../../models/entity');
 
-module.exports = {
+var task = {
   
   getMany: function(options, callback) {
     console.log(clc.yellowBright('\n   tasks.resource.getMany'));
@@ -506,7 +506,7 @@ module.exports = {
   // },
   
   discoverMany: function(options, callback) {
-    console.log(clc.yellowBright('\n   tasks.resource.discover'));
+    console.log(clc.yellowBright('\n   tasks.resource.discoverMany'));
     
     var queue = async.waterfall([
       // get pictures and documents having a caption
@@ -714,3 +714,5 @@ module.exports = {
 
   }
 }
+
+module.exports = task
