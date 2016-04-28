@@ -543,11 +543,12 @@ module.exports =  function(io){
         if(err)
           return helpers.cypherQueryError(err, res);
         
-        Resource.getByIds(_.assign({}, form.params, {
-          ids: _.map(results.items, 'id')
-        }), function (err, items){
-          helpers.models.getMany(err, res, items, results.count_items, form.params);
-        });
+        helpers.models.getMany(err, res, results.items, results.count_items, form.params); 
+        // Resource.getByIds(_.assign({}, form.params, {
+        //   ids: _.map(results.items, 'id')
+        // }), function (err, items){
+        //   helpers.models.getMany(err, res, items, results.count_items, form.params);
+        // });
         
       });
     },
@@ -576,42 +577,32 @@ module.exports =  function(io){
         return helpers.formError(form.errors, res);
       
       query = parser.agentBrown(queries.get_all_in_between_graph, form.params);
-      
-      neo4j.query(query, form.params, function (err, paths) {
+
+      helpers.cypherGraph(query, form.params, function (err, graph) {
         if(err)
           return helpers.cypherQueryError(err, res);
-        // console.log(paths)
-        // for each path
-        for(var i=0, lp=paths.length; i < lp; i++){
-          //for each nodes
-          for(var j=0, ln=paths[i].ns.length; j < ln; j++)
-            if(!nodes[paths[i].ns[j].id]) {
-              nodes[paths[i].ns[j].id] = paths[i].ns[j]
-              nodes[paths[i].ns[j].id].degree=1
-            } else {
-              nodes[paths[i].ns[j].id].degree++;
-            }
-          // for each relationship
-          for(var j=0, lr=paths[i].rels.length; j < lr; j++) {
-            // console.log(paths[i].rels[j])
-            if(!edges[paths[i].rels[j].id])
-              edges[paths[i].rels[j].id] = {
-                id: paths[i].rels[j].id,
-                source: paths[i].rels[j].start,
-                target: paths[i].rels[j].end,
-                weight: paths[i].rels[j].properties.frequency
-              }
-          }
-        }
-        
         return res.ok({
-          graph: {
-            nodes: _.values(nodes),
-            edges: _.values(edges)
-          }
+          graph: graph
         });
-      })
-      
+      });
+    },
+
+    getAllInBetweenTimeline: function(req, res) {
+      var form = validator.request(req);
+
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+
+      helpers.cypherTimeline(queries.get_all_in_between_timeline, form.params, function (err, timeline) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        else
+          return res.ok({
+              timeline: timeline
+            }, {
+              params: form.params
+            });
+      });
     },
 
     /*

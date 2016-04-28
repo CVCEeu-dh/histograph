@@ -66,7 +66,7 @@ module.exports = {
           services: properties.services,
           languages: properties.languages,
           frequency: properties.frequency || 1,
-          resource_id: properties.resource.id,
+          resource_id: properties.resource.uuid,
           username: properties.username,
           name_search: properties.name_search || properties.name.toLowerCase()
         }),
@@ -255,10 +255,14 @@ module.exports = {
       
 
       // 2. UPVOTE RELATIONSHIP
+      // guarantee that there are unique username in both set of upvoters and downvoters
       result.rel.properties.upvote = _.unique((result.rel.properties.upvote || []).concat([user.username]));
       if(result.rel.properties.downvote && !!~result.rel.properties.downvote.indexOf(user.username)) {
         _.remove(result.rel.properties.downvote, function(d) {return d==user.username});
       }
+      // 2b. calculate score for the relationship
+      result.rel.properties.score =  result.rel.properties.upvote.length - (result.rel.properties.downvote|| []).length;
+      result.rel.properties.celebrity =  result.rel.properties.upvote.length + (result.rel.properties.downvote|| []).length;
 
       // 3.  
       // download the updated version for the given resource

@@ -166,7 +166,7 @@ angular.module('histograph')
     Search & Suggest
   */
   .factory('SuggestFactory', function ($resource) {
-    return $resource('/api/suggest/:m/:ids/:model', {}, {
+    return $resource('/api/suggest/:m/:ids/:model/:viz', {}, {
       getVIAF: {
         method: 'GET',
         params: {

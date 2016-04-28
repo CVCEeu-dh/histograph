@@ -453,7 +453,6 @@ LIMIT {limit}
 
 // name: get_related_entities_graph
 // monopartite graph of entities
-PROFILE 
 MATCH (n:entity {uuid: {id}})-[r:appears_in]->(t:resource)
   WHERE r.score > -1
   {if:start_time}
@@ -476,8 +475,9 @@ WITH t
 {/if}
 MATCH (p1:{:entity})-[:appears_in]->(t)<-[:appears_in]-(p2:{:entity})
 WHERE id(p1) > id(p2) 
-WITH p1, p2, min(p1.score) as min_score,
-count(t) as w WITH p1,p2,min_score,w ORDER BY min_score DESC, w DESC
+WITH p1, p2, count(t) as w 
+WITH p1, p2, w
+ORDER BY w DESC
 LIMIT {limit} RETURN {
   source: { 
     id: p1.uuid, 

@@ -239,7 +239,7 @@ angular.module('histograph')
                 play: 0
               },
             
-            scale = d3.scale.sqrt()
+            scale = d3.scale.linear()
               .domain([0,100])
               .range(['#d4d4d4', '#000000']);
         

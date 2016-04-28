@@ -2,7 +2,7 @@
   A bunch of useful functions
 */
 var fs       = require('fs'),
-    uuid     = require('uuid'),
+    shortid  = require('shortid'),
     path     = require('path'),
     async    = require('async'),
     crypto   = require('crypto'),
@@ -875,7 +875,7 @@ module.exports = {
   },
 
   uuid: function(){
-    return uuid.v1();
+    return shortid.generate();
   },
 
   /*

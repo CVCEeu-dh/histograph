@@ -46,7 +46,7 @@ module.exports = {
     var q = async.queue(function (cluster, nextCluster) {
       console.log('    cluster:', clc.cyanBright(cluster.links_wiki));
       var ids = _.map(cluster.entities, 'id'),
-          the_id = _.get(_.first(_.sortByOrder(_.filter(cluster.entities, 'df'), ['df'],['desc'])), 'id'),// index with most df will take all
+          the_id = _.get(_.first(_.orderBy(_.filter(cluster.entities, 'df'), ['df'],['desc'])), 'id'),// index with most df will take all
           labels = _.unique(_.map(cluster.entities, 'label'));
       console.log(clc.blackBright('    most important id:', clc.cyanBright(the_id)))
       if(!ids || ids.length == 0) {

@@ -20,7 +20,7 @@ module.exports = {
     uuid: function(options, callback) {
       console.log(clc.yellowBright('\n   tasks.helpers.utils.uuid'));
 
-      neo4j.query('MATCH (n) WHERE not(has(n.uuid)) RETURN count(n) as total_count', function(err, results) {
+      neo4j.query('MATCH (n) WHERE size(n.uuid) > 24 RETURN count(n) as total_count', function(err, results) {
         if(err) {
           callback(err);
           return;
@@ -31,7 +31,7 @@ module.exports = {
 
           console.log('    set uuid ', uuid,'for:', n, 'of', results[0].total_count)
           
-          neo4j.query('MATCH (n) WHERE not(has(n.uuid)) WITH n LIMIT 1 SET n.uuid = {uuid} RETURN n', {
+          neo4j.query('MATCH (n) WHERE size(n.uuid) > 24 WITH n LIMIT 1 SET n.uuid = {uuid} RETURN n', {
             uuid: uuid
           }, function(err, results){
             if(err)
@@ -375,6 +375,9 @@ module.exports = {
   csv: {
     stringify: function(options, callback) {
       console.log(clc.yellowBright('\n   tasks.helpers.csv.stringify'));
+      if(!options.filepath) {
+        return callback(' Please specify the output csv file path with --filepath=path/to/source.tsv');
+      }
       csv.stringify(options.records, {
         delimiter: options.delimiter || '\t',
         columns:   options.fields,
@@ -386,6 +389,8 @@ module.exports = {
             callback(err);
             return
           }
+          console.log(clc.blackBright('   file created successfully:', clc.cyanBright(options.filepath), 'containing', clc.magentaBright(options.records.length),'records'));
+        
           callback(null, options);
         })
       });
@@ -407,6 +412,7 @@ module.exports = {
           return;
         }
         console.log(clc.blackBright('   parsing csv file completed,', clc.magentaBright(data.length), 'records found'));
+        console.log(clc.blackBright('   e.g:'), _.take(data,2));
         options.data = data;
         callback(null, options);
       });

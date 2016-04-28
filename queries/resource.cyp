@@ -131,7 +131,7 @@ WITH res
 ORDER BY {:orderby}
 {/if}
 {unless:orderby}
-ORDER BY res.start_time DESC
+ORDER BY res.last_modification_time DESC
 {/unless}
 SKIP {offset} 
 LIMIT {limit}
@@ -637,7 +637,7 @@ WITH res
 {unless:with}
 MATCH (p1:{:entity})-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:{:entity})
 {/unless}
-  WHERE id(p1) < id(p2) AND p1.status = 1 AND p2.status = 1 AND p1.common AND p2.common
+  WHERE id(p1) < id(p2) AND r1.score > -1 AND r2.score > -1 AND p1.score > -1 AND p2.score > -1
   {if:start_time}
     AND res.start_time >= {start_time}
   {/if}

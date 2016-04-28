@@ -171,11 +171,9 @@ angular.module('histograph')
                 scope.fill([res.result.item]);
             });
           } else if(itemsIdsToLoad.length > 0){
-
-            SuggestFactory.getUnknownNodes({
-              ids: itemsIdsToLoad
+            EntityFactory.get({
+              id: itemsIdsToLoad
             }, function (res) {
-              
               if(res.result && res.result.items.length)
                 scope.fill(res.result.items);
                 // load in between

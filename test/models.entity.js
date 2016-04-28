@@ -281,6 +281,8 @@ describe('model:entity upvote downvote and create relationship', function() {
       should.not.exist(err);
       should.equal(result.related.resource.id, __resource.id)
       should.equal(result.rel.created_by, __user.username);
+      // get points
+      should.equal(result.rel.score, result.rel.upvote.length);
       done();
     })
   });

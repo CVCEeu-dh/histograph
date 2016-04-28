@@ -44,6 +44,21 @@
           </div>
           {{!$last? ' OR ': ''}}
         </span>
+
+        <span ng-if="filters.from">
+          &nbsp;{{grammar.connector.from}}&nbsp;
+        
+          <span ng-repeat='filter in filters.from'>
+            <span class="filter "><b>{{filter}}</b><span ng-click='removeFilter("from",filter)'>&nbsp;<i class="fa fa-times-circle"></i></span></span>
+          </span>
+        </span>
+        
+        <span ng-if="filters.to">
+          &nbsp;{{grammar.connector.to}}&nbsp;
+          <span ng-repeat='filter in filters.to'>
+            <span class="filter"><b>{{filter}}</b><span ng-click='removeFilter("to",filter)'>&nbsp;<i class="fa fa-times-circle"></i></span></span>
+          </span>
+        </span>
       </div>
     </li>
   </ul>
