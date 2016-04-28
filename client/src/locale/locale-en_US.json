@@ -169,6 +169,8 @@
   "resource.type.video": "video",
   "resource.type.schema": "diagram",
   "resource.type.table": "table",
+  "resource.type.tweet":"tweet",
+  "resource.type.instagram":"instagram",
 
   "placeholder.search": "search ...",
   "placeholder.search.entity": "search {{type}}",

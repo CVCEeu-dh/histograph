@@ -677,7 +677,7 @@ module.exports = {
         2. verify that the languages have been assigned to the resource.
       
       */
-      function checkLanguages(resource, callback) { console.log(clc.whiteBright('   checking languages'));
+      function checkLanguages(resource, callback) { console.log(clc.whiteBright('   checking languages'), 'resource:', resource.id,'uuid:', resource.uuid);
         if(resource.languages) {
           callback(null, resource);
           return;
@@ -717,7 +717,7 @@ module.exports = {
       /*
         2.B check slug and name according to avaialbe fields
       */
-      function checkSlug(resource, callback) { console.log(clc.whiteBright('   checking slug'));
+      function checkSlug(resource, callback) { console.log(clc.yellowBright('   checking slug'));
         if(!_.isEmpty(resource.slug) && !_.isEmpty(resource.name)) {
           callback(null, resource);
           return;

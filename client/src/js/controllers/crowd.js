@@ -110,5 +110,5 @@ angular.module('histograph')
     
 
     $log.debug('CrowdCtrl ready');
-    $scope.start();
+    // $scope.start();
   });

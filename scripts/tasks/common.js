@@ -45,7 +45,8 @@ module.exports = {
       
       var neo4j     = require('seraph')(settings.neo4j.host),
           queries   = require('decypher')('./queries/' + path[0] + '.cyp'),
-          parser    = require('../../helpers/parser'),
+          helpers   = require('../../helpers'),
+          parser    = require('../../parser'),
           query;
       
       if(!queries[path[1]]) {
@@ -76,7 +77,7 @@ module.exports = {
       
       // enrich options with timestamp (always useful though)
       if(!options.exec_time || !options.exec_date){
-        var now = require('../../helpers/utils').now();
+        var now = helpers.now();
         options.exec_time = now.time;
         options.exec_date = now.date;
       }
