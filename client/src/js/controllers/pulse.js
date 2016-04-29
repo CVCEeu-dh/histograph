@@ -28,7 +28,7 @@ angular.module('histograph')
         method: 'pulsations'
       }, function(res) {
         $log.log('PulseController->ping() received:', res);
-        $scope.pulsations = res.info.total_items;
+        $scope.pulsations = res.info[0].total_items;
       })
       //if(message.user != $scope.user.username)
     };
