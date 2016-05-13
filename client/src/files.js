@@ -81,11 +81,13 @@ module.exports = {
       '/js/controllers/collection.js',
       '/js/controllers/crowd.js',
       '/js/controllers/entity.js',
+      '/js/controllers/geo.js',
       '/js/controllers/graph.js',
       '/js/controllers/guided-tour.js',
       '/js/controllers/index.js',
       '/js/controllers/inquiry.js',
       '/js/controllers/issue.js',
+
       '/js/controllers/neighbors.js',
       '/js/controllers/projection.js', 
       '/js/controllers/pulse.js',
@@ -100,7 +102,8 @@ module.exports = {
 
 
       '/js/directives/annotator.js', 
-      '/js/directives/annotorious.js', 
+      '/js/directives/annotorious.js',
+      '/js/directives/geo.js',
       '/js/directives/sigma.js',  
       '/js/directives/snippets.js', 
       '/js/directives/timeline.js',

@@ -155,6 +155,20 @@ angular
         controller: 'IndexCtrl',
         reloadOnSearch: false,
       })
+
+      .state('geo', {
+        url: '/geo',
+        templateUrl: 'templates/geo.html',
+        controller: 'GeoCtrl',
+        reloadOnSearch: false,
+        resolve:{
+          points: function(VisualizationFactory, $location) {
+            return VisualizationFactory.geo($location.search()).then(function(res){
+              return res.data.result.items
+            });
+          }
+        }
+      })
       
       .state('explore', {
         url: '/',

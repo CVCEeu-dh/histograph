@@ -50,9 +50,15 @@ angular.module('histograph')
         return $http.get('/api/resource/' +viz, {
           params: options
         });
+      },
+      geo: function(params){
+        return $http.get('/api/geo', {
+          params: params
+        })
       }
     };
   })
+
   /*
     Add a comment to a resource
     DEPRECATED
