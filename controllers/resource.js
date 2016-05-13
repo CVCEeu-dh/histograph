@@ -706,14 +706,17 @@ module.exports = function(io){
     */
     getGeo: function(req, res){
       var form = validator.request(req);
+      
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       Resource.getGeo(form.params, function (err, items, info) {
+
         if(err)
-          return helpers.cypherQueryError(err, res);
-        return res.ok({
+          helpers.cypherQueryError(err, res);
+        else
+          res.ok({
           items: items
-        }, info);
+          }, info);
       })
     },
     

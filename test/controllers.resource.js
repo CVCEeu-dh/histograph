@@ -369,6 +369,18 @@ describe('controller:resource (related resources)', function() {
       });
   });
 
+  it('should return the map data', function(done){
+    session
+      .get('/api/geo')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        
+        should.not.exist(err);
+        should.exist(res.body.result.items)
+        done();
+      })
+  })
 })
 
 

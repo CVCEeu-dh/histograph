@@ -1126,7 +1126,7 @@ RETURN {
 MATCH (loc:location)-[r:appears_in]->(res:resource)
 WHERE has(loc.lat)
 WITH loc, count(res) as df
-ORDER BY df DESC
+ORDER BY df DESC LIMIT 10
 RETURN {
   id: loc.uuid,
   lat: loc.lat,
