@@ -1084,13 +1084,13 @@ module.exports = {
               q.kill();
               return callback(err);
             }
-           
+            console.log(entity)
             
             for(var i in ent.context) {
               if(!yaml[ent.context[i].language])
                 yaml[ent.context[i].language] = [];
               yaml[ent.context[i].language].push({
-                id: entity.uuid,
+                id: entity.props.uuid,
                 context: {
                   left: ent.context[i].left,
                   right: ent.context[i].right
