@@ -74,7 +74,7 @@ var getCacheName = function(req) {
 var sessionMiddleware = session({
   name: 'hg.sid',
   secret: settings.secret.cookie,
-  trustProxy: false,
+  // trustProxy: false,
   resave: true,
   saveUninitialized: true
 })
@@ -578,6 +578,9 @@ apiRouter.route('/resource/:id([\\da-zA-Z_\\-]+)/related/resource/timeline')
 apiRouter.route('/cooccurrences/:entityA(person|theme|location|place|organization)/related/:entityB(person|theme|location|place|organization)') // @todo move to entity controller.
   .get(ctrl.resource.getCooccurrences)
 // apiRouter.route('/resource/related/:entity(person|location|organization|theme)/graph')
+
+apiRouter.route('/geo') //
+  .get(ctrl.resource.getGeo);
 
 /*
 

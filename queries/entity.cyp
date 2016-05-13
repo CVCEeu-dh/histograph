@@ -133,6 +133,9 @@ ON CREATE SET
   {if:lng}
     ent.lng         = {lng},
   {/if}
+  {if:fcl}
+    ent.fcl         = {fcl},
+  {/if}
   {if:country}
     ent.country         = {country},
   {/if}
@@ -181,6 +184,9 @@ ON MATCH SET
   {/if}
   {if:lng}
     ent.lng         = {lng},
+  {/if}
+  {if:fcl}
+    ent.fcl         = {fcl},
   {/if}
   {if:country}
     ent.country         = {country},

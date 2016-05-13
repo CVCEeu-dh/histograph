@@ -638,7 +638,18 @@ module.exports = {
       // console.log(options, d, d + '_' + options.language)
       return resource[d + '_' + options.language] || '';
     })).join('. ');
-  },   
+  }, 
+
+
+  /*
+    Call geo query, return a list of location
+    (accept resource filters)
+  */  
+  getGeo: function(params, next){
+    var query = parser.agentBrown(rQueries.get_geo, params);
+    neo4j.query(query, params, next);
+    
+  },
   
   /*
     The long chain of the discovery.
@@ -1049,6 +1060,7 @@ module.exports = {
             additionalProperties = {
               lat: ent.lat,
               lng: ent.lng,
+              fcl: ent.fcl,
               country: ent.country,
               geoname_id: ent.geoname_id,
               geoname_fcl: ent.geoname_fcl,

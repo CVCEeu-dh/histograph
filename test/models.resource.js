@@ -84,6 +84,7 @@ describe('model:resource ', function() {
   
   it('should create a relationship with an entity', function (done) {
     Resource.createRelatedEntity(__resourceA, generator.entity.social_group(), function (err, entity) {
+      should.not.exist(err);
       __social_group = entity;
       should.equal(__social_group.rel.end, __resourceA.props.id)
       done();
@@ -240,6 +241,7 @@ describe('model:resource ', function() {
     }, function (err, items, info) {
       if(err)
         console.log(err);
+      should.not.exist(err)
       // console.log(__social_group.id, items[1],info.total_items)
       should.exist(items[0]) // at least one item have to be here
       should.exist(items.length)
@@ -268,6 +270,14 @@ describe('model:resource ', function() {
   it('should return the timeline of resources', function (done) {
     Resource.getTimeline({}, function (err, res) {
       should.not.exist(err);
+      done()
+    })
+  })
+
+  it('should return the geographical map of resources', function (done) {
+    Resource.getGeo({}, function (err, items) {
+      should.not.exist(err);
+      console.log(_.take(items, 2))
       done()
     })
   })

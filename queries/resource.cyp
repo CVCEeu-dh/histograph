@@ -1119,3 +1119,19 @@ RETURN {
   performed_by: alias_u,
   mentioning: mentioning
 }
+
+
+// name: get_geo
+// get map
+MATCH (loc:location)-[r:appears_in]->(res:resource)
+WHERE has(loc.lat)
+WITH loc, count(res) as df
+ORDER BY df DESC
+RETURN {
+  id: loc.uuid,
+  lat: loc.lat,
+  lng: loc.lng,
+  fcl: loc.fcl,
+  name: loc.name,
+  w: df
+}

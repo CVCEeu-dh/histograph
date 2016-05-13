@@ -553,7 +553,7 @@ var task = {
             neo4j.save(res, function (err, n) {
               if(err)
                 throw err;
-              console.log('node', n.id, clc.cyanBright('saved'))
+              console.log('node', n.id, n.uuid, clc.cyanBright('saved'))
               console.log(clc.blackBright('waiting for the next resource ... remaining:', clc.white.bgMagenta(q.length())))
               setTimeout(nextNode, 1675);
             })

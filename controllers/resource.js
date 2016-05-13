@@ -700,6 +700,22 @@ module.exports = function(io){
         return res.ok({items: items}, info);
       })
     },
+
+    /*
+      get the geopoints.
+    */
+    getGeo: function(req, res){
+      var form = validator.request(req);
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      Resource.getGeo(form.params, function (err, items, info) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({
+          items: items
+        }, info);
+      })
+    },
     
     /*
       remap neo4j items to nice resource objects
