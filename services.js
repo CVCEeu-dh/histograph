@@ -150,7 +150,7 @@ module.exports = {
         }
         if(body.error) { // lanugage etc... just ignore, but print it
           console.log('IGNORE ERROR', body)
-          next(null, []);
+          next(err);
           return
         }
         if(!body.response) {
