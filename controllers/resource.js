@@ -599,6 +599,27 @@ module.exports = function(io){
         });
       });
     },
+
+    getElastic: function (req, res) {
+      var form = validator.request(req, {
+            limit: 100,
+            offset: 0,
+            entity: 'entity'
+          });
+
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      Resource.getElastic(form.params, function (err, items) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({
+          facets: items
+        }, {
+          params: form.params
+        });
+      });
+    },
     
     getRelatedResourcesTimeline: function (req, res) {
       var form = validator.request(req, {

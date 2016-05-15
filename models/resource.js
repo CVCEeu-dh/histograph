@@ -605,7 +605,7 @@ module.exports = {
   /*
     Return the related entities facets acoording to a specific entity type (neo4j label)
   */
-  facetRelatedEntities: function(params, next){
+  getElastic: function(params, next){
     _.assign(params, {
       entity: params.entity || 'entity',
       limit: +params.limit || 100,

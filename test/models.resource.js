@@ -303,7 +303,7 @@ describe('model:resource ', function() {
   })
 
   it('should return the facet for label "person"', function(done){
-    Resource.facetRelatedEntities({
+    Resource.getElastic({
       entity: 'person'
     }, function(err, facets){
       should.not.exist(err);
