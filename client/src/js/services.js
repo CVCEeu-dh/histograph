@@ -51,7 +51,7 @@ angular.module('histograph')
           params: options
         });
       },
-      geo: function(params){
+      geo: function(params) {
         return $http.get('/api/geo', {
           params: params
         })

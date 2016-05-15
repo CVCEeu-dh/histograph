@@ -172,6 +172,12 @@
   "resource.type.tweet":"tweet",
   "resource.type.instagram":"instagram",
 
+  "elastic.type.entity": "overall",
+  "elastic.type.person": "people",
+  "elastic.type.theme": "themes",
+  "elastic.type.location": "locations",
+  "elastic.type.place": "with geotag",
+
   "placeholder.search": "search ...",
   "placeholder.search.entity": "search {{type}}",
   "placeholder.search.everything": "search person, location ...",

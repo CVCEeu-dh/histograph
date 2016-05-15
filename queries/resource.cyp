@@ -100,38 +100,36 @@ RETURN {
 
 // name: get_resources
 // get resources with number of comments, if any
-MATCH (res:resource)
-{if:with}
+{if:ids}
+  MATCH (res:resource)
+  WHERE res.uuid IN {ids}
   WITH res
+{/if}
+{unless:ids}
+  MATCH (res:resource)
+{/unless}
+{?res:start_time__gt}
+{AND?res:end_time__lt}
+{AND?res:type__in}
+WITH res
+{if:with}
   MATCH (res)<-[:appears_in]-(ent:entity)
   WHERE ent.uuid IN {with}
+  WITH res, count(ent) as strict
+  WHERE strict = size({with})
+  WITH res
+{/if}
+{if:without}
+  OPTIONAL MATCH  (res)<-[r:appears_in]-(ent:entity)
+  WHERE ent.uuid IN {without}
+  WHERE r is null
   WITH DISTINCT res
 {/if}
-WHERE res:resource
-{if:ids}
-  AND res.uuid IN {ids}
-{/if}
-{if:start_time}
-  AND res.start_time >= {start_time}
-{/if}
-{if:end_time}
-  AND res.end_time >= {end_time}
-{/if}
-{if:type}
-  AND res.type IN {type}
-{/if}
-{if:mimetype}
-  AND res.mimetype IN {mimetype}
-{/if}
-
-
-WITH res
-
 {if:orderby}
 ORDER BY {:orderby}
 {/if}
 {unless:orderby}
-ORDER BY res.last_modification_time DESC
+ORDER BY res.start_time DESC
 {/unless}
 SKIP {offset} 
 LIMIT {limit}
@@ -209,17 +207,31 @@ ORDER BY resource.props.start_time ASC
 
 // name: count_resources
 // count resources having a version, with current filters
-MATCH (res:resource)
-{if:with}
+{if:ids}
+  MATCH (res:resource)
+  WHERE res.uuid IN {ids}
   WITH res
-  MATCH (res)<-[:appears_in]-(ent)
-  WHERE ent.uuid IN {with}
 {/if}
-WITH DISTINCT res
+{unless:ids}
+  MATCH (res:resource)
+{/unless}
 {?res:start_time__gt}
 {AND?res:end_time__lt}
 {AND?res:type__in}
-
+WITH res
+{if:with}
+  MATCH (res)<-[:appears_in]-(ent:entity)
+  WHERE ent.uuid IN {with}
+  WITH res, count(ent) as strict
+  WHERE strict = size({with})
+  WITH res
+{/if}
+{if:without}
+  OPTIONAL MATCH  (res)<-[r:appears_in]-(ent:entity)
+  WHERE ent.uuid IN {without}
+  WHERE r is null
+  WITH DISTINCT res
+{/if}
 WITH collect(res) as resources
 WITH resources, length(resources) as total_items
 UNWIND resources as res
@@ -1164,6 +1176,22 @@ MATCH (res:resource)
 {AND?res:end_time__lt}
 {AND?res:type__in}
 WITH res
+{if:minlat}
+
+{/if}
+{if:with}
+  MATCH (res)<-[:appears_in]-(ent:entity)
+  WHERE ent.uuid IN {with}
+  WITH res, count(ent) as strict
+  WHERE strict = size({with})
+  WITH res
+{/if}
+{if:without}
+  OPTIONAL MATCH  (res)<-[r:appears_in]-(ent:entity)
+  WHERE ent.uuid IN {without}
+  WHERE r is null
+  WITH DISTINCT res
+{/if}
 MATCH (res)<-[:appears_in]-(ent:{:entity})
 WITH ent, count(res) as df
 ORDER BY df desc, ent.name ASC

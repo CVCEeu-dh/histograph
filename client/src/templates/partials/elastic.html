@@ -4,7 +4,11 @@
   <div class='btn btn-line btn-straight' ng-click='opened=false'>hide filters</div>
   </div>
 </div>
-<div  class='inner'>
-  hey
-
+<div  class='inner '>
+  <ul class="nav nav-tabs sans-serif" role="tablist">
+    <li ng-repeat='dim in availableDimensions' role="presentation" ng-class='{"active": dimension == dim}'><a ng-click='setDimension(dim)' aria-controls="home" role="tab" data-toggle="tab" translate='elastic.type.{{dim}}'></a></li>
+  </ul>
+  <ul>
+    <li ng-repeat='value in values' ng-click='toggleValue(value)' ng-include='"templates/partials/helpers/elastic-facet.html"'></li>
+  </ul>
 </div>
