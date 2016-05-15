@@ -277,7 +277,17 @@ describe('model:resource ', function() {
   it('should return the geographical map of resources', function (done) {
     Resource.getGeo({}, function (err, items) {
       should.not.exist(err);
-      console.log(_.take(items, 2))
+      done()
+    })
+  })
+
+  it('should return the geographical map of resources (all filters)', function (done) {
+    Resource.getGeo({
+      fcl: ['P'],
+      start_time: 1200000000,
+      end_time: 24000000000
+    }, function (err, items) {
+      should.not.exist(err);
       done()
     })
   })
@@ -291,6 +301,16 @@ describe('model:resource ', function() {
       done()
     })
   })
+
+  it('should return the facet for label "person"', function(done){
+    Resource.facetRelatedEntities({
+      entity: 'person'
+    }, function(err, facets){
+      should.not.exist(err);
+      should.exist(facets.length);
+      done();
+    })
+  });
   
   it('should get a NOT found error', function (done) {
     Resource.get(111600000000, __userB, function (err, res) {

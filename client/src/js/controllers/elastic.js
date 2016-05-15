@@ -7,8 +7,9 @@
  * 
  */
 angular.module('histograph')
-  .controller('GeoCtrl', function ($scope, $log, points, EVENTS) {
-    $log.log('GeoCtrl -> ready', $scope.filters, points);
+  .controller('ElasticCtrl', function ($scope, $log, EVENTS) {
+    $log.log('ElasticCtrl -> ready');
 
-    $scope.points = points;
+    $scope.dimensions = [];
+    
   })

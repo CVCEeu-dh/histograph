@@ -80,6 +80,7 @@ module.exports = {
       '/js/controllers/all-shortest-paths.js',
       '/js/controllers/collection.js',
       '/js/controllers/crowd.js',
+      '/js/controllers/elastic.js',
       '/js/controllers/entity.js',
       '/js/controllers/geo.js',
       '/js/controllers/graph.js',

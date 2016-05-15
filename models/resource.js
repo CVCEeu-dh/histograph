@@ -601,6 +601,27 @@ module.exports = {
     }); 
     
   },
+
+  /*
+    Return the related entities facets acoording to a specific entity type (neo4j label)
+  */
+  facetRelatedEntities: function(params, next){
+    _.assign(params, {
+      entity: params.entity || 'entity',
+      limit: +params.limit || 100,
+      offset: +params.offset || 0
+    });
+
+    var query = parser.agentBrown(rQueries.facet_related_entities, params);
+
+    neo4j.query(query, params, function (err, nodes) {
+      if(err) {
+        next(err);
+        return;
+      }
+      next(null, nodes);
+    });
+  },
   
   /*
     Return the 

@@ -118,6 +118,67 @@ a#header-title {
   max-width: 50px;
 }
 
+#elastic{
+  position: absolute;
+  
+  top: 80px;
+  bottom: 60px;
+  right: 10px;
+  
+  z-index: 14;
+}
+
+#elastic .inner{
+  display: none;
+  position:absolute;
+  top: 0px;
+  right: 0;
+  bottom:0px;
+  background-color: #f0f0f0;
+  width: 300px;
+  z-index: 14;
+}
+
+#elastic.active .inner{
+  display: block;
+  border: 1px solid rgba(0,0,0,.15);
+    border-radius: 4px;
+    -webkit-box-shadow: 0 6px 12px rgba(0,0,0,.175);
+    box-shadow: 0 6px 12px rgba(0,0,0,.175);
+} 
+
+#elastic-toggler{
+  position: absolute;
+  right: 0;
+  height: 20px;
+  width: 50px;
+  overflow: hidden;
+  z-index: 15;
+}
+
+#elastic-toggler .group{
+  display: block;
+  position:absolute;
+  top:0px;
+  right: 0px;
+  width: 50px;
+  height: 20px;
+  transform:translateY(0px);
+  -webkit-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
+     -moz-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+       -o-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+          transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
+}
+
+#elastic-toggler .btn{
+  display: block;
+  height: 20px;
+}
+
+#elastic-toggler .group.active{
+  transform:translateY(-20px);
+}
+
 .view{
   position: absolute;
   top: 50px;

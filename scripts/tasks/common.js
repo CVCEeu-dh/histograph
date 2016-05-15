@@ -95,7 +95,7 @@ module.exports = {
         if(err)
           console.log(err);
         else
-          console.log(result);
+          console.log(_.take(result, 10), 'total:', result.length);
         
       callback(null, options);
       })

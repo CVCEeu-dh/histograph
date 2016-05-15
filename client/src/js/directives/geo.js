@@ -19,17 +19,43 @@ angular.module('histograph')
       },
       link : function(scope, element, attrs) {
         'use strict';
+        // mapbox map value, filled during init()
+        var map;
+
         $log.log('::mapbox ready');
         element.css({ position: 'absolute', top:0, bottom:0, width:'100%' });
         
         function init(points){
+          
+
           L.mapbox.accessToken = 'pk.eyJ1IjoiZGFuaWVsZWd1aWRvIiwiYSI6Im84VnNKdlUifQ.IVtv3hWrgHbSQBEwuWaYmw';
-          var map = L.mapbox.map(element[0], 'mapbox.streets')
-            .setView([-37.82, 175.215], 14);
+          map = L.mapbox.map(element[0], 'mapbox.streets')
+            
+
         }
 
         function draw(points){
-          var markers = new L.MarkerClusterGroup();
+          var markers = new L.MarkerClusterGroup(),
+              lats,
+              lngs;
+
+          lats = d3.extent(points, function(d){
+            return d.lat
+          });
+
+          lngs = d3.extent(points, function(d){
+            return d.lng
+          });
+
+          // map.setView([-37.82, 175.215], 14);
+
+          map.fitBounds([[
+            lats[0], 
+            lngs[0],
+          ],[ 
+            lats[1], 
+            lngs[1],
+          ]]);
 
           for (var i = 0; i < scope.points.length; i++) {
               var a = scope.points[i];

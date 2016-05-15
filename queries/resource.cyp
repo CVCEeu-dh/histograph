@@ -1125,8 +1125,29 @@ RETURN {
 // get map
 MATCH (loc:location)-[r:appears_in]->(res:resource)
 WHERE has(loc.lat)
+{if:fcl}
+  AND loc.fcl IN {fcl}
+{/if}
+{if:start_time}
+  AND res.start_time >= {start_time} 
+{/if}
+{if:end_time}
+  AND res.end_time <= {end_time} 
+{/if}
+{if:minlat}
+  AND loc.lat >= minlat 
+{/if}
+{if:maxlat}
+  AND loc.lat <= maxlat 
+{/if}
+{if:minlng}
+  AND loc.lng >= minlng 
+{/if}
+{if:maxlng}
+  AND loc.lng <= maxlng 
+{/if}
 WITH loc, count(res) as df
-ORDER BY df DESC LIMIT 10
+ORDER BY df DESC LIMIT 100000
 RETURN {
   id: loc.uuid,
   lat: loc.lat,
@@ -1135,3 +1156,28 @@ RETURN {
   name: loc.name,
   w: df
 }
+
+// name: facet_related_entities
+//
+MATCH (res:resource)
+{?res:start_time__gt}
+{AND?res:end_time__lt}
+{AND?res:type__in}
+WITH res
+MATCH (res)<-[:appears_in]-(ent:{:entity})
+WITH ent, count(res) as df
+ORDER BY df desc, ent.name ASC
+LIMIT 100 
+RETURN {
+  id: ent.uuid,
+  label: last(labels(ent)),
+  name: ent.name,
+  w:df
+}
+
+
+
+
+
+
+
