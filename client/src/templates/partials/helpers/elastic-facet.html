@@ -1,7 +1,16 @@
 <div class='facet' style:'float:none'>
-  <div class='number'>{{value.w}}</div>
+  <div class='number sans-serif'>{{value.w}}</div>
   <div class='name'>
+    <span class='tag' ng-click='toggleValue(value)'>
     {{value.name}}
     ({{value.label}})
+    </span>
+    <a ng-click='excludeValue(value)'>(exclude)</a>
   </div>
+  <div style='position:relative'>
+    <div style='position:absolute;height:2px;width:60px;right:0px;background-color: #f0f0f0;'>
+      <div style='position:absolute; height:2px;left:{{100 - 100*value.w/totalItems}}%;width:{{100*value.w/totalItems}}%;background-color: #151515'></div>
+    </div>
+  </div>
+  
 </div>

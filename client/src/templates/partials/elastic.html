@@ -1,14 +1,32 @@
 <div id='elastic-toggler'>
-  <div ng-class='{"active":opened}' class='group'>
-  <div class='btn btn-line btn-straight' ng-click='opened=true'>show filters</div>
-  <div class='btn btn-line btn-straight' ng-click='opened=false'>hide filters</div>
-  </div>
+  <div ng-class='{"active": opened}' class='btn btn-line' ng-click='toggleOpened()'><span translate='button.toggle.filters'></span><span>{{status=='loading'?'...': ''}}</span></div>
 </div>
 <div  class='inner '>
   <ul class="nav nav-tabs sans-serif" role="tablist">
+    <!-- resource properties facets -->
+    <li ng-repeat='(key,values) in facets' role="presentation" ng-class='{"active": dimension == key}'><a ng-click='setDimension(key)' aria-controls="home" role="tab" data-toggle="tab" translate='elastic.type.{{key}}'></a></li>
+    
     <li ng-repeat='dim in availableDimensions' role="presentation" ng-class='{"active": dimension == dim}'><a ng-click='setDimension(dim)' aria-controls="home" role="tab" data-toggle="tab" translate='elastic.type.{{dim}}'></a></li>
   </ul>
-  <ul>
-    <li ng-repeat='value in values' ng-click='toggleValue(value)' ng-include='"templates/partials/helpers/elastic-facet.html"'></li>
+  <ul ng-if='dimension != "type"'>
+    <li ng-repeat='value in values'  ng-include='"templates/partials/helpers/elastic-facet.html"'></li>
+  </ul>
+  <ul ng-if='dimension == "type"'>
+    <li ng-repeat='group in values'>
+      <div class='facet' style:'float:none'>
+        <div class='number sans-serif'>{{group.count_items}}</div>
+        <div class='name'>
+          <span  ng-click='toggleGroup(group)'>
+          {{group.group}}
+          </span>
+          <!-- <a ng-click='excludeGroup(group)'>(exclude)</a> -->
+        </div>
+        <div style='position:relative'>
+    <div style='position:absolute;height:2px;width:60px;right:0px;background-color: #f0f0f0;'>
+      <div style='position:absolute; height:2px;left:{{100 - 100*value.w/totalItems}}%;width:{{100*value.w/totalItems}}%;background-color: #151515'></div>
+    </div>
+  </div>
+      </div>
+    </li>
   </ul>
 </div>

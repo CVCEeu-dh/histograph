@@ -7,7 +7,7 @@
  * it was written in order to simplify CoreCtrl debugging
  */
 angular.module('histograph')
-  .controller('FiltersCtrl', function ($scope, $log, $http, $location, $stateParams, SuggestFactory,EVENTS) {
+  .controller('FiltersCtrl', function ($scope, $log, $http, $location, $stateParams, $q, SuggestFactory,EVENTS) {
     $log.debug('FiltersCtrl ready, filters active:', $location.search());
     
     $scope.filters = {};
@@ -16,6 +16,8 @@ angular.module('histograph')
     $scope.qs = ''; // the location.search() object as querystring
 
     $scope.____q = '';
+
+    var timer_apply_filters;
     /*
       e.g.
       setFacets('type', [
@@ -28,10 +30,14 @@ angular.module('histograph')
       ])
     */
     $scope.setFacets = function(key, values) {
-      $scope.facets[key] = values;
-    }
+      $scope.facets[key] = _.filter(values, 'group');
+    };
     
+    $scope.setTotalItems = function(value){
+      $log.log('FiltersCtrl --> setTotalItems():', value);
     
+      $scope.totalItems = value;
+    };
     
     /*
       Filters function for templates
@@ -46,6 +52,11 @@ angular.module('histograph')
         var index = _.map($scope.filterItems.with, 'id').indexOf(value);
         $scope.filterItems.with.splice(index, 1);    
       }
+
+      if(key == 'without') {
+        var index = _.map($scope.filterItems.without, 'id').indexOf(value);
+        $scope.filterItems.without.splice(index, 1);
+      }
          
         
       if(aliveFilters.length == 0)
@@ -56,8 +67,8 @@ angular.module('histograph')
     
     $scope.addFilterFromTypeahead = function($item, $model, $label) {
       $scope.addFilter("with", $item.id);
-    }
-    
+    };
+
     /*
       Add filter and take care of putting the right args in location.search object.
     */
@@ -96,21 +107,38 @@ angular.module('histograph')
     
     /*
       For some field, load complex items (e.g; location, persons etc..);
-      Ids can be resoruce or other.
+      
     */
     $scope.loadFiltersItems = function() {
-      // collect ids
-      if(!$scope.filters.with) {
+      // reset with and without filteritems if they're not present.
+      if(!$scope.filters.with && !$scope.filters.without){
         $scope.filterItems.with = [];
-      } else {
-        _.each(angular.copy($scope.filters), function (d, key) {
-          if(key == 'with')
-            SuggestFactory.getUnknownNodes({
-              ids: d
-            }, function (res) {
-              $scope.filterItems[key] = res.result.items;
-            })
-        });   
+        $scope.filterItems.without = [];
+        return;
+      }
+      
+      // collect ids
+      var filterItems = ids = _.compact(($scope.filters.without || []).concat($scope.filters.with || []));
+      if(ids.length){
+        SuggestFactory.getUnknownNodes({
+          ids: ids
+        }, function (res) {
+          var _withItems = [],
+              _withoutItems = [];
+          _(res.result.items)
+            .each(function(d){
+              if($scope.filters.with && $scope.filters.with.indexOf(d.id) !== -1){
+                _withItems.push(d);
+              }
+              if($scope.filters.without && $scope.filters.without.indexOf(d.id) !== -1){
+                 _withoutItems.push(d);
+              }
+            });
+          // publish to scope
+          $scope.filterItems.with = _withItems;
+          $scope.filterItems.without = _withoutItems;
+        });
+        
       }
     };
     

@@ -122,8 +122,9 @@ WITH res
 {if:without}
   OPTIONAL MATCH  (res)<-[r:appears_in]-(ent:entity)
   WHERE ent.uuid IN {without}
+  WITH res, r
   WHERE r is null
-  WITH DISTINCT res
+  WITH res
 {/if}
 {if:orderby}
 ORDER BY {:orderby}
@@ -229,8 +230,9 @@ WITH res
 {if:without}
   OPTIONAL MATCH  (res)<-[r:appears_in]-(ent:entity)
   WHERE ent.uuid IN {without}
+  WITH res, r
   WHERE r is null
-  WITH DISTINCT res
+  WITH res
 {/if}
 WITH collect(res) as resources
 WITH resources, length(resources) as total_items
@@ -635,33 +637,32 @@ RETURN {
 } as result
 
 
-
 // name: get_cooccurrences
 // 
-{if:with}
-MATCH (ent2:entity)
-  WHERE ent2.uuid IN {with}
-WITH ent2
-MATCH (res:resource)<-[:appears_in]-(ent2)
+MATCH (res:resource)
+{?res:start_time__gt}
+{AND?res:end_time__lt}
+{AND?res:type__in}
 WITH res
-  MATCH (p1:{:entity})-[r1:appears_in]->(res)<-[r2:appears_in]-(p2:{:entity})
+{if:minlat}
+
 {/if}
-{unless:with}
-MATCH (p1:{:entity})-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:{:entity})
-{/unless}
+{if:with}
+  MATCH (res)<-[:appears_in]-(ent:entity)
+  WHERE ent.uuid IN {with}
+  WITH res, count(ent) as strict
+  WHERE strict = size({with})
+  WITH res
+{/if}
+{if:without}
+  OPTIONAL MATCH  (res)<-[r:appears_in]-(ent:entity)
+  WHERE ent.uuid IN {without}
+  WITH res, r
+  WHERE r is null
+  WITH res
+{/if}
+MATCH (p1:{:entity})-[r1:appears_in]->(res)<-[r2:appears_in]-(p2:{:entity})
   WHERE id(p1) < id(p2) AND r1.score > -1 AND r2.score > -1 AND p1.score > -1 AND p2.score > -1
-  {if:start_time}
-    AND res.start_time >= {start_time}
-  {/if}
-  {if:end_time}
-    AND res.end_time <= {end_time}
-  {/if}
-  {if:mimetype}
-    AND res.mimetype in {mimetype}
-  {/if}
-  {if:type}
-    AND res.type in {type}
-  {/if}
 WITH p1, p2, count(res) as w
 ORDER BY w DESC
 LIMIT {limit}
@@ -684,32 +685,30 @@ RETURN {
 
 // name: get_bipartite_cooccurrences
 //
-{if:with}
-MATCH (ent2:entity)
-  WHERE ent2.uuid IN {with}
-WITH ent2
-MATCH (res:resource)<-[:appears_in]-(ent2)
+MATCH (res:resource)
+{?res:start_time__gt}
+{AND?res:end_time__lt}
+{AND?res:type__in}
 WITH res
-  MATCH (p1:{:entityA})-[r1:appears_in]->(res)<-[r2:appears_in]-(p2:{:entityB})
+{if:minlat}
+
 {/if}
-{unless:with}
-MATCH (p1:{:entityA})-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:{:entityB})
-{/unless}
+{if:with}
+  MATCH (res)<-[:appears_in]-(ent:entity)
+  WHERE ent.uuid IN {with}
+  WITH res, count(ent) as strict
+  WHERE strict = size({with})
+  WITH res
+{/if}
+{if:without}
+  OPTIONAL MATCH  (res)<-[r:appears_in]-(ent:entity)
+  WHERE ent.uuid IN {without}
+  WITH res, r
+  WHERE r is null
+  WITH res
+{/if}
+  MATCH (p1:{:entityA})-[r1:appears_in]->(res)<-[r2:appears_in]-(p2:{:entityB})
   WHERE p1.score > -1 AND p2.score > -1
-  {if:start_time}
-    AND res.start_time >= {start_time}
-  {/if}
-  {if:end_time}
-    AND res.end_time <= {end_time}
-  {/if}
-  {if:mimetype}
-    AND res.mimetype in {mimetype}
-  {/if}
-  {if:type}
-    AND res.type in {type}
-  {/if}
-  
-  
 WITH p1, p2, count(res) as w
 ORDER BY w DESC
 LIMIT {limit}
@@ -1140,24 +1139,29 @@ WHERE has(loc.lat)
 {if:fcl}
   AND loc.fcl IN {fcl}
 {/if}
-{if:start_time}
-  AND res.start_time >= {start_time} 
+WITH res, collect(loc) as locations
+{if:with}
+  MATCH (res)<-[:appears_in]-(ent:entity)
+  WHERE ent.uuid IN {with}
+  WITH res, locations, count(ent) as strict
+  WHERE strict = size({with})
+  WITH res, locations
 {/if}
-{if:end_time}
-  AND res.end_time <= {end_time} 
+
+{?res:start_time__gt}
+{AND?res:end_time__lt}
+{AND?res:type__in}
+WITH res, locations
+
+{if:without}
+  OPTIONAL MATCH  (res)<-[r:appears_in]-(ent:entity)
+  WHERE ent.uuid IN {without}
+  WITH res, locations, r
+  WHERE r is null
+  WITH res, locations
 {/if}
-{if:minlat}
-  AND loc.lat >= minlat 
-{/if}
-{if:maxlat}
-  AND loc.lat <= maxlat 
-{/if}
-{if:minlng}
-  AND loc.lng >= minlng 
-{/if}
-{if:maxlng}
-  AND loc.lng <= maxlng 
-{/if}
+
+WITH res, locations UNWIND locations as loc
 WITH loc, count(res) as df
 ORDER BY df DESC LIMIT 100000
 RETURN {
@@ -1171,7 +1175,16 @@ RETURN {
 
 // name: facet_related_entities
 //
+{if:with}
+  MATCH (res:resource)<-[:appears_in]-(ent:entity)
+  WHERE ent.uuid IN {with}
+  WITH res, count(ent) as strict
+  WHERE strict = size({with})
+  WITH res
+{/if}
+{unless:with}
 MATCH (res:resource)
+{/unless}
 {?res:start_time__gt}
 {AND?res:end_time__lt}
 {AND?res:type__in}
@@ -1179,33 +1192,26 @@ WITH res
 {if:minlat}
 
 {/if}
-{if:with}
-  MATCH (res)<-[:appears_in]-(ent:entity)
-  WHERE ent.uuid IN {with}
-  WITH res, count(ent) as strict
-  WHERE strict = size({with})
-  WITH res
-{/if}
+
 {if:without}
   OPTIONAL MATCH  (res)<-[r:appears_in]-(ent:entity)
   WHERE ent.uuid IN {without}
+  WITH res, r
   WHERE r is null
-  WITH DISTINCT res
+  WITH res
 {/if}
+WITH collect(res) as resources
+WITH size(resources) as total_items, resources UNWIND resources as res
 MATCH (res)<-[:appears_in]-(ent:{:entity})
-WITH ent, count(res) as df
+WITH total_items, ent, count(res) as df
 ORDER BY df desc, ent.name ASC
 LIMIT 100 
 RETURN {
   id: ent.uuid,
   label: last(labels(ent)),
   name: ent.name,
-  w:df
+  w:df,
+  t:total_items
 }
-
-
-
-
-
 
 

@@ -135,7 +135,7 @@ angular.module('histograph')
         $scope.loading = false;
         $scope.offset  = res.info.offset;
         $scope.limit   = res.info.limit;
-        $scope.totalItems = res.info.total_items;
+        $scope.setTotalItems(res.info.total_items);
         if($scope.offset > 0)
           $scope.addRelatedItems(res.result.items);
         else

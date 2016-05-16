@@ -124,6 +124,10 @@ angular.module('histograph')
       $log.log('CoreCtrl > addRelatedItems', relatedItems.length);
       $scope.relatedItems = ($scope.relatedItems || []).concat(relatedItems);
     }
+
+    $scope.setTotalItems = function(value) {
+      debugger;
+    }
     
     $scope.relatedPage = 1;
     $scope.relatedCount = 0; // total number of items
@@ -1242,8 +1246,7 @@ angular.module('histograph')
     A generic controller for every relatedItem
   */
   .controller('RelatedItemsCtrl', function ($scope, $log, $stateParams, $filter, specials, relatedItems, relatedModel, relatedVizFactory, relatedFactory, socket, EVENTS) {
-    
-    $scope.totalItems  = relatedItems.info.total_items;
+    $scope.setTotalItems(relatedItems.info.total_items);
     $scope.limit       = relatedItems.info.limit;
     $scope.offset      = relatedItems.info.offset;
     // $scope.page        = 1; // always first page!!
@@ -1260,7 +1263,7 @@ angular.module('histograph')
     */
     $scope.setFacets('type', relatedItems.info.groups);
     
-    $log.debug('RelatedItemsCtrl ready');
+    $log.debug('RelatedItemsCtrl ready babe');
     /*
       Load graph data
     */
@@ -1300,7 +1303,7 @@ angular.module('histograph')
         $scope.unlock('RelatedItemsCtrl');
         $scope.offset  = res.info.offset;
         $scope.limit   = res.info.limit;
-        $scope.totalItems = res.info.total_items;
+        $scope.setTotalItems(res.info.total_items);
         if($scope.offset > 0)
           $scope.addRelatedItems(res.result.items);
         else

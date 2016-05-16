@@ -27,6 +27,7 @@
   "button.myselection.explore": "explore connections",
   "button.skip": "skip",
   "button.steps.skip": "skip this step",
+  "button.toggle.filters": "filters",
   "button.untag": "untag this",
 
   "contribute.title": "Which {{type}} did you identify?",
@@ -177,6 +178,7 @@
   "elastic.type.theme": "themes",
   "elastic.type.location": "locations",
   "elastic.type.place": "with geotag",
+  "elastic.type.type": "type",
 
   "placeholder.search": "search ...",
   "placeholder.search.entity": "search {{type}}",
