@@ -40,8 +40,8 @@ angular.module('histograph')
           $scope.status = 'idle';
           $scope.values = res.data.result.facets;
           // if t, set totalItems
-          if(res.data.result.facets.length && res.data.result.facets[0].t)
-            $scope.setTotalItems(res.data.result.facets[0].t)
+          // if(res.data.result.facets.length && res.data.result.facets[0].t)
+          //   $scope.setTotalItems(res.data.result.facets[0].t)
 
         });
       }, 500);
