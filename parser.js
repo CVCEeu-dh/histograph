@@ -112,7 +112,7 @@ module.exports = {
             return filters[property]
           });
         })
-        .replace(/\{(AND|OR)?\?([a-z_A-Z]+):([a-z_A-Z]+)__([a-z_A-Z]+)\}/g, function (m, operand, node, property, method) {
+        .replace(/\{(AND|OR)?\?([a-z_A-Z0-9]+):([a-z_A-Z]+)__([a-z_A-Z]+)\}/g, function (m, operand, node, property, method) {
           // replace WHERE clauses
           var chunk = '',
               segments = [

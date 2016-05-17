@@ -270,8 +270,7 @@ WITH DISTINCT res
 
 // name: count_related_resources
 // get top 100 similar resources sharing the same persons, orderd by time proximity if this info is available
-MATCH (res:resource)
-  WHERE res.uuid = {id} 
+MATCH (res:resource {uuid: {id}})
 WITH res
 MATCH (res)<-[r1:appears_in]-(ent:entity)
 WHERE r1.score > -1 AND ent.score > -1
@@ -281,59 +280,55 @@ WITH res, r1, ent
 WITH ent
 MATCH (ent)-[:appears_in]->(res2:resource)
 {if:with}
-  WHERE id(res2) <> {id}
-
+  WHERE res2.uuid <> {id}
   WITH res2
-  MATCH (res2)<-[:appears_in]-(ent2:entity) 
-  WHERE id(ent2) IN {with}
-
+  MATCH (res2)<-[r:appears_in]-(ent2:entity) 
+  WHERE ent2.uuid IN {with}
+  WITH res2, count(r) as strict
+  WHERE strict = size({with})
+  WITH DISTINCT res2
 {/if}
 {unless:with}
-  WHERE id(res2) <> {id}
+  WHERE res2.uuid <> {id}
+  WITH DISTINCT res2
 {/unless}
-
-  {if:mimetype}
-  AND res2.mimetype IN {mimetype}
-  {/if}
-  {if:type}
-  AND res2.type IN {type}
-  {/if}
-  {if:start_time}
-  AND res2.start_time >= {start_time}
-  {/if}
-  {if:end_time}
-  AND res2.end_time <= {end_time}
-  {/if}
-WITH res2
+{?res2:start_time__gt}
+{AND?res2:end_time__lt}
+{AND?res2:type__in}
+WITH collect(res2) as resources
+WITH resources, length(resources) as total_items
+UNWIND resources as res
 RETURN {
-  group: {if:group}res2.{:group}{/if}{unless:group}res2.type{/unless}, 
-  count_items: count(res2)
-} // count per type
+  group: {if:group}res.{:group}{/if}{unless:group}res.type{/unless}, 
+  count_items: count(res),
+  total_items: total_items
+}
 
 
 // name: get_related_resources
 // top 20 entities attached to the person
-MATCH (res1:resource {uuid: {id}})<-[r1:appears_in]-(ent:entity)
+MATCH (res1:resource {uuid: {id}})
+WITH res1 
+MATCH (res1)<-[r1:appears_in]-(ent:entity)
 WHERE r1.score > -1 AND ent.score > -1
 WITH res1, r1, ent
   ORDER BY r1.score DESC, r1.tfidf DESC
   LIMIT 9
-WITH res1, r1, ent
-MATCH (ent)-[r2:appears_in]->(res2:resource){if:with}, (res2)<-[:appears_in]-(ent2:entity) WHERE id(ent2) IN {with} AND id(res2) <> {id}{/if}
-{unless:with} WHERE res2.uuid <> {id} {/unless}
-
-    {if:mimetype}
-    AND res2.mimetype IN {mimetype}
-    {/if}
-    {if:type}
-    AND res2.type IN {type}
-    {/if}
-    {if:start_time}
-    AND res2.start_time >= {start_time}
-    {/if}
-    {if:end_time}
-    AND res2.end_time <= {end_time}
-    {/if}
+WITH res1, ent
+MATCH (ent)-[r2:appears_in]->(res2:resource){if:with}<-[r:appears_in]-(ent2:entity)
+WHERE ent2.uuid IN {with}
+AND res2.uuid <> {id}
+WITH res1, res2, count(r) as strict
+WHERE strict = size({with})
+  WITH res1, res2
+{/if}
+{unless:with}
+WHERE res2.uuid <> {id} 
+WITH res1, res2
+{/unless}
+{?res2:start_time__gt}
+{AND?res2:end_time__lt}
+{AND?res2:type__in}
 
 WITH res1, res2, count(*) as intersection
 
@@ -1176,9 +1171,9 @@ RETURN {
 // name: facet_related_entities
 //
 {if:with}
-  MATCH (res:resource)<-[:appears_in]-(ent:entity)
+  MATCH (res:resource)<-[r:appears_in]-(ent:entity)
   WHERE ent.uuid IN {with}
-  WITH res, count(ent) as strict
+  WITH res, count(r) as strict
   WHERE strict = size({with})
   WITH res
 {/if}
@@ -1214,4 +1209,52 @@ RETURN {
   t:total_items
 }
 
+// name: facet_related_resources_entities
+//
+MATCH (res:resource)
+  WHERE res.uuid = {id} 
+WITH res
+MATCH (res)<-[r1:appears_in]-(ent:entity)
+WHERE r1.score > -1 AND ent.score > -1
+WITH res, r1, ent
+  ORDER BY r1.tfidf DESC
+  LIMIT 9
+WITH ent
+MATCH (ent)-[:appears_in]->(res2:resource)
+
+{if:with}
+  WHERE res2.uuid <> {id}
+
+  WITH res2
+  MATCH (res2)<-[:appears_in]-(ent2:entity) 
+  WHERE id(ent2) IN {with}
+
+  MATCH (res:resource)<-[r:appears_in]-(ent:entity)
+  WHERE ent.uuid IN {with}
+  WITH res, count(r) as strict
+  WHERE strict = size({with})
+  WITH res
+
+{/if}
+{unless:with}
+  WHERE id(res2) <> {id}
+{/unless}
+
+  {if:mimetype}
+  AND res2.mimetype IN {mimetype}
+  {/if}
+  {if:type}
+  AND res2.type IN {type}
+  {/if}
+  {if:start_time}
+  AND res2.start_time >= {start_time}
+  {/if}
+  {if:end_time}
+  AND res2.end_time <= {end_time}
+  {/if}
+WITH res2
+RETURN {
+  group: {if:group}res2.{:group}{/if}{unless:group}res2.type{/unless}, 
+  count_items: count(res2)
+} // count per type
 
