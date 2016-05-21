@@ -888,30 +888,33 @@ return count(distinct res.start_time)
 // name: get_timeline
 //
 MATCH (res:resource)
-
+WHERE exists(res.start_month)
+WITH res
 {if:with}
-  WHERE has(res.start_month)
-  WITH res
-  MATCH (ent:entity)-[r:appears_in]->(res)
+  MATCH (res)<-[:appears_in]-(ent:entity)
   WHERE ent.uuid IN {with}
-  WITH DISTINCT res 
+  WITH res, count(ent) as strict
+  WHERE strict = size({with})
+  WITH res
 {/if}
-  WHERE has(res.start_month)
-{if:mimetype}
-  AND res.mimetype = {mimetype}
+
+{?res:start_time__gt}
+{AND?res:end_time__lt}
+{AND?res:type__in}
+WITH res
+
+{if:without}
+  OPTIONAL MATCH  (res)<-[r:appears_in]-(ent:entity)
+  WHERE ent.uuid IN {without}
+  WITH res, locations, r
+  WHERE r is null
+  WITH res, locations
 {/if}
-{if:type}
-  AND res.type IN {type}
-{/if}
-{if:start_time}
-  AND res.start_time >= {start_time}
-{/if}
-{if:end_time}
-  AND res.end_time <= {end_time}
-{/if} 
+
 WITH  res.start_month as tm, min(res.start_time) as t, count(res) as weight
 RETURN tm, t, weight
 ORDER BY tm ASC
+
 
 // name: get_related_resources_timeline
 //
