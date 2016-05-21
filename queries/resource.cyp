@@ -918,37 +918,32 @@ ORDER BY tm ASC
 
 // name: get_related_resources_timeline
 //
-MATCH (res:resource)<-[:appears_in]-(ent:entity)
-WHERE res.uuid = {id} AND ent.score > -1
+MATCH (res:resource {uuid: {id}})
+WITH res
+MATCH (res)<-[r1:appears_in]-(ent:entity)
+WHERE r1.score > -1 AND ent.score > -1
+WITH res, r1, ent
+  ORDER BY r1.tfidf DESC
+  LIMIT 9
 WITH ent
+MATCH (ent)-[:appears_in]->(res2:resource)
 {if:with}
-  MATCH (ent2:entity)
-  WHERE ent2.uuid  IN {with}
-  WITH ent2
-  MATCH (ent2)-[:appears_in]->(res:resource)<-[r:appears_in]-(ent)
-  WITH DISTINCT res
+  WHERE res2.uuid <> {id}
+  WITH res2
+  MATCH (res2)<-[r:appears_in]-(ent2:entity) 
+  WHERE ent2.uuid IN {with}
+  WITH res2, count(r) as strict
+  WHERE strict = size({with})
+  WITH DISTINCT res2
 {/if}
 {unless:with}
-  MATCH (res:resource)<-[r:appears_in]-(ent)
-  WITH DISTINCT res
+  WHERE res2.uuid <> {id}
+  WITH DISTINCT res2
 {/unless}
-
-WHERE res.uuid <> {id} AND has(res.start_month)
-  {if:mimetype}
-  AND res.mimetype = {mimetype}
-  {/if}
-  {if:type}
-  AND res.type IN {type}
-  {/if}
-  {if:start_time}
-  AND res.start_time >= {start_time}
-  {/if}
-  {if:end_time}
-  AND res.end_time <= {end_time}
-  {/if}
-WITH DISTINCT res
-  
-WITH  res.start_month as tm, min(res.start_time) as t,  count(res) as weight
+{?res2:start_time__gt}
+{AND?res2:end_time__lt}
+{AND?res2:type__in}
+WITH res2.start_month as tm, min(res2.start_time) as t,  count(res2) as weight
 RETURN tm, t, weight
 ORDER BY tm ASC
 

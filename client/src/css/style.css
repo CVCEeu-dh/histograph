@@ -12,6 +12,12 @@
   display: none !important;
 }
 
+.leaflet-marker-icon.m{
+  background-color: #151515;
+  border-radius: 6px;
+  width: 2px;
+  height: 2px;
+}
 header{
   -webkit-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1); /* Changed here */ 
      -moz-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);

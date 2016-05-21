@@ -622,7 +622,16 @@ module.exports = {
       next(null, nodes);
     });
   },
-  
+  // todo
+  getRelatedResourcesElastic: function(resource, properties, next) {
+    helpers.cypherTimeline(rQueries.get_related_resources_timeline, _.assign({}, properties, resource), function (err, timeline) {
+      if(err)
+        next(err);
+      else
+        next(null, timeline);
+    });
+  },
+
   /*
     Return the 
   */
