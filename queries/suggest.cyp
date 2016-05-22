@@ -560,12 +560,24 @@ WITH res
 {if:with}
   MATCH (res)<-[r:appears_in]-(ent:entity)
     WHERE ent.uuid in {with}
-  WITH res, count(r) as df
+    WITH res, count(ent) as strict
+    WHERE strict = size({with})
+    WITH res
 {/if}
-
+{if:without}
+  OPTIONAL MATCH (res)<-[r:appears_in]-(ent:entity)
+  WHERE ent.uuid IN {without}
+  WITH res, r
+  WHERE r is null
+  WITH res
+{/if}
+WITH collect(res) as resources
+WITH resources, length(resources) as total_items
+UNWIND resources as res
 RETURN {
   group: {if:group}res.{:group}{/if}{unless:group}res.type{/unless}, 
-  count_items: count(res)
+  count_items: count(res),
+  total_items: total_items
 }
 
 
@@ -593,10 +605,20 @@ WITH res, max(coalesce(r1.frequency,0)) as ms, count(r1) as z
   WHERE z = size({ids})
 WITH res, ms
 {if:with}
-  MATCH (res)<-[r:appears_in]-(ent:entity)
-    WHERE ent.uuid in {with}
-  WITH res, ms, count(r) as df
+  MATCH (res)<-[r:appears_in]-(ent2:entity)
+  WHERE ent2.uuid IN {with}
+  WITH res, ms, count(r) as strict
+  WHERE strict = size({with})
+  WITH res, ms
 {/if}
+{if:without}
+  OPTIONAL MATCH  (res)<-[r:appears_in]-(ent2:entity)
+  WHERE ent2.uuid IN {without}
+  WITH res, ms, r
+  WHERE r is null
+  WITH res, ms
+{/if}
+
 ORDER BY ms DESC
 SKIP {offset}
 LIMIT {limit}

@@ -440,7 +440,7 @@ MATCH (ent)-[:appears_in]->(res:resource)
   {/if}
 WITH DISTINCT res
 {if:with}
-  MATCH (res)<-[r:appears_in]-(ent2)
+  MATCH (res)<-[r:appears_in]-(ent2:entity)
   WHERE ent2.uuid IN {with}
   WITH res, count(r) as strict
   WHERE strict = size({with})
