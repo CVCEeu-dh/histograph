@@ -503,6 +503,10 @@ apiRouter.route('/user/:id([\\da-zA-Z_\\-]+)/related/resource') // api session i
   .get(ctrl.user.getRelatedResources)
 apiRouter.route('/user/:id([\\da-zA-Z_\\-]+)/related/resource/graph') // api session info
   .get(ctrl.user.getRelatedResourcesGraph)
+apiRouter.route('/user/:id([\\da-zA-Z_\\-]+)/related/resource/timeline') // api session info
+  .get(ctrl.user.getRelatedResourcesTimeline)
+apiRouter.route('/user/:id([\\da-zA-Z_\\-]+)/related/resource/elastic') // api session info
+  .get(ctrl.user.getRelatedResourcesElastic)
   
 
 /*
@@ -706,6 +710,8 @@ apiRouter.route('/suggest/resource/graph')
   .get(ctrl.suggest.getResourcesGraph)
 apiRouter.route('/suggest/resource/elastic')
   .get(ctrl.suggest.getResourcesElastic)
+apiRouter.route('/suggest/resource/timeline')
+  .get(ctrl.suggest.getResourcesTimeline)
 apiRouter.route('/suggest/:entity(person|location|organization)/graph')
   .get(ctrl.suggest.getEntitiesGraph)
 

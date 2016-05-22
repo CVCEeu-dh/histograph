@@ -416,6 +416,35 @@ RETURN {
 }
 
 
+// name: get_resources_timeline
+// get facets by query
+start res=node:node_auto_index({query})
+WITH res
+{?res:start_time__gt}
+{AND?res:end_time__lt}
+{AND?res:type__in}
+WITH res
+WHERE exists(res.start_month)
+WITH res
+{if:with}
+  MATCH (res)<-[r:appears_in]-(ent2:entity) 
+  WHERE ent2.uuid IN {with}
+  WITH res, count(r) as strict
+  WHERE strict = size({with})
+  WITH res
+{/if}
+{if:without}
+  OPTIONAL MATCH  (res)<-[r:appears_in]-(ent:entity)
+  WHERE ent.uuid IN {without}
+  WITH res, r
+  WHERE r is null
+  WITH res
+{/if}
+WITH  res.start_month as tm, min(res.start_time) as t, count(res) as weight
+RETURN tm, t, weight
+ORDER BY tm ASC
+
+
 // name: get_matching_entities_count
 // get resources by query, will suggest other enpoint too
 start n=node:node_auto_index({query})

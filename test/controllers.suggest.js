@@ -155,13 +155,25 @@ describe('controller:suggest check lucene query', function() {
       })
   });
 
-  it('should get the resource A facets', function (done) {
+  it('should get the facets', function (done) {
     session
       .get('/api/suggest/resource/elastic?query=improbable query ever')
       .expect(200)
       .end(function (err, res) {
         should.not.exist(err) // err on statusCode
         console.log(res.body)
+        done();
+      })
+  });
+
+  it('should get the timeline', function (done) {
+    session
+      .get('/api/suggest/resource/timeline?query=improbable query ever')
+      .expect(200)
+      .end(function (err, res) {
+        console.log(res.body)
+        should.not.exist(err) // err on statusCode
+        
         done();
       })
   });

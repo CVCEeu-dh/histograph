@@ -1038,7 +1038,7 @@ header ul li .notification a {
 }
 
 .search #see-also{
-  left: 200px;
+  left: 0px;
 }
 
 .viewpoint-read #see-also-menu {
@@ -1467,7 +1467,7 @@ header ul li .notification a {
 
 
 #milkyway.search, #milkyway.user {
-  left: 560px;
+  left: 360px;
   display: block
 }
 

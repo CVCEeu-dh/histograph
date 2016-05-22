@@ -213,5 +213,19 @@ module.exports = {
       else
         next(null, graph);
     });
+  },
+  /*
+    Return the timeline for the user favourite resources.
+  */
+  getRelatedResourcesTimeline: function(user, params, next) {
+    helpers.cypherTimeline(queries.get_related_resources_timeline, _.assign(params, user), next);
+  },
+  /*
+    Return the facets for the user favourite resources.
+  */
+  getRelatedResourcesElastic: function(user, params, next) {
+    _.assign(params, user);
+    var query = parser.agentBrown(queries.get_related_resources_elastic, params);
+    neo4j.query(query, params, next);
   }
 };

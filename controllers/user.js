@@ -276,5 +276,47 @@ module.exports = function(io) {
         }, form.params));
       });
     },
+
+    getRelatedResourcesTimeline: function (req, res) {
+      var form = validator.request(req, {
+            id: req.user.id // default the single user
+          });
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      User.getRelatedResourcesTimeline({
+        id: form.params.id
+      }, form.params, function(err, timeline) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({
+          timeline: timeline
+        }, {
+          params: form.params
+        });
+      });
+    },
+
+    getRelatedResourcesElastic: function (req, res) {
+      var form = validator.request(req, {
+            limit: 100,
+            offset: 0,
+            entity: 'entity'
+          });
+
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      User.getRelatedResourcesElastic({
+        id: form.params.id
+      }, form.params, function (err, items) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        return res.ok({
+          facets: items
+        }, {
+          params: form.params
+        });
+      });
+    }
   }
 };

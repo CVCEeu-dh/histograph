@@ -493,6 +493,29 @@ module.exports =  function(io){
       });
     },
 
+    getResourcesTimeline: function(req, res){
+      var query = '',
+          form = validator.request(req, {
+            query: ''
+          });
+
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+
+      form.params.query = parser.toLucene(form.params.query, 'full_search');
+      
+      helpers.cypherTimeline(queries.get_resources_timeline, form.params, function (err, timeline) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        else
+          return res.ok({
+              timeline: timeline
+            }, {
+              params: form.params
+            });
+      });
+    },
+
     getResourcesElastic: function(req, res){
       var query = '',
           form = validator.request(req, {

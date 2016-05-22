@@ -185,6 +185,28 @@ describe('controller:user (related users)', function() {
         done();
       });
   });
+
+  it('should get the timeline of user curated resources', function (done) {
+    session
+      .get('/api/user/'+ __user.id +'/related/resource/timeline')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exist(err);
+        done();
+      });
+  });
+
+  it('should get the elastic of user curated resources', function (done) {
+    session
+      .get('/api/user/'+ __user.id +'/related/resource/elastic')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exist(err);
+        done();
+      });
+  });
 })
 
 /*

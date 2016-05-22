@@ -351,6 +351,71 @@ return{
 }
 
 
+// name: get_related_resources_timeline
+// 
+MATCH (u:user {uuid: {id}})-[r:likes|curates]->(res:resource)
+WITH res
+{?res:start_time__gt}
+{AND?res:end_time__lt}
+{AND?res:type__in}
+WITH res
+WHERE exists(res.start_month)
+WITH res
+{if:with}
+  MATCH (res)<-[r:appears_in]-(ent2:entity) 
+  WHERE ent2.uuid IN {with}
+  WITH res, count(r) as strict
+  WHERE strict = size({with})
+  WITH res
+{/if}
+{if:without}
+  OPTIONAL MATCH  (res)<-[r:appears_in]-(ent:entity)
+  WHERE ent.uuid IN {without}
+  WITH res, r
+  WHERE r is null
+  WITH res
+{/if}
+WITH  res.start_month as tm, min(res.start_time) as t, count(res) as weight
+RETURN tm, t, weight
+ORDER BY tm ASC
+
+// name: get_related_resources_elastic
+// 
+MATCH (u:user {uuid: {id}})-[r:likes|curates]->(res:resource)
+WITH res
+{?res:start_time__gt}
+{AND?res:end_time__lt}
+{AND?res:type__in}
+WITH res
+WHERE exists(res.start_month)
+WITH res
+{if:with}
+  MATCH (res)<-[r:appears_in]-(ent2:entity) 
+  WHERE ent2.uuid IN {with}
+  WITH res, count(r) as strict
+  WHERE strict = size({with})
+  WITH res
+{/if}
+{if:without}
+  OPTIONAL MATCH  (res)<-[r:appears_in]-(ent:entity)
+  WHERE ent.uuid IN {without}
+  WITH res, r
+  WHERE r is null
+  WITH res
+{/if}
+MATCH (res)<-[r:appears_in]-(ent:{:entity})
+WHERE r.score > -1
+WITH ent, count(r) as df
+ORDER BY df desc, ent.name ASC
+LIMIT 100 
+RETURN {
+  id: ent.uuid,
+  label: last(labels(ent)),
+  name: ent.name,
+  w:df
+}
+
+
 // name: count_noise
 // get love or curation noise, see below get_noise query.
 MATCH (res:resource)<-[r:likes|curates]-(u:user)
