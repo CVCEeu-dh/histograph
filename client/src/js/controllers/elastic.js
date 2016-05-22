@@ -12,7 +12,7 @@ angular.module('histograph')
 
     $scope.availableDimensions = ['entity'].concat(SETTINGS.types.entity);
     $scope.dimensions = [];
-    $scope.dimension = 'entity'; // i.e, generic entity.
+    $scope.dimension = 'type'; // i.e, generic entity.
 
     $scope.values = [];
     $scope.opened = false;
@@ -102,12 +102,20 @@ angular.module('histograph')
     // set dimension
     $scope.setDimension = function(dimension){
       $log.log('ElasticCtrl --> setDimension() dimension:', dimension);
-      if(dimension != $scope.dimension){
-        $scope.values = [];
-        $scope.sync();
-      }
+      // if(dimension != $scope.dimension){
+      //   $scope.values = [];
+      //   $scope.sync();
+      // }
       $scope.dimension = dimension;
     };
+
+    // watch dimension
+    $scope.$watch('dimension', function(v){
+      if(!v)
+        return;
+      $scope.values = [];
+      $scope.sync();
+    });
 
     // watch status.
     $scope.$watch('opened', function(v){
