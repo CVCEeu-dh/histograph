@@ -704,6 +704,8 @@ apiRouter.route('/suggest/:entity(entity|person|location|organization)')
   .get(ctrl.suggest.getEntities)
 apiRouter.route('/suggest/resource/graph')
   .get(ctrl.suggest.getResourcesGraph)
+apiRouter.route('/suggest/resource/elastic')
+  .get(ctrl.suggest.getResourcesElastic)
 apiRouter.route('/suggest/:entity(person|location|organization)/graph')
   .get(ctrl.suggest.getEntitiesGraph)
 

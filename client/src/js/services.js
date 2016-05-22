@@ -215,6 +215,13 @@ angular.module('histograph')
           model: ''
         }
       },
+      getResourcesViz: {
+        method: 'GET',
+        params: {
+          m: 'resource',
+          model: ''
+        }
+      },
       getUnknownNode: {
         method: 'GET',
         params: {

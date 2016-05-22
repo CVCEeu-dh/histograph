@@ -154,6 +154,17 @@ describe('controller:suggest check lucene query', function() {
         done();
       })
   });
+
+  it('should get the resource A facets', function (done) {
+    session
+      .get('/api/suggest/resource/elastic?query=improbable query ever')
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exist(err) // err on statusCode
+        console.log(res.body)
+        done();
+      })
+  });
   
 });
 

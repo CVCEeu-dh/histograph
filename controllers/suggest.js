@@ -492,6 +492,30 @@ module.exports =  function(io){
         });
       });
     },
+
+    getResourcesElastic: function(req, res){
+      var query = '',
+          form = validator.request(req, {
+            limit: 20,
+            offset: 0,
+            query: ''
+          });
+
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      form.params.query = parser.toLucene(form.params.query, 'full_search');
+      query = parser.agentBrown(queries.get_resources_elastic, form.params);
+      neo4j.query(query, form.params, function(err, items){
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        res.ok({
+          facets: items
+        }, {
+          params: form.params
+        });
+      });
+    },
     
     getEntitiesGraph: function (req, res) {
       var form = validator.request(req, {

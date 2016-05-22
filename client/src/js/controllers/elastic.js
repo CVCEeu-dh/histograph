@@ -7,7 +7,7 @@
  * 
  */
 angular.module('histograph')
-  .controller('ElasticCtrl', function ($rootScope, $scope, $log, $timeout, $stateParams, VisualizationFactory, ResourceRelatedVizFactory, EntityRelatedVizFactory, EVENTS, SETTINGS) {
+  .controller('ElasticCtrl', function ($rootScope, $scope, $log, $timeout, $stateParams, VisualizationFactory, ResourceRelatedVizFactory, EntityRelatedVizFactory, SearchVizFactory, EVENTS, SETTINGS) {
     $log.log('ElasticCtrl -> ready', $scope.filters, SETTINGS.types.entity, $scope.state);
 
     $scope.availableDimensions = ['entity'].concat(SETTINGS.types.entity);
@@ -58,7 +58,15 @@ angular.module('histograph')
               $scope.values = res.result.facets;
             });
             break;
-
+          case 'search.resources':
+            SearchVizFactory.get(angular.extend({
+              viz: 'elastic',
+              model: 'resource'
+            }, params, $stateParams),function(res) {
+              $scope.status = 'idle';
+              $scope.values = res.result.facets;
+            });
+            break;
           default:
             VisualizationFactory.resource('elastic', params).then(function(res) {
               $scope.status = 'idle';

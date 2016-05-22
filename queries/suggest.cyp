@@ -299,17 +299,30 @@ WITH res
 {?res:start_time__gt}
 {AND?res:end_time__lt}
 {AND?res:type__in}
-WITH DISTINCT res
+WITH res
 {if:with}
-  MATCH (ent:entity)
-    WHERE ent.uuid IN {with}
-  WITH ent
-  MATCH (ent) -[:appears_in]->(res)
-  WITH DISTINCT res
+  MATCH (ent:entity)-[r:appears_in]->(res)
+  WHERE ent.uuid IN {with}
+  WITH res, count(r) as strict
+  WHERE strict = size({with})
+  WITH res
 {/if}
+{if:without}
+  OPTIONAL MATCH  (res)<-[r:appears_in]-(ent:entity)
+  WHERE ent.uuid IN {without}
+  WITH res, r
+  WHERE r is null
+  WITH res
+{/if}
+
+WITH collect(res) as resources
+WITH resources, length(resources) as total_items
+UNWIND resources as res
+
 RETURN {
   group: res.type,
-  count_items: count(res)
+  count_items: count(res),
+  total_items: total_items
 } // count per type
 
 
@@ -320,11 +333,20 @@ WITH res
 {?res:start_time__gt}
 {AND?res:end_time__lt}
 {AND?res:type__in}
-WITH DISTINCT res
+WITH res
 {if:with}
-  MATCH (ent:entity)-[:appears_in]->(res)
+  MATCH (ent:entity)-[r:appears_in]->(res)
   WHERE ent.uuid IN {with}
-  WITH DISTINCT res
+  WITH res, count(r) as strict
+  WHERE strict = size({with})
+  WITH res
+{/if}
+{if:without}
+  OPTIONAL MATCH  (res)<-[r:appears_in]-(ent:entity)
+  WHERE ent.uuid IN {without}
+  WITH res, r
+  WHERE r is null
+  WITH res
 {/if}
 SKIP {offset}
 LIMIT {limit}
@@ -354,9 +376,44 @@ RETURN {
   id: res.uuid,
   props: res,
   type: 'resource',
-  persons:        persons,
-  themes:  themes
+  persons: persons,
+  themes: themes
 } AS result
+
+
+// name: get_resources_elastic
+// get facets by query
+start res=node:node_auto_index({query})
+WITH res
+{?res:start_time__gt}
+{AND?res:end_time__lt}
+{AND?res:type__in}
+WITH res
+{if:with}
+  MATCH (res)<-[r:appears_in]-(ent2:entity) 
+  WHERE ent2.uuid IN {with}
+  WITH res, count(r) as strict
+  WHERE strict = size({with})
+  WITH res
+{/if}
+{if:without}
+  OPTIONAL MATCH  (res)<-[r:appears_in]-(ent:entity)
+  WHERE ent.uuid IN {without}
+  WITH res, r
+  WHERE r is null
+  WITH res
+{/if}
+MATCH (res)<-[r:appears_in]-(ent:{:entity})
+WHERE r.score > -1
+WITH ent, count(r) as df
+ORDER BY df desc, ent.name ASC
+LIMIT 100 
+RETURN {
+  id: ent.uuid,
+  label: last(labels(ent)),
+  name: ent.name,
+  w:df
+}
 
 
 // name: get_matching_entities_count
