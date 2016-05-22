@@ -304,35 +304,39 @@ LIMIT 10
 // get related nodes that are connected with the entity
 MATCH (ent:entity {uuid: {id}})
 WITH ent
-MATCH
-  (ent)-[r:appears_in]->(res:resource){if:with}<-[:appears_in]-(ent2){/if}
-  WHERE r.score > -2
-  {if:with}
-    AND ent2.uuid in {with}
-  {/if}
-  {if:start_time}
-    AND res.start_time >= {start_time}
-  {/if}
-  {if:end_time}
-    AND res.end_time <= {end_time}
-  {/if}
-  {if:mimetype}
-    AND res.mimetype in {mimetype}
-  {/if}
-  {if:type}
-    AND res.type in {type}
-  {/if}
-WITH DISTINCT res, r, ent
+MATCH (ent)-[r1:appears_in]->(res:resource)
+WHERE r1.score > -1
+WITH res
+{if:with}
+  MATCH (res)<-[r:appears_in]-(ent2:entity) 
+  WHERE ent2.uuid IN {with}
+  WITH res, count(r) as strict
+  WHERE strict = size({with})
+  WITH res
+{/if}
+{?res:start_time__gt}
+{AND?res:end_time__lt}
+{AND?res:type__in}
+WITH res
+{if:without}
+  OPTIONAL MATCH  (res)<-[r:appears_in]-(ent:entity)
+  WHERE ent.uuid IN {without}
+  WITH res, r
+  WHERE r is null
+  WITH res
+{/if}
 {if:orderby}
 ORDER BY {:orderby}
 {/if}
 {unless:orderby}
-ORDER BY r.tfidf DESC, res.start_time DESC
+ORDER BY res.start_time DESC
 {/unless}
-
 SKIP {offset}
 LIMIT {limit}
-
+WITH res
+MATCH (ent:entity {uuid: {id}})-[r:appears_in]->(res)
+WHERE r.score > -1
+WITH res,r,ent
 OPTIONAL MATCH (res)<-[r_the:appears_in]-(the:`theme`)
 
 WITH r, ent, res, r_the, the
@@ -364,7 +368,13 @@ WITH r, ent, res, themes, persons
     themes: themes,
     persons: persons
   } as result
+{if:orderby}
+ORDER BY {:orderby}
+{/if}
+{unless:orderby}
 ORDER BY r.tfidf DESC, res.start_date DESC
+{/unless}
+
 
 
 // name: signale_related_resource
@@ -376,24 +386,38 @@ WHERE ent.uuid = {entity_id} AND res.uuid = {resource_id}
 
 
 // name:count_related_resources
-MATCH (ent: entity {uuid: {id}})-[r:appears_in]->(res:resource){if:with}<-[:appears_in]-(ent2){/if}
-WHERE r.score > -2
-  {if:with}
-    AND ent2.uuid in {with}
-  {/if}
-  {if:start_time}
-    AND res.start_time >= {start_time}
-  {/if}
-  {if:end_time}
-    AND res.end_time <= {end_time}
-  {/if}
-  {if:mimetype}
-    AND res.mimetype in {mimetype}
-  {/if}
-  {if:type}
-    AND res.type in {type}
-  {/if}
-RETURN count(res) as count_items
+// count related reosurces
+MATCH (ent:entity {uuid: {id}})
+WITH ent
+MATCH (ent)-[r1:appears_in]->(res:resource)
+WHERE r1.score > -1
+WITH res
+{if:with}
+  MATCH (res)<-[r:appears_in]-(ent2:entity) 
+  WHERE ent2.uuid IN {with}
+  WITH res, count(r) as strict
+  WHERE strict = size({with})
+  WITH res
+{/if}
+{?res:start_time__gt}
+{AND?res:end_time__lt}
+{AND?res:type__in}
+WITH res
+{if:without}
+  OPTIONAL MATCH  (res)<-[r:appears_in]-(ent:entity)
+  WHERE ent.uuid IN {without}
+  WITH res, r
+  WHERE r is null
+  WITH res
+{/if}
+WITH collect(res) as resources
+WITH resources, length(resources) as total_items
+UNWIND resources as res
+RETURN {
+  group: {if:group}res.{:group}{/if}{unless:group}res.type{/unless}, 
+  count_items: count(res),
+  total_items: total_items
+} // count per type
 
 
 
