@@ -641,6 +641,9 @@ apiRouter.route('/entity/:id([\\da-zA-Z_\\-]+)/related/resource/graph')
 apiRouter.route('/entity/:id([\\da-zA-Z_\\-]+)/related/resource/timeline')
   .get(ctrl.entity.getRelatedResourcesTimeline);
 
+apiRouter.route('/entity/:id([\\da-zA-Z_\\-]+)/related/resource/elastic')
+  .get(ctrl.entity.getRelatedResourcesElastic);
+
 apiRouter.route('/entity/:id([\\da-zA-Z_\\-]+)/upvote')
   .post(ctrl.entity.upvote)
   

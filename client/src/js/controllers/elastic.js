@@ -7,7 +7,7 @@
  * 
  */
 angular.module('histograph')
-  .controller('ElasticCtrl', function ($rootScope, $scope, $log, $timeout, $stateParams, VisualizationFactory, ResourceRelatedVizFactory, EVENTS, SETTINGS) {
+  .controller('ElasticCtrl', function ($rootScope, $scope, $log, $timeout, $stateParams, VisualizationFactory, ResourceRelatedVizFactory, EntityRelatedVizFactory, EVENTS, SETTINGS) {
     $log.log('ElasticCtrl -> ready', $scope.filters, SETTINGS.types.entity, $scope.state);
 
     $scope.availableDimensions = ['entity'].concat(SETTINGS.types.entity);
@@ -37,27 +37,36 @@ angular.module('histograph')
           limit: 20,
         }, $scope.params);
 
-        if($scope.currentState.name == 'resource.resources') {
-          // special query for type
-          ResourceRelatedVizFactory.get(angular.extend({
-            id: $stateParams.id,
-            viz: 'elastic',
-            model: 'resource'
-          }, params), function(res) {
-            $scope.status = 'idle';
-            $scope.values = res.result.facets;
-          });
-        } else {
-          // special query for type
-          VisualizationFactory.resource('elastic', params).then(function(res) {
-            $scope.status = 'idle';
-            $scope.values = res.data.result.facets;
-            // if t, set totalItems
-            // if(res.data.result.facets.length && res.data.result.facets[0].t)
-            //   $scope.setTotalItems(res.data.result.facets[0].t)
+        switch($scope.currentState.name){
+          case 'resource.resources':
+            ResourceRelatedVizFactory.get(angular.extend({
+              id: $stateParams.id,
+              viz: 'elastic',
+              model: 'resource'
+            }, params), function(res) {
+              $scope.status = 'idle';
+              $scope.values = res.result.facets;
+            });
+            break;
+          case 'entity.resources':
+            EntityRelatedVizFactory.get(angular.extend({
+              id: $stateParams.id,
+              viz: 'elastic',
+              model: 'resource'
+            }, params), function(res) {
+              $scope.status = 'idle';
+              $scope.values = res.result.facets;
+            });
+            break;
 
-          });
+          default:
+            VisualizationFactory.resource('elastic', params).then(function(res) {
+              $scope.status = 'idle';
+              $scope.values = res.data.result.facets;
+            })
+            break;
         }
+        
       }, 500);
     };
 

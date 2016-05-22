@@ -701,6 +701,32 @@ module.exports = function(io){
         });
       })
     },
+
+    /*
+      Get facets for the resource related to the entity
+    */
+    getRelatedResourcesElastic: function (req, res) {
+      var form = validator.request(req, {
+            limit: 100,
+            offset: 0,
+            entity: 'entity'
+          });
+
+      if(!form.isValid)
+        return helpers.formError(form.errors, res);
+      
+      Entity.getRelatedResourcesElastic({
+        id: form.params.id
+      }, form.params, function (err, items) {
+        if(err)
+          return helpers.cypherQueryError(err, res);
+        res.ok({
+          facets: items
+        }, {
+          params: form.params
+        });
+      });
+    },
     
   }
 }

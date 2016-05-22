@@ -189,6 +189,18 @@ describe('controller:entity related items', function() {
       });
   });
 
+  it('should get the elastic facets with the related item' , function (done) {
+    session
+      .get('/api/entity/' + __entity.id +'/related/resource/elastic')
+      .expect('Content-Type', /json/)
+      .expect(200)
+      .end(function (err, res) {
+        should.not.exists(err);
+        should.exist(res.body.result.facets);
+        done();
+      });
+  });
+
   it('should upvote the relationship' , function (done) {
     session
       .post('/api/entity/' + __entity.id +'/related/resource/'+ __resource.id + '/upvote')

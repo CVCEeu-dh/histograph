@@ -906,9 +906,9 @@ WITH res
 {if:without}
   OPTIONAL MATCH  (res)<-[r:appears_in]-(ent:entity)
   WHERE ent.uuid IN {without}
-  WITH res, locations, r
+  WITH res, r
   WHERE r is null
-  WITH res, locations
+  WITH res
 {/if}
 
 WITH  res.start_month as tm, min(res.start_time) as t, count(res) as weight
@@ -1234,7 +1234,7 @@ MATCH (ent)-[:appears_in]->(res2:resource)
   WHERE ent2.uuid IN {with}
   WITH res2, count(r) as strict
   WHERE strict = size({with})
-  WITH DISTINCT res2
+  WITH res2
 {/if}
 {unless:with}
   WHERE res2.uuid <> {id}

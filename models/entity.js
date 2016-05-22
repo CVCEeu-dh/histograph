@@ -558,6 +558,18 @@ module.exports = {
         next(null, timeline);
     });
   },
+
+  /*
+    get facet of related resources elastic list (for filtering purposes)
+
+    @params entity - object containing at least the entity id
+    @params params - other filters ofr cypher query params to be assigned to the query
+    @params next   - callback function
+  */
+  getRelatedResourcesElastic: function(entity, params, next) {
+    var query = parser.agentBrown(queries.get_related_resources_elastic, params);
+    neo4j.query(query, params, next);
+  },
   /**
     Bipartite graph of entity and resources
   */

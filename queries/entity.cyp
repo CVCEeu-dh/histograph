@@ -414,21 +414,61 @@ MATCH (ent)-[:appears_in]->(res:resource)
   {if:end_time}
   AND res.end_time <= {end_time}
   {/if}
-
-{if:with}
-  WITH res
-  MATCH (ent2)
-  WHERE ent2.uuid in {with}
-  WITH res, ent2
-  MATCH (res)<-[:appears_in]-(ent2)
-{/if}
-  
 WITH DISTINCT res
-  
+{if:with}
+  MATCH (res)<-[r:appears_in]-(ent2)
+  WHERE ent2.uuid IN {with}
+  WITH res, count(r) as strict
+  WHERE strict = size({with})
+  WITH res
+{/if}
+{if:without}
+  OPTIONAL MATCH  (res)<-[r:appears_in]-(ent2:entity)
+  WHERE ent2.uuid IN {without}
+  WITH res, r
+  WHERE r is null
+  WITH res
+{/if}
 WITH  res.start_month as tm, min(res.start_time) as t,  count(res) as weight
 RETURN tm, t, weight
 ORDER BY tm ASC
 
+
+// name: get_related_resources_elastic
+MATCH (ent:entity {uuid: {id}})
+WITH ent
+MATCH (ent)-[r1:appears_in]->(res:resource)
+WHERE r1.score > -1
+WITH res
+{if:with}
+  MATCH (res)<-[r:appears_in]-(ent2:entity) 
+  WHERE ent2.uuid IN {with}
+  WITH res, count(r) as strict
+  WHERE strict = size({with})
+  WITH res
+{/if}
+{?res:start_time__gt}
+{AND?res:end_time__lt}
+{AND?res:type__in}
+WITH res
+{if:without}
+  OPTIONAL MATCH  (res)<-[r:appears_in]-(ent:entity)
+  WHERE ent.uuid IN {without}
+  WITH res, r
+  WHERE r is null
+  WITH res
+{/if}
+MATCH (res)<-[r:appears_in]-(ent:{:entity})
+WHERE r.score > -1
+WITH ent, count(r) as df
+ORDER BY df desc, ent.name ASC
+LIMIT 100 
+RETURN {
+  id: ent.uuid,
+  label: last(labels(ent)),
+  name: ent.name,
+  w:df
+}
 
 
 // name:get_graph

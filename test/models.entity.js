@@ -204,6 +204,19 @@ describe('model:entity ', function() {
       done();
     })
   });
+
+  it('should return elastic facet', function(done){
+    Entity.getRelatedResourcesElastic({
+      id: __entity.id,
+      limit: 12,
+      offset: 0,
+      with: [__entityB.id]
+    }, function (err, facets){
+      should.not.exist(err, err);
+      should.exist(facets.length)
+      done();
+    });
+  });
 });
 
 describe('model:entity upvote downvote the entity', function() {
