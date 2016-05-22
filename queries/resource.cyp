@@ -286,12 +286,19 @@ MATCH (ent)-[:appears_in]->(res2:resource)
   WHERE ent2.uuid IN {with}
   WITH res2, count(r) as strict
   WHERE strict = size({with})
-  WITH DISTINCT res2
+  WITH res2
 {/if}
 {unless:with}
   WHERE res2.uuid <> {id}
   WITH DISTINCT res2
 {/unless}
+{if:without}
+  OPTIONAL MATCH  (res2)<-[r:appears_in]-(ent:entity)
+  WHERE ent.uuid IN {without}
+  WITH res2, r
+  WHERE r is null
+  WITH res2
+{/if}
 {?res2:start_time__gt}
 {AND?res2:end_time__lt}
 {AND?res2:type__in}
@@ -311,6 +318,7 @@ MATCH (res1:resource {uuid: {id}})
 WITH res1 
 MATCH (res1)<-[r1:appears_in]-(ent:entity)
 WHERE r1.score > -1 AND ent.score > -1
+
 WITH res1, r1, ent
   ORDER BY r1.score DESC, r1.tfidf DESC
   LIMIT 9
@@ -331,7 +339,14 @@ WITH res1, res2
 {AND?res2:type__in}
 
 WITH res1, res2, count(*) as intersection
-
+{if:without}
+  WITH res1, res2, intersection
+  OPTIONAL MATCH  (res2)<-[r:appears_in]-(ent:entity)
+  WHERE ent.uuid IN {without}
+  WITH res1, res2, intersection, r
+  WHERE r is null
+  WITH res1, res2, intersection
+{/if}
 // MATCH (res1)<-[rel:appears_in]-(r1:entity)
 // WITH res1, res2, intersection, count(rel) as H1
 
