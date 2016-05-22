@@ -311,6 +311,18 @@ describe('model:resource ', function() {
       done();
     })
   });
+
+  it('should return the facet for label "person" related to a specific resource', function(done){
+    Resource.getRelatedResourcesElastic({
+      id: __resourceA.id
+    },{
+      entity: 'person'
+    }, function(err, facets){
+      should.not.exist(err);
+      should.exist(facets.length);
+      done();
+    })
+  });
   
   it('should get a NOT found error', function (done) {
     Resource.get(111600000000, __userB, function (err, res) {

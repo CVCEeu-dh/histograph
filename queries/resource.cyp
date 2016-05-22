@@ -943,6 +943,14 @@ MATCH (ent)-[:appears_in]->(res2:resource)
 {?res2:start_time__gt}
 {AND?res2:end_time__lt}
 {AND?res2:type__in}
+{if:without}
+  WITH res2
+  OPTIONAL MATCH  (res2)<-[r:appears_in]-(ent:entity)
+  WHERE ent.uuid IN {without}
+  WITH res2, r
+  WHERE r is null
+  WITH res2
+{/if}
 WITH res2.start_month as tm, min(res2.start_time) as t,  count(res2) as weight
 RETURN tm, t, weight
 ORDER BY tm ASC
@@ -1207,10 +1215,10 @@ RETURN {
   t:total_items
 }
 
+
 // name: facet_related_resources_entities
 //
-MATCH (res:resource)
-  WHERE res.uuid = {id} 
+MATCH (res:resource {uuid: {id}})
 WITH res
 MATCH (res)<-[r1:appears_in]-(ent:entity)
 WHERE r1.score > -1 AND ent.score > -1
@@ -1219,40 +1227,38 @@ WITH res, r1, ent
   LIMIT 9
 WITH ent
 MATCH (ent)-[:appears_in]->(res2:resource)
-
 {if:with}
   WHERE res2.uuid <> {id}
-
   WITH res2
-  MATCH (res2)<-[:appears_in]-(ent2:entity) 
-  WHERE id(ent2) IN {with}
-
-  MATCH (res:resource)<-[r:appears_in]-(ent:entity)
-  WHERE ent.uuid IN {with}
-  WITH res, count(r) as strict
+  MATCH (res2)<-[r:appears_in]-(ent2:entity) 
+  WHERE ent2.uuid IN {with}
+  WITH res2, count(r) as strict
   WHERE strict = size({with})
-  WITH res
-
+  WITH DISTINCT res2
 {/if}
 {unless:with}
-  WHERE id(res2) <> {id}
+  WHERE res2.uuid <> {id}
+  WITH DISTINCT res2
 {/unless}
-
-  {if:mimetype}
-  AND res2.mimetype IN {mimetype}
-  {/if}
-  {if:type}
-  AND res2.type IN {type}
-  {/if}
-  {if:start_time}
-  AND res2.start_time >= {start_time}
-  {/if}
-  {if:end_time}
-  AND res2.end_time <= {end_time}
-  {/if}
+{?res2:start_time__gt}
+{AND?res2:end_time__lt}
+{AND?res2:type__in}
 WITH res2
+{if:without}
+  OPTIONAL MATCH  (res2)<-[r:appears_in]-(ent:entity)
+  WHERE ent.uuid IN {without}
+  WITH res2, r
+  WHERE r is null
+  WITH res2
+{/if}
+MATCH (res2)<-[:appears_in]-(ent:{:entity})
+WITH ent, count(res2) as df
+ORDER BY df desc, ent.name ASC
+LIMIT 100 
 RETURN {
-  group: {if:group}res2.{:group}{/if}{unless:group}res2.type{/unless}, 
-  count_items: count(res2)
-} // count per type
+  id: ent.uuid,
+  label: last(labels(ent)),
+  name: ent.name,
+  w:df
+}
 

@@ -599,6 +599,8 @@ apiRouter.route('/resource/:id([\\da-zA-Z_\\-]+)/related/resource/graph')
   .get(ctrl.resource.getRelatedResourcesGraph);
 apiRouter.route('/resource/:id([\\da-zA-Z_\\-]+)/related/resource/timeline')
   .get(ctrl.resource.getRelatedResourcesTimeline);
+apiRouter.route('/resource/:id([\\da-zA-Z_\\-]+)/related/resource/elastic')
+  .get(ctrl.resource.getRelatedResourcesElastic);
 
 
 apiRouter.route('/cooccurrences/:entityA(person|theme|location|place|organization)/related/:entityB(person|theme|location|place|organization)') // @todo move to entity controller.

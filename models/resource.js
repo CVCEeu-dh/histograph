@@ -622,13 +622,26 @@ module.exports = {
       next(null, nodes);
     });
   },
-  // todo
-  getRelatedResourcesElastic: function(resource, properties, next) {
-    helpers.cypherTimeline(rQueries.get_related_resources_timeline, _.assign({}, properties, resource), function (err, timeline) {
-      if(err)
+  /*
+    Return the related entities facets related to entities connected with a specific resource.
+    Please specific the entity type (neo4j label)
+  */
+  getRelatedResourcesElastic: function(resource, params, next) {
+    _.assign(params, {
+      id: resource.id,
+      entity: params.entity || 'entity',
+      limit: +params.limit || 100,
+      offset: +params.offset || 0
+    });
+
+    var query = parser.agentBrown(rQueries.facet_related_resources_entities, params);
+
+    neo4j.query(query, params, function (err, nodes) {
+      if(err) {
         next(err);
-      else
-        next(null, timeline);
+        return;
+      }
+      next(null, nodes);
     });
   },
 
