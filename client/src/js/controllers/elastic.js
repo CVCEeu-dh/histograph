@@ -7,8 +7,8 @@
  * 
  */
 angular.module('histograph')
-  .controller('ElasticCtrl', function ($scope, $log, $timeout, VisualizationFactory, EVENTS, SETTINGS) {
-    $log.log('ElasticCtrl -> ready', $scope.filters, SETTINGS.types.entity);
+  .controller('ElasticCtrl', function ($rootScope, $scope, $log, $timeout, $stateParams, VisualizationFactory, ResourceRelatedVizFactory, EVENTS, SETTINGS) {
+    $log.log('ElasticCtrl -> ready', $scope.filters, SETTINGS.types.entity, $scope.state);
 
     $scope.availableDimensions = ['entity'].concat(SETTINGS.types.entity);
     $scope.dimensions = [];
@@ -17,7 +17,8 @@ angular.module('histograph')
     $scope.values = [];
     $scope.opened = false;
 
-    var sync_timer;
+    var sync_timer,
+        dimension;
 
     // load facet(s?)
     $scope.sync = function(){
@@ -35,15 +36,28 @@ angular.module('histograph')
           entity: $scope.dimension,
           limit: 20,
         }, $scope.params);
-        // special query for type
-        VisualizationFactory.resource('elastic', params).then(function(res) {
-          $scope.status = 'idle';
-          $scope.values = res.data.result.facets;
-          // if t, set totalItems
-          // if(res.data.result.facets.length && res.data.result.facets[0].t)
-          //   $scope.setTotalItems(res.data.result.facets[0].t)
 
-        });
+        if($scope.currentState.name == 'resource.resources') {
+          // special query for type
+          ResourceRelatedVizFactory.get(angular.extend({
+            id: $stateParams.id,
+            viz: 'elastic',
+            model: 'resource'
+          }, params), function(res) {
+            $scope.status = 'idle';
+            $scope.values = res.result.facets;
+          });
+        } else {
+          // special query for type
+          VisualizationFactory.resource('elastic', params).then(function(res) {
+            $scope.status = 'idle';
+            $scope.values = res.data.result.facets;
+            // if t, set totalItems
+            // if(res.data.result.facets.length && res.data.result.facets[0].t)
+            //   $scope.setTotalItems(res.data.result.facets[0].t)
+
+          });
+        }
       }, 500);
     };
 
@@ -71,10 +85,11 @@ angular.module('histograph')
     // set dimension
     $scope.setDimension = function(dimension){
       $log.log('ElasticCtrl --> setDimension() dimension:', dimension);
-      if(dimension != $scope.dimension)
+      if(dimension != $scope.dimension){
         $scope.values = [];
+        $scope.sync();
+      }
       $scope.dimension = dimension;
-      $scope.sync();
     };
 
     // watch status.
@@ -82,6 +97,7 @@ angular.module('histograph')
       if(!v)
         return;
       $log.log('ElasticCtrl @opened', v);
+
       $scope.sync()
     });
 
@@ -98,5 +114,12 @@ angular.module('histograph')
     $scope.$on(EVENTS.API_PARAMS_CHANGED, function(e, params){
        $log.log('ElasticCtrl @API_PARAMS_CHANGED', params, $scope.filters);
        $scope.sync()
+    });
+
+
+    // watch $stateChangeStart. Empty value list
+    $rootScope.$on('$stateChangeStart', function (e, state) {
+      $log.log('ElasticCtrl @stateChangeStart', state.name);
+      $scope.values = [];
     });
   })
