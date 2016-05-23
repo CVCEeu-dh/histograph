@@ -46,11 +46,11 @@
   
         
         <div class='grammar-choice' ng-if='grammar.types'>
-          <span ng-if='filters.type'>
+          <!-- <span ng-if='filters.type'>
             <span ng-repeat='filter in filters.type'>
               <span class="filter ">type:<b>{{filter}}</b><span ng-click='removeFilter("type",filter)'>&nbsp;<i class="fa fa-times-circle"></i></span></span>{{!$last? ' OR ': ''}}
             </span>
-          </span>
+          </span> -->
         </div>
         <!-- <span ng-if='filters.type'>
             &nbsp;{{grammar.connector.type}}&nbsp;
@@ -83,21 +83,7 @@
           &nbsp;{{grammar.connector.relatedTo}}&nbsp;
         </span> -->
         
-        <!-- filters -->
-        <span ng-repeat='item in filterItems.with'>
-          <div class="grammar-choice">
-            <span class="filter {{item.type}}"><b data-id='{{item.id}}' gasp-type='{{item.type}}'>{{item.props|lookup:'name':language:24}}</b><span tooltip-append-to-body="true" tooltip='remove {{item.type}} {{item.props|lookup:"name":language:24}} from filters' ng-click='removeFilter("with",item.id)'>&nbsp;<i class="fa fa-times-circle"></i></span></span>
-          </div>
-          <!-- {{!$last? ' OR ': ''}} -->
-        </span>
-
-        <!-- filters -->
-        <span ng-repeat='item in filterItems.without'>
-          <div class="grammar-choice">
-            <span class="filter {{item.type}}" style='text-decoration: line-through'><b data-id='{{item.id}}' gasp-type='{{item.type}}'>{{item.props|lookup:'name':language:24}}</b><span tooltip-append-to-body="true" tooltip='remove {{item.type}} {{item.props|lookup:"name":language:24}} from filters' ng-click='removeFilter("without",item.id)'>&nbsp;<i class="fa fa-times-circle"></i></span></span>
-          </div>
-          <!-- {{!$last? ' OR ': ''}} -->
-        </span>
+        
 
         <div class='grammar-choice related-to' ng-if='grammar.relatedTo'  isolate-item>
           <span ng-if='!filters.with'>
@@ -124,7 +110,7 @@
         </div>
         
         
-        <span ng-if="filters.from">
+        <!-- <span ng-if="filters.from">
           &nbsp;{{grammar.connector.from}}&nbsp;
         
           <span ng-repeat='filter in filters.from'>
@@ -137,7 +123,7 @@
           <span ng-repeat='filter in filters.to'>
             <span class="filter"><b>{{filter}}</b><span ng-click='removeFilter("to",filter)'>&nbsp;<i class="fa fa-times-circle"></i></span></span>
           </span>
-        </span>
+        </span> -->
         
         
         

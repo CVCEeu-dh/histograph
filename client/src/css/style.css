@@ -143,13 +143,19 @@ a#header-title {
 
 #elastic .nav-tabs{
   border-bottom: 1px solid #C2C2C2;
-  background: #EBEAEA;
+  background: #f0f0f0;
+    border-top: 1px solid white;
 }
+
+
 
 #elastic .nav-tabs>li>a{
   text-transform: uppercase;
   font-size:11px;
   color: #8A8A8A;
+  line-height: 20px;
+  margin:0;
+  border: 0px solid transparent;
 }
 
 #elastic .nav-tabs>li.active>a, .nav-tabs>li.active>a:focus, .nav-tabs>li.active>a:hover {
@@ -206,8 +212,25 @@ a#header-title {
   z-index: 15;
   text-align: right;
 }
+
+#elastic-toggler .number{
+  position: absolute;
+  min-width: 20px; 
+  padding: 0 5px 0 5px;
+  height: 20px;
+  color: white;
+  text-align: center;
+  line-height: 20px;
+  top: 5px;
+  right: 10px;
+  background: #151515;
+  border-radius: 10px;
+  margin-left: 5px;
+  font-size: 10px;
+}
 #elastic-toggler .btn{
   height: 30px;
+  padding-right: 35px;
 }
 
 #elastic-toggler .btn.btn-line.active, #elastic-toggler .btn.btn-line.focus {
@@ -224,6 +247,24 @@ a#header-title {
   transform:translateY(-20px);
 }
 
+.active-filters{
+  padding: 10px;
+  border-bottom: 1px solid #C2C2C2;
+  background: #EBEAEA;
+}
+.filter-section{
+  /*border-top: 1px solid #d2d2d2;*/
+  padding-top: 10px;
+  /*margin-top: 10px;*/
+}
+.filter{
+    line-height: 25px;
+    display: inline-block;
+    padding: 0 5px;
+    border: 1px solid #ddd;
+    border-radius: 2px;
+        background: #f2f2f2;
+}
 
 .view{
   position: absolute;
