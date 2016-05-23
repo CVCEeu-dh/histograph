@@ -666,7 +666,8 @@ module.exports =  function(io){
         });
         // console.log(form)
         if(!form.isValid)
-          return helpers.models.formError(form.errors, res);
+          return helpers.formError(form.errors, res);
+
         services.viaf.autosuggest({
           query: form.params.query
         }, function (err, result){
@@ -703,7 +704,8 @@ module.exports =  function(io){
       });
       // console.log(form)
       if(!form.isValid)
-        return helpers.models.formError(form.errors, res);
+        return helpers.formError(form.errors, res);
+
       helpers.dbpediaPerson(form.params.link, function (err, result){
         if(err)
           res.error();
