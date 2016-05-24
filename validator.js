@@ -182,6 +182,14 @@ module.exports = {
       ],
       error: 'should be something like date'
     },
+    'bounds': {
+      field: 'bounds',
+      check: 'matches',
+      args: [
+        /[\d\.]+,[\d\.],[\d\.]+,[\d\.]+/
+      ],
+      error: 'bounds should be a string containing lat,lng,maxlat,maxlng '
+    },
   },
   /*
     Common validation fields
@@ -408,7 +416,7 @@ module.exports = {
     var errors     = {},
         warnings   = {},
         safeParams = {},
-        params     = _.merge(params || {}, req.query || {}, req.body || {}, req.params || {}),
+        params     = _.assign({}, params || {}, req.query || {}, req.body || {}, req.params || {}),
         
         fields     = module.exports.FIELDS,
         result;
@@ -420,7 +428,7 @@ module.exports = {
       // specify which fields are required (when usually they're not) or viceversa. Cfr module.exports.FIELDS
       
     }
-    
+
     // verify  
     result = verify(params, fields);
   
@@ -436,6 +444,9 @@ module.exports = {
     }
     // sanitize here the params if required (e.g, limit and offset if they're exagerated etc..)...
     safeParams = params;
+    
+    if(safeParams.bounds)
+      safeParams.bounds = safeParams.bounds.split(',');
     
     if(safeParams.id)
       safeParams.id = ''+safeParams.id;

@@ -8,6 +8,7 @@
 
 
 var validator = require('../validator.js'),
+    settings = require('../settings.js'),
     should    = require('should');
    
    
@@ -148,7 +149,7 @@ describe('validator: check mimetype field', function() {
   
   it('should work with multiple TYPE filters, comma separated', function (done) {
     var form = validator.request({}, {
-      type: 'letter,press'
+      type: settings.types.resources
     })
     // console.log(form.params)
     should.not.exist(form.errors);
@@ -159,16 +160,25 @@ describe('validator: check mimetype field', function() {
   });
   it('should NOT work with unrecognized TYPE filters, comma separated', function (done) {
     var form = validator.request({}, {
-      type: 'letter,press'
+      type: 'rabadaba,press'
     })
     // console.log(form.params)
-    should.not.exist(form.errors);
-    should.exist(form.params.type);
-    should.equal(form.params.type.length, 2);
-    should.equal(form.isValid, true);
+    should.exist(form.errors);
+    should.equal(form.isValid, false);
     done();
   });
   
+});
+
+describe('validator: check geo boundaries', function() {
+  it('should work for lat lng complete and correct boundaries tuples (exact location)', function (done) {
+    var form = validator.request({}, {
+      bounds: '42.64383,42.64383,11.98506,11.98506'
+    })
+    should.equal(form.params.bounds.length, 4);
+    should.equal(form.isValid, true);
+    done();
+  });
 });
 
 describe('validator: check entity fields', function() {
