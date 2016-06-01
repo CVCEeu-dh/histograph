@@ -1,4 +1,5 @@
 var gulp     = require('gulp'),
+    path     = require('path'),
 
     pkg      = require('./package.json'),
     _        = require('lodash'),
@@ -12,6 +13,7 @@ var gulp     = require('gulp'),
       }
     });
 // console.log(files)
+console.log('writing dist folder:', settings.paths.dist);
 // Files
 var banner = '/* histograph.js - Version: ' + pkg.version + ' - Author: danieleguido (Daniele Guido) */\n';
 
@@ -43,7 +45,7 @@ gulp.task('scripts', function() {
     .pipe($.concat('scripts.min.js'))
     // .pipe($.uglify())
     // Output files
-    .pipe(gulp.dest('./client/dist/js'))
+    .pipe(gulp.dest(path.join(settings.paths.dist,'js')))
     .pipe($.size({title: 'js'}))
 });
 
@@ -53,21 +55,21 @@ gulp.task('styles', function() {
   return gulp.src('./client/src/css/*')
     .pipe($.if('*.css', $.minifyCss()))
       // Output files
-    .pipe(gulp.dest('./client/dist/css'))
+    .pipe(gulp.dest(path.join(settings.paths.dist,'css')))
     .pipe($.size({title: 'styles'}));
 });
 
 // Optimize images
 gulp.task('images', function() {
   return gulp.src('./client/src/images/*')
-    .pipe(gulp.dest('./client/dist/images'))
+    .pipe(gulp.dest(path.join(settings.paths.dist,'images')))
     .pipe($.size({title: 'images'}));
 });
 
 // Copy web fonts to dist
 gulp.task('fonts', function() {
   return gulp.src(['./client/src/fonts/**'])
-    .pipe(gulp.dest('./client/dist/fonts'))
+    .pipe(gulp.dest(path.join(settings.paths.dist,'fonts')))
     .pipe($.size({title: 'fonts'}));
 });
 
@@ -75,7 +77,7 @@ gulp.task('fonts', function() {
 gulp.task('locale', function() {
   return gulp.src(['./client/src/locale/*.json'])
     .pipe($.jsonminify())
-    .pipe(gulp.dest('./client/dist/locale'))
+    .pipe(gulp.dest(path.join(settings.paths.dist,'locale')))
     .pipe($.size({title: 'locale'}));
 });
 // Build
