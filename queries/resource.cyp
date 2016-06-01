@@ -1205,15 +1205,19 @@ MATCH (res:resource)
 {AND?res:end_time__lt}
 {AND?res:type__in}
 WITH res
-{if:minlat}
-
-{/if}
-
 {if:without}
   OPTIONAL MATCH  (res)<-[r:appears_in]-(ent:entity)
   WHERE ent.uuid IN {without}
   WITH res, r
   WHERE r is null
+  WITH res
+{/if}
+{if:minlat}
+  MATCH (loc:location)<-[r:appears_in]-(ent:entity)
+  WHERE loc.lat >= {minlat}
+    AND loc.lat <= {maxlat}
+    AND loc.lng <= {minlng}
+    AND loc.lng <= {maxlng}
   WITH res
 {/if}
 WITH collect(res) as resources

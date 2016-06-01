@@ -1,14 +1,17 @@
-var gulp  = require('gulp'),
-    pkg   = require('./package.json'),
-    _     = require('lodash'),
+var gulp     = require('gulp'),
+
+    pkg      = require('./package.json'),
+    _        = require('lodash'),
     
-    files = require('./client/src/files').development,
-    $     = require('gulp-load-plugins')({
-              rename: {
-                'gulp-angular-templatecache': 'templatecache'
-              }
-            });
-console.log(files)
+    files    = require('./client/src/files').development,
+
+    settings = require('./settings'),
+    $        = require('gulp-load-plugins')({
+      rename: {
+        'gulp-angular-templatecache': 'templatecache'
+      }
+    });
+// console.log(files)
 // Files
 var banner = '/* histograph.js - Version: ' + pkg.version + ' - Author: danieleguido (Daniele Guido) */\n';
 
