@@ -19,7 +19,7 @@ html
 
     script(src='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.js')
     link(href='https://api.mapbox.com/mapbox.js/v2.4.0/mapbox.css',rel='stylesheet')
-    script(src='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/leaflet.markercluster.js')
+    //- script(src='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/leaflet.markercluster.js')
     script(src='https://api.mapbox.com/mapbox.js/plugins/leaflet-heat/v0.1.3/leaflet-heat.js')
 
     link(href='https://api.mapbox.com/mapbox.js/plugins/leaflet-markercluster/v0.4.0/MarkerCluster.css', rel='stylesheet')
@@ -834,6 +834,7 @@ html
         var types = !{JSON.stringify(types)};
         var analytics = !{JSON.stringify(analytics)};
         var user = !{JSON.stringify(user)};
+        //- var settings = !{JSON.stringify(settings)};
 
         console.log('AVAILABLE TYPES:', types)
         /*
@@ -843,7 +844,8 @@ html
           .constant("SETTINGS", {
             types: types,
             analytics: analytics,
-            user: user
+            user: user,
+            //- mapbox: 
           })
         .constant('GRAMMAR', {
           AS_TYPES: [

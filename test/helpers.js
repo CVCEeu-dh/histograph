@@ -199,8 +199,8 @@ describe('helpers: human date service', function() {
       format: 'YYYY-MM-DD'
     });
     
-    should.equal(d.start_date, '2015-06-07T00:00:00+00:00')
-    should.equal(d.end_date, '2015-06-07T23:59:00+00:00')
+    should.equal(d.start_date, '2015-06-07T00:00:00Z')
+    should.equal(d.end_date, '2015-06-07T23:59:00Z')
     
     var d_END = helpers.reconcileIntervals({
       start_date: '2015-06-07',
@@ -208,8 +208,8 @@ describe('helpers: human date service', function() {
       format: 'YYYY-MM-DD'
     });
     
-    should.equal(d_END.start_date, '2015-06-07T00:00:00+00:00')
-    should.equal(d_END.end_date, '2015-06-10T23:59:59+00:00')
+    should.equal(d_END.start_date, '2015-06-07T00:00:00Z')
+    should.equal(d_END.end_date, '2015-06-10T23:59:59Z')
     
     var d_STRICT = helpers.reconcileIntervals({
       start_date: '2015-06-07',
@@ -218,8 +218,8 @@ describe('helpers: human date service', function() {
       strict: true
     });
     
-    should.equal(d_STRICT.start_date, '2015-06-07T00:00:00+00:00')
-    should.equal(d_STRICT.end_date, '2015-06-10T00:00:00+00:00')
+    should.equal(d_STRICT.start_date, '2015-06-07T00:00:00Z')
+    should.equal(d_STRICT.end_date, '2015-06-10T00:00:00Z')
     
     done()
   });
@@ -228,16 +228,16 @@ describe('helpers: human date service', function() {
   it('should transform 90-92 in two years span', function (done) {
     helpers.reconcileHumanDate('90-92', 'fr', function (err, res) {
       should.not.exist(err, err);
-      should.equal(res.start_date, '1990-01-01T00:00:00+00:00'); // utc format
-      should.equal(res.end_date,  '1992-12-31T23:59:00+00:00');
+      should.equal(res.start_date, '1990-01-01T00:00:00Z'); // utc format
+      should.equal(res.end_date,  '1992-12-31T23:59:00Z');
       done();
     });
   });
   // it('should transform from 1933 to 1951 in a looot of years span', function (done) {
   //   helpers.reconcileHumanDate('from 1933 to 1951', 'fr', function (err, res) {
   //     should.not.exist(err, err);
-  //     should.equal(res.start_date, '1990-01-01T00:00:00+00:00'); // utc format
-  //     should.equal(res.end_date,  '1992-12-31T23:59:00+00:00');
+  //     should.equal(res.start_date, '1990-01-01T00:00:00Z'); // utc format
+  //     should.equal(res.end_date,  '1992-12-31T23:59:00Z');
   //     done();
   //   });
   // });
@@ -245,8 +245,8 @@ describe('helpers: human date service', function() {
     helpers.reconcileHumanDate('Brief von Duncan Sandys an Jean Monnet (London, 21. Dezember 1954)', 'de', function (err, res) {
       should.not.exist(err, err);
       
-      should.equal(res.start_date, '1954-12-21T00:00:00+00:00'); // utc format
-      should.equal(res.end_date, '1954-12-21T23:59:00+00:00');
+      should.equal(res.start_date, '1954-12-21T00:00:00Z'); // utc format
+      should.equal(res.end_date, '1954-12-21T23:59:00Z');
       done();
     });
   });
@@ -254,40 +254,40 @@ describe('helpers: human date service', function() {
   it('should transform 1er et 2 juin 1955 in two day span', function (done) {
     helpers.reconcileHumanDate('1er et 2 juin 1955', 'fr', function (err, res) {
       should.not.exist(err, err);
-      should.equal(res.start_date, '1955-06-01T00:00:00+00:00'); // utc format
-      should.equal(res.end_date, '1955-06-02T23:59:00+00:00');
+      should.equal(res.start_date, '1955-06-01T00:00:00Z'); // utc format
+      should.equal(res.end_date, '1955-06-02T23:59:00Z');
       done();
     });
   });
   it('should transform 17 septembre 1987 in a day span', function (done) {
     helpers.reconcileHumanDate('17 septembre 1987', 'fr', function (err, res) {
       should.not.exist(err, err);
-      should.equal(res.start_date, '1987-09-17T00:00:00+00:00'); // utc format
-      should.equal(res.end_date, '1987-09-17T23:59:00+00:00');
+      should.equal(res.start_date, '1987-09-17T00:00:00Z'); // utc format
+      should.equal(res.end_date, '1987-09-17T23:59:00Z');
       done();
     });
   });
   it('should transform Octobre 1972 in a month span', function (done) {
     helpers.reconcileHumanDate('Octobre 1972', 'fr', function (err, res) {
       should.not.exist(err, err);
-      should.equal(res.start_date, '1972-10-01T00:00:00+00:00'); // utc format
-      should.equal(res.end_date, '1972-10-31T23:59:00+00:00');
+      should.equal(res.start_date, '1972-10-01T00:00:00Z'); // utc format
+      should.equal(res.end_date, '1972-10-31T23:59:00Z');
       done();
     });
   });
   it('should transform 12 et 13 juillet 1976 in a two days span', function (done) {
     helpers.reconcileHumanDate('12 et 13 juillet 1976', 'fr', function (err, res) {
       should.not.exist(err, err);
-      should.equal(res.start_date, '1976-07-12T00:00:00+00:00'); // utc format
-      should.equal(res.end_date, '1976-07-13T23:59:00+00:00');
+      should.equal(res.start_date, '1976-07-12T00:00:00Z'); // utc format
+      should.equal(res.end_date, '1976-07-13T23:59:00Z');
       done();
     });
   });
   it('should transform 1er octobre 1945 in a one day span', function (done) {
     helpers.reconcileHumanDate('1er octobre 1945', 'fr', function (err, res) {
       should.not.exist(err, err);
-      should.equal(res.start_date, '1945-10-01T00:00:00+00:00'); // utc format
-      should.equal(res.end_date, '1945-10-01T23:59:00+00:00');
+      should.equal(res.start_date, '1945-10-01T00:00:00Z'); // utc format
+      should.equal(res.end_date, '1945-10-01T23:59:00Z');
       done();
     });
   });
@@ -295,8 +295,8 @@ describe('helpers: human date service', function() {
   it('should transform vers 1969 in a one day span', function (done) {
     helpers.reconcileHumanDate('vers 1969', 'fr', function (err, res) {
       should.not.exist(err, err);
-      should.equal(res.start_date, '1969-01-01T00:00:00+00:00'); // utc format
-      should.equal(res.end_date, '1969-12-31T23:59:00+00:00');
+      should.equal(res.start_date, '1969-01-01T00:00:00Z'); // utc format
+      should.equal(res.end_date, '1969-12-31T23:59:00Z');
       done();
     });
   });
@@ -304,8 +304,8 @@ describe('helpers: human date service', function() {
   it('should transform Années 1960 in a TEN YEARS span', function (done) {
     helpers.reconcileHumanDate('Années 1960', 'fr', function (err, res) {
       should.not.exist(err, err);
-      should.equal(res.start_date, '1960-01-01T00:00:00+00:00'); // utc format
-      should.equal(res.end_date, '1969-12-31T23:59:00+00:00');
+      should.equal(res.start_date, '1960-01-01T00:00:00Z'); // utc format
+      should.equal(res.end_date, '1969-12-31T23:59:00Z');
       done();
     });
   });
@@ -313,8 +313,8 @@ describe('helpers: human date service', function() {
   it('should transform (Bonn, 9 juin 1970) in a one day span', function (done) {
     helpers.reconcileHumanDate('Note interne de la chancellerie allemande sur le traité avec la Pologne (Bonn, 9 juin 1970)', 'fr', function (err, res) {
       should.not.exist(err, err);
-      should.equal(res.start_date, '1970-06-09T00:00:00+00:00'); // utc format
-      should.equal(res.end_date, '1970-06-09T23:59:00+00:00');
+      should.equal(res.start_date, '1970-06-09T00:00:00Z'); // utc format
+      should.equal(res.end_date, '1970-06-09T23:59:00Z');
       done();
     });
   });
@@ -322,8 +322,8 @@ describe('helpers: human date service', function() {
   it('should transform  e (July 1950 in a one month span', function (done) {
     helpers.reconcileHumanDate('e (July 1950', 'en', function (err, res) {
       should.not.exist(err, err);
-      should.equal(res.start_date,  '1950-07-01T00:00:00+00:00'); // utc format
-      should.equal(res.end_date, '1950-07-31T23:59:00+00:00');
+      should.equal(res.start_date,  '1950-07-01T00:00:00Z'); // utc format
+      should.equal(res.end_date, '1950-07-31T23:59:00Z');
       done();
     });
   });

@@ -1127,8 +1127,10 @@ module.exports = {
               q.kill();
               return callback(err);
             }
-            console.log(entity)
-            
+            // output debug
+            console.log(clc.blackBright('   saved:',clc.greenBright(entity.props.name), '-uuid:', clc.greenBright(entity.props.uuid)));
+            console.log(clc.blackBright('   - frequency:', clc.magentaBright(entity.rel.properties.frequency), '/', entity.rel.properties.tdf));
+
             for(var i in ent.context) {
               if(!yaml[ent.context[i].language])
                 yaml[ent.context[i].language] = [];
@@ -1150,7 +1152,7 @@ module.exports = {
             //     }
             //   }]);
             // });
-            console.log('    language:', ent.languages[0], '- n. splitpoints:',yaml[ent.languages[0]].length)
+            console.log(clc.blackBright('   - language:', ent.languages[0], '- n. splitpoints:',yaml[ent.languages[0]].length));
             nextEntity();
           })
         }, 1);

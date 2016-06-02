@@ -465,7 +465,10 @@ module.exports = {
             Person: 'person',
             Organisation: 'organization',
           };
-          
+      if(!entities) {
+        next(null, []);
+        return;
+      }   
       // clean entities
       entities = entities.map(function (d) {
         var _d = {
@@ -1228,30 +1231,51 @@ module.exports = {
         redirects = [],
         cache     = {};
     var q = async.queue(function (_link, nextLink) {
-      if(cache[_link]) {
-        console.log('skipping, already analyzed');
-        redirects.push(cache[_link]);
-        nextLink();
-        return;
-      }
-      
-      services.dbpedia({
-        link: _link,
-        followRedirection: false
-      }, function (err, wiki) {
-        var redirection = {};
-        if(err) {
-          redirection.redirectOf = undefined;
-        } else if(_.size(wiki) == 0) {
-          redirection.redirectOf = undefined;
-        } else if(!wiki["http://dbpedia.org/resource/" + _link] || !wiki["http://dbpedia.org/resource/" + _link]["http://dbpedia.org/ontology/wikiPageRedirects"]) {
-          redirection.redirectOf = _link;
-        } else {
-          redirection.redirectOf = path.basename(_.first(wiki["http://dbpedia.org/resource/" + _link]["http://dbpedia.org/ontology/wikiPageRedirects"]).value);
+      // if(cache[_link]) {
+      //   // console.log('skipping, already analyzed');
+      //   redirects.push(cache[_link]);
+      //   nextLink();
+      //   return;
+      // }
+      var key = 'dbpediaRedirect:' + _link;
+      console.log('key', key);
+      module.exports.cache.read({
+        namespace: 'services',
+        ref: key
+      }, function (err, contents) {
+        if(contents) {
+          console.log('using saved data')
+          // next(null, contents);
+          redirects.push(contents);
+          nextLink();
+          return;
         }
-        cache[_link] = redirection;
-        redirects.push(redirection);
-        setTimeout(nextLink, 5);
+
+        services.dbpedia({
+          link: _link,
+          followRedirection: false
+        }, function (err, wiki) {
+          var redirection = {};
+          if(err) {
+            redirection.redirectOf = undefined;
+          } else if(_.size(wiki) == 0) {
+            redirection.redirectOf = undefined;
+          } else if(!wiki["http://dbpedia.org/resource/" + _link] || !wiki["http://dbpedia.org/resource/" + _link]["http://dbpedia.org/ontology/wikiPageRedirects"]) {
+            redirection.redirectOf = _link;
+          } else {
+            redirection.redirectOf = path.basename(_.first(wiki["http://dbpedia.org/resource/" + _link]["http://dbpedia.org/ontology/wikiPageRedirects"]).value);
+          }
+          // cache[_link] = redirection;
+          // redirects.push(redirection);
+          // setTimeout(nextLink, 5);
+          module.exports.cache.write(JSON.stringify(redirection), {
+            namespace: 'services',
+            ref: key
+          }, function(err) {
+            redirects.push(redirection);
+            nextLink();
+          });
+        });
       });
     }, 1);
     q.push(links)
@@ -1294,7 +1318,9 @@ module.exports = {
         withoutWiki = _.filter(entities, function (d) {
           return !d.links_wiki || !d.links_wiki.length
         });
-    
+        console.log('disambiguating...')
+        
+
         module.exports.dbpediaRedirect(_.map(withWiki, 'links_wiki'), function (err, redirects) {
           if(err) {
             callback(err);

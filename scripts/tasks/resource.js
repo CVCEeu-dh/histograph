@@ -53,6 +53,25 @@ var task = {
       
     })
   },
+
+  checkAnnotation: function(options, callback) {
+    console.log(clc.yellowBright('\n   tasks.resource.checkAnnotation'),'uuid:', options.uuid);
+    neo4j.query(
+      ' MATCH (res:resource {uuid:{uuid}})-[r]-(ann:annotation)\n'+
+      ' RETURN res,r,ann', options, function (err, nodes) {
+      if(err) {
+        callback(err);
+        return;
+      }
+      // console.log(nodes)
+      console.log(clc.blackBright('   nodes:', clc.magentaBright(nodes.length)));
+      var t = Resource.getAnnotatedText(nodes[0].res, nodes[0].ann)
+      console.log(t)
+      callback(null, options)
+      
+    })
+  },
+
   
   /*
     cluster date basd on month

@@ -186,7 +186,7 @@ module.exports = {
       field: 'bounds',
       check: 'matches',
       args: [
-        /[\d\.]+,[\d\.],[\d\.]+,[\d\.]+/
+        /[\d\.,]+;[\d\.,]+;[\d\.,]+;[\d\.,]+/
       ],
       error: 'bounds should be a string containing lat,lng,maxlat,maxlng '
     },
@@ -442,12 +442,21 @@ module.exports = {
           errors: result
         };
     }
+
+    // hasfilters
+
+
     // sanitize here the params if required (e.g, limit and offset if they're exagerated etc..)...
     safeParams = params;
     
-    if(safeParams.bounds)
-      safeParams.bounds = safeParams.bounds.split(',');
-    
+    if(safeParams.bounds){
+      console.log(safeParams.bounds)
+      // safeParams.bounds = _.map(String(safeParams.bounds)
+      _.assign(safeParams, _.zipObject(['maxlat', 'maxlng', 'minlat', 'minlng'], _.map(safeParams.bounds.split(';'), function(d){
+        return +d;
+      })));
+      console.log(safeParams)
+    }
     if(safeParams.id)
       safeParams.id = ''+safeParams.id;
     

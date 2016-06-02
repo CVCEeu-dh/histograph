@@ -19,6 +19,9 @@ angular.module('histograph')
     
     $scope.params = {}; //  this would contain limit, offset, from, to and other API params. Cfr. EVENT.API_PARAMS_CHANGED
     
+    $scope.setParams = function(params) {
+      $scope.params = params;
+    }
     // the paths followed by a single user
     $scope.trails = [];
     
@@ -506,23 +509,6 @@ angular.module('histograph')
       $scope.$broadcast(EVENTS.LOCATION_CHANGE_START)
       $scope.setMessage(MESSAGES.LOADING);
     });
-    
-    $scope.currentPath;
-    
-    $scope.$on('$locationChangeSuccess', function (e, path) {
-      $log.log('CoreCtrl @locationChangeSuccess', path, $location);
-      
-      // same state as before???
-      if($scope.currentPath == $location.path()) {
-        $scope.params = $location.search();
-        $scope.$broadcast(EVENTS.API_PARAMS_CHANGED, angular.copy($scope.params));
-      
-      }
-      $scope.currentPath = $location.path();
-      
-      $scope.unsetMessage();
-    });
-
     /*
       listener socket disconnection
       ---

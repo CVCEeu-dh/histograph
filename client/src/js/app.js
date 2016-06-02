@@ -51,6 +51,7 @@ angular
     USE_USER: 'use_user',
     USER_NOT_AUTHENTIFIED: 'user_not_authentified',
     API_PARAMS_CHANGED: 'api_params_changed',
+    API_FILTERS_CHANGED: 'api_filters_changed',
     PAGE_CHANGED: 'page_changed',
     ANNOTATOR_SHOWN: 'annotationEditorShown',
     ANNOTATOR_HIDDEN: 'annotationEditorHidden',

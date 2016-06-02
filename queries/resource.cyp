@@ -119,6 +119,14 @@ WITH res
   WHERE strict = size({with})
   WITH res
 {/if}
+{if:minlat}
+  MATCH (res)<-[r:appears_in]-(loc:location)
+  WHERE loc.lat >= {minlat}
+    AND loc.lat <= {maxlat}
+    AND loc.lng >= {minlng}
+    AND loc.lng <= {maxlng}
+  WITH res
+{/if}
 {if:without}
   OPTIONAL MATCH  (res)<-[r:appears_in]-(ent:entity)
   WHERE ent.uuid IN {without}
@@ -225,6 +233,14 @@ WITH res
   WHERE ent.uuid IN {with}
   WITH res, count(ent) as strict
   WHERE strict = size({with})
+  WITH res
+{/if}
+{if:minlat}
+  MATCH (res)<-[r:appears_in]-(loc:location)
+  WHERE loc.lat >= {minlat}
+    AND loc.lat <= {maxlat}
+    AND loc.lng >= {minlng}
+    AND loc.lng <= {maxlng}
   WITH res
 {/if}
 {if:without}
@@ -1192,8 +1208,10 @@ RETURN {
 // name: facet_related_entities
 //
 {if:with}
-  MATCH (res:resource)<-[r:appears_in]-(ent:entity)
+  MATCH (ent:entity)
   WHERE ent.uuid IN {with}
+  WITH ent
+  MATCH (res:resource)<-[r:appears_in]-(ent)
   WITH res, count(r) as strict
   WHERE strict = size({with})
   WITH res
@@ -1213,10 +1231,10 @@ WITH res
   WITH res
 {/if}
 {if:minlat}
-  MATCH (loc:location)<-[r:appears_in]-(ent:entity)
+  MATCH (res)<-[r:appears_in]-(loc:location)
   WHERE loc.lat >= {minlat}
     AND loc.lat <= {maxlat}
-    AND loc.lng <= {minlng}
+    AND loc.lng >= {minlng}
     AND loc.lng <= {maxlng}
   WITH res
 {/if}

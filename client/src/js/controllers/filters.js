@@ -170,13 +170,14 @@ angular.module('histograph')
       // set query for search ctrl
       if(filters['query'])
         $scope.query = filters['query'].join('');
-      $log.debug('FiltersCtrl -> loadFilters()', filters);
+      $log.debug('FiltersCtrl -> loadFilters() @locationChangeSuccess', filters);
       $scope.filters = filters;
       $scope.isFiltered = !_.isEmpty($scope.filters);
       $scope.qs = qs.join('&');
-      $scope.loadFiltersItems();
-      
+
     }
+
+
     
     /*
       typeahead, with filters.
@@ -224,8 +225,27 @@ angular.module('histograph')
         $scope.removeFilter('type')
     }
     
-    $scope.$on('$locationChangeSuccess', $scope.loadFilters);
     
+    
+    $scope.currentPath;
+    
+    $scope.$on('$locationChangeSuccess', function (e, path) {
+      $log.log('CoreCtrl @locationChangeSuccess', path, $location);
+      
+      $scope.setParams($location.search());
+      $scope.loadFilters();
+      $scope.loadFiltersItems();
+        
+      // same state as before???
+      if($scope.currentPath == $location.path()) {
+        $scope.$broadcast(EVENTS.API_PARAMS_CHANGED, angular.copy($scope.params));
+      }
+      $scope.currentPath = $location.path();
+      
+      $scope.unsetMessage();
+
+    });
+
     /*
       Watch for currentState changes in ui.router.
       Cfr StateChangeSuccess listener in core.js
