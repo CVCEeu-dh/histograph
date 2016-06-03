@@ -231,6 +231,7 @@ a#header-title {
 #elastic-toggler .btn{
   height: 30px;
   padding-right: 35px;
+  background-color: #f0f0f0;
 }
 
 #elastic-toggler .btn.btn-line.active, #elastic-toggler .btn.btn-line.focus {
@@ -261,6 +262,7 @@ a#header-title {
     line-height: 25px;
     display: inline-block;
     padding: 0 5px;
+    margin-bottom: 5px;
     border: 1px solid #ddd;
     border-radius: 2px;
         background: #f2f2f2;

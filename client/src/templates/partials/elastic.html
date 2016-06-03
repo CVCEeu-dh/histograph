@@ -23,6 +23,11 @@
           <span class="filter">to: <b>{{filter}}</b><span ng-click='removeFilter("to",filter)'>&nbsp;<i class="fa fa-times-circle"></i></span></span>
         </span>
       </span>
+      <span ng-if="filters.bounds">
+        <span ng-repeat='filter in filters.bounds'>
+          <span class="filter">location in: <b>geo bounds</b> <a ng-href='/#/geo?{{qs}}'>(edit)</a> <span ng-click='removeFilter("bounds",filter)'>&nbsp;<i class="fa fa-times-circle"></i></span></span>
+        </span>
+      </span>
     </div>
     <div class='filter-section' ng-if='filterItems.with && filterItems.with.length'>
       <!-- filters -->

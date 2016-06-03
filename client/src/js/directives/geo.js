@@ -63,6 +63,20 @@ angular.module('histograph')
             bounds = _bounds;
             
           });
+
+          // load bounds if any ar given
+
+          if(scope.filters.bounds && scope.filters.bounds.length){
+            var _b = scope.filters.bounds[0].split(';');
+
+            map.fitBounds([[
+              _b[0], 
+              _b[1],
+            ],[ 
+              _b[2], 
+              _b[3],
+            ]]);
+          }
         };
 
         function draw(points){

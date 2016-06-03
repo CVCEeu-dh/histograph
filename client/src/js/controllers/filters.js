@@ -7,7 +7,7 @@
  * it was written in order to simplify CoreCtrl debugging
  */
 angular.module('histograph')
-  .controller('FiltersCtrl', function ($scope, $log, $http, $location, $stateParams, $q, SuggestFactory,EVENTS) {
+  .controller('FiltersCtrl', function ($scope, $log, $http, $location, $stateParams, $q, SuggestFactory, localStorageService,EVENTS) {
     $log.debug('FiltersCtrl ready, filters active:', $location.search());
     
     $scope.filters = {};
@@ -128,27 +128,43 @@ angular.module('histograph')
         $scope.filterItems.without = [];
         return;
       }
-      
-      // collect ids
-      var filterItems = ids = _.compact(($scope.filters.without || []).concat($scope.filters.with || []));
-      if(ids.length){
+      $log.log('FiltersCtrl -> loadFiltersItems() ', $scope.filters);
+      // load items needed only. The rest stays in memory (@todo)
+      var storedItems = localStorageService.get('unknownnodes') || {},
+          requested   = _.compact(($scope.filters.without || []).concat($scope.filters.with || [])),
+          toLoad      = _.difference(requested, _.keys(storedItems)); // get differences between the stored keys and the requested ones
+      $log.log('FiltersCtrl -> loadFiltersItems() ', requested, toLoad, _.keys(storedItems));
+      function dispatch(items){
+        var _withItems = [],
+            _withoutItems = [];
+
+        _(items)
+          .each(function(d){
+            if($scope.filters.with && $scope.filters.with.indexOf(d.id) !== -1){
+              _withItems.push(d);
+            }
+            if($scope.filters.without && $scope.filters.without.indexOf(d.id) !== -1){
+               _withoutItems.push(d);
+            }
+          });
+        $scope.filterItems.with = _withItems;
+        $scope.filterItems.without = _withoutItems;
+      }
+
+      if(toLoad.length == 0){
+        dispatch(storedItems);
+      } else {
+        // load from the server
         SuggestFactory.getUnknownNodes({
-          ids: ids
+          ids: toLoad
         }, function (res) {
-          var _withItems = [],
-              _withoutItems = [];
+          // merge storedItems
           _(res.result.items)
             .each(function(d){
-              if($scope.filters.with && $scope.filters.with.indexOf(d.id) !== -1){
-                _withItems.push(d);
-              }
-              if($scope.filters.without && $scope.filters.without.indexOf(d.id) !== -1){
-                 _withoutItems.push(d);
-              }
+              storedItems[d.id] = d;
             });
-          // publish to scope
-          $scope.filterItems.with = _withItems;
-          $scope.filterItems.without = _withoutItems;
+          localStorageService.set('unknownnodes', storedItems);
+          dispatch(storedItems);
         });
         
       }
