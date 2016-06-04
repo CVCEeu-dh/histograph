@@ -439,7 +439,7 @@ module.exports = {
         items: rQueries.get_related_actions
       },
       params: {
-        id:     +resource.id,
+        id:     resource.id,
         kind:   params.action,
         limit:  params.limit,
         offset: params.offset
