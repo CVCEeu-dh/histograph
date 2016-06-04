@@ -1474,6 +1474,7 @@ header ul li .notification a {
   right: 20px;
   bottom: 70px;
   background: #e8e8e8;
+  z-index: 10;
   display:none;
   -webkit-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
      -moz-transition: transform .3s cubic-bezier(0.65, 0.05, 0.36, 1);
@@ -1503,9 +1504,11 @@ header ul li .notification a {
   display: block
 }
 
-#milkyway.graph{
+#milkyway.graph, #milkyway.projection{
   display: block;
-  left: 20px;
+  left: 0px;
+  top: 70px;
+  border-top: 2px solid #fff;
 }
 
 
@@ -1720,6 +1723,62 @@ height: 150px;
   border-radius: 2px;
 }
 
+/*
+  Milkyway node switch menu
+*/
+#projection-menu{
+position: absolute;
+    z-index: 11;
+    right: 120px;
+    width: 250px;
+    /* margin-left: -125px; */
+    top: 5px;
+    color: #f0f0f0;
+    text-align: right;
+}
+
+#projection-menu .inner{
+  background: #353535;
+  padding: 0px 10px;
+  border-radius: 4px;
+  height: 30px;
+  line-height: 30px;
+      display: inline-block;
+    box-sizing: border-box;
+}
+
+
+#projection-menu .inner > div{
+  display: inline-block;
+}
+#projection-menu .btn{
+  display: inline-block;
+  height: 30px;
+  line-height: 30px;
+  padding:0 10px;
+  background-color: #f0f0f0;
+
+}
+
+#projection-menu .circle{
+    width: 15px;
+    height: 15px;
+    display: inline-block;
+    margin: 0 5px;
+    border-radius: 15px;
+}
+
+#projection-menu .circle.person{
+  background-color: #4dc3ba;
+}
+
+#projection-menu .circle.location{
+  background-color: #7e213c;
+}
+
+#projection-menu .circle.theme{
+  background-color: #ff9b01;
+}
 /*
   
   Sigma snippets
@@ -6476,7 +6535,7 @@ Copyright (c) 2015 Daniel Eden
   left: 0;
   right: 0;
   background-color: #f0f0f0;
-  z-index: 4;
+  z-index: 14;
   height: 50px;
   /*border-bottom: 1px solid #d4d4d4;*/
   border-top: 1px solid #E5E5E5;

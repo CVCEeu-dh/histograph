@@ -47,6 +47,7 @@ angular.module('histograph')
       var c = !!$scope.filters.type +
               !!$scope.filters.from + 
               !!$scope.filters.to +
+              !!$scope.filters.bounds +
               ($scope.filterItems.with? $scope.filterItems.with.length:0) +
               ($scope.filterItems.without? $scope.filterItems.without.length:0);
       return c;

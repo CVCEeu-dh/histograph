@@ -158,7 +158,7 @@ angular
       })
 
       .state('geo', {
-        url: '/geo',
+        url: '/geo?bounds&type&with&without&from&to',
         templateUrl: 'templates/geo.html',
         controller: 'GeoCtrl',
         reloadOnSearch: false,
@@ -277,33 +277,7 @@ angular
             }
           },
         })
-        .state('explore.projection', {
-          url: 'projection/:modelA/:modelB',
-          template: '<div></div>',
-          controller: 'ProjectionCtrl',
-          grammar: {
-            label: 'graph of :modelA---:modelB co-occurrences',
-            connector: {
-              type: 'in documents of type',
-              relatedTo: 'which mentions',
-              notRelatedTo: 'related to anyone',
-              from: 'from',
-              to: 'to'
-            },
-            types: GRAMMAR.IN_TYPES,
-            relatedTo: {
-              typeahead: 'entity'
-            }
-          },
-          resolve: {
-            relatedModel: function($stateParams) {
-              return $stateParams.modelA
-            },
-            projectedModel: function($stateParams) {
-              return $stateParams.modelB
-            },
-          }
-        })
+        
         
         .state('explore.issues', {
           url: 'issues',
@@ -325,6 +299,19 @@ angular
           },
         })
 
+      .state('projection', {
+          url: '/projection/:modelA/:modelB?bounds&type&with&without&from&to',
+          templateUrl: 'templates/partials/projection.html',
+          controller: 'ProjectionCtrl',
+          resolve: {
+            relatedModel: function($stateParams) {
+              return $stateParams.modelA
+            },
+            projectedModel: function($stateParams) {
+              return $stateParams.modelB
+            },
+          }
+        })
       
       .state('entity', {
         abstract: true,

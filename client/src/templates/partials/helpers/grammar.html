@@ -22,25 +22,7 @@
   </div> -->
 
 
-  
-  <div ng-if='ruler' class='grammar-choice ruler' ng-if='grammar'>
-    <!-- <b ng-if='item' class='grammar-item'>{{item.props|lookup:'name':language:36}}</b> --> 
-    {{grammar.label|enrichWithStateParams:stateParams}} <span ng-if='totalItems'>(
-        {{totalItems}})
-        </span>
-    <div class="btn-group" uib-dropdown is-open="false">
-      <button id="single-button" type="button" class="btn btn-default" uib-dropdown-toggle>
-        <i class='fa fa-angle-down'></i>
-      </button>
-      <ul class="uib-dropdown-menu dropdown-menu" role="menu" aria-labelledby="single-button">
-        <li ng-repeat="item in ruler.choices">
-          <a ng-click='setChoice(item)'>
-            {{item.label}}
-          </a>
-        </li>
-      </ul>
-    </div>
-  </div>
+ 
   
   <!-- grammar: filters -->
   

@@ -8,7 +8,7 @@
  * 
  */
 angular.module('histograph')
-  .controller('GeoCtrl', function ($scope, $log, points, VisualizationFactory, EVENTS) {
+  .controller('GeoCtrl', function ($scope, $log, points, VisualizationFactory, ResourceVizFactory, EVENTS) {
     $log.log('GeoCtrl -> ready', $scope.params);
 
     $scope.points = points;
@@ -28,6 +28,18 @@ angular.module('histograph')
         .join('-');
     };
 
+    // sync timeline
+    $scope.syncTimeline = function() {
+      ResourceVizFactory.get(angular.extend({
+          viz: 'timeline'
+      }, $scope.params), function (res) {
+          // if(res.result.titmeline)
+        $scope.setTimeline(res.result.timeline)
+      });
+      // else
+        // $scope.setTimeline([])
+    };
+
     // on param changed, update the geo points only when needed (again, geo boundaries are excluded).
     $scope.$on(EVENTS.API_PARAMS_CHANGED, function(e, params){
       var _hash = getFiltersWithoutGeo(params);
@@ -37,6 +49,10 @@ angular.module('histograph')
           $scope.points = res.data.result.items
         });
       }
+      $scope.syncTimeline();
       hash = _hash;
     });
+
+    // load timeline
+    $scope.syncTimeline();
   })

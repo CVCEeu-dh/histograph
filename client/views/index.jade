@@ -71,6 +71,7 @@ html
         line-height: 50px;
         font-size:13px;
         padding: 0 50px;
+        box-shadow: 1px 2px 0px #c5c5c5;
       }
 
       header ul{
@@ -271,7 +272,8 @@ html
       }
 
       header ul.menu li.active a{
-        color: #FF5742;
+        color: black;
+      border-bottom: 2px solid;
       }
 
       header ul.menu li a:hover{
@@ -597,9 +599,13 @@ html
                     a(href='#/?{{qs}}')
                       span#tip1 gallery
 
-                  li(class='{{currentState.name == "explore.persons"?"active":""}}')
-                    a(ng-href='#/projection/person/person?{{qs}}')
+                  li(ng-class="{active: currentState.name == 'projection'}")
+                    a(href='',ui-sref="projection({modelA: 'person', modelB: 'person', bounds:params.bounds, from:params.from, to:params.to, type: params.type, with:params.with, without:params.without})")
                       span#tip2 graph
+
+                  li(ng-class="{active: currentState.name == 'geo'}")
+                    a(href='',ui-sref="geo({bounds:params.bounds, from:params.from, to:params.to, type: params.type, with:params.with, without:params.without})")
+                      span#tip20 map
 
                   li
                     a.with-number(ng-click='toggleQueue()', uib-tooltip='pinboard', tooltip-placement='bottom') my pinboard 

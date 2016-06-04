@@ -7,10 +7,15 @@
  * 
  */
 angular.module('histograph')
-  .controller('ProjectionCtrl', function ($scope, $log, CooccurrencesFactory, ResourceVizFactory, relatedModel, projectedModel, EVENTS) {
+  .controller('ProjectionCtrl', function ($scope, $log, $stateParams, CooccurrencesFactory, ResourceVizFactory, relatedModel, projectedModel, EVENTS) {
     $log.debug('ProjectionCtrl ready', $scope.params);
     $scope.limit  = 20;
     $scope.offset = 0;
+
+    $scope.modelA = $stateParams.modelA;
+    $scope.modelB = $stateParams.modelB;
+
+    $scope.types = ['person', 'theme', 'location', 'place'];
     /*
       Reload related items, with filters.
     */
@@ -19,7 +24,7 @@ angular.module('histograph')
       CooccurrencesFactory.get(angular.extend({}, $scope.params, {
           model: relatedModel,
           projected_model: projectedModel,
-          limit: 300
+          limit: 500
         }), function (res){
         $scope.unlock('ProjectionCtrlgraph');
         $log.log('ProjectionCtrl CooccurrencesFactory returned a graph of',res.result.graph.nodes.length, 'nodes');

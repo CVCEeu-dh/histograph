@@ -1,0 +1,38 @@
+<div id='projection-menu' class='sans-serif'>
+  <div class="inner">
+    <div>
+      nodes
+    </div>
+
+    <div uib-dropdown class='node'>
+      <div uib-dropdown-toggle class=''>
+        <span class='circle' ng-class='modelA'></span>
+        <span translate='{{modelA}}'></span>
+        <span class='fa fa-angle-down'></span>
+      </div>
+      <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button">
+        <li role="menuitem" ng-repeat='type in types'>
+          <a ui-sref="projection({modelA: type, modelB: modelB})" translate='{{type}}'></a>
+        </li>
+      </ul>
+    </div>
+    <div uib-dropdown class='node'>
+      <div uib-dropdown-toggle class=''>
+        <span class='circle' ng-class='modelB'></span>
+        <span translate='{{modelB}}'></span>
+        <span class='fa fa-angle-down'></span>
+      </div>
+      <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="single-button">
+        <li role="menuitem" ng-repeat='type in types'>
+          <a ui-sref="projection({modelA: modelA, modelB: type})" translate='{{type}}'></a>
+        </li>
+        
+      </ul>
+    </div>
+  </div>
+    <!-- span(uib-dropdown, on-toggle="toggle(open)")
+                      a.with-number(href='#/', uib-dropdown-toggle)
+                        i.fa.fa-flash
+                        div.number.animated(ng-if='pulsations > 0') {{pulsations}}
+                      ul.uib-dropdown-menu.dropdown-menu -->
+</div>

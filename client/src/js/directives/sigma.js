@@ -21,7 +21,7 @@ angular.module('histograph')
         graph: '=',
         tips: '=',
         isLoading: '=isloading',
-        params: '=', // current filters, cfr CoreCtrl
+        params: '=', // current filters, cfr FiltersCtrl
         controller: '=',
         redirect: '&',
         addToQueue: '&queue',

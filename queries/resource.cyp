@@ -922,7 +922,7 @@ MATCH (res:resource)
 WHERE exists(res.start_month)
 WITH res
 {if:with}
-  MATCH (res)<-[:appears_in]-(ent:entity)
+  MATCH (ent:entity)-[:appears_in]->(res)
   WHERE ent.uuid IN {with}
   WITH res, count(ent) as strict
   WHERE strict = size({with})
@@ -933,6 +933,14 @@ WITH res
 {AND?res:end_time__lt}
 {AND?res:type__in}
 WITH res
+{if:minlat}
+  MATCH (loc:location)-[r:appears_in]->(res)
+  WHERE loc.lat >= {minlat}
+    AND loc.lat <= {maxlat}
+    AND loc.lng >= {minlng}
+    AND loc.lng <= {maxlng}
+  WITH res
+{/if}
 
 {if:without}
   OPTIONAL MATCH  (res)<-[r:appears_in]-(ent:entity)
@@ -1256,9 +1264,10 @@ RETURN {
 // name: facet_related_resources_entities
 //
 MATCH (res:resource {uuid: {id}})
+USING INDEX res:resource(uuid)
 WITH res
 MATCH (res)<-[r1:appears_in]-(ent:entity)
-WHERE r1.score > -1 AND ent.score > -1
+WHERE r1.score IN range(-1, 10000) AND ent.score IN range(-1, 10000)
 WITH res, r1, ent
   ORDER BY r1.tfidf DESC
   LIMIT 9
