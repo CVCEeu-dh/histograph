@@ -90,8 +90,8 @@ RETURN {
     social_groups:  social_groups,
     themes:  themes,
     //collections: EXTRACT(p in COLLECT(DISTINCT col)|{name: p.name, id: p.uuid, type: 'collection'}),
-    comments: count(distinct com),
-    inquiries: count(distinct inq),
+    comments: count(com),
+    inquiries: count(inq),
     lovers: lovers,
     curators: curators
   }
@@ -665,14 +665,6 @@ RETURN {
 
 // name: get_cooccurrences
 // 
-MATCH (res:resource)
-{?res:start_time__gt}
-{AND?res:end_time__lt}
-{AND?res:type__in}
-WITH res
-{if:minlat}
-
-{/if}
 {if:with}
   MATCH (res)<-[:appears_in]-(ent:entity)
   WHERE ent.uuid IN {with}
@@ -680,6 +672,21 @@ WITH res
   WHERE strict = size({with})
   WITH res
 {/if}
+{unless:with}
+MATCH (res:resource)
+{?res:start_time__gt}
+{AND?res:end_time__lt}
+{AND?res:type__in}
+WITH res
+{if:minlat}
+  MATCH (res)<-[r:appears_in]-(loc:location)
+  WHERE loc.lat >= {minlat}
+    AND loc.lat <= {maxlat}
+    AND loc.lng >= {minlng}
+    AND loc.lng <= {maxlng}
+  WITH res
+{/if}
+
 {if:without}
   OPTIONAL MATCH  (res)<-[r:appears_in]-(ent:entity)
   WHERE ent.uuid IN {without}
@@ -717,7 +724,12 @@ MATCH (res:resource)
 {AND?res:type__in}
 WITH res
 {if:minlat}
-
+  MATCH (res)<-[r:appears_in]-(loc:location)
+  WHERE loc.lat >= {minlat}
+    AND loc.lat <= {maxlat}
+    AND loc.lng >= {minlng}
+    AND loc.lng <= {maxlng}
+  WITH res
 {/if}
 {if:with}
   MATCH (res)<-[:appears_in]-(ent:entity)
@@ -1249,8 +1261,8 @@ WITH res
 WITH collect(res) as resources
 WITH size(resources) as total_items, resources UNWIND resources as res
 MATCH (res)<-[:appears_in]-(ent:{:entity})
-WITH total_items, ent, count(res) as df
-ORDER BY df desc, ent.name ASC
+WITH total_items, ent, count(*) as df
+ORDER BY df desc
 LIMIT 100 
 RETURN {
   id: ent.uuid,
