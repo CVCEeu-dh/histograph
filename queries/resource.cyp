@@ -62,6 +62,8 @@ WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, p
     }) WHERE has(x.id))[0..10] as social_groups
 
 OPTIONAL MATCH (res)-[r_the:appears_in]-(the:`theme`)
+WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, persons, organizations, social_groups, r_the, the
+ORDER BY r_the.score DESC
 WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, persons, organizations, social_groups, filter(x in collect({
       id: the.uuid,
       type: 'theme',
@@ -424,8 +426,7 @@ RETURN {
 
 // name: add_comment_to_resource
 // add a comment to a resource, by user username. At least one #tag should be provided
-START res=node({id})
-  MATCH (u:user {username:{username}})
+  MATCH (res:resource {uuid:{id}}), (u:user {username:{username}})
   WITH res, u 
     CREATE (com:`comment` {
       creation_date: {creation_date},
@@ -674,6 +675,7 @@ RETURN {
 {/if}
 {unless:with}
 MATCH (res:resource)
+{/unless}
 {?res:start_time__gt}
 {AND?res:end_time__lt}
 {AND?res:type__in}

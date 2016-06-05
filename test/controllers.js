@@ -324,25 +324,25 @@ describe('controllers: get resource items available to the user', function() {
         done();
       });
   });
-  
-  it('should create a comment and attach it to the required resource', function (done) {
-    session
-      .post('/api/resource/'+__resourceA.id+'/related/comment')
-      .send({
-        content : 'A content with some #taa and #location tag',
-        resource_id: 512,
-        tags: ['#taa', '#location']
-      })
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        should.exist(res.body.result.items.length)
-        should.exist(res.body.result.items[0].id)
-        should.equal(res.body.result.items[0].user.username, 'hello-world')
-        
-        done();
-      });
-  });
+  // DEPRECATED
+  // it('should create a comment and attach it to the required resource', function (done) {
+  //   session
+  //     .post('/api/resource/'+__resourceA.id+'/related/comment')
+  //     .send({
+  //       content : 'A content with some #taa and #location tag',
+  //       resource_id: 512,
+  //       tags: ['#taa', '#location']
+  //     })
+  //     .expect('Content-Type', /json/)
+  //     .expect(200)
+  //     .end(function (err, res) {
+  //       console.log('good', res.body.result.items)
+  //       should.exist(res.body.result.items.length)
+  //       should.exist(res.body.result.items[0].id)
+  //       should.equal(res.body.result.items[0].user.username, 'hello-world')
+  //       done();
+  //     });
+  // });
   
   it('should return the timeline of resources, filtered', function (done) {
     session
@@ -389,210 +389,13 @@ describe('controllers: get resource items available to the user', function() {
   
 });
 
-describe('controllers: inquiries', function() {
-
-  
-  it('should get some inquiries', function (done) {
-    session
-      .get('/api/inquiry?limit=10')
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        // if(err)
-        //   console.log(err);
-        should.not.exist(err);
-        should.exist(res.body.result.items.length);
-        done()
-      });
-  })
-  
-  it('should create a new inquiry', function (done) {
-    session
-      .post('/api/resource/'+__resourceA.id+'/related/inquiry')
-      .send({
-        name: 'this is a test inquiry',
-        description: 'please provide the resource with something important'
-      })
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        should.not.exist(err);
-        should.equal(res.body.result.item.proposed_by, 'hello-world')
-        __inquiry = res.body.result.item;
-        
-        done();
-      });
-  })
-  
-  it('should create a new comment', function (done) {
-    session
-      .post('/api/inquiry/' + __inquiry.id + '/related/comment')
-      .send({
-        content: 'this is a test comment'
-      })
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        should.not.exist(err);
-        
-        if(err)
-          console.log(err)   
-        __comment = res.body.result.item;
-        done();
-      });
-  })
-  
-  it('should downvote the new comment', function (done) {
-    session
-      .post('/api/comment/' + __comment.id + '/downvote')
-      .send({
-        upvoted_by: __inquiry.proposed_by
-      })
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        if(err)
-          console.log(err)   
-        should.not.exist(err);
-        should.equal(res.body.result.item.props.score, -1)
-        should.equal(res.body.result.item.props.celebrity, 1)
-        done();
-      });
-  })
-  
-  it('should upvote the new comment', function (done) {
-    session
-      .post('/api/comment/' + __comment.id + '/upvote')
-      .send({
-        upvoted_by: __inquiry.proposed_by
-      })
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        if(err)
-          console.log(err);
-        should.not.exist(err);
-        should.equal(res.body.result.item.props.score, 0)
-        should.equal(res.body.result.item.props.celebrity, 1)
-        done();
-      });
-  })
-  
-  it('should get the list of comments related to an inquiry', function (done) {
-    session
-      .get('/api/inquiry/' + __inquiry.id + '/related/comment?limit=12')
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        if(err)
-          console.log(err);
-        should.not.exist(err);
-        should.exist(res.body.result.items.length);
-        should.equal(res.body.info.params.limit, 12);
-        done()
-      });
-  })
-  
-  it('should get the inquiry just created', function (done) {
-    session
-      .get('/api/inquiry/' + __inquiry.id)
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        if(err)
-          console.log(err);
-        should.not.exist(err);
-        
-        should.exist(res.body.result.item);
-        done()
-      });
-  })
-  
-  it('should get a list of inquiries related to a resource', function (done) {
-    session
-      .get('/api/resource/'+__resourceA.id +'/related/inquiry?limit=10')
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        if(err)
-          console.log(err);
-        should.not.exist(err);
-        should.exist(res.body.result.items.length);
-        done()
-      });
-  });
-  
-});
 
 
 
 
 
-describe('controllers: collections', function() {
-  var __collection;
-  
-  it('should create a collection', function (done) {
-    session
-      .post('/api/collection')
-      .send({
-        ids: '26441,27631,11173',
-        name: 'Hello, world! test collection',
-        description: 'Hello, world! test collection. A long description.',
-      })
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        if(err)
-          console.log(err);
-        should.not.exist(err);
-        should.exist(res.body.result.item);
-        __collection = res.body.result.item;
-        done()
-      });
-  });
-  
-  it('should get a single collection item', function (done) {
-    session
-      .get('/api/collection/' + __collection.id)
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        if(err)
-          console.log(err);
-        should.not.exist(err);
-        should.exist(res.body.result.item);
-        done()
-      });
-  });
-  
-  it('should get a single collection related resources', function (done) {
-    session
-      .get('/api/collection/' + __collection.id + '/related/resources')
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        if(err)
-          console.log('ERROR', err);
-        should.not.exist(err);
-        should.exist(res.body.result.items);
-        done()
-      });
-  });
-  
-  it('should get a single collection graph object', function (done) {
-    session
-      .get('/api/collection/11137/graph')
-      .expect('Content-Type', /json/)
-      .expect(200)
-      .end(function (err, res) {
-        if(err)
-          console.log('ERROR', err);
-        should.not.exist(err);
-        should.exist(res.body.result.graph);
-        done()
-      });
-  });
-});
+
+
 
 describe('controllers: play with entities', function() {
   var Entity = require('../models/entity')

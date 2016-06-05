@@ -496,7 +496,7 @@ module.exports = function(io){
 
       // add dummy comments on it.
       neo4j.query(queries.add_comment_to_resource, {
-        id: +req.params.id,
+        id: req.params.id,
         content: req.body.content,
         tags: req.body.tags,
         username: req.user.username,

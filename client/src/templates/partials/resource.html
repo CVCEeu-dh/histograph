@@ -25,8 +25,14 @@
           
         <div class="meta">
           <p ng-if="item.themes.length" class="tags"><strong class='sans-serif' translate='resource.themes.mentioned'></strong>:
-            <span ng-repeat="the in item.themes"><span class="tag theme" data-id='{{the.id}}' gasp-type='theme' gasp-parent='{{item.type}}-{{item.id}}'>{{the.props|lookup:"name":language}}</span>{{$last? '':  ', '}}</span> — 
+            <span ng-repeat="tag in item.themes" ng-include='"templates/partials/entity-tag.html"'></span>   <!-- — --> 
+            <a class='btn btn-contribute' ng-click='contribute(item, "theme")'>add</a>
           </p>
+<!-- 
+            <span ng-repeat="the in item.themes"><span class="tag theme" data-id='{{the.id}}' gasp-type='theme' gasp-parent='{{item.type}}-{{item.id}}'>{{the.props|lookup:"name":language}}</span>{{$last? '':  ', '}}</span> — 
+          </p> -->
+
+
           <p class="tags"><strong class='sans-serif' translate='resource.people.mentioned'></strong>:
             <span ng-if="item.persons.length == 0">none.</span>
             <span ng-repeat="per in item.persons" ng-include='"templates/partials/entity-person-tag.html"'></span>   <!-- — --> 

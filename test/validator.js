@@ -173,9 +173,12 @@ describe('validator: check mimetype field', function() {
 describe('validator: check geo boundaries', function() {
   it('should work for lat lng complete and correct boundaries tuples (exact location)', function (done) {
     var form = validator.request({}, {
-      bounds: '42.64383,42.64383,11.98506,11.98506'
+      bounds: '42.64383;42.64383;11.98506;11.98506'
     })
-    should.equal(form.params.bounds.length, 4);
+    should.equal(form.params.maxlat, 42.64383);
+    should.equal(form.params.maxlng, 42.64383);
+    should.equal(form.params.minlat, 11.98506);
+    should.equal(form.params.minlng, 11.98506);
     should.equal(form.isValid, true);
     done();
   });
