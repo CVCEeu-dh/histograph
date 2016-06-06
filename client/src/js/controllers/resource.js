@@ -17,7 +17,7 @@ angular.module('histograph')
     /*
       Set graph title
     */
-    $scope.setHeader('graph', 'neighborhood for the document "' + $filter('title')(resource.result.item.props, $scope.language, 24) + '"');
+    // $scope.setHeader('graph', 'neighborhood for the document "' + $filter('title')(resource.result.item.props, $scope.language, 24) + '"');
     
     /**
       controller to directive 
