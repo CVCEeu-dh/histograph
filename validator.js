@@ -134,12 +134,14 @@ module.exports = {
       field: 'entity',
       check: 'includedIn',
       args: [
-        [
+        settings.types.entity || [
           'entity',
           'person',
           'location',
           'organization',
-          'social_group'
+          'social_group',
+          'theme',
+          'place'
         ]
       ],
       error: 'should be something like person, location or organization'
