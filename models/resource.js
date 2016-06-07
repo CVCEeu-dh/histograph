@@ -1047,8 +1047,8 @@ module.exports = {
           var additionalProperties = {};
           if(_.first(ent.type) == 'location') {
             additionalProperties = {
-              lat: ent.lat,
-              lng: ent.lng,
+              lat: +ent.lat,
+              lng: +ent.lng,
               country: ent.country,
               geoname_id: ent.geoname_id,
               geoname_fcl: ent.geoname_fcl,
@@ -1072,7 +1072,7 @@ module.exports = {
               q.kill();
               return callback(err);
             }
-            console.log(entity)
+            // console.log(entity)
             
             for(var i in ent.context) {
               if(!yaml[ent.context[i].language])

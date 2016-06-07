@@ -42,14 +42,24 @@ var express       = require('express'),        // call express
     _             = require('lodash'),
     
     // app client scripts dependencies (load scripts in jade)
-    clientFiles  = require('./client/src/files')[env];
+    clientFiles  = require('./client/src/files')[env],
 
+    // session middleware
+    sessionMiddleware;
 
 // check cache availability with redis
 if(settings.cache && settings.cache.redis) {
+  console.log('cache:','redis found in settings.js ...'); 
+  var redis = require('redis').createClient({
+        host: settings.cache.redis.host,
+        port: settings.cache.redis.port,
+      }),
+      RedisStore = require('connect-redis')(session);
+
   cache = require('express-redis-cache')({
-    host: settings.cache.redis.host,
-    port: settings.cache.redis.port,
+    client: redis,
+    // host: settings.cache.redis.host,
+    // port: settings.cache.redis.port,
     expire: 5 * 60 // 5 min OR till a POST/delete has benn done
   });
 
@@ -59,6 +69,28 @@ if(settings.cache && settings.cache.redis) {
 
   cache.on('error', function (error) {
     console.log('redis connection error', error)
+  });
+
+  // initilalize session middleware with redis
+  sessionMiddleware = session({
+    name: 'hg.sid',
+    secret: settings.secret.cookie,
+    store: new RedisStore({
+      client: redis
+    }),
+    
+    // trustProxy: false,
+    resave: true,
+    saveUninitialized: true
+  });
+} else {
+  // initilalize session middleware without redis
+  sessionMiddleware = session({
+    name: 'hg.sid',
+    secret: settings.secret.cookie,
+    // trustProxy: false,
+    resave: true,
+    saveUninitialized: true
   });
 }
 
@@ -70,14 +102,6 @@ var getCacheName = function(req) {
       .replace(/-$/, '');// + '?' + JSON.stringify(req.query);
   };
 
-// initilalize session middleware
-var sessionMiddleware = session({
-  name: 'hg.sid',
-  secret: settings.secret.cookie,
-  trustProxy: false,
-  resave: true,
-  saveUninitialized: true
-})
 
 console.log('title:', settings.title);
 console.log('logs: ', settings.paths.accesslog);
@@ -109,7 +133,7 @@ if ('production' == env) {
 // configure static files and jade templates
 
 app.set('views', './client/views');
-app.set('view engine', 'jade');
+app.set('view engine', 'pug');
 
 
 // configure app to use bodyParser(), this will let us get the data from a POST
@@ -666,11 +690,11 @@ apiRouter.route('/suggest/stats')
   .get(ctrl.suggest.getStats)
 apiRouter.route('/suggest/resource')
   .get(ctrl.suggest.getResources)
-apiRouter.route('/suggest/:entity(entity|person|location|organization)')
+apiRouter.route('/suggest/:entity(entity|person|location|organization|theme)')
   .get(ctrl.suggest.getEntities)
 apiRouter.route('/suggest/resource/graph')
   .get(ctrl.suggest.getResourcesGraph)
-apiRouter.route('/suggest/:entity(person|location|organization)/graph')
+apiRouter.route('/suggest/:entity(person|location|organization|theme)/graph')
   .get(ctrl.suggest.getEntitiesGraph)
 
 apiRouter.route('/suggest/all-in-between/:ids([\\da-zA-Z_\\-][\\d,a-zA-Z\\-_]+)/resource/graph')
