@@ -134,7 +134,7 @@ module.exports = {
       field: 'entity',
       check: 'includedIn',
       args: [
-        [
+        settings.types.entity || [
           'entity',
           'person',
           'location',
