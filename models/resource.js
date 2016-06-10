@@ -1062,6 +1062,7 @@ module.exports = {
           
           module.exports.createRelatedEntity(resource, _.assign(additionalProperties, {
             name: ent.name,
+            slug: ent.slug || helpers.text.slugify(ent.name),
             type: _.first(ent.type),
             services: ent.services,
             languages: ent.languages,
