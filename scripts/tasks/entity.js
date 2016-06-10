@@ -5,6 +5,7 @@
 var settings  = require('../../settings'),
     YAML = require('yamljs'),
     parser    = require('../../parser'),
+    helpers    = require('../../helpers'),
     inquirer     = require('inquirer'),
     neo4j     = require('seraph')(settings.neo4j.host),
     async     = require('async'),
@@ -15,7 +16,7 @@ var settings  = require('../../settings'),
     
     queries   = require('decypher')('./queries/similarity.cyp');
 
-module.exports = {
+var task = {
   /*
     get couples of entities having the same id.
     Call it before
@@ -584,5 +585,39 @@ module.exports = {
       else
         callback(null, options);
     });
+  },
+
+  slugify: function(options, callback){
+    console.log(clc.yellowBright('\n   tasks.entity.slugify'));
+    var q = async.queue(function(entity, nextEntity){
+      if(entity.slug && entity.slug.length){
+        console.log(clc.magentaBright('skipping ent'), entity.name, entity.slug)
+        nextEntity();
+      } else {
+        entity.slug = helpers.text.slugify(entity.name);
+        console.log(entity.name, ' -> ', entity.slug)
+        neo4j.save(entity, function(err, node){
+          if(err){
+            q.kill();
+            callback(err);
+            return
+          }
+          nextEntity();
+        });
+      }
+    }, 1);
+    q.push(options.records);
+    q.drain = function(){
+      callback(null, options)
+    }
   }
+
+
+};
+
+module.exports = {
+  slugify: [
+    task.getMany,
+    task.slugify
+  ]
 }
