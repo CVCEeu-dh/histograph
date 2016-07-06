@@ -4,6 +4,7 @@ email: histograph@cvce.eu
 url: http://histograph.eu
 description: "Open source graph-based exploration web app with crowd-based indexation of contents for multimedia collections."
 baseurl: 
+demourl: http://histograph.cvce.eu
 
 # Color settings (hex-codes without the leading hash-tag)
 color:
@@ -12,7 +13,9 @@ color:
   links: '#219ab3'
 
 # Footer settings
-footer: CVCE
+footer: 
+  - title: uni.lu
+    url: http://uni.lu
 
 # Social networks usernames (many more available: google-plus, flickr, dribbble, pinterest, instagram, tumblr, linkedin, etc.)
 social:
