@@ -369,23 +369,42 @@ a#header-title {
   margin: 0 8px 0 0;
 }
 .tag {
+  word-break: break-word;
   padding: 0px 4px;
   text-decoration: none;
   background:#f5f5f5;
   color: #ACABAC;
   cursor: pointer;
   border: 1px solid transparent;
-    
   transition: background .3s ease-out;
 }
 
-.tag.validated{
+.tag.lang{
+  color: #808080;
+  background:#fff;
+}
+
+.tag.confirmed, .tag.confirmed.lang{
   color: #151515;
-  background:#eee;
+  background:#fff;
+}
+
+.tag .fa{
+  font-size: 12px;
+  margin-left: 5px;
+}
+
+
+.tag.validated .fa{
+  color: green;
 }
 
 .tag.with-issues{
-  border-color: #FF5742;
+  border-bottom-color: #cc1600;
+}
+
+.tag.with-issues .fa{
+  color: #cc1600;
 }
 
 .tag.starred{
@@ -2214,8 +2233,9 @@ input.form-control{
 */
 #search-field .dropdown-menu{
   max-width: 100%;
-    max-height: 360px;
-    overflow-y: scroll;
+  max-height: 500px;
+  overflow-y: scroll;
+  margin-left: -20px;
 }
 #search-field .dropdown-menu li{
   padding: 10px 30px 5px 15px;

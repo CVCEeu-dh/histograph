@@ -37,8 +37,8 @@
       </span>
     </span>
 
-    <span ng-if='relatedItem.persons.length' class='tags'> — <i translate>resource.people.mentioned</i>:
-      <span ng-repeat="per in relatedItem.persons" ng-include='"templates/partials/entity-person-tag.html"' ng-init='item=relatedItem'></span>  
+    <span ng-if='relatedItem.persons.length' class='tags'> — <i translate='resource.people.mentioned'></i>:
+      <span ng-repeat="tag in relatedItem.persons" ng-include='"templates/partials/entity-tag.html"' ng-init='item=relatedItem'></span>  
     </span>
     
   </div>

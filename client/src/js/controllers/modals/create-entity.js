@@ -61,7 +61,7 @@ angular.module('histograph')
       if(type == 'person') {
         // understand dates (later)
         // remove falsey values
-        return _.pick({
+        return {
           name: _.compact([$scope.ghost.first_name, $scope.ghost.last_name]).join(' '),
           first_name: $scope.ghost.first_name,
           last_name: $scope.ghost.last_name,
@@ -71,7 +71,7 @@ angular.module('histograph')
           reference: $scope.ghost.reference,
           links_wiki: $scope.ghost.dbpedia? $scope.ghost.dbpedia.links_wiki: '',
           links_viaf: $scope.ghost.viaf? $scope.ghost.viaf.viafid: ''
-        }, _.identity)
+        }
       }
 
       return {};

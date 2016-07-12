@@ -358,25 +358,42 @@ Annotator.Plugin.HelloWorld = function (element, options) {
 
       this.annotator.viewer.addField({
         load: function (field, annotation) {
-          // console.log(annotation);
+          console.log(annotation);
 
           field.innerHTML = annotation.mentions.map(function(d){
             console.log(d)
             field.className = 'custom';
             var html = '';
 
-            if(d.type == 'person')
-              html = '' +
-              '<div class="node '+ d.type + '">' + 
-                '<div class="thumbnail"><div class="thumbnail-wrapper" style="background-image: url(' + d.props.thumbnail + ')"></div></div>' +
-                '<div class="content tk-proxima-nova"><h4><a class="tk-proxima-nova">' + d.props.name + '</a></h4> ' + d.props.description + '</div>' + 
-              '</div>';
+            html = '' +
+              '<div class="sans-serif '+d.type+'" style="padding: 10px 20px; font-size:13px; color: white; border: 0px solid transparent; font-style: normal ">'+
 
-             if(d.type == 'location')
-              html = '' + 
-              '<div class="node '+ d.type + '">' + 
-                '<div class="content tk-proxima-nova"><h4><a class="tk-proxima-nova">' + d.props.name + (d.props.country?'('+d.props.country + ')':'')+'</a></h4> ' + d.props.type + '</div>' + 
-              '</div>';
+              '<span data-id="'+ d.props.uuid + '"' +
+              ' gasp-removable="false" gasp-upvotes=\''+ JSON.stringify(d.props.upvote || []) +'\'' +
+              ' gasp-downvotes=\''+ JSON.stringify(d.props.downvote || []) +'\'' +
+              ' gasp-creator="" gasp-type="'+d.type+'"  class="tag '+d.type+'">'+
+                d.props.name
+              '</span></div>';
+
+            // console.log(html)
+            // if(d.type == 'person')
+            //   html = '' +
+            //   '<div class="node '+ d.type + '">' + 
+            //     '<div class="thumbnail"><div class="thumbnail-wrapper" style="background-image: url(' + d.props.thumbnail + ')"></div></div>' +
+            //     '<div class="content tk-proxima-nova"><h4><a class="tk-proxima-nova">' + d.props.name + '</a></h4> ' + d.props.description + '</div>' + 
+            //   '</div>';
+
+            //  if(d.type == 'location')
+            //   html = '' + 
+            //   '<div class="node '+ d.type + '">' + 
+            //     '<div class="content tk-proxima-nova"><h4><a class="tk-proxima-nova">' + d.props.name + (d.props.country?'('+d.props.country + ')':'')+'</a></h4> ' + d.props.type + '</div>' + 
+            //   '</div>';
+
+            // if(d.type == 'organization')
+            //   html = '' + 
+            //   '<div class="node '+ d.type + '">' + 
+            //     '<div class="content tk-proxima-nova"><h4><a class="tk-proxima-nova">' + d.props.name +'</a></h4> ' + d.props.type + '</div>' + 
+            //   '</div>';
 
             return html;
 

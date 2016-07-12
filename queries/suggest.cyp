@@ -54,6 +54,7 @@ WITH ent
 MATCH (ent)-[r:appears_in]->(res:resource)
 {?res:start_time__gt} {AND?res:end_time__lt} {AND?res:mimetype__in} {AND?res:type__in}
 WITH res, count(ent) as c
+WHERE c > 1
 WITH res 
 RETURN {
   group: res.type, 
@@ -74,29 +75,31 @@ WITH res, sum(r.tf) as stf, collect({
     props: ent,
     rel: r
   })  as matches 
-WITH res,matches,stf
-ORDER BY size(matches) DESC, stf DESC
-WITH res, matches
+WITH res,matches,size(matches) as sm, stf
+WHERE sm > 1
+WITH res, matches, sm, stf
+ORDER BY sm DESC, stf DESC
+WITH res, matches, sm
 SKIP {offset}
 LIMIT {limit}
-WITH res, matches
+WITH res, matches, sm
   OPTIONAL MATCH (res)<-[r_per:appears_in]-(per:`person`)
-  WITH res, matches, r_per, per
+  WITH res, matches, sm, r_per, per
   ORDER BY  r_per.score DESC, 
             r_per.tfidf DESC, 
             r_per.frequency DESC
-WITH res, matches, filter(x in collect({  
+WITH res, matches, sm, filter(x in collect({  
       id: per.uuid,
       type: 'person',
       props: per,
       rel: r_per
     }) WHERE has(x.id))[0..5] as people
   OPTIONAL MATCH (res)<-[r_the:appears_in]-(the:`theme`)
-  WITH res, matches, people, r_the, the
+  WITH res, matches, sm, people, r_the, the
   ORDER BY  r_the.score DESC, 
             r_the.tfidf DESC, 
             r_the.frequency DESC
-WITH res, matches, people, filter(x in collect({    
+WITH res, matches, sm, people, filter(x in collect({    
       id: the.uuid,
       type: 'theme',
       props: the,
@@ -111,6 +114,7 @@ RETURN {
   themes:     themes,
   matches: matches
 } as resource
+ORDER BY sm DESC
 
 
 
@@ -121,14 +125,14 @@ MATCH (ent:entity)
 WITH ent
   MATCH (ent)-[r:appears_in]->(res:resource)
   {?res:start_time__gt} {AND?res:end_time__lt} {AND?res:mimetype__in} {AND?res:type__in}
-WITH res, sum(r.tf) as stf, count(ent)  as c 
+WITH res, sum(r.tf) as stf, count(ent) as c 
 WHERE c > 1
 WITH res, c, stf
 ORDER BY c DESC, stf DESC
-LIMIT 50
+LIMIT 500
 WITH res 
-  MATCH (A:person)-[r1:appears_in]->(res)<-[:appears_in]-(B:person)
-  WHERE id(A) > id(B) WITH A,B, count(res) as w 
+  MATCH (A:person)-[r1:appears_in]->(res)<-[r2:appears_in]-(B:person)
+  WHERE id(A) > id(B) WITH A,B, count(*) as w 
   ORDER BY w DESC
   LIMIT {limit}
 RETURN {
@@ -455,7 +459,7 @@ LIMIT {limit}
   WITH res
 {/if}
 MATCH (n:entity)-[r1:appears_in]->{if:center}(res){/if}{unless:center}(res:resource){/unless}
-WHERE n.uuid IN {ids}
+WHERE n.uuid IN {ids} AND r1.score > -2
 {if:start_time}
   AND res.start_time >= {start_time}
 {/if}
@@ -475,6 +479,7 @@ WITH res
   MATCH (res)<-[r:appears_in]-(ent:entity)
     WHERE ent.uuid in {with}
   WITH res, count(r) as df
+    WHERE df = size({with})
 {/if}
 
 RETURN {
@@ -503,13 +508,14 @@ WHERE n.uuid IN {ids}
 {if:type}
   AND res.type in {type}
 {/if}
-WITH res, max(coalesce(r1.frequency,0)) as ms, count(r1) as z
+WITH res, sum(coalesce(r1.tf,0)) as ms, count(r1) as z
   WHERE z = size({ids})
 WITH res, ms
 {if:with}
   MATCH (res)<-[r:appears_in]-(ent:entity)
     WHERE ent.uuid in {with}
   WITH res, ms, count(r) as df
+  WHERE df = size({with})
 {/if}
 ORDER BY ms DESC
 SKIP {offset}

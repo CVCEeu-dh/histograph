@@ -2,9 +2,9 @@
   <div ng-repeat="mentioned in issue.mentioning">
     <div ng-if="!resource">
       <span translate translate-values='{name: "{{entity.props.name}}",_name: "{{mentioned.props.name}}"}'>popit.fix.suggest.confirm</span>
-      <div class='btn-group'>
+      <!-- <div class='btn-group'>
         <button class='btn btn-line-white btn-straight btn-block' not-yet-ng-click='inspectIssue(issue)' translate>inspect.open</button>
-      </div>
+      </div> -->
     </div>
     <div ng-if="resource">
       <span translate translate-values='{name: "{{entity.props.name}}",_name: "{{mentioned.props.name}}"}'>popit.fix.suggest.confirm_in_context</span>

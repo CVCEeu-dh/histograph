@@ -439,7 +439,7 @@ module.exports = {
         items: rQueries.get_related_actions
       },
       params: {
-        id:     +resource.id,
+        id:     resource.id,
         kind:   params.action,
         limit:  params.limit,
         offset: params.offset
@@ -1047,8 +1047,8 @@ module.exports = {
           var additionalProperties = {};
           if(_.first(ent.type) == 'location') {
             additionalProperties = {
-              lat: ent.lat,
-              lng: ent.lng,
+              lat: +ent.lat,
+              lng: +ent.lng,
               country: ent.country,
               geoname_id: ent.geoname_id,
               geoname_fcl: ent.geoname_fcl,
@@ -1062,6 +1062,7 @@ module.exports = {
           
           module.exports.createRelatedEntity(resource, _.assign(additionalProperties, {
             name: ent.name,
+            slug: ent.slug || helpers.text.slugify(ent.name),
             type: _.first(ent.type),
             services: ent.services,
             languages: ent.languages,
@@ -1072,13 +1073,13 @@ module.exports = {
               q.kill();
               return callback(err);
             }
-           
+            // console.log(entity)
             
             for(var i in ent.context) {
               if(!yaml[ent.context[i].language])
                 yaml[ent.context[i].language] = [];
               yaml[ent.context[i].language].push({
-                id: entity.uuid,
+                id: entity.props.uuid,
                 context: {
                   left: ent.context[i].left,
                   right: ent.context[i].right

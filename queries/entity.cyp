@@ -88,8 +88,7 @@ LIMIT {limit}
 
 // name: merge_entity
 // create or merge entity, by name or links_wiki.
-MATCH (res:resource)
-  WHERE res.uuid = {resource_id}
+MATCH (res:resource {uuid:{resource_id}})
 WITH res
 {if:links_wiki}
   MERGE (ent:entity:{:type} {links_wiki: {links_wiki}})
@@ -100,6 +99,7 @@ WITH res
 ON CREATE SET
   ent.uuid          = {uuid},
   ent.name          = {name},
+  ent.slug          = {slug},
   ent.name_search   = {name_search},
   ent.celebrity     = 0,
   ent.score         = 0,
@@ -203,8 +203,7 @@ ON MATCH SET
   ent.last_modification_time = {exec_time}
 WITH ent
 LIMIT 1
-MATCH (res:resource)
-  WHERE res.uuid = {resource_id}
+MATCH (res:resource {uuid:{resource_id}})
 WITH ent, res
   MERGE (ent)-[r:appears_in]->(res)
   ON CREATE SET

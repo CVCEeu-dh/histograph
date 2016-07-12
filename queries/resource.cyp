@@ -100,10 +100,11 @@ RETURN {
 
 // name: get_resources
 // get resources with number of comments, if any
+{unless:with}
 MATCH (res:resource)
+{/unless}
 {if:with}
-  WITH res
-  MATCH (res)<-[:appears_in]-(ent:entity)
+  MATCH (res:resource)<-[:appears_in]-(ent:entity)
   WHERE ent.uuid IN {with}
   WITH DISTINCT res
 {/if}
@@ -209,13 +210,15 @@ ORDER BY resource.props.start_time ASC
 
 // name: count_resources
 // count resources having a version, with current filters
+{unless:with}
 MATCH (res:resource)
+{/unless}
 {if:with}
-  WITH res
-  MATCH (res)<-[:appears_in]-(ent)
+  MATCH (res:resource)<-[:appears_in]-(ent:entity)
   WHERE ent.uuid IN {with}
+  WITH DISTINCT res
 {/if}
-WITH DISTINCT res
+
 {?res:start_time__gt}
 {AND?res:end_time__lt}
 {AND?res:type__in}
@@ -600,7 +603,7 @@ RETURN col, res
 
 // name: get_precomputated_cooccurrences
 //
-MATCH (p1:{:entity} {status:1})-[r:appear_in_same_document]-(p2:{:entity} {status:1})
+MATCH (p1:{:entity})-[r:appear_in_same_document]-(p2:{:entity})
 WHERE id(p1) < id(p2)
 WITH p1,p2,r
 ORDER BY r.intersections DESC

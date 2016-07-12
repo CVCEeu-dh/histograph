@@ -16,6 +16,7 @@ module.exports = {
   },
   
   paths: {
+    dist: './client/dist',
     media: './contents/media',
     txt: './contents/txt',
     accesslog: './logs/access.log',

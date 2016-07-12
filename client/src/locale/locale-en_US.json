@@ -9,7 +9,7 @@
   "button.unconfirm": "un-validate",
   "button.crowd.canfixthis": "Yes, I can fix this",
   "button.crowd.askmelater": "ask me later",
-  "button.disagree": "I disagree",
+  "button.disagree": "disagree",
   "button.discard": "discard",
   "button.edit": "edit",
   "button.egonetwork": "ego-network",
@@ -33,6 +33,7 @@
   "contribute.description": "Tagging improves the quality of the recommended resources",
   "contribute.create-entity.select": "Select from the list above or",
   "contribute.suggest.noresults": "No result matches your search.",
+  "contribute.suggest.loading": "loading...",
 
   "create-entity.title": "Create a {{type}}",
   "create-entity.person.description": "Add or edit person basic information",
@@ -135,7 +136,7 @@
   "popit.fix.spotcorrecttype.type.irrelevant.confirm": "Do you really want to untag this <strong class='sans-serif'>{{type}}</strong>?",
   "popit.fix.spotcorrecttype.type.confirm": "Suggest <strong class='sans-serif' style='color: white'>{{_type}}</strong> as replacement for <strong class='sans-serif' style='color: white'>{{type}}</strong>?",
   "popit.fix.suggest.same_entity": "They are the same (@todo)",
-  "popit.fix.suggest.confirm": "It seems that <strong class='sans-serif'>{{name}}</strong> can be replaced with <strong class='sans-serif'>{{_name}}</strong>?",
+  "popit.fix.suggest.confirm": "It seems that <strong class='sans-serif'>{{name}}</strong> can be replaced with <strong class='sans-serif'>{{_name}}</strong>",
   "popit.fix.suggest.confirm_in_context": "It seems that <strong class='sans-serif'>{{name}}</strong> can be replaced with <strong class='sans-serif'>{{_name}}</strong> in this specific context",
   "popit.fix.remove": "Remove this",
   
@@ -150,6 +151,7 @@
 
   "resource.language.availability": "available in",
   "resource.seealso.title": "recommended resources",
+  "resource.in_between": "containing",
 
   "tooltip.resource.add.to.favourites": "add to your bookmarks",
   "tooltip.resource.add.to.myselection": "add to your pinboard",

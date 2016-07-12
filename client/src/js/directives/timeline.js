@@ -142,6 +142,12 @@ angular.module('histograph')
             .range([
               '#AB2211', '#FF5742'
             ]);
+
+          tim.fn.fy = d3.scale.sqrt()
+            .range([
+              10,
+              50
+            ]);
           
           // tim.fn.area = d3.svg.area()
           //     //.interpolate("monotone")
@@ -344,8 +350,9 @@ angular.module('histograph')
             return d.weight
           });
           tim.fn.fcolor.domain(weigthExtent);
+          tim.fn.fy.domain(weigthExtent);
 
-           console.log('    weightext: ', weigthExtent, tim.fn.fcolor(5), tim.fn.fcolor(100))
+          console.log('    weightext: ', weigthExtent, tim.fn.fcolor(5), tim.fn.fcolor(100))
           
           // sort by time label
           dataset.sort(function (a, b) {
@@ -368,11 +375,11 @@ angular.module('histograph')
                 return tim.fn.x(d.t)
               },
               y: function(d) {
-                return 15 - (tim.fn.y(d.weight)/2)
+                return 15 - (tim.fn.fy(d.weight)/2)
               },
               width: 2,
               height: function(d) {
-                return tim.fn.y(d.weight)
+                return tim.fn.fy(d.weight)
               },
               // height: 20,
               fill: function(d) {
