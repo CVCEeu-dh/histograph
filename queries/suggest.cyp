@@ -111,6 +111,7 @@ RETURN {
   themes:     themes,
   matches: matches
 } as resource
+ORDER BY size(matches) DESC
 
 
 
