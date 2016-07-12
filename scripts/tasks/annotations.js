@@ -21,7 +21,7 @@ var task = {
   getAnnotations: function(options, callback ){
     console.log(clc.yellowBright('\n   tasks.annotations.getMany'));
 
-    neo4j.query('MATCh(res:resource)-[r]-(ann:annotation) WHERE exists(ann.yaml) AND size(ann.yaml) > 0 WITH res,r,ann return res,r,ann LIMIT {limit}', options, function(err, res){
+    neo4j.query('MATCh(res:resource)-[r]-(ann:annotation) WHERE exists(ann.yaml) AND size(ann.yaml) > 0 WITH res,r,ann return res,r,ann SKIP {offset} LIMIT {limit}', options, function(err, res){
       if(err)
         return callback(err);
       options.records = res;
@@ -32,7 +32,7 @@ var task = {
   parseAnnotations: function(options, callback) {
     var q = async.queue(function(tuple, nextTuple){
       var yaml = parser.yaml(tuple.ann.yaml);
-      console.log(tuple.res.uuid, yaml);
+      console.log(tuple.res.uuid, yaml.length, _.take(yaml, 1));//, yaml);
       // rewrite ids.
       async.series(yaml
         .filter(function(d){
@@ -55,7 +55,7 @@ var task = {
           }
         })
 
-        console.log('results', yaml);
+        console.log('results', yaml.length, _.take(yaml, 1));
         // save 
         neo4j.query('MATCH (ann:annotation) WHERE id(ann) = {id} SET ann.yaml = {yaml}',{
           id: tuple.ann.id,
@@ -65,12 +65,12 @@ var task = {
             q.kill();
             return callback(err);
           }
-          console.log(clc.blackBright('    saved annotation for resource:'), tuple.res.uuid);
+          console.log(clc.blackBright('    saved annotation for resource:'), tuple.res.uuid, clc.blackBright('remaining'), q.length());
           nextTuple();
         });
         // nextTuple();
       })
-    }, 1);
+    }, 3);
 
     q.push(options.records);
     q.drain = function(){
@@ -117,6 +117,8 @@ var task = {
         }
         return d;
 
+      }).filter(function(d){
+        return d && d.identification && d.id
       });
 
       // console.log(yaml)
