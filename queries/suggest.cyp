@@ -455,7 +455,7 @@ LIMIT {limit}
   WITH res
 {/if}
 MATCH (n:entity)-[r1:appears_in]->{if:center}(res){/if}{unless:center}(res:resource){/unless}
-WHERE n.uuid IN {ids}
+WHERE n.uuid IN {ids} AND r1.score > -2
 {if:start_time}
   AND res.start_time >= {start_time}
 {/if}
@@ -475,6 +475,7 @@ WITH res
   MATCH (res)<-[r:appears_in]-(ent:entity)
     WHERE ent.uuid in {with}
   WITH res, count(r) as df
+    WHERE df = size({with})
 {/if}
 
 RETURN {
@@ -503,13 +504,14 @@ WHERE n.uuid IN {ids}
 {if:type}
   AND res.type in {type}
 {/if}
-WITH res, max(coalesce(r1.frequency,0)) as ms, count(r1) as z
+WITH res, sum(coalesce(r1.tf,0)) as ms, count(r1) as z
   WHERE z = size({ids})
 WITH res, ms
 {if:with}
   MATCH (res)<-[r:appears_in]-(ent:entity)
     WHERE ent.uuid in {with}
   WITH res, ms, count(r) as df
+  WHERE df = size({with})
 {/if}
 ORDER BY ms DESC
 SKIP {offset}

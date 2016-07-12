@@ -3,6 +3,7 @@
   Resource task collection
 */
 var settings  = require('../../settings'),
+    _ = require('lodash'),
     YAML = require('yamljs'),
     parser    = require('../../parser'),
     helpers    = require('../../helpers'),
@@ -47,7 +48,13 @@ var task = {
     var q = async.queue(function (cluster, nextCluster) {
       console.log('    cluster:', clc.cyanBright(cluster.links_wiki));
       var ids = _.map(cluster.entities, 'id'),
-          the_id = _.get(_.first(_.orderBy(_.filter(cluster.entities, 'df'), ['df'],['desc'])), 'id'),// index with most df will take all
+          the_id = _(cluster.entities)
+            .filter('df')
+            .sortBy(['df'],['desc']);
+          console.log(the_id.value().length)
+          the_id = the_id
+            .first()
+            .get('id');// _.get(_.first(_.orderBy(_.filter(cluster.entities, 'df'), ['df'],['desc'])), 'id'),// index with most df will take all
           labels = _.unique(_.map(cluster.entities, 'label'));
       console.log(clc.blackBright('    most important id:', clc.cyanBright(the_id)))
       if(!ids || ids.length == 0) {
@@ -55,7 +62,7 @@ var task = {
         callback('ids should be a valid array of ints') ;
         return;
       }
-
+      throw 'stop'
       // for each cluster
       async.waterfall([
         /*
@@ -361,18 +368,21 @@ var task = {
       Count relationships to be cleaned
     */
     var loops = 0,
-        limit= isNaN(options.limit)? 20000: options.limit;
+        limit = 500,
+        total = 0;
 
     neo4j.query(queries.count_appear_in_same_document, function (err, results){
       if(err) {
         callback(err);
         return;
       }
-      
-      loops = Math.ceil(results[0].total_count / limit);
-      console.log('    loops needed:', loops,'- total:',results[0].total_count);
+      console.log(results);
+      total = results[0].total_count;
+      loops = Math.ceil(total / limit);
+      console.log('    loops needed:', loops,'- total:',total);
+
       async.timesSeries(loops, function (n, _next) {
-        console.log('    loop:', n ,'- offset:', n*limit, '- limit:', limit, '- total:', results.total_count)
+        console.log('    loop:', n ,'- offset:', n*limit, '- limit:', limit, '- total:', total)
         neo4j.query(queries.clear_appear_in_same_document, {
           limit: limit
         }, _next);
@@ -406,29 +416,29 @@ var task = {
   tfidf: function(options, callback) {
     console.log(clc.yellowBright('\n   tasks.entity.tfidf'));
     var loops = 0,
-        limit= isNaN(options.limit)? 50000: options.limit;
+        limit= isNaN(options.limit)? 20000: options.limit;
 
     neo4j.query(queries.count_appears_in, function(err, results) {
       if(err) {
         callback(err);
         return;
       }
-      loops = Math.ceil(results[0].total_count / limit);
-      console.log('    loops needed:', loops,'- total:',results[0].total_count);
-      
+      loops = Math.ceil(total / limit);
+      console.log('    loops needed:', loops,'- total:',total);
+
       var query = parser.agentBrown(queries.computate_tfidf, options);
 
       async.timesSeries(loops, function (n, _next) {
-        console.log('    loop:', n ,'- offset:', n*limit, '- limit:', limit, '- total:', results[0].total_count)
-        neo4j.query(query, {
-          offset: n*limit,
-          limit: limit
-        }, _next);
+        console.log('    loop:', n ,'- offset:', n*limit, '- limit:', limit, '- total:', total)
+        console.log('    starting in 1 s.');
+          setTimeout(function(){
+            neo4j.query(query, {
+              offset: n*limit,
+              limit: limit
+            }, _next);
+          }, 2000);
       }, function (err) {
-        if(err)
-          callback(err);
-        else
-          callback(null, options)
+        callback(err, options);
       });
     });
     
@@ -439,20 +449,24 @@ var task = {
     async.waterfall([
       // count expected combinations
       function countExpected (next) {
-        neo4j.query(parser.agentBrown(queries.count_computate_jaccard_distance, options), next)
+        console.log('   count expected for entity label: ', options.entity)
+        neo4j.query(parser.agentBrown(queries.count_entities, options), next)
       },
       // repeat n time to oid java mem heap space
       function performJaccard (result, next) {
-        var limit = 5000,
-            loops = Math.ceil(result.total_count / limit);
-        console.log('   loops:', loops);
+        console.log(result)
+        var limit = 100,
+            total = result[0].total_count,
+            loops = Math.ceil(total / limit);
+        
         async.timesSeries(loops, function (n, _next) {
-          console.log('    loop:', n ,'- offset:', n*limit, '- limit:', limit, '- total:', result.total_count)
+          console.log('    loop:', n ,'- offset:', n*limit, '- limit:', limit, '- total:', total, '(loops:', loops,')')
           var query = parser.agentBrown(queries.computate_jaccard_distance, options);
-          neo4j.query(query, {
+          neo4j.query(query, _.assign(options, {
             offset: n*limit,
             limit: limit
-          }, _next);
+          }), _next);
+          
         }, next);
       }
     ], function (err) {
@@ -610,14 +624,29 @@ var task = {
     q.drain = function(){
       callback(null, options)
     }
-  }
+  },
+
+
 
 
 };
 
-module.exports = {
+module.exports = _.defaults({
   slugify: [
     task.getMany,
     task.slugify
+  ],
+  precomputateCooccurrences:[
+    task.cleanSimilarity,
+    function(options,callback){
+      options.entity = 'person';
+      callback(null, options);
+    },
+    task.jaccard,
+    function(options,callback){
+      options.entity = 'theme';
+      callback(null, options);
+    },
+    task.jaccard
   ]
-}
+}, task);

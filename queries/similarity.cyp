@@ -9,21 +9,22 @@ DELETE r
 
 // name: count_appears_in
 // count possible combination (perf preventing java heap error)
-MATCH (e:entity)-[r:appears_in]->(res:resource)
+MATCH ()-[r:appears_in]->(res:resource)
 RETURN count(r) as total_count
 
 // name: computate_tfidf
 // tfidf computation based on entity frequence, keep also the number used to calculate them
-MATCH (res:resource) 
-WHERE (res)<-[:appears_in]-()
-  WITH count(res) as num_of_docs
+MATCH (res:resource)<-[:appears_in]-()
+  WITH count(DISTINCT res) as num_of_docs
 MATCH (res:resource)<-[r:appears_in]-()
   // SET r.frequency = COALESCE(r.frequency, 1)
   WITH num_of_docs, res, sum(r.frequency) as num_of_ents_per_doc
-MATCH (e:entity)-[r2:appears_in]->(res:resource)
-  WITH e, r2, num_of_ents_per_doc, num_of_docs
   SKIP {offset}
   LIMIT {limit}
+  WITH num_of_docs, res, num_of_ents_per_doc
+MATCH (e:entity)-[r2:appears_in]->(res)
+  WITH e, r2, num_of_ents_per_doc, num_of_docs
+  
   WITH e, r2, num_of_ents_per_doc, num_of_docs
   
     SET
@@ -58,25 +59,42 @@ MATCH (e)-[r3:appears_in]->(res:resource)
 // SET   r.cosine = toFloat(xyDotProduct / toFloat(d))
 
 
-// name: count_computate_min_ntersections
-
+// name: count_entities
+MATCH (p1:{:entity})
+WITH p1, size((p1)-[:appears_in]->()) as num_of_docs
+WHERE num_of_docs > 0
+WITH distinct p1
+RETURN count(p1) as total_count
 
 // name: count_computate_jaccard_distance
-MATCH (p1:{:entity})-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:{:entity})
-WHERE id(p1) < id(p2) AND p1.status = 1 AND p2.status=1
+MATCH (p1:{:entity})-[r1:appears_in]->(res:resource)
+WHERE p1.score > -2 AND r1.score > -2
+WITH p1, res
+MATCH (res)<-[r2:appears_in]-(p2:{:entity})
+WHERE id(p1) < id(p2) AND p2.score > -2 AND r2.score > -2
+WITH p1, p2, count(*) as intersection
+WHERE intersection > 2
 RETURN count(*) as total_count
 
 // name: computate_jaccard_distance
-// For the "WHERE id(p1) < id(p2)" part, see:
-// https://stackoverflow.com/questions/33083491/how-to-get-a-unique-set-of-node-pairs-for-undirected-relationships/33084035#33084035
-MATCH (p1:{:entity})-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:{:entity})
-WHERE id(p1) < id(p2) AND AND p1.status = 1 AND p2.status=1
-// WITH r1, r2, p1, p2, count(*) as intersection
-WITH p1, p2, count(*) as intersection
-WHERE intersection > 1
-WITH p1, p2, intersection
+// dep. For the "WHERE id(p1) < id(p2)" part, see:
+// dep. https://stackoverflow.com/questions/33083491/how-to-get-a-unique-set-of-node-pairs-for-undirected-relationships/33084035#33084035
+MATCH (p1:{:entity})
+WHERE p1.score > -2
+WITH p1
 SKIP {offset}
 LIMIT {limit}
+WITH p1
+MATCh (p1)-[r1:appears_in]->(res:resource)
+WHERE r1.score > -2
+WITH p1, res
+
+MATCH (res)<-[r2:appears_in]-(p2:{:entity})
+WHERE p2.score > -2 AND r2.score > -2
+WITH p1, p2, count(*) as intersection
+WHERE intersection > 2
+WITH p1, p2, intersection
+
 
 MATCH (p1)-[rel:appears_in]->(res1:resource)
 WITH p1,p2, intersection, collect(res1) as H1

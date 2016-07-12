@@ -603,7 +603,7 @@ RETURN col, res
 
 // name: get_precomputated_cooccurrences
 //
-MATCH (p1:{:entity} {status:1})-[r:appear_in_same_document]-(p2:{:entity} {status:1})
+MATCH (p1:{:entity})-[r:appear_in_same_document]-(p2:{:entity})
 WHERE id(p1) < id(p2)
 WITH p1,p2,r
 ORDER BY r.intersections DESC
