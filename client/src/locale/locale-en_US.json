@@ -150,6 +150,7 @@
 
   "resource.language.availability": "available in",
   "resource.seealso.title": "recommended resources",
+  "resource.in_between": "containing",
 
   "tooltip.resource.add.to.favourites": "add to your bookmarks",
   "tooltip.resource.add.to.myselection": "add to your pinboard",
