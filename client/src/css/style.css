@@ -2233,8 +2233,9 @@ input.form-control{
 */
 #search-field .dropdown-menu{
   max-width: 100%;
-    max-height: 360px;
-    overflow-y: scroll;
+  max-height: 500px;
+  overflow-y: scroll;
+  margin-left: -20px;
 }
 #search-field .dropdown-menu li{
   padding: 10px 30px 5px 15px;
