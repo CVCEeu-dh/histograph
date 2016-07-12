@@ -76,7 +76,7 @@
   <!-- use detail only if a single node has been selected -->
   <div class='detail' ng-if='items.length == 1'>
     <div ng-repeat='relatedItem in items'>
-      <div class="abstract {{showMore?'expanded': ''}}" ng-if='relatedItem.type=="person" '>
+      <div class="abstract {{showMore?'expanded': ''}}" ng-if='relatedItem.type=="person"'>
         <blockquote lookup context='relatedItem' field='abstract' language='language'>
         </blockquote>
         <div class="ellipsis">
