@@ -31,6 +31,7 @@ adjust the `paths` section of your `settings.js` file, then create the folders a
 	mkdir contents/cache/disambiguation
     mkdir contents/cache/dbpedia
     mkdir contents/cache/queries
+    mkdir contents/cache/services
 
 Histograph makes use of [node js passport](https://www.npmjs.com/package/passport) social auth as authentication method. It has been tested with [twitter](https://www.npmjs.com/package/passport-twitter) and [google plus](passport-google-oauth).
 Obtain the tokens and credentials for those services, then fill the twitter and google section of the `settings.js` file accordingly.
@@ -74,7 +75,7 @@ Once started, modify the default password and fill the `neo4j.host` section in `
 
 Run then the setup script: it will add the required constraints to neo4j db.
 
-	node scripts\manage.js --task=setup
+	node scripts/manage.js --task=setup
 
 Modify neo4j related configuration in your histograph `settings.js` file, then run the unit tests (using mocha) in order to check that the settings have been set properly.
 

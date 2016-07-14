@@ -60,7 +60,7 @@ if(settings.cache && settings.cache.redis) {
     client: redis,
     // host: settings.cache.redis.host,
     // port: settings.cache.redis.port,
-    expire: 5 * 60 // 5 min OR till a POST/delete has benn done
+    expire: 50 * 60 // 5 min OR till a POST/delete has benn done
   });
 
   cache.on('connected', function () {

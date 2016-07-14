@@ -329,7 +329,7 @@ module.exports = {
   */
   createRelatedEntity: function(resource, entity, next) {
     var Entity = require('../models/entity');
-    
+
     Entity.create(_.assign(entity, {
       resource: resource
     }), function (err, entity) {

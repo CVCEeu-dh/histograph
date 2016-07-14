@@ -85,6 +85,7 @@ describe('model:resource ', function() {
   it('should create a relationship with an entity', function (done) {
     Resource.createRelatedEntity(__resourceA, generator.entity.social_group(), function (err, entity) {
       __social_group = entity;
+      should.not.exist(err)
       should.equal(__social_group.rel.end, __resourceA.props.id)
       done();
     })
