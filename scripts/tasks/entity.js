@@ -413,30 +413,48 @@ var task = {
     // })
   },
   
+  prepare_resource_tfidf_variables: function(options, callback) {
+    console.log(clc.yellowBright('\n   tasks.entity.prepare_resource_tfidf_variables'));
+    neo4j.query(queries.prepare_resource_tfidf_variables, function(err, results) {
+      if(err)
+        console.log(err)
+      callback(null, options)
+    });
+  },
+
+  prepare_entity_tfidf_variables: function(options, callback) {
+    console.log(clc.yellowBright('\n   tasks.entity.prepare_entity_tfidf_variables'));
+    neo4j.query(queries.prepare_entity_tfidf_variables, function(err, results) {
+      if(err)
+        console.log(err)
+      callback(null, options)
+    });
+  },
+
   tfidf: function(options, callback) {
     console.log(clc.yellowBright('\n   tasks.entity.tfidf'));
     var loops = 0,
-        limit= isNaN(options.limit)? 20000: options.limit;
+        total = 0,
+        limit= isNaN(options.limit)? 5000: options.limit;
 
     neo4j.query(queries.count_appears_in, function(err, results) {
       if(err) {
         callback(err);
         return;
       }
+      total = results[0].total_count;
       loops = Math.ceil(total / limit);
-      console.log('    loops needed:', loops,'- total:',total);
+      console.log('    loops needed:', loops,'- total:',total, '- limit:', limit);
 
       var query = parser.agentBrown(queries.computate_tfidf, options);
 
       async.timesSeries(loops, function (n, _next) {
-        console.log('    loop:', n ,'- offset:', n*limit, '- limit:', limit, '- total:', total)
-        console.log('    starting in 1 s.');
-          setTimeout(function(){
-            neo4j.query(query, {
+        console.log('    loop:', n ,'/', loops)
+        neo4j.query(query, {
               offset: n*limit,
               limit: limit
             }, _next);
-          }, 2000);
+
       }, function (err) {
         callback(err, options);
       });
@@ -632,11 +650,16 @@ var task = {
 };
 
 module.exports = _.defaults({
+  tfidf:[
+    task.prepare_resource_tfidf_variables,
+    task.prepare_entity_tfidf_variables,
+    task.tfidf
+  ],
   slugify: [
     task.getMany,
     task.slugify
   ],
-  precomputateCooccurrences:[
+  set_entity_cooccurrences:[
     task.cleanSimilarity,
     function(options,callback){
       options.entity = 'person';

@@ -9,37 +9,45 @@ DELETE r
 
 // name: count_appears_in
 // count possible combination (perf preventing java heap error)
-MATCH ()-[r:appears_in]->(res:resource)
-RETURN count(r) as total_count
+MATCH (res:resource)
+WITH res, size((res)<-[:appears_in]-()) as z
+RETURN sum(z) as total_count
+
+// name: prepare_resource_tfidf_variables
+// add or update global variables (count etc.)
+MATCH (res:resource) WITH res, size((res)<-[:appears_in]-()) as z
+WHERE z > 0
+WITH res, z
+WITH count(*) as num_of_docs
+MERGE (v:variables {scope:'tfidf'})
+  SET v.num_of_docs = num_of_docs
+WITH v
+MATCH (res:resource)<-[r:appears_in]-()
+  WITH v, res, sum(r.frequency) as stdf
+  SET res.stdf = stdf
+
+// name: prepare_entity_tfidf_variables
+// add or update global variables (count etc.)
+MATCH (ent:entity)
+WITH ent, size((ent)-[:appears_in]->()) as df
+  SET ent.df = df
 
 // name: computate_tfidf
 // tfidf computation based on entity frequence, keep also the number used to calculate them
-MATCH (res:resource)<-[:appears_in]-()
-  WITH count(DISTINCT res) as num_of_docs
-MATCH (res:resource)<-[r:appears_in]-()
-  // SET r.frequency = COALESCE(r.frequency, 1)
-  WITH num_of_docs, res, sum(r.frequency) as num_of_ents_per_doc
+MATCH (v:variables {scope:'tfidf'})
+  WITH v.num_of_docs as num_of_docs
+MATCH (ent:entity)-[r:appears_in]->(res:resource)
+WITH ent, r, res, num_of_docs
   SKIP {offset}
   LIMIT {limit}
-  WITH num_of_docs, res, num_of_ents_per_doc
-MATCH (e:entity)-[r2:appears_in]->(res)
-  WITH e, r2, num_of_ents_per_doc, num_of_docs
-  
-  WITH e, r2, num_of_ents_per_doc, num_of_docs
-  
-    SET
-      r2.tf  = toFloat(r2.frequency) / num_of_ents_per_doc,
-      r2.tdf = num_of_ents_per_doc
-
-  WITH num_of_docs, e, count(r2) as num_of_docs_per_ent
-MATCH (e)-[r3:appears_in]->(res:resource)
-  WHERE has(r3.frequency) AND r3.tf < 1
-    SET
-      r3.tfidf = r3.tf * log(num_of_docs/num_of_docs_per_ent),
-      e.df = num_of_docs_per_ent,
-      e.common = num_of_docs_per_ent > 1,
-      e.specificity = toFloat(num_of_docs_per_ent)/toFloat(num_of_docs)
-
+WITH ent, r, 
+  num_of_docs,
+  res.stdf as stdf,
+  toFloat(r.frequency) / res.stdf as tf
+  SET
+    r.tf  = tf,
+    r.tdf = stdf,
+    r.tfidf = tf * log(num_of_docs/ent.df)
 
 
 
@@ -90,7 +98,7 @@ WHERE r1.score > -2
 WITH p1, res
 
 MATCH (res)<-[r2:appears_in]-(p2:{:entity})
-WHERE p2.score > -2 AND r2.score > -2
+WHERE id(p1) < id(p2) AND p2.score > -2 AND r2.score > -2
 WITH p1, p2, count(*) as intersection
 WHERE intersection > 2
 WITH p1, p2, intersection

@@ -52,3 +52,11 @@ CREATE INDEX ON :entity(status)
 // name: create_index_on_entity_common
 // create index
 CREATE INDEX ON :entity(common)
+
+// name: create_index_on_df
+// create index
+CREATE INDEX ON :entity(df)
+
+// name: create_index_on_scope
+// create index on variables scope
+CREATE INDEX ON :variables(scope)
