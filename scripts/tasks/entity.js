@@ -473,7 +473,7 @@ var task = {
       // repeat n time to oid java mem heap space
       function performJaccard (result, next) {
         console.log(result)
-        var limit = 100,
+        var limit = options.limit || 100,
             total = result[0].total_count,
             loops = Math.ceil(total / limit);
         
@@ -649,6 +649,21 @@ var task = {
 
 };
 
+var fns= _(settings.types.jaccard)
+  .map(function(d){
+    console.log(d)
+    return [
+      function(options, callback){
+        options.entity = d;
+        callback(null, options);
+      },
+      task.jaccard
+    ]
+  })
+  .flatten()
+  .value();
+console.log(fns)
+
 module.exports = _.defaults({
   tfidf:[
     task.prepare_resource_tfidf_variables,
@@ -659,17 +674,5 @@ module.exports = _.defaults({
     task.getMany,
     task.slugify
   ],
-  set_entity_cooccurrences:[
-    task.cleanSimilarity,
-    function(options,callback){
-      options.entity = 'person';
-      callback(null, options);
-    },
-    task.jaccard,
-    function(options,callback){
-      options.entity = 'theme';
-      callback(null, options);
-    },
-    task.jaccard
-  ]
+  set_entity_cooccurrences: [task.cleanSimilarity].concat(fns)
 }, task);

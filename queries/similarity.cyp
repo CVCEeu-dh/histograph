@@ -55,17 +55,30 @@ WITH ent, r,
 // name: computate_cosine_similarity
 // NO MORE USED Cfr. http://gist.neo4j.org/?8173017
 // Note that tfidf should be computated already. Calculate the cosine similarity between coappearing entities
-// MATCH (p1:{:entity})-[x:appears_in]->(res:resource)<-[y:appears_in]-(p2:{:entity})
-// WHERE id(p1) < id(p2)
-// WITH  SUM(toFloat(x.tf * y.tf)) AS xyDotProduct,
-//       SQRT(REDUCE(xDot = 0.0, a IN COLLECT(x.tf) | xDot + a^2)) AS xLength,
-//       SQRT(REDUCE(yDot = 0.0, b IN COLLECT(y.tf) | yDot + b^2)) AS yLength,
-//       p1, p2
-// WITH  p1, p2, xyDotProduct, xLength, yLength, toFloat(xLength * yLength) AS d
-// WHERE d > 0
-// MERGE (p1)-[r:appear_in_same_document]-(p2)
-// SET   r.cosine = toFloat(xyDotProduct / toFloat(d))
+// usage:
+// $ node scripts/manage.js --task=common.cypher.query --cypher=similarity/computate_cosine_similarity --limit=10 --offset=0 --entity=person
 
+MATCH (p1:{:entity})
+WITH p1
+  SKIP {offset}
+  LIMIT {limit}
+WITH p1
+MATCH (p1)-[x:appears_in]->(res:resource)<-[y:appears_in]-(p2:{:entity})
+ WHERE id(p1) < id(p2) AND x.score > -2 AND y.score > -2
+ WITH x, y, p1,p2
+
+ WITH  SUM(toFloat(x.tf * y.tf)) AS xyDotProduct,
+       SQRT(REDUCE(xDot = 0.0, a IN COLLECT(x.tf) | xDot + a^2)) AS xLength,
+       SQRT(REDUCE(yDot = 0.0, b IN COLLECT(y.tf) | yDot + b^2)) AS yLength,
+       p1, p2
+ WITH  p1, p2, xyDotProduct, xLength, yLength, toFloat(xLength * yLength) AS d
+ WHERE d > 0
+ WITH  p1, p2, d, toFloat(xyDotProduct / d) as cosine_similarity
+ WHERE cosine_similarity > 0 AND cosine_similarity < 1
+  WITH  p1, p2,cosine_similarity,d
+   MERGE (p1)-[r:appear_in_same_document]-(p2)
+   SET r.cosine_similarity = cosine_similarity
+ RETURN r.cosine_similarity,d
 
 // name: count_entities
 MATCH (p1:{:entity})
@@ -87,6 +100,8 @@ RETURN count(*) as total_count
 // name: computate_jaccard_distance
 // dep. For the "WHERE id(p1) < id(p2)" part, see:
 // dep. https://stackoverflow.com/questions/33083491/how-to-get-a-unique-set-of-node-pairs-for-undirected-relationships/33084035#33084035
+// usage:
+// $ node scripts/manage.js --task=common.cypher.query --cypher=similarity/computate_jaccard_distance --limit=10 --offset=0 --entity=person
 MATCH (p1:{:entity})
 WHERE p1.score > -2
 WITH p1
@@ -95,30 +110,32 @@ LIMIT {limit}
 WITH p1
 MATCh (p1)-[r1:appears_in]->(res:resource)
 WHERE r1.score > -2
-WITH p1, res
+WITH p1, res // res where p1 is
 
 MATCH (res)<-[r2:appears_in]-(p2:{:entity})
-WHERE id(p1) < id(p2) AND p2.score > -2 AND r2.score > -2
-WITH p1, p2, count(*) as intersection
-WHERE intersection > 2
-WITH p1, p2, intersection
-
+WHERE id(p1) <> id(p2) AND p2.score > -2 AND r2.score > -2
+WITH p1, p2, count(DISTINCT res) as intersections // count res. group by p2
+WHERE intersections > 2                  // filter ... ?
+WITH p1, p2, intersections
 
 MATCH (p1)-[rel:appears_in]->(res1:resource)
-WITH p1,p2, intersection, collect(res1) as H1
+WITH p1,p2, intersections, count(DISTINCT res1) as H1
+WITH p1,p2, intersections, H1, H1 - intersections as c1diff
 
 MATCH (p2)-[rel:appears_in]->(res2:resource)
-WITH p1,p2, intersection, H1, collect(res2) as H2
+WITH p1,p2, intersections, H1, c1diff, count(DISTINCT res2) as H2
+WITH p1,p2, intersections, H1, c1diff, H2, H2 - intersections as c2diff
+WITH p1, p2, intersections, H1 + H2 - intersections as U, // union
+  [c1diff, c2diff] as cdiffs,
+  reduce(x=[999999999999,0], cdiff IN [c1diff, c2diff] | 
+    CASE WHEN cdiff < x[0] THEN [cdiff, x[1]+1] ELSE [x[0], x[1]+1] END 
+  )[0] as cdiff
 
-WITH p1, p2, intersection, ABS(length(H1)-intersection - length(H2)-intersection) as cdiff, H1+H2 as U UNWIND U as res
-WITH p1, p2, intersection, cdiff, count(distinct res) as union
-WITH p1, p2, intersection,  union, toFloat(intersection)/toFloat(union) as jaccard, cdiff
-WITH p1, p2, intersection,  union, jaccard, cdiff, toFloat(cdiff)/toFloat(union) as overlapping
+WITH p1, p2, intersections, U, cdiff, toFloat(intersections)/toFloat(U) as jaccard
 
 MERGE (p1)-[r:appear_in_same_document]-(p2)
   SET
-    r.jaccard     = jaccard,
-    r.intersections  = intersection,
-    r.union       = union,
-    r.overlapping = overlapping,
-    r.cdiff       = cdiff
+    r.jaccard        = jaccard,
+    r.intersections  = intersections,
+    r.cdiff          = cdiff,
+    r.union          = U
