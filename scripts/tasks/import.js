@@ -6,7 +6,8 @@ var settings   = require('../../settings'),
     fs         = require ('fs'),
     path       = require('path'),
 
-    Resource   = require('../../models/resource');
+    Resource   = require('../../models/resource'),
+    Entity     = require('../../models/entity');;
 
 var task = {
   importData: function(options, callback) {
@@ -112,10 +113,102 @@ var task = {
       callback(null, options);
     }
   },
+
+  bulkImport: function(options, callback){
+    console.log(clc.yellowBright('\n   tasks.resource.importData'));
+    
+
+    if(!options.src) {
+      console.log()
+      callback('  missing: --src argument where the JOSN files are located (glob)')
+      return;
+    }
+
+    console.log(clc.blackBright('   src glob path: '), options.src);
+
+    var gulp        = require('gulp'),
+        through     = require('through2');
+
+    gulp.src(options.src)
+      .pipe(function(){
+        return through.obj(function (file, encoding, done) {
+          if(file.isNull())
+            return done(null, file);
+
+          console.log(clc.blackBright('   processing:'), file.path);
+
+          var graph = require(file.path);
+
+          // checking for nodes and edges
+          async.series(graph.nodes.filter(function(n){
+            return n.mimetype
+          }).map(function(n, i){
+            return function saveNode(next){
+              
+              Resource.create(_.assign(n, {
+                user: options.marvin
+              }), function(err, node){
+                if(err)
+                  return next(err);
+                console.log(clc.blackBright('   - node', clc.greenBright('saved!'), 'id:'), node.id, clc.blackBright('- slug:'),node.props.slug);
+                // store node id directly in the graph;)
+                n.id = node.id;
+                next();
+              })
+              
+            }
+          }).concat(graph.links.map(function(n){
+            return function savelink(next){
+              var resource = _.find(graph.nodes, {slug: n.target}),
+                  entity = _.find(graph.nodes, {slug: n.source});
+              console.log(clc.blackBright('   - link:'), entity.slug, clc.blackBright('   --> resource:'), resource.id);
+
+              // next()
+              Entity.create(_.assign({
+                resource: {
+                  uuid: resource.id
+                },
+                username: options.marvin.username
+              }, entity), function (err, entity) {
+                if(err)
+                  return next(err);
+                console.log(clc.blackBright('   - entity', clc.greenBright('saved!'), 'id:'), entity.id, clc.blackBright('- slug:'),entity.props.slug);
+                next()
+              });
+
+              // console.log(person)
+              // get the node matching source and the node matching target
+
+              // next();
+            }
+          })), function(err){
+            // console.log(graph.nodes)
+            if(err){
+              console.log(err)
+              throw err;
+            }
+            done(null, file);
+          })
+          
+        })
+      }()).on('finish', function() {
+        console.log(clc.blackBright('   gulp task status:'), 'finished');
+        callback(null, options)
+      })
+
+    
+  }
+
 }
 
-module.exports=[
-  helpers.csv.parse,
-  helpers.marvin.create,
-  task.importData
-]
+module.exports={
+  fromCSV: [ // bulk import resources from a single csv file
+    helpers.csv.parse,
+    helpers.marvin.create,
+    task.importData
+  ],
+  fromJSON: [ // gulp-like bulk import form distinct json sources. require a --src argument
+    helpers.marvin.create,
+    task.bulkImport
+  ]
+}

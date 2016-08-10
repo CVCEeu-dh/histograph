@@ -505,7 +505,6 @@ RETURN col
     res.creation_date = {creation_date},
     res.creation_time = {creation_time}
   ON MATCH SET
-    res.uuid = {uuid},
     {if:start_time}
       res.start_time = {start_time},
       res.end_time   = {end_time},
