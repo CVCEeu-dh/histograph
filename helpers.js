@@ -904,6 +904,15 @@ module.exports = {
       return result;
   },
   /*
+    Get months for timeline
+  */
+  getMonths: function(start_time, end_time, next){
+    return {
+      start_month: moment.utc(start_time, 'X').format('YYYYMM'),
+      end_month: moment.utc(end_time, 'X').format('YYYYMM')
+    }
+  },
+  /*
     options.start_date and options.start_time according to options.format.
     Cfr moment documentation.
     If options.strict is not present, the start date and the end_date will be rounded to the

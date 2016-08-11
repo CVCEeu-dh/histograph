@@ -287,6 +287,9 @@ module.exports = {
         strict: properties.datestrict
       }));
       
+    } else if(properties.start_time && properties.end_time) {
+      // calculate month
+      properties = _.assign(properties, helpers.getMonths(properties.start_time, properties.end_time))
     }
     properties = _.assign(properties, {
       uuid: helpers.uuid(),

@@ -116,7 +116,7 @@ WHERE res:resource
   AND res.start_time >= {start_time}
 {/if}
 {if:end_time}
-  AND res.end_time >= {end_time}
+  AND res.end_time <= {end_time}
 {/if}
 {if:type}
   AND res.type IN {type}
