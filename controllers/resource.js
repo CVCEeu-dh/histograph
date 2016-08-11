@@ -97,7 +97,6 @@ module.exports = function(io){
               validator.SPECIALS.orderby
             ]
           });
-      
       if(!form.isValid)
         return helpers.formError(form.errors, res);
 
@@ -108,6 +107,8 @@ module.exports = function(io){
         orderby = form.params.orderby = _t[''+form.params.orderby]; 
 
       Resource.getMany(form.params, function (err, items, info) {
+        if(err)
+          console.log(err)
         helpers.models.getMany(err, res, items, info, form.params);
       });
     },
@@ -193,9 +194,9 @@ module.exports = function(io){
           form = validator.request(req, required, {
             fields: fields
           });
-
-      if(!form.isValid)
+      if(!form.isValid){
         return helpers.formError(form.errors, res);
+      }
       // console.log('createRelatedEntity', form.isValid)
       var resource = {
             id: form.params.id

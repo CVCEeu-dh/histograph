@@ -436,8 +436,8 @@ RETURN col
     res.mimetype = {mimetype},
     res.languages = {languages},
     {if:start_time}
-      res.start_time = {start_time},
-      res.end_time   = {end_time},
+      res.start_time = toInt({start_time}),
+      res.end_time   = toInt({end_time}),
       res.start_date = {start_date},
       res.end_date   = {end_date},
     {/if}
@@ -506,8 +506,8 @@ RETURN col
     res.creation_time = {creation_time}
   ON MATCH SET
     {if:start_time}
-      res.start_time = {start_time},
-      res.end_time   = {end_time},
+      res.start_time = toInt({start_time}),
+      res.end_time   = toInt({end_time}),
       res.start_date = {start_date},
       res.end_date   = {end_date},
     {/if}

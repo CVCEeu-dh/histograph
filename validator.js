@@ -47,6 +47,11 @@ function verify(form, fields, options) {
     for(var i in fields) {
       if(fields[i].optional && !form[fields[i].field])
         continue;
+      if(form[i] !== undefined){
+        form[i] = ''+ form[i];
+      } else {
+        form[i] = '';
+      }
       if(!validator[fields[i].check].apply(this, [form[fields[i].field]].concat(fields[i].args))) {
         errors.push(fields[i]);
       }
@@ -58,8 +63,13 @@ function verify(form, fields, options) {
       var index = indexes.indexOf(i);
       if(index == -1)
         continue;
-      // console.log(indexes, index, fields[index], i)
+      //console.log(indexes, index, fields[index], i)
       // console.log(i, form[i], fields[index].check)
+      if(form[i] !== undefined){
+        form[i] = ''+ form[i];
+      } else {
+        form[i] = '';
+      }
       if(!validator[fields[index].check].apply(this, [form[i]].concat(fields[index].args))) {
         fields[index].value = form[i];
         errors.push(fields[index]);
@@ -369,15 +379,19 @@ module.exports = {
       safeParams.start_date = moment.utc(params.from,'YYYY-MM-DD', true);
       if(!safeParams.start_date.isValid())
         errors.start_date = 'not a valid date';
-      else
+      else{
         safeParams.start_time = +safeParams.start_date.format('X');
+        safeParams.start_date = safeParams.start_date.toISOString();
+      }
     };
     if(params.to) {
       safeParams.end_date = moment.utc(params.to,'YYYY-MM-DD', true);
       if(!safeParams.end_date.isValid())
         errors.end_date = 'not a valid date'
-      else
+      else{
         safeParams.end_time = +safeParams.end_date.format('X');
+        safeParams.end_date = safeParams.end_date.toISOString();
+      }
      
     };
 
@@ -412,7 +426,6 @@ module.exports = {
       // specify which fields are required (when usually they're not) or viceversa. Cfr module.exports.FIELDS
       
     }
-    
     // verify  
     result = verify(params, fields);
   
@@ -448,13 +461,15 @@ module.exports = {
       safeParams.mimetype = safeParams.mimetype.split(',');
     
     if(params.from) {
-      safeParams.start_date = moment.utc(params.from,'YYYY-MM-DD', true);
-      safeParams.start_time = +safeParams.start_date.format('X');
+      var start_date = moment.utc(params.from,'YYYY-MM-DD', true);
+      safeParams.start_date = start_date.toISOString();
+      safeParams.start_time = +start_date.format('X'); // force num
     };
     
     if(params.to) {
-      safeParams.end_date = moment.utc(params.to,'YYYY-MM-DD', true);
-      safeParams.end_time = +safeParams.end_date.format('X');
+      var end_date = moment.utc(params.to,'YYYY-MM-DD', true);
+      safeParams.end_date = end_date.toISOString();
+      safeParams.end_time = +end_date.format('X'); // force num
     };
     
     if(typeof safeParams.type == 'string')
