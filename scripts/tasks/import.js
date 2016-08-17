@@ -132,13 +132,16 @@ var task = {
     gulp.src(options.src)
       .pipe(function(){
         return through.obj(function (file, encoding, done) {
-          if(file.isNull())
+          if(file.isNull()){
+            console.log('FILE IS NULL')
             return done(null, file);
+          }
 
           console.log(clc.blackBright('   processing:'), file.path);
 
-          var graph = require(file.path);
-
+          
+          var graph = JSON.parse(file.contents);
+          console.log('   ',graph.links.length);
           // checking for nodes and edges
           async.series(graph.nodes.filter(function(n){
             return n.mimetype
@@ -148,6 +151,7 @@ var task = {
               Resource.create(_.assign(n, {
                 user: options.marvin
               }), function(err, node){
+                
                 if(err)
                   return next(err);
                 console.log(clc.blackBright('   - node', clc.greenBright('saved!'), 'id:'), node.id, clc.blackBright('- slug:'),node.props.slug);
@@ -161,6 +165,7 @@ var task = {
             return function savelink(next){
               var resource = _.find(graph.nodes, {slug: n.target}),
                   entity = _.find(graph.nodes, {slug: n.source});
+              
               console.log(clc.blackBright('   - link:'), entity.slug, clc.blackBright('   --> resource:'), resource.id);
 
               // next()
@@ -170,8 +175,10 @@ var task = {
                 },
                 username: options.marvin.username
               }, entity), function (err, entity) {
-                if(err)
+                if(err){
+                  console.log(err)
                   return next(err);
+                }
                 console.log(clc.blackBright('   - entity', clc.greenBright('saved!'), 'id:'), entity.id, clc.blackBright('- slug:'),entity.props.slug);
                 next()
               });
@@ -191,7 +198,9 @@ var task = {
           })
           
         })
-      }()).on('finish', function() {
+      }()).on('data', function() {
+        console.log(clc.blackBright('  cleaning '));
+      }).on('finish', function() {
         console.log(clc.blackBright('   gulp task status:'), 'finished');
         callback(null, options)
       })

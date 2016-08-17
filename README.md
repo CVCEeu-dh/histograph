@@ -91,9 +91,9 @@ And finally,
  
 
 ## import data: manage.js script
-Once histograph has been installed, documents can be loaded from a csv file via the **import** script by running:
+Once histograph has been installed, documents and links can be loaded from a JSON graph file via the **import** script by running:
 	
-	node scripts\manage.js --task=import-resources --source=contents\resources.tsv.example
+	node scripts/manage.js --task=import.fromJSON --src=/your/data/**/*.json 
 
 For detailed instructions about import and annotation process, see the [related wiki page](https://github.com/CVCEeu-dh/histograph/wiki/importing-text-documents-and-configure-the-annotation-script)
 	
