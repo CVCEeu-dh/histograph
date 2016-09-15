@@ -14,7 +14,7 @@ module.exports = {
       firstname: 'anonymous',
       lastname: 'user'
     },
-    username:  'anonymous',
+    // username:  'anonymous',
     picture:   'anonymous.jpg'
   },
 
