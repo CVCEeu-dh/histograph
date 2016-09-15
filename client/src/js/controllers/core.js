@@ -1145,7 +1145,13 @@ angular.module('histograph')
       /*
         change the given user, programmatically. Cfr httpProvider config in app.js
       */
-      if(!SETTINGS.user.id) {
+      // depreated, allow for anonymous user via get
+      // if(!SETTINGS.user.id) {
+      //   // do nothing
+      //   return;
+      // }
+      if(!SETTINGS.user) {
+        $log.error("Can't find a valid SETTINGS.user var");
         // do nothing
         return;
       }

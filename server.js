@@ -206,7 +206,7 @@ express.response.error = function(statusCode, err) {
 clientRouter.route('/').
   get(function(req, res) { // test route to make sure everything is working (accessed at GET http://localhost:8080/api)
     res.render('index', {
-      user: req.user || 'anonymous',
+      user: req.user || settings.anonymousUser,
       message: 'hooray! welcome to our api!',
       types: settings.types,
       title: settings.title,
@@ -218,7 +218,7 @@ clientRouter.route('/').
 clientRouter.route('/terms').
   get(function(req, res) { // test route to make sure everything is working (accessed at GET http://localhost:8080/api)
     res.render('terms', {
-      user: req.user || 'anonymous',
+      user: req.user || settings.anonymousUser,
       message: 'hooray! welcome to our api!',
       types: settings.types,
       title: settings.title,
@@ -421,7 +421,9 @@ clientRouter.route('/txt/:path/:file')
 
 */
 apiRouter.use(function (req, res, next) {
-  if(req.isAuthenticated() || (settings.allowUnauthenticatedRequests && settings.env == 'development')) {
+  if(settings.authOrReadOnlyMode && req.method == 'GET'){
+    req.logIn(settings.anonymousUser, next);
+  } else if(req.isAuthenticated() || (settings.allowUnauthenticatedRequests && settings.env == 'development')) {
     return next();
   } else
     return res.error(403);

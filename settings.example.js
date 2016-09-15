@@ -8,6 +8,15 @@ module.exports = {
   port: 8000,
   env: 'development', // production | development
   title: 'Histograph', // name of 
+  authOrReadOnlyMode: false,
+  anonymousUser: {
+    props: {
+      firstname: 'anonymous',
+      lastname: 'user'
+    },
+    username:  'anonymous',
+    picture:   'anonymous.jpg'
+  },`
 
   secret: {
     cookie: 'cookie secret', // cookie salt
