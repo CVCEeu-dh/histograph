@@ -16,7 +16,7 @@ module.exports = {
     },
     username:  'anonymous',
     picture:   'anonymous.jpg'
-  },`
+  },
 
   secret: {
     cookie: 'cookie secret', // cookie salt
