@@ -137,10 +137,18 @@ var task = {
             return done(null, file);
           }
 
+
+
           console.log(clc.blackBright('   processing:'), file.path);
 
           
           var graph = JSON.parse(file.contents);
+
+          if(!graph || !graph.nodes || !graph.links){
+            console.log('   not a valid json file:', '' + file.contents);
+            return done(null, file);
+          }
+
           console.log('   ',graph.links.length);
           // checking for nodes and edges
           async.series(graph.nodes.filter(function(n){

@@ -270,15 +270,15 @@ WITH res, r1, ent
 WITH ent
 MATCH (ent)-[:appears_in]->(res2:resource)
 {if:with}
-  WHERE id(res2) <> {id}
+  WHERE res2.uuid <> {id}
 
   WITH res2
   MATCH (res2)<-[:appears_in]-(ent2:entity) 
-  WHERE id(ent2) IN {with}
+  WHERE ent2.uuid IN {with}
 
 {/if}
 {unless:with}
-  WHERE id(res2) <> {id}
+  WHERE res2.uuid <> {id}
 {/unless}
 
   {if:mimetype}
