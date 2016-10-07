@@ -13,6 +13,10 @@ CREATE CONSTRAINT ON (u:user) ASSERT u.username IS UNIQUE
 // name: create_constraint_user_uuid
 CREATE CONSTRAINT ON (u:user) ASSERT u.uuid IS UNIQUE
 
+// name: update_constraint_user_uuid
+// create index on start date to group / filter result by date
+MATCH (u:user) WHERE exists(u.uuid) WITH u SET u.uuid=u.uuid
+
 // name: create_constraint_resource_uuid
 CREATE CONSTRAINT ON (res:resource) ASSERT res.uuid IS UNIQUE
 
@@ -33,9 +37,21 @@ CREATE INDEX ON :resource(start_time)
 // create index on start date to group / filter result by timestamp
 CREATE INDEX ON :resource(last_modification_time)
 
+// name: create_index_on_start_year
+// create index on start date to group / filter result by date
+CREATE INDEX ON :resource(start_year)
+
+// name: update_index_on_start_year
+// create index on start date to group / filter result by date
+MATCH (res:resource) WHERE exists(res.start_year) WITH res SET res.start_year=toInt(res.start_year)
+
 // name: create_index_on_start_month
 // create index on start date to group / filter result by date
 CREATE INDEX ON :resource(start_month)
+
+// name: update_index_on_start_month
+// create index on start date to group / filter result by date
+MATCH (res:resource) WHERE exists(res.start_month) WITH res SET res.start_month=toInt(res.start_month)
 
 // name: create_index_on_end_time
 // create index on start date to group / filter result by date
@@ -44,6 +60,10 @@ CREATE INDEX ON :resource(end_time)
 // name: create_index_on_end_month
 // create index on start date to group / filter result by date
 CREATE INDEX ON :resource(end_month)
+
+// name: update_index_on_end_month
+// create index on start date to group / filter result by date
+MATCH (res:resource) WHERE exists(res.end_month) WITH res SET res.end_month=toInt(res.end_month)
 
 // name: create_index_on_entity_status
 // create index
@@ -60,3 +80,4 @@ CREATE INDEX ON :entity(df)
 // name: create_index_on_scope
 // create index on variables scope
 CREATE INDEX ON :variables(scope)
+

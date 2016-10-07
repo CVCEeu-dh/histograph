@@ -174,7 +174,7 @@ var task = {
               var resource = _.find(graph.nodes, {slug: n.target}),
                   entity = _.find(graph.nodes, {slug: n.source});
               
-              console.log(clc.blackBright('   - link:'), entity.slug, clc.blackBright('   --> resource:'), resource.id);
+              console.log(clc.blackBright('   - link from:'), entity.slug, clc.blackBright('   --> resource:'), resource.id);
 
               // next()
               Entity.create(_.assign({
