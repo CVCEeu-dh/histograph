@@ -19,7 +19,7 @@ WITH res, curated_by_user, loved_by_user, curators, lovers, filter(x in collect(
       type: 'place',
       props: pla,
       rel: r_pla
-    }) WHERE has(x.id))[0..5] as places
+    }) WHERE exists(x.id))[0..5] as places
 
 OPTIONAL MATCH (res)-[r_loc:appears_in]-(loc:`location`)
 WITH res, curated_by_user, loved_by_user, curators, lovers, places, r_loc, loc
@@ -29,7 +29,7 @@ WITH res, curated_by_user, loved_by_user, curators, lovers, places, filter(x in 
       type: 'location',
       props: loc,
       rel: r_loc
-    }) WHERE has(x.id))[0..5] as locations
+    }) WHERE exists(x.id))[0..5] as locations
 
 OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
 WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, r_per, per
@@ -39,7 +39,7 @@ WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, f
       type: 'person',
       props: per,
       rel: r_per
-    }) WHERE has(x.id))[0..10] as persons
+    }) WHERE exists(x.id))[0..10] as persons
 
 OPTIONAL MATCH (res)-[r_org:appears_in]-(org:`organization`)
 WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, persons, r_org, org
@@ -49,7 +49,7 @@ WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, p
       type: 'organization',
       props: org,
       rel: r_org
-    }) WHERE has(x.id))[0..10] as organizations
+    }) WHERE exists(x.id))[0..10] as organizations
 
 OPTIONAL MATCH (res)-[r_soc:appears_in]-(soc:`social_group`)
 WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, persons, organizations, r_soc, soc
@@ -59,7 +59,7 @@ WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, p
       type: 'social_group',
       props: soc,
       rel: r_soc
-    }) WHERE has(x.id))[0..10] as social_groups
+    }) WHERE exists(x.id))[0..10] as social_groups
 
 OPTIONAL MATCH (res)-[r_the:appears_in]-(the:`theme`)
 WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, persons, organizations, social_groups, filter(x in collect({
@@ -67,7 +67,7 @@ WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, p
       type: 'theme',
       props: the,
       rel: r_the
-    }) WHERE has(x.id))[0..5] as themes
+    }) WHERE exists(x.id))[0..5] as themes
 
 OPTIONAL MATCH (ver)-[:describes]->(res)
 OPTIONAL MATCH (res)-[:belongs_to]->(col)
@@ -146,7 +146,7 @@ WITH res,  filter(x in collect({
       type: 'location',
       props: loc,
       rel: r_loc
-    }) WHERE has(x.id))[0..5] as locations   
+    }) WHERE exists(x.id))[0..5] as locations   
 OPTIONAL MATCH (res)<-[r_per:appears_in]-(per:`person`)
 // WHERE per.score > -2
 WITH res, locations, r_per, per
@@ -156,7 +156,7 @@ WITH res, locations,  filter(x in collect({
       type: 'person',
       props: per,
       rel: r_per
-    }) WHERE has(x.id))[0..5] as persons
+    }) WHERE exists(x.id))[0..5] as persons
 OPTIONAL MATCH (res)<-[r_org:appears_in]-(org:`organization`)
 // WHERE org.score > -2
 WITH res, locations, persons,  filter(x in collect({    
@@ -164,7 +164,7 @@ WITH res, locations, persons,  filter(x in collect({
       type: 'organization',
       props: org,
       rel: r_org
-    }) WHERE has(x.id))[0..5] as organizations
+    }) WHERE exists(x.id))[0..5] as organizations
 OPTIONAL MATCH (res)<-[r_soc:appears_in]-(soc:`social_group`)
 // WHERE soc.score > -2
 WITH res, locations, persons, organizations,  filter(x in collect({  
@@ -172,7 +172,7 @@ WITH res, locations, persons, organizations,  filter(x in collect({
       type: 'social_group',
       props: soc,
       rel: r_soc
-    }) WHERE has(x.id))[0..5] as social_groups
+    }) WHERE exists(x.id))[0..5] as social_groups
 OPTIONAL MATCH (res)<-[r_the:appears_in]-(the:`theme`)
 // WHERE the.score > -2
 WITH res, locations, persons, organizations, social_groups, filter(x in collect({    
@@ -180,7 +180,7 @@ WITH res, locations, persons, organizations, social_groups, filter(x in collect(
       type: 'theme',
       props: the,
       rel: r_the
-    }) WHERE has(x.id))[0..5] as themes
+    }) WHERE exists(x.id))[0..5] as themes
 
 {if:with}
   OPTIONAL MATCH (res)--(ann:annotation) 
@@ -354,7 +354,7 @@ WITH res1, res2, intersection, filter(x in collect({
       type: 'person',
       props: per,
       rel: r_per
-    }) WHERE has(x.id))[0..5] as persons
+    }) WHERE exists(x.id))[0..5] as persons
 
 WITH res1, res2, intersection, persons
 OPTIONAL MATCH (res2)<-[r_the:appears_in]-(the:`theme`)
@@ -365,7 +365,7 @@ WITH res1, res2, intersection, persons, filter(x in collect({
       type: 'theme',
       props: the,
       rel: r_the
-    }) WHERE has(x.id))[0..5] as themes
+    }) WHERE exists(x.id))[0..5] as themes
 
 RETURN {
   id: res2.uuid,
@@ -442,8 +442,8 @@ RETURN col
       res.end_date   = {end_date},
     {/if}
     {if:start_month}
-      res.start_month = {start_month},
-      res.end_month   = {end_month},
+      res.start_month = toInt({start_month}),
+      res.end_month   = toInt({end_month}),
     {/if}
     {if:full_search}
       res.full_search = {full_search},
@@ -886,13 +886,13 @@ return count(distinct res.start_time)
 MATCH (res:resource)
 
 {if:with}
-  WHERE has(res.start_month)
+  WHERE exists(res.start_month)
   WITH res
   MATCH (ent:entity)-[r:appears_in]->(res)
   WHERE ent.uuid IN {with}
   WITH DISTINCT res 
 {/if}
-  WHERE has(res.start_month)
+  WHERE exists(res.start_month)
 {if:mimetype}
   AND res.mimetype = {mimetype}
 {/if}
@@ -926,7 +926,7 @@ WITH ent
   WITH DISTINCT res
 {/unless}
 
-WHERE res.uuid <> {id} AND has(res.start_month)
+WHERE res.uuid <> {id} AND exists(res.start_month)
   {if:mimetype}
   AND res.mimetype = {mimetype}
   {/if}
@@ -950,7 +950,7 @@ ORDER BY tm ASC
 // name: get_timeline_per_day
 //
 MATCH (res:resource)
-WHERE has(res.start_time)
+WHERE exists(res.start_time)
 {if:start_time}
   AND res.start_time >= {start_time}
 {/if}
@@ -1102,7 +1102,7 @@ SKIP {offset}
 LIMIT {limit}
 
 WITH act
-MATCH (u:user)-[r:performs]->act
+MATCH (u:user)-[r:performs]->(act)
 
 WITH act, r, {
     id: u.uuid,

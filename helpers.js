@@ -904,12 +904,15 @@ module.exports = {
       return result;
   },
   /*
-    Get months for timeline
+    Get months for timeline.
+    @Return a dictionary of strings
   */
   getMonths: function(start_time, end_time, next){
     return {
       start_month: moment.utc(start_time, 'X').format('YYYYMM'),
-      end_month: moment.utc(end_time, 'X').format('YYYYMM')
+      end_month:   moment.utc(end_time, 'X').format('YYYYMM'),
+      start_year:  moment.utc(start_time, 'X').format('YYYY'),
+      end_year:    moment.utc(end_time, 'X').format('YYYY')
     }
   },
   /*

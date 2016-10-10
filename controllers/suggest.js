@@ -344,7 +344,7 @@ module.exports =  function(io){
       // lucene.setSearchTerm('name_search:' + req.query.query);
       // entity_query = '' + lucene.getFormattedSearchTerm();
       // console.log('resource_query', resource_query)
-          // console.log('entity_query', entity_query)
+      //     console.log('entity_query', entity_query)
       
       neo4j.query(queries.lucene_query, {
         resource_query: resource_query,

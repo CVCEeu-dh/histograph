@@ -93,7 +93,7 @@ WITH res, matches, sm, filter(x in collect({
       type: 'person',
       props: per,
       rel: r_per
-    }) WHERE has(x.id))[0..5] as people
+    }) WHERE EXISTS(x.id))[0..5] as people
   OPTIONAL MATCH (res)<-[r_the:appears_in]-(the:`theme`)
   WITH res, matches, sm, people, r_the, the
   ORDER BY  r_the.score DESC, 
@@ -104,7 +104,7 @@ WITH res, matches, sm, people, filter(x in collect({
       type: 'theme',
       props: the,
       rel: r_the
-    }) WHERE has(x.id))[0..5] as themes
+    }) WHERE EXISTS(x.id))[0..5] as themes
 
 RETURN {
   id: res.uuid,
@@ -156,7 +156,7 @@ MATCH (ent:entity)
   WHERE ent.uuid in {ids}
 WITH ent
   MATCH (ent)-[r:appears_in]->(res:resource)
-  WHERE has(res.start_month)
+  WHERE EXISTS(res.start_month)
     {if:mimetype}
     AND res.mimetype = {mimetype}
     {/if}
@@ -589,18 +589,18 @@ RETURN { id: id(n), props: n } LIMIT {limit}
 
 // name: build_full_search_legacy_index
 // fill the full search index. Cfr scripts/tasks/lucene.js
-MATCH (res:resource) WHERE has(res.full_search)
+MATCH (res:resource) WHERE EXISTS(res.full_search)
 SET res.full_search = res.full_search
 
 
 // name: build_title_search_legacy_index
 // fill the full search index. Cfr scripts/tasks/lucene.js
-MATCH (res:resource) WHERE has(res.title_search)
+MATCH (res:resource) WHERE EXISTS(res.title_search)
 SET res.title_search = res.title_search
 
 
 // name: build_name_search_legacy_index
 // fill the full search index. Cfr scripts/tasks/lucene.js
-MATCH (ent:entity) WHERE has(ent.name_search)
+MATCH (ent:entity) WHERE EXISTS(ent.name_search)
 SET ent.name_search = ent.name_search
 

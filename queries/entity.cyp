@@ -14,14 +14,14 @@ WITH ent // collect issues
 
   WITH ent, act, collect(alias_u) as alias_us
   OPTIONAL MATCH (act)-[:mentions]->(ent2:entity)
-    WHERE ent2 <> ent
+    WHERE ent2.uuid <> ent.uuid
   WITH ent, act, alias_us,
     {
       id: ent2.uuid,
       props: ent2,
       type: last(labels(ent2))
     } as alias_m
-  WITH ent, act, alias_us, filter(x in collect(alias_m) WHERE has(x.id)) as alias_ms
+  WITH ent, act, alias_us, filter(x in collect(alias_m) WHERE exists(x.id)) as alias_ms
   WITH ent, 
     {
       id: act.uuid,
@@ -29,7 +29,7 @@ WITH ent // collect issues
       users: alias_us,
       mentioning: alias_ms
     } as alias_issue 
-  WITH ent, filter(x in collect(alias_issue) WHERE has(x.id)) as issues
+  WITH ent, filter(x in collect(alias_issue) WHERE exists(x.id)) as issues
 RETURN {
   id: ent.uuid,
   type: LAST(labels(ent)),
@@ -335,7 +335,7 @@ WITH r, ent, res, filter(x in collect({
       type: 'theme',
       props: the,
       rel: r_the
-    }) WHERE has(x.id))[0..5] as themes   
+    }) WHERE exists(x.id))[0..5] as themes   
 
 OPTIONAL MATCH (res)<-[r_per:appears_in]-(per:`person`)
 WITH r, ent, res, themes, r_per, per
@@ -345,7 +345,7 @@ WITH r, ent, res, themes, filter(x in collect({
       type: 'person',
       props: per,
       rel: r_per
-    }) WHERE has(x.id))[0..5] as persons
+    }) WHERE exists(x.id))[0..5] as persons
 
 WITH r, ent, res, themes, persons
 
@@ -394,7 +394,7 @@ RETURN count(res) as count_items
 MATCH (ent:entity {uuid: {id}})
 WITH ent
 MATCH (ent)-[:appears_in]->(res:resource)
-  WHERE has(res.start_month)
+  WHERE exists(res.start_month)
   {if:mimetype}
   AND res.mimetype = {mimetype}
   {/if}
@@ -626,7 +626,7 @@ RETURN COUNT(DISTINCT ent1) as count_items
 // name: get_timeline
 // get timebased resources id where the entioty a^^ears
 MATCH (ent)-[:appears_in]->(res:resource)
-WHERE ent.uuid = {id} AND has(res.start_time)
+WHERE ent.uuid = {id} AND exists(res.start_time)
 RETURN {id: res.uuid, start_time: res.start_time }
 ORDER BY res.start_time
 

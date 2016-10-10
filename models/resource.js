@@ -535,8 +535,9 @@ module.exports = {
   */
   getTimeline: function (properties, next) {
     helpers.cypherTimeline(rQueries.get_timeline, properties, function (err, timeline) {
-      if(err)
+      if(err){
         next(err);
+      }
       else
         next(null, timeline);
     });

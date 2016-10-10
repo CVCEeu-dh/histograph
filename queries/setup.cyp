@@ -65,6 +65,14 @@ CREATE INDEX ON :resource(end_month)
 // create index on start date to group / filter result by date
 MATCH (res:resource) WHERE exists(res.end_month) WITH res SET res.end_month=toInt(res.end_month)
 
+// name: create_index_on_end_year
+// create index on start date to group / filter result by date
+CREATE INDEX ON :resource(end_year)
+
+// name: update_index_on_end_year
+// create index on start date to group / filter result by date
+MATCH (res:resource) WHERE exists(res.end_year) WITH res SET res.end_year=toInt(res.end_year)
+
 // name: create_index_on_entity_status
 // create index
 CREATE INDEX ON :entity(status)
@@ -81,3 +89,10 @@ CREATE INDEX ON :entity(df)
 // create index on variables scope
 CREATE INDEX ON :variables(scope)
 
+// name: update_auto_index_on_resource_full_search
+// create index on variables scope
+MATCH (res:resource) WHERE exists(res.full_search) WITH res SET res.full_search=res.full_search
+
+// name: update_auto_index_on_entity_name_search
+// create index on variables scope
+MATCH (ent:entity) WHERE exists(ent.name_search) WITH ent SET ent.name_search=ent.name_search

@@ -38,7 +38,7 @@ WITH u
     id: t.uuid,
     props: t,
     type: last(labels(t))
-  }) WHERE has(x.id)) AS alias_ms,{
+  }) WHERE exists(x.id)) AS alias_ms,{
     id: u.uuid,
     username: u.username,
     picture: u.picture
@@ -110,7 +110,7 @@ WITH a, alias_u, r, filter(x in collect({
     id: t.uuid,
     props: t,
     type: last(labels(t))
-  }) WHERE has(x.id)) AS alias_ms
+  }) WHERE exists(x.id)) AS alias_ms
 return {
   id: a.uuid,
   props: a,
@@ -132,7 +132,7 @@ SKIP {offset}
 LIMIT {limit}
 
 WITH act
-MATCH (u:user)-[r:performs]->act
+MATCH (u:user)-[r:performs]->(act)
 
 WITH act, r, {
     id: u.uuid,
