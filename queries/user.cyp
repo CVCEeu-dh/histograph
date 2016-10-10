@@ -91,7 +91,7 @@ RETURN count(act) as total_items
 MATCH (you:user {username:{username}})
 WITH you 
 MATCH (u:user)-[:performs]->(act:action)
-WHERE id(you) <> id(u) AND act.last_modification_time > you.last_notification_time
+WHERE you.uuid <> u.uuid AND act.last_modification_time > you.last_notification_time
 WITH act, you, u, {
     id: u.uuid,
     username: u.username,
@@ -108,7 +108,7 @@ WITH act, alias_u, filter(x in collect({
     id: t.uuid,
     props: t,
     type: last(labels(t))
-  }) WHERE has(x.id)) AS alias_ms
+  }) WHERE EXISTS(x.id)) AS alias_ms
 RETURN {
   id: act.uuid,
   props: act,
@@ -131,7 +131,7 @@ RETURN act
 // name: count_crowdsourcing_unknownpeople
 // is ... a Person?
 MATCH (per:person)-[r:appears_in]->(res:resource)
-WHERE NOT(has(per.last_name))
+WHERE NOT(EXISTS(per.last_name))
   AND per.celebrity = 0 AND per.df > 1
 WITH DISTINCT per
 RETURN count(per) as count_items
@@ -140,7 +140,7 @@ RETURN count(per) as count_items
 // name: get_crowdsourcing_unknownpeople
 // is ... a Person? It should also give you a simple context (that probably you may know... @todo)
 MATCH (per:person)-[r:appears_in]->(res:resource)
-WHERE NOT(has(per.last_name))
+WHERE NOT(EXISTS(per.last_name))
   AND per.celebrity = 0
 WITH per, collect(res) as resources
 WITH per, resources, length(resources) as df
@@ -170,13 +170,13 @@ RETURN {
 // name: count_crowdsourcing_resourcelackingdate
 // how many (connected) resources are ... lacking starttime
 MATCH ()-[r:appears_in]->(res:resource)
-WHERE NOT(has(res.start_time))
+WHERE NOT(EXISTS(res.start_time))
 RETURN count(DISTINCT res) as count_items
 
 // name: get_crowdsourcing_resourcelackingdate
 // is ... a Person? It should also give you a simple context (that probably you may know... @todo)
 MATCH ()-[r:appears_in]->(res:resource)
-WHERE NOT(has(res.start_time))
+WHERE NOT(EXISTS(res.start_time))
 WITH res, count(r) as df
 SKIP {offset}
 LIMIT {limit}
@@ -354,7 +354,7 @@ return{
 // name: count_noise
 // get love or curation noise, see below get_noise query.
 MATCH (res:resource)<-[r:likes|curates]-(u:user)
-WHERE has(r.last_modification_time)
+WHERE EXISTS(r.last_modification_time)
 WITH res, r ORDER BY r.last_modification_time DESC
 WITH collect(DISTINCT res) as resources
 WITH resources, length(resources) as total_items
@@ -371,7 +371,7 @@ RETURN {
 // > node scripts/manage.js --task=query --cypher=user/get_noise --offset=0 --limit=10
 // @todo: add filters...
 MATCH (res:resource)<-[r:likes|curates]-(u:user)
-WHERE has(r.last_modification_time)
+WHERE EXISTS(r.last_modification_time)
 WITH res, r ORDER BY r.last_modification_time DESC
 WITH DISTINCT res
 SKIP {offset}

@@ -283,6 +283,19 @@ describe('model:resource ', function() {
     })
   })
   
+  it('should output a list of curators, if any.', function(done) {
+    Resource.getRelatedUsers({
+     id: __resourceA.id
+    }, {}, function (err, items) {
+      if(err){
+        console.error(err)
+      }
+      should.not.exist(err);
+      should.exist(items.length)
+      done()
+    })
+  })
+
   it('should get a NOT found error', function (done) {
     Resource.get(111600000000, __userB, function (err, res) {
       should.exist(err)

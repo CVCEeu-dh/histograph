@@ -591,7 +591,7 @@ module.exports = {
       },
       params: {
         entity: params.entity,
-        id: +params.id,
+        id: params.id, // uuid is string
         limit: +params.limit || 10,
         offset: +params.offset || 0
       }

@@ -173,6 +173,7 @@ describe('controller:resource (related users)', function() {
   })
   
   it('should get the list of curators by date, 2 in this case (the owner and the curator)', function (done) {
+    this.timeout(5000)
     session
       .get('/api/resource/'+ __resourceA.id +'/related/user')
       .expect('Content-Type', /json/)
@@ -189,7 +190,7 @@ describe('controller:resource (related users)', function() {
 
 describe('controller:resource (related entities)', function() {
   
-  it('should get the list of curators by date, 2 in this case (the owner and the curator)', function (done) {
+  it('should get the list of related entities', function (done) {
     session
       .get('/api/resource/'+ __resourceA.id +'/related/person')
       .expect('Content-Type', /json/)

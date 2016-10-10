@@ -445,6 +445,9 @@ RETURN col
       res.start_month = toInt({start_month}),
       res.end_month   = toInt({end_month}),
     {/if}
+    {if:start_year}
+      res.start_year = toInt({start_year})
+    {/if}
     {if:full_search}
       res.full_search = {full_search},
     {/if}
@@ -512,8 +515,11 @@ RETURN col
       res.end_date   = {end_date},
     {/if}
     {if:start_month}
-      res.start_month = {start_month},
-      res.end_month   = {end_month},
+      res.start_month = toInt({start_month}),
+      res.end_month   = toInt({end_month}),
+    {/if}
+    {if:start_year}
+      res.start_year = toInt({start_year})
     {/if}
     {if:full_search}
       res.full_search = {full_search},
@@ -999,8 +1005,7 @@ RETURN count(DISTINCT u) as count_items
 
 // name:get_related_users
 // get related users that 'curates'sthe resource
-MATCH (res:resource)-[*0..2]-(u)
-WHERE res.uuid = {id}
+MATCH (res:resource {uuid: {id}})-[*0..2]-(u)
 WITH res
 OPTIONAL MATCH (u)-[r:curates]->(res)
 OPTIONAL MATCH (u)-[r2:proposes]->(inq)-[:questions]->(res)
@@ -1022,58 +1027,29 @@ RETURN  {
 
 // name:get_related_entities
 // get related nodes that are connected with the entity. test with
-// > node .\scripts\manage.js --task=query --cypher=resource/get_related_entities --id=<ID> --limit=10 --type=person --offset=0
-MATCH (ent:{:entity})-[r:appears_in]->(res:resource){if:with}<-[:appears_in]-(ent2){/if}
-  WHERE res.uuid = {id} AND ent.score > -1
-  {if:with}
-    AND id(ent2) in {with}
-  {/if}
+// > node scripts/manage.js --task=common.cypher.query --cypher=resource/get_related_entities --id=N1frQNKD2g --limit=10 --entity=person --offset=0
+MATCH (res:resource {uuid: {id}})
+WITH res
+MATCH (ent:{:entity})-[r:appears_in]->(res)
 WITH ent, r
-  ORDER BY r.tfidf
-  LIMIT 50
-WITH ent
-  MATCH (ent)-[r1:appears_in]->(res:resource)
-  WHERE ent.score > -1
-  {if:start_time}
-    AND res.start_time >= {start_time}
-  {/if}
-  {if:end_time}
-    AND res.end_time <= {end_time}
-  {/if}
-  {if:mimetype}
-    AND res.mimetype in {mimetype}
-  {/if}
-  {if:type}
-    AND res.type in {type}
-  {/if}
-  // order by relevance ...
-WITH DISTINCT res
-  MATCH (ent1:{:entity})-[r:appears_in]->(res)
-  WHERE ent1.score > -1
-WITH ent1, count(DISTINCT r) as w
-RETURN {
-  id: id(ent1),
-  type: last(labels(ent1)),
-  props: ent1,
-  weight: w
-}
-ORDER BY w DESC
+ORDER BY r.tfidf DESC
 SKIP {offset}
 LIMIT {limit}
+RETURN {
+  id: ent.uuid,
+  type: last(labels(ent)),
+  props: ent,
+  weight: r.tfidf
+}
+ORDER BY r.tfidf DESC 
+
 
 // name:count_related_entities
 // get related nodes that are connected with the entity. test with
-// > node .\scripts\manage.js --task=query --cypher=resource/get_related_entities --id=<ID> --limit=10 --type=person --offset=0
-MATCH (n)-[r]-(ent:{:entity})
-  WHERE n.uuid = {id}
-WITH ent
-  MATCH (ent)--(res:resource)
-  // order by relevance ...
-WITH res
-  MATCH (ent1:{:entity})-[:appears_in]->(res)
-  WHERE ent1.score > -1
-WITH ent1
-RETURN COUNT(DISTINCT ent1) as count_items
+// > node scripts/manage.js --task=common.cypher.query --cypher=resource/count_related_entities --id=N1frQNKD2g --limit=10 --entity=person --offset=0
+MATCH (n:resource {uuid:{id}})<-[r1:appears_in]-(ent:{:entity})
+  WHERE r1.score > -1 AND ent.score > -1
+RETURN COUNT(DISTINCT ent) as count_items
 
 
 // name:count_related_actions
