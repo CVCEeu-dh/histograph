@@ -108,7 +108,7 @@ WITH act, alias_u, filter(x in collect({
     id: t.uuid,
     props: t,
     type: last(labels(t))
-  }) WHERE has(x.id)) AS alias_ms
+  }) WHERE exists(x.id)) AS alias_ms
 RETURN {
   id: act.uuid,
   props: act,
@@ -131,7 +131,7 @@ RETURN act
 // name: count_crowdsourcing_unknownpeople
 // is ... a Person?
 MATCH (per:person)-[r:appears_in]->(res:resource)
-WHERE NOT(has(per.last_name))
+WHERE NOT(exists(per.last_name))
   AND per.celebrity = 0 AND per.df > 1
 WITH DISTINCT per
 RETURN count(per) as count_items
@@ -140,7 +140,7 @@ RETURN count(per) as count_items
 // name: get_crowdsourcing_unknownpeople
 // is ... a Person? It should also give you a simple context (that probably you may know... @todo)
 MATCH (per:person)-[r:appears_in]->(res:resource)
-WHERE NOT(has(per.last_name))
+WHERE NOT(exists(per.last_name))
   AND per.celebrity = 0
 WITH per, collect(res) as resources
 WITH per, resources, length(resources) as df
@@ -170,13 +170,13 @@ RETURN {
 // name: count_crowdsourcing_resourcelackingdate
 // how many (connected) resources are ... lacking starttime
 MATCH ()-[r:appears_in]->(res:resource)
-WHERE NOT(has(res.start_time))
+WHERE NOT(exists(res.start_time))
 RETURN count(DISTINCT res) as count_items
 
 // name: get_crowdsourcing_resourcelackingdate
 // is ... a Person? It should also give you a simple context (that probably you may know... @todo)
 MATCH ()-[r:appears_in]->(res:resource)
-WHERE NOT(has(res.start_time))
+WHERE NOT(exists(res.start_time))
 WITH res, count(r) as df
 SKIP {offset}
 LIMIT {limit}
@@ -419,7 +419,7 @@ RETURN {
 // name: count_noise
 // get love or curation noise, see below get_noise query.
 MATCH (res:resource)<-[r:likes|curates]-(u:user)
-WHERE has(r.last_modification_time)
+WHERE exists(r.last_modification_time)
 WITH res, r ORDER BY r.last_modification_time DESC
 WITH collect(DISTINCT res) as resources
 WITH resources, length(resources) as total_items
@@ -436,7 +436,7 @@ RETURN {
 // > node scripts/manage.js --task=query --cypher=user/get_noise --offset=0 --limit=10
 // @todo: add filters...
 MATCH (res:resource)<-[r:likes|curates]-(u:user)
-WHERE has(r.last_modification_time)
+WHERE exists(r.last_modification_time)
 WITH res, r ORDER BY r.last_modification_time DESC
 WITH DISTINCT res
 SKIP {offset}

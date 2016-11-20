@@ -133,7 +133,7 @@ if ('production' == env) {
 // configure static files and jade templates
 
 app.set('views', './client/views');
-app.set('view engine', 'jade');
+app.set('view engine', 'pug');
 
 
 // configure app to use bodyParser(), this will let us get the data from a POST

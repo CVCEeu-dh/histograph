@@ -47,6 +47,11 @@ function verify(form, fields, options) {
     for(var i in fields) {
       if(fields[i].optional && !form[fields[i].field])
         continue;
+      if(form[i] !== undefined){
+        form[i] = ''+ form[i];
+      } else {
+        form[i] = '';
+      }
       if(!validator[fields[i].check].apply(this, [form[fields[i].field]].concat(fields[i].args))) {
         errors.push(fields[i]);
       }
@@ -58,8 +63,13 @@ function verify(form, fields, options) {
       var index = indexes.indexOf(i);
       if(index == -1)
         continue;
-      // console.log(indexes, index, fields[index], i)
+      //console.log(indexes, index, fields[index], i)
       // console.log(i, form[i], fields[index].check)
+      if(form[i] !== undefined){
+        form[i] = ''+ form[i];
+      } else {
+        form[i] = '';
+      }
       if(!validator[fields[index].check].apply(this, [form[i]].concat(fields[index].args))) {
         fields[index].value = form[i];
         errors.push(fields[index]);

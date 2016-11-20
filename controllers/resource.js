@@ -360,7 +360,7 @@ module.exports = function(io){
       //   form.params.precomputated = true;
       // } else {
 
-        query = parser.agentBrown(form.params.entityA == form.params.entityB? queries.get_cooccurrences: queries.get_bipartite_cooccurrences, form.params);
+      query = parser.agentBrown(form.params.entityA == form.params.entityB? queries.get_cooccurrences: queries.get_bipartite_cooccurrences, form.params);
       // }
       helpers.cypherGraph(query, form.params, function (err, graph) {
         if(err) {

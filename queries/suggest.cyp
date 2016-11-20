@@ -74,23 +74,25 @@ WITH res, sum(r.tf) as stf, collect({
     props: ent,
     rel: r
   })  as matches 
-WITH res,matches,stf
-ORDER BY size(matches) DESC, stf DESC
-WITH res, matches
+WITH res,matches,size(matches) as sm, stf
+WHERE sm > 1
+WITH res, matches, sm, stf
+ORDER BY sm DESC, stf DESC
+WITH res, matches, sm
 SKIP {offset}
 LIMIT {limit}
-WITH res, matches
+WITH res, matches, sm
   OPTIONAL MATCH (res)<-[r_per:appears_in]-(per:`person`)
-  WITH res, matches, r_per, per
+  WITH res, matches, sm, r_per, per
   ORDER BY  r_per.score DESC, 
             r_per.tfidf DESC, 
             r_per.frequency DESC
-WITH res, matches, filter(x in collect({  
+WITH res, matches, sm, filter(x in collect({  
       id: per.uuid,
       type: 'person',
       props: per,
       rel: r_per
-    }) WHERE has(x.id))[0..5] as people
+    }) WHERE exists(x.id))[0..5] as people
   OPTIONAL MATCH (res)<-[r_the:appears_in]-(the:`theme`)
   WITH res, matches, people, r_the, the
   ORDER BY  r_the.score DESC, 
@@ -101,7 +103,7 @@ WITH res, matches, people, filter(x in collect({
       type: 'theme',
       props: the,
       rel: r_the
-    }) WHERE has(x.id))[0..5] as themes
+    }) WHERE exists(x.id))[0..5] as themes
 
 RETURN {
   id: res.uuid,
@@ -152,7 +154,7 @@ MATCH (ent:entity)
   WHERE ent.uuid in {ids}
 WITH ent
   MATCH (ent)-[r:appears_in]->(res:resource)
-  WHERE has(res.start_month)
+  WHERE exists(res.start_month)
     {if:mimetype}
     AND res.mimetype = {mimetype}
     {/if}
@@ -571,6 +573,14 @@ WITH res
   WHERE r is null
   WITH res
 {/if}
+{if:minlat}
+  MATCH (res)<-[r:appears_in]-(loc:location)
+  WHERE loc.lat >= {minlat}
+    AND loc.lat <= {maxlat}
+    AND loc.lng >= {minlng}
+    AND loc.lng <= {maxlng}
+  WITH res
+{/if}
 WITH collect(res) as resources
 WITH resources, length(resources) as total_items
 UNWIND resources as res
@@ -618,7 +628,14 @@ WITH res, ms
   WHERE r is null
   WITH res, ms
 {/if}
-
+{if:minlat}
+  MATCH (res)<-[r:appears_in]-(loc:location)
+  WHERE loc.lat >= {minlat}
+    AND loc.lat <= {maxlat}
+    AND loc.lng >= {minlng}
+    AND loc.lng <= {maxlng}
+  WITH res, ms
+{/if}
 ORDER BY ms DESC
 SKIP {offset}
 LIMIT {limit}
@@ -691,18 +708,18 @@ RETURN { id: id(n), props: n } LIMIT {limit}
 
 // name: build_full_search_legacy_index
 // fill the full search index. Cfr scripts/tasks/lucene.js
-MATCH (res:resource) WHERE has(res.full_search)
+MATCH (res:resource) WHERE exists(res.full_search)
 SET res.full_search = res.full_search
 
 
 // name: build_title_search_legacy_index
 // fill the full search index. Cfr scripts/tasks/lucene.js
-MATCH (res:resource) WHERE has(res.title_search)
+MATCH (res:resource) WHERE exists(res.title_search)
 SET res.title_search = res.title_search
 
 
 // name: build_name_search_legacy_index
 // fill the full search index. Cfr scripts/tasks/lucene.js
-MATCH (ent:entity) WHERE has(ent.name_search)
+MATCH (ent:entity) WHERE exists(ent.name_search)
 SET ent.name_search = ent.name_search
 

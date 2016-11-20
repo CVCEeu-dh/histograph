@@ -341,13 +341,13 @@ angular.module('histograph')
           Redraw the current graph, calculate the force layout min duration
         */
         scope.$watch('graph', function (graph, previousGraph) {
-          if(timers.play)
-            clearTimeout(timers.play);
+          clearTimeout(timers.play);
           
           
           stop();
           if(!graph && !previousGraph) {
             // first instantiation
+            $log.warn('::sigma @graph no graph loaded');
             return;
           }
           $log.log('::sigma @graph changed');
@@ -378,21 +378,25 @@ angular.module('histograph')
 
           // timout the layout
           timers.play = setTimeout(function() {
-            si.graph.clear();
+            
           // si.refresh();
             // previous nodes
-            var pns = previousGraph? _.keyBy(previousGraph.nodes, 'id'): {};
+            // var pns = previousGraph? _.keyBy(previousGraph.nodes, 'id'): {};
             // set size, and fixes what need to be fixed. If there are fixed nodes, the camera should center on it
             graph.nodes = graph.nodes.map(function (n) {
-              if(pns[n.id]) {
-                n = pns[n.id];
+              var _n =  si.graph.nodes(n.id);
+              if(_n) {
+                n = _n;
                 n.center = false;
+                // console.log('previous node!!!', n.id, n, pns[n.id])
+                // debugger
               } else {
                 n.color = n.type && colors[n.type]? colors[n.type](n.importance): "#353535";
                 n.x = n.x || Math.random()*50;
                 n.y = n.y || Math.random()*50;
               }
 
+              // resize
               n.size = n.degree || 5;
 
               if(graph.centers && graph.centers.indexOf(n.id) !== -1) {
@@ -407,7 +411,6 @@ angular.module('histograph')
               return n
             });
             
-            
             if(graph.nodes.length > 50) {
               si.settings('labelThreshold', 5.5);
               si.settings('labelSize', 'fixed');
@@ -417,7 +420,7 @@ angular.module('histograph')
               si.settings('labelThreshold', 0);
               si.settings('labelSize', 'fixed');
             }
-            $log.log('::sigma @graph add', graph.edges.length, 'edges,', graph.nodes.length, 'nodes');
+            $log.log('::sigma @graph add', graph.edges.length, 'edges,', graph.nodes.length, 'nodes', graph.nodes);
             si.graph.clear().read(graph);
             // si.graph.nodes().forEach(function (n) {
             //   n.size =si.graph.degree(n.id);

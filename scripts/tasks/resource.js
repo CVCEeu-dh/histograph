@@ -210,7 +210,7 @@ var task = {
       return callback(' Please specify the file path to write in with --target=path/to/source.tsv');
     }
 
-    neo4j.query('MATCH (loc:location)-[rel:appears_in]->(res:resource) WHERE has(loc.lat) WITH loc, rel, res ORDER BY rel.frequency ASC WITH loc, last(collect(res)) as r, COUNT(res) as distribution, MIN(res.start_time) as start_time, MAX(res.end_time) as end_time RETURN {name: loc.name, lat: loc.lat, lng: loc.lng,start_time: start_time, distribution: distribution, end_time: end_time, example_title:COALESCE(r.name, r.title_en, r.title_fr), example_id:id(r), example_slug:r.slug} skip {offset} LIMIT {limit} ', {
+    neo4j.query('MATCH (loc:location)-[rel:appears_in]->(res:resource) WHERE exists(loc.lat) WITH loc, rel, res ORDER BY rel.frequency ASC WITH loc, last(collect(res)) as r, COUNT(res) as distribution, MIN(res.start_time) as start_time, MAX(res.end_time) as end_time RETURN {name: loc.name, lat: loc.lat, lng: loc.lng,start_time: start_time, distribution: distribution, end_time: end_time, example_title:COALESCE(r.name, r.title_en, r.title_fr), example_id:id(r), example_slug:r.slug} skip {offset} LIMIT {limit} ', {
         limit: +options.limit || 100000,
         offset: +options.offset || 0
     }, function(err, rows) {
@@ -510,7 +510,7 @@ var task = {
     
     
     
-  //   neo4j.query('MATCH (res:resource) WHERE not(has(res.slug)) RETURN RES SKIP {offset} LIMIT {limit}', {
+  //   neo4j.query('MATCH (res:resource) WHERE not(exists(res.slug)) RETURN RES SKIP {offset} LIMIT {limit}', {
   //     limit: +options.limit || 10,
   //     offset: +options.offset || 0
   //   }, function(err, nodes) {
@@ -530,7 +530,7 @@ var task = {
     var queue = async.waterfall([
       // get pictures and documents having a caption
       function (next) {
-        neo4j.query('MATCH (a:resource) WHERE NOT(has(a.discovered)) RETURN a ORDER BY a.mimetype ASC skip {offset} LIMIT {limit} ', {
+        neo4j.query('MATCH (a:resource) WHERE NOT(exists(a.discovered)) RETURN a ORDER BY a.mimetype ASC skip {offset} LIMIT {limit} ', {
           limit: +options.limit || 10,
           offset: +options.offset || 0
         }, function (err, nodes) {

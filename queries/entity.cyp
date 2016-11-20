@@ -21,7 +21,7 @@ WITH ent // collect issues
       props: ent2,
       type: last(labels(ent2))
     } as alias_m
-  WITH ent, act, alias_us, filter(x in collect(alias_m) WHERE has(x.id)) as alias_ms
+  WITH ent, act, alias_us, filter(x in collect(alias_m) WHERE exists(x.id)) as alias_ms
   WITH ent, 
     {
       id: act.uuid,
@@ -29,7 +29,7 @@ WITH ent // collect issues
       users: alias_us,
       mentioning: alias_ms
     } as alias_issue 
-  WITH ent, filter(x in collect(alias_issue) WHERE has(x.id)) as issues
+  WITH ent, filter(x in collect(alias_issue) WHERE exists(x.id)) as issues
 RETURN {
   id: ent.uuid,
   type: LAST(labels(ent)),
@@ -88,8 +88,7 @@ LIMIT {limit}
 
 // name: merge_entity
 // create or merge entity, by name or links_wiki.
-MATCH (res:resource)
-  WHERE res.uuid = {resource_id}
+MATCH (res:resource {uuid:{resource_id}})
 WITH res
 {if:links_wiki}
   MERGE (ent:entity:{:type} {links_wiki: {links_wiki}})
@@ -100,6 +99,7 @@ WITH res
 ON CREATE SET
   ent.uuid          = {uuid},
   ent.name          = {name},
+  ent.slug          = {slug},
   ent.name_search   = {name_search},
   ent.celebrity     = 0,
   ent.score         = 0,
@@ -209,8 +209,7 @@ ON MATCH SET
   ent.last_modification_time = {exec_time}
 WITH ent
 LIMIT 1
-MATCH (res:resource)
-  WHERE res.uuid = {resource_id}
+MATCH (res:resource {uuid:{resource_id}})
 WITH ent, res
   MERGE (ent)-[r:appears_in]->(res)
   ON CREATE SET
@@ -346,7 +345,7 @@ WITH r, ent, res, filter(x in collect({
       type: 'theme',
       props: the,
       rel: r_the
-    }) WHERE has(x.id))[0..5] as themes   
+    }) WHERE exists(x.id))[0..5] as themes   
 
 OPTIONAL MATCH (res)<-[r_per:appears_in]-(per:`person`)
 WITH r, ent, res, themes, r_per, per
@@ -356,7 +355,7 @@ WITH r, ent, res, themes, filter(x in collect({
       type: 'person',
       props: per,
       rel: r_per
-    }) WHERE has(x.id))[0..5] as persons
+    }) WHERE exists(x.id))[0..5] as persons
 
 WITH r, ent, res, themes, persons
 
@@ -425,7 +424,7 @@ RETURN {
 MATCH (ent:entity {uuid: {id}})
 WITH ent
 MATCH (ent)-[:appears_in]->(res:resource)
-  WHERE has(res.start_month)
+  WHERE exists(res.start_month)
   {if:mimetype}
   AND res.mimetype = {mimetype}
   {/if}
@@ -537,10 +536,19 @@ MATCH (n:entity {uuid: {id}})-[r:appears_in]->(t:resource)
   {if:type}
     AND t.type in {type}
   {/if}
+
 WITH t
 {if:with}
   MATCH (t)<-[r2:appears_in]-(ent2:entity)
   WHERE ent2.uuid in {with} AND r2.score > -1
+  WITH t
+{/if}
+{if:minlat}
+  MATCH (t)<-[r:appears_in]-(loc:location)
+  WHERE loc.lat >= {minlat}
+    AND loc.lat <= {maxlat}
+    AND loc.lng >= {minlng}
+    AND loc.lng <= {maxlng}
   WITH t
 {/if}
 MATCH (p1:{:entity})-[:appears_in]->(t)<-[:appears_in]-(p2:{:entity})
@@ -697,7 +705,7 @@ RETURN COUNT(DISTINCT ent1) as count_items
 // name: get_timeline
 // get timebased resources id where the entioty a^^ears
 MATCH (ent)-[:appears_in]->(res:resource)
-WHERE ent.uuid = {id} AND has(res.start_time)
+WHERE ent.uuid = {id} AND exists(res.start_time)
 RETURN {id: res.uuid, start_time: res.start_time }
 ORDER BY res.start_time
 
