@@ -162,6 +162,14 @@ module.exports = {
       ],
       error: 'without should contain only numbers and commas, at least one'
     },
+    'hide': {
+      field: 'hide',
+      check: 'matches',
+      args: [
+        /[\dA-Za-z\-_][\d,A-Za-z\-_]+/
+      ],
+      error: 'without should contain only numbers and commas, at least one'
+    },
     orderby: {
       field: 'orderby',
       check: 'includedIn',
@@ -467,6 +475,9 @@ module.exports = {
 
     if(safeParams.with)
       safeParams.with = _.compact(String(safeParams.with).split(','));
+    
+    if(safeParams.hide)
+      safeParams.hide = _.compact(String(safeParams.hide).split(','));
     
     if(safeParams.without)
       safeParams.without = _.compact(String(safeParams.without).split(','));

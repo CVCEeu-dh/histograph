@@ -10,7 +10,7 @@ angular.module('histograph')
   .controller('ElasticCtrl', function ($rootScope, $scope, $log, $timeout, $stateParams, VisualizationFactory, ResourceRelatedVizFactory, EntityRelatedVizFactory, SearchVizFactory, UserRelatedVizFactory, EVENTS, SETTINGS) {
     $log.log('ElasticCtrl -> ready', $scope.filters, SETTINGS.types.entity, $scope.state);
 
-    $scope.availableDimensions = ['entity'].concat(SETTINGS.types.entity);
+    $scope.availableDimensions = _.uniq(['entity'].concat(SETTINGS.types.entity));
     $scope.dimensions = [];
     $scope.dimension = 'type'; // i.e, generic entity.
 

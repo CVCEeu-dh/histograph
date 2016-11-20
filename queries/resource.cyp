@@ -669,8 +669,8 @@ RETURN {
 {if:with}
   MATCH (res)<-[:appears_in]-(ent:entity)
   WHERE ent.uuid IN {with}
-  WITH res, count(ent) as strict
-  WHERE strict = size({with})
+  // WITH res, count(ent) as strict
+  // WHERE strict = size({with})
   WITH res
 {/if}
 {unless:with}
@@ -697,7 +697,12 @@ WITH res
   WITH res
 {/if}
 MATCH (p1:{:entity})-[r1:appears_in]->(res)<-[r2:appears_in]-(p2:{:entity})
-  WHERE id(p1) < id(p2) AND r1.score > -1 AND r2.score > -1 AND p1.score > -1 AND p2.score > -1
+  WHERE id(p1) < id(p2)  {if:hide}
+    AND NOT(p1.uuid in {hide})
+    AND NOT(p2.uuid in {hide})
+  {/if}
+  AND p1.score IN range(0, 10000) AND p2.score IN range(0, 10000)
+  AND r1.score IN range(0, 10000) AND r2.score IN range(0, 10000)
 WITH p1, p2, count(res) as w
 ORDER BY w DESC
 LIMIT {limit}

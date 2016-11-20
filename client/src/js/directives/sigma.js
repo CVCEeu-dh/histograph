@@ -341,7 +341,8 @@ angular.module('histograph')
           Redraw the current graph, calculate the force layout min duration
         */
         scope.$watch('graph', function (graph, previousGraph) {
-          clearTimeout(timers.play);
+          if(timers.play)
+            clearTimeout(timers.play);
           
           
           stop();
