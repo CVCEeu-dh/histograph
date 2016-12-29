@@ -516,6 +516,7 @@ WITH res, ms
     WHERE ent.uuid in {with}
   WITH res, ms, count(r) as df
   WHERE df = size({with})
+  WITH res, ms
 {/if}
 ORDER BY ms DESC
 SKIP {offset}

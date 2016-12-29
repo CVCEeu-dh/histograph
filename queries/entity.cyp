@@ -155,6 +155,9 @@ ON CREATE SET
   ent.last_modification_date = {exec_date},
   ent.last_modification_time = {exec_time}
 ON MATCH SET
+  {if:slug}
+    ent.slug          = {slug},
+  {/if}
   {if:links_viaf}
     ent.links_viaf         = {links_viaf},
   {/if}

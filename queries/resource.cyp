@@ -446,7 +446,7 @@ RETURN col
       res.end_month   = toInt({end_month}),
     {/if}
     {if:start_year}
-      res.start_year = toInt({start_year})
+      res.start_year = toInt({start_year}),
     {/if}
     {if:full_search}
       res.full_search = {full_search},
@@ -519,7 +519,7 @@ RETURN col
       res.end_month   = toInt({end_month}),
     {/if}
     {if:start_year}
-      res.start_year = toInt({start_year})
+      res.start_year = toInt({start_year}),
     {/if}
     {if:full_search}
       res.full_search = {full_search},
