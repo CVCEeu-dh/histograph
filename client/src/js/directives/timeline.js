@@ -145,7 +145,7 @@ angular.module('histograph')
 
           tim.fn.fy = d3.scale.sqrt()
             .range([
-              10,
+              20,
               50
             ]);
           
@@ -331,12 +331,13 @@ angular.module('histograph')
 
         tim.draw = function() {
           clearTimeout(tim.resizeTimer);
-          if(!tim.ui.viewer || !scope.timeline)
+          if(!tim.ui.viewer || !scope.timeline || !scope.contextualTimeline)
             return;
           // tim.width(tim.ui.viewer[0][0].clientWidth);
           
           var dataset,    // the current dataset, sorted
               weigthExtent,
+              // sameWeigthExtent, // when min and max have the same values.
               timeExtent; // [minT, maxT] array of max and min timestamps
 
           dataset = angular.copy(_.flatten([scope.timeline])).map(function (d) {
@@ -349,6 +350,7 @@ angular.module('histograph')
           weigthExtent = d3.extent(dataset, function (d) {
             return d.weight
           });
+
           tim.fn.fcolor.domain(weigthExtent);
           tim.fn.fy.domain(weigthExtent);
 
@@ -377,7 +379,7 @@ angular.module('histograph')
               y: function(d) {
                 return 15 - (tim.fn.fy(d.weight)/2)
               },
-              width: 2,
+              width: 1,
               height: function(d) {
                 return tim.fn.fy(d.weight)
               },
@@ -488,7 +490,7 @@ angular.module('histograph')
             })
           
           if(scope.timeline)
-            tim.draw();
+            tim.draw(); // draw or redraw
         };
         
         /*
