@@ -127,6 +127,7 @@ passport.use(new GoogleStrategy({
 
 passport.serializeUser(function(user, done) {
   done(null, {
+    is_authentified: true,
     firstname: user.props.firstname,
     lastname:  user.props.lastname,
     email:     user.email,

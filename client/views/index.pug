@@ -576,12 +576,12 @@ html
 
     div(ng-controller='CoreCtrl')
       div(ng-controller='FiltersCtrl')
-        if user.username
+        if user.is_authentified
           header(class='{{queueStatus}}') 
             //- a(id='header-logo', href='#/')
             //-   img(src='images/hg_v.png')
-            a(id='header-logo', href='http://www.cvce.eu')
-              img(src='images/cvce.svg')
+            //- a(id='header-logo', href='http://www.cvce.eu')
+            //-   img(src='images/cvce.svg')
               
             
             div(class='row', ng-cloak)
@@ -662,7 +662,7 @@ html
             //- div(id='history')
             //-   div(history='', trails='trails')
             
-        if !user.username
+        if !user.is_authentified
 
             div(id='logo')
               img(src='images/cvce.svg')
