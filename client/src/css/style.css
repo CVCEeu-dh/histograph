@@ -2978,6 +2978,8 @@ input.form-control{
   /*box-shadow: inset 0 0 6px #111;*/
   padding: 10px 20px 10px 20px;
   margin: 10px 0 5px 0;
+  max-height: 150px;
+  overflow: auto;
 } 
 
 .crowdsourcing .issue{

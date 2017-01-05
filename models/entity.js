@@ -422,7 +422,7 @@ module.exports = {
   update: function(entity, params, next) {
     var now = helpers.now();
         // query = parser.agentBrown(queries.update_comment, properties);
-    
+    console.log('models.entity.update()', params)
     neo4j.query(queries.get_entity, {
       id: entity.id
     }, function (err, ent) {
@@ -457,7 +457,7 @@ module.exports = {
       ent.props.score = (ent.props.upvote || []).length - (ent.props.downvote|| []).length;
       ent.props.last_modification_date = now.date;
       ent.props.last_modification_time = now.time;
-      ent.props.status = (ent.props.score >= 0? 1: (ent.props.score < -1? 0: -1));
+      ent.props.status = (ent.props.score >= -1? 1: 0); // simplify.
       
       // if there is an issue, add it to the entity directly (mongodb style)
       if(params.issue) {

@@ -1,7 +1,7 @@
 <div class='issue' ng-repeat='issue in issues.ENTITY_MERGE'>
   <div ng-repeat="mentioned in issue.mentioning">
     <div ng-if="!resource">
-      <span translate translate-values='{name: "{{entity.props.name}}",_name: "{{mentioned.props.name}}"}'>popit.fix.suggest.confirm</span>
+      <span translate-values='{name: "{{entity.props.name}}",_name: "{{mentioned.props.name}}"}' translate='popit.fix.suggest.confirm'></span>
       <!-- <div class='btn-group'>
         <button class='btn btn-line-white btn-straight btn-block' not-yet-ng-click='inspectIssue(issue)' translate>inspect.open</button>
       </div> -->
@@ -12,14 +12,15 @@
       
       <div class='answers btn-group-wrapper'>
         <div class='btn-group '>
-          <button class='btn btn-line-white btn-primary btn-number' ng-click='mergeInContext(entity, mentioned)'>
+          <button class='btn btn-line-white btn-primary btn-number' ng-click='raiseIssue("mergeable", issue.props.solution)'>
+          <!--   mergeInContext(entity, mentioned)'-->
             <span translate>button.agree </span>
-            <span class='number'>{{entity.downvotes.length || 0}}</span>
+            <span class='number'>{{issue.upvotes || 0}}</span>
           </button>
-          <!-- disagree with merge: upvote entity will suffice -->
+          <!-- disagree with merge: upvote entity IN CONTEXT will suffice -->
           <button class='btn btn-line-white obscure btn-number' ng-click='upvote()'>
             <span translate>button.disagree </span>
-            <span class='number'>{{entity.upvotes.length || 0}}</span>
+            <span class='number'>{{issue.downvotes || 0}}</span>
           </button>
         </div>
       </div>

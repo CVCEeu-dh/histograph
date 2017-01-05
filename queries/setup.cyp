@@ -37,6 +37,9 @@ CREATE INDEX ON :resource(start_time)
 // create index on start date to group / filter result by timestamp
 CREATE INDEX ON :resource(last_modification_time)
 
+// name: update_index_on_last_modification_time
+MATCH (res:resource) WHERE exists(res.last_modification_time) WITH res SET res.last_modification_time=res.last_modification_time
+
 // name: create_index_on_start_year
 // create index on start date to group / filter result by date
 CREATE INDEX ON :resource(start_year)

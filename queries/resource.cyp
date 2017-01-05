@@ -137,8 +137,8 @@ ORDER BY res.last_modification_time DESC
 SKIP {offset} 
 LIMIT {limit}
 WITH res
-OPTIONAL MATCH (res)-[r_loc:appears_in]->(loc:`location`)
-// WHERE loc.score > -2
+OPTIONAL MATCH (res)-[r_loc:appears_in]->(loc:`location` {status:1})
+WHERE r_loc.score > -2
 WITH res, r_loc, loc
 ORDER BY r_loc.score DESC, r_loc.tfidf DESC, r_loc.frequency DESC
 WITH res,  filter(x in collect({  
@@ -147,8 +147,8 @@ WITH res,  filter(x in collect({
       props: loc,
       rel: r_loc
     }) WHERE exists(x.id))[0..5] as locations   
-OPTIONAL MATCH (res)<-[r_per:appears_in]-(per:`person`)
-// WHERE per.score > -2
+OPTIONAL MATCH (res)<-[r_per:appears_in]-(per:`person` {status:1})
+WHERE r_per.score > -2
 WITH res, locations, r_per, per
 ORDER BY  r_per.score DESC, r_per.tfidf DESC, r_per.frequency DESC
 WITH res, locations,  filter(x in collect({  
@@ -157,24 +157,24 @@ WITH res, locations,  filter(x in collect({
       props: per,
       rel: r_per
     }) WHERE exists(x.id))[0..5] as persons
-OPTIONAL MATCH (res)<-[r_org:appears_in]-(org:`organization`)
-// WHERE org.score > -2
+OPTIONAL MATCH (res)<-[r_org:appears_in]-(org:`organization` {status:1})
+WHERE org.score > -2
 WITH res, locations, persons,  filter(x in collect({    
       id: org.uuid,
       type: 'organization',
       props: org,
       rel: r_org
     }) WHERE exists(x.id))[0..5] as organizations
-OPTIONAL MATCH (res)<-[r_soc:appears_in]-(soc:`social_group`)
-// WHERE soc.score > -2
+OPTIONAL MATCH (res)<-[r_soc:appears_in]-(soc:`social_group` {status:1})
+WHERE soc.score > -2
 WITH res, locations, persons, organizations,  filter(x in collect({  
       id: soc.uuid,
       type: 'social_group',
       props: soc,
       rel: r_soc
     }) WHERE exists(x.id))[0..5] as social_groups
-OPTIONAL MATCH (res)<-[r_the:appears_in]-(the:`theme`)
-// WHERE the.score > -2
+OPTIONAL MATCH (res)<-[r_the:appears_in]-(the:`theme` {status:1})
+WHERE the.score > -2
 WITH res, locations, persons, organizations, social_groups, filter(x in collect({    
       id: the.uuid,
       type: 'theme',
