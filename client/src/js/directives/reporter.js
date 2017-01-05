@@ -151,6 +151,9 @@ angular.module('histograph')
           $scope.cancelQuestion();
           $rootScope.raiseIssue($scope.entity, null, type, solution, function(){
             $scope.isLocked = false;
+            // 
+            if(type=='mergeable')
+              $scope.downvote();
           });
         };
 
@@ -278,6 +281,8 @@ angular.module('histograph')
           $scope.cancelQuestion();
           $rootScope.downvoteIssue($scope.entity, null, type, solution, function() {
             $scope.isLocked = false;
+            if(type=='mergeable')
+              $scope.upvote();
           });
         };
 

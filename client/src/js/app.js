@@ -1264,5 +1264,5 @@ angular
   })
 
   .run(function(Analytics) {
-    
+    console.log('hg running...')
   })
