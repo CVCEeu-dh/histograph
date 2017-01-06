@@ -608,7 +608,7 @@ RETURN col, res
 
 // name: get_precomputated_cooccurrences
 //
-MATCH (p1:{:entity})-[r:appear_in_same_document]-(p2:{:entity})
+MATCH (p1:{:entity} {status:1})-[r:appear_in_same_document]-(p2:{:entity} {status:1})
 WHERE id(p1) < id(p2)
 WITH p1,p2,r
 ORDER BY r.intersections DESC
@@ -638,14 +638,14 @@ RETURN {
 MATCH (ent2:entity)
   WHERE ent2.uuid IN {with}
 WITH ent2
-MATCH (res:resource)<-[:appears_in]-(ent2)
+MATCH (res:resource)<-[:appears_in]-(ent2 {status:1})
 WITH res
-  MATCH (p1:{:entity})-[r1:appears_in]->(res)<-[r2:appears_in]-(p2:{:entity})
+  MATCH (p1:{:entity} {status:1})-[r1:appears_in]->(res)<-[r2:appears_in]-(p2:{:entity} {status:1})
 {/if}
 {unless:with}
-MATCH (p1:{:entity})-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:{:entity})
+MATCH (p1:{:entity} {status:1})-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:{:entity} {status:1})
 {/unless}
-  WHERE id(p1) < id(p2) AND r1.score > -1 AND r2.score > -1 AND p1.score > -1 AND p2.score > -1
+  WHERE id(p1) < id(p2) AND r1.score > -2 AND r2.score > -2
   {if:start_time}
     AND res.start_time >= {start_time}
   {/if}
@@ -686,12 +686,12 @@ MATCH (ent2:entity)
 WITH ent2
 MATCH (res:resource)<-[:appears_in]-(ent2)
 WITH res
-  MATCH (p1:{:entityA})-[r1:appears_in]->(res)<-[r2:appears_in]-(p2:{:entityB})
+  MATCH (p1:{:entityA} {status:1})-[r1:appears_in]->(res)<-[r2:appears_in]-(p2:{:entityB} {status:1})
 {/if}
 {unless:with}
-MATCH (p1:{:entityA})-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:{:entityB})
+MATCH (p1:{:entityA} {status:1})-[r1:appears_in]->(res:resource)<-[r2:appears_in]-(p2:{:entityB} {status:1})
 {/unless}
-  WHERE p1.score > -1 AND p2.score > -1
+  WHERE r1.score > -2 AND r2.score > -2
   {if:start_time}
     AND res.start_time >= {start_time}
   {/if}
