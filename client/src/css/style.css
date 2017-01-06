@@ -1848,6 +1848,16 @@ margin-left: 50px;
   padding: 0;
 }
 
+#sigma-snippets ul.dropdown-menu .with-thumbnail h4{
+  color: #151515;
+  margin: 0 20px 0 55px;
+  padding: 0;
+}
+
+#sigma-snippets ul.dropdown-menu .with-thumbnail p{
+  margin: 0 20px 0 55px;
+}
+
 #sigma-snippets .detail{
   text-align: left;
   background: #383838;
