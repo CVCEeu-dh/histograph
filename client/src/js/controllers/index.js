@@ -118,7 +118,7 @@ angular.module('histograph')
   /*
     wall of resources
   */
-  .controller('ExploreResourcesCtrl', function ($scope, $log, ResourceVizFactory, VIZ, ResourceFactory, EVENTS) {
+  .controller('ExploreResourcesCtrl', function ($scope, $log, socket, ResourceVizFactory, VIZ, ResourceFactory, EVENTS) {
     $log.debug('ExploreResourcesCtrl ready', $scope.params);
     $scope.limit  = 20;
     $scope.offset = 0;
@@ -182,6 +182,19 @@ angular.module('histograph')
       $log.debug('ExploreCtrl @INFINITE_SCROLL', '- skip:',$scope.offset,'- limit:', $scope.limit);
       $scope.sync();
     });
+
+    function onSocket(result) {
+      console.log('ExploreResourcesCtrl @socket', result)
+      for(var i=0, l=$scope.relatedItems.length; i < l; i++){
+        if($scope.relatedItems[i].id == result.resource.id) {
+          $scope.relatedItems[i] = result.data.related.resource
+          break;
+        }
+      }
+    };
+
+    socket.on('entity:upvote-related-resource:done', onSocket);
+    // socket.on('entity:create-related-issue:done', onSocket);
 
     if(!_.isEmpty($scope.params))
       $scope.syncTimeline();

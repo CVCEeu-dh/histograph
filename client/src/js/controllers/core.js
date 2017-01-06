@@ -1353,8 +1353,8 @@ angular.module('histograph')
     socket.on('entity:upvote-related-resource:done', onSocket);
     socket.on('entity:downvote-related-resource:done', onSocket);
     socket.on('entity:merge-entity:done', onSocket);
+    socket.on('entity:upvote-related-resource:done', onSocket);
     
-
     // $scope.syncGraph();
     $log.log('RelatedItemsCtrl -> setRelatedItems - items', relatedItems.result.items);
     $scope.setRelatedItems(relatedItems.result.items);
