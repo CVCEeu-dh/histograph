@@ -471,12 +471,12 @@ MATCH (n:entity {uuid: {id}})-[r:appears_in]->(t:resource)
   {/if}
 WITH t
 {if:with}
-  MATCH (t)<-[r2:appears_in]-(ent2:entity)
+  MATCH (t)<-[r2:appears_in]-(ent2:entity {status:1})
   WHERE ent2.uuid in {with} AND r2.score > -1
   WITH t
 {/if}
-MATCH (p1:{:entity})-[:appears_in]->(t)<-[:appears_in]-(p2:{:entity})
-WHERE id(p1) > id(p2) 
+MATCH (p1:{:entity} {status:1})-[r1:appears_in]->(t)<-[r2:appears_in]-(p2:{:entity} {status:1})
+WHERE id(p1) > id(p2) AND r1.score > -2 AND r2.score > -2
 WITH p1, p2, count(t) as w 
 WITH p1, p2, w
 ORDER BY w DESC
