@@ -328,14 +328,14 @@ angular.module('histograph')
           $log.info(':: reporter socket@entity:upvote:done - by:', result.user);
           if($scope.entity && result.data.id == $scope.entity.id)
             $scope.entity.props.upvote = result.data.props.upvote;
-          if($scope.entity && result.user == core.user.username)
+          if($scope.entity && result.user == $scope.user.username)
             $scope.isUpvotedByUser = true;
         })
         socket.on('entity:downvote:done', function (result) {
           $log.info(':: reporter socket@entity:downvote:done - by:', result.user);
           if($scope.entity && result.data.id == $scope.entity.id)
             $scope.entity.props.upvote = result.data.props.upvote;
-          if($scope.entity && result.user == core.user.username)
+          if($scope.entity && result.user == $scope.user.username)
             $scope.isUpvotedByUser = false;
         })
 
