@@ -60,7 +60,7 @@ angular.module('histograph')
       }, function(res) {
         $log.log('PulseController->sync() received:', res);
         $scope.totalItems = res.info.groups.total_items;
-
+        $scope.pulsations = 0;
         $scope.notifications = res.result.items.map(function(d) {
           if(['APPEARS_IN_RELATIONSHIP', 'LIKES_RELATIONSHIP', 'ENTITY_LABEL', 'ENTITY_WRONG'].indexOf(d.props.target) !== -1){
             d.resource = _.find(d.mentioning, {type: 'resource'});

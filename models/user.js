@@ -104,6 +104,8 @@ module.exports = {
     This method return a list of live items
   */
   pulse: function(user, params, next) {
+    var now = helpers.now();
+
     models.getMany({
       queries: {
         count_items: queries.count_pulse,
@@ -118,6 +120,13 @@ module.exports = {
         next(err);
         return;
       }
+      // save user last_modification_date
+      // update last_notification_date
+      neo4j.query(queries.reset_pulse,{
+        username : user.username,
+        exec_date: now.date,
+        exec_time: now.time
+      }, function(err, res){})
       next(null, results.items, results.count_items);
     });
   },

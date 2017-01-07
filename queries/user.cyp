@@ -92,32 +92,39 @@ MATCH (you:user {username:{username}})
 WITH you 
 MATCH (u:user)-[:performs]->(act:action)
 WHERE you.uuid <> u.uuid AND act.last_modification_time > you.last_notification_time
-WITH act, you, u, {
-    id: u.uuid,
-    username: u.username,
-    picture: u.picture
-  } as alias_u
-MATCH (act)-[:mentions]->(n)<-[r]-(you)
-WITH DISTINCT act, alias_u
+WITH DISTINCT act
+MATCH (act)-[:mentions]->(n)<-[r]-(you:user {username:{username}})
+WITH act, collect(n) as mentioned
   ORDER BY act.last_modification_time DESC
   SKIP {offset}
   LIMIT {limit}
-WITH act, alias_u
-MATCH (act)-[r2:mentions]->(t)
-WITH act, alias_u, filter(x in collect({
-    id: t.uuid,
-    props: t,
-    type: last(labels(t))
-  }) WHERE EXISTS(x.id)) AS alias_ms
+WITH act
+MATCH (u:user)-[:performs]->(act)-[:mentions]->(t)
+WITH act, u, collect(t) as mentioned
 RETURN {
   id: act.uuid,
   props: act,
   type: last(labels(act)),
-  performed_by: alias_u,
-  mentioning: alias_ms
+  performed_by: {
+    id: u.uuid,
+    username: u.username,
+    picture: u.picture
+  },
+  mentioning: extract(t in mentioned | {
+    id: t.uuid,
+    props: t,
+    type: last(labels(t))
+  })
 }
 ORDER BY act.last_modification_time DESC
 
+
+// name: reset_pulse 
+// reset the user last_notification_time
+MATCH (u:user {username:{username}})
+SET 
+  u.last_notification_time = {exec_time},
+  u.last_notification_date = {exec_date}
 
 // name: get_challenges
 // help unresolved issue
@@ -353,7 +360,7 @@ return{
 
 // name: count_noise
 // get love or curation noise, see below get_noise query.
-MATCH (res:resource)<-[r:likes|curates]-(u:user)
+MATCH (res:resource)<-[r:likes|curates]-(u:user {username:{username}})
 WHERE EXISTS(r.last_modification_time)
 WITH res, r ORDER BY r.last_modification_time DESC
 WITH collect(DISTINCT res) as resources
@@ -370,7 +377,7 @@ RETURN {
 // test with 
 // > node scripts/manage.js --task=query --cypher=user/get_noise --offset=0 --limit=10
 // @todo: add filters...
-MATCH (res:resource)<-[r:likes|curates]-(u:user)
+MATCH (res:resource)<-[r:likes|curates]-(u:user {username:{username}})
 WHERE EXISTS(r.last_modification_time)
 WITH res, r ORDER BY r.last_modification_time DESC
 WITH DISTINCT res

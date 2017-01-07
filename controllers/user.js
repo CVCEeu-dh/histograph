@@ -226,6 +226,7 @@ module.exports = function(io) {
           });
       if(!form.isValid)
         return helpers.formError(form.errors, res);
+      // console.log('passed here', req.user, form.params)
       User.noise(req.user, form.params, function (err, items, info) {
         helpers.models.getMany(err, res, items, info, form.params);
       });

@@ -339,7 +339,7 @@ clientRouter.route('/auth/google')
 clientRouter.route('/auth/google/callback')
   .get(function (req, res, next) {
     auth.passport.authenticate('google', function(err, user, info) {
-      //console.log('user', user); // handle errors
+      console.log('user:', user, 'error:',err, 'info', info); // handle errors
       req.logIn(user, function(err) {
         if (err)
           return next(err);
@@ -421,7 +421,16 @@ clientRouter.route('/txt/:path/:file')
 
 */
 apiRouter.use(function (req, res, next) {
-  if(settings.authOrReadOnlyMode && req.method == 'GET'){
+  if(settings.disableAuth){
+    if(!req.isAuthenticated()){
+      console.log('discard authentication. Custom session token ...')
+      req.logIn(settings.anonymousUser, next);
+    } else {
+      console.log('no routing')
+      
+      next();
+    }
+  } else if(settings.authOrReadOnlyMode && req.method == 'GET'){
     req.logIn(settings.anonymousUser, next);
   } else if(req.isAuthenticated() || (settings.allowUnauthenticatedRequests && settings.env == 'development')) {
     return next();
@@ -436,7 +445,7 @@ if(cache) {
 
     res.use_express_redis_cache = req.path.indexOf('/user') == -1 && req.method == 'GET';
 
-    // console.log(cachename,'use cache',res.use_express_redis_cache);
+    console.log(cachename,'use cache',res.use_express_redis_cache);
     cache.route({
       name: cachename,
       expire: _.isEmpty(req.query)? 60: 40,
