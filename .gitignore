@@ -2,6 +2,7 @@ node_modules
 
 settings.js
 
+*.conf
 *.json
 *.lnk
 *.jpg

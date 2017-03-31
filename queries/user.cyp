@@ -79,7 +79,7 @@ RETURN {
 MATCH (you:user {username:{username}})
 WITH you 
 MATCH (u:user)-[:performs]->(act:action)
-WHERE id(you) <> id(u) AND act.last_modification_time > you.last_notification_time
+WHERE you.uuid <> u.uuid AND act.last_modification_time > you.last_notification_time
 WITH act, you
 MATCH (act)-[:mentions]->(n)<-[r]-(you)
 WITH DISTINCT act
@@ -91,7 +91,7 @@ RETURN count(act) as total_items
 MATCH (you:user {username:{username}})
 WITH you 
 MATCH (u:user)-[:performs]->(act:action)
-WHERE you.uuid <> u.uuid AND act.last_modification_time > you.last_notification_time
+WHERE you.uuid <> u.uuid
 WITH DISTINCT act
 MATCH (act)-[:mentions]->(n)<-[r]-(you:user {username:{username}})
 WITH act, collect(n) as mentioned
