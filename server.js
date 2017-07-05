@@ -108,6 +108,7 @@ console.log('logs: ', settings.paths.accesslog);
 console.log('env:  ', env);
 console.log('port: ', settings.port);
 console.log('url:  ', settings.baseurl);
+console.log('media:', settings.paths.media);
 if(!cache){
   console.log('cache:', 'not enabled');
 }
@@ -355,7 +356,8 @@ clientRouter.route('/auth/google/callback')
 clientRouter.route('/media/:path/:file')
   .get(function (req, res, next) {
     var filename = path.join(settings.paths.media, req.params.path, req.params.file);
-    res.sendFile(filename, {root: path.isAbsolute(settings.paths.media)?'':__dirname}, function (err) {
+    
+    res.sendFile(filename, function (err) {
       if(err) {
         res.status(err.status).end();
       }
@@ -365,6 +367,7 @@ clientRouter.route('/media/:path/:file')
 clientRouter.route('/media/:file')
   .get(function (req, res, next) {
     var filename = path.join(settings.paths.media, req.params.file);
+    
     res.sendFile(filename, {root: path.isAbsolute(settings.paths.media)?'':__dirname}, function (err) {
       if(err) {
         res.status(err.status).end();
