@@ -356,6 +356,26 @@ ul.banner-social-buttons li {
   }
 }
 
+@media(min-width: 768px){
+  .navbar-custom .nav li a {
+    max-width: 150px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding: 15px 5px;
+  }
+  .container {
+    width: auto;
+  }
+}
+
+@media (min-width: 992px) {
+  .navbar-custom .nav li a {
+    max-width: none;
+    padding: 15px 10px;
+  }
+}
+
 @media (min-width: 1200px) {
   .container {
     width: 100%;
@@ -365,6 +385,7 @@ ul.banner-social-buttons li {
 }
 
 @media(max-width:767px) {
+  
   ul.banner-social-buttons li {
     display: block;
     margin-bottom: 20px;
