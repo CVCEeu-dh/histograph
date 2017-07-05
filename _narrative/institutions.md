@@ -1,6 +1,6 @@
 ---
 ordering: 4
-title: for institutions
+title: for Institutions
 ranking: 1
 ---
 

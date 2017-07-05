@@ -1,10 +1,10 @@
 # Site settings
 title: histograph
 email: histograph@cvce.eu
-url: http://histograph.eu
+url: https://histograph.uni.lu
 description: "Open source graph-based exploration web app with crowd-based indexation of contents for multimedia collections."
 baseurl: 
-demourl: http://histograph.cvce.eu
+demourl: https://histograph.cvce.eu
 
 # Color settings (hex-codes without the leading hash-tag)
 color:
