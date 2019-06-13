@@ -8,14 +8,14 @@ module.exports = {
             2,
             "single"
         ],
-        "linebreak-style": [
-            2,
-            "windows"
-        ],
-        "semi": [
-            2,
-            "always"
-        ]
+        // "linebreak-style": [
+        //     2,
+        //     "windows"
+        // ],
+        // "semi": [
+        //     2,
+        //     "always"
+        // ]
     },
     "env": {
         "node": true,
