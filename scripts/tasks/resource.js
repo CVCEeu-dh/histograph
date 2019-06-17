@@ -511,7 +511,7 @@ var task = {
     var queue = async.waterfall([
       // get pictures and documents having a caption
       function (next) {
-        neo4j.query('MATCH (a:resource) WHERE NOT(has(a.discovered)) RETURN a ORDER BY a.mimetype ASC skip {offset} LIMIT {limit} ', {
+        neo4j.query('MATCH (a:resource) WHERE NOT EXISTS(a.discovered) RETURN a ORDER BY a.mimetype ASC skip {offset} LIMIT {limit} ', {
           limit: +options.limit || 10,
           offset: +options.offset || 0
         }, function (err, nodes) {
