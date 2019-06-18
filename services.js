@@ -256,7 +256,7 @@ module.exports = {
       next('settings.yagoaida.endopoint not found')
       return;
     }
-    // console.log('AIDA')
+    // console.log('AIDA', options)
     request
       .post({
         url: settings.yagoaida.endpoint,

@@ -41,9 +41,12 @@ Install [Neo4j](http://neo4j.com/) (v 2.3.*) and configure the database indexing
 	# Autoindexing
 
 	# Enable auto-indexing for nodes, default is false
+	# NOTE: renamed to "dbms.auto_index.nodes.enabled" in Neo4j 3x (https://neo4j.com/developer/kb/manually-migrating-configuration-settings-from-neo4j-2x-to-neo4j-3x/) and then deprecated. 
+	# See here: http://neo4j-contrib.github.io/neo4j-apoc-procedures/3.5/indexes/fulltext-index/
 	node_auto_indexing=true
 
 	# The node property keys to be auto-indexed, if enabled
+	# NOTE: renamed "dbms.auto_index.nodes.keys". See above.
 	node_keys_indexable=full_search,name_search
 
 Complete the neo4j installation by pointing to a location in your system that will store the neo4j data in `conf/neo4j-server.properties`:

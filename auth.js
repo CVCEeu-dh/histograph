@@ -25,7 +25,6 @@ passport.use(new LocalStrategy(function (username, password, done) {
     username: username,
     password: password
   }, function(err, user) {
-    // console.log(err, user)
     if(err)
       done({reason: 'credentials not matching', error: err});
     else if(user.props.status != 'enabled')

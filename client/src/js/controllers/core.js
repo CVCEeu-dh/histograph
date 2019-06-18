@@ -8,7 +8,7 @@
  */
 angular.module('histograph')
   
-  .controller('CoreCtrl', function ($scope, $rootScope, $location, $state, $timeout, $route, $log, $timeout, $http, $routeParams, $modal, $uibModal, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, EntityExtraFactory, EntityRelatedExtraFactory, localStorageService, EntityRelatedFactory, EVENTS, VIZ, MESSAGES, ORDER_BY, SETTINGS) {
+  .controller('CoreCtrl', function ($scope, $rootScope, $location, $state, $timeout, $route, $log, $timeout, $http, $routeParams, $modal, $uibModal, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, EntityExtraFactory, EntityRelatedExtraFactory, localStorageService, EntityRelatedFactory, EVENTS, VIZ, MESSAGES, ORDER_BY, SETTINGS, UserFactory) {
     $log.debug('CoreCtrl ready');
     $scope.locationPath = $location.path();
     $scope.locationJson  = JSON.stringify($location.search()); 
@@ -1142,20 +1142,14 @@ angular.module('histograph')
       Load timeline, after some ms
     */
     $timeout(function(){
-      /*
-        change the given user, programmatically. Cfr httpProvider config in app.js
-      */
-      // depreated, allow for anonymous user via get
-      // if(!SETTINGS.user.id) {
-      //   // do nothing
-      //   return;
-      // }
-      if(!SETTINGS.user) {
-        $log.error("Can't find a valid SETTINGS.user var");
-        // do nothing
-        return;
-      }
-      $scope.user = SETTINGS.user;
+      UserFactory
+        .get({ method: 'session' }).$promise
+        .then(function(response) {
+          $scope.user = _.get(response, 'result.item', {});
+        })
+        .catch(function(error) {
+          $log.error('Could not fetch user details because: ' + error.message);
+        })
         /*
           First load only,
           or to be updated whenever a

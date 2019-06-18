@@ -829,8 +829,6 @@ html
       script.
         var types = !{JSON.stringify(types)};
         var analytics = !{JSON.stringify(analytics)};
-        var user = !{JSON.stringify(user)};
-
 
         /*
           Build config according to express settings
@@ -839,7 +837,6 @@ html
           .constant("SETTINGS", {
             types: types,
             analytics: analytics,
-            user: user
           })
         .constant('GRAMMAR', {
           AS_TYPES: [
