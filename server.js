@@ -6,11 +6,11 @@
 */
 var express       = require('express'),        // call express
     compress      = require('compression'),
-    session       = require('express-session'),
+    session       = require('express-session');
     
-    settings      = require('./settings'),
+var settings      = require('./settings');
 
-    app           = exports.app = express(),                 // define our app using express
+var app           = exports.app = express(),                 // define our app using express
     port          = settings.port || process.env.PORT || 8000,
     env           = settings.env || process.env.NODE_ENV || 'development',
     server        = app.listen(port),
@@ -550,6 +550,7 @@ apiRouter.route('/issue')
   .get(ctrl.issue.getItems)
 apiRouter.route('/issue/:id([\\da-zA-Z_\\-]+)')
   .get(ctrl.issue.getItem)
+// RK: Does not look like the endpoints below are being used
 apiRouter.route('/issue/:id([\\da-zA-Z_\\-]+)/upvote')
   .post(ctrl.issue.upvote)
 apiRouter.route('/issue/:id([\\da-zA-Z_\\-]+)/downvote')
@@ -752,3 +753,8 @@ apiRouter.route('/suggest/dbpedia')
 io.use(function (socket, next) {
   sessionMiddleware(socket.request, {}, next);
 })
+
+process.on('SIGINT', function() {
+  console.log('Interrupted. Exiting...');
+  process.exit();
+});

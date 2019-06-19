@@ -1,6 +1,7 @@
 node_modules
 
 settings.js
+docker/settings.js
 
 *.conf
 *.json

@@ -1,0 +1,22 @@
+version: '3'
+services:
+  neo4j:
+    image: neo4j
+    ports:
+      - 7474:7474
+      - 7473:7473
+      - 7687:7687
+    environment: 
+      NEO4J_AUTH: neo4j/neo4jpwd
+    volumes:
+      - ~/.neo4j/histograph:/data
+  histograph:
+    image: theorm/histograph
+    command: node server.js
+    depends_on:
+      - neo4j
+    ports:
+      - 8000:8000
+    volumes:
+      - ~/.histograph/contents:/histograph/contents
+      - ./settings.js:/histograph/settings.js

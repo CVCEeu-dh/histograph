@@ -185,6 +185,7 @@ var task = {
       callback(null, options)
     }
   },
+  // RK: This function is most likely not used.
   cartoDB: function(options, callback) {
     console.log(clc.yellowBright('\n   tasks.resource.cartoDB'));
     if(!options.target) {

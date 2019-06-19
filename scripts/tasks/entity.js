@@ -22,6 +22,7 @@ var task = {
     get couples of entities having the same id.
     Call it before
   */
+ // RK: Most likely not being used.
   getClustersByWiki: function(options, callback) {
     console.log(clc.yellowBright('\n   tasks.entity.getClustersByWiki'));
     neo4j.query('MATCH (ent:entity) WHERE has(ent.links_wiki) AND ent.links_wiki <> ""  WITH ent.links_wiki as links_wiki, collect({id: id(ent), label: last(labels(ent)), df: ent.df}) as entities WITH links_wiki, entities, length(entities) as c WHERE c > 1 RETURN  links_wiki, entities ORDER by c DESC', function (err, clusters) {
@@ -315,6 +316,7 @@ var task = {
     Get the chunks where you can find an entity.
     Based on annotation!
   */
+ // RK: does not look like it is being used.
   chunks: function(options, callback) {
     console.log(clc.yellowBright('\n   tasks.entity.chunks'));
     
