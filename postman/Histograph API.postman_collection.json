@@ -1,0 +1,209 @@
+{
+	"info": {
+		"_postman_id": "e7f42e3c-147d-4d7a-ae96-6e60c697bcb6",
+		"name": "Histograph API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Resources",
+			"item": [
+				{
+					"name": "Get resources",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{apiBaseUrl}}/resources/curated",
+							"host": [
+								"{{apiBaseUrl}}"
+							],
+							"path": [
+								"resources",
+								"curated"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start disambiguation",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "04eb3d66-b0f9-4b36-bbf8-70f7d76bc793",
+								"exec": [
+									"const response = pm.response.json();",
+									"pm.environment.set(\"disambiguationProcessId\", response.refId)"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{apiBaseUrl}}/resources/discovery-processes",
+							"host": [
+								"{{apiBaseUrl}}"
+							],
+							"path": [
+								"resources",
+								"discovery-processes"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start disambiguation Copy",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{apiBaseUrl}}/resources/discovery-processes/{{disambiguationProcessId}}",
+							"host": [
+								"{{apiBaseUrl}}"
+							],
+							"path": [
+								"resources",
+								"discovery-processes",
+								"{{disambiguationProcessId}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add resource",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"type\": \"external-text\",\n\t\"start_date\": \"2019-01-01\",\n\t\"end_date\": \"2019-01-01\",\n\t\"slug\": \"foo\",\n\t\"title\": {\n\t\t\"en\": \"Lipsum\"\n\t},\n\t\"caption\": {\n\t\t\"en\": \"Lipsum\"\n\t},\n\t\"content\": {\n\t\t\"en\": \"In publishing and graphic design, Lorem ipsum is a placeholder text commonly used to demonstrate the visual form of a document without relying on meaningful content (also called greeking). Replacing the actual content with placeholder text allows designers to design the form of the content before the content itself has been produced. The lorem ipsum text is typically a scrambled section of De finibus bonorum et malorum, a 1st-century BC Latin text by Cicero, with words altered, added, and removed to make it nonsensical, improper Latin.\"\n\t}\n}"
+						},
+						"url": {
+							"raw": "{{apiBaseUrl}}/resources",
+							"host": [
+								"{{apiBaseUrl}}"
+							],
+							"path": [
+								"resources"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Users",
+			"item": [
+				{
+					"name": "Incorrect api key",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{apiBaseUrl}}/users/self?apiKey=wrong",
+							"host": [
+								"{{apiBaseUrl}}"
+							],
+							"path": [
+								"users",
+								"self"
+							],
+							"query": [
+								{
+									"key": "apiKey",
+									"value": "wrong"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Current user details",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{apiBaseUrl}}/users/self",
+							"host": [
+								"{{apiBaseUrl}}"
+							],
+							"path": [
+								"users",
+								"self"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{apiKey}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "26434708-8353-4350-b7e5-83c695acbda6",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "aed5d017-4cd6-4b50-80d5-ecd572e73bda",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}

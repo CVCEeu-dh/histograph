@@ -4,7 +4,7 @@ settings.js
 docker/settings.js
 
 *.conf
-*.json
+package-lock.json
 *.lnk
 *.jpg
 *.log
