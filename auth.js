@@ -4,6 +4,10 @@
   ===
 
 */
+
+const createError = require('http-errors')
+const { isString, get } = require('lodash')
+
 var settings        = require('./settings'),
     helpers         = require('./helpers'),
     passport        = require('passport'),
@@ -122,22 +126,52 @@ passport.use(new GoogleStrategy({
   }
 ));
 
-
-
-passport.serializeUser(function(user, done) {
-  done(null, {
+function asSerializedUser(user) {
+  return {
     is_authentified: true,
     firstname: user.props.firstname,
-    lastname:  user.props.lastname,
-    email:     user.email,
-    username:  user.username,
-    id:        user.id,
-    picture:   user.props.picture
-  });
-});
+    lastname: user.props.lastname,
+    email: user.email,
+    username: user.username,
+    id: user.id,
+    picture: user.props.picture,
+    apiKey: user.props.apiKey
+  }
+}
 
-passport.deserializeUser(function(user, done) {
-  done(null, user);
-});
+passport.serializeUser((user, done) => {
+  done(null, asSerializedUser(user))
+})
 
-exports.passport = passport;
+passport.deserializeUser((user, done) => {
+  done(null, user)
+})
+
+const AuthHeaderTokenRegex = /^Bearer\s+(.*)$/i
+
+/**
+ * Middleware for authenticating user with an API Key.
+ * API Key can be provided as a bearer token or
+ * a query parameter (overrides token).
+ * @param {Request} req request
+ * @param {Response} res response
+ * @param {function} next callback
+ */
+function apiKeyAuthMiddleware(req, res, next) {
+  const { apiKey: apiKeyQueryParameterValue } = req.query
+  const apiKeyHeaderValue = get(get(req.headers, 'authorization', '').match(AuthHeaderTokenRegex), 1)
+  const apiKey = apiKeyQueryParameterValue || apiKeyHeaderValue
+
+  if (!isString(apiKey)) return next(createError(403, 'No API Key Provided ("apiKey")'))
+  return User.getByApiKey(apiKey, (err, user) => {
+    if (err) return next(err)
+    if (!user) return next(createError(403, 'Invalid API Key'))
+    req.user = asSerializedUser(user)
+    return next()
+  })
+}
+
+module.exports = {
+  passport,
+  apiKeyAuthMiddleware
+}

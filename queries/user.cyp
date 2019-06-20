@@ -372,6 +372,11 @@ RETURN {
   total_items: total_items
 }
 
+// name: get_curated_resources
+MATCH (res:resource)<-[r:likes|curates]-(u:user {username:{username}})
+WITH res, r ORDER BY r.last_modification_time DESC
+RETURN res
+
 // name: get_noise
 // get love or curation noise (something that just happened).
 // test with 
@@ -449,3 +454,32 @@ RETURN {
   users: users
 }
 ORDER BY last_modification_time DESC
+
+// name: update_api_key
+// given an username
+MATCH (u:user)
+  WHERE u.email = {username}
+    OR u.username = {username}
+WITH u
+  LIMIT 1
+SET
+  u.apiKey = {apiKey}
+RETURN {
+  id: u.uuid,
+  username: u.username,
+  email: u.email,
+  props: u
+}
+
+// name: get_by_api_key
+// given an api key
+MATCH (u:user)
+  WHERE u.apiKey = {apiKey}
+WITH u
+  LIMIT 1
+RETURN {
+  id: u.uuid,
+  username: u.username,
+  email: u.email,
+  props: u
+}

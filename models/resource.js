@@ -610,6 +610,7 @@ module.exports = {
     Return the 
   */
   getText: function(resource, options) {
+
     return _.compact(options.fields.map(function (d) {
       if(d == 'url') {
         if(!_.isEmpty(resource[d + '_' + options.language])) {
@@ -811,14 +812,23 @@ module.exports = {
         var candidates = []; // candidate entities extracted by various mechanisms
         
         var q = async.queue(function (language, nextLanguage) {
+
           var filename = [
-                'resource',
-                resource.id,
-                _.keys(settings.disambiguation.services).join('_'),
-                language
-              ].join('_') + '.json',
+            'txt',
+            resource['url_' + language].replace(/\./g, '-'),
+            _.keys(settings.disambiguation.services).join('_'),
+          ].join('_') + '.json';
+
+          // Previous cache filename. It did not take into account
+          // that underlying resource may have changed.
+          // var filename = [
+          //       'resource',
+          //       resource.id,
+          //       _.keys(settings.disambiguation.services).join('_'),
+          //       language
+          //     ].join('_') + '.json';
               
-              content; // the text content to be disambiguated. if it's too long, helpers method should chunk it.
+          var content; // the text content to be disambiguated. if it's too long, helpers method should chunk it.
           
           if(settings.paths.cache && settings.paths.cache.disambiguation) {
             try{

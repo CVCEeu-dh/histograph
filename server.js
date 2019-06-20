@@ -482,6 +482,10 @@ apiRouter.route('/skybiometry/face-detect')
   .post(ctrl.skybiometry.faceDetect)
 
 
+let dataApiRouter = express.Router()
+dataApiRouter.use(auth.apiKeyAuthMiddleware)
+dataApiRouter = require('./lib/endpoints/api')(dataApiRouter)
+
 /*
 
   Registering routes ...
@@ -489,8 +493,28 @@ apiRouter.route('/skybiometry/face-detect')
 
 */
 app.use('/', clientRouter); // client router
+app.use('/api/v1', dataApiRouter)
 app.use('/api', apiRouter); // api endpoint. we should be auth to pass this point.
 
+function getErrorStatusCode(err) {
+  const { code, statusCode } = err
+  if (statusCode) return statusCode
+  if (code === 'ERR_ASSERTION') return 400
+  return 500
+}
+
+app.use(function (err, req, res, next) {
+  const statusCode = getErrorStatusCode(err)
+  if (statusCode >= 500) console.log(err.stack)
+
+  const responseBody = {
+    message: err.message
+  }
+  if (process.env.NODE_ENV !== 'production') {
+    responseBody.stack = err.stack
+  }
+  res.status(statusCode).json(responseBody)
+})
 
 /*
 
@@ -517,7 +541,9 @@ apiRouter.route('/user/:id([\\da-zA-Z_\\-]+)/related/resource') // api session i
   .get(ctrl.user.getRelatedResources)
 apiRouter.route('/user/:id([\\da-zA-Z_\\-]+)/related/resource/graph') // api session info
   .get(ctrl.user.getRelatedResourcesGraph)
-  
+
+apiRouter.route('/user/apikey').put(ctrl.user.updateApiKey)
+
 
 /*
 

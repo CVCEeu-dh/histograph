@@ -1,25 +1,16 @@
 module.exports = {
-    "rules": {
-        // "indent": [
-        //     2,
-        //     2
-        // ],
-        "quotes": [
-            2,
-            "single"
-        ],
-        // "linebreak-style": [
-        //     2,
-        //     "windows"
-        // ],
-        // "semi": [
-        //     2,
-        //     "always"
-        // ]
+    "extends": ["airbnb-base", "plugin:jest/recommended"],
+    "parserOptions": {
+    	"ecmaVersion": 2017,
     },
     "env": {
-        "node": true,
-        "browser": true
+        "jest/globals": true
     },
-    "extends": "eslint:recommended"
+    "plugins": ["jest"],
+    "rules": {
+        "semi": ["warn", "never"],
+        "no-underscore-dangle": "off",
+        "arrow-parens": "off",
+        "comma-dangle": "off"
+    }
 };

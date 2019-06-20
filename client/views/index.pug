@@ -653,6 +653,9 @@ html
                         li
                           a(style='cursor:pointer', ng-click='startGuidedTour()') start guided tour!
                         li
+                          span API Key&nbsp;
+                          input(value='{{user.apiKey}}' onclick="event.stopPropagation();")
+                        li
                           a(href='#/u/'+user.id) favourites
                         li
                           a(href='/logout') logout

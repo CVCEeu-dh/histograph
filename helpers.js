@@ -1,6 +1,8 @@
 /**
   A bunch of useful functions
 */
+const { isFunction } = require('lodash')
+
 var fs       = require('fs'),
     shortid  = require('shortid'),
     path     = require('path'),
@@ -59,47 +61,60 @@ module.exports = {
     @param params - cypher query params
     @return (err, graph) - error, or a graph of nodes and edges
   */
-  cypherGraph: function(query, params, next) {
-    query= parser.agentBrown(query, params);
-    neo4j.query(query, params, function (err, items) {
-      if(err) {
-        next(err);
-        return;
+  cypherGraph: (cypherQuery, params, callback) => new Promise((res, rej) => {
+    const done = (err, result) => {
+      if (err) {
+        if (isFunction(callback)) callback(err)
+        return rej(err)
       }
-      
-      var graph = {
+      if (isFunction(callback)) callback(undefined, result)
+      return res(result)
+    }
+
+    const query = parser.agentBrown(cypherQuery, params)
+    neo4j.query(query, params, (err, items) => {
+      if (err) return done(err)
+
+      const graph = {
         nodes: [],
         edges: []
-      };
-      var index = {},
-          edgeIndex = {};
+      }
+      const index = {}
+      const edgeIndex = {}
+
       /*
         Create the graph object of nodes and edges.
         calculate the degree as well
       */
-      for(var i = 0; i < items.length; i++) {
-        if(!index[items[i].source.id]) {
-          index[items[i].source.id] = items[i].source;//items[i].source;
+      for (let i = 0; i < items.length; i += 1) {
+        if (!index[items[i].source.id]) {
+          index[items[i].source.id] = items[i].source // items[i].source;
           // add the weight as a measure of the node importance among the others
-          index[items[i].source.id].importance = items[i].weight;
-          index[items[i].source.id].degree = 1;
+          index[items[i].source.id].importance = items[i].weight
+          index[items[i].source.id].degree = 1
         } else {
           // rescale the importance if the weight is higher
-          index[items[i].source.id].importance = Math.max(items[i].weight, index[items[i].source.id].importance);
-          index[items[i].source.id].degree++;
+          index[items[i].source.id].importance = Math.max(
+            items[i].weight,
+            index[items[i].source.id].importance
+          )
+          index[items[i].source.id].degree += 1
         }
-        if(!index[items[i].target.id]) {
-          index[items[i].target.id] = items[i].target;
-          index[items[i].target.id].importance = items[i].weight;
-          index[items[i].target.id].degree = 1;
-        }else {
+        if (!index[items[i].target.id]) {
+          index[items[i].target.id] = items[i].target
+          index[items[i].target.id].importance = items[i].weight
+          index[items[i].target.id].degree = 1
+        } else {
           // rescale the importance if the weight is higher
-          index[items[i].target.id].importance = Math.max(items[i].weight, index[items[i].target.id].importance);
-          index[items[i].target.id].degree++;
+          index[items[i].target.id].importance = Math.max(
+            items[i].weight,
+            index[items[i].target.id].importance
+          )
+          index[items[i].target.id].degree += 1
         }
-        
-        var edgeId = _.sortBy([items[i].target.id, items[i].source.id]).join('.');
-        if(!edgeIndex[edgeId]) {
+
+        const edgeId = _.sortBy([items[i].target.id, items[i].source.id]).join('.')
+        if (!edgeIndex[edgeId]) {
           // in some case we have useless symmetric links. @todo cypher query to be improved
           edgeIndex[edgeId] = 1;
           graph.edges.push({
@@ -107,13 +122,14 @@ module.exports = {
             source: items[i].source.id,
             target: items[i].target.id,
             weight: items[i].weight
-        });
+          })
         }
       }
-      graph.nodes= _.values(index);
-      next(null, graph);
+      graph.nodes = _.values(index);
+      return done(undefined, graph)
     })
-  },
+  }),
+
    /**
     Given a query, extract one useful timeline.
     The query MUST return a list of (timestamp,weight) couples.

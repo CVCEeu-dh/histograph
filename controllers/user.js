@@ -32,8 +32,7 @@ var settings   = require('../settings'),
     ];
 
 
-module.exports = function(io) {
-  return {
+module.exports = () => ({
     // set user fav language. the resources will be 
     setLanguage: function (req, res) {
       return res.ok({
@@ -277,5 +276,12 @@ module.exports = function(io) {
         }, form.params));
       });
     },
-  }
-};
+
+  updateApiKey: (req, res) => {
+    const callback = (err, user) => {
+      if (err) return helpers.cypherQueryError(err, res)
+      return res.ok({ user })
+    }
+    User.regenerateApiKey(req.user, {}, callback)
+  },
+})

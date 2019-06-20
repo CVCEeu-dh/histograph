@@ -3,6 +3,9 @@
  * ======================
  *
  */
+
+const { get } = require('lodash')
+
 var settings  = require('../settings'),
     helpers   = require('../helpers'),
     parser    = require('../parser'),
@@ -11,11 +14,15 @@ var settings  = require('../settings'),
     neo4j     = require('seraph')(settings.neo4j.host),
     _         = require('lodash');
 
+const queryNeo4j = require('../lib/util/neo4j').getQueryMethod()
+
+const { generateApiKey } = require('../lib/util/crypto')
+
 module.exports = {
   /*
     Create a new user into the database.
     User should have the following fields:
-    
+
     username   : 'hello-world',
     password   : 'WorldHello',
     email      : 'world@globetrotter.it',
@@ -51,7 +58,8 @@ module.exports = {
       password               : encrypted.key,
       salt                   : encrypted.salt,
       status                 : user.status || 'disabled',
-      activation             : activation.key   
+      activation             : activation.key   ,
+      apiKey: generateApiKey()
     });
      
     neo4j.query(parser.agentBrown(queries.merge_user, user), user, function (err, node) {
@@ -222,5 +230,43 @@ module.exports = {
       else
         next(null, graph);
     });
+  },
+
+  getCuratedResources: async user => {
+    const { username } = user
+    return queryNeo4j(
+      queries.get_curated_resources,
+      { username }
+    )
+  },
+
+  /**
+   * Generate a new API Key for the user.
+   * @param {User} user - authenticated user object.
+   * @param {object} params - API request payload - not used.
+   * @param {function} next - callback.
+   */
+  regenerateApiKey(user, params, next) {
+    const parameters = {
+      username: user.username,
+      apiKey: generateApiKey()
+    }
+    const callback = (err, results) => next(err, results[0])
+
+    neo4j.query(
+      queries.update_api_key,
+      parameters,
+      callback
+    )
+  },
+
+  /**
+   * Return user by API Key
+   * @param {string} apiKey API Key
+   * @param {function} next callback
+   */
+  getByApiKey(apiKey, next) {
+    const callback = (err, response) => next(err, get(response, '0'))
+    neo4j.query(queries.get_by_api_key, { apiKey }, callback)
   }
-};
+}

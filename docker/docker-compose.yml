@@ -10,13 +10,13 @@ services:
       NEO4J_AUTH: neo4j/neo4jpwd
     volumes:
       - ~/.neo4j/histograph:/data
-  histograph:
-    image: theorm/histograph
-    command: node server.js
-    depends_on:
-      - neo4j
-    ports:
-      - 8000:8000
-    volumes:
-      - ~/.histograph/contents:/histograph/contents
-      - ./settings.js:/histograph/settings.js
+  # histograph:
+  #   image: theorm/histograph
+  #   command: node server.js
+  #   depends_on:
+  #     - neo4j
+  #   ports:
+  #     - 8000:8000
+  #   volumes:
+  #     - ~/.histograph/contents:/histograph/contents
+  #     - ./settings.js:/histograph/settings.js
