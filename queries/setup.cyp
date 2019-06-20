@@ -99,3 +99,7 @@ MATCH (res:resource) WHERE exists(res.full_search) WITH res SET res.full_search=
 // name: update_auto_index_on_entity_name_search
 // create index on variables scope
 MATCH (ent:entity) WHERE exists(ent.name_search) WITH ent SET ent.name_search=ent.name_search
+
+
+// name: create_full_text_index
+CALL db.index.fulltext.createNodeIndex("full_text_index",["entity", "resource"],["name_search","full_search"])

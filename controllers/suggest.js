@@ -417,7 +417,7 @@ module.exports =  function(io){
             entity: 'person'
           }, {
             fields: [
-              validator.SPECIALS.entity
+              // validator.SPECIALS.entity
             ]
           });
       if(!form.isValid)

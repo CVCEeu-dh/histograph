@@ -1,6 +1,7 @@
 // name: lucene_query
 //
-start n=node:node_auto_index({resource_query})
+CALL db.index.fulltext.queryNodes('full_text_index', {resource_query})
+YIELD node as n
 WITH n
 LIMIT {limit}
 RETURN {
@@ -9,7 +10,8 @@ RETURN {
   type: 'resource'
 } AS result
 UNION
-start n=node:node_auto_index({entity_query})
+CALL db.index.fulltext.queryNodes('full_text_index', {entity_query})
+YIELD node as n
 WITH n
 MATCH (n)-[r:appears_in]->()
 WITH n, count(r) as distribution
@@ -278,7 +280,8 @@ RETURN {
 
 // name: count
 // global facets for a specific query
-start res=node:node_auto_index({resource_query})
+CALL db.index.fulltext.queryNodes('full_text_index', {resource_query})
+YIELD node as res
 WITH res
 RETURN {
   group: 'resource',
@@ -286,7 +289,8 @@ RETURN {
   count_items: count(res)
 } as g
 UNION
-start ent=node:node_auto_index({entity_query})
+CALL db.index.fulltext.queryNodes('full_text_index', {entity_query})
+YIELD node as ent
 WITH ent
 RETURN {
   group: 'entity',
@@ -298,7 +302,8 @@ RETURN {
 
 // name: count_resources
 // get resources by query
-start res=node:node_auto_index({query})
+CALL db.index.fulltext.queryNodes('full_text_index', {query})
+YIELD node as res
 WITH res
 {?res:start_time__gt}
 {AND?res:end_time__lt}
@@ -319,7 +324,8 @@ RETURN {
 
 // name: get_resources
 // get resources by query
-start res=node:node_auto_index({query})
+CALL db.index.fulltext.queryNodes('full_text_index', {query})
+YIELD node as res
 WITH res
 {?res:start_time__gt}
 {AND?res:end_time__lt}
@@ -365,7 +371,8 @@ RETURN {
 
 // name: get_matching_entities_count
 // get resources by query, will suggest other enpoint too
-start n=node:node_auto_index({query})
+CALL db.index.explicit.auto.searchNodes({query})
+YIELD node as n
 WHERE 'entity' in labels(n)
 WITH last(labels(n)) as group, count(n) as count_items
 RETURN {
@@ -376,7 +383,8 @@ RETURN {
 
 // name: get_matching_entities
 // get resources by query
-start n=node:node_auto_index({query})
+CALL db.index.fulltext.queryNodes('full_text_index', {query})
+YIELD node as n
 WHERE {entity} in labels(n)
 WITH (n)
 MATCH (n)-[r:appears_in]->()
@@ -394,7 +402,8 @@ LIMIT {limit}
 
 // name: get_matching_resources_graph
 // e.g. START m=node:node_auto_index('full_search:*goerens*')
-START res=node:node_auto_index({query})
+CALL db.index.fulltext.queryNodes('full_text_index', {query})
+YIELD node as res
 {if:with}
   MATCH(res)<-[:appears_in]-(ent:entity)
   WHERE id(ent) IN {with}
@@ -428,7 +437,8 @@ LIMIT {limit}
 
 // name: get_matching_entities_graph
 // e.g. START m=node:node_auto_index('full_search:*goerens*')
-START m=node:node_auto_index({query})
+CALL db.index.fulltext.queryNodes('full_text_index', {query})
+YIELD node as m
 WHERE last(labels(m)) = {entity}
 MATCH (m)-[r:appears_in]->(ent)
 WITH ent, collect(DISTINCT m) as ms
