@@ -45,7 +45,7 @@ var task = {
     }));
     
     // get the expected fields according to language
-    expectedFields = _.unique(
+    expectedFields = _.uniq(
       COLUMNS.concat(
         _.flatten(
           languages.map(function (language) {

@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 /**
 
   API Controller for hg:Resource

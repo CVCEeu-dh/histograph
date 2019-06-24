@@ -415,6 +415,9 @@ START res=node({id})
 MATCH (res:resource {doi:{doi}})
 RETURN res
 
+// name: get_resource_by_uuid
+MATCH (res:resource { uuid:{uuid} })
+RETURN res
 
 // name: merge_collection_by_name
 // add a collection (it is basically a tag for resource) FOR MIGRATION ONLY
@@ -1097,3 +1100,15 @@ RETURN {
   performed_by: alias_u,
   mentioning: mentioning
 }
+
+// name:mark_discovered
+// mark resource discovered
+MATCH (r:resource { uuid: {uuid} })
+SET r.discovered = true
+RETURN r
+
+// name:get_uuids_of_not_discovered_resources
+// get uuid list of not yet discovered resources
+MATCH(r:resource)
+WHERE NOT EXISTS(r.discovered) OR r.discovered<>true
+RETURN r.uuid

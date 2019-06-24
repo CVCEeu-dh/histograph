@@ -146,11 +146,11 @@ module.exports = {
       iss = iss[0];
        // -> { make: 'Citroen', model: 'DS4', id: 1 }
       if(properties.upvoted_by) {
-        iss.props.upvote = _.unique((iss.props.upvote || []).concat(properties.upvoted_by));
+        iss.props.upvote = _.uniq((iss.props.upvote || []).concat(properties.upvoted_by));
       } else if(properties.downvoted_by) {
-        iss.props.downvote = _.unique((iss.props.downvote || []).concat(properties.downvoted_by));
+        iss.props.downvote = _.uniq((iss.props.downvote || []).concat(properties.downvoted_by));
       }
-      iss.props.celebrity =  _.unique((iss.props.upvote || []).concat(iss.props.downvote|| [])).length;
+      iss.props.celebrity =  _.uniq((iss.props.upvote || []).concat(iss.props.downvote|| [])).length;
       iss.props.score = (iss.props.upvote || []).length - (iss.props.downvote|| []).length;
       iss.props.last_modification_date = now.date;
       iss.props.last_modification_time = now.time;

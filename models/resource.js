@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 /**
  * Resource Model for documents, video etc...
  * ======================

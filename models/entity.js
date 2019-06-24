@@ -246,7 +246,7 @@ module.exports = {
       
       // 1. UPVOTE ENTITY upvote automatically, since you admitted that the entity exists ;)
       // it increases score and celebrity, removes from the downvotes if any
-      result.ent.upvote = _.unique((result.ent.upvote || []).concat([user.username]));
+      result.ent.upvote = _.uniq((result.ent.upvote || []).concat([user.username]));
       if(result.ent.downvote && !!~result.ent.downvote.indexOf(user.username)) {
         _.remove(result.ent.downvote, function(d) {return d==user.username});
       }
@@ -256,7 +256,7 @@ module.exports = {
 
       // 2. UPVOTE RELATIONSHIP
       // guarantee that there are unique username in both set of upvoters and downvoters
-      result.rel.properties.upvote = _.unique((result.rel.properties.upvote || []).concat([user.username]));
+      result.rel.properties.upvote = _.uniq((result.rel.properties.upvote || []).concat([user.username]));
       if(result.rel.properties.downvote && !!~result.rel.properties.downvote.indexOf(user.username)) {
         _.remove(result.rel.properties.downvote, function(d) {return d==user.username});
       }
@@ -325,7 +325,7 @@ module.exports = {
       
       if(!!~['upvote', 'downvote'].indexOf(params.action)) {
         if(params.action == 'upvote') {
-          result.rel.properties.upvote = _.unique((result.rel.properties.upvote || []).concat(user.username));
+          result.rel.properties.upvote = _.uniq((result.rel.properties.upvote || []).concat(user.username));
           if(result.rel.properties.downvote && !!~result.rel.properties.downvote.indexOf(user.username)) {
             _.remove(result.rel.properties.downvote, function(d) {return d==user.username});
           }
@@ -335,7 +335,7 @@ module.exports = {
         }
 
         if(params.action == 'downvote') {
-          result.rel.properties.downvote = _.unique((result.rel.properties.downvote || []).concat(user.username));
+          result.rel.properties.downvote = _.uniq((result.rel.properties.downvote || []).concat(user.username));
           if(result.rel.properties.upvote && !!~result.rel.properties.upvote.indexOf(user.username)) {
             _.remove(result.rel.properties.upvote, function(d) {return d==user.username});
           }
@@ -343,7 +343,7 @@ module.exports = {
 
         }
         
-        result.rel.properties.celebrity =  _.compact(_.unique((result.rel.properties.upvote || []).concat(result.rel.properties.downvote|| []))).length;
+        result.rel.properties.celebrity =  _.compact(_.uniq((result.rel.properties.upvote || []).concat(result.rel.properties.downvote|| []))).length;
         result.rel.properties.score = _.compact((result.rel.properties.upvote || [])).length - _.compact((result.rel.properties.downvote|| [])).length;
         
         async.series([
@@ -437,7 +437,7 @@ module.exports = {
       ent = ent[0];
       
       if(params.upvoted_by) {
-        ent.props.upvote = _.unique((ent.props.upvote || []).concat([params.upvoted_by]));
+        ent.props.upvote = _.uniq((ent.props.upvote || []).concat([params.upvoted_by]));
         if(ent.props.downvote && ent.props.downvote.indexOf(params.upvoted_by) != -1)
           _.remove(ent.props.downvote, function(d) {return d==params.upvoted_by});
       }
@@ -449,11 +449,11 @@ module.exports = {
         }
         // only when a VALID REASON applies
         if(params.issue) {
-            ent.props.downvote = _.unique((ent.props.downvote || []).concat([params.downvoted_by]));
+            ent.props.downvote = _.uniq((ent.props.downvote || []).concat([params.downvoted_by]));
         }
       }
       // calculate celebrity and score for the entity
-      ent.props.celebrity =  _.unique((ent.props.upvote || []).concat(ent.props.downvote|| [])).length;
+      ent.props.celebrity =  _.uniq((ent.props.upvote || []).concat(ent.props.downvote|| [])).length;
       ent.props.score = (ent.props.upvote || []).length - (ent.props.downvote|| []).length;
       ent.props.last_modification_date = now.date;
       ent.props.last_modification_time = now.time;
@@ -461,11 +461,11 @@ module.exports = {
       
       // if there is an issue, add it to the entity directly (mongodb style)
       if(params.issue) {
-        ent.props.issues = _.unique((ent.props.issues || []).concat([params.issue]));
+        ent.props.issues = _.uniq((ent.props.issues || []).concat([params.issue]));
         
         // add the user to the upvoters (if he/she raised the issue or she/he agrees)
         if(params.issue_upvoted_by) {
-          ent.props['issue_' + params.issue + '_upvote'] = _.unique((ent.props['issue_' + params.issue + '_upvote'] || []).concat([params.issue_upvoted_by]));
+          ent.props['issue_' + params.issue + '_upvote'] = _.uniq((ent.props['issue_' + params.issue + '_upvote'] || []).concat([params.issue_upvoted_by]));
           if(ent.props['issue_' + params.issue + '_downvote'] && ent.props['issue_' + params.issue + '_downvote'].indexOf(params.issue_upvoted_by) != -1){
             _.remove(ent.props['issue_' + params.issue + '_downvote'], function(d) {return d==params.issue_upvoted_by});
           }
@@ -485,7 +485,7 @@ module.exports = {
             // We do not reset the downvotes, since if someone raise it again, the downvoters will be there already ;)
           } else {
             // there's still upoters, just add the suer to the downvoters
-            ent.props['issue_' + params.issue + '_downvote'] = _.unique(ent.props['issue_' + params.issue + '_downvote'] || []).concat([params.issue_downvoted_by]);
+            ent.props['issue_' + params.issue + '_downvote'] = _.uniq(ent.props['issue_' + params.issue + '_downvote'] || []).concat([params.issue_downvoted_by]);
           }
         }
 
@@ -833,7 +833,7 @@ module.exports = {
           // get aliases (alternate variations)
           // automatic name_search
           if(wiki.aliases)
-            addons.name_search = _.unique(
+            addons.name_search = _.uniq(
               _.map((node.name_search || '')
                 .split(' || ')
                 .concat(

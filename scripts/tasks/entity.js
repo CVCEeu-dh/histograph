@@ -1,3 +1,4 @@
+/* eslint-disable */
 /*
   
   Resource task collection
@@ -56,7 +57,7 @@ var task = {
           the_id = the_id
             .first()
             .get('id');// _.get(_.first(_.orderBy(_.filter(cluster.entities, 'df'), ['df'],['desc'])), 'id'),// index with most df will take all
-          labels = _.unique(_.map(cluster.entities, 'label'));
+          labels = _.uniq(_.map(cluster.entities, 'label'));
       console.log(clc.blackBright('    most important id:', clc.cyanBright(the_id)))
       if(!ids || ids.length == 0) {
         q.kill()

@@ -7,7 +7,10 @@
 var express       = require('express'),        // call express
     compress      = require('compression'),
     session       = require('express-session');
-    
+
+const cookieSession = require('cookie-session')
+const { compose: composeMiddleware } = require('compose-middleware')
+
 var settings      = require('./settings');
 
 var app           = exports.app = express(),                 // define our app using express
@@ -85,13 +88,23 @@ if(settings.cache && settings.cache.redis) {
   });
 } else {
   // initilalize session middleware without redis
-  sessionMiddleware = session({
+
+  const a = cookieSession({
+    name: 'hg.sess',
+    secret: settings.secret.cookie,
+    httpOnly: false,
+    signed: true,
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 2592000000 // 30 days
+  })
+  const b = session({
     name: 'hg.sid',
     secret: settings.secret.cookie,
     // trustProxy: false,
     resave: true,
     saveUninitialized: true
-  });
+  })
+  sessionMiddleware = composeMiddleware([a, b])
 }
 
 var getCacheName = function(req) {

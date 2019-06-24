@@ -70,7 +70,7 @@ module.exports =  function(io){
         }
       }, function (err, results) {
         // ids of all the discovered.
-        var discovered = _.unique(_.flatten(results.count_items, true), 'id');
+        var discovered = _.uniq(_.flatten(results.count_items, true), 'id');
       
         if(err)
           return helpers.cypherQueryError(err, res);

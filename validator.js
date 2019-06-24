@@ -422,7 +422,7 @@ module.exports = {
     if(typeof options == 'object') {
       // override certain specific fields (format: cfr module.exports.FIELDS)
       if(options.fields)
-        fields = _.unique((options.fields || []).concat(module.exports.FIELDS), 'field');
+        fields = _.uniq((options.fields || []).concat(module.exports.FIELDS), 'field');
       // specify which fields are required (when usually they're not) or viceversa. Cfr module.exports.FIELDS
       
     }

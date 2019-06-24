@@ -369,7 +369,7 @@ module.exports = {
         return;
       };
       
-      var name = _.unique([body.geonames[0].toponymName, body.geonames[0].countryName]).join(', ');
+      var name = _.uniq([body.geonames[0].toponymName, body.geonames[0].countryName]).join(', ');
       // console.log(name, '----->', body.geonames[0]);
       
       next(null, _.take(body.geonames.map(function (result) {

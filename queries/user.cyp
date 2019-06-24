@@ -19,6 +19,10 @@ MERGE (k:user { email:{email} })
     k.gender     = {gender},
     {/if}
 
+    {if:apiKey}
+    k.apiKey     = {apiKey},
+    {/if}
+
     k.strategy   = {strategy},
     k.about      = {about},
 

@@ -159,7 +159,7 @@ module.exports = {
     
     
     // array of left plus right splitpoint to chunk the string
-    splitpoints = _.sortBy(_.unique([0, content.length].concat(
+    splitpoints = _.sortBy(_.uniq([0, content.length].concat(
       _.map(points, function(d){
         return d.context.left
       })).concat(
@@ -174,7 +174,7 @@ module.exports = {
     for(var i = 0; i < splitpoints.length - 1; i++) {
       
       // get the leftmost or rightmost for this splitpoint
-      var ls = _.unique(_.map(points.filter(function(d) {
+      var ls = _.uniq(_.map(points.filter(function(d) {
         return d.context.left == splitpoints[i] || d.context.right == splitpoints[i + 1]
       }), 'id'));
       

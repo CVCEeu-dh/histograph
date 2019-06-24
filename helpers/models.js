@@ -155,7 +155,7 @@ module.exports = {
           } else {
             callback(null, {
               groups: result,
-              total_items: _.sum(result, 'count_items') 
+              total_items: _.sum(result.map(r => r.count_items)) 
             });
           }
         })

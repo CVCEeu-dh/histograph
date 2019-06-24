@@ -329,7 +329,7 @@ module.exports = {
       });
       //console.log(props)
       // abstract languages
-      props.languages = _.unique(languages); 
+      props.languages = _.uniq(languages); 
       next(null, props);
     });
   },
@@ -497,8 +497,8 @@ module.exports = {
         };
         
         if(d.type && d.type.length){
-          _d.__type = _.unique(d.type);
-          _d.type = _.unique(_.compact(d.type.map(function (type) {
+          _d.__type = _.uniq(d.type);
+          _d.type = _.uniq(_.compact(d.type.map(function (type) {
             return entitiesPrefixesToKeep[type]
           })));
           
@@ -649,7 +649,7 @@ module.exports = {
           matched_text: d.matchedText
         };
         
-        _d.type = _.unique(_.compact(d.type.map(function (type) {
+        _d.type = _.uniq(_.compact(d.type.map(function (type) {
           var abstractType =  _.dropRight(type.split('_')).join('_');
           return entitiesPrefixesToKeep[abstractType]
         })));
@@ -1365,10 +1365,10 @@ module.exports = {
           // console.log(aliases)
           // ... then remap the extracted entities in order to have group of same entity.
           var _d = {
-            name: _.first(_.unique(_.map(aliases, 'name'))),
-            type: _.unique(_.flatten(_.map(aliases, 'type'))),
-            services: _.unique(_.flatten(_.map(aliases, 'service'))),
-            languages: _.unique(_.map(aliases, function (d) { 
+            name: _.first(_.uniq(_.map(aliases, 'name'))),
+            type: _.uniq(_.flatten(_.map(aliases, 'type'))),
+            services: _.uniq(_.flatten(_.map(aliases, 'service'))),
+            languages: _.uniq(_.map(aliases, function (d) { 
               return d.context.language
             }))
           };
@@ -1379,9 +1379,9 @@ module.exports = {
           }));
           
           // get the unique wikilink for this group, if any. 
-          var redirects = _.unique(_.flatten(_.map(aliases, 'redirectOf')));
+          var redirects = _.uniq(_.flatten(_.map(aliases, 'redirectOf')));
           // ... and assign it
-          _d.links_wiki = _.first(_.compact(_.unique(_.map(aliases, redirects.length? 'redirectOf': 'links_wiki')))) || ''
+          _d.links_wiki = _.first(_.compact(_.uniq(_.map(aliases, redirects.length? 'redirectOf': 'links_wiki')))) || ''
           return _d
         });
 
@@ -1406,7 +1406,7 @@ module.exports = {
     }
   */
   geocluster: function(entities, next) {
-    var amountOfServices = _.unique(_.map(entities, 'service')).length;
+    var amountOfServices = _.uniq(_.map(entities, 'service')).length;
     
     // if there are more than one service, we disambiguate just the first entity for each service
     // services are meant for "suggestions": they provide the user with the amplest spectrum of possibilities.
@@ -1452,25 +1452,25 @@ module.exports = {
     
     best = _.first(_.sortBy(combinations, 'distance'));
     
-    amountOfNames = _.unique(_.compact(_.map([best.left.__name, best.right.__name], function (d) {
+    amountOfNames = _.uniq(_.compact(_.map([best.left.__name, best.right.__name], function (d) {
       return d.trim().toLowerCase();
     }))).length;
     
-    amountOfCountries = _.unique(_.compact(_.map([best.left.country, best.right.country], function (d) {
+    amountOfCountries = _.uniq(_.compact(_.map([best.left.country, best.right.country], function (d) {
       return (d || '').trim().toLowerCase();
     }))).length;
     
-    amountOfFcls = _.unique(_.compact(_.map([best.left.fcl, best.right.fcl], function (d) {
+    amountOfFcls = _.uniq(_.compact(_.map([best.left.fcl, best.right.fcl], function (d) {
       return (d || '').trim().toLowerCase();
     }))).length;
     
     
     var merged = _.assign({
-      name: _.unique(_.compact([best.left.__name, best.right.__name])).join(', '),
-      lat: +_.first(_.unique([best.left.lat, best.right.lat])),
-      lng: +_.first(_.unique([best.left.lng, best.right.lng])),
-      fcl: _.unique([best.left.fcl, best.right.fcl]).join(', '),
-      country: _.unique([best.left.country, best.right.country]).join(', '),
+      name: _.uniq(_.compact([best.left.__name, best.right.__name])).join(', '),
+      lat: +_.first(_.uniq([best.left.lat, best.right.lat])),
+      lng: +_.first(_.uniq([best.left.lng, best.right.lng])),
+      fcl: _.uniq([best.left.fcl, best.right.fcl]).join(', '),
+      country: _.uniq([best.left.country, best.right.country]).join(', '),
       trustworthiness:
         .1 * amountOfServices / _.size(settings.disambiguation.geoservices) + 
         .3 / amountOfNames + 

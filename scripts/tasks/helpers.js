@@ -159,7 +159,7 @@ module.exports = {
                               
                         ) {
                           if(_.isEmpty(nodes[ids[i]][k]) || _.isEmpty(nodes[ids[j]][k])) {
-                            quietlyUpdatable[k] = _.unique(_.compact((quietlyUpdatable[k] || []).concat(nodes[ids[i]][k], nodes[ids[j]][k])))
+                            quietlyUpdatable[k] = _.uniq(_.compact((quietlyUpdatable[k] || []).concat(nodes[ids[i]][k], nodes[ids[j]][k])))
                             continue;
                           }
                           if(typeof nodes[ids[i]][k] != 'object' || nodes[ids[i]][k].join() != nodes[ids[j]][k].join() )

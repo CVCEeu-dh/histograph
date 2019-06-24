@@ -50,12 +50,12 @@ module.exports = {
       com = com[0];
        // -> { make: 'Citroen', model: 'DS4', id: 1 }
       if(properties.upvoted_by) {
-        com.props.upvote = _.unique((com.props.upvote || []).concat(properties.upvoted_by));
+        com.props.upvote = _.uniq((com.props.upvote || []).concat(properties.upvoted_by));
       }
       if(properties.downvoted_by) {
-        com.props.downvote = _.unique((com.props.downvote || []).concat(properties.downvoted_by));
+        com.props.downvote = _.uniq((com.props.downvote || []).concat(properties.downvoted_by));
       }
-      com.props.celebrity =  _.unique((com.props.upvote || []).concat(com.props.downvote|| [])).length;
+      com.props.celebrity =  _.uniq((com.props.upvote || []).concat(com.props.downvote|| [])).length;
       com.props.score = (com.props.upvote || []).length - (com.props.downvote|| []).length;
       com.props.last_modification_date = now.date;
       com.props.last_modification_time = now.time;
