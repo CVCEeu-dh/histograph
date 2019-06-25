@@ -106,6 +106,23 @@ ON CREATE SET
   ent.status        = 1,
   ent.df            = 1,
 
+  {if:description}
+    ent.description = {description},
+  {/if}
+
+  {if:links__wikidata_id}
+    ent.links__wikidata_id = {links__wikidata_id},
+  {/if}
+  {if:links__dbpedia_uri}
+    ent.links__dbpedia_uri = {links__dbpedia_uri},
+  {/if}
+  {if:links__google_kg_id}
+    ent.links__google_kg_id = {links__google_kg_id},
+  {/if}
+  {if:links__wikipedia_uri}
+    ent.links__wikipedia_uri = {links__wikipedia_uri},
+  {/if}
+  
   {if:links_viaf}
     ent.links_viaf         = {links_viaf},
   {/if}
@@ -158,6 +175,24 @@ ON MATCH SET
   {if:slug}
     ent.slug          = {slug},
   {/if}
+
+  {if:description}
+    ent.description = {description},
+  {/if}
+
+  {if:links__wikidata_id}
+    ent.links__wikidata_id = {links__wikidata_id},
+  {/if}
+  {if:links__dbpedia_uri}
+    ent.links__dbpedia_uri = {links__dbpedia_uri},
+  {/if}
+  {if:links__google_kg_id}
+    ent.links__google_kg_id = {links__google_kg_id},
+  {/if}
+  {if:links__wikipedia_uri}
+    ent.links__wikipedia_uri = {links__wikipedia_uri},
+  {/if}
+
   {if:links_viaf}
     ent.links_viaf         = {links_viaf},
   {/if}

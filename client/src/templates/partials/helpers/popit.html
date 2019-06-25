@@ -46,6 +46,7 @@
           </div>
           <div ng-if='entity.isIncomplete || entity.type == "location" || entity.type=="theme"'>
             <div class='date' >{{entity.type}}</div>
+            <div>{{entity.props|lookup:'description'}}</div>
           </div>
           <div ng-if="entity.props.links_viaf">
             <a target='_blank' ng-href='http://viaf.org/viaf/{{entity.props.links_viaf}}'>VIAF: {{entity.props.links_viaf}}

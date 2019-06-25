@@ -1,4 +1,5 @@
 
+/* eslint-disable */
 
 /**
  * Entity Model for Location, Organisation, etc...

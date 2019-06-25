@@ -25,8 +25,12 @@
             <span ng-if='relatedItem.type=="person"'>{{relatedItem.props.birth_time | datesOfAPerson : relatedItem.props.death_time}}</span>
             <span ng-if='relatedItem.type=="location"'>{{relatedItem.props.country}} {{relatedItem.props.lat}} - {{relatedItem.props.lng}}</span>
           </div>
+          <div>
+            {{relatedItem.props|lookup:'description'}}
+          </div>
           <div ng-if="relatedItem.props.links_viaf">VIAF: {{relatedItem.props.links_viaf}}</div>
           <div ng-if="relatedItem.props.links_wiki" class='links'><a href='http://dbpedia.org/resource/{{relatedItem.props.links_wiki}}' target='_blank'>dbpedia: {{relatedItem.props.links_wiki}}</a></div>
+          <div ng-if="relatedItem.props.links__wikipedia_uri" class='links'><a href='http://dbpedia.org/resource/{{relatedItem.props.links__wikipedia_uri}}' target='_blank'>Wikipedia</a></div>
         </div>
         <div class="actions">
           
