@@ -55,10 +55,18 @@
         <div class="actions">
           <div >
             
+            <button ng-if="item.previous_resource_uuid" class="btn btn-default action" tooltip="{{'tooltip.resource.go.to.previous.resource'|translate}}" ng-click="goToResource(item.previous_resource_uuid)">
+              <i class="fa fa-arrow-left"></i>
+            </button>
+
+            <button ng-if="item.next_resource_uuid" class="btn btn-default action" tooltip="{{'tooltip.resource.go.to.next.resource'|translate}}" ng-click="goToResource(item.next_resource_uuid)">
+              <i class="fa fa-arrow-right"></i>
+            </button>
+
             <!-- <a class="btn btn-default action" tooltip="create a new inquiry" ng-href="#/r/{{item.id}}/inq/create">
               <i class="fa fa-comment-o"></i>
             </a> -->
-             <button class="btn btn-default action" tooltip="{{'tooltip.resource.add.to.myselection'|translate}}" ng-click="queue(item, true)">
+            <button class="btn btn-default action" tooltip="{{'tooltip.resource.add.to.myselection'|translate}}" ng-click="queue(item, true)">
               <i class="fa fa-thumb-tack"></i>
             </button>
             <button ng-if='!item.loved_by_user' class="btn btn-default action" ng-click='favourite(item)' tooltip="{{'tooltip.resource.add.to.favourites'|translate}}">

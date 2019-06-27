@@ -19,7 +19,7 @@ WITH res, curated_by_user, loved_by_user, curators, lovers, filter(x in collect(
       type: 'place',
       props: pla,
       rel: r_pla
-    }) WHERE exists(x.id))[0..5] as places
+    }) WHERE exists(x.id)) as places
 
 OPTIONAL MATCH (res)-[r_loc:appears_in]-(loc:`location`)
 WITH res, curated_by_user, loved_by_user, curators, lovers, places, r_loc, loc
@@ -29,7 +29,7 @@ WITH res, curated_by_user, loved_by_user, curators, lovers, places, filter(x in 
       type: 'location',
       props: loc,
       rel: r_loc
-    }) WHERE exists(x.id))[0..5] as locations
+    }) WHERE exists(x.id)) as locations
 
 OPTIONAL MATCH (res)-[r_per:appears_in]-(per:`person`)
 WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, r_per, per
@@ -39,7 +39,7 @@ WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, f
       type: 'person',
       props: per,
       rel: r_per
-    }) WHERE exists(x.id))[0..10] as persons
+    }) WHERE exists(x.id)) as persons
 
 OPTIONAL MATCH (res)-[r_org:appears_in]-(org:`organization`)
 WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, persons, r_org, org
@@ -49,7 +49,7 @@ WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, p
       type: 'organization',
       props: org,
       rel: r_org
-    }) WHERE exists(x.id))[0..10] as organizations
+    }) WHERE exists(x.id)) as organizations
 
 OPTIONAL MATCH (res)-[r_soc:appears_in]-(soc:`social_group`)
 WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, persons, organizations, r_soc, soc
@@ -59,7 +59,7 @@ WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, p
       type: 'social_group',
       props: soc,
       rel: r_soc
-    }) WHERE exists(x.id))[0..10] as social_groups
+    }) WHERE exists(x.id)) as social_groups
 
 OPTIONAL MATCH (res)-[r_the:appears_in]-(the:`theme`)
 WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, persons, organizations, social_groups, filter(x in collect({
@@ -67,13 +67,15 @@ WITH res, curated_by_user, loved_by_user, curators, lovers, places, locations, p
       type: 'theme',
       props: the,
       rel: r_the
-    }) WHERE exists(x.id))[0..5] as themes
+    }) WHERE exists(x.id)) as themes
 
 OPTIONAL MATCH (ver)-[:describes]->(res)
 OPTIONAL MATCH (res)-[:belongs_to]->(col)
 OPTIONAL MATCH (com)-[:mentions]->(res)
 OPTIONAL MATCH (inq)-[:questions]->(res)
 
+OPTIONAL MATCH (after:resource)-[:comes_after]->(res)
+OPTIONAL MATCH (res)-[:comes_after]->(before:resource)
 
 RETURN {
   resource: {
@@ -93,7 +95,9 @@ RETURN {
     comments: count(distinct com),
     inquiries: count(distinct inq),
     lovers: lovers,
-    curators: curators
+    curators: curators,
+    previous_resource_uuid: before.uuid,
+    next_resource_uuid: after.uuid 
   }
 } AS result
 
@@ -586,6 +590,11 @@ RETURN col
 WITH res
 MATCH (u:user {username: {username}})
   MERGE (u)-[r:curates]->(res)
+{if:previous_resource_uuid}
+WITH res, u
+OPTIONAL MATCH (prev:resource { uuid: {previous_resource_uuid} })
+  MERGE (res)-[ca:comes_after]->(prev)
+{/if}
 RETURN {
   id: res.uuid,
   props: res,
@@ -1112,3 +1121,11 @@ RETURN r
 MATCH(r:resource)
 WHERE NOT EXISTS(r.discovered) OR r.discovered<>true
 RETURN r.uuid
+
+
+// name:get_linked_resources_uuids
+// return UUIDs of resources that come before and after this resource
+OPTIONAL MATCH (after:resource)-[:comes_after]->(current:resource { uid: {uuid} }) 
+WITH after, current
+OPTIONAL MATCH (current)-[:comes_after]->(before:resource)
+RETURN after.uid as after_uid, before.uid as before_uid

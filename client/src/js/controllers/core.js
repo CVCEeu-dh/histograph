@@ -641,6 +641,10 @@ angular.module('histograph')
         $location.path('/neighbors/'+$scope.playlistIds.join(','));
       }
     };
+
+    $scope.goToResource = function(resourceUuid) {
+      $location.path('/r/' + resourceUuid);
+    }
     
     $scope.hideQueue = function(item) {
       $scope.queueStatus = 'sleep';

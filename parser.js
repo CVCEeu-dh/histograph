@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 /**
   Our parser. with test
 */

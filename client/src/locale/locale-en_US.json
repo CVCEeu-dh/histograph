@@ -155,6 +155,8 @@
 
   "tooltip.resource.add.to.favourites": "add to your bookmarks",
   "tooltip.resource.add.to.myselection": "add to your pinboard",
+  "tooltip.resource.go.to.previous.resource": "go to previous resource",
+  "tooltip.resource.go.to.next.resource": "go to next resource",
   "tooltip.visit.entity.page": "visit %s page",
   "tooltip.sigma.center": "find in the current graph",
 

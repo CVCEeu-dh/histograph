@@ -26,7 +26,12 @@
           <h4>{{match.model.props|lookup:'name':'en'}} — theme</h4>
         </a>
 
-        
+
+        <a ng-if='match.model.type=="organization"' ng-href='/#/e/{{match.model.id}}'>
+          <div class='thumbnail' ng-if='match.model.props.thumbnail' style='background-image:url({{match.model.props.thumbnail}})'></div>
+          <h4>{{match.model.props|lookup:'name':'en'}} — organization</h4>
+        </a>
+
 
         <span class='action' ng-if='match.model.type != "default"' ng-click='$parent.$parent.$parent.$parent.queue(match.model.id, true)'>
           <i class='fa fa-thumb-tack'></i>

@@ -186,7 +186,6 @@ module.exports = {
           }));
           content.push(fulltext); // pop before, push right now. TO BE REFACTORED.
         } else {
-          
           annotations = parser.annotate(_.compact(content).join('§ '), annotation.yaml, {}).split('§ ');
         }
         
