@@ -39,7 +39,7 @@ module.exports = {
 
     q = q.map(function (d) {
       // has BOTH matches of Q?
-      var l = [field, ':'];
+      var l = field === undefined ? [] : [field, ':'];
       if(d.indexOf(Q) === -1)
         l.push('*', d, '*')
       else

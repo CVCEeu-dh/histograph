@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 /**
  * Suggest controller for autocompletion and search purposes
  * =====================================
@@ -327,16 +329,19 @@ module.exports =  function(io){
     suggest: function(req, res) {
       var resource_query,
           entity_query;
+
+      const language = 'en'
           
       var form = validator.request(req, {
             limit: 5,
             offset: 0,
-            language: 'en'
+            language
           });
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       
-      resource_query = '(' + parser.toLucene(req.query.query, 'full_search') + ') OR (' + parser.toLucene(req.query.query, 'title_search') + ')';
+      resource_query = parser.toLucene(req.query.query)
+      // resource_query = '(' + parser.toLucene(req.query.query, 'full_search') + ') OR (' + parser.toLucene(req.query.query, 'title_search') + ')';
       entity_query = parser.toLucene(req.query.query, 'name_search');
       // lucene.setSearchTerm('full_search:(' + req.query.query + ') OR title_search:(' + req.query.query+')');
       // resource_query = '' + lucene.getFormattedSearchTerm();
@@ -344,13 +349,14 @@ module.exports =  function(io){
       // lucene.setSearchTerm('name_search:' + req.query.query);
       // entity_query = '' + lucene.getFormattedSearchTerm();
       // console.log('resource_query', resource_query)
-      //     console.log('entity_query', entity_query)
+      // console.log('entity_query', entity_query)
       
       neo4j.query(queries.lucene_query, {
         resource_query: resource_query,
         entity_query: entity_query,
         limit: form.params.limit,
-        language: form.params.language
+        language: form.params.language,
+        resource_index: `resource_text_index_${language}`
       }, function (err, items) {
         if (err) {
           

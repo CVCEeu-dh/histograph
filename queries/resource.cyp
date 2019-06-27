@@ -509,6 +509,24 @@ RETURN col
     {if:caption_und} 
       res.caption_und = {caption_und},
     {/if}
+    {if:content_en}
+      res.content_en = {content_en},
+    {/if}
+    {if:content_fr}
+      res.content_fr = {content_fr},
+    {/if}
+    {if:content_it}
+      res.content_it = {content_it},
+    {/if}
+    {if:content_es}
+      res.content_es = {content_es},
+    {/if}
+    {if:content_de}
+      res.content_de = {content_de},
+    {/if}
+    {if:content_und} 
+      res.content_und = {content_und},
+    {/if}
     {if:type}
       res.type = {type},
     {/if}
@@ -581,6 +599,24 @@ RETURN col
     {/if}
     {if:caption_und} 
       res.caption_und = {caption_und},
+    {/if}
+        {if:content_en}
+      res.content_en = {content_en},
+    {/if}
+    {if:content_fr}
+      res.content_fr = {content_fr},
+    {/if}
+    {if:content_it}
+      res.content_it = {content_it},
+    {/if}
+    {if:content_es}
+      res.content_es = {content_es},
+    {/if}
+    {if:content_de}
+      res.content_de = {content_de},
+    {/if}
+    {if:content_und} 
+      res.content_und = {content_und},
     {/if}
     {if:type}
       res.type = {type},

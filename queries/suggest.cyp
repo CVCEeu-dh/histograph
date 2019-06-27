@@ -1,6 +1,6 @@
 // name: lucene_query
 //
-CALL db.index.fulltext.queryNodes('full_text_index', {resource_query})
+CALL db.index.fulltext.queryNodes({resource_index}, {resource_query})
 YIELD node as n
 WITH n
 LIMIT {limit}

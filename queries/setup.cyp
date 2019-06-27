@@ -103,3 +103,4 @@ MATCH (ent:entity) WHERE exists(ent.name_search) WITH ent SET ent.name_search=en
 
 // name: create_full_text_index
 CALL db.index.fulltext.createNodeIndex("full_text_index",["entity", "resource"],["name_search","full_search"])
+CALL db.index.fulltext.createNodeIndex("resource_text_index_en", ["resource"], ["title_en", "caption_en", "content_en"])
