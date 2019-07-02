@@ -70,7 +70,7 @@ passport.use(new LocalStrategy(function (username, password, done) {
 passport.use(new TwitterStrategy({
     consumerKey: settings.twitter.consumer_key,
     consumerSecret: settings.twitter.consumer_secret,
-    callbackURL: settings.baseurl + "/auth/twitter/callback"
+    callbackURL: "/auth/twitter/callback"
   },
   function(token, tokenSecret, profile, done) {
     User.create({
@@ -101,7 +101,7 @@ passport.use(new TwitterStrategy({
 passport.use(new GoogleStrategy({
     clientID: settings.google.clientId,
     clientSecret: settings.google.clientSecret,
-    callbackURL:  settings.baseurl + "/auth/google/callback"
+    callbackURL:  "/auth/google/callback"
   },
   function(accessToken, refreshToken, profile, done) {
     User.create({

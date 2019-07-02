@@ -120,7 +120,6 @@ console.log('title:', settings.title);
 console.log('logs: ', settings.paths.accesslog);
 console.log('env:  ', env);
 console.log('port: ', settings.port);
-console.log('url:  ', settings.baseurl);
 console.log('media:', settings.paths.media);
 if(!cache){
   console.log('cache:', 'not enabled');

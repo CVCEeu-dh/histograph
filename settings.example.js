@@ -4,7 +4,6 @@
   ===
 */
 module.exports = {
-  baseurl: 'http://localhost:8000', // the remote address used to handle OAuth2 callbacks, without TRAILING slashes
   port: 8000,
   env: 'development', // production | development
   title: 'Histograph', // name of 
