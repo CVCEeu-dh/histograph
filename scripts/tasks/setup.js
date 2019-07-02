@@ -21,7 +21,9 @@ var task = {
       
       neo4j.query(query.cypher, function (err, result) {
         if(err) {
-          q.kill();callback(err);
+          if (err.code !== 'Neo.ClientError.Schema.IndexAlreadyExists') {
+            q.kill();callback(err);
+          }
         }
 
         console.log(clc.greenBright('   done'),  q.length(), clc.blackBright('remaining\n'))
