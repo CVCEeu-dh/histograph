@@ -530,6 +530,9 @@ RETURN col
     {if:type}
       res.type = {type},
     {/if}
+    {if:iiif_url}
+      res.iiif_url = {iiif_url},
+    {/if}
     res.creation_date = {creation_date},
     res.creation_time = {creation_time}
   ON MATCH SET
@@ -620,6 +623,9 @@ RETURN col
     {/if}
     {if:type}
       res.type = {type},
+    {/if}
+    {if:iiif_url}
+      res.iiif_url = {iiif_url},
     {/if}
     res.last_modification_date = {creation_date},
     res.last_modification_time = {creation_time}

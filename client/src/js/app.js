@@ -744,7 +744,7 @@ angular
           url: '',
           //templateUrl: 'templates/partials/resources.html',
           templateUrl: 'templates/partials/resources-masonry.html',
-          controller: 'RelatedItemsCtrl',
+          controller: 'ResourceContextCtrl',
           grammar: {
             label: 'Related documents',
             connector: {

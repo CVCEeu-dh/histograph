@@ -1365,4 +1365,28 @@ angular.module('histograph')
     
     if($stateParams.ids || $stateParams.query || ~~!specials.indexOf('syncGraph'))
       $scope.syncGraph();
+  })
+
+  .controller('ResourceContextCtrl', function ($scope, $log, $stateParams, $filter, specials, relatedItems, relatedModel, relatedVizFactory, relatedFactory, socket, EVENTS, $controller) {
+    $scope.currentTab = $scope.item.props.iiif_url ? 'resource-image' : 'related-resource';
+
+    // $log.log('***', $scope.item)
+    
+    $controller('RelatedItemsCtrl', {
+      $scope: $scope, 
+      $log: $log, 
+      $stateParams: $stateParams,
+      $filter: $filter,
+      specials: specials,
+      relatedItems: relatedItems,
+      relatedModel: relatedModel,
+      relatedVizFactory: relatedVizFactory,
+      relatedFactory: relatedFactory,
+      socket: socket,
+      EVENTS: EVENTS
+    });
+
+    $scope.selectTab = function(tabName) {
+      $scope.currentTab = tabName;
+    }
   });

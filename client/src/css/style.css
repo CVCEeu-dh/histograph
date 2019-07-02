@@ -868,6 +868,83 @@ header ul li .notification a {
 }
 
 /*
+  Tabs: resource related items / resource image preview
+*/
+
+.resource-see-also {
+  overflow-y: hidden !important;
+  display: flex;
+  flex-direction: column;
+}
+
+.resource.context {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow-y: scroll;
+  flex: 1;
+}
+
+.resource.context.fullwidth {
+  margin-left: -10px;
+  margin-right: -10px;
+}
+
+.resource.context .related-resources {
+  position: absolute;
+  width: 100%;
+}
+
+.resource.context .related-resources .related-resources-container {
+  position: relative;
+  overflow-y: scroll;
+  width: 100%;
+}
+
+.resource-see-also .tabs {
+  /* border: 1px dashed #aaa; */
+  display: flex;
+  margin-left: -10px; /* compensating for #see-also padding */
+  margin-right: -10px; /*  --- // ---  */
+  border-bottom: 1px solid #d8d8d8;
+}
+
+.resource-see-also .tabs .tab {
+  /* border-right: 1px solid #d8d8d8; */
+  flex: 1;
+  padding: .5em;
+  text-align: center;
+  cursor: pointer;
+  color: #8a8a8a;
+}
+
+.resource-see-also .tabs .tab:hover {
+  color: inherit;
+}
+
+
+/* .resource.context .tabs .tab:last-child {
+  border-right: none;
+} */
+
+.resource-see-also .tabs .tab.selected {
+  background-color: #f0f0f0;
+  font-weight: 600;
+  color: inherit;
+}
+
+.resource.context .iiif-image-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+.resource.context .iiif-image {
+  height: 100%;
+  overflow-y: hidden !important;
+}
+
+/*
 
   related items
   =============

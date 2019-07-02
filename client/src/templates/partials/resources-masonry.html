@@ -1,15 +1,31 @@
- <div  class='{{currentCtrl}}'>
-    <h3 class='see-also-header'>{{totalItems}} <span translate>resource.seealso.title</span> <span lookup context='item' field='name' language='language'></span> </h3>
+<div class="tabs" ng-if="item.props.iiif_url">
+  <div class="tab" ng-class="currentTab === 'resource-image' ? 'selected' : ''" ng-click="selectTab('resource-image')">
+    Resource image
+  </div>
+  <div class="tab" ng-class="currentTab !== 'resource-image' ? 'selected' : ''" ng-click="selectTab('related-resources')">
+    Related resources
+  </div>              
+</div>
 
-    <div class="empty-list" ng-if="totalItems == 0">
-      There are no related <i>resources</i>.
-    </div>
-    <div masonry='{ "transitionDuration" : "0s" , "itemSelector" : ".masonry-brick"}'>
-      
-        <div masonry-tile='{"imagesLoaded": {"background": ".img"}}' class="masonry-brick" ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/resource-lite.html"'></div>
-      
-    </div>
-    <div class='more' ng-if='totalItems > 0 && offset + limit < totalItems'>
-      <button ng-click='more()' class='btn btn-block '>{{isLoading?'loading...':'load more items'}}</button>
+<div class="resource context" ng-class="currentTab === 'resource-image' ? 'fullwidth' : ''">
+  <div ng-if="currentTab === 'resource-image'" class="resource-image">
+    <div iiif-image="item.props.iiif_url" class="iiif-image-container"></div>
+  </div>
+  <div ng-if="currentTab !== 'resource-image'" class="related-resources">
+    <div class="related-resources-container">
+      <h3 class='see-also-header'>{{totalItems}} <span translate>resource.seealso.title</span> <span lookup context='item' field='name' language='language'></span> </h3>
+    
+      <div class="empty-list" ng-if="totalItems == 0">
+        There are no related <i>resources</i>.
+      </div>
+      <div masonry='{ "transitionDuration" : "0s" , "itemSelector" : ".masonry-brick"}'>
+        
+          <div masonry-tile='{"imagesLoaded": {"background": ".img"}}' class="masonry-brick" ng-repeat='relatedItem in relatedItems' ng-include='"templates/partials/resource-lite.html"'></div>
+        
+      </div>
+      <div class='more' ng-if='totalItems > 0 && offset + limit < totalItems'>
+        <button ng-click='more()' class='btn btn-block '>{{isLoading?'loading...':'load more items'}}</button>
+      </div>
     </div>
   </div>
+</div>

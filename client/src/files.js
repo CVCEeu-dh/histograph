@@ -67,6 +67,8 @@ module.exports = {
       '/js/lib/ui-bootstrap-tpls.min.js',
       '/js/lib/angular-perfect-scrollbar.js',
 
+      '/js/lib/leaflet.js',
+      '/js/lib/leaflet-iiif.js',
 
       '/js/app.js',
       '/js/services.js',
@@ -107,6 +109,7 @@ module.exports = {
       '/js/directives/reporter.js',
       '/js/directives/popit.js',
       '/js/directives/lazy-text.js',
+      '/js/directives/iiifImage.js',
     ]
   }
 };
