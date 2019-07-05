@@ -380,21 +380,26 @@ module.exports =  function(io){
     getStats: function (req, res) {
       var resource_query,
           entity_query;
+
+      const language = 'en'
           
       var form = validator.request(req, {
             limit: 20,
             offset: 0,
-            language: 'en'
+            language
           });
       if(!form.isValid)
         return helpers.formError(form.errors, res);
 
-      resource_query = '(' + parser.toLucene(req.query.query, 'full_search') + ') OR (' + parser.toLucene(req.query.query, 'title_search') + ')';
+      // resource_query = '(' + parser.toLucene(req.query.query, 'full_search') + ') OR (' + parser.toLucene(req.query.query, 'title_search') + ')';
+      // entity_query = parser.toLucene(req.query.query, 'name_search');
+      resource_query = parser.toLucene(req.query.query)
       entity_query = parser.toLucene(req.query.query, 'name_search');
-      
+
       neo4j.query(queries.count, {
         resource_query: resource_query,
-        entity_query: entity_query
+        entity_query: entity_query,
+        resource_index: `resource_text_index_${language}`
         
       }, function (err, groups) {
         if (err) {
@@ -449,17 +454,23 @@ module.exports =  function(io){
     /*
       Lucene results. can also be used for typeahead, since it is very fast.
     */
+    /**
+     * RK: Confirming - it is used.
+     */
     getResources: function (req, res) {
+      const language = 'en'
+
       var form = validator.request(req, {
             limit: 20,
             offset: 0,
+            resource_index: `resource_text_index_${language}`
           }, {
             
           });
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       
-      var q = parser.toLucene(req.query.query, 'full_search');
+      var q = parser.toLucene(req.query.query); //, 'full_search');
       form.params.query = q;
       
       models.getMany({
@@ -475,18 +486,25 @@ module.exports =  function(io){
       });
     },
     
+    /**
+     * RK: Confirming - it is used.
+     */
     getResourcesGraph: function (req, res) {
+
+      const language = 'en'
+
       var query = '',
           form = validator.request(req, {
             limit: 20,
             offset: 0,
-            query: ''
+            query: '',
+            resource_index: `resource_text_index_${language}`
           });
 
       if(!form.isValid)
         return helpers.formError(form.errors, res);
       
-      form.params.query = parser.toLucene(form.params.query, 'full_search');
+      form.params.query = parser.toLucene(form.params.query); //, 'full_search');
       
       query = parser.agentBrown(queries.get_matching_resources_graph, form.params);
       // build a nodes edges graph
