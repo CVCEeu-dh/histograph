@@ -20,7 +20,7 @@ if (require.main === module) {
       process.exit(0)
     })
     .catch(err => {
-      log.error('Unexpected error:', err.stack)
+      log.error(`Unexpected error: ${err.message}`, err.stack)
       process.exit(1)
     })
 }

@@ -223,3 +223,20 @@ describe('parser:agentBrown cypher template parser', function() {
     done()
   });
 });
+
+describe('parser:expand-prefix-set', () => {
+  it('expands variables with prefix', () => {
+    const q = parser.agentBrown('\n{expand-prefix-set:pref__:ent}\n', {
+      pref__one: 1,
+      pref__two3: 2
+    })
+    should.equal(q.trim(), 'ent.pref__one = {pref__one}, ent.pref__two3 = {pref__two3}')
+  })
+  it('expands variables with prefix and ending', () => {
+    const q = parser.agentBrown('\n{expand-prefix-set:pref__:ent:,}\n', {
+      pref__one: 1,
+      pref__two3: 2
+    })
+    should.equal(q.trim(), 'ent.pref__one = {pref__one}, ent.pref__two3 = {pref__two3},')
+  })
+})

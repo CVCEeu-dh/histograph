@@ -100,6 +100,12 @@ module.exports = {
           }
           return template.join(', ');
         })
+        .replace(/\{expand-prefix-set:([a-z_A-Z0-9-]+):([a-z_A-Z0-9-]+)(:([^\}]*))?\}/g, function (m, prefix, variableName, __, ending = '') {
+          const items = Object.keys(filters)
+            .filter(k => k.startsWith(prefix))
+            .map(k => `${variableName}.${k} = {${k}}`)
+          return items.length > 0 ? items.join(', ') + ending : ''
+        })
         .replace(/\{:([a-z_A-Z]+)\}/g, function (m, placeholder) {
           // replace dynamic variables (used for label)
           // e.g. `MATCH (ent:{:type})` becomes `MATCH (ent:person)` if type = 'person'

@@ -110,6 +110,15 @@ ON CREATE SET
     ent.description = {description},
   {/if}
 
+  {if:entity__model}
+    ent.entity__model = {entity__model},
+  {/if}
+  {if:entity__id}
+    ent.entity__id = {entity__id},
+  {/if}
+
+  {expand-prefix-set:metadata__:ent:,}
+
   {if:links__wikidata_id}
     ent.links__wikidata_id = {links__wikidata_id},
   {/if}
@@ -179,6 +188,15 @@ ON MATCH SET
   {if:description}
     ent.description = {description},
   {/if}
+
+  {if:entity__model}
+    ent.entity__model = {entity__model},
+  {/if}
+  {if:entity__id}
+    ent.entity__id = {entity__id},
+  {/if}
+
+  {expand-prefix-set:metadata__:ent:,}
 
   {if:links__wikidata_id}
     ent.links__wikidata_id = {links__wikidata_id},
@@ -788,3 +806,67 @@ SET
 MATCH (n:entity) WHERE n.uuid = {id} WITH n
 OPTIONAL MATCH (n)-[r]-()
 DELETE n, r
+
+
+// name: update_entity_properties
+MATCH (ent:entity {uuid:{uuid}})
+SET
+  {if:description}
+    ent.description = {description},
+  {/if}
+
+  {if:entity__model}
+    ent.entity__model = {entity__model},
+  {/if}
+  {if:entity__id}
+    ent.entity__id = {entity__id},
+  {/if}
+
+  {expand-prefix-set:metadata__:ent:,}
+  {expand-prefix-set:links__:ent:,}
+
+  {if:links_viaf}
+    ent.links_viaf         = {links_viaf},
+  {/if}
+  {if:links_wiki}
+    ent.links_wiki         = {links_wiki},
+  {/if}
+
+  {if:first_name}
+    ent.first_name     = {first_name},
+  {/if}
+  {if:last_name}
+    ent.last_name     = {last_name},
+  {/if}
+
+  {if:lat}
+    ent.lat         = {lat},
+  {/if}
+  {if:lng}
+    ent.lng         = {lng},
+  {/if}
+  {if:country}
+    ent.country = {country},
+  {/if}
+  {if:geoname_id}
+    ent.geoname_id = {geoname_id},
+  {/if}
+  {if:geoname_fcl}
+    ent.geoname_fcl = {geoname_fcl},
+  {/if}
+  {if:geoname_country}
+    ent.geoname_country  = {geoname_country},
+  {/if}
+  {if:geocoding_id}
+    ent.geocoding_id  = {geocoding_id},
+    ent.geocoding_fcl = {geocoding_fcl},
+    ent.geocoding_country = {geocoding_country},
+  {/if}
+  ent.last_modification_date = {exec_date},
+  ent.last_modification_time = {exec_time}
+
+RETURN ent
+
+// name: find_ids_by_entity_model
+MATCH(e:entity {entity__model:{entity_model}})
+RETURN e.uuid as uuid
