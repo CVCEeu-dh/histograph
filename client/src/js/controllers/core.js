@@ -1178,6 +1178,19 @@ angular.module('histograph')
 
     }, 236);
     
+    $scope.hasImage = function(relatedItem) {
+      var isImageType = relatedItem.props.mimetype=="image" && relatedItem.props.url;
+      var hasIiif = !!relatedItem.props.iiif_url;
+
+      return isImageType || hasIiif;
+    }
+
+    $scope.getImageUrl = function(relatedItem) {
+      if (!!relatedItem.props.iiif_url) {
+        return relatedItem.props.iiif_url.replace(/info.json$/, 'full/pct:20/0/default.jpg');
+      }
+      return '/media/' + relatedItem.props.url;
+    }
   })
   
 
