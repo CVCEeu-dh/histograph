@@ -226,20 +226,20 @@ angular.module('histograph')
             camera = si.addCamera('main'),
             
             colors = {
-              person: d3.scale.sqrt().range(['#94d9f8', '#1a75bb']),
-              location: d3.scale.sqrt().range(['#e16666', '#7e213c']),
-              place: d3.scale.sqrt().range(['#7de366', '#3ba220']),
-              theme: d3.scale.sqrt().range(['#ffe46d','#ff9b01']),
-              hashtag: d3.scale.sqrt().range(['#ffe46d','#ff9b01']),
-              resource: d3.scale.sqrt().range(['#f6941c', '#f6941c']),
-              resourceKnown: d3.scale.sqrt().range(['#f6941c', '#f6941c']),
+              person: d3.scaleSqrt().range(['#94d9f8', '#1a75bb']),
+              location: d3.scaleSqrt().range(['#e16666', '#7e213c']),
+              place: d3.scaleSqrt().range(['#7de366', '#3ba220']),
+              theme: d3.scaleSqrt().range(['#ffe46d','#ff9b01']),
+              hashtag: d3.scaleSqrt().range(['#ffe46d','#ff9b01']),
+              resource: d3.scaleSqrt().range(['#f6941c', '#f6941c']),
+              resourceKnown: d3.scaleSqrt().range(['#f6941c', '#f6941c']),
             },
             
             timers = {
                 play: 0
               },
             
-            scale = d3.scale.linear()
+            scale = d3.scaleLinear()
               .domain([0,100])
               .range(['#d4d4d4', '#000000']);
         

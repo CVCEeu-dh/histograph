@@ -479,6 +479,8 @@ apiRouter.route('/another').
     res.ok({ message: 'hooray! another!' });   
   });
 
+apiRouter.route('/settings/optional-features')
+  .get((req, res) => res.json(settings.optionalFeatures))
 
 // face recognition tests
 apiRouter.route('/alchemyapi/image-face-tags')
@@ -623,6 +625,12 @@ apiRouter.route('/resource')
   .get(ctrl.resource.getItems)
 apiRouter.route('/resource/timeline')
   .get(ctrl.resource.getTimeline)
+apiRouter.route('/resource/topic-modelling/scores')
+  .get(ctrl.resource.topicModellingScores)
+apiRouter.route('/resource/topic-modelling/aspects/:aspect')
+  .get(ctrl.resource.topicModellingExtraAspect)
+apiRouter.route('/resource/topic-modelling/aspects/:aspect/filter-values')
+  .get(ctrl.resource.topicModellingAspectFilterValues)
 apiRouter.route('/resource/:id([\\d,a-zA-Z\\-_]+)')
   .get(ctrl.resource.getItem)
 apiRouter.route('/resource/:id([\\da-zA-Z_\\-]+)/related/resource')
@@ -650,7 +658,6 @@ apiRouter.route('/resource/:id([\\da-zA-Z_\\-]+)/related/resource/graph')
   .get(ctrl.resource.getRelatedResourcesGraph);
 apiRouter.route('/resource/:id([\\da-zA-Z_\\-]+)/related/resource/timeline')
   .get(ctrl.resource.getRelatedResourcesTimeline);
-
 
 apiRouter.route('/cooccurrences/:entityA(person|theme|location|place|organization)/related/:entityB(person|theme|location|place|organization)') // @todo move to entity controller.
   .get(ctrl.resource.getCooccurrences)

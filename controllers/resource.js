@@ -21,7 +21,41 @@ var settings   = require('../settings'),
     Action     = require('../models/action'),
     Entity     = require('../models/entity');
     Resource   = require('../models/resource');
-    
+ 
+const assert = require('assert')
+const { promisify } = require('util')
+const { isString, isNaN } = require('lodash')
+const { asyncHandler } = require('../lib/util/express')
+const { toUnixSeconds } = require('../lib/util/date')
+const {
+  aggregateResourcesInBinsByCount,
+  getAggregatedTopicModellingScoreFromResourcesBin,
+  fillEmptyScoresWithZeros
+} = require('../lib/logic/resource/topicModelling')
+const {
+  aspectRetrievers, filterValuesRetrievers
+} = require('../lib/logic/resource/topicModelling/aspects')
+
+const findTopicModellingScores = promisify(Resource.findTopicModellingScores.bind(Resource))
+
+/* eslint-enable */
+function getTopicModellingRequestDetails(req) {
+  const {
+    from,
+    to,
+    bins
+  } = req.query
+
+  const fromTime = isString(from) ? toUnixSeconds(from) : undefined
+  const toTime = isString(to) ? toUnixSeconds(to) : undefined
+  const binsCount = isString(bins) ? parseInt(bins, 10) : undefined
+
+  assert(!isNaN(binsCount), `Invalid bins value: "${bins}"`)
+
+  return { fromTime, toTime, binsCount }
+}
+/* eslint-disable */
+
 
 module.exports = function(io){
   // io socket event listener
@@ -703,7 +737,51 @@ module.exports = function(io){
         return res.ok({items: items}, info);
       })
     },
-    
+
+    /* eslint-enable */
+    topicModellingScores: asyncHandler(async (req, res) => {
+      const {
+        fromTime,
+        toTime,
+        binsCount
+      } = getTopicModellingRequestDetails(req)
+
+      const results = await findTopicModellingScores(fromTime, toTime)
+      const aggregatedResults = aggregateResourcesInBinsByCount(
+        results,
+        binsCount,
+        getAggregatedTopicModellingScoreFromResourcesBin
+      )
+
+      res.json({
+        aggregates: fillEmptyScoresWithZeros(aggregatedResults.aggregates),
+        aggregatesMeta: aggregatedResults.aggregatesMeta
+      })
+    }, false),
+
+    topicModellingExtraAspect: asyncHandler(async (req, res) => {
+      const { aspect } = req.params
+      assert(aspect in aspectRetrievers, `Unknown aspect ${aspect}`)
+      const {
+        fromTime,
+        toTime,
+        binsCount
+      } = getTopicModellingRequestDetails(req)
+
+      const result = await aspectRetrievers[aspect](fromTime, toTime, binsCount, req.query)
+
+      res.json(result)
+    }, false),
+
+    topicModellingAspectFilterValues: asyncHandler(async (req, res) => {
+      const { aspect } = req.params
+      assert(aspect in filterValuesRetrievers, `Unknown aspect ${aspect}`)
+
+      const result = await filterValuesRetrievers[aspect]()
+      res.json(result)
+    }, false),
+    /* eslint-disable */
+
     /*
       remap neo4j items to nice resource objects
       @return list of resource objects

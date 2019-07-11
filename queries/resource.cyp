@@ -1171,3 +1171,53 @@ OPTIONAL MATCH (after:resource)-[:comes_after]->(current:resource { uid: {uuid} 
 WITH after, current
 OPTIONAL MATCH (current)-[:comes_after]->(before:resource)
 RETURN after.uid as after_uid, before.uid as before_uid
+
+// name: find_by_uuid_or_slug
+OPTIONAL MATCH(r:resource {uuid: {uuidOrSlug}})
+RETURN r
+UNION
+OPTIONAL MATCH(r:resource {slug: {uuidOrSlug}})
+RETURN r
+
+// name: update_topic_modelling_scores
+MATCH(r:resource {uuid: {uuid}})
+SET r.topic_modelling__scores = {scores}
+RETURN r
+
+// name: find_topic_modelling_scores
+MATCH(r:resource)
+WHERE
+  {if:start_time}
+    r.start_time > {start_time} AND
+  {/if}
+  {if:end_time}
+    r.start_time < {end_time} AND
+  {/if}
+
+  true
+RETURN {
+  uuid: r.uuid,
+  scores: r.topic_modelling__scores,
+  startDate: r.start_date
+}
+ORDER BY r.start_time
+
+// name: find_with_nationality_aspect
+MATCH (r:resource)
+WHERE
+  {if:start_time}
+    r.start_time > {start_time} AND
+  {/if}
+  {if:end_time}
+    r.start_time < {end_time} AND
+  {/if}
+
+  true
+OPTIONAL MATCH (r)-[]-(e:entity:person)
+WITH { 
+	uuid: r.uuid, 
+    startDate: r.start_date, 
+    nationalities: collect(e.metadata__nationality) 
+} AS result
+RETURN result
+ORDER BY result.startDate

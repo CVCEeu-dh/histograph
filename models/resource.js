@@ -265,7 +265,27 @@ module.exports = {
       });
     });
   },
-  
+
+  /* eslint-enable */
+  findByUuidOrSlug(uuidOrSlug, cb) {
+    const params = { uuidOrSlug }
+    const query = parser.agentBrown(rQueries.find_by_uuid_or_slug, params)
+    return neo4j.query(query, params, cb)
+  },
+
+  updateTopicModellingScores(uuid, scores, cb) {
+    const params = { uuid, scores }
+    const query = parser.agentBrown(rQueries.update_topic_modelling_scores, params)
+    return neo4j.query(query, params, cb)
+  },
+
+  findTopicModellingScores(startTime, endTime, cb) {
+    const params = { start_time: startTime, end_time: endTime }
+    const query = parser.agentBrown(rQueries.find_topic_modelling_scores, params)
+    return neo4j.query(query, params, cb)
+  },
+  /* eslint-disable */
+
   search: function(options, next) {
     // at least options.search should be given.
     // note that if there is a solr endpoint, this endpoint should be used.

@@ -43,7 +43,17 @@ module.exports = {
       pass: 'neo4j'
     }
   },
-  
+
+  // A list of features that are enabled for this instance.
+  // If a feature is not defined here, it is considered disabled.
+  optionalFeatures: {
+    topicModellingTimeline: {
+      enabled: false,
+      aspect: 'foreigners-ratio',
+      aspectFilteringEnabled: true
+    }
+  },
+
   /*
     google analytics account to track view pages
   */

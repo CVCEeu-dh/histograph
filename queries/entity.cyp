@@ -870,3 +870,8 @@ RETURN ent
 // name: find_ids_by_entity_model
 MATCH(e:entity {entity__model:{entity_model}})
 RETURN e.uuid as uuid
+
+// name: get_unique_field_values
+MATCH(e:entity:{:type})
+WHERE EXISTS(e.{:field_name})
+RETURN DISTINCT(e.{:field_name}) AS value

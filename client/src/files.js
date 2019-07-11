@@ -70,6 +70,8 @@ module.exports = {
       'js/lib/leaflet.js',
       'js/lib/leaflet-iiif.js',
 
+      'js/lib/components/topicModellingTimeline.js',
+
       'js/app.js',
       'js/services.js',
       'js/filters.js',
@@ -110,6 +112,8 @@ module.exports = {
       'js/directives/popit.js',
       'js/directives/lazy-text.js',
       'js/directives/iiifImage.js',
+      'js/directives/topicModellingTimeline.js',
+
     ]
   }
 };

@@ -11,9 +11,7 @@
     </span> -->
     
   </li>
-  
-
-
+ 
   <li ng-include src="'templates/partials/helpers/grammar.html'"></li>
   
   <!-- sort -->
@@ -34,4 +32,17 @@
     <a ng-click='setViewpoint(p)' class='{{ p.name == viewpoint.selected.name? "active": ""}}'><i class="fa fa-{{p.icon}}"></i>
     </a>
   </li -->
+  <li class="right">
+    <button class="btn btn-default toggle-panel-button" 
+            ng-click="toggleTopicModellingPanelVisibility()"
+            ng-if="optionalFeatures.topicModellingTimeline.enabled">
+      Topic Modelling <i class="fa" ng-class="flags.isTopicModellingVisible ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+    </button>
+  </li>
 </ul>
+
+<div hi-topic-modelling-timeline="optionalFeatures"
+     hi-topic-modelling-timeline-visible="flags.isTopicModellingVisible"
+     class="topic-modelling-timeline-container"
+     ng-class="flags.isTopicModellingVisible ? '' : 'hidden'"
+     ng-if="optionalFeatures.topicModellingTimeline.enabled"/>

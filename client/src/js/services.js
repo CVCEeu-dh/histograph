@@ -1,3 +1,6 @@
+/* eslint-env browser */
+/* globals angular */
+/* eslint-disable prefer-arrow-callback, func-names, object-shorthand */
 /**
  * @ngdoc service
  * @name histograph.services
@@ -9,12 +12,15 @@ angular.module('histograph')
   /*
     Check & clean service
   */
-  .factory('cleanService', function() {
+  .factory('cleanService', function () {
     return {
-      params: function(params) {
+      params: function (params) {
         return params;
       }
     };
+  })
+  .factory('OptionalFeaturesService', function ($resource) {
+    return $resource('/api/settings/optional-features', {}, {})
   })
   /*
     Get a list of resource

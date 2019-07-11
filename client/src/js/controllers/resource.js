@@ -1,3 +1,5 @@
+/* eslint-env browser */
+/* globals angular */
 /**
  * @ngdoc function
  * @name histograph.controller:indexCtrl
@@ -5,6 +7,7 @@
  * # IndexCtrl
  */
 angular.module('histograph')
+  // eslint-disable-next-line prefer-arrow-callback, func-names
   .controller('ResourceCtrl', function ($rootScope, $scope, $log, $stateParams, $filter, resource, annotations, ResourceRelatedVizFactory, ResourceRelatedFactory, socket, EVENTS) {
     $log.debug('ResourceCtrl ready', annotations);
     
@@ -29,8 +32,6 @@ angular.module('histograph')
       $scope.focusId = id;
       $scope.$broadcast('focuson', {id:id});
     }
-    
-    
 
     /*
       LoadTimeline

@@ -1,3 +1,6 @@
+/* eslint-env browser */
+/* globals angular */
+/* eslint-disable prefer-arrow-callback, func-names, object-shorthand */
 /**
  * @ngdoc function
  * @name histograph.controller:CoreCtrl
@@ -7,14 +10,33 @@
  * It is the parent of the other controllers. Note: It contains also partial controllers for modals.
  */
 angular.module('histograph')
-  
-  .controller('CoreCtrl', function ($scope, $rootScope, $location, $state, $timeout, $route, $log, $timeout, $http, $routeParams, $modal, $uibModal, socket, ResourceCommentsFactory, ResourceRelatedFactory, SuggestFactory, cleanService, VisualizationFactory, EntityExtraFactory, EntityRelatedExtraFactory, localStorageService, EntityRelatedFactory, EVENTS, VIZ, MESSAGES, ORDER_BY, SETTINGS, UserFactory) {
+  .controller('CoreCtrl', function ($scope, $rootScope, $location,
+    $state, $timeout, $route, $log, $http, $routeParams,
+    $modal, $uibModal, socket, ResourceCommentsFactory,
+    ResourceRelatedFactory, SuggestFactory, cleanService,
+    VisualizationFactory, EntityExtraFactory, EntityRelatedExtraFactory,
+    localStorageService, EntityRelatedFactory, EVENTS, VIZ, MESSAGES,
+    ORDER_BY, SETTINGS, UserFactory, OptionalFeaturesService, $window) {
+
     $log.debug('CoreCtrl ready');
     $scope.locationPath = $location.path();
-    $scope.locationJson  = JSON.stringify($location.search()); 
+    $scope.locationJson = JSON.stringify($location.search());
 
+    try {
+      $scope.flags = JSON.parse($window.localStorage.getItem('histograph.flags')) || {}
+    } catch (e) {
+      $scope.flags = {}
+    }
 
-    var suggestionTimeout = 0;
+    $scope.$watch('flags', value => {
+      $window.localStorage.setItem('histograph.flags', JSON.stringify(value))
+    }, true)
+
+    OptionalFeaturesService.get().$promise
+      .then(val => {
+        $scope.optionalFeatures = val
+      })
+      .catch(e => $log.error(e))
     
     $scope.params = {}; //  this would contain limit, offset, from, to and other API params. Cfr. EVENT.API_PARAMS_CHANGED
     
@@ -1190,6 +1212,10 @@ angular.module('histograph')
         return relatedItem.props.iiif_url.replace(/info.json$/, 'full/pct:20/0/default.jpg');
       }
       return '/media/' + relatedItem.props.url;
+    }
+
+    $scope.toggleTopicModellingPanelVisibility = () => {
+      $scope.flags.isTopicModellingVisible = !$scope.flags.isTopicModellingVisible
     }
   })
   
