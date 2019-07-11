@@ -110,11 +110,11 @@ ON CREATE SET
     ent.description = {description},
   {/if}
 
-  {if:entity__model}
-    ent.entity__model = {entity__model},
+  {if:entity__ned_model}
+    ent.entity__ned_model = {entity__ned_model},
   {/if}
-  {if:entity__id}
-    ent.entity__id = {entity__id},
+  {if:entity__ned_id}
+    ent.entity__ned_id = {entity__ned_id},
   {/if}
 
   {expand-prefix-set:metadata__:ent:,}
@@ -189,11 +189,11 @@ ON MATCH SET
     ent.description = {description},
   {/if}
 
-  {if:entity__model}
-    ent.entity__model = {entity__model},
+  {if:entity__ned_model}
+    ent.entity__ned_model = {entity__ned_model},
   {/if}
-  {if:entity__id}
-    ent.entity__id = {entity__id},
+  {if:entity__ned_id}
+    ent.entity__ned_id = {entity__ned_id},
   {/if}
 
   {expand-prefix-set:metadata__:ent:,}
@@ -815,11 +815,11 @@ SET
     ent.description = {description},
   {/if}
 
-  {if:entity__model}
-    ent.entity__model = {entity__model},
+  {if:entity__ned_model}
+    ent.entity__ned_model = {entity__ned_model},
   {/if}
-  {if:entity__id}
-    ent.entity__id = {entity__id},
+  {if:entity__ned_id}
+    ent.entity__ned_id = {entity__ned_id},
   {/if}
 
   {expand-prefix-set:metadata__:ent:,}
@@ -867,8 +867,10 @@ SET
 
 RETURN ent
 
-// name: find_ids_by_entity_model
-MATCH(e:entity {entity__model:{entity_model}})
+// name: find_ids_by_entity_ned_model
+// `entity_ned_model` is the tag of the NED model used to 
+// disambiguate this entity.
+MATCH(e:entity {entity__ned_model:{entity_ned_model}})
 RETURN e.uuid as uuid
 
 // name: get_unique_field_values
