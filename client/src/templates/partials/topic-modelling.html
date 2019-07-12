@@ -1,0 +1,45 @@
+<div class="topic-modelling-page">
+  <div id='perspective-menu' class="tk-proxima-nova header-menu">
+    <ul>
+      <li class="menu-item" ng-include src="'templates/partials/helpers/grammar.html'"></li>
+      <li class="menu-item">
+        <div class="aspect-value-selector dropdown" ng-if="aspectFilter">
+          <div class="btn-group" uib-dropdown is-open="false">
+            <button id="topic-modelling-aspect-value-selector-btn" type="button" class="btn btn-default btn-line" uib-dropdown-toggle>
+              {{aspectFilter.label}} {{ aspectFilter.value }} <span class="caret"></span>
+            </button>
+            <ul class="uib-dropdown-menu dropdown-menu" role="menu" aria-labelledby="topic-modelling-aspect-value-selector-btn">
+              <li class="{{aspectFilter.value === item ? 'active' : ''}}" ng-repeat="item in aspectFilter.values">
+                <a ng-click='setAspectFilterValue(item)'>{{item}}</a>
+              </li>
+            </ul>
+          </div>
+        </div>    
+      </li>
+    </ul>
+  </div>
+
+  <div class="view explore perspective"
+      id="see-also"
+      ng-if="optionalFeatures.topicModellingTimeline.enabled">
+
+    <div class="busy-indicator" ng-show="busyCounter > 0">
+      <div class='loading animated'>
+        <div class='loader'>
+          <div class="sk-double-bounce">
+            <div class="sk-child sk-double-bounce1"></div>
+            <div class="sk-child sk-double-bounce2"></div>
+          </div>
+        </div>
+      </div>    
+    </div>
+
+    <div hi-topic-modelling-timeline
+         hi-topic-modelling-data="topicModellingData"
+         hi-extra-frequencies-data="extraFrequenciesData"
+         hi-set-bins-count="setBinsCount"
+         class="topic-modelling-timeline-container">
+    </div>
+
+  </div>
+</div>

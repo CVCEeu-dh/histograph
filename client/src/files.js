@@ -96,6 +96,7 @@ module.exports = {
       'js/controllers/resource.js',
       'js/controllers/search.js',
       'js/controllers/user.js',
+      'js/controllers/topicModelling.js',
 
       // modal controllers. templates in templates/modal
       'js/controllers/modals/contribute.js',

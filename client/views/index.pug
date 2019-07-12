@@ -602,6 +602,10 @@ html
                     a(ng-href='#/projection/person/person?{{qs}}')
                       span#tip2 graph
 
+                  li(class='{{currentState.name == "explore.persons"?"active":""}}', ng-if="optionalFeatures.topicModellingTimeline.enabled")
+                    a(ng-href='#/topic-modelling?{{qs}}')
+                      span#tip2 topic modelling
+
                   li
                     a.with-number(ng-click='toggleQueue()', uib-tooltip='pinboard', tooltip-placement='bottom') my pinboard 
                       div.number.animated.lite {{playlist.length}}

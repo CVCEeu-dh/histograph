@@ -1214,9 +1214,6 @@ angular.module('histograph')
       return '/media/' + relatedItem.props.url;
     }
 
-    $scope.toggleTopicModellingPanelVisibility = () => {
-      $scope.flags.isTopicModellingVisible = !$scope.flags.isTopicModellingVisible
-    }
   })
   
 

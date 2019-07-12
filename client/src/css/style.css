@@ -722,23 +722,12 @@ header ul li .notification a {
   padding: 10px 15px;
 }
 
-.header-menu .topic-modelling-timeline-container {
-  margin: 1em;
-  /* border: 1px dashed #333; */
-}
-
-.header-menu .topic-modelling-timeline-container .svg-container {
-  width: 100%;
-  height: 200px;
-  margin-bottom: 1em;
-}
-
-.header-menu .topic-modelling-timeline-container.hidden {
-  height: 0px;
-}
-
 .header-menu ul > li.right {
   float: right;
+}
+
+.header-menu ul > li.menu-item {
+  margin-left: 1em;
 }
 
 .header-menu .btn > .fa {
@@ -747,6 +736,30 @@ header ul li .notification a {
 
 .header-menu .toggle-panel-button .fa {
   margin-left: 1em;
+}
+
+.topic-modelling-page .busy-indicator {
+  position: fixed;
+  margin: 10% 50%;
+}
+
+.topic-modelling-page .perspective {
+  width: 100% !important;
+}
+
+.topic-modelling-page .topic-modelling-timeline-container {
+  margin: 1em;
+  /* border: 1px dashed #333; */
+}
+
+.topic-modelling-page .topic-modelling-timeline-container .svg-container {
+  width: 100%;
+  height: 200px;
+  margin-bottom: 1em;
+}
+
+.topic-modelling-page .topic-modelling-timeline-container.hidden {
+  height: 0px;
 }
 
 /*
