@@ -47,10 +47,13 @@
          class="topic-modelling-timeline-container">
     </div>
 
-    <div class="selected-resources">
+    <div class="selected-resources related-resources-container">
       <div ng-repeat="relatedItem in selectedResources" 
            ng-include='"templates/partials/resource-lite.html"'
            class="masonry-brick">
+      </div>
+      <div class="more" ng-if="selectedResources.length < totalItems">
+        <button class="btn" ng-click="loadMoreResources()">load more items</button>
       </div>
     </div>
 

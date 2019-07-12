@@ -774,6 +774,10 @@ header ul li .notification a {
   display: inline-block;
 }
 
+.topic-modelling-page .selected-resources .more .btn {
+  width: 100%;
+}
+
 /*
 
   The focus: #perspective

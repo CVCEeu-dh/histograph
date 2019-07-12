@@ -12,8 +12,7 @@ angular.module('histograph')
     $scope.busyCounter = 0
     $scope.criteria = $location.search()
 
-    $scope.resourcesDisplayLimit = 10
-    $scope.resourcesDisplayOffset = 0
+    $scope.resourcesPageLimit = 10
 
     $scope.$on(EVENTS.API_PARAMS_CHANGED, (e, params) => {
       const { from, to } = params
@@ -37,9 +36,29 @@ angular.module('histograph')
       $scope.binsCount = val
     }
 
+    $scope.loadMoreResources = () => {
+      ResourceFactory.get({
+        limit: $scope.resourcesPageLimit,
+        offset: $scope.selectedResources.length,
+        from_uuid: $scope.selectedItemMeta.firstResourceUuid,
+        to_uuid: $scope.selectedItemMeta.lastResourceUuid
+      }).$promise
+        .then(results => {
+          $scope.selectedResources = $scope.selectedResources.concat(results.result.items)
+          $scope.totalItems = results.info.total_items
+        })
+        .catch(e => {
+          $log.error('Could not get resources from the API', e.message)
+        })
+    }
+
     $scope.itemClickHandler = ({ stepIndex, topicIndex }) => {
       const meta = $scope.topicModellingData.aggregatesMeta[stepIndex]
       $log.info('Topic item selected', stepIndex, topicIndex, meta)
+      $scope.selectedItemMeta = meta
+      $scope.selectedResources = []
+      $scope.totalItems = 0
+
       if (meta.totalResources === 1) {
         ResourceFactory.get({
           id: meta.firstResourceUuid,
@@ -54,8 +73,8 @@ angular.module('histograph')
           })
       } else {
         ResourceFactory.get({
-          limit: $scope.resourcesDisplayLimit,
-          offset: $scope.resourcesDisplayOffset,
+          limit: $scope.resourcesPageLimit,
+          offset: $scope.selectedResources.length,
           from_uuid: meta.firstResourceUuid,
           to_uuid: meta.lastResourceUuid
         }).$promise
