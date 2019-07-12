@@ -8,7 +8,8 @@ angular.module('histograph')
       scope: {
         topicModellingData: '=hiTopicModellingData',
         extraFrequenciesData: '=hiExtraFrequenciesData',
-        setBinsCount: '=hiSetBinsCount'
+        setBinsCount: '=hiSetBinsCount',
+        itemClickHandler: '=hiItemClickHandler'
       },
       template: `
         <div class="svg-container"></div>
@@ -20,6 +21,11 @@ angular.module('histograph')
           onDesiredNumberOfTimestepsChange: val => {
             if (scope.setBinsCount) {
               scope.setBinsCount(val)
+            }
+          },
+          itemClickHandler: e => {
+            if (scope.itemClickHandler) {
+              scope.itemClickHandler(e)
             }
           }
         })
@@ -54,7 +60,6 @@ angular.module('histograph')
           if (!data) return
           // eslint-disable-next-line no-param-reassign
           scope.extraFrequencies = data.aggregates
-          if (scope.topicsScores === undefined) return
 
           timeline.setData({
             topicsScores: scope.topicsScores,

@@ -104,6 +104,8 @@ RETURN {
 
 // name: get_resources
 // get resources with number of comments, if any
+//
+// NOTE: if `from_uuid` parameter is provided it assumes that `to_uuid` is provided as well.
 {unless:with}
 MATCH (res:resource)
 {/unless}
@@ -129,6 +131,11 @@ WHERE res:resource
   AND res.mimetype IN {mimetype}
 {/if}
 
+{if:from_uuid}
+WITH res
+MATCH p=(b:resource {uuid: {from_uuid}})<-[:comes_after*]-(a:resource {uuid: {to_uuid}})
+WHERE res.uuid in extract(n IN nodes(p)| n.uuid)
+{/if}
 
 WITH res
 
@@ -226,6 +233,12 @@ MATCH (res:resource)
 {?res:start_time__gt}
 {AND?res:end_time__lt}
 {AND?res:type__in}
+
+{if:from_uuid}
+WITH res
+MATCH p=(b:resource {uuid: {from_uuid}})<-[:comes_after*]-(a:resource {uuid: {to_uuid}})
+WHERE res.uuid in extract(n IN nodes(p)| n.uuid)
+{/if}
 
 WITH collect(res) as resources
 WITH resources, length(resources) as total_items

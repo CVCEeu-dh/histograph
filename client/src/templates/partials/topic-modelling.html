@@ -43,7 +43,15 @@
          hi-topic-modelling-data="topicModellingData"
          hi-extra-frequencies-data="extraFrequenciesData"
          hi-set-bins-count="setBinsCount"
+         hi-item-click-handler="itemClickHandler"
          class="topic-modelling-timeline-container">
+    </div>
+
+    <div class="selected-resources">
+      <div ng-repeat="relatedItem in selectedResources" 
+           ng-include='"templates/partials/resource-lite.html"'
+           class="masonry-brick">
+      </div>
     </div>
 
   </div>

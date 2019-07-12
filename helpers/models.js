@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 /*
   Helpers for model scripts. 
   ===

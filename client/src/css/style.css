@@ -770,6 +770,10 @@ header ul li .notification a {
   height: 0px;
 }
 
+.topic-modelling-page .selected-resources .masonry-brick {
+  display: inline-block;
+}
+
 /*
 
   The focus: #perspective

@@ -11,6 +11,9 @@ class TopicModellingTimeline {
     if (options.extraFrequenciesLabel) {
       this.extraFrequenciesLabel = options.extraFrequenciesLabel
     }
+    if (options.itemClickHandler) {
+      this._itemClickHandler = options.itemClickHandler
+    }
 
     const { width, height } = this.container.node().getBoundingClientRect()
     if (width === 0) this._warn(`Width of the SVG container is ${width}`)
@@ -110,14 +113,15 @@ class TopicModellingTimeline {
       .attr('x', xScale(0) + this.labelOffset)
       .text((d, i) => `Topic ${i + 1}`)
 
-    if (!this._timestepsContainer) {
-      this._timestepsContainer = this.svg.append('g')
-    }
-
-    const timestepContainer = this._timestepsContainer
-      .selectAll('g')
-      .data(this.data.topicsScores)
+    const timestepContainer = this.svg
+      .selectAll('g.timesteps')
+      .data([this.data.topicsScores])
       .join('g')
+      .attr('class', 'timesteps')
+      .selectAll('g.step')
+      .data(d => d)
+      .join('g')
+      .attr('class', 'step')
       .attr('transform', (d, i) => `translate(${xScale(i) + this.labelOffset + this.labelMargin + maxCircleRadius}, 0)`)
 
     timestepContainer
@@ -129,7 +133,13 @@ class TopicModellingTimeline {
       .attr('y1', yScale(0))
       .attr('y2', height)
 
-    timestepContainer.selectAll('circle')
+    // value circle
+    timestepContainer
+      .selectAll('g.values')
+      .data(d => [d])
+      .join('g')
+      .attr('class', 'values')
+      .selectAll('circle')
       .data(d => {
         const std = d3.deviation(d)
         const mean = d3.mean(d)
@@ -139,6 +149,24 @@ class TopicModellingTimeline {
       .attr('cy', (d, i) => yScale(i))
       .attr('fill', d => this._getColour(d))
       .attr('r', d => (parseFloat(d.val) > 0 ? d.val * maxCircleRadius : 0))
+
+    // // overlay mouse event catching circle
+    timestepContainer
+      .selectAll('g.hotspots')
+      .data(d => [d])
+      .join('g')
+      .attr('class', 'hotspots')
+      .selectAll('circle')
+      .data((d, stepIndex) => {
+        return d.map(value => ({ value, stepIndex }))
+      })
+      .join('circle')
+      .attr('cy', (d, i) => yScale(i))
+      .attr('fill', () => '#33333300')
+      .attr('r', () => maxCircleRadius)
+      .on('mouseover', this._onCircleOver.bind(this))
+      .on('mouseout', this._onCircleOut.bind(this))
+      .on('click', this._onCicleClick.bind(this))
 
     // divider
     if (!this._divider) {
@@ -201,6 +229,26 @@ class TopicModellingTimeline {
     if (sval < 0) sval = 0.0
     const opacity = (55 + Math.round(sval * 200)).toString(16)
     return colour + (opacity.length === 1 ? `0${opacity}` : opacity)
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  _onCircleOver(d, topicIndex, circles) {
+    const circle = circles[topicIndex]
+    d3.select(circle).style('fill', '#3333330f')
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  _onCircleOut(d, topicIndex, circles) {
+    const circle = circles[topicIndex]
+    d3.select(circle).style('fill', undefined)
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  _onCicleClick(d, topicIndex) {
+    if (this._itemClickHandler) {
+      const { stepIndex } = d
+      this._itemClickHandler({ stepIndex, topicIndex })
+    }
   }
 
   /**
