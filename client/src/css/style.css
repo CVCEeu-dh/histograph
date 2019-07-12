@@ -738,6 +738,14 @@ header ul li .notification a {
   margin-left: 1em;
 }
 
+.topic-modelling-page .clear-button {
+  margin-left: 0.3em;
+}
+
+.topic-modelling-page .clear-button .fa {
+  vertical-align: middle;
+}
+
 .topic-modelling-page .busy-indicator {
   position: fixed;
   margin: 10% 50%;

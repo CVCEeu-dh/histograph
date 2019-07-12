@@ -7,7 +7,7 @@ angular.module('histograph')
     TopicModellingAspectsService,
     TopicModellingScoresService, EVENTS
   ) {
-    $scope.aspectFilter = {}
+    $scope.aspectFilter = { selectedValues: [] }
     $scope.busyCounter = 0
     $scope.criteria = $location.search()
 
@@ -16,8 +16,17 @@ angular.module('histograph')
       $scope.criteria = { from, to }
     })
 
-    $scope.setAspectFilterValue = value => {
-      $scope.aspectFilter.value = value
+    $scope.addOrRemoveAspectFilterValue = value => {
+      if ($scope.aspectFilter.selectedValues.indexOf(value) >= 0) {
+        $scope.aspectFilter.selectedValues = $scope.aspectFilter
+          .selectedValues.filter(v => v !== value)
+      } else {
+        $scope.aspectFilter.selectedValues.push(value)
+      }
+    }
+
+    $scope.clearAspectFilter = () => {
+      $scope.aspectFilter.selectedValues = []
     }
 
     $scope.setBinsCount = val => {
@@ -35,7 +44,7 @@ angular.module('histograph')
           .get({ aspect, extra: 'filter-values' }).$promise
           .then(data => {
             $scope.aspectFilter = {
-              value: data.values[0],
+              selectedValues: $scope.aspectFilter.selectedValues,
               values: data.values,
               label: data.filterLabel,
               filterKey: data.filterKey,
@@ -51,10 +60,10 @@ angular.module('histograph')
       () => ({
         bins: $scope.binsCount,
         criteria: $scope.criteria,
-        filterValue: $scope.aspectFilter.value
+        filterValues: $scope.aspectFilter.selectedValues
       }),
       ({
-        bins, criteria: { from, to }, filterValue
+        bins, criteria: { from, to }, filterValues
       }) => {
         if (!bins) return
 
@@ -69,8 +78,9 @@ angular.module('histograph')
           const params = {
             aspect, bins, from, to
           }
-          if ($scope.aspectFilter.filterKey && filterValue) {
-            params[$scope.aspectFilter.filterKey] = filterValue
+          if ($scope.aspectFilter.filterKey && filterValues) {
+            // eslint-disable-next-line prefer-destructuring
+            params[$scope.aspectFilter.filterKey] = JSON.stringify(filterValues)
           }
 
           $scope.busyCounter += 1
