@@ -41,7 +41,9 @@ angular.module('histograph')
         limit: $scope.resourcesPageLimit,
         offset: $scope.selectedResources.length,
         from_uuid: $scope.selectedItemMeta.firstResourceUuid,
-        to_uuid: $scope.selectedItemMeta.lastResourceUuid
+        to_uuid: $scope.selectedItemMeta.lastResourceUuid,
+        from: $scope.selectedItemMeta.firstStartDate,
+        to: $scope.selectedItemMeta.lastEndDate
       }).$promise
         .then(results => {
           $scope.selectedResources = $scope.selectedResources.concat(results.result.items)
@@ -76,7 +78,9 @@ angular.module('histograph')
           limit: $scope.resourcesPageLimit,
           offset: $scope.selectedResources.length,
           from_uuid: meta.firstResourceUuid,
-          to_uuid: meta.lastResourceUuid
+          to_uuid: meta.lastResourceUuid,
+          from: meta.firstStartDate,
+          to: meta.lastEndDate
         }).$promise
           .then(results => {
             $log.info('Selection results', results)

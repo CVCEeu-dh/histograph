@@ -1211,7 +1211,8 @@ WHERE
 RETURN {
   uuid: r.uuid,
   scores: r.topic_modelling__scores,
-  startDate: r.start_date
+  startDate: r.start_date,
+  endDate: r.end_date
 }
 ORDER BY r.start_time
 
