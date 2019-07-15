@@ -1,7 +1,12 @@
-HG
+Histograph 1.0
 ===
 
-! __wip__
+---
+
+**NOTE** This is the version running on [https://histograph.cvce.eu](https://histograph.cvce.eu/#/). It has been archived and no new features are added here.
+
+---
+
 
 HG is the new Histograph, a **node-express**application aiming at providing digital humanities specialists with an online *collaborative* environment.
 Connections between **people**, **documents** and **images** are stored in a [Neo4j](http://neo4j.com/) graph database.
