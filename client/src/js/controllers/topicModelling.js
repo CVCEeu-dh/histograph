@@ -1,5 +1,5 @@
 /* eslint-env browser */
-/* globals angular */
+/* globals angular, moment */
 angular.module('histograph')
   // eslint-disable-next-line prefer-arrow-callback, func-names
   .controller('TopicModellingCtrl', function (
@@ -37,13 +37,14 @@ angular.module('histograph')
     }
 
     $scope.loadMoreResources = () => {
+      $scope.busyCounter += 1
       ResourceFactory.get({
         limit: $scope.resourcesPageLimit,
         offset: $scope.selectedResources.length,
         from_uuid: $scope.selectedItemMeta.firstResourceUuid,
         to_uuid: $scope.selectedItemMeta.lastResourceUuid,
         from: $scope.selectedItemMeta.minStartDate.replace(/T.*$/, ''),
-        to: $scope.selectedItemMeta.maxEndDate.replace(/T.*$/, ''),
+        to: moment($scope.selectedItemMeta.maxEndDate).add(1, 'days').toISOString().replace(/T.*$/, ''),
       }).$promise
         .then(results => {
           $scope.selectedResources = $scope.selectedResources.concat(results.result.items)
@@ -51,6 +52,9 @@ angular.module('histograph')
         })
         .catch(e => {
           $log.error('Could not get resources from the API', e.message)
+        })
+        .finally(() => {
+          $scope.busyCounter -= 1
         })
     }
 
@@ -61,36 +65,34 @@ angular.module('histograph')
       $scope.selectedResources = []
       $scope.totalItems = 0
 
-      if (meta.totalResources === 1) {
-        ResourceFactory.get({
+      const requestParams = meta.totalResources === 1
+        ? {
           id: meta.firstResourceUuid,
-        }).$promise
-          .then(results => {
-            $log.info('Selection results', results)
-            $scope.selectedResources = [results.result.item]
-            $scope.totalItems = 1
-          })
-          .catch(e => {
-            $log.error('Could not get resources from the API', e.message)
-          })
-      } else {
-        ResourceFactory.get({
+        }
+        : {
           limit: $scope.resourcesPageLimit,
           offset: $scope.selectedResources.length,
           from_uuid: meta.firstResourceUuid,
           to_uuid: meta.lastResourceUuid,
           from: meta.minStartDate.replace(/T.*$/, ''),
-          to: meta.maxEndDate.replace(/T.*$/, ''),
-        }).$promise
-          .then(results => {
-            $log.info('Selection results', results)
-            $scope.selectedResources = results.result.items
-            $scope.totalItems = results.info.total_items
-          })
-          .catch(e => {
-            $log.error('Could not get resources from the API', e.message)
-          })
-      }
+          to: moment(meta.maxEndDate).add(1, 'days').toISOString().replace(/T.*$/, ''),
+        }
+
+      $scope.busyCounter += 1
+      ResourceFactory
+        .get(requestParams).$promise
+        .then(results => {
+          $log.info('Selection results', results)
+          const items = results.result.items || [results.result.item]
+          $scope.selectedResources = items
+          $scope.totalItems = results.info.total_items || 1
+        })
+        .catch(e => {
+          $log.error('Could not get resources from the API', e.message)
+        })
+        .finally(() => {
+          $scope.busyCounter -= 1
+        })
     }
 
     $scope.$watch('optionalFeatures.topicModellingTimeline', val => {

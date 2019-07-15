@@ -135,6 +135,8 @@ WHERE res:resource
 WITH res
 MATCH p=(b:resource {uuid: {from_uuid}})<-[:comes_after*]-(a:resource {uuid: {to_uuid}})
 WHERE res.uuid in extract(n IN nodes(p)| n.uuid)
+AND b.end_time <= {end_time}
+AND a.start_time >= {start_time}
 {/if}
 
 WITH res
@@ -238,6 +240,8 @@ MATCH (res:resource)
 WITH res
 MATCH p=(b:resource {uuid: {from_uuid}})<-[:comes_after*]-(a:resource {uuid: {to_uuid}})
 WHERE res.uuid in extract(n IN nodes(p)| n.uuid)
+AND b.end_time <= {end_time}
+AND a.start_time >= {start_time}
 {/if}
 
 WITH collect(res) as resources
