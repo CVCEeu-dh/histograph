@@ -1,7 +1,7 @@
 HG
 ===
 
-**NOTE**: Further development continued in (https://github.com/C2DH/histograph)[https://github.com/C2DH/histograph].
+**NOTE**: Further development continued in [https://github.com/C2DH/histograph](https://github.com/C2DH/histograph).
 
 HG is the new Histograph, a **node-express**application aiming at providing digital humanities specialists with an online *collaborative* environment.
 Connections between **people**, **documents** and **images** are stored in a [Neo4j](http://neo4j.com/) graph database.
