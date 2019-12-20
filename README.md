@@ -1,5 +1,6 @@
-HG
-===
+# Histograph
+
+***!!!Development has been moved to [Histograph repository @C2DH](https://github.com/C2DH/histograph)***.
 
 **NOTE**: Further development continued in [https://github.com/C2DH/histograph](https://github.com/C2DH/histograph).
 
